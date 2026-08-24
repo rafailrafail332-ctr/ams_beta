@@ -64,7 +64,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen HR, GA & Head Office Ops Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'hr', 'ga', 'manager']
+      allowedModules: ['todo-attendance', 'hr', 'ga', 'manager', 'customer-relation']
     },
     {
       id: 'USR-005',
@@ -74,7 +74,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Site Office Lapangan & Kontraktor Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp', 'manager', 'procurement']
+      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp', 'manager', 'procurement', 'customer-relation']
     },
     {
       id: 'USR-006',
@@ -84,7 +84,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Legal & Perizinan Properti Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'legal', 'marketing']
+      allowedModules: ['todo-attendance', 'legal', 'marketing', 'customer-relation']
     },
     {
       id: 'USR-007',
@@ -94,7 +94,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Teknik & Konstruksi Lapangan',
-      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp']
+      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp', 'customer-relation']
     },
     {
       id: 'USR-008',
@@ -104,7 +104,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Teknik & Konstruksi Lapangan',
-      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp']
+      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp', 'customer-relation']
     },
     {
       id: 'USR-009',
@@ -114,7 +114,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Teknik & Konstruksi Lapangan',
-      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp']
+      allowedModules: ['todo-attendance', 'teknik-rumah', 'teknik-fasilitas', 'teknik-batp', 'customer-relation']
     },
     {
       id: 'USR-010',
@@ -124,7 +124,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Gudang Material & Logistik Proyek',
-      allowedModules: ['todo-attendance', 'procurement', 'ga']
+      allowedModules: ['todo-attendance', 'procurement', 'ga', 'customer-relation']
     },
     {
       id: 'USR-011',
@@ -144,7 +144,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Pemasaran & Sales Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'marketing']
+      allowedModules: ['todo-attendance', 'marketing', 'customer-relation']
     },
     {
       id: 'USR-013',
@@ -154,7 +154,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Pemasaran & Sales Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'marketing']
+      allowedModules: ['todo-attendance', 'marketing', 'customer-relation']
     },
     {
       id: 'USR-014',
@@ -164,7 +164,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Pemasaran & Sales Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'marketing']
+      allowedModules: ['todo-attendance', 'marketing', 'customer-relation']
     },
     {
       id: 'USR-015',
@@ -174,7 +174,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Keuangan Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'finance']
+      allowedModules: ['todo-attendance', 'finance', 'customer-relation']
     },
     {
       id: 'USR-016',
@@ -184,7 +184,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen Akuntansi & Pajak Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'finance']
+      allowedModules: ['todo-attendance', 'finance', 'customer-relation']
     },
     {
       id: 'USR-017',
@@ -564,6 +564,8 @@ export const AppProvider = ({ children }) => {
     }
 
     if (moduleKey === 'todo-attendance') return true;
+
+    if (moduleKey === 'customer-relation') return true;
 
     if (roleLower.includes('general manager')) {
       return true;

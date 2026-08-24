@@ -38,8 +38,21 @@ import {
 } from 'lucide-react';
 
 export const CustomerRelationModule = () => {
-  const { showNotification } = useApp();
-  const [activeTab, setActiveTab] = useState('tickets'); // 'tickets', 'handover', 'csat', 'ipl', 'documents', 'helpdesk'
+  const { showNotification, activeSubTab, setActiveSubTab } = useApp();
+  const [activeTab, setActiveTab] = useState(activeSubTab && activeSubTab !== 'default' ? activeSubTab : 'tickets');
+
+  React.useEffect(() => {
+    if (activeSubTab && activeSubTab !== 'default') {
+      setActiveTab(activeSubTab);
+    }
+  }, [activeSubTab]);
+
+  // Search Filter States across all Customer Relation Tabs
+  const [searchTicket, setSearchTicket] = useState('');
+  const [searchHandover, setSearchHandover] = useState('');
+  const [searchCsat, setSearchCsat] = useState('');
+  const [searchIpl, setSearchIpl] = useState('');
+  const [searchDoc, setSearchDoc] = useState('');
 
   // BAST Printable Modal State
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
@@ -425,19 +438,19 @@ export const CustomerRelationModule = () => {
       {/* Tabs Menu for 6 Pillars */}
       <div className="tab-list">
         <button className={`tab-item ${activeTab === 'tickets' ? 'active' : ''}`} onClick={() => setActiveTab('tickets')}>
-          <Wrench size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Keluhan & Garansi Retensi
+          <Wrench size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Keluhan & Garansi Retensi ({tickets.length})
         </button>
         <button className={`tab-item ${activeTab === 'handover' ? 'active' : ''}`} onClick={() => setActiveTab('handover')}>
-          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. BAST & PLN/PDAM
+          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. BAST & PLN/PDAM ({handovers.length})
         </button>
         <button className={`tab-item ${activeTab === 'csat' ? 'active' : ''}`} onClick={() => setActiveTab('csat')}>
-          <Star size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Survei CSAT & Referal
+          <Star size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Survei CSAT & Referal ({reviews.length})
         </button>
         <button className={`tab-item ${activeTab === 'ipl' ? 'active' : ''}`} onClick={() => setActiveTab('ipl')}>
-          <Building2 size={16} style={{ display: 'inline', marginRight: '6px' }} /> 4. Iuran Lingkungan (IPL)
+          <Building2 size={16} style={{ display: 'inline', marginRight: '6px' }} /> 4. Iuran Lingkungan (IPL) ({iplList.length})
         </button>
         <button className={`tab-item ${activeTab === 'documents' ? 'active' : ''}`} onClick={() => setActiveTab('documents')}>
-          <FileCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 5. Penyerahan SHM/PBG
+          <FileCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 5. Penyerahan SHM/PBG ({documentHandovers.length})
         </button>
         <button className={`tab-item ${activeTab === 'helpdesk' ? 'active' : ''}`} onClick={() => setActiveTab('helpdesk')}>
           <Headphones size={16} style={{ display: 'inline', marginRight: '6px' }} /> 6. Helpdesk & Consultation
@@ -445,298 +458,491 @@ export const CustomerRelationModule = () => {
       </div>
 
       {/* PILAR 1: KELUHAN & GARANSI RETENSI */}
-      {activeTab === 'tickets' && (
-        <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Daftar Tiket Keluhan & Pemeliharaan Garansi Retensi</h3>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>No Tiket & Unit</th>
-                  <th>Nama Konsumen & WA</th>
-                  <th>Kategori Keluhan</th>
-                  <th>Deskripsi Perbaikan</th>
-                  <th>Sisa Garansi</th>
-                  <th>Kontraktor Penanggung Jawab</th>
-                  <th>Status & Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tickets.map((t) => (
-                  <tr key={t.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{t.id}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Unit {t.unitNo} &bull; {t.cluster}</div>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{t.customerName}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.phone}</div>
-                    </td>
-                    <td><span className="badge badge-warning">{t.category}</span></td>
-                    <td><div style={{ fontSize: '0.825rem' }}>{t.description}</div></td>
-                    <td><span className="badge badge-info">{t.warrantyDaysLeft} Hari</span></td>
-                    <td>{t.contractorAssigned}</td>
-                    <td>
-                      {t.status.includes('Completed') ? (
-                        <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
-                      ) : (
-                        <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)}>
-                          <CheckCircle2 size={13} /> Selesaikan Tiket
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {activeTab === 'tickets' && (() => {
+        const filteredTickets = tickets.filter(t => !searchTicket || [t.id, t.unitNo, t.cluster, t.customerName, t.phone, t.category, t.description, t.contractorAssigned, t.status].some(val => (val || '').toLowerCase().includes(searchTicket.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Daftar Tiket Keluhan & Pemeliharaan Garansi Retensi</h3>
+              <button className="btn btn-primary btn-sm" onClick={() => setIsTicketModalOpen(true)}>
+                <Plus size={14} /> Buat Tiket Keluhan Baru
+              </button>
+            </div>
+
+            {/* Search Bar Tiket */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari no tiket, kavling unit, nama konsumen, kontraktor, kategori keluhan..."
+                  value={searchTicket}
+                  onChange={(e) => setSearchTicket(e.target.value)}
+                />
+                {searchTicket && (
+                  <button onClick={() => setSearchTicket('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredTickets.length}</span> dari {tickets.length} Tiket
+              </div>
+            </div>
+
+            {filteredTickets.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Wrench size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada tiket keluhan yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchTicket('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>No Tiket & Unit</th>
+                      <th>Nama Konsumen & WA</th>
+                      <th>Kategori Keluhan</th>
+                      <th>Deskripsi Perbaikan</th>
+                      <th>Sisa Garansi</th>
+                      <th>Kontraktor Penanggung Jawab</th>
+                      <th>Status & Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTickets.map((t) => (
+                      <tr key={t.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{t.id}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Unit {t.unitNo} &bull; {t.cluster}</div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>{t.customerName}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.phone}</div>
+                        </td>
+                        <td><span className="badge badge-warning">{t.category}</span></td>
+                        <td><div style={{ fontSize: '0.825rem' }}>{t.description}</div></td>
+                        <td><span className="badge badge-info">{t.warrantyDaysLeft} Hari</span></td>
+                        <td>{t.contractorAssigned}</td>
+                        <td>
+                          {t.status.includes('Completed') ? (
+                            <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
+                          ) : (
+                            <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)}>
+                              <CheckCircle2 size={13} /> Selesaikan Tiket
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PILAR 2: BAST SERAH TERIMA & UTILITIES */}
-      {activeTab === 'handover' && (
-        <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Manajemen BAST Serah Terima Kunci & Balik Nama Meteran</h3>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Kavling Unit & Konsumen</th>
-                  <th>Tanggal BAST</th>
-                  <th>Sambungan PLN (Listrik)</th>
-                  <th>Sambungan Air (PDAM)</th>
-                  <th>Status BAST Kunci</th>
-                  <th>Aksi Serah Terima</th>
-                </tr>
-              </thead>
-              <tbody>
-                {handovers.map((h) => (
-                  <tr key={h.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {h.unitNo}</div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{h.customerName}</div>
-                    </td>
-                    <td><div style={{ fontWeight: 700 }}>{h.bastDate}</div></td>
-                    <td><span className="badge badge-success">{h.statusPLN}</span></td>
-                    <td><span className="badge badge-success">{h.statusPDAM}</span></td>
-                    <td><span className="badge badge-info">{h.statusBAST}</span></td>
-                    <td>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleOpenPrintBast(h)} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#000', fontWeight: 800, border: 'none' }}>
-                        <Printer size={13} /> Cetak Dokumen BAST
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {activeTab === 'handover' && (() => {
+        const filteredHandovers = handovers.filter(h => !searchHandover || [h.id, h.unitNo, h.customerName, h.cluster, h.bastDate, h.statusPLN, h.statusPDAM, h.statusBAST].some(val => (val || '').toLowerCase().includes(searchHandover.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Manajemen BAST Serah Terima Kunci & Balik Nama Meteran</h3>
+
+            {/* Search Bar BAST */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari nomor unit, nama konsumen, tanggal BAST, status meteran PLN/PDAM..."
+                  value={searchHandover}
+                  onChange={(e) => setSearchHandover(e.target.value)}
+                />
+                {searchHandover && (
+                  <button onClick={() => setSearchHandover('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredHandovers.length}</span> dari {handovers.length} Handover
+              </div>
+            </div>
+
+            {filteredHandovers.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <KeyRound size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data serah terima yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchHandover('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Kavling Unit & Konsumen</th>
+                      <th>Tanggal BAST</th>
+                      <th>Sambungan PLN (Listrik)</th>
+                      <th>Sambungan Air (PDAM)</th>
+                      <th>Status BAST Kunci</th>
+                      <th>Aksi Serah Terima</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredHandovers.map((h) => (
+                      <tr key={h.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {h.unitNo}</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{h.customerName}</div>
+                        </td>
+                        <td><div style={{ fontWeight: 700 }}>{h.bastDate}</div></td>
+                        <td><span className="badge badge-success">{h.statusPLN}</span></td>
+                        <td><span className="badge badge-success">{h.statusPDAM}</span></td>
+                        <td><span className="badge badge-info">{h.statusBAST}</span></td>
+                        <td>
+                          <button className="btn btn-primary btn-sm" onClick={() => handleOpenPrintBast(h)} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#000', fontWeight: 800, border: 'none' }}>
+                            <Printer size={13} /> Cetak Dokumen BAST
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PILAR 3: SURVEI CSAT & REFERRAL */}
-      {activeTab === 'csat' && (
-        <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Ulasan Kepuasan Pelanggan (CSAT & NPS Ratings)</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {reviews.map((r) => (
-              <div key={r.id} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{r.customer}</div>
-                  <div style={{ color: '#F59E0B', fontWeight: 900 }}>{'★'.repeat(r.rating)}</div>
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontStyle: 'italic' }}>"{r.comment}"</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', marginTop: '6px' }}>{r.date}</div>
+      {activeTab === 'csat' && (() => {
+        const filteredReviews = reviews.filter(r => !searchCsat || [r.customer, r.comment, r.date].some(val => (val || '').toLowerCase().includes(searchCsat.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Ulasan Kepuasan Pelanggan (CSAT & NPS Ratings)</h3>
+
+            {/* Search Bar CSAT */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari nama konsumen, kata ulasan testimoni, tanggal rating..."
+                  value={searchCsat}
+                  onChange={(e) => setSearchCsat(e.target.value)}
+                />
+                {searchCsat && (
+                  <button onClick={() => setSearchCsat('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
               </div>
-            ))}
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredReviews.length}</span> dari {reviews.length} Ulasan
+              </div>
+            </div>
+
+            {filteredReviews.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Star size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada ulasan yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchCsat('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {filteredReviews.map((r) => (
+                  <div key={r.id} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{r.customer}</div>
+                      <div style={{ color: '#F59E0B', fontWeight: 900 }}>{'★'.repeat(r.rating)}</div>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontStyle: 'italic' }}>"{r.comment}"</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', marginTop: '6px' }}>{r.date}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PILAR 4: IURAN PENGELOLAAN LINGKUNGAN (IPL) */}
-      {activeTab === 'ipl' && (
-        <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Tagihan & Kolektibilitas IPL Lingkungan Cluster</h3>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>No Tagihan & Unit</th>
-                  <th>Nama Penghuni</th>
-                  <th>Bulan Tagihan</th>
-                  <th>Nominal IPL (Rp)</th>
-                  <th>Status Pembayaran</th>
-                  <th>Aksi Verifikasi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {iplList.map((i) => (
-                  <tr key={i.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{i.id}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Unit {i.unitNo}</div>
-                    </td>
-                    <td>{i.customerName}</td>
-                    <td>{i.month}</td>
-                    <td><div style={{ fontWeight: 800 }}>{formatRupiah(i.amount)}</div></td>
-                    <td>
-                      <span className={`badge ${i.status.includes('LUNAS') ? 'badge-success' : 'badge-danger'}`}>
-                        {i.status}
-                      </span>
-                    </td>
-                    <td>
-                      {!i.status.includes('LUNAS') && (
-                        <button className="btn btn-primary btn-sm" onClick={() => handlePayIPL(i.id)}>
-                          <CheckCircle2 size={13} /> Bayar IPL
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {activeTab === 'ipl' && (() => {
+        const filteredIplList = iplList.filter(i => !searchIpl || [i.id, i.unitNo, i.customerName, i.month, i.status, i.amount?.toString()].some(val => (val || '').toLowerCase().includes(searchIpl.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Tagihan & Kolektibilitas IPL Lingkungan Cluster</h3>
+
+            {/* Search Bar IPL */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari no tagihan (IPL-08), nomor unit (A-01), nama penghuni, bulan, status..."
+                  value={searchIpl}
+                  onChange={(e) => setSearchIpl(e.target.value)}
+                />
+                {searchIpl && (
+                  <button onClick={() => setSearchIpl('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredIplList.length}</span> dari {iplList.length} Tagihan
+              </div>
+            </div>
+
+            {filteredIplList.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Building2 size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada tagihan IPL yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchIpl('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>No Tagihan & Unit</th>
+                      <th>Nama Penghuni</th>
+                      <th>Bulan Tagihan</th>
+                      <th>Nominal IPL (Rp)</th>
+                      <th>Status Pembayaran</th>
+                      <th>Aksi Verifikasi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredIplList.map((i) => (
+                      <tr key={i.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{i.id}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Unit {i.unitNo}</div>
+                        </td>
+                        <td>{i.customerName}</td>
+                        <td>{i.month}</td>
+                        <td><div style={{ fontWeight: 800 }}>{formatRupiah(i.amount)}</div></td>
+                        <td>
+                          <span className={`badge ${i.status.includes('LUNAS') ? 'badge-success' : 'badge-danger'}`}>
+                            {i.status}
+                          </span>
+                        </td>
+                        <td>
+                          {!i.status.includes('LUNAS') && (
+                            <button className="btn btn-primary btn-sm" onClick={() => handlePayIPL(i.id)}>
+                              <CheckCircle2 size={13} /> Bayar IPL
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PILAR 5: DOKUMEN SHM & PBG ASLI */}
-      {activeTab === 'documents' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FolderCheck color="#F59E0B" size={24} /> Log & Tracking Penyerahan Berkas Asli Konsumen
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Monitoring serah terima fisik Sertifikat SHM BPN, IMB/PBG Pecahan, & Polis Asuransi KPR ke tangan pemilik rumah sah.
-              </p>
-            </div>
-
-            <button className="btn btn-primary" onClick={handleOpenAddDocHandover} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none' }}>
-              <Plus size={16} /> Catat Serah Terima Berkas Baru
-            </button>
-          </div>
-
-          {/* KPI Mini Cards for Documents */}
-          <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
-            <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-              <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Total Berkas Unit</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>{documentHandovers.length} Unit</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Terdata di Buku Tanah Legal</div>
-            </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-              <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700 }}>Lengkap & Diserahkan</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
-                {documentHandovers.filter(d => d.status.includes('Lengkap')).length} Unit
+      {activeTab === 'documents' && (() => {
+        const filteredDocumentHandovers = documentHandovers.filter(d => !searchDoc || [d.id, d.unitNo, d.customerName, d.cluster, d.shmNo, d.pbgNo, d.polisNo, d.receiverName, d.status, d.picLegal].some(val => (val || '').toLowerCase().includes(searchDoc.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FolderCheck color="#F59E0B" size={24} /> Log & Tracking Penyerahan Berkas Asli Konsumen
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Monitoring serah terima fisik Sertifikat SHM BPN, IMB/PBG Pecahan, & Polis Asuransi KPR ke tangan pemilik rumah sah.
+                </p>
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tuntas BAST Konsumen</div>
+
+              <button className="btn btn-primary" onClick={handleOpenAddDocHandover} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none' }}>
+                <Plus size={16} /> Catat Serah Terima Berkas Baru
+              </button>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-              <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>Siap Diambil di Kantor</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
-                {documentHandovers.filter(d => d.status.includes('Siap Diambil')).length} Unit
+            {/* KPI Mini Cards for Documents */}
+            <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Total Berkas Unit</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>{documentHandovers.length} Unit</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Terdata di Buku Tanah Legal</div>
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Undangan Pengambilan Terkirim</div>
-            </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
-              <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Proses Splitzing / Vault</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
-                {documentHandovers.filter(d => !d.status.includes('Lengkap') && !d.status.includes('Siap Diambil')).length} Unit
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700 }}>Lengkap & Diserahkan</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
+                  {documentHandovers.filter(d => d.status.includes('Lengkap')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tuntas BAST Konsumen</div>
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>BPN & Bank KPR Mitra</div>
-            </div>
-          </div>
 
-          {/* Table Document Handovers */}
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Unit & Pemilik</th>
-                  <th>Sertifikat SHM Asli</th>
-                  <th>PBG / IMB Pecahan</th>
-                  <th>Polis Asuransi KPR</th>
-                  <th>Tanggal & Penerima Berkas</th>
-                  <th>Status Serah Terima</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentHandovers.map((doc) => {
-                  const isDone = doc.status.includes('Lengkap');
-                  const isReady = doc.status.includes('Siap Diambil');
-                  return (
-                    <tr key={doc.id}>
-                      <td>
-                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {doc.unitNo}</div>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.85rem' }}>{doc.customerName}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.cluster} &bull; {doc.phone || '-'}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.shmNo}</div>
-                        <div style={{ fontSize: '0.72rem', color: isDone ? 'var(--success)' : '#F59E0B', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <BadgeCheck size={12} /> {doc.shmStatus}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.pbgNo}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.pbgStatus}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.polisNo}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.polisStatus}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.receiverName}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tgl: {doc.handoverDate}</div>
-                        {doc.receiverNik && doc.receiverNik !== '-' && (
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>NIK: {doc.receiverNik}</div>
-                        )}
-                      </td>
-                      <td>
-                        <span className={`badge ${isDone ? 'badge-success' : isReady ? 'badge-info' : 'badge-warning'}`}>
-                          {isDone ? <CheckCircle2 size={12} /> : isReady ? <FolderCheck size={12} /> : <Clock size={12} />} {doc.status}
-                        </span>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>PIC: {doc.picLegal}</div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '0.35rem' }}>
-                          <button 
-                            className="btn btn-primary btn-sm" 
-                            onClick={() => handleOpenPrintDocBast(doc)}
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', background: '#10B981', border: 'none' }}
-                            title="Cetak BAST Dokumen Asli"
-                          >
-                            <Printer size={13} /> BAST
-                          </button>
-                          <button 
-                            className="btn btn-secondary btn-sm" 
-                            onClick={() => handleOpenEditDocHandover(doc)}
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
-                            title="Edit Data Penyerahan"
-                          >
-                            <Edit3 size={13} /> Edit
-                          </button>
-                          <button 
-                            className="btn btn-secondary btn-sm" 
-                            onClick={() => handleDeleteDocHandover(doc.id, doc.unitNo)}
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>Siap Diambil di Kantor</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
+                  {documentHandovers.filter(d => d.status.includes('Siap Diambil')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Undangan Pengambilan Terkirim</div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Proses Splitzing / Vault</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
+                  {documentHandovers.filter(d => !d.status.includes('Lengkap') && !d.status.includes('Siap Diambil')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>BPN & Bank KPR Mitra</div>
+              </div>
+            </div>
+
+            {/* Search Bar Dokumen */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari nomor unit (A-01), nama pemilik, No SHM, PBG, Polis Asuransi, PIC..."
+                  value={searchDoc}
+                  onChange={(e) => setSearchDoc(e.target.value)}
+                />
+                {searchDoc && (
+                  <button onClick={() => setSearchDoc('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredDocumentHandovers.length}</span> dari {documentHandovers.length} Berkas
+              </div>
+            </div>
+
+            {filteredDocumentHandovers.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <FolderCheck size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada berkas yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchDoc('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Unit & Pemilik</th>
+                      <th>Sertifikat SHM Asli</th>
+                      <th>PBG / IMB Pecahan</th>
+                      <th>Polis Asuransi KPR</th>
+                      <th>Tanggal & Penerima Berkas</th>
+                      <th>Status Serah Terima</th>
+                      <th>Aksi CRUD</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {filteredDocumentHandovers.map((doc) => {
+                      const isDone = doc.status.includes('Lengkap');
+                      const isReady = doc.status.includes('Siap Diambil');
+                      return (
+                        <tr key={doc.id}>
+                          <td>
+                            <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {doc.unitNo}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.85rem' }}>{doc.customerName}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.cluster} &bull; {doc.phone || '-'}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.shmNo}</div>
+                            <div style={{ fontSize: '0.72rem', color: isDone ? 'var(--success)' : '#F59E0B', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                              <BadgeCheck size={12} /> {doc.shmStatus}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.pbgNo}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.pbgStatus}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.polisNo}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{doc.polisStatus}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{doc.receiverName}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tgl: {doc.handoverDate}</div>
+                            {doc.receiverNik && doc.receiverNik !== '-' && (
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>NIK: {doc.receiverNik}</div>
+                            )}
+                          </td>
+                          <td>
+                            <span className={`badge ${isDone ? 'badge-success' : isReady ? 'badge-info' : 'badge-warning'}`}>
+                              {isDone ? <CheckCircle2 size={12} /> : isReady ? <FolderCheck size={12} /> : <Clock size={12} />} {doc.status}
+                            </span>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>PIC: {doc.picLegal}</div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.35rem' }}>
+                              <button 
+                                className="btn btn-primary btn-sm" 
+                                onClick={() => handleOpenPrintDocBast(doc)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', background: '#10B981', border: 'none' }}
+                                title="Cetak BAST Dokumen Asli"
+                              >
+                                <Printer size={13} /> BAST
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-sm" 
+                                onClick={() => handleOpenEditDocHandover(doc)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                                title="Edit Data Penyerahan"
+                              >
+                                <Edit3 size={13} /> Edit
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-sm" 
+                                onClick={() => handleDeleteDocHandover(doc.id, doc.unitNo)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
+                                title="Hapus"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* PILAR 6: HELPDESK & CONSULTATION */}
       {activeTab === 'helpdesk' && (

@@ -27,7 +27,10 @@ import {
   Truck, 
   Printer,
   Receipt,
-  Landmark
+  Landmark,
+  Headphones,
+  KeyRound,
+  Wrench
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -66,7 +69,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'teknik-rumah', title: 'Progress Kavling Unit Rumah & WA Tracker', moduleKey: 'teknik-rumah', subTabKey: 'rumah', icon: Building2, color: '#FBBF24' },
         { id: 'teknik-fasilitas', title: 'Utilitas & Komersil (Fasum/Fasos)', moduleKey: 'teknik-fasilitas', subTabKey: 'fasilitas', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'teknik-batp', title: 'Berita Acara BATP Kontraktor Utama', moduleKey: 'teknik-batp', subTabKey: 'batp', icon: FileCheck, color: '#10B981' }
+        { id: 'teknik-batp', title: 'Berita Acara BATP Kontraktor Utama', moduleKey: 'teknik-batp', subTabKey: 'batp', icon: FileCheck, color: '#10B981' },
+        { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
     }
 
@@ -79,7 +83,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'legal-apht', title: '4. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
         { id: 'legal-ppjb', title: '5. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
         { id: 'legal-dispute', title: '6. Dispute Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' },
-        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' }
+        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' },
+        { id: 'cr-docs', title: '8. Serah Terima Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: KeyRound, color: '#FB7185' }
       ];
     }
 
@@ -90,11 +95,12 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hr-payroll', title: '2. Payroll & Kompensasi SDM', moduleKey: 'hr', subTabKey: 'payroll', icon: DollarSign, color: '#10B981' },
         { id: 'ga-office', title: '3. Site Office & Fasilitas Lapangan', moduleKey: 'ga', subTabKey: 'site-office', icon: Building2, color: '#38BDF8' },
         { id: 'ga-fleet', title: '4. Fleet & Transportasi Lapangan', moduleKey: 'ga', subTabKey: 'fleet', icon: Truck, color: '#38BDF8' },
-        { id: 'ga-k3', title: '5. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' }
+        { id: 'ga-k3', title: '5. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' },
+        { id: 'cr-helpdesk', title: '6. Customer Relation & Helpdesk', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#FB7185' }
       ];
     }
 
-    if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax')) {
+    if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'fin-tax', title: '1. Akuntansi & Pajak (PPh Final & PPN)', moduleKey: 'finance', subTabKey: 'tax', icon: Landmark, color: '#10B981' },
@@ -102,20 +108,36 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'fin-dp', title: '3. Monitoring DP & Pembayaran Cash In', moduleKey: 'finance', subTabKey: 'dp', icon: DollarSign, color: '#10B981' },
         { id: 'fin-kpr', title: '4. SLA Pencairan KPR Bank Mitra', moduleKey: 'finance', subTabKey: 'kpr', icon: CreditCard, color: '#38BDF8' },
         { id: 'fin-price', title: '5. Penetapan Pricelist & HPP Rumah', moduleKey: 'finance', subTabKey: 'pricelist', icon: Tag, color: '#60A5FA' },
-        { id: 'fin-overrun', title: '6. Cost Overrun Inspector (Faktur)', moduleKey: 'finance', subTabKey: 'cost-overrun', icon: AlertTriangle, color: '#F59E0B' }
+        { id: 'fin-overrun', title: '6. Cost Overrun Inspector (Faktur)', moduleKey: 'finance', subTabKey: 'cost-overrun', icon: AlertTriangle, color: '#F59E0B' },
+        { id: 'cr-ipl', title: '7. Customer Relation: Tagihan IPL Estate', moduleKey: 'customer-relation', subTabKey: 'ipl', icon: HeartHandshake, color: '#FB7185' }
       ];
     }
 
-    if (roleLower.includes('marketing')) {
+    if (roleLower.includes('marketing') || roleLower.includes('sales')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'mkt-leads', title: '1. Pipeline CRM Leads & Komisi Sales', moduleKey: 'marketing', subTabKey: 'leads', icon: Users, color: '#FBBF24' },
-        { id: 'mkt-spr', title: '2. Transaksi Unit & Upload Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: FileText, color: '#FBBF24' }
+        { id: 'mkt-spr', title: '2. Transaksi Unit & Upload Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: FileText, color: '#FBBF24' },
+        { id: 'cr-tickets', title: '3. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'cr-handover', title: '4. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
+      ];
+    }
+
+    if (roleLower.includes('customer') || roleLower.includes('crm') || roleLower.includes('relation') || roleLower.includes('after-sales')) {
+      return [
+        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'cr-tickets', title: '1. Komplain & Tiket Garansi Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: Wrench, color: '#FB7185' },
+        { id: 'cr-handover', title: '2. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' },
+        { id: 'cr-csat', title: '3. Kepuasan Pelanggan (CSAT) & Review', moduleKey: 'customer-relation', subTabKey: 'csat', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'cr-ipl', title: '4. Tagihan IPL & Maintenance Estate', moduleKey: 'customer-relation', subTabKey: 'ipl', icon: DollarSign, color: '#10B981' },
+        { id: 'cr-docs', title: '5. Penyerahan Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: FileCheck, color: '#38BDF8' },
+        { id: 'cr-helpdesk', title: '6. Helpdesk & Broadcast WA Konsumen', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#F59E0B' }
       ];
     }
 
     return [
-      { id: 'todo-attendance', title: 'To-Do List & Presensi Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' }
+      { id: 'todo-attendance', title: 'To-Do List & Presensi Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+      { id: 'cr-all', title: 'Customer Relation & After Sales', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
     ];
   };
 
