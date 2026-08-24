@@ -68,16 +68,27 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       ];
     }
 
-    if (roleLower.includes('legal') || roleLower.includes('hr')) {
+    if (roleLower.includes('legal')) {
+      return [
+        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'legal-shgb', title: '1. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
+        { id: 'legal-pbg', title: '2. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
+        { id: 'legal-split', title: '3. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
+        { id: 'legal-apht', title: '4. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
+        { id: 'legal-ppjb', title: '5. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
+        { id: 'legal-dispute', title: '6. Dispute Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' },
+        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' }
+      ];
+    }
+
+    if (roleLower.includes('hr') || roleLower.includes('dodi')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'hr-staff', title: '1. SDM & Penyesuaian Gaji Karyawan', moduleKey: 'hr', subTabKey: 'staff', icon: Users, color: '#F87171' },
-        { id: 'legal-shgb', title: '2. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
-        { id: 'legal-pbg', title: '3. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
-        { id: 'legal-split', title: '4. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
-        { id: 'legal-apht', title: '5. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
-        { id: 'legal-ppjb', title: '6. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
-        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' }
+        { id: 'hr-payroll', title: '2. Payroll & Kompensasi SDM', moduleKey: 'hr', subTabKey: 'payroll', icon: DollarSign, color: '#10B981' },
+        { id: 'ga-office', title: '3. Site Office & Fasilitas Lapangan', moduleKey: 'ga', subTabKey: 'site-office', icon: Building2, color: '#38BDF8' },
+        { id: 'ga-fleet', title: '4. Fleet & Transportasi Lapangan', moduleKey: 'ga', subTabKey: 'fleet', icon: Truck, color: '#38BDF8' },
+        { id: 'ga-k3', title: '5. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' }
       ];
     }
 
