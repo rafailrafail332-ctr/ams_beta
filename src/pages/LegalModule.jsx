@@ -32,6 +32,14 @@ export const LegalModule = () => {
   const [activeTab, setActiveTab] = useState('shgb');
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
+  // Search Filter States for all 6 Legal Modules
+  const [searchShgb, setSearchShgb] = useState('');
+  const [searchPbg, setSearchPbg] = useState('');
+  const [searchSplit, setSearchSplit] = useState('');
+  const [searchBank, setSearchBank] = useState('');
+  const [searchPpjb, setSearchPpjb] = useState('');
+  const [searchDispute, setSearchDispute] = useState('');
+
   useEffect(() => {
     if (activeSubTab && activeSubTab !== 'default') {
       setActiveTab(activeSubTab);
@@ -485,6 +493,89 @@ export const LegalModule = () => {
     window.print();
   };
 
+  // -------------------------------------------------------------
+  // REAL-TIME SEARCH FILTERED DATA LISTS FOR ALL 6 TABS
+  // -------------------------------------------------------------
+  const filteredShgbList = shgbList.filter(item => {
+    const q = searchShgb.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (item.projectName && item.projectName.toLowerCase().includes(q)) ||
+      (item.noSertifikat && item.noSertifikat.toLowerCase().includes(q)) ||
+      (item.nib && item.nib.toLowerCase().includes(q)) ||
+      (item.kantorBpn && item.kantorBpn.toLowerCase().includes(q)) ||
+      (item.pemegangHak && item.pemegangHak.toLowerCase().includes(q)) ||
+      (item.bpnStatus && item.bpnStatus.toLowerCase().includes(q)) ||
+      (item.id && item.id.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredPbgList = pbgList.filter(item => {
+    const q = searchPbg.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (item.noPbg && item.noPbg.toLowerCase().includes(q)) ||
+      (item.peruntukan && item.peruntukan.toLowerCase().includes(q)) ||
+      (item.dinas && item.dinas.toLowerCase().includes(q)) ||
+      (item.notes && item.notes.toLowerCase().includes(q)) ||
+      (item.status && item.status.toLowerCase().includes(q)) ||
+      (item.id && item.id.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredSplitUnits = units.filter(u => {
+    const q = searchSplit.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (u.unitNo && u.unitNo.toString().toLowerCase().includes(q)) ||
+      (u.owner && u.owner.toLowerCase().includes(q)) ||
+      (u.cluster && u.cluster.toLowerCase().includes(q)) ||
+      (u.legal?.shgb && u.legal.shgb.toLowerCase().includes(q)) ||
+      (u.legal?.status && u.legal.status.toLowerCase().includes(q)) ||
+      (u.legal?.splitStatus && u.legal.splitStatus.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredBankList = bankList.filter(item => {
+    const q = searchBank.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (item.bankName && item.bankName.toLowerCase().includes(q)) ||
+      (item.pksNo && item.pksNo.toLowerCase().includes(q)) ||
+      (item.aphtStatus && item.aphtStatus.toLowerCase().includes(q)) ||
+      (item.pic && item.pic.toLowerCase().includes(q)) ||
+      (item.status && item.status.toLowerCase().includes(q)) ||
+      (item.plafon && item.plafon.toLowerCase().includes(q)) ||
+      (item.id && item.id.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredPpjbList = notaryDeeds.filter(item => {
+    const q = searchPpjb.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (item.id && item.id.toLowerCase().includes(q)) ||
+      (item.kavling && item.kavling.toLowerCase().includes(q)) ||
+      (item.owner && item.owner.toLowerCase().includes(q)) ||
+      (item.notaris && item.notaris.toLowerCase().includes(q)) ||
+      (item.bankPks && item.bankPks.toLowerCase().includes(q)) ||
+      (item.status && item.status.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredDisputeList = disputeList.filter(item => {
+    const q = searchDispute.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (item.id && item.id.toLowerCase().includes(q)) ||
+      (item.objectLand && item.objectLand.toLowerCase().includes(q)) ||
+      (item.auditor && item.auditor.toLowerCase().includes(q)) ||
+      (item.result && item.result.toLowerCase().includes(q)) ||
+      (item.status && item.status.toLowerCase().includes(q)) ||
+      (item.conclusion && item.conclusion.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div>
       {/* Page Header */}
@@ -550,26 +641,26 @@ export const LegalModule = () => {
           <Scale size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. SHGB Master Titling ({shgbList.length} Perumahan)
         </button>
         <button className={`tab-item ${activeTab === 'pbg' ? 'active' : ''}`} onClick={() => setActiveTab('pbg')}>
-          <FileSignature size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. PBG / IMB Induk
+          <FileSignature size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. PBG / IMB Induk ({pbgList.length})
         </button>
         <button className={`tab-item ${activeTab === 'split' ? 'active' : ''}`} onClick={() => setActiveTab('split')}>
-          <FileCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Splitzing SHM BPN
+          <FileCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Splitzing SHM BPN ({units.length} Unit)
         </button>
         <button className={`tab-item ${activeTab === 'apht' ? 'active' : ''}`} onClick={() => setActiveTab('apht')}>
-          <Award size={16} style={{ display: 'inline', marginRight: '6px' }} /> 4. APHT & Bank Mitra
+          <Award size={16} style={{ display: 'inline', marginRight: '6px' }} /> 4. APHT & Bank Mitra ({bankList.length})
         </button>
         <button className={`tab-item ${activeTab === 'ppjb' ? 'active' : ''}`} onClick={() => setActiveTab('ppjb')}>
-          <BookOpen size={16} style={{ display: 'inline', marginRight: '6px' }} /> 5. Akta PPJB Notaris
+          <BookOpen size={16} style={{ display: 'inline', marginRight: '6px' }} /> 5. Akta PPJB Notaris ({notaryDeeds.length})
         </button>
         <button className={`tab-item ${activeTab === 'dispute' ? 'active' : ''}`} onClick={() => setActiveTab('dispute')}>
-          <ShieldCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 6. Dispute Audit Sengketa
+          <ShieldCheck size={16} style={{ display: 'inline', marginRight: '6px' }} /> 6. Dispute Audit Sengketa ({disputeList.length})
         </button>
       </div>
 
-      {/* 1. SHGB MASTER TITLING (MULTI-PROJECT CRUD) */}
+      {/* 1. SHGB MASTER TITLING (MULTI-PROJECT CRUD + SEARCH) */}
       {activeTab === 'shgb' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>1. SHGB Master Titling (Sertifikat Induk Kawasan Perumahan)</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -581,69 +672,103 @@ export const LegalModule = () => {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {shgbList.map((item, idx) => (
-              <div key={item.id} className="glass-card" style={{ borderLeft: '4px solid var(--accent-primary)', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '4px' }}>
-                      <span className="badge badge-primary">{item.id}</span>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
-                        {item.projectName}
-                      </h4>
-                    </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Pemegang Hak: <strong style={{ color: 'var(--text-main)' }}>{item.pemegangHak || 'PT Ashoka Enterprise Development'}</strong>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditShgb(item)} title="Edit Sertifikat Induk">
-                      <Edit3 size={14} /> Edit
-                    </button>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteShgb(item.id, item.projectName)} title="Hapus">
-                      <Trash2 size={14} /> Hapus
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Nomor Sertifikat Induk</div>
-                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--accent-primary)', marginTop: '2px' }}>{item.noSertifikat}</div>
-                  </div>
-
-                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Masa Berlaku HGB</div>
-                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--success)', marginTop: '2px' }}>{item.expDate}</div>
-                  </div>
-
-                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Luas Lahan Terdaftar</div>
-                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-main)', marginTop: '2px' }}>{item.luasTotal}</div>
-                  </div>
-
-                  <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Status BPN & NIB</div>
-                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--success)', marginTop: '2px' }}>
-                      ✓ {item.bpnStatus} &bull; {item.nib}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <MapPin size={13} color="var(--accent-primary)" /> {item.kantorBpn}
-                </div>
-              </div>
-            ))}
+          {/* Search Bar SHGB */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari perumahan, no SHGB induk, NIB, pemegang hak, atau kantor BPN..."
+                value={searchShgb}
+                onChange={(e) => setSearchShgb(e.target.value)}
+              />
+              {searchShgb && (
+                <button onClick={() => setSearchShgb('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredShgbList.length}</span> dari {shgbList.length} Kawasan
+            </div>
           </div>
+
+          {filteredShgbList.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Scale size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada sertifikat induk yang sesuai dengan pencarian</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchShgb('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {filteredShgbList.map((item) => (
+                <div key={item.id} className="glass-card" style={{ borderLeft: '4px solid var(--accent-primary)', position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '4px' }}>
+                        <span className="badge badge-primary">{item.id}</span>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                          {item.projectName}
+                        </h4>
+                      </div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                        Pemegang Hak: <strong style={{ color: 'var(--text-main)' }}>{item.pemegangHak || 'PT Ashoka Enterprise Development'}</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditShgb(item)} title="Edit Sertifikat Induk">
+                        <Edit3 size={14} /> Edit
+                      </button>
+                      <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteShgb(item.id, item.projectName)} title="Hapus">
+                        <Trash2 size={14} /> Hapus
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Nomor Sertifikat Induk</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--accent-primary)', marginTop: '2px' }}>{item.noSertifikat}</div>
+                    </div>
+
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Masa Berlaku HGB</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--success)', marginTop: '2px' }}>{item.expDate}</div>
+                    </div>
+
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Luas Lahan Terdaftar</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-main)', marginTop: '2px' }}>{item.luasTotal}</div>
+                    </div>
+
+                    <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Status BPN & NIB</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--success)', marginTop: '2px' }}>
+                        ✓ {item.bpnStatus} &bull; {item.nib}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <MapPin size={13} color="var(--accent-primary)" /> {item.kantorBpn}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* 2. PBG / IMB INDUK (FULL CRUD) */}
+      {/* 2. PBG / IMB INDUK (FULL CRUD + SEARCH) */}
       {activeTab === 'pbg' && (
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>2. PBG / IMB Induk & Per-Kavling Unit</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Daftar Surat Persetujuan Bangunan Gedung (PBG) resmi dari Dinas Penanaman Modal (DPMPTSP) & PUPR.</p>
@@ -651,6 +776,29 @@ export const LegalModule = () => {
             <button className="btn btn-primary btn-sm" onClick={handleOpenAddPbg}>
               <Plus size={14} /> + Tambah Izin PBG
             </button>
+          </div>
+
+          {/* Search Bar PBG */}
+          <div style={{ padding: '0.6rem 0.85rem', marginBottom: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '240px' }}>
+              <Search size={15} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', height: '32px' }}
+                placeholder="Cari nomor PBG, peruntukan gedung, instansi dinas, atau keterangan..."
+                value={searchPbg}
+                onChange={(e) => setSearchPbg(e.target.value)}
+              />
+              {searchPbg && (
+                <button onClick={() => setSearchPbg('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Ditemukan: <strong style={{ color: 'var(--accent-primary)' }}>{filteredPbgList.length}</strong> data
+            </div>
           </div>
 
           <div className="table-container">
@@ -666,44 +814,78 @@ export const LegalModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {pbgList.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{p.noPbg}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{p.id}</div>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{p.peruntukan}</div>
-                      {p.notes && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{p.notes}</div>}
-                    </td>
-                    <td><span className="badge badge-info">{p.dinas}</span></td>
-                    <td>{p.tglTerbit}</td>
-                    <td><span className="badge badge-success">{p.status}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditPbg(p)} title="Edit PBG">
-                          <Edit3 size={13} />
-                        </button>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePbg(p.id, p.noPbg)} title="Hapus">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
+                {filteredPbgList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      Tidak ditemukan izin PBG dengan kata kunci "{searchPbg}".
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredPbgList.map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{p.noPbg}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{p.id}</div>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 700 }}>{p.peruntukan}</div>
+                        {p.notes && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{p.notes}</div>}
+                      </td>
+                      <td><span className="badge badge-info">{p.dinas}</span></td>
+                      <td>{p.tglTerbit}</td>
+                      <td><span className="badge badge-success">{p.status}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditPbg(p)} title="Edit PBG">
+                            <Edit3 size={13} />
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePbg(p.id, p.noPbg)} title="Hapus">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* 3. SPLITZING SHM BPN (FULL CRUD STATUS) */}
+      {/* 3. SPLITZING SHM BPN (FULL CRUD STATUS + SEARCH) */}
       {activeTab === 'split' && (
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>3. Pemecahan SHM Per-Kavling BPN (Splitzing)</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Monitoring dan update pemecahan sertifikat induk menjadi Sertipikat Hak Milik (SHM) per kavling.</p>
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Total Proyek: <strong style={{ color: 'var(--accent-primary)' }}>{units.length} Unit Kavling</strong>
+            </div>
+          </div>
+
+          {/* Search Bar Splitzing */}
+          <div style={{ padding: '0.6rem 0.85rem', marginBottom: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '240px' }}>
+              <Search size={15} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', height: '32px' }}
+                placeholder="Cari no unit kavling (misal: A-01), nama pemilik, SHGB induk, atau status SHM..."
+                value={searchSplit}
+                onChange={(e) => setSearchSplit(e.target.value)}
+              />
+              {searchSplit && (
+                <button onClick={() => setSearchSplit('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Ditemukan: <strong style={{ color: 'var(--accent-primary)' }}>{filteredSplitUnits.length}</strong> unit
             </div>
           </div>
 
@@ -720,32 +902,40 @@ export const LegalModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {units.map((u) => (
-                  <tr key={u.id}>
-                    <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div></td>
-                    <td><div style={{ fontWeight: 700 }}>{u.owner}</div></td>
-                    <td>{u.legal?.shgb || 'SHGB No 405 (Exp 2045)'}</td>
-                    <td><span className="badge badge-success">{u.legal?.status || 'SHM Ready (No. 1024/SHM)'}</span></td>
-                    <td>
-                      <span className="badge badge-info">{u.legal?.splitStatus || 'SELESAI BALIK NAMA'}</span>
-                    </td>
-                    <td>
-                      <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditSplit(u)}>
-                        <Edit3 size={13} /> Edit Status
-                      </button>
+                {filteredSplitUnits.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      Tidak ditemukan data kavling dengan kata kunci "{searchSplit}".
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredSplitUnits.map((u) => (
+                    <tr key={u.id}>
+                      <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div></td>
+                      <td><div style={{ fontWeight: 700 }}>{u.owner}</div></td>
+                      <td>{u.legal?.shgb || 'SHGB No 405 (Exp 2045)'}</td>
+                      <td><span className="badge badge-success">{u.legal?.status || 'SHM Ready (No. 1024/SHM)'}</span></td>
+                      <td>
+                        <span className="badge badge-info">{u.legal?.splitStatus || 'SELESAI BALIK NAMA'}</span>
+                      </td>
+                      <td>
+                        <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditSplit(u)}>
+                          <Edit3 size={13} /> Edit Status
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* 4. APHT NOTARIS & BANK MITRA (FULL CRUD) */}
+      {/* 4. APHT NOTARIS & BANK MITRA (FULL CRUD + SEARCH) */}
       {activeTab === 'apht' && (
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>4. APHT Notaris & PKS Kerjasama Bank Mitra KPR</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Perjanjian Kerjasama (PKS) pembiayaan KPR & Akta Pembebanan Hak Tanggungan (APHT).</p>
@@ -753,6 +943,29 @@ export const LegalModule = () => {
             <button className="btn btn-primary btn-sm" onClick={handleOpenAddBank}>
               <Plus size={14} /> + Tambah Mitra Bank
             </button>
+          </div>
+
+          {/* Search Bar Bank APHT */}
+          <div style={{ padding: '0.6rem 0.85rem', marginBottom: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '240px' }}>
+              <Search size={15} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', height: '32px' }}
+                placeholder="Cari nama bank mitra (Mandiri, BCA, BTN, BSI), nomor PKS, PIC loan officer..."
+                value={searchBank}
+                onChange={(e) => setSearchBank(e.target.value)}
+              />
+              {searchBank && (
+                <button onClick={() => setSearchBank('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Ditemukan: <strong style={{ color: 'var(--accent-primary)' }}>{filteredBankList.length}</strong> bank
+            </div>
           </div>
 
           <div className="table-container">
@@ -769,39 +982,47 @@ export const LegalModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {bankList.map((b) => (
-                  <tr key={b.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{b.bankName}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{b.id}</div>
-                    </td>
-                    <td><div style={{ fontWeight: 700 }}>{b.pksNo}</div></td>
-                    <td><span className="badge badge-success">{b.aphtStatus}</span></td>
-                    <td><div style={{ fontWeight: 700 }}>{b.plafon}</div></td>
-                    <td>{b.pic}</td>
-                    <td><span className="badge badge-info">{b.status}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditBank(b)} title="Edit Bank">
-                          <Edit3 size={13} />
-                        </button>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteBank(b.id, b.bankName)} title="Hapus">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
+                {filteredBankList.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      Tidak ditemukan mitra bank dengan kata kunci "{searchBank}".
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredBankList.map((b) => (
+                    <tr key={b.id}>
+                      <td>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{b.bankName}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{b.id}</div>
+                      </td>
+                      <td><div style={{ fontWeight: 700 }}>{b.pksNo}</div></td>
+                      <td><span className="badge badge-success">{b.aphtStatus}</span></td>
+                      <td><div style={{ fontWeight: 700 }}>{b.plafon}</div></td>
+                      <td>{b.pic}</td>
+                      <td><span className="badge badge-info">{b.status}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditBank(b)} title="Edit Bank">
+                            <Edit3 size={13} />
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteBank(b.id, b.bankName)} title="Hapus">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* 5. PPJB (FULL CRUD) */}
+      {/* 5. PPJB (FULL CRUD + SEARCH) */}
       {activeTab === 'ppjb' && (
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>5. Akta Pengikatan PPJB & Notaris Mitras</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Daftar akta pengikatan jual beli (PPJB) resmi dihadapan Notaris rekanan.</p>
@@ -809,6 +1030,29 @@ export const LegalModule = () => {
             <button className="btn btn-primary btn-sm" onClick={handleOpenAddPpjb}>
               <Plus size={14} /> + Tambah Berkas PPJB
             </button>
+          </div>
+
+          {/* Search Bar PPJB */}
+          <div style={{ padding: '0.6rem 0.85rem', marginBottom: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '240px' }}>
+              <Search size={15} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', height: '32px' }}
+                placeholder="Cari no berkas PPJB, kavling unit, nama pembeli, notaris rekanan, atau status akta..."
+                value={searchPpjb}
+                onChange={(e) => setSearchPpjb(e.target.value)}
+              />
+              {searchPpjb && (
+                <button onClick={() => setSearchPpjb('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Ditemukan: <strong style={{ color: 'var(--accent-primary)' }}>{filteredPpjbList.length}</strong> berkas
+            </div>
           </div>
 
           <div className="table-container">
@@ -825,40 +1069,48 @@ export const LegalModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {notaryDeeds.map((n) => (
-                  <tr key={n.id}>
-                    <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{n.id}</div></td>
-                    <td>{n.kavling}</td>
-                    <td><div style={{ fontWeight: 700 }}>{n.owner}</div></td>
-                    <td>{n.notaris}</td>
-                    <td><span className="badge badge-info">{n.bankPks}</span></td>
-                    <td>
-                      <span className={`badge ${n.status.includes('Selesai') ? 'badge-success' : 'badge-warning'}`}>
-                        {n.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditPpjb(n)} title="Edit PPJB">
-                          <Edit3 size={13} />
-                        </button>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePpjb(n.id, n.kavling)} title="Hapus">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
+                {filteredPpjbList.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      Tidak ditemukan berkas PPJB dengan kata kunci "{searchPpjb}".
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredPpjbList.map((n) => (
+                    <tr key={n.id}>
+                      <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{n.id}</div></td>
+                      <td>{n.kavling}</td>
+                      <td><div style={{ fontWeight: 700 }}>{n.owner}</div></td>
+                      <td>{n.notaris}</td>
+                      <td><span className="badge badge-info">{n.bankPks}</span></td>
+                      <td>
+                        <span className={`badge ${n.status.includes('Selesai') ? 'badge-success' : 'badge-warning'}`}>
+                          {n.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditPpjb(n)} title="Edit PPJB">
+                            <Edit3 size={13} />
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeletePpjb(n.id, n.kavling)} title="Hapus">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* 6. DISPUTE AUDIT (FULL CRUD) */}
+      {/* 6. DISPUTE AUDIT (FULL CRUD + SEARCH) */}
       {activeTab === 'dispute' && (
         <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
             <div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>6. Dispute Audit Sengketa & Legal Due Diligence Lahan</h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dokumen hasil uji kelayakan hukum dan sertifikasi bebas sengketa lahan proyek.</p>
@@ -866,6 +1118,29 @@ export const LegalModule = () => {
             <button className="btn btn-primary btn-sm" onClick={handleOpenAddDispute}>
               <Plus size={14} /> + Tambah Laporan Audit
             </button>
+          </div>
+
+          {/* Search Bar Dispute */}
+          <div style={{ padding: '0.6rem 0.85rem', marginBottom: '1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '240px' }}>
+              <Search size={15} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', height: '32px' }}
+                placeholder="Cari objek lahan, auditor legal, hasil uji sengketa, atau status..."
+                value={searchDispute}
+                onChange={(e) => setSearchDispute(e.target.value)}
+              />
+              {searchDispute && (
+                <button onClick={() => setSearchDispute('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Ditemukan: <strong style={{ color: 'var(--accent-primary)' }}>{filteredDisputeList.length}</strong> laporan
+            </div>
           </div>
 
           <div className="table-container">
@@ -881,28 +1156,36 @@ export const LegalModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {disputeList.map((d) => (
-                  <tr key={d.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{d.objectLand}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{d.id} &bull; {d.conclusion}</div>
-                    </td>
-                    <td>{d.date}</td>
-                    <td><div style={{ fontWeight: 700 }}>{d.auditor}</div></td>
-                    <td><span className="badge badge-success">{d.result}</span></td>
-                    <td><span className="badge badge-info">{d.status}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditDispute(d)} title="Edit Audit">
-                          <Edit3 size={13} />
-                        </button>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteDispute(d.id, d.objectLand)} title="Hapus">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
+                {filteredDisputeList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      Tidak ditemukan laporan audit dengan kata kunci "{searchDispute}".
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredDisputeList.map((d) => (
+                    <tr key={d.id}>
+                      <td>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{d.objectLand}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{d.id} &bull; {d.conclusion}</div>
+                      </td>
+                      <td>{d.date}</td>
+                      <td><div style={{ fontWeight: 700 }}>{d.auditor}</div></td>
+                      <td><span className="badge badge-success">{d.result}</span></td>
+                      <td><span className="badge badge-info">{d.status}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleOpenEditDispute(d)} title="Edit Audit">
+                            <Edit3 size={13} />
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteDispute(d.id, d.objectLand)} title="Hapus">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
