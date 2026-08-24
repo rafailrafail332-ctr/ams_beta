@@ -304,25 +304,22 @@ export const AppProvider = ({ children }) => {
     showNotification('AKUN DITERBITKAN KEMBALI! Seluruh 17 akun pimpinan & staf resmi aktif.', 'info');
   };
 
-  // 3. HOUSING UNITS STORE
-  const [units, setUnits] = useState([
-    {
-      id: 'UNT-001',
-      unitNo: 'A-01',
-      cluster: 'Grand Harmoni - Cluster Emerald',
-      owner: 'Budi Santoso',
-      phone: '0812-9988-7711',
-      tipe: '45/90',
-      progress: 100,
-      status: 'Ready (Handover)',
-      contractor: 'PT Bangun Jaya Perdana',
-      startDate: '2025-01-10',
-      targetDate: '2025-07-31',
-      legal: { status: 'SHM Ready (No. 1024/SHM)', shgb: 'SHGB No 405 (Exp 2045)', splitStatus: 'SELESAI BALIK NAMA' },
-      finance: { skema: 'KPR Bank Mandiri', dpStatus: 'Lunas 100%', harga: 650000000, pencairanKpr: 'Cair 100%', batpPayment: 'Lunas BATP 100%' },
-      crm: { ticketStatus: 'No Complaints', bastStatus: 'BAST Selesai Diserahterimakan', iplStatus: 'Lunas Agt 2025' }
-    }
-  ]);
+  // 3. HOUSING UNITS STORE (CLEAN EMPTY INITIAL STATE - 0% S-CURVE BASELINE)
+  const getInitialUnits = () => {
+    try {
+      const saved = localStorage.getItem('ams_units_clean_v22');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return []; // Clean Empty List: Progress, Cashflow & S-Curve start at 0%
+  };
+
+  const [units, setUnits] = useState(getInitialUnits);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_units_clean_v22', JSON.stringify(units));
+    } catch (e) {}
+  }, [units]);
 
   // 4. CLEAN TO-DO LIST STORE (EMPTY LIST READY FOR MANUAL TESTING)
   const getInitialTodos = () => {

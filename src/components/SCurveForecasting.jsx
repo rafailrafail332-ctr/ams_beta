@@ -17,12 +17,12 @@ export const SCurveForecasting = () => {
   const [selectedCluster, setSelectedCluster] = useState('Cluster Emerald');
 
   // Filter units based on selected cluster
-  const clusterUnits = units.filter(u => selectedCluster === 'All' || u.cluster.includes(selectedCluster.replace(' (Phase 1)', '').replace(' (Phase 2)', '')));
-  const totalClusterUnits = clusterUnits.length || 1;
+  const clusterUnits = (units || []).filter(u => selectedCluster === 'All' || (u.cluster && u.cluster.includes(selectedCluster.replace(' (Phase 1)', '').replace(' (Phase 2)', ''))));
+  const totalClusterUnits = clusterUnits.length;
 
   // DYNAMIC CALCULATIONS FROM REAL APP CONTEXT DATA
-  const actualTeknikProgress = clusterUnits.length > 0
-    ? Math.round(clusterUnits.reduce((acc, curr) => acc + curr.progress, 0) / totalClusterUnits)
+  const actualTeknikProgress = totalClusterUnits > 0
+    ? Math.round(clusterUnits.reduce((acc, curr) => acc + (Number(curr.progress) || 0), 0) / totalClusterUnits)
     : 0;
 
   const paidUnitsCount = clusterUnits.filter(u => 
@@ -30,22 +30,22 @@ export const SCurveForecasting = () => {
     u.finance?.batpPayment?.toLowerCase().includes('lunas')
   ).length;
 
-  const actualCashflowFinance = clusterUnits.length > 0
+  const actualCashflowFinance = totalClusterUnits > 0
     ? Math.round((paidUnitsCount / totalClusterUnits) * 100)
     : 0;
 
-  const targetProgress = 100; // Expected completion target
+  const targetProgress = totalClusterUnits > 0 ? 100 : 0; // 0% if no units inputted yet, 100% when active
   const deviation = actualTeknikProgress - targetProgress;
 
   // Dynamic S-Curve Monthly Data Points based on current actualTeknikProgress
   const monthlyData = [
-    { month: 'Jan 2025', target: 10, actualTeknik: Math.min(10, Math.round(actualTeknikProgress * 0.1)), cashflowFinance: Math.min(10, Math.round(actualCashflowFinance * 0.1)) },
-    { month: 'Feb 2025', target: 25, actualTeknik: Math.min(25, Math.round(actualTeknikProgress * 0.25)), cashflowFinance: Math.min(25, Math.round(actualCashflowFinance * 0.25)) },
-    { month: 'Mar 2025', target: 45, actualTeknik: Math.min(45, Math.round(actualTeknikProgress * 0.45)), cashflowFinance: Math.min(45, Math.round(actualCashflowFinance * 0.45)) },
-    { month: 'Apr 2025', target: 65, actualTeknik: Math.min(65, Math.round(actualTeknikProgress * 0.65)), cashflowFinance: Math.min(65, Math.round(actualCashflowFinance * 0.65)) },
-    { month: 'Mei 2025', target: 80, actualTeknik: Math.min(80, Math.round(actualTeknikProgress * 0.8)), cashflowFinance: Math.min(80, Math.round(actualCashflowFinance * 0.8)) },
-    { month: 'Jun 2025', target: 95, actualTeknik: Math.min(95, Math.round(actualTeknikProgress * 0.95)), cashflowFinance: Math.min(95, Math.round(actualCashflowFinance * 0.95)) },
-    { month: 'Jul 2025', target: 100, actualTeknik: actualTeknikProgress, cashflowFinance: actualCashflowFinance }
+    { month: 'Jan 2025', target: totalClusterUnits > 0 ? 10 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(10, Math.round(actualTeknikProgress * 0.1)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(10, Math.round(actualCashflowFinance * 0.1)) : 0 },
+    { month: 'Feb 2025', target: totalClusterUnits > 0 ? 25 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(25, Math.round(actualTeknikProgress * 0.25)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(25, Math.round(actualCashflowFinance * 0.25)) : 0 },
+    { month: 'Mar 2025', target: totalClusterUnits > 0 ? 45 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(45, Math.round(actualTeknikProgress * 0.45)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(45, Math.round(actualCashflowFinance * 0.45)) : 0 },
+    { month: 'Apr 2025', target: totalClusterUnits > 0 ? 65 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(65, Math.round(actualTeknikProgress * 0.65)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(65, Math.round(actualCashflowFinance * 0.65)) : 0 },
+    { month: 'Mei 2025', target: totalClusterUnits > 0 ? 80 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(80, Math.round(actualTeknikProgress * 0.8)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(80, Math.round(actualCashflowFinance * 0.8)) : 0 },
+    { month: 'Jun 2025', target: totalClusterUnits > 0 ? 95 : 0, actualTeknik: totalClusterUnits > 0 ? Math.min(95, Math.round(actualTeknikProgress * 0.95)) : 0, cashflowFinance: totalClusterUnits > 0 ? Math.min(95, Math.round(actualCashflowFinance * 0.95)) : 0 },
+    { month: 'Jul 2025', target: totalClusterUnits > 0 ? 100 : 0, actualTeknik: actualTeknikProgress, cashflowFinance: actualCashflowFinance }
   ];
 
   return (
@@ -78,7 +78,7 @@ export const SCurveForecasting = () => {
         <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
           <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Target S-Curve Waktu</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{targetProgress}%</div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Target Selesai: Juli 2025</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Target Selesai: {totalClusterUnits > 0 ? 'Juli 2025' : 'Menunggu Input Data'}</div>
         </div>
 
         <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
@@ -90,7 +90,7 @@ export const SCurveForecasting = () => {
             </span>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Status: {deviation >= 0 ? 'On Track (Target Selesai Sesuai Schedule)' : `Deviasi ${deviation}% dari Target Schedule`}
+            Status: {totalClusterUnits === 0 ? 'Menunggu Input Data Unit (0%)' : (deviation >= 0 ? 'On Track (Target Selesai Sesuai Schedule)' : `Deviasi ${deviation}% dari Target Schedule`)}
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export const SCurveForecasting = () => {
             stroke="#F59E0B"
             strokeWidth="3"
             strokeDasharray="6 4"
-            points="70,164 160,140 250,108 340,76 430,52 520,28 610,20"
+            points={monthlyData.map((d, idx) => `${70 + idx * 90},${180 - (d.target * 1.6)}`).join(' ')}
           />
 
           {/* Actual Physical Teknik Curve (Blue Line Dynamic) */}
@@ -167,12 +167,12 @@ export const SCurveForecasting = () => {
       {/* Legend & Alert Footnote */}
       <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', gap: '0.5rem' }}>
         <div style={{ display: 'flex', gap: '1.25rem' }}>
-          <span style={{ color: '#F59E0B', fontWeight: 700 }}>---- Target Rencana S-Curve</span>
+          <span style={{ color: '#F59E0B', fontWeight: 700 }}>---- Target Rencana S-Curve ({targetProgress}%)</span>
           <span style={{ color: '#3B82F6', fontWeight: 700 }}>── Realisasi Fisik ({actualTeknikProgress}%)</span>
           <span style={{ color: '#10B981', fontWeight: 700 }}>── Penerimaan Cashflow ({actualCashflowFinance}%)</span>
         </div>
         <div style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>
-          *Data diperbarui secara real-time dari data unit & pembayaran di sistem.
+          *Data Kurva-S tersinkronisasi otomatis dengan input data unit kavling & pembayaran di sistem.
         </div>
       </div>
     </div>
