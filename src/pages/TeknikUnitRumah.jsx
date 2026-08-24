@@ -226,34 +226,42 @@ export const TeknikUnitRumah = () => {
       <CostOverrunInspector />
 
       {/* Filter and Search Bar */}
-      <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1rem 1.25rem' }}>
+      <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '0.75rem 1rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '0.75rem', flex: 1, minWidth: '280px' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                className="form-control"
-                style={{ paddingLeft: '36px' }}
-                placeholder="Cari nomor unit, nama pemilik, atau kontraktor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div style={{ display: 'flex', gap: '0.6rem', flex: 1, minWidth: '280px', position: 'relative', alignItems: 'center' }}>
+            <Search size={16} color="var(--accent-primary)" />
+            <input
+              type="text"
+              className="form-control"
+              style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+              placeholder="Cari nomor unit (A-01), nama pemilik, tipe, atau kontraktor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            )}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Filter size={16} color="var(--text-muted)" />
-            <select
-              className="form-control"
-              style={{ width: '180px' }}
-              value={selectedCluster}
-              onChange={(e) => setSelectedCluster(e.target.value)}
-            >
-              <option value="All">Semua Cluster</option>
-              <option value="Emerald">Cluster Emerald</option>
-              <option value="Sapphire">Cluster Sapphire</option>
-            </select>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <Filter size={16} color="var(--text-muted)" />
+              <select
+                className="form-control"
+                style={{ width: '180px' }}
+                value={selectedCluster}
+                onChange={(e) => setSelectedCluster(e.target.value)}
+              >
+                <option value="All">Semua Cluster</option>
+                <option value="Emerald">Cluster Emerald</option>
+                <option value="Sapphire">Cluster Sapphire</option>
+              </select>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredUnits.length}</span> dari {units.length} Unit
+            </div>
           </div>
         </div>
       </div>
@@ -262,94 +270,105 @@ export const TeknikUnitRumah = () => {
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Daftar Unit Rumah & Monitoring Progress Fisik</h3>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{filteredUnits.length} Unit Terdaftar</span>
         </div>
-        <div className="table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>No Kavling & Tipe</th>
-                <th>Cluster</th>
-                <th>Pemilik (Owner)</th>
-                <th>Foto Progres Lapangan</th>
-                <th>Progress Fisik</th>
-                <th>Status Pengerjaan</th>
-                <th>WA Live Tracker</th>
-                <th>Aksi Teknik</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUnits.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Tipe {u.tipe}</div>
-                  </td>
-                  <td>{u.cluster}</td>
-                  <td>
-                    <div style={{ fontWeight: 700 }}>{u.owner}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{u.phone || '-'}</div>
-                  </td>
-                  <td>
-                    {u.progressPhoto ? (
-                      <div 
-                        onClick={() => setPreviewPhotoUrl(u.progressPhoto)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
-                        title="Klik untuk memperbesar foto progres"
-                      >
-                        <img 
-                          src={u.progressPhoto} 
-                          alt="Progres" 
-                          style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover', border: '1.5px solid var(--accent-primary)' }} 
-                        />
-                        <span style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: 700 }}>Lihat Foto</span>
-                      </div>
-                    ) : (
-                      <button 
-                        className="btn btn-secondary btn-sm" 
-                        onClick={() => handleOpenUpdateModal(u)}
-                        style={{ fontSize: '0.72rem', gap: '0.25rem' }}
-                      >
-                        <Camera size={13} /> Upload Foto
-                      </button>
-                    )}
-                  </td>
-                  <td style={{ minWidth: '130px' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, marginBottom: '2px', color: u.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }}>
-                      {u.progress}%
-                    </div>
-                    <div style={{ width: '100%', height: '7px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${u.progress}%`, height: '100%', backgroundColor: u.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }} />
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`badge ${u.progress === 100 ? 'badge-success' : 'badge-info'}`}>
-                      {u.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="btn btn-secondary btn-sm" onClick={() => handleOpenWATracker(u)} style={{ color: '#25D366', fontWeight: 700 }}>
-                      <MessageSquare size={13} /> Kirim WA Konsumen
-                    </button>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleOpenUpdateModal(u)}>
-                        <Edit3 size={13} /> Update % & Foto
-                      </button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleOpenQCModal(u)}>
-                        <ClipboardCheck size={13} /> QC Form
-                      </button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteUnitClick(u.id, u.unitNo)} style={{ color: 'var(--danger)' }} title="Hapus Unit Kavling">
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </td>
+
+        {filteredUnits.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+            <Building2 size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+            <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada unit rumah yang sesuai dengan pencarian</h4>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+            <button className="btn btn-secondary btn-sm" onClick={() => { setSearchTerm(''); setSelectedCluster('All'); }} style={{ marginTop: '0.75rem' }}>
+              Reset Pencarian
+            </button>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>No Kavling & Tipe</th>
+                  <th>Cluster</th>
+                  <th>Pemilik (Owner)</th>
+                  <th>Foto Progres Lapangan</th>
+                  <th>Progress Fisik</th>
+                  <th>Status Pengerjaan</th>
+                  <th>WA Live Tracker</th>
+                  <th>Aksi Teknik</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredUnits.map((u) => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Tipe {u.tipe}</div>
+                    </td>
+                    <td>{u.cluster}</td>
+                    <td>
+                      <div style={{ fontWeight: 700 }}>{u.owner}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{u.phone || '-'}</div>
+                    </td>
+                    <td>
+                      {u.progressPhoto ? (
+                        <div 
+                          onClick={() => setPreviewPhotoUrl(u.progressPhoto)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
+                          title="Klik untuk memperbesar foto progres"
+                        >
+                          <img 
+                            src={u.progressPhoto} 
+                            alt="Progres" 
+                            style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover', border: '1.5px solid var(--accent-primary)' }} 
+                          />
+                          <span style={{ fontSize: '0.72rem', color: 'var(--accent-primary)', fontWeight: 700 }}>Lihat Foto</span>
+                        </div>
+                      ) : (
+                        <button 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => handleOpenUpdateModal(u)}
+                          style={{ fontSize: '0.72rem', gap: '0.25rem' }}
+                        >
+                          <Camera size={13} /> Upload Foto
+                        </button>
+                      )}
+                    </td>
+                    <td style={{ minWidth: '130px' }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 800, marginBottom: '2px', color: u.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }}>
+                        {u.progress}%
+                      </div>
+                      <div style={{ width: '100%', height: '7px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ width: `${u.progress}%`, height: '100%', backgroundColor: u.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }} />
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`badge ${u.progress === 100 ? 'badge-success' : 'badge-info'}`}>
+                        {u.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button className="btn btn-secondary btn-sm" onClick={() => handleOpenWATracker(u)} style={{ color: '#25D366', fontWeight: 700 }}>
+                        <MessageSquare size={13} /> Kirim WA Konsumen
+                      </button>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button className="btn btn-primary btn-sm" onClick={() => handleOpenUpdateModal(u)}>
+                          <Edit3 size={13} /> Update % & Foto
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenQCModal(u)}>
+                          <ClipboardCheck size={13} /> QC Form
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteUnitClick(u.id, u.unitNo)} style={{ color: 'var(--danger)' }} title="Hapus Unit Kavling">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}

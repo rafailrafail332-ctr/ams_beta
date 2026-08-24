@@ -15,7 +15,8 @@ import {
   Eye, 
   Image as ImageIcon,
   Plus,
-  Trash2
+  Trash2,
+  Search
 } from 'lucide-react';
 
 export const TeknikKomersilFasilitas = () => {
@@ -35,6 +36,11 @@ export const TeknikKomersilFasilitas = () => {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('fasilitas'); // Set Facilities as default active tab
+
+  // Search Filter States for all 3 Sub-tabs
+  const [searchFacility, setSearchFacility] = useState('');
+  const [searchCommercial, setSearchCommercial] = useState('');
+  const [searchUtility, setSearchUtility] = useState('');
 
   // Modal State for Add / Edit Facility
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -183,6 +189,44 @@ export const TeknikKomersilFasilitas = () => {
     }
   };
 
+  // Real-time search filtered data for all 3 sub-tabs
+  const filteredFacilities = (facilities || []).filter((fac) => {
+    if (!searchFacility) return true;
+    const q = searchFacility.toLowerCase().trim();
+    return (
+      (fac.nama || '').toLowerCase().includes(q) ||
+      (fac.status || '').toLowerCase().includes(q) ||
+      (fac.target || '').toLowerCase().includes(q) ||
+      (fac.pengawas || '').toLowerCase().includes(q)
+    );
+  });
+
+  const filteredCommercials = (commercials || []).filter((kom) => {
+    if (!searchCommercial) return true;
+    const q = searchCommercial.toLowerCase().trim();
+    return (
+      (kom.id || '').toLowerCase().includes(q) ||
+      (kom.nama || '').toLowerCase().includes(q) ||
+      (kom.tipe || '').toLowerCase().includes(q) ||
+      (kom.status || '').toLowerCase().includes(q) ||
+      (kom.kontraktor || '').toLowerCase().includes(q) ||
+      (kom.legalStatus || '').toLowerCase().includes(q)
+    );
+  });
+
+  const filteredUtilities = (utilities || []).filter((utl) => {
+    if (!searchUtility) return true;
+    const q = searchUtility.toLowerCase().trim();
+    return (
+      (utl.id || '').toLowerCase().includes(q) ||
+      (utl.jenis || '').toLowerCase().includes(q) ||
+      (utl.nama || '').toLowerCase().includes(q) ||
+      (utl.status || '').toLowerCase().includes(q) ||
+      (utl.pihak || '').toLowerCase().includes(q) ||
+      (utl.penyedia || '').toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div>
       {/* Page Header */}
@@ -217,129 +261,162 @@ export const TeknikKomersilFasilitas = () => {
           className={`tab-item ${activeTab === 'fasilitas' ? 'active' : ''}`}
           onClick={() => setActiveTab('fasilitas')}
         >
-          Fasilitas Umum & Sosial (Fasum)
+          Fasilitas Umum & Sosial (Fasum) ({facilities.length})
         </button>
         <button
           className={`tab-item ${activeTab === 'komersil' ? 'active' : ''}`}
           onClick={() => setActiveTab('komersil')}
         >
-          Unit Komersil (Ruko)
+          Unit Komersil (Ruko) ({commercials.length})
         </button>
         <button
           className={`tab-item ${activeTab === 'utilitas' ? 'active' : ''}`}
           onClick={() => setActiveTab('utilitas')}
         >
-          Utilitas Kawasan (PLN/PDAM/Fiber)
+          Utilitas Kawasan (PLN/PDAM/Fiber) ({utilities.length})
         </button>
       </div>
 
       {/* ========================================================================= */}
-      {/* TAB CONTENT: FASILITAS UMUM & SOSIAL (FULL CRUD)                           */}
+      {/* TAB CONTENT: FASILITAS UMUM & SOSIAL (FULL CRUD + SEARCH)                  */}
       {/* ========================================================================= */}
       {activeTab === 'fasilitas' && (
         <div className="glass-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Fasilitas Umum, Sosial & Sarana Perumahan</h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{facilities.length} Sarana Kawasan</span>
           </div>
 
-          <div className="grid-3">
-            {(facilities || []).map((fac) => (
-              <div 
-                key={fac.id} 
-                style={{ 
-                  background: 'var(--bg-secondary)', 
-                  borderRadius: 'var(--radius-md)', 
-                  border: '1px solid var(--border-color)',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}
-              >
-                {/* IMAGE BANNER / THUMBNAIL */}
-                <div style={{ position: 'relative', height: '145px', background: '#1e293b', overflow: 'hidden' }}>
-                  {fac.photo ? (
-                    <img 
-                      src={fac.photo} 
-                      alt={fac.nama} 
-                      onClick={() => setPreviewPhotoUrl(fac.photo)}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer', transition: 'transform 0.3s' }}
-                      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', flexDirection: 'column', gap: '0.4rem' }}>
-                      <ImageIcon size={32} />
-                      <span style={{ fontSize: '0.75rem' }}>Belum Ada Foto Progres</span>
+          {/* Search Bar Fasilitas */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari sarana (Masjid, Taman, Clubhouse, Jalan, Gate)..."
+                value={searchFacility}
+                onChange={(e) => setSearchFacility(e.target.value)}
+              />
+              {searchFacility && (
+                <button onClick={() => setSearchFacility('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredFacilities.length}</span> dari {facilities.length} Sarana
+            </div>
+          </div>
+
+          {filteredFacilities.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Building size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada sarana fasilitas yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchFacility('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="grid-3">
+              {filteredFacilities.map((fac) => (
+                <div 
+                  key={fac.id} 
+                  style={{ 
+                    background: 'var(--bg-secondary)', 
+                    borderRadius: 'var(--radius-md)', 
+                    border: '1px solid var(--border-color)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  {/* IMAGE BANNER / THUMBNAIL */}
+                  <div style={{ position: 'relative', height: '145px', background: '#1e293b', overflow: 'hidden' }}>
+                    {fac.photo ? (
+                      <img 
+                        src={fac.photo} 
+                        alt={fac.nama} 
+                        onClick={() => setPreviewPhotoUrl(fac.photo)}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer', transition: 'transform 0.3s' }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', flexDirection: 'column', gap: '0.4rem' }}>
+                        <ImageIcon size={32} />
+                        <span style={{ fontSize: '0.75rem' }}>Belum Ada Foto Progres</span>
+                      </div>
+                    )}
+                    
+                    {/* BADGE OVERLAY */}
+                    <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                      <span className={`badge ${fac.progress === 100 ? 'badge-success' : 'badge-warning'}`}>
+                        {fac.progress === 100 ? 'Selesai 100%' : `${fac.progress}% Pengerjaan`}
+                      </span>
                     </div>
-                  )}
-                  
-                  {/* BADGE OVERLAY */}
-                  <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                    <span className={`badge ${fac.progress === 100 ? 'badge-success' : 'badge-warning'}`}>
-                      {fac.progress === 100 ? 'Selesai 100%' : `${fac.progress}% Pengerjaan`}
-                    </span>
                   </div>
-                </div>
 
-                {/* CARD BODY CONTENT */}
-                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{fac.nama}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>{fac.status}</div>
+                  {/* CARD BODY CONTENT */}
+                  <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{fac.nama}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>{fac.status}</div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-                      <span>Progress Fisik</span>
-                      <span style={{ color: fac.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }}>{fac.progress}%</span>
-                    </div>
-                    <div className="progress-bar-bg" style={{ marginBottom: '0.85rem' }}>
-                      <div className="progress-bar-fill" style={{ width: `${fac.progress}%`, backgroundColor: fac.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }} />
-                    </div>
-                  </div>
-
-                  {/* ACTION FOOTER */}
-                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
-                      Target: {fac.target || '-'}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+                        <span>Progress Fisik</span>
+                        <span style={{ color: fac.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }}>{fac.progress}%</span>
+                      </div>
+                      <div className="progress-bar-bg" style={{ marginBottom: '0.85rem' }}>
+                        <div className="progress-bar-fill" style={{ width: `${fac.progress}%`, backgroundColor: fac.progress === 100 ? 'var(--success)' : 'var(--accent-primary)' }} />
+                      </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
-                      {fac.photo && (
+                    {/* ACTION FOOTER */}
+                    <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
+                        Target: {fac.target || '-'}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        {fac.photo && (
+                          <button 
+                            className="btn btn-secondary btn-sm" 
+                            onClick={() => setPreviewPhotoUrl(fac.photo)}
+                            style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem' }}
+                            title="Lihat Foto Berkas Fullscreen"
+                          >
+                            <Eye size={13} /> Foto
+                          </button>
+                        )}
+                        <button 
+                          className="btn btn-primary btn-sm" 
+                          onClick={() => handleOpenEditFacility(fac)}
+                          style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem' }}
+                        >
+                          <Edit3 size={13} /> Edit
+                        </button>
                         <button 
                           className="btn btn-secondary btn-sm" 
-                          onClick={() => setPreviewPhotoUrl(fac.photo)}
-                          style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem' }}
-                          title="Lihat Foto Berkas Fullscreen"
+                          onClick={() => handleDeleteFacilityClick(fac.id, fac.nama)}
+                          style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
+                          title="Hapus Sarana Fasilitas"
                         >
-                          <Eye size={13} /> Foto
+                          <Trash2 size={13} /> Hapus
                         </button>
-                      )}
-                      <button 
-                        className="btn btn-primary btn-sm" 
-                        onClick={() => handleOpenEditFacility(fac)}
-                        style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem' }}
-                      >
-                        <Edit3 size={13} /> Edit
-                      </button>
-                      <button 
-                        className="btn btn-secondary btn-sm" 
-                        onClick={() => handleDeleteFacilityClick(fac.id, fac.nama)}
-                        style={{ padding: '0.3rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
-                        title="Hapus Sarana Fasilitas"
-                      >
-                        <Trash2 size={13} /> Hapus
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* TAB CONTENT: KOMERSIL (RUKO)                                               */}
+      {/* TAB CONTENT: KOMERSIL (RUKO + SEARCH)                                      */}
       {/* ========================================================================= */}
       {activeTab === 'komersil' && (
         <div className="glass-card">
@@ -349,56 +426,91 @@ export const TeknikKomersilFasilitas = () => {
               <Plus size={14} /> Tambah Unit Komersil
             </button>
           </div>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>ID Unit</th>
-                  <th>Nama Unit & Lokasi</th>
-                  <th>Spesifikasi</th>
-                  <th>Progress Physical %</th>
-                  <th>Status Pekerjaan</th>
-                  <th>Kontraktor</th>
-                  <th>Status Legalitas</th>
-                  <th>Aksi Hapus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(commercials || []).map((kom) => (
-                  <tr key={kom.id}>
-                    <td><span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{kom.id}</span></td>
-                    <td><div style={{ fontWeight: 700 }}>{kom.nama}</div></td>
-                    <td><span className="badge badge-neutral">{kom.tipe}</span></td>
-                    <td style={{ width: '180px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.2rem' }}>
-                        <span>{kom.progress}%</span>
-                      </div>
-                      <div className="progress-bar-bg">
-                        <div className="progress-bar-fill" style={{ width: `${kom.progress}%` }} />
-                      </div>
-                    </td>
-                    <td><div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{kom.status}</div></td>
-                    <td>{kom.kontraktor}</td>
-                    <td><span className="badge badge-success">{kom.legalStatus}</span></td>
-                    <td>
-                      <button 
-                        className="btn btn-secondary btn-sm" 
-                        onClick={() => handleDeleteCommercialClick(kom.id, kom.nama)}
-                        style={{ color: 'var(--danger)' }}
-                      >
-                        <Trash2 size={13} /> Hapus
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Search Bar Komersil */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari nama ruko komersil, tipe, kontraktor, status legalitas..."
+                value={searchCommercial}
+                onChange={(e) => setSearchCommercial(e.target.value)}
+              />
+              {searchCommercial && (
+                <button onClick={() => setSearchCommercial('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredCommercials.length}</span> dari {commercials.length} Ruko
+            </div>
           </div>
+
+          {filteredCommercials.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Building size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada unit komersil yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchCommercial('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID Unit</th>
+                    <th>Nama Unit & Lokasi</th>
+                    <th>Spesifikasi</th>
+                    <th>Progress Physical %</th>
+                    <th>Status Pekerjaan</th>
+                    <th>Kontraktor</th>
+                    <th>Status Legalitas</th>
+                    <th>Aksi Hapus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCommercials.map((kom) => (
+                    <tr key={kom.id}>
+                      <td><span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{kom.id}</span></td>
+                      <td><div style={{ fontWeight: 700 }}>{kom.nama}</div></td>
+                      <td><span className="badge badge-neutral">{kom.tipe}</span></td>
+                      <td style={{ width: '180px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.2rem' }}>
+                          <span>{kom.progress}%</span>
+                        </div>
+                        <div className="progress-bar-bg">
+                          <div className="progress-bar-fill" style={{ width: `${kom.progress}%` }} />
+                        </div>
+                      </td>
+                      <td><div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{kom.status}</div></td>
+                      <td>{kom.kontraktor}</td>
+                      <td><span className="badge badge-success">{kom.legalStatus}</span></td>
+                      <td>
+                        <button 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => handleDeleteCommercialClick(kom.id, kom.nama)}
+                          style={{ color: 'var(--danger)' }}
+                        >
+                          <Trash2 size={13} /> Hapus
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* TAB CONTENT: UTILITAS                                                     */}
+      {/* TAB CONTENT: UTILITAS (SEARCH + CRUD)                                     */}
       {/* ========================================================================= */}
       {activeTab === 'utilitas' && (
         <div className="glass-card">
@@ -408,58 +520,93 @@ export const TeknikKomersilFasilitas = () => {
               <Plus size={14} /> Tambah Utilitas
             </button>
           </div>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>ID Utilitas</th>
-                  <th>Jenis Infrastruktur</th>
-                  <th>Progress Pemasangan %</th>
-                  <th>Tahap Lapangan</th>
-                  <th>Mitra Instansi / Pihak Ketiga</th>
-                  <th>Aksi Hapus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(utilities || []).map((utl) => {
-                  const jenisText = utl.jenis || utl.nama || '';
-                  const pihakText = utl.pihak || utl.penyedia || '-';
-                  return (
-                    <tr key={utl.id}>
-                      <td><span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{utl.id}</span></td>
-                      <td>
-                        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-                          {jenisText.includes('PLN') && <Zap size={16} color="#f59e0b" />}
-                          {jenisText.includes('PDAM') && <Droplets size={16} color="#06b6d4" />}
-                          {(jenisText.includes('Fiber') || jenisText.includes('Internet')) && <Wifi size={16} color="#6366f1" />}
-                          {jenisText}
-                        </div>
-                      </td>
-                      <td style={{ width: '180px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.2rem', color: 'var(--text-main)' }}>
-                          <span>{utl.progress}%</span>
-                        </div>
-                        <div className="progress-bar-bg">
-                          <div className="progress-bar-fill" style={{ width: `${utl.progress}%` }} />
-                        </div>
-                      </td>
-                      <td><div style={{ color: 'var(--text-main)', fontSize: '0.88rem' }}>{utl.status}</div></td>
-                      <td><span className="badge badge-neutral">{pihakText}</span></td>
-                      <td>
-                        <button 
-                          className="btn btn-secondary btn-sm" 
-                          onClick={() => handleDeleteUtilityClick(utl.id, utl.nama || utl.jenis)}
-                          style={{ color: 'var(--danger)' }}
-                        >
-                          <Trash2 size={13} /> Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+
+          {/* Search Bar Utilitas */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari infrastruktur PLN, PDAM, Fiber Optic, instansi mitra..."
+                value={searchUtility}
+                onChange={(e) => setSearchUtility(e.target.value)}
+              />
+              {searchUtility && (
+                <button onClick={() => setSearchUtility('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredUtilities.length}</span> dari {utilities.length} Jaringan
+            </div>
           </div>
+
+          {filteredUtilities.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Zap size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data utilitas yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchUtility('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID Utilitas</th>
+                    <th>Jenis Infrastruktur</th>
+                    <th>Progress Pemasangan %</th>
+                    <th>Tahap Lapangan</th>
+                    <th>Mitra Instansi / Pihak Ketiga</th>
+                    <th>Aksi Hapus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUtilities.map((utl) => {
+                    const jenisText = utl.jenis || utl.nama || '';
+                    const pihakText = utl.pihak || utl.penyedia || '-';
+                    return (
+                      <tr key={utl.id}>
+                        <td><span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{utl.id}</span></td>
+                        <td>
+                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+                            {jenisText.includes('PLN') && <Zap size={16} color="#f59e0b" />}
+                            {jenisText.includes('PDAM') && <Droplets size={16} color="#06b6d4" />}
+                            {(jenisText.includes('Fiber') || jenisText.includes('Internet')) && <Wifi size={16} color="#6366f1" />}
+                            {jenisText}
+                          </div>
+                        </td>
+                        <td style={{ width: '180px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.2rem', color: 'var(--text-main)' }}>
+                            <span>{utl.progress}%</span>
+                          </div>
+                          <div className="progress-bar-bg">
+                            <div className="progress-bar-fill" style={{ width: `${utl.progress}%` }} />
+                          </div>
+                        </td>
+                        <td><div style={{ color: 'var(--text-main)', fontSize: '0.88rem' }}>{utl.status}</div></td>
+                        <td><span className="badge badge-neutral">{pihakText}</span></td>
+                        <td>
+                          <button 
+                            className="btn btn-secondary btn-sm" 
+                            onClick={() => handleDeleteUtilityClick(utl.id, utl.nama || utl.jenis)}
+                            style={{ color: 'var(--danger)' }}
+                          >
+                            <Trash2 size={13} /> Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
