@@ -26,7 +26,8 @@ import {
   ShoppingCart, 
   Truck, 
   Printer,
-  Receipt
+  Receipt,
+  Landmark
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -93,14 +94,15 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       ];
     }
 
-    if (roleLower.includes('finance') || roleLower.includes('accounting')) {
+    if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'fin-price', title: '1. Penetapan Pricelist Resmi Finance', moduleKey: 'finance', subTabKey: 'pricelist', icon: Tag, color: '#60A5FA' },
-        { id: 'fin-dp', title: '2. Monitoring DP & Pembayaran Cash In', moduleKey: 'finance', subTabKey: 'dp', icon: DollarSign, color: '#10B981' },
-        { id: 'fin-kpr', title: '3. SLA Pencairan KPR Bank Mitra', moduleKey: 'finance', subTabKey: 'kpr', icon: CreditCard, color: '#38BDF8' },
-        { id: 'fin-expenses', title: '4. Pengeluaran Kantor & Operasional (Cash Out)', moduleKey: 'finance', subTabKey: 'expenses', icon: Receipt, color: '#F87171' },
-        { id: 'fin-overrun', title: '5. Cost Overrun Inspector (Faktur)', moduleKey: 'finance', subTabKey: 'cost-overrun', icon: AlertTriangle, color: '#F59E0B' }
+        { id: 'fin-tax', title: '1. Akuntansi & Pajak (PPh Final & PPN)', moduleKey: 'finance', subTabKey: 'tax', icon: Landmark, color: '#10B981' },
+        { id: 'fin-expenses', title: '2. Pengeluaran Kantor & Kuitansi (OpEx)', moduleKey: 'finance', subTabKey: 'expenses', icon: Receipt, color: '#F87171' },
+        { id: 'fin-dp', title: '3. Monitoring DP & Pembayaran Cash In', moduleKey: 'finance', subTabKey: 'dp', icon: DollarSign, color: '#10B981' },
+        { id: 'fin-kpr', title: '4. SLA Pencairan KPR Bank Mitra', moduleKey: 'finance', subTabKey: 'kpr', icon: CreditCard, color: '#38BDF8' },
+        { id: 'fin-price', title: '5. Penetapan Pricelist & HPP Rumah', moduleKey: 'finance', subTabKey: 'pricelist', icon: Tag, color: '#60A5FA' },
+        { id: 'fin-overrun', title: '6. Cost Overrun Inspector (Faktur)', moduleKey: 'finance', subTabKey: 'cost-overrun', icon: AlertTriangle, color: '#F59E0B' }
       ];
     }
 
