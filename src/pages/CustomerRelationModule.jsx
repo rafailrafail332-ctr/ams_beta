@@ -53,6 +53,163 @@ export const CustomerRelationModule = () => {
   const [searchCsat, setSearchCsat] = useState('');
   const [searchIpl, setSearchIpl] = useState('');
   const [searchDoc, setSearchDoc] = useState('');
+  const [searchHelpdesk, setSearchHelpdesk] = useState('');
+
+  // Initial Helpdesk Inquiries Data
+  const initialHelpdeskList = [
+    {
+      id: 'HD-2025-001',
+      unitNo: 'A-01',
+      cluster: 'Cluster Emerald',
+      customerName: 'Budi Santoso',
+      phone: '081299887766',
+      topic: 'Jadwal Serah Terima BAST & Sertifikat SHM',
+      channel: 'WhatsApp Care',
+      priority: 'Tinggi',
+      status: 'Dijawab CS',
+      pic: 'Dodi Syaiful Nugroho',
+      date: '2025-08-20',
+      lastMessage: 'Mohon info perkiraan jadwal serah terima kunci dan sertifikat SHM unit kami.'
+    },
+    {
+      id: 'HD-2025-002',
+      unitNo: 'B-04',
+      cluster: 'Cluster Sapphire',
+      customerName: 'Siti Aminah',
+      phone: '081344556677',
+      topic: 'Konsultasi Pencairan KPR Bank BTN',
+      channel: 'Hotline Telepon',
+      priority: 'Tinggi',
+      status: 'Eskalasi Finance',
+      pic: 'Tarkum Aditya / Syamsul',
+      date: '2025-08-22',
+      lastMessage: 'Apakah surat persetujuan SP3K Bank BTN sudah diterima pihak developer?'
+    },
+    {
+      id: 'HD-2025-003',
+      unitNo: 'A-12',
+      cluster: 'Cluster Emerald',
+      customerName: 'Hendra Gunawan',
+      phone: '081122334455',
+      topic: 'Konfirmasi Pembayaran IPL Estate & Stiker Akses Portal',
+      channel: 'WhatsApp Care',
+      priority: 'Sedang',
+      status: 'Selesai',
+      pic: 'Dodi Syaiful Nugroho',
+      date: '2025-08-23',
+      lastMessage: 'Kuitansi IPL bulan Agustus sudah kami terima dan stiker RFID gerbang sudah aktif.'
+    },
+    {
+      id: 'HD-2025-004',
+      unitNo: 'B-01',
+      cluster: 'Cluster Sapphire',
+      customerName: 'Dr. Tri Handoko',
+      phone: '085711223344',
+      topic: 'Lampu PJU Jalan Utama Agak Redup',
+      channel: 'Portal Helpdesk',
+      priority: 'Sedang',
+      status: 'Diteruskan ke GA Lapangan',
+      pic: 'Irwan (GA Site Manager)',
+      date: '2025-08-24',
+      lastMessage: 'Lampu penerangan depan kavling B-01 mohon dicek instalasi kabelnya.'
+    }
+  ];
+
+  const [helpdeskList, setHelpdeskList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_cr_helpdesk_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialHelpdeskList;
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('ams_cr_helpdesk_v1', JSON.stringify(helpdeskList));
+    } catch (e) {}
+  }, [helpdeskList]);
+
+  // Modal Helpdesk
+  const [isHelpdeskModalOpen, setIsHelpdeskModalOpen] = useState(false);
+  const [editingHelpdesk, setEditingHelpdesk] = useState(null);
+  const [helpdeskForm, setHelpdeskForm] = useState({
+    unitNo: 'A-01',
+    cluster: 'Cluster Emerald',
+    customerName: '',
+    phone: '',
+    topic: '',
+    channel: 'WhatsApp Care',
+    priority: 'Sedang',
+    status: 'Dalam Antrean',
+    pic: 'Dodi Syaiful Nugroho',
+    lastMessage: ''
+  });
+
+  const handleOpenAddHelpdesk = () => {
+    setEditingHelpdesk(null);
+    setHelpdeskForm({
+      unitNo: 'A-01',
+      cluster: 'Cluster Emerald',
+      customerName: '',
+      phone: '',
+      topic: '',
+      channel: 'WhatsApp Care',
+      priority: 'Sedang',
+      status: 'Dalam Antrean',
+      pic: 'Dodi Syaiful Nugroho',
+      lastMessage: ''
+    });
+    setIsHelpdeskModalOpen(true);
+  };
+
+  const handleOpenEditHelpdesk = (item) => {
+    setEditingHelpdesk(item);
+    setHelpdeskForm({ ...item });
+    setIsHelpdeskModalOpen(true);
+  };
+
+  const handleSaveHelpdesk = (e) => {
+    e.preventDefault();
+    if (editingHelpdesk) {
+      setHelpdeskList(prev => prev.map(h => h.id === editingHelpdesk.id ? { ...h, ...helpdeskForm } : h));
+      showNotification(`Tiket Helpdesk ${helpdeskForm.customerName} berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `HD-2025-${String(helpdeskList.length + 1).padStart(3, '0')}`,
+        date: new Date().toISOString().split('T')[0],
+        ...helpdeskForm
+      };
+      setHelpdeskList(prev => [newItem, ...prev]);
+      showNotification(`Tiket Helpdesk baru untuk ${helpdeskForm.customerName} berhasil ditambahkan!`, 'success');
+    }
+    setIsHelpdeskModalOpen(false);
+  };
+
+  const handleDeleteHelpdesk = (id, name) => {
+    if (window.confirm(`Hapus catatan tiket helpdesk ${name}?`)) {
+      setHelpdeskList(prev => prev.filter(h => h.id !== id));
+      showNotification(`Tiket helpdesk ${name} dihapus.`, 'warning');
+    }
+  };
+
+  const handleToggleHelpdeskStatus = (item) => {
+    const nextStatus = item.status === 'Selesai' ? 'Dalam Antrean' : 'Selesai';
+    setHelpdeskList(prev => prev.map(h => h.id === item.id ? { ...h, status: nextStatus } : h));
+    showNotification(`Status tiket helpdesk ${item.customerName} diubah menjadi: ${nextStatus}`, 'info');
+  };
+
+  // Direct WA Message Sender Helper
+  const handleSendWaDirect = (phone, name, topic, unitNo) => {
+    const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+    const intlPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
+    const message = encodeURIComponent(
+      `Halo Bapak/Ibu ${name} (Unit ${unitNo} Ashoka Enterprise).\n\nMenindaklanjuti perihal: "${topic}", kami dari Tim Customer Relation Ashoka Care siap membantu Anda.\n\nAda yang bisa kami bantu lebih lanjut?\n\nSalam hangat,\nCustomer Relation PT Ashoka Enterprise Development`
+    );
+    window.open(`https://wa.me/${intlPhone}?text=${message}`, '_blank');
+  };
 
   // BAST Printable Modal State
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
@@ -1179,19 +1336,186 @@ export const CustomerRelationModule = () => {
         );
       })()}
 
-      {/* PILAR 6: HELPDESK & CONSULTATION */}
-      {activeTab === 'helpdesk' && (
-        <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
-          <Headphones size={48} color="#38BDF8" style={{ marginBottom: '1rem' }} />
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Pusat Layanan Helpdesk & Consultation KPR</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: '500px', margin: '0.5rem auto 1.5rem' }}>
-            Layanan pengaduan cepat & konsultasi perbankan KPR via WhatsApp Resmi Ashoka Care.
-          </p>
-          <button className="btn btn-primary" onClick={() => alert('Menghubungkan ke WhatsApp Helpdesk Ashoka CRM Care...')}>
-            <MessageSquare size={16} /> Hubungkan ke WA Customer Care
-          </button>
-        </div>
-      )}
+      {/* PILAR 6: HELPDESK & CONSULTATION (INTERACTIVE CALL CENTER & WA DIRECT) */}
+      {activeTab === 'helpdesk' && (() => {
+        const filteredHelpdesk = helpdeskList.filter(h => !searchHelpdesk || [h.id, h.unitNo, h.cluster, h.customerName, h.phone, h.topic, h.channel, h.status, h.pic, h.lastMessage].some(val => (val || '').toLowerCase().includes(searchHelpdesk.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Headphones color="#38BDF8" size={24} /> 6. Pusat Layanan Helpdesk, Konsultasi KPR & WhatsApp Care
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Pusat penanganan pertanyaan konsumen cepat, konsultasi bank mitra, & pengiriman pesan langsung via WhatsApp resmi.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button className="btn btn-primary" onClick={handleOpenAddHelpdesk} style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800 }}>
+                  <Plus size={16} /> Buat Tiket Helpdesk Baru
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Contact & Emergency Hotline Cards */}
+            <div className="grid-3" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#38BDF8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <PhoneCall size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Hotline WhatsApp Konsumen</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#38BDF8' }}>0812-9988-7700</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Senin - Minggu (08:00 - 20:00)</div>
+                </div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageSquare size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>PIC Bantuan KPR & Legal</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#10B981' }}>Dodi / Salma (Legal & HR)</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Respon Cepat SLA &lt; 30 Menit</div>
+                </div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#F59E0B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Posko Satpam & Darurat 24 Jam</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#F59E0B' }}>Pos Gerbang Utama Site</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Penjagaan & Mitigasi Lapangan</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Bar Helpdesk */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari nama konsumen, unit, topik pengaduan, status, nomor WA, PIC..."
+                  value={searchHelpdesk}
+                  onChange={(e) => setSearchHelpdesk(e.target.value)}
+                />
+                {searchHelpdesk && (
+                  <button onClick={() => setSearchHelpdesk('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredHelpdesk.length}</span> dari {helpdeskList.length} Antrean Helpdesk
+              </div>
+            </div>
+
+            {filteredHelpdesk.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Headphones size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada tiket helpdesk yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchHelpdesk('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Konsumen & Unit</th>
+                      <th>Topik Pengaduan / Pertanyaan</th>
+                      <th>Saluran & Prioritas</th>
+                      <th>PIC Penanggung Jawab</th>
+                      <th>Status Helpdesk</th>
+                      <th>Aksi & Hubungi Konsumen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredHelpdesk.map((h) => {
+                      const isCompleted = h.status === 'Selesai';
+                      return (
+                        <tr key={h.id}>
+                          <td>
+                            <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{h.customerName}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
+                              Unit {h.unitNo} &bull; {h.cluster}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{h.phone}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{h.topic}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: '280px', marginTop: '2px' }}>
+                              "{h.lastMessage}"
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge badge-info" style={{ marginBottom: '4px', display: 'inline-block' }}>{h.channel}</span>
+                            <div>
+                              <span className={`badge ${h.priority === 'Tinggi' ? 'badge-danger' : 'badge-neutral'}`} style={{ fontSize: '0.65rem' }}>
+                                Prioritas {h.priority}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.8rem' }}>{h.pic}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tgl: {h.date}</div>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => handleToggleHelpdeskStatus(h)}
+                              className={`badge ${isCompleted ? 'badge-success' : 'badge-warning'}`}
+                              style={{ cursor: 'pointer', border: 'none', padding: '0.35rem 0.6rem' }}
+                              title="Klik untuk ubah status"
+                            >
+                              {isCompleted ? <CheckCircle2 size={12} style={{ display: 'inline', marginRight: '3px' }} /> : <Clock size={12} style={{ display: 'inline', marginRight: '3px' }} />}
+                              {h.status}
+                            </button>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleSendWaDirect(h.phone, h.customerName, h.topic, h.unitNo)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', background: '#22c55e', border: 'none' }}
+                                title="Kirim Pesan WhatsApp Langsung"
+                              >
+                                <MessageSquare size={13} /> Kirim WA
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleOpenEditHelpdesk(h)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                              >
+                                <Edit3 size={13} /> Edit
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleDeleteHelpdesk(h.id, h.customerName)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* CREATE COMPLAINT TICKET MODAL */}
       {isTicketModalOpen && (
@@ -1842,6 +2166,160 @@ export const CustomerRelationModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHandoverModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
                   Simpan Catatan BAST
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE / EDIT HELPDESK TICKET MODAL */}
+      {isHelpdeskModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Headphones size={20} color="#38BDF8" />
+                {editingHelpdesk ? `Edit Tiket Helpdesk: ${editingHelpdesk.id}` : 'Buat Tiket Helpdesk & Pengaduan Konsumen Baru'}
+              </h3>
+              <button onClick={() => setIsHelpdeskModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveHelpdesk}>
+              <div className="modal-body">
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nama Konsumen Pelapor</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Budi Santoso"
+                      value={helpdeskForm.customerName}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, customerName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nomor WhatsApp / HP</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: 081299887766"
+                      value={helpdeskForm.phone}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, phone: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Unit Kavling</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: A-01"
+                      value={helpdeskForm.unitNo}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, unitNo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Cluster Perumahan</label>
+                    <select
+                      className="form-control"
+                      value={helpdeskForm.cluster}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, cluster: e.target.value })}
+                    >
+                      <option value="Cluster Emerald">Cluster Emerald</option>
+                      <option value="Cluster Sapphire">Cluster Sapphire</option>
+                      <option value="Cluster Diamond">Cluster Diamond</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Topik Pertanyaan / Pengaduan</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Informasi Jadwal BAST Kunci / Tagihan IPL"
+                    value={helpdeskForm.topic}
+                    onChange={(e) => setHelpdeskForm({ ...helpdeskForm, topic: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid-3">
+                  <div className="form-group">
+                    <label className="form-label">Saluran Kontak</label>
+                    <select
+                      className="form-control"
+                      value={helpdeskForm.channel}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, channel: e.target.value })}
+                    >
+                      <option value="WhatsApp Care">WhatsApp Care</option>
+                      <option value="Hotline Telepon">Hotline Telepon</option>
+                      <option value="Portal Helpdesk">Portal Helpdesk</option>
+                      <option value="Walk-in Site">Walk-in Site Gallery</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Tingkat Prioritas</label>
+                    <select
+                      className="form-control"
+                      value={helpdeskForm.priority}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, priority: e.target.value })}
+                    >
+                      <option value="Tinggi">Tinggi</option>
+                      <option value="Sedang">Sedang</option>
+                      <option value="Rendah">Rendah</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status Helpdesk</label>
+                    <select
+                      className="form-control"
+                      value={helpdeskForm.status}
+                      onChange={(e) => setHelpdeskForm({ ...helpdeskForm, status: e.target.value })}
+                    >
+                      <option value="Dalam Antrean">Dalam Antrean</option>
+                      <option value="Dijawab CS">Dijawab CS</option>
+                      <option value="Eskalasi Finance">Eskalasi Finance</option>
+                      <option value="Diteruskan ke GA">Diteruskan ke GA</option>
+                      <option value="Selesai">Selesai</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">PIC Petugas CS</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={helpdeskForm.pic}
+                    onChange={(e) => setHelpdeskForm({ ...helpdeskForm, pic: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Rincian Pertanyaan / Pesan Konsumen</label>
+                  <textarea
+                    rows="3"
+                    className="form-control"
+                    placeholder="Tuliskan isi pesan atau detail konsultasi konsumen..."
+                    value={helpdeskForm.lastMessage}
+                    onChange={(e) => setHelpdeskForm({ ...helpdeskForm, lastMessage: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsHelpdeskModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800 }}>
+                  Simpan Tiket Helpdesk
                 </button>
               </div>
             </form>
