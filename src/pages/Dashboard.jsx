@@ -292,7 +292,7 @@ export const Dashboard = ({ setCurrentTab }) => {
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Dashboard Utama Ashoka AMS Enterprise</h1>
+          <h1 className="page-title">Dashboard Utama Ashoka AMS</h1>
           <p className="page-subtitle">Pusat pemantauan S-Curve forecasting, jam kerja operasional, status unit rumah, instruksi memo direksi & keuangan real-time.</p>
         </div>
 
@@ -307,13 +307,13 @@ export const Dashboard = ({ setCurrentTab }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. ENTERPRISE OPERATIONAL WORKING HOURS CARD (WITH EDIT CRUD)             */}
+      {/* 1. OPERATIONAL WORKING HOURS CARD (WITH EDIT CRUD)                        */}
       {/* ========================================================================= */}
       <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1.25rem', borderLeft: '4px solid #F59E0B' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
           <div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Clock color="#F59E0B" size={22} /> Informasi Jam Kerja Operasional (Working Hours Ashoka Enterprise)
+              <Clock color="#F59E0B" size={22} /> Informasi Jam Kerja Operasional (Working Hours Ashoka)
             </h3>
             <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>Jadwal operasional aktif kantor pusat, site office proyek, & pos keamanan.</p>
           </div>

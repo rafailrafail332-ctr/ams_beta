@@ -122,10 +122,10 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           </div>
 
           <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff' }}>
-            ASHOKA ENTERPRISE
+            ASHOKA
           </h1>
           <p style={{ fontSize: '0.85rem', color: '#F59E0B', fontWeight: 800, marginTop: '0.15rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Asset & Real Estate Management System (AMS)
+            Asset & Property Management System (AMS)
           </p>
         </div>
 
@@ -355,7 +355,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#64748b' }}>
-          &copy; 2025 Ashoka Enterprise Management System. All rights reserved.
+          &copy; 2025 Ashoka Asset Management System (AMS). All rights reserved.
         </div>
       </div>
     </div>

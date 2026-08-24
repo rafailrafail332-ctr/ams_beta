@@ -199,7 +199,7 @@ export const UserManagement = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Modul Super Admin - Manajemen User & Hak Akses Fitur</h1>
-          <p className="page-subtitle">Daftar Manajemen & Direksi Resmi Ashoka Enterprise. Upload foto profil manual & atur otorisasi modul.</p>
+          <p className="page-subtitle">Daftar Manajemen & Direksi Resmi Ashoka. Upload foto profil manual & atur otorisasi modul.</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button className="btn btn-outline-danger" onClick={handleResetToOfficialConfirm} title="Reset ke Daftar 6 Manajemen Resmi (Foto Kosong)">

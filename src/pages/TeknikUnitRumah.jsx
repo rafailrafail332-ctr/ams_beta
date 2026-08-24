@@ -201,7 +201,7 @@ export const TeknikUnitRumah = () => {
     const photoText = u.progressPhoto ? `\n📸 Foto Progres Fisik: ${u.progressPhoto.startsWith('data:') ? '[Foto Terlampir di Sistem]' : u.progressPhoto}` : '';
     
     const msg = encodeURIComponent(
-      `Halo Kak ${u.owner},\n\nBerikut update resmi progres pembangunan unit rumah Kakak (Unit ${u.unitNo}):\n📌 Progress Fisik: ${u.progress}%\n🏗️ Status Pekerjaan: ${u.status}${photoText}\n\nLaporan langsung dari Tim Teknik Ashoka Enterprise. Terima kasih!`
+      `Halo Kak ${u.owner},\n\nBerikut update resmi progres pembangunan unit rumah Kakak (Unit ${u.unitNo}):\n📌 Progress Fisik: ${u.progress}%\n🏗️ Status Pekerjaan: ${u.status}${photoText}\n\nLaporan langsung dari Tim Teknik Ashoka. Terima kasih!`
     );
     window.open(`https://wa.me/${phoneNum}?text=${msg}`, '_blank');
   };
