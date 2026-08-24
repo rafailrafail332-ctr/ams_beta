@@ -64,7 +64,7 @@ export const AppProvider = ({ children }) => {
       status: 'Aktif',
       avatar: '',
       address: 'Departemen HR, GA & Head Office Ops Ashoka Enterprise',
-      allowedModules: ['todo-attendance', 'hr', 'ga', 'manager', 'customer-relation']
+      allowedModules: ['todo-attendance', 'hr', 'ga', 'procurement', 'customer-relation']
     },
     {
       id: 'USR-005',

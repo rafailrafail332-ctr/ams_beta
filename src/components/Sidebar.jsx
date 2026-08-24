@@ -90,13 +90,15 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
 
     if (roleLower.includes('hr') || roleLower.includes('dodi')) {
       return [
-        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'hr-staff', title: '1. SDM & Penyesuaian Gaji Karyawan', moduleKey: 'hr', subTabKey: 'staff', icon: Users, color: '#F87171' },
-        { id: 'hr-payroll', title: '2. Payroll & Kompensasi SDM', moduleKey: 'hr', subTabKey: 'payroll', icon: DollarSign, color: '#10B981' },
+        { id: 'todo-attendance', title: 'To-Do List & Presensi Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'hr-staff', title: '1. SDM & Karyawan Perusahaan', moduleKey: 'hr', subTabKey: 'staff', icon: Users, color: '#F87171' },
+        { id: 'hr-payroll', title: '2. Manajemen Penggajian (Payroll Gaji)', moduleKey: 'hr', subTabKey: 'payroll', icon: DollarSign, color: '#10B981' },
         { id: 'ga-office', title: '3. Site Office & Fasilitas Lapangan', moduleKey: 'ga', subTabKey: 'site-office', icon: Building2, color: '#38BDF8' },
-        { id: 'ga-fleet', title: '4. Fleet & Transportasi Lapangan', moduleKey: 'ga', subTabKey: 'fleet', icon: Truck, color: '#38BDF8' },
-        { id: 'ga-k3', title: '5. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' },
-        { id: 'cr-helpdesk', title: '6. Customer Relation & Helpdesk', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#FB7185' }
+        { id: 'ga-permits', title: '4. Perizinan Lingkungan & Warga', moduleKey: 'ga', subTabKey: 'permits', icon: FileCheck, color: '#34D399' },
+        { id: 'ga-fleet', title: '5. Fleet & Transportasi Lapangan', moduleKey: 'ga', subTabKey: 'fleet', icon: Truck, color: '#60A5FA' },
+        { id: 'ga-k3', title: '6. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' },
+        { id: 'proc-logistik', title: '7. Pengadaan & Logistik Kantor', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' },
+        { id: 'cr-helpdesk', title: '8. Customer Relation & Helpdesk', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#FB7185' }
       ];
     }
 

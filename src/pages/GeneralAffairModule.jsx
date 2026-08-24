@@ -24,8 +24,20 @@ import {
 } from 'lucide-react';
 
 export const GeneralAffairModule = () => {
-  const { showNotification } = useApp();
-  const [activeTab, setActiveTab] = useState('site-office'); // 'site-office', 'permits', 'fleet', 'k3'
+  const { showNotification, activeSubTab, setActiveSubTab } = useApp();
+  const [activeTab, setActiveTab] = useState(activeSubTab && activeSubTab !== 'default' ? activeSubTab : 'site-office'); // 'site-office', 'permits', 'fleet', 'k3'
+
+  useEffect(() => {
+    if (activeSubTab && activeSubTab !== 'default') {
+      setActiveTab(activeSubTab);
+    }
+  }, [activeSubTab]);
+
+  // Search Filter States for each GA Tab
+  const [searchSiteOffice, setSearchSiteOffice] = useState('');
+  const [searchPermits, setSearchPermits] = useState('');
+  const [searchFleet, setSearchFleet] = useState('');
+  const [searchK3, setSearchK3] = useState('');
 
   // ==========================================
   // 1. SITE OFFICE & FASILITAS LAPANGAN
@@ -346,249 +358,397 @@ export const GeneralAffairModule = () => {
       </div>
 
       {/* TAB 1: MANAJEMEN PROYEK & SITE OFFICE */}
-      {activeTab === 'site-office' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Building color="var(--accent-primary)" size={20} /> 1. Infrastruktur Site Office & Keamanan Lapangan
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pengadaan Marketing Gallery, Show Unit, Mess Pekerja, Air/Listrik Kerja, & Akses Material Berat.</p>
+      {activeTab === 'site-office' && (() => {
+        const filteredSiteOffice = siteOfficeList.filter(item => !searchSiteOffice || [item.name, item.id, item.category, item.location, item.pic, item.status, item.condition].some(val => (val || '').toLowerCase().includes(searchSiteOffice.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Building color="var(--accent-primary)" size={20} /> 1. Infrastruktur Site Office & Keamanan Lapangan
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pengadaan Marketing Gallery, Show Unit, Mess Pekerja, Air/Listrik Kerja, & Akses Material Berat.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('site-office')}>
+                <Plus size={14} /> Tambah Fasilitas
+              </button>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('site-office')}>
-              <Plus size={14} /> Tambah Fasilitas
-            </button>
-          </div>
 
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Fasilitas / Infrastruktur Lapangan</th>
-                  <th>Kategori GA</th>
-                  <th>Lokasi Penempatan</th>
-                  <th>Penanggung Jawab (PIC)</th>
-                  <th>Kondisi & Status Operasional</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {siteOfficeList.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{item.name}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{item.id}</div>
-                    </td>
-                    <td><span className="badge badge-info">{item.category}</span></td>
-                    <td><div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><MapPin size={14} color="#F59E0B" /> {item.location}</div></td>
-                    <td><div style={{ fontWeight: 600 }}>{item.pic}</div></td>
-                    <td>
-                      <span className="badge badge-success">
-                        <CheckCircle2 size={12} /> {item.status} ({item.condition})
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('site-office', item)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                          <Edit3 size={13} /> Edit
-                        </button>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('site-office', item.id, item.name)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Search Bar Site Office */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari fasilitas, kategori, lokasi penempatan, PIC, kondisi..."
+                  value={searchSiteOffice}
+                  onChange={(e) => setSearchSiteOffice(e.target.value)}
+                />
+                {searchSiteOffice && (
+                  <button onClick={() => setSearchSiteOffice('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredSiteOffice.length}</span> dari {siteOfficeList.length} Fasilitas
+              </div>
+            </div>
+
+            {filteredSiteOffice.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Building size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada fasilitas yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchSiteOffice('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Fasilitas / Infrastruktur Lapangan</th>
+                      <th>Kategori GA</th>
+                      <th>Lokasi Penempatan</th>
+                      <th>Penanggung Jawab (PIC)</th>
+                      <th>Kondisi & Status Operasional</th>
+                      <th>Aksi CRUD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredSiteOffice.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{item.name}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{item.id}</div>
+                        </td>
+                        <td><span className="badge badge-info">{item.category}</span></td>
+                        <td><div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><MapPin size={14} color="#F59E0B" /> {item.location}</div></td>
+                        <td><div style={{ fontWeight: 600 }}>{item.pic}</div></td>
+                        <td>
+                          <span className="badge badge-success">
+                            <CheckCircle2 size={12} /> {item.status} ({item.condition})
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('site-office', item)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('site-office', item.id, item.name)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* TAB 2: HUBUNGAN EKSTERNAL & PERIZINAN PROPERTI */}
-      {activeTab === 'permits' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FileCheck color="#10B981" size={20} /> 2. Hubungan Eksternal & Perizinan Properti (Licensing & Land Permits)
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>KKPR, AMDAL/UKL-UPL, PBG Induk, Koordinasi Dinas PDAM/PLN, & Hubungan Warga Lokal.</p>
+      {activeTab === 'permits' && (() => {
+        const filteredPermits = permitsList.filter(p => !searchPermits || [p.permitName, p.id, p.agency, p.status, p.note, p.progress?.toString()].some(val => (val || '').toLowerCase().includes(searchPermits.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FileCheck color="#10B981" size={20} /> 2. Hubungan Eksternal & Perizinan Properti (Licensing & Land Permits)
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>KKPR, AMDAL/UKL-UPL, PBG Induk, Koordinasi Dinas PDAM/PLN, & Hubungan Warga Lokal.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('permits')}>
+                <Plus size={14} /> Tambah Izin / Legalitas
+              </button>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('permits')}>
-              <Plus size={14} /> Tambah Izin / Legalitas
-            </button>
-          </div>
 
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Nama Perizinan / Dokumen Legalitas</th>
-                  <th>Instansi / Pihak Terkait</th>
-                  <th>Progres Perizinan</th>
-                  <th>Status Dokumen GA</th>
-                  <th>Keterangan / Nomor SK</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {permitsList.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{p.permitName}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{p.id}</div>
-                    </td>
-                    <td><div style={{ fontWeight: 600 }}>{p.agency}</div></td>
-                    <td style={{ minWidth: '140px' }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '2px' }}>{p.progress}%</div>
-                      <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${p.progress}%`, height: '100%', backgroundColor: 'var(--success)' }} />
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge badge-success">
-                        <FileCheck size={12} /> {p.status}
-                      </span>
-                    </td>
-                    <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.note}</div></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('permits', p)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                          <Edit3 size={13} /> Edit
-                        </button>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('permits', p.id, p.permitName)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Search Bar Permits */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari nama izin, instansi terkait (PUPR, BPN), status, nomor SK..."
+                  value={searchPermits}
+                  onChange={(e) => setSearchPermits(e.target.value)}
+                />
+                {searchPermits && (
+                  <button onClick={() => setSearchPermits('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredPermits.length}</span> dari {permitsList.length} Perizinan
+              </div>
+            </div>
+
+            {filteredPermits.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <FileCheck size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada perizinan yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchPermits('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Nama Perizinan / Dokumen Legalitas</th>
+                      <th>Instansi / Pihak Terkait</th>
+                      <th>Progres Perizinan</th>
+                      <th>Status Dokumen GA</th>
+                      <th>Keterangan / Nomor SK</th>
+                      <th>Aksi CRUD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPermits.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{p.permitName}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{p.id}</div>
+                        </td>
+                        <td><div style={{ fontWeight: 600 }}>{p.agency}</div></td>
+                        <td style={{ minWidth: '140px' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '2px' }}>{p.progress}%</div>
+                          <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <div style={{ width: `${p.progress}%`, height: '100%', backgroundColor: 'var(--success)' }} />
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge badge-success">
+                            <FileCheck size={12} /> {p.status}
+                          </span>
+                        </td>
+                        <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.note}</div></td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('permits', p)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('permits', p.id, p.permitName)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* TAB 3: MANAJEMEN KENDARAAN & TRANSPORTASI LAPANGAN (FLEET MANAGEMENT) */}
-      {activeTab === 'fleet' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Truck color="#38BDF8" size={20} /> 3. Armada Kendaraan Operasional & Transportasi Konsumen
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mobil 4x4 Double Cabin Pengawas Lapangan & Armada HiAce Antar-Jemput Site Visit Konsumen.</p>
+      {activeTab === 'fleet' && (() => {
+        const filteredFleet = fleetList.filter(flt => !searchFleet || [flt.vehicle, flt.id, flt.type, flt.driver, flt.status, flt.serviceDue].some(val => (val || '').toLowerCase().includes(searchFleet.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Truck color="#38BDF8" size={20} /> 3. Armada Kendaraan Operasional & Transportasi Konsumen
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mobil 4x4 Double Cabin Pengawas Lapangan & Armada HiAce Antar-Jemput Site Visit Konsumen.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('fleet')}>
+                <Plus size={14} /> Tambah Armada
+              </button>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('fleet')}>
-              <Plus size={14} /> Tambah Armada
-            </button>
-          </div>
 
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Armada & Nomor Polisi</th>
-                  <th>Peruntukan Transportasi</th>
-                  <th>Driver Penanggung Jawab</th>
-                  <th>Jadwal Service Rutin</th>
-                  <th>Status Kesiapan Armada</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fleetList.map((flt) => (
-                  <tr key={flt.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{flt.vehicle}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{flt.id}</div>
-                    </td>
-                    <td><div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{flt.type}</div></td>
-                    <td><div style={{ fontWeight: 700 }}>{flt.driver}</div></td>
-                    <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{flt.serviceDue}</div></td>
-                    <td>
-                      <span className={`badge ${flt.status.includes('Siap') ? 'badge-success' : 'badge-warning'}`}>
-                        <Truck size={12} /> {flt.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('fleet', flt)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                          <Edit3 size={13} /> Edit
-                        </button>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('fleet', flt.id, flt.vehicle)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Search Bar Fleet */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari armada (Hilux, Triton, HiAce), plat nomor, nama driver, status..."
+                  value={searchFleet}
+                  onChange={(e) => setSearchFleet(e.target.value)}
+                />
+                {searchFleet && (
+                  <button onClick={() => setSearchFleet('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredFleet.length}</span> dari {fleetList.length} Armada
+              </div>
+            </div>
+
+            {filteredFleet.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Truck size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada armada yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchFleet('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Armada & Nomor Polisi</th>
+                      <th>Peruntukan Transportasi</th>
+                      <th>Driver Penanggung Jawab</th>
+                      <th>Jadwal Service Rutin</th>
+                      <th>Status Kesiapan Armada</th>
+                      <th>Aksi CRUD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredFleet.map((flt) => (
+                      <tr key={flt.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{flt.vehicle}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{flt.id}</div>
+                        </td>
+                        <td><div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{flt.type}</div></td>
+                        <td><div style={{ fontWeight: 700 }}>{flt.driver}</div></td>
+                        <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{flt.serviceDue}</div></td>
+                        <td>
+                          <span className={`badge ${flt.status.includes('Siap') ? 'badge-success' : 'badge-warning'}`}>
+                            <Truck size={12} /> {flt.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('fleet', flt)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('fleet', flt.id, flt.vehicle)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* TAB 4: K3 (KESELAMATAN KERJA) & TANGGAP DARURAT PROYEK */}
-      {activeTab === 'k3' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <HardHat color="#EF4444" size={20} /> 4. Standar Keselamatan (K3) & Tanggap Darurat Bencana Proyek
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tabung APAR, Posko P3K, Mitigasi Banjir (Pompa Submersible), & Rambu Keselamatan K3.</p>
+      {activeTab === 'k3' && (() => {
+        const filteredK3 = k3List.filter(k => !searchK3 || [k.title, k.id, k.qty, k.location, k.status, k.lastCheck].some(val => (val || '').toLowerCase().includes(searchK3.toLowerCase().trim())));
+        return (
+          <div className="glass-card">
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <HardHat color="#EF4444" size={20} /> 4. Standar Keselamatan (K3) & Tanggap Darurat Bencana Proyek
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tabung APAR, Posko P3K, Mitigasi Banjir (Pompa Submersible), & Rambu Keselamatan K3.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('k3')}>
+                <Plus size={14} /> Tambah Standar K3
+              </button>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => handleOpenAdd('k3')}>
-              <Plus size={14} /> Tambah Standar K3
-            </button>
-          </div>
 
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Fasilitas & Standar K3 Proyek</th>
-                  <th>Jumlah & Spesifikasi</th>
-                  <th>Penempatan Lokasi Titik Krusial</th>
-                  <th>Tanggal Inspeksi Terakhir</th>
-                  <th>Status Kelayakan K3</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {k3List.map((k) => (
-                  <tr key={k.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{k.title}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{k.id}</div>
-                    </td>
-                    <td><span className="badge badge-neutral">{k.qty}</span></td>
-                    <td><div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><MapPin size={14} color="#ef4444" /> {k.location}</div></td>
-                    <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{k.lastCheck}</div></td>
-                    <td>
-                      <span className="badge badge-success">
-                        <HardHat size={12} /> {k.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('k3', k)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                          <Edit3 size={13} /> Edit
-                        </button>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('k3', k.id, k.title)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Search Bar K3 */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="var(--accent-primary)" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari standar K3 (APAR, P3K, Pompa), lokasi penempatan, status kelayakan..."
+                  value={searchK3}
+                  onChange={(e) => setSearchK3(e.target.value)}
+                />
+                {searchK3 && (
+                  <button onClick={() => setSearchK3('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredK3.length}</span> dari {k3List.length} Standar K3
+              </div>
+            </div>
+
+            {filteredK3.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <HardHat size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada standar K3 yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchK3('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Fasilitas & Standar K3 Proyek</th>
+                      <th>Jumlah & Spesifikasi</th>
+                      <th>Penempatan Lokasi Titik Krusial</th>
+                      <th>Tanggal Inspeksi Terakhir</th>
+                      <th>Status Kelayakan K3</th>
+                      <th>Aksi CRUD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredK3.map((k) => (
+                      <tr key={k.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{k.title}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{k.id}</div>
+                        </td>
+                        <td><span className="badge badge-neutral">{k.qty}</span></td>
+                        <td><div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><MapPin size={14} color="#ef4444" /> {k.location}</div></td>
+                        <td><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{k.lastCheck}</div></td>
+                        <td>
+                          <span className="badge badge-success">
+                            <HardHat size={12} /> {k.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit('k3', k)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                              <Edit3 size={13} /> Edit
+                            </button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteItem('k3', k.id, k.title)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* MODAL EDIT / ADD DEDICATED PER TAB */}
       {isModalOpen && (
