@@ -118,29 +118,174 @@ export const CustomerRelationModule = () => {
     }
   ]);
 
-  // Pillar 2: BAST Handover & Utilities Data
-  const [handovers, setHandovers] = useState([
+  // Pillar 2: BAST Handover & Utilities Data (Persistent Store with Full CRUD)
+  const initialHandovers = [
     {
       id: 'HO-001',
       unitNo: 'A-01',
       customerName: 'Budi Santoso',
-      cluster: 'Cluster Emerald',
+      phone: '0812-9988-7766',
+      cluster: 'Grand Harmoni - Cluster Emerald',
+      tipe: '45/90 (Standard Emerald)',
       bastDate: '01 Agustus 2025',
-      statusPLN: 'Aktif 1300W (No: 5412-9900)',
-      statusPDAM: 'Aktif PDAM Tirta (No: 8871)',
-      statusBAST: 'Selesai BAST (Kunci Diserahkan)'
+      statusPLN: 'Aktif 1300W',
+      meteranPLNNo: '5412-9900-1123',
+      dayaPLN: '1300 VA',
+      statusPDAM: 'Aktif PDAM Tirta',
+      meteranPDAMNo: 'PDAM-TIRTA-8871',
+      statusBAST: 'Selesai BAST (Kunci Diserahkan)',
+      notes: 'Serah terima 3 set kunci utama, kartu garansi retensi 100 hari, & meteran PLN/PDAM aktif.'
     },
     {
       id: 'HO-002',
       unitNo: 'A-02',
       customerName: 'Siti Rahmawati',
-      cluster: 'Cluster Emerald',
+      phone: '0812-3344-5566',
+      cluster: 'Grand Harmoni - Cluster Emerald',
+      tipe: '45/90 (Standard Emerald)',
       bastDate: '25 Agustus 2025 (Undangan)',
-      statusPLN: 'Proses Pemasangan Meteran',
-      statusPDAM: 'Proses Sambungan Pipa',
-      statusBAST: 'Jadwal Undangan Serah Terima'
+      statusPLN: 'Proses Pemasangan Meteran PLN',
+      meteranPLNNo: 'Menunggu Token Pemasangan',
+      dayaPLN: '1300 VA',
+      statusPDAM: 'Proses Sambungan Pipa PDAM',
+      meteranPDAMNo: 'Proses Sambung',
+      statusBAST: 'Jadwal Undangan Serah Terima',
+      notes: 'Undangan resmi serah terima kunci telah terkirim via WhatsApp Customer Care.'
+    },
+    {
+      id: 'HO-003',
+      unitNo: 'A-06',
+      customerName: 'Rian Perdana',
+      phone: '0813-4455-6677',
+      cluster: 'Grand Harmoni - Cluster Emerald',
+      tipe: '60/120 (Corner Emerald)',
+      bastDate: '28 Juli 2025',
+      statusPLN: 'Aktif 2200W',
+      meteranPLNNo: '5412-9921-8840',
+      dayaPLN: '2200 VA',
+      statusPDAM: 'Aktif PDAM Tirta',
+      meteranPDAMNo: 'PDAM-TIRTA-8902',
+      statusBAST: 'Selesai BAST (Kunci Diserahkan)',
+      notes: 'Serah terima kunci lengkap tuntas, rumah dihuni langsung oleh konsumen.'
+    },
+    {
+      id: 'HO-004',
+      unitNo: 'B-01',
+      customerName: 'Dr. Tri Handoko',
+      phone: '0811-2233-4455',
+      cluster: 'Grand Harmoni - Cluster Sapphire',
+      tipe: '75/150 (Sapphire Luxury)',
+      bastDate: '15 September 2025 (Jadwal)',
+      statusPLN: 'Pengajuan PLN Sub-station',
+      meteranPLNNo: 'Proses Antrian PLN',
+      dayaPLN: '2200 VA',
+      statusPDAM: 'Pipa Sambungan Induk Ready',
+      meteranPDAMNo: 'Proses Registrasi',
+      statusBAST: 'Dalam Persiapan Finishing Akhir',
+      notes: 'Finishing cat dan instalasi carport sedang diselesaikan oleh kontraktor pelaksana.'
     }
-  ]);
+  ];
+
+  const getSavedHandovers = () => {
+    try {
+      const saved = localStorage.getItem('ams_bast_handovers_clean_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialHandovers;
+  };
+
+  const [handovers, setHandovers] = useState(getSavedHandovers);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('ams_bast_handovers_clean_v2', JSON.stringify(handovers));
+    } catch (e) {}
+  }, [handovers]);
+
+  // Modal State for BAST Handover Add/Edit
+  const [isHandoverModalOpen, setIsHandoverModalOpen] = useState(false);
+  const [editingHandover, setEditingHandover] = useState(null);
+  const [handoverForm, setHandoverForm] = useState({
+    unitNo: 'A-01',
+    customerName: '',
+    phone: '',
+    cluster: 'Grand Harmoni - Cluster Emerald',
+    tipe: '45/90',
+    bastDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+    statusPLN: 'Aktif 1300W',
+    meteranPLNNo: '',
+    dayaPLN: '1300 VA',
+    statusPDAM: 'Aktif PDAM Tirta',
+    meteranPDAMNo: '',
+    statusBAST: 'Selesai BAST (Kunci Diserahkan)',
+    notes: ''
+  });
+
+  const handleOpenAddHandover = () => {
+    setEditingHandover(null);
+    setHandoverForm({
+      unitNo: 'A-01',
+      customerName: '',
+      phone: '',
+      cluster: 'Grand Harmoni - Cluster Emerald',
+      tipe: '45/90',
+      bastDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+      statusPLN: 'Aktif 1300W',
+      meteranPLNNo: '',
+      dayaPLN: '1300 VA',
+      statusPDAM: 'Aktif PDAM Tirta',
+      meteranPDAMNo: '',
+      statusBAST: 'Selesai BAST (Kunci Diserahkan)',
+      notes: ''
+    });
+    setIsHandoverModalOpen(true);
+  };
+
+  const handleOpenEditHandover = (h) => {
+    setEditingHandover(h);
+    setHandoverForm({
+      unitNo: h.unitNo || '',
+      customerName: h.customerName || '',
+      phone: h.phone || '',
+      cluster: h.cluster || 'Grand Harmoni - Cluster Emerald',
+      tipe: h.tipe || '45/90',
+      bastDate: h.bastDate || '',
+      statusPLN: h.statusPLN || 'Aktif 1300W',
+      meteranPLNNo: h.meteranPLNNo || '',
+      dayaPLN: h.dayaPLN || '1300 VA',
+      statusPDAM: h.statusPDAM || 'Aktif PDAM Tirta',
+      meteranPDAMNo: h.meteranPDAMNo || '',
+      statusBAST: h.statusBAST || 'Selesai BAST (Kunci Diserahkan)',
+      notes: h.notes || ''
+    });
+    setIsHandoverModalOpen(true);
+  };
+
+  const handleSaveHandover = (e) => {
+    e.preventDefault();
+    if (editingHandover) {
+      setHandovers(handovers.map(h => h.id === editingHandover.id ? { ...h, ...handoverForm } : h));
+      showNotification(`BAST Unit ${handoverForm.unitNo} (${handoverForm.customerName}) berhasil diperbarui!`, 'success');
+    } else {
+      const newHo = {
+        id: `HO-00${handovers.length + 1}`,
+        ...handoverForm
+      };
+      setHandovers([newHo, ...handovers]);
+      showNotification(`BAST Serah Terima Kunci Unit ${handoverForm.unitNo} berhasil dicatat!`, 'success');
+    }
+    setIsHandoverModalOpen(false);
+  };
+
+  const handleDeleteHandover = (id, unitNo) => {
+    if (window.confirm(`Hapus catatan BAST Serah Terima Kunci Unit ${unitNo}?`)) {
+      setHandovers(handovers.filter(h => h.id !== id));
+      showNotification(`Catatan BAST Unit ${unitNo} berhasil dihapus.`, 'warning');
+    }
+  };
 
   // Pillar 3: CSAT & Loyalty Referral Data
   const [reviews] = useState([
@@ -549,12 +694,58 @@ export const CustomerRelationModule = () => {
         );
       })()}
 
-      {/* PILAR 2: BAST SERAH TERIMA & UTILITIES */}
+      {/* PILAR 2: BAST SERAH TERIMA & UTILITIES (FULL CRUD) */}
       {activeTab === 'handover' && (() => {
-        const filteredHandovers = handovers.filter(h => !searchHandover || [h.id, h.unitNo, h.customerName, h.cluster, h.bastDate, h.statusPLN, h.statusPDAM, h.statusBAST].some(val => (val || '').toLowerCase().includes(searchHandover.toLowerCase().trim())));
+        const filteredHandovers = handovers.filter(h => !searchHandover || [h.id, h.unitNo, h.customerName, h.cluster, h.bastDate, h.statusPLN, h.statusPDAM, h.statusBAST, h.meteranPLNNo, h.meteranPDAMNo].some(val => (val || '').toLowerCase().includes(searchHandover.toLowerCase().trim())));
         return (
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Manajemen BAST Serah Terima Kunci & Balik Nama Meteran</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <KeyRound color="#F59E0B" size={24} /> Manajemen BAST Serah Terima Kunci & Balik Nama Meteran
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Pusat pencatatan resmi serah terima kunci fisik rumah, garansi retensi, & status aktivasi meteran PLN / PDAM warga.
+                </p>
+              </div>
+
+              <button className="btn btn-primary" onClick={handleOpenAddHandover} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none' }}>
+                <Plus size={16} /> Catat BAST Serah Terima Kunci Baru
+              </button>
+            </div>
+
+            {/* KPI Mini Cards for BAST */}
+            <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Total BAST Terdaftar</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>{handovers.length} Unit</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Kavling Siap / Selesai Handover</div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700 }}>Kunci Diserahkan</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
+                  {handovers.filter(h => h.statusBAST.includes('Selesai')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rumah Aktif Dihuni Warga</div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>PLN & PDAM Aktif</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
+                  {handovers.filter(h => h.statusPLN.includes('Aktif')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Meteran Mandiri Terpasang</div>
+              </div>
+
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Jadwal Undangan</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
+                  {handovers.filter(h => !h.statusBAST.includes('Selesai')).length} Unit
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Menunggu Serah Terima Kunci</div>
+              </div>
+            </div>
 
             {/* Search Bar BAST */}
             <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -564,7 +755,7 @@ export const CustomerRelationModule = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
-                  placeholder="Cari nomor unit, nama konsumen, tanggal BAST, status meteran PLN/PDAM..."
+                  placeholder="Cari nomor unit (A-01), nama konsumen, tanggal BAST, status meteran PLN/PDAM..."
                   value={searchHandover}
                   onChange={(e) => setSearchHandover(e.target.value)}
                 />
@@ -595,30 +786,74 @@ export const CustomerRelationModule = () => {
                     <tr>
                       <th>Kavling Unit & Konsumen</th>
                       <th>Tanggal BAST</th>
-                      <th>Sambungan PLN (Listrik)</th>
+                      <th>Sambungan Listrik (PLN)</th>
                       <th>Sambungan Air (PDAM)</th>
                       <th>Status BAST Kunci</th>
                       <th>Aksi Serah Terima</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredHandovers.map((h) => (
-                      <tr key={h.id}>
-                        <td>
-                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {h.unitNo}</div>
-                          <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{h.customerName}</div>
-                        </td>
-                        <td><div style={{ fontWeight: 700 }}>{h.bastDate}</div></td>
-                        <td><span className="badge badge-success">{h.statusPLN}</span></td>
-                        <td><span className="badge badge-success">{h.statusPDAM}</span></td>
-                        <td><span className="badge badge-info">{h.statusBAST}</span></td>
-                        <td>
-                          <button className="btn btn-primary btn-sm" onClick={() => handleOpenPrintBast(h)} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#000', fontWeight: 800, border: 'none' }}>
-                            <Printer size={13} /> Cetak Dokumen BAST
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredHandovers.map((h) => {
+                      const isHandoverDone = h.statusBAST.includes('Selesai');
+                      return (
+                        <tr key={h.id}>
+                          <td>
+                            <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {h.unitNo}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.85rem' }}>{h.customerName}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{h.cluster} &bull; {h.phone || '-'}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700 }}>{h.bastDate}</div>
+                            {h.notes && (
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {h.notes}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{h.statusPLN}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>No: {h.meteranPLNNo || '-'} ({h.dayaPLN || '1300 VA'})</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{h.statusPDAM}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>No: {h.meteranPDAMNo || '-'}</div>
+                          </td>
+                          <td>
+                            <span className={`badge ${isHandoverDone ? 'badge-success' : 'badge-info'}`}>
+                              {isHandoverDone ? <CheckCircle2 size={12} /> : <Clock size={12} />} {h.statusBAST}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.35rem' }}>
+                              <button 
+                                className="btn btn-primary btn-sm" 
+                                onClick={() => handleOpenPrintBast(h)} 
+                                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#000', fontWeight: 800, border: 'none', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                                title="Cetak Dokumen BAST Serah Terima Kunci"
+                              >
+                                <Printer size={13} /> Cetak BAST
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-sm" 
+                                onClick={() => handleOpenEditHandover(h)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                                title="Edit Data BAST"
+                              >
+                                <Edit3 size={13} /> Edit
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-sm" 
+                                onClick={() => handleDeleteHandover(h.id, h.unitNo)}
+                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
+                                title="Hapus"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1423,6 +1658,193 @@ export const CustomerRelationModule = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CATAT / EDIT BAST SERAH TERIMA KUNCI & METERAN */}
+      {isHandoverModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '650px', width: '95%' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <KeyRound size={20} color="#F59E0B" />
+                <h3 className="modal-title">
+                  {editingHandover ? `Edit BAST Serah Terima - Unit ${editingHandover.unitNo}` : 'Catat BAST Serah Terima Kunci Baru'}
+                </h3>
+              </div>
+              <button onClick={() => setIsHandoverModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveHandover}>
+              <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nomor Kavling Unit</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: A-01, B-03"
+                      value={handoverForm.unitNo}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, unitNo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Cluster Perumahan</label>
+                    <select
+                      className="form-control"
+                      value={handoverForm.cluster}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, cluster: e.target.value })}
+                    >
+                      <option value="Grand Harmoni - Cluster Emerald">Grand Harmoni - Cluster Emerald</option>
+                      <option value="Grand Harmoni - Cluster Sapphire">Grand Harmoni - Cluster Sapphire</option>
+                      <option value="Grand Harmoni - Cluster Diamond">Grand Harmoni - Cluster Diamond</option>
+                      <option value="Cluster Ruby">Cluster Ruby</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nama Pemilik Konsumen</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Nama Lengkap Pemilik"
+                      value={handoverForm.customerName}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, customerName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">No. Telepon / WhatsApp Konsumen</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="0812-xxxx-xxxx"
+                      value={handoverForm.phone}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Tipe Rumah Unit</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: 45/90 Standard"
+                      value={handoverForm.tipe}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, tipe: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Tanggal BAST Serah Kunci</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: 01 Agustus 2025"
+                      value={handoverForm.bastDate}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, bastDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Status Serah Terima Kunci (BAST)</label>
+                  <select
+                    className="form-control"
+                    value={handoverForm.statusBAST}
+                    onChange={(e) => setHandoverForm({ ...handoverForm, statusBAST: e.target.value })}
+                  >
+                    <option value="Selesai BAST (Kunci Diserahkan)">Selesai BAST (Kunci Diserahkan)</option>
+                    <option value="Jadwal Undangan Serah Terima">Jadwal Undangan Serah Terima</option>
+                    <option value="Dalam Persiapan Finishing Akhir">Dalam Persiapan Finishing Akhir</option>
+                  </select>
+                </div>
+
+                <div style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '1rem' }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#38BDF8', marginBottom: '0.5rem' }}>
+                    ⚡ Utilitas Listrik PLN & Air PDAM
+                  </div>
+                  
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="form-label">Status Listrik PLN</label>
+                      <select
+                        className="form-control"
+                        value={handoverForm.statusPLN}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, statusPLN: e.target.value })}
+                      >
+                        <option value="Aktif 1300W">Aktif 1300W</option>
+                        <option value="Aktif 2200W">Aktif 2200W</option>
+                        <option value="Proses Pemasangan Meteran PLN">Proses Pemasangan Meteran PLN</option>
+                        <option value="Pengajuan PLN Sub-station">Pengajuan PLN Sub-station</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">No. ID Pelanggan / Seri Meteran PLN</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Contoh: 5412-9900-1123"
+                        value={handoverForm.meteranPLNNo}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, meteranPLNNo: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="form-label">Status Air Bersih (PDAM / WTP)</label>
+                      <select
+                        className="form-control"
+                        value={handoverForm.statusPDAM}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, statusPDAM: e.target.value })}
+                      >
+                        <option value="Aktif PDAM Tirta">Aktif PDAM Tirta</option>
+                        <option value="Proses Sambungan Pipa PDAM">Proses Sambungan Pipa PDAM</option>
+                        <option value="Pipa Sambungan Induk Ready">Pipa Sambungan Induk Ready</option>
+                        <option value="Sumur Bor Terpadu">Sumur Bor Terpadu</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">No. Seri Pelanggan PDAM</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Contoh: PDAM-TIRTA-8871"
+                        value={handoverForm.meteranPDAMNo}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, meteranPDAMNo: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Catatan Kelengkapan Serah Terima (Kunci / Remote / Garansi)</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Serah terima 3 set kunci utama, kartu garansi 100 hari, & kartu IPL."
+                    value={handoverForm.notes}
+                    onChange={(e) => setHandoverForm({ ...handoverForm, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsHandoverModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
+                  Simpan Catatan BAST
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
