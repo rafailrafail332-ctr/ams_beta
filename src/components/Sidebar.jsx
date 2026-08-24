@@ -64,31 +64,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
   const getStaffSubModules = () => {
     const roleLower = currentUser?.role.toLowerCase() || '';
 
-    if (roleLower.includes('teknik') || roleLower.includes('operation')) {
-      return [
-        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'teknik-rumah', title: 'Progress Kavling Unit Rumah & WA Tracker', moduleKey: 'teknik-rumah', subTabKey: 'rumah', icon: Building2, color: '#FBBF24' },
-        { id: 'teknik-fasilitas', title: 'Utilitas & Komersil (Fasum/Fasos)', moduleKey: 'teknik-fasilitas', subTabKey: 'fasilitas', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'teknik-batp', title: 'Berita Acara BATP Kontraktor Utama', moduleKey: 'teknik-batp', subTabKey: 'batp', icon: FileCheck, color: '#10B981' },
-        { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
-      ];
-    }
-
-    if (roleLower.includes('legal')) {
-      return [
-        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'legal-shgb', title: '1. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
-        { id: 'legal-pbg', title: '2. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
-        { id: 'legal-split', title: '3. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
-        { id: 'legal-apht', title: '4. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
-        { id: 'legal-ppjb', title: '5. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
-        { id: 'legal-dispute', title: '6. Dispute Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' },
-        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' },
-        { id: 'cr-docs', title: '8. Serah Terima Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: KeyRound, color: '#FB7185' }
-      ];
-    }
-
-    if (roleLower.includes('hr') || roleLower.includes('dodi')) {
+    // 1. HR, GENERAL AFFAIR & HEAD OFFICE OPS (PAK DODI)
+    if (roleLower.includes('hr') || roleLower.includes('dodi') || (roleLower.includes('ga') && !roleLower.includes('legal'))) {
       return [
         { id: 'todo-attendance', title: 'To-Do List & Presensi Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'hr-staff', title: '1. SDM & Karyawan Perusahaan', moduleKey: 'hr', subTabKey: 'staff', icon: Users, color: '#F87171' },
@@ -102,7 +79,23 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       ];
     }
 
-    if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen')) {
+    // 2. LEGAL DIVISION (BU SALMA)
+    if (roleLower.includes('legal') || roleLower.includes('salma')) {
+      return [
+        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'legal-shgb', title: '1. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
+        { id: 'legal-pbg', title: '2. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
+        { id: 'legal-split', title: '3. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
+        { id: 'legal-apht', title: '4. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
+        { id: 'legal-ppjb', title: '5. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
+        { id: 'legal-dispute', title: '6. Dispute Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' },
+        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' },
+        { id: 'cr-docs', title: '8. Serah Terima Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: KeyRound, color: '#FB7185' }
+      ];
+    }
+
+    // 3. FINANCE, ACCOUNTING, TAX & COLLECTION (PAK TARKUM, SYAMSUL, JEZEN)
+    if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen') || roleLower.includes('tarkum')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'fin-tax', title: '1. Akuntansi & Pajak (PPh Final & PPN)', moduleKey: 'finance', subTabKey: 'tax', icon: Landmark, color: '#10B981' },
@@ -115,6 +108,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       ];
     }
 
+    // 4. MARKETING & SALES (BU YULIEKA, FRESDA, AMANDA, BAMBANG)
     if (roleLower.includes('marketing') || roleLower.includes('sales')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
@@ -125,6 +119,29 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       ];
     }
 
+    // 5. LOGISTIC & PROCUREMENT (PAK FAJAR)
+    if (roleLower.includes('logistic') || roleLower.includes('fajar') || roleLower.includes('procurement')) {
+      return [
+        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'proc-po', title: '1. Purchase Order & Pengadaan Material', moduleKey: 'procurement', subTabKey: 'default', icon: ShoppingCart, color: '#34D399' },
+        { id: 'proc-stock', title: '2. Gudang & Manajemen Stok Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: Package, color: '#38BDF8' },
+        { id: 'ga-office', title: '3. Fasilitas & Logistik Lapangan', moduleKey: 'ga', subTabKey: 'site-office', icon: Building2, color: '#FBBF24' },
+        { id: 'cr-helpdesk', title: '4. Customer Relation & Helpdesk', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#FB7185' }
+      ];
+    }
+
+    // 6. TEKNIK & SITE OPERATIONS (PAK HAPIP, KHOLIDIN, NAUFAL, NASEH)
+    if (roleLower.includes('teknik') || roleLower.includes('site') || roleLower.includes('hapip')) {
+      return [
+        { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
+        { id: 'teknik-rumah', title: 'Progress Kavling Unit Rumah & WA Tracker', moduleKey: 'teknik-rumah', subTabKey: 'rumah', icon: Building2, color: '#FBBF24' },
+        { id: 'teknik-fasilitas', title: 'Utilitas & Komersil (Fasum/Fasos)', moduleKey: 'teknik-fasilitas', subTabKey: 'fasilitas', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'teknik-batp', title: 'Berita Acara BATP Kontraktor Utama', moduleKey: 'teknik-batp', subTabKey: 'batp', icon: FileCheck, color: '#10B981' },
+        { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
+      ];
+    }
+
+    // 7. CUSTOMER RELATION & CRM
     if (roleLower.includes('customer') || roleLower.includes('crm') || roleLower.includes('relation') || roleLower.includes('after-sales')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
