@@ -41,6 +41,13 @@ export const FinanceModule = () => {
   const { currentUser, units, activeSubTab, updateUnit, showNotification } = useApp();
   const [activeTab, setActiveTab] = useState('pricelist');
 
+  // Search Filter States for all Finance Sub-modules
+  const [searchPricelist, setSearchPricelist] = useState('');
+  const [searchDp, setSearchDp] = useState('');
+  const [searchKpr, setSearchKpr] = useState('');
+  const [searchTax, setSearchTax] = useState('');
+  const [searchExpenses, setSearchExpenses] = useState('');
+
   useEffect(() => {
     if (activeSubTab && activeSubTab !== 'default') {
       setActiveTab(activeSubTab);
@@ -481,6 +488,77 @@ export const FinanceModule = () => {
   const totalPpn = taxLedger.reduce((acc, curr) => acc + curr.ppnAmount, 0);
   const totalBphtb = taxLedger.reduce((acc, curr) => acc + curr.bphtbAmount, 0);
 
+  // REAL-TIME SEARCH FILTERED DATA FOR ALL TABS
+  const filteredPricelists = pricelists.filter((prc) => {
+    if (!searchPricelist) return true;
+    const q = searchPricelist.toLowerCase().trim();
+    return (
+      (prc.type || '').toLowerCase().includes(q) ||
+      (prc.cluster || '').toLowerCase().includes(q) ||
+      (prc.status || '').toLowerCase().includes(q) ||
+      (prc.marginProfit || '').toLowerCase().includes(q) ||
+      prc.cashPrice?.toString().includes(q) ||
+      prc.kprPrice?.toString().includes(q) ||
+      prc.baseCostHPP?.toString().includes(q)
+    );
+  });
+
+  const filteredDpUnits = units.filter((u) => {
+    if (!searchDp) return true;
+    const q = searchDp.toLowerCase().trim();
+    return (
+      (u.unitNo || '').toLowerCase().includes(q) ||
+      (u.owner || '').toLowerCase().includes(q) ||
+      (u.cluster || '').toLowerCase().includes(q) ||
+      (u.finance?.skema || '').toLowerCase().includes(q) ||
+      (u.finance?.dpStatus || '').toLowerCase().includes(q) ||
+      (u.finance?.pencairanKpr || '').toLowerCase().includes(q) ||
+      u.finance?.harga?.toString().includes(q)
+    );
+  });
+
+  const filteredKprUnits = units.filter((u) => {
+    if (!searchKpr) return true;
+    const q = searchKpr.toLowerCase().trim();
+    return (
+      (u.unitNo || '').toLowerCase().includes(q) ||
+      (u.owner || '').toLowerCase().includes(q) ||
+      (u.finance?.skema || '').toLowerCase().includes(q) ||
+      (u.finance?.pencairanKpr || '').toLowerCase().includes(q)
+    );
+  });
+
+  const filteredTaxLedger = taxLedger.filter((t) => {
+    if (!searchTax) return true;
+    const q = searchTax.toLowerCase().trim();
+    return (
+      (t.unitNo || '').toLowerCase().includes(q) ||
+      (t.customerName || '').toLowerCase().includes(q) ||
+      (t.cluster || '').toLowerCase().includes(q) ||
+      (t.efakturNo || '').toLowerCase().includes(q) ||
+      (t.ntpnStatus || '').toLowerCase().includes(q) ||
+      (t.statusPajak || '').toLowerCase().includes(q) ||
+      (t.verifiedBy || '').toLowerCase().includes(q) ||
+      t.hargaTransaksi?.toString().includes(q)
+    );
+  });
+
+  const filteredExpenses = officeExpenses.filter((exp) => {
+    if (!searchExpenses) return true;
+    const q = searchExpenses.toLowerCase().trim();
+    return (
+      (exp.id || '').toLowerCase().includes(q) ||
+      (exp.title || '').toLowerCase().includes(q) ||
+      (exp.category || '').toLowerCase().includes(q) ||
+      (exp.requestedBy || '').toLowerCase().includes(q) ||
+      (exp.approvedBy || '').toLowerCase().includes(q) ||
+      (exp.status || '').toLowerCase().includes(q) ||
+      (exp.notes || '').toLowerCase().includes(q) ||
+      (exp.date || '').includes(q) ||
+      exp.amount?.toString().includes(q)
+    );
+  });
+
   return (
     <div>
       {/* Page Header */}
@@ -608,43 +686,77 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Cluster & Tipe Unit</th>
-                  <th>HPP Pokok Lahan & Fisik</th>
-                  <th>Harga Cash Keras (Rp)</th>
-                  <th>Harga KPR Bank (Rp)</th>
-                  <th>Minimal Uang Muka / DP 20%</th>
-                  <th>Margin Keuntungan (Gross)</th>
-                  <th>Status SK Finance</th>
-                  <th>Aksi Edit Harga Finance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pricelists.map((prc) => (
-                  <tr key={prc.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{prc.type}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{prc.cluster}</div>
-                    </td>
-                    <td><div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatRupiah(prc.baseCostHPP)}</div></td>
-                    <td><div style={{ fontWeight: 900, color: 'var(--success)', fontSize: '0.95rem' }}>{formatRupiah(prc.cashPrice)}</div></td>
-                    <td><div style={{ fontWeight: 900, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{formatRupiah(prc.kprPrice)}</div></td>
-                    <td><div style={{ fontWeight: 700 }}>{formatRupiah(prc.minDpAmount)}</div></td>
-                    <td><span className="badge badge-success">{prc.marginProfit}</span></td>
-                    <td><span className="badge badge-info">{prc.status}</span></td>
-                    <td>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEditPrice(prc)}>
-                        <Edit3 size={13} /> Edit Harga Finance
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Search Bar Pricelist */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="var(--accent-primary)" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari cluster perumahan, tipe unit, harga cash/KPR, margin..."
+                value={searchPricelist}
+                onChange={(e) => setSearchPricelist(e.target.value)}
+              />
+              {searchPricelist && (
+                <button onClick={() => setSearchPricelist('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredPricelists.length}</span> dari {pricelists.length} Pricelist
+            </div>
           </div>
+
+          {filteredPricelists.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Tag size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada pricelist yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchPricelist('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Cluster & Tipe Unit</th>
+                    <th>HPP Pokok Lahan & Fisik</th>
+                    <th>Harga Cash Keras (Rp)</th>
+                    <th>Harga KPR Bank (Rp)</th>
+                    <th>Minimal Uang Muka / DP 20%</th>
+                    <th>Margin Keuntungan (Gross)</th>
+                    <th>Status SK Finance</th>
+                    <th>Aksi Edit Harga Finance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPricelists.map((prc) => (
+                    <tr key={prc.id}>
+                      <td>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{prc.type}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{prc.cluster}</div>
+                      </td>
+                      <td><div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatRupiah(prc.baseCostHPP)}</div></td>
+                      <td><div style={{ fontWeight: 900, color: 'var(--success)', fontSize: '0.95rem' }}>{formatRupiah(prc.cashPrice)}</div></td>
+                      <td><div style={{ fontWeight: 900, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{formatRupiah(prc.kprPrice)}</div></td>
+                      <td><div style={{ fontWeight: 700 }}>{formatRupiah(prc.minDpAmount)}</div></td>
+                      <td><span className="badge badge-success">{prc.marginProfit}</span></td>
+                      <td><span className="badge badge-info">{prc.status}</span></td>
+                      <td>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEditPrice(prc)}>
+                          <Edit3 size={13} /> Edit Harga Finance
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -652,33 +764,68 @@ export const FinanceModule = () => {
       {activeTab === 'dp' && (
         <div className="glass-card">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Monitoring DP & Angsuran Cash In Konsumen</h3>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Kavling Unit & Pemilik</th>
-                  <th>Harga Jual Unit</th>
-                  <th>Skema Pembayaran</th>
-                  <th>Status Pelunasan DP</th>
-                  <th>Status Pencairan KPR Bank</th>
-                </tr>
-              </thead>
-              <tbody>
-                {units.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{u.owner}</div>
-                    </td>
-                    <td><div style={{ fontWeight: 800 }}>{formatRupiah(u.finance.harga)}</div></td>
-                    <td><span className="badge badge-info">{u.finance.skema}</span></td>
-                    <td><span className="badge badge-success">{u.finance.dpStatus}</span></td>
-                    <td><span className="badge badge-success">{u.finance.pencairanKpr}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Search Bar DP */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="#10B981" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari nomor kavling (A-01), nama pemilik, skema bayar, status DP..."
+                value={searchDp}
+                onChange={(e) => setSearchDp(e.target.value)}
+              />
+              {searchDp && (
+                <button onClick={() => setSearchDp('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: '#10B981', fontWeight: 800 }}>{filteredDpUnits.length}</span> dari {units.length} Unit
+            </div>
           </div>
+
+          {filteredDpUnits.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <DollarSign size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data pembayaran DP yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchDp('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Kavling Unit & Pemilik</th>
+                    <th>Harga Jual Unit</th>
+                    <th>Skema Pembayaran</th>
+                    <th>Status Pelunasan DP</th>
+                    <th>Status Pencairan KPR Bank</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDpUnits.map((u) => (
+                    <tr key={u.id}>
+                      <td>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{u.owner}</div>
+                      </td>
+                      <td><div style={{ fontWeight: 800 }}>{formatRupiah(u.finance.harga)}</div></td>
+                      <td><span className="badge badge-info">{u.finance.skema}</span></td>
+                      <td><span className="badge badge-success">{u.finance.dpStatus}</span></td>
+                      <td><span className="badge badge-success">{u.finance.pencairanKpr}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -686,28 +833,63 @@ export const FinanceModule = () => {
       {activeTab === 'kpr' && (
         <div className="glass-card">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Monitoring SLA Pencairan KPR Bank Mitra</h3>
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Kavling Unit</th>
-                  <th>Bank Penyalur KPR</th>
-                  <th>Status SP3K Bank</th>
-                  <th>Pencairan Rekening Escrow</th>
-                </tr>
-              </thead>
-              <tbody>
-                {units.map((u) => (
-                  <tr key={u.id}>
-                    <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div></td>
-                    <td>{u.finance.skema}</td>
-                    <td><span className="badge badge-success">{u.finance.pencairanKpr}</span></td>
-                    <td><span className="badge badge-info">Escrow Realized</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Search Bar KPR */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="#38BDF8" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari nomor kavling, nama pemilik, nama bank penyalur KPR..."
+                value={searchKpr}
+                onChange={(e) => setSearchKpr(e.target.value)}
+              />
+              {searchKpr && (
+                <button onClick={() => setSearchKpr('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: '#38BDF8', fontWeight: 800 }}>{filteredKprUnits.length}</span> dari {units.length} Unit
+            </div>
           </div>
+
+          {filteredKprUnits.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <CreditCard size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data KPR yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchKpr('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Kavling Unit</th>
+                    <th>Bank Penyalur KPR</th>
+                    <th>Status SP3K Bank</th>
+                    <th>Pencairan Rekening Escrow</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredKprUnits.map((u) => (
+                    <tr key={u.id}>
+                      <td><div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {u.unitNo}</div></td>
+                      <td>{u.finance.skema}</td>
+                      <td><span className="badge badge-success">{u.finance.pencairanKpr}</span></td>
+                      <td><span className="badge badge-info">Escrow Realized</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -767,64 +949,98 @@ export const FinanceModule = () => {
               </h3>
             </div>
 
-            <div className="table-container">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Unit & Pembeli</th>
-                    <th>Harga Transaksi (Rp)</th>
-                    <th>PPh Final 2.5% (Setor Kas Negara)</th>
-                    <th>e-Faktur PPN 11%</th>
-                    <th>BPHTB 5% Konsumen</th>
-                    <th>Nomor e-Faktur & Kode NTPN Pajak</th>
-                    <th>Status Audit Pajak</th>
-                    <th>Aksi Verifikasi Tax</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {taxLedger.map((t) => (
-                    <tr key={t.id}>
-                      <td>
-                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {t.unitNo}</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t.customerName}</div>
-                      </td>
-                      <td><div style={{ fontWeight: 800 }}>{formatRupiah(t.hargaTransaksi)}</div></td>
-                      <td>
-                        <div style={{ fontWeight: 800, color: '#10B981' }}>{formatRupiah(t.pphAmount)}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Tarif PPh Final {t.pphFinalRate}%</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 800, color: '#38BDF8' }}>{formatRupiah(t.ppnAmount)}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Tarif PPN {t.ppnRate}%</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700 }}>{formatRupiah(t.bphtbAmount)}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{t.efakturNo}</div>
-                        <div style={{ fontSize: '0.72rem', color: t.ntpnStatus.includes('NTPN') ? 'var(--success)' : 'var(--warning)' }}>
-                          {t.ntpnStatus}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${t.statusPajak.includes('Lunas') ? 'badge-success' : 'badge-warning'}`}>
-                          {t.statusPajak}
-                        </span>
-                      </td>
-                      <td>
-                        <button 
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleOpenEditTax(t)}
-                          style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}
-                        >
-                          <FileCheck2 size={13} /> Edit e-Faktur / NTPN
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* Search Bar Tax */}
+            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                <Search size={16} color="#10B981" />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                  placeholder="Cari unit kavling, nama konsumen, no e-Faktur DJP, status NTPN, atau status pajak..."
+                  value={searchTax}
+                  onChange={(e) => setSearchTax(e.target.value)}
+                />
+                {searchTax && (
+                  <button onClick={() => setSearchTax('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Menampilkan <span style={{ color: '#10B981', fontWeight: 800 }}>{filteredTaxLedger.length}</span> dari {taxLedger.length} Rekap Pajak
+              </div>
             </div>
+
+            {filteredTaxLedger.length === 0 ? (
+              <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                <Landmark size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data pajak yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => setSearchTax('')} style={{ marginTop: '0.75rem' }}>
+                  Reset Pencarian
+                </button>
+              </div>
+            ) : (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Unit & Pembeli</th>
+                      <th>Harga Transaksi (Rp)</th>
+                      <th>PPh Final 2.5% (Setor Kas Negara)</th>
+                      <th>e-Faktur PPN 11%</th>
+                      <th>BPHTB 5% Konsumen</th>
+                      <th>Nomor e-Faktur & Kode NTPN Pajak</th>
+                      <th>Status Audit Pajak</th>
+                      <th>Aksi Verifikasi Tax</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTaxLedger.map((t) => (
+                      <tr key={t.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {t.unitNo}</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t.customerName}</div>
+                        </td>
+                        <td><div style={{ fontWeight: 800 }}>{formatRupiah(t.hargaTransaksi)}</div></td>
+                        <td>
+                          <div style={{ fontWeight: 800, color: '#10B981' }}>{formatRupiah(t.pphAmount)}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Tarif PPh Final {t.pphFinalRate}%</div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 800, color: '#38BDF8' }}>{formatRupiah(t.ppnAmount)}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Tarif PPN {t.ppnRate}%</div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>{formatRupiah(t.bphtbAmount)}</div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{t.efakturNo}</div>
+                          <div style={{ fontSize: '0.72rem', color: t.ntpnStatus.includes('NTPN') ? 'var(--success)' : 'var(--warning)' }}>
+                            {t.ntpnStatus}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge ${t.statusPajak.includes('Lunas') ? 'badge-success' : 'badge-warning'}`}>
+                            {t.statusPajak}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleOpenEditTax(t)}
+                            style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}
+                          >
+                            <FileCheck2 size={13} /> Edit e-Faktur / NTPN
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* FINANCIAL PROFIT & LOSS LEDGER SUMMARY */}
@@ -874,7 +1090,7 @@ export const FinanceModule = () => {
         </div>
       )}
 
-      {/* TAB 4: PENGELUARAN KANTOR & OPERASIONAL (OPEX / PETTY CASH TRACKER) */}
+      {/* TAB 5: PENGELUARAN KANTOR & OPERASIONAL (OPEX / PETTY CASH TRACKER) */}
       {activeTab === 'expenses' && (
         <div className="glass-card">
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
@@ -911,36 +1127,69 @@ export const FinanceModule = () => {
             </div>
           </div>
 
+          {/* Search Bar Expenses */}
+          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+              <Search size={16} color="#EF4444" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+                placeholder="Cari judul keperluan, kategori pengeluaran, nama pemohon, tanggal, status..."
+                value={searchExpenses}
+                onChange={(e) => setSearchExpenses(e.target.value)}
+              />
+              {searchExpenses && (
+                <button onClick={() => setSearchExpenses('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Menampilkan <span style={{ color: '#EF4444', fontWeight: 800 }}>{filteredExpenses.length}</span> dari {officeExpenses.length} Pengeluaran
+            </div>
+          </div>
+
           {/* Table Expenses */}
-          <div className="table-container">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>ID & Tanggal</th>
-                  <th>Kategori Pengeluaran</th>
-                  <th>Judul Keperluan</th>
-                  <th>Foto Nota / Kuitansi</th>
-                  <th>Nominal (Rp)</th>
-                  <th>Pemohon (Staf)</th>
-                  <th>Disetujui Oleh</th>
-                  <th>Status</th>
-                  <th>Aksi CRUD</th>
-                </tr>
-              </thead>
-              <tbody>
-                {officeExpenses.map((exp) => {
-                  const isApproved = exp.status.includes('Disetujui');
-                  return (
-                    <tr key={exp.id}>
-                      <td>
-                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{exp.id}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{exp.date}</div>
-                      </td>
-                      <td><span className="badge badge-neutral">{exp.category}</span></td>
-                      <td>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{exp.title}</div>
-                        {exp.notes && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{exp.notes}</div>}
-                      </td>
+          {filteredExpenses.length === 0 ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+              <Receipt size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+              <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada catatan pengeluaran yang sesuai</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSearchExpenses('')} style={{ marginTop: '0.75rem' }}>
+                Reset Pencarian
+              </button>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>ID & Tanggal</th>
+                    <th>Kategori Pengeluaran</th>
+                    <th>Judul Keperluan</th>
+                    <th>Foto Nota / Kuitansi</th>
+                    <th>Nominal (Rp)</th>
+                    <th>Pemohon (Staf)</th>
+                    <th>Disetujui Oleh</th>
+                    <th>Status</th>
+                    <th>Aksi CRUD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredExpenses.map((exp) => {
+                    const isApproved = exp.status.includes('Disetujui');
+                    return (
+                      <tr key={exp.id}>
+                        <td>
+                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{exp.id}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{exp.date}</div>
+                        </td>
+                        <td><span className="badge badge-neutral">{exp.category}</span></td>
+                        <td>
+                          <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{exp.title}</div>
+                          {exp.notes && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{exp.notes}</div>}
+                        </td>
                       <td>
                         {exp.receiptImage ? (
                           <div 
@@ -1007,8 +1256,9 @@ export const FinanceModule = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
 
       {/* TAB 5: COST OVERRUN INSPECTOR */}
       {activeTab === 'cost-overrun' && (

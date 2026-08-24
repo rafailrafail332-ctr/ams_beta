@@ -13,12 +13,14 @@ import {
   Plus,
   Edit3,
   Trash2,
-  X
+  X,
+  Search
 } from 'lucide-react';
 
 export const CostOverrunInspector = () => {
   const { showNotification } = useApp();
   const [filterCluster, setFilterCluster] = useState('All');
+  const [searchOverrun, setSearchOverrun] = useState('');
 
   // Initial RAB vs Realized Data
   const initialBudgetItems = [
@@ -58,7 +60,20 @@ export const CostOverrunInspector = () => {
     actualSpent: 420000000
   });
 
-  const filteredItems = budgetItems.filter((b) => filterCluster === 'All' || b.cluster === filterCluster);
+  const filteredItems = budgetItems.filter((b) => {
+    const matchesCluster = filterCluster === 'All' || b.cluster === filterCluster;
+    if (!matchesCluster) return false;
+    if (!searchOverrun) return true;
+    const q = searchOverrun.toLowerCase().trim();
+    return (
+      (b.unitNo || '').toLowerCase().includes(q) ||
+      (b.cluster || '').toLowerCase().includes(q) ||
+      (b.contractor || '').toLowerCase().includes(q) ||
+      (b.status || '').toLowerCase().includes(q) ||
+      b.rabBudget?.toString().includes(q) ||
+      b.actualSpent?.toString().includes(q)
+    );
+  });
 
   const totalRab = budgetItems.reduce((acc, c) => acc + (c.rabBudget || 0), 0);
   const totalSpent = budgetItems.reduce((acc, c) => acc + (c.actualSpent || 0), 0);
@@ -187,60 +202,94 @@ export const CostOverrunInspector = () => {
         </div>
       </div>
 
-      {/* Main Budget Table */}
-      <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Kavling Unit & Cluster</th>
-              <th>Kontraktor Pelaksana</th>
-              <th>Target RAB Awal (Rp)</th>
-              <th>Realisasi BATP (Rp)</th>
-              <th>Selisih (Variance)</th>
-              <th>Status Overrun Inspector</th>
-              <th>Aksi CRUD</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredItems.map((item) => {
-              const itemDiff = item.actualSpent - item.rabBudget;
-              const isOver = itemDiff > 0;
-
-              return (
-                <tr key={item.id}>
-                  <td>
-                    <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {item.unitNo}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{item.cluster}</div>
-                  </td>
-                  <td>{item.contractor}</td>
-                  <td><div style={{ fontWeight: 700 }}>{formatRupiah(item.rabBudget)}</div></td>
-                  <td><div style={{ fontWeight: 700 }}>{formatRupiah(item.actualSpent)}</div></td>
-                  <td>
-                    <div style={{ fontWeight: 800, color: isOver ? '#ef4444' : '#10B981' }}>
-                      {isOver ? `+${formatRupiah(itemDiff)}` : formatRupiah(itemDiff)}
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`badge ${isOver ? 'badge-danger' : 'badge-success'}`}>
-                      {isOver ? <ShieldAlert size={12} /> : <CheckCircle2 size={12} />} {item.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit(item)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                        <Edit3 size={13} /> Edit
-                      </button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleDelete(item.id, item.unitNo)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Search Bar Cost Overrun */}
+      <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+          <Search size={16} color="#F59E0B" />
+          <input
+            type="text"
+            className="form-control"
+            style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
+            placeholder="Cari nomor kavling, cluster, nama kontraktor, atau status anggaran..."
+            value={searchOverrun}
+            onChange={(e) => setSearchOverrun(e.target.value)}
+          />
+          {searchOverrun && (
+            <button onClick={() => setSearchOverrun('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+          Menampilkan <span style={{ color: '#F59E0B', fontWeight: 800 }}>{filteredItems.length}</span> dari {budgetItems.length} Item RAB
+        </div>
       </div>
+
+      {/* Main Budget Table */}
+      {filteredItems.length === 0 ? (
+        <div className="glass-card" style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+          <AlertTriangle size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+          <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada item RAB yang sesuai</h4>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
+          <button className="btn btn-secondary btn-sm" onClick={() => setSearchOverrun('')} style={{ marginTop: '0.75rem' }}>
+            Reset Pencarian
+          </button>
+        </div>
+      ) : (
+        <div className="table-container">
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>Kavling Unit & Cluster</th>
+                <th>Kontraktor Pelaksana</th>
+                <th>Target RAB Awal (Rp)</th>
+                <th>Realisasi BATP (Rp)</th>
+                <th>Selisih (Variance)</th>
+                <th>Status Overrun Inspector</th>
+                <th>Aksi CRUD</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((item) => {
+                const itemDiff = item.actualSpent - item.rabBudget;
+                const isOver = itemDiff > 0;
+
+                return (
+                  <tr key={item.id}>
+                    <td>
+                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {item.unitNo}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{item.cluster}</div>
+                    </td>
+                    <td>{item.contractor}</td>
+                    <td><div style={{ fontWeight: 700 }}>{formatRupiah(item.rabBudget)}</div></td>
+                    <td><div style={{ fontWeight: 700 }}>{formatRupiah(item.actualSpent)}</div></td>
+                    <td>
+                      <div style={{ fontWeight: 800, color: isOver ? '#ef4444' : '#10B981' }}>
+                        {isOver ? `+${formatRupiah(itemDiff)}` : formatRupiah(itemDiff)}
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`badge ${isOver ? 'badge-danger' : 'badge-success'}`}>
+                        {isOver ? <ShieldAlert size={12} /> : <CheckCircle2 size={12} />} {item.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit(item)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                          <Edit3 size={13} /> Edit
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleDelete(item.id, item.unitNo)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}>
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* MODAL: TAMBAH / EDIT ITEM RAB OVERRUN */}
       {isModalOpen && (
