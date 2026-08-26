@@ -159,6 +159,7 @@ export const TodoAttendanceModule = () => {
   const [reportPicFilter, setReportPicFilter] = useState('all');
   const [reportDivisionFilter, setReportDivisionFilter] = useState('all');
   const [reportStatusFilter, setReportStatusFilter] = useState('all');
+  const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState('all');
 
   // Modal State for Adding/Editing Daily Work Report Item
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -236,7 +237,40 @@ export const TodoAttendanceModule = () => {
     return false;
   };
 
-  // FILTERED REPORTS: By Date, By PIC, By Division, and By Status (DAPAT DILIHAT OLEH SEMUA KARYAWAN)
+  // Helper to check if a report is related to an employee name (PIC, Pemberi, Kordinasi, atau Disebutkan di Laporan)
+  const isReportRelatedToEmployee = (report, targetName) => {
+    if (!report || !targetName || targetName === 'all') return true;
+    const normalize = (str) => (str || '')
+      .toLowerCase()
+      .replace(/[\(\)\[\],.\-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const targetNorm = normalize(targetName);
+    const picNorm = normalize(report.pic || report.assignee || '');
+    const assignedByNorm = normalize(report.assignedBy || '');
+    const kordinasiNorm = normalize(report.kordinasi || '');
+    const laporanNorm = normalize(report.laporan || report.text || '');
+
+    if (picNorm.includes(targetNorm) || targetNorm.includes(picNorm)) return true;
+    if (assignedByNorm.includes(targetNorm)) return true;
+    if (kordinasiNorm.includes(targetNorm)) return true;
+    if (laporanNorm.includes(targetNorm)) return true;
+
+    // Token matching
+    const ignoredWords = ['staf', 'staff', 'head', 'manager', 'direktur', 'utama', 'general', 'super', 'admin', 'se', 'st', 'sh', 'ssi', 'mba', 'mm', 'pt', 'cv'];
+    const targetTokens = targetNorm.split(' ').filter(w => w.length >= 3 && !ignoredWords.includes(w));
+    
+    if (targetTokens.length > 0) {
+      if (targetTokens.some(tok => picNorm.includes(tok) || assignedByNorm.includes(tok) || kordinasiNorm.includes(tok))) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // FILTERED REPORTS: By Date, By PIC, By Division, By Status, and By Related Employee Name
   const visibleReports = safeTodos.filter((t) => {
     if (!showAllDates && selectedDateFilter) {
       const taskDate = t.date || t.assignDate;
@@ -247,6 +281,10 @@ export const TodoAttendanceModule = () => {
 
     if (reportPicFilter === 'for_me') {
       if (!isTaskAssignedToUser(t, currentUser)) return false;
+    }
+
+    if (selectedEmployeeFilter !== 'all') {
+      if (!isReportRelatedToEmployee(t, selectedEmployeeFilter)) return false;
     }
 
     if (reportStatusFilter === 'completed' && !t.completed) return false;
@@ -1137,6 +1175,27 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 👤 PIC Saya ({safeTodos.filter(t => isTaskAssignedToUser(t, currentUser)).length})
               </button>
 
+              {/* Filter Nama Karyawan Terkait / PIC */}
+              <select
+                className="form-control"
+                value={selectedEmployeeFilter}
+                onChange={(e) => setSelectedEmployeeFilter(e.target.value)}
+                style={{ 
+                  width: '185px', 
+                  height: '36px', 
+                  fontSize: '0.8rem', 
+                  fontWeight: 700, 
+                  borderColor: selectedEmployeeFilter !== 'all' ? '#38BDF8' : undefined, 
+                  background: selectedEmployeeFilter !== 'all' ? 'rgba(56, 189, 248, 0.15)' : undefined,
+                  color: selectedEmployeeFilter !== 'all' ? '#38BDF8' : undefined 
+                }}
+              >
+                <option value="all">👤 Semua Nama Karyawan</option>
+                {safeUsers.map(u => (
+                  <option key={u.id} value={u.name}>👤 {u.name} ({u.role.split(' ')[0]})</option>
+                ))}
+              </select>
+
               {/* Filter Status */}
               <select
                 className="form-control"
@@ -1171,6 +1230,26 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
               </button>
             </div>
           </div>
+
+          {/* ACTIVE EMPLOYEE FILTER NOTIFICATION BADGE */}
+          {selectedEmployeeFilter !== 'all' && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.85rem', marginBottom: '1rem', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid #38BDF8', borderRadius: '6px', fontSize: '0.825rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: '#38BDF8' }}>
+                <span>🎯 Menyaring Laporan & Rekap Terkait:</span>
+                <span style={{ color: 'var(--text-main)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                  {selectedEmployeeFilter}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({visibleReports.length} pekerjaan ditemukan)</span>
+              </div>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => setSelectedEmployeeFilter('all')}
+                style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+              >
+                ✕ Reset Filter Nama
+              </button>
+            </div>
+          )}
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
           <div className="table-container" style={{ border: '1.5px solid #EAB308', borderRadius: '8px', overflow: 'hidden' }}>
@@ -1258,14 +1337,28 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                         {getDivisionBadge(item.kordinasi)}
                       </td>
 
-                      {/* 5. Kolom PIC */}
+                      {/* 5. Kolom PIC & Pihak Terkait */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                          {item.pic || item.assignee || '-'}
+                        <div 
+                          onClick={() => setSelectedEmployeeFilter(selectedEmployeeFilter === (item.pic || item.assignee) ? 'all' : (item.pic || item.assignee))}
+                          style={{ 
+                            fontWeight: 800, 
+                            fontSize: '0.85rem', 
+                            color: '#38BDF8',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          title="Klik untuk menyaring laporan karyawan ini"
+                        >
+                          👤 {item.pic || item.assignee || '-'}
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>
-                          {item.assignedBy ? `Oleh: ${item.assignedBy.split(' ')[0]}` : ''}
-                        </div>
+                        {item.assignedBy && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                            <span style={{ color: 'var(--text-subtle)' }}>Ditugaskan:</span> {item.assignedBy.split(' ')[0]}
+                          </div>
+                        )}
                       </td>
 
                       {/* 6. Kolom Status & Aksi */}
