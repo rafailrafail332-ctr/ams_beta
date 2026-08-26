@@ -109,6 +109,12 @@ export const TodoAttendanceModule = () => {
   const [newKordinasi, setNewKordinasi] = useState('');
   const [newPic, setNewPic] = useState(() => (safeUsers[0]?.name || 'Syamsul Dahari'));
   const [newPriority, setNewPriority] = useState('Sedang');
+  const [reportPhoto, setReportPhoto] = useState(null);
+  const reportFileInputRef = useRef(null);
+
+  // Modal State for Viewing Full Report Photo Proof
+  const [selectedReportForPhotoModal, setSelectedReportForPhotoModal] = useState(null);
+  const [isReportPhotoModalOpen, setIsReportPhotoModalOpen] = useState(false);
 
   // Sub-filter for reports: 'all' | 'for_me'
   const [reportPicFilter, setReportPicFilter] = useState(() => isBoss ? 'all' : 'for_me');
@@ -116,6 +122,48 @@ export const TodoAttendanceModule = () => {
   // Modal State for Adding/Editing Daily Work Report Item
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [editingReportItem, setEditingReportItem] = useState(null);
+
+  const handleReportPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const now = new Date();
+        const timeStr = now.toLocaleDateString('id-ID', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        }) + ' • ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+        const fontSize = Math.max(16, Math.floor(canvas.width / 32));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        const bannerHeight = fontSize * 3.2;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+        ctx.fillRect(0, canvas.height - bannerHeight, canvas.width, bannerHeight);
+
+        ctx.fillStyle = '#F59E0B';
+        ctx.fillText(`📸 BUKTI LAPORAN PEKERJAAN HARIAN • AMS`, fontSize, canvas.height - bannerHeight + fontSize * 1.2);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`PIC: ${isBoss ? newPic : currentUser?.name} • ${timeStr}`, fontSize, canvas.height - bannerHeight + fontSize * 2.4);
+
+        const watermarkedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        setReportPhoto(watermarkedDataUrl);
+      };
+      img.src = uploadEvent.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Helper to match if task is assigned to a user
   const isTaskAssignedToUser = (task, user) => {
@@ -182,6 +230,7 @@ export const TodoAttendanceModule = () => {
     setNewKordinasi('');
     setNewPic(isBoss ? (safeUsers[0]?.name || 'Syamsul Dahari') : (currentUser?.name || ''));
     setNewPriority('Sedang');
+    setReportPhoto(null);
     setIsReportModalOpen(true);
   };
 
@@ -193,6 +242,7 @@ export const TodoAttendanceModule = () => {
     setNewKordinasi(item.kordinasi || '');
     setNewPic(item.pic || item.assignee || (currentUser?.name || ''));
     setNewPriority(item.priority || 'Sedang');
+    setReportPhoto(item.photo || null);
     setIsReportModalOpen(true);
   };
 
@@ -229,7 +279,8 @@ export const TodoAttendanceModule = () => {
             pic: isBoss ? finalPic : t.pic,
             assignee: isBoss ? finalPic : t.assignee,
             picId: isBoss ? finalPicId : t.picId,
-            priority: newPriority
+            priority: newPriority,
+            photo: reportPhoto || t.photo || null
           };
         }
         return t;
@@ -249,6 +300,7 @@ export const TodoAttendanceModule = () => {
         priority: newPriority,
         completed: false,
         notes: '',
+        photo: reportPhoto || null,
         assignedBy: finalAssignedBy
       };
       setTodos([newItem, ...safeTodos]);
@@ -1112,7 +1164,8 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
 
                       {/* 6. Kolom Status & Aksi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          {/* 1. Status Checklist Button */}
                           <button
                             onClick={() => handleToggleReport(item.id)}
                             className={`btn btn-sm ${item.completed ? 'btn-primary' : 'btn-secondary'}`}
@@ -1128,6 +1181,45 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                             {item.completed ? <Check size={12} /> : null} {item.completed ? 'Selesai' : 'Pending'}
                           </button>
 
+                          {/* 2. Photo Proof Button */}
+                          {item.photo ? (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => { setSelectedReportForPhotoModal(item); setIsReportPhotoModalOpen(true); }}
+                              style={{ 
+                                padding: '0.25rem 0.45rem', 
+                                fontSize: '0.72rem', 
+                                fontWeight: 800, 
+                                background: 'rgba(56, 189, 248, 0.15)', 
+                                color: '#38BDF8', 
+                                borderColor: 'rgba(56, 189, 248, 0.4)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}
+                              title="Lihat Foto Bukti Pekerjaan"
+                            >
+                              <Eye size={12} /> Foto Bukti
+                            </button>
+                          ) : (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleOpenEditReportModal(item)}
+                              style={{ 
+                                padding: '0.25rem 0.45rem', 
+                                fontSize: '0.72rem', 
+                                color: 'var(--text-muted)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}
+                              title="Upload Foto Bukti Pekerjaan"
+                            >
+                              <Camera size={12} /> + Foto
+                            </button>
+                          )}
+
+                          {/* 3. Action Buttons */}
                           {(isBoss || isTaskAssignedToUser(item, currentUser)) && (
                             <>
                               <button
@@ -1592,6 +1684,64 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                     </select>
                   </div>
                 </div>
+
+                {/* Upload Foto Bukti Pekerjaan */}
+                <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Camera size={16} color="#38BDF8" /> 📷 Foto Bukti Pekerjaan (Dokumentasi Lapangan / Berkas / Nota)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={reportFileInputRef}
+                    onChange={handleReportPhotoUpload}
+                    style={{ display: 'none' }}
+                  />
+
+                  {!reportPhoto ? (
+                    <div 
+                      onClick={() => reportFileInputRef.current && reportFileInputRef.current.click()}
+                      style={{ 
+                        border: '2px dashed var(--border-color)', 
+                        borderRadius: '8px', 
+                        padding: '1.25rem', 
+                        textAlign: 'center', 
+                        cursor: 'pointer', 
+                        background: 'rgba(15, 23, 42, 0.4)',
+                        transition: 'border-color 0.2s ease'
+                      }}
+                    >
+                      <Upload size={24} color="#38BDF8" style={{ marginBottom: '4px' }} />
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>Klik untuk Upload / Ambil Foto Bukti</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Sistem akan mencantumkan stempel watermark waktu & nama PIC secara otomatis.</div>
+                    </div>
+                  ) : (
+                    <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                      <img src={reportPhoto} alt="Bukti Laporan" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} />
+                      <div style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', background: 'rgba(15, 23, 42, 0.85)', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 800 }}>✓ Foto Bukti Terlampir</span>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button 
+                            type="button" 
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => reportFileInputRef.current && reportFileInputRef.current.click()}
+                            style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}
+                          >
+                            Ganti Foto
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setReportPhoto(null)}
+                            style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', color: '#ef4444' }}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsReportModalOpen(false)}>Batal</button>
@@ -1901,6 +2051,48 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: DETAIL FOTO BUKTI LAPORAN PEKERJAAN HARIAN              */}
+      {/* ------------------------------------------------------------- */}
+      {isReportPhotoModalOpen && selectedReportForPhotoModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '640px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Eye size={20} color="#F59E0B" /> Foto Bukti Pekerjaan Harian
+              </h3>
+              <button onClick={() => setIsReportPhotoModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: '1rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)', background: '#000' }}>
+                <img src={selectedReportForPhotoModal.photo} alt="Bukti Laporan" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', display: 'block' }} />
+              </div>
+              <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', fontSize: '0.825rem' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '4px' }}>
+                  {selectedReportForPhotoModal.laporan || selectedReportForPhotoModal.text}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '6px', color: 'var(--text-muted)' }}>
+                  <div><strong>👤 PIC:</strong> {selectedReportForPhotoModal.pic || selectedReportForPhotoModal.assignee}</div>
+                  <div><strong>📅 Tanggal:</strong> {selectedReportForPhotoModal.date || selectedReportForPhotoModal.assignDate}</div>
+                  <div><strong>⏰ Waktu:</strong> {selectedReportForPhotoModal.waktu || '08:00 - 17:00'}</div>
+                  <div><strong>🤝 Kordinasi:</strong> {selectedReportForPhotoModal.kordinasi || '-'}</div>
+                </div>
+                {selectedReportForPhotoModal.notes && (
+                  <div style={{ marginTop: '6px', color: '#10B981', fontWeight: 600 }}>
+                    Catatan: {selectedReportForPhotoModal.notes}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setIsReportPhotoModalOpen(false)}>Tutup</button>
+            </div>
           </div>
         </div>
       )}
