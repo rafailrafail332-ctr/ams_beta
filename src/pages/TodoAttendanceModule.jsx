@@ -48,6 +48,20 @@ import {
   PhoneCall
 } from 'lucide-react';
 
+export const COMPANY_DIVISIONS = [
+  { id: 'DIV-FIN', name: 'Finance & Accounting', short: 'Finance', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.15)' },
+  { id: 'DIV-DIR', name: 'Direksi (Direktur Utama / GM)', short: 'Direksi', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
+  { id: 'DIV-MKT', name: 'Marketing & Promosi', short: 'Marketing', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
+  { id: 'DIV-HR', name: 'HR & GA (General Affairs)', short: 'HR & GA', color: '#EC4899', bg: 'rgba(236, 72, 153, 0.15)' },
+  { id: 'DIV-LEG', name: 'Legal & Perizinan Properti', short: 'Legal', color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)' },
+  { id: 'DIV-TEK', name: 'Teknik & Lapangan (Sipil/Mandor)', short: 'Teknik', color: '#EAB308', bg: 'rgba(234, 179, 8, 0.15)' },
+  { id: 'DIV-PRO', name: 'Procurement & Vendor Logistik', short: 'Procurement', color: '#6366F1', bg: 'rgba(99, 102, 241, 0.15)' },
+  { id: 'DIV-CRM', name: 'Customer Relation & Konsumen', short: 'Customer Relation', color: '#06B6D4', bg: 'rgba(6, 182, 212, 0.15)' },
+  { id: 'DIV-BNK', name: 'Perbankan (KPR / SP3K Bank BTN/Mandiri)', short: 'Perbankan', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)' },
+  { id: 'DIV-NOT', name: 'Notaris & PPAT / BPN', short: 'Notaris', color: '#14B8A6', bg: 'rgba(20, 184, 166, 0.15)' },
+  { id: 'DIV-EKS', name: 'Pihak Eksternal / Konsumen', short: 'Eksternal', color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.15)' }
+];
+
 export const TodoAttendanceModule = () => {
   const { 
     currentUser, 
@@ -63,6 +77,31 @@ export const TodoAttendanceModule = () => {
     instructions,
     setInstructions
   } = useApp();
+
+  // Helper to render Division Badge
+  const getDivisionBadge = (kordinasiText) => {
+    if (!kordinasiText) return <span style={{ color: 'var(--text-subtle)', fontSize: '0.8rem' }}>-</span>;
+    const lower = kordinasiText.toLowerCase();
+    const matched = COMPANY_DIVISIONS.find(d => 
+      lower.includes(d.short.toLowerCase()) || 
+      lower.includes(d.name.toLowerCase()) ||
+      (d.id === 'DIV-FIN' && (lower.includes('pajak') || lower.includes('kasir') || lower.includes('finance') || lower.includes('keuangan'))) ||
+      (d.id === 'DIV-DIR' && (lower.includes('bod') || lower.includes('direktur') || lower.includes('yazid') || lower.includes('gm') || lower.includes('adhi'))) ||
+      (d.id === 'DIV-MKT' && (lower.includes('sales') || lower.includes('marketing') || lower.includes('iklan') || lower.includes('promo') || lower.includes('brosur'))) ||
+      (d.id === 'DIV-TEK' && (lower.includes('sipil') || lower.includes('mandor') || lower.includes('teknik') || lower.includes('proyek') || lower.includes('qc') || lower.includes('cor'))) ||
+      (d.id === 'DIV-BNK' && (lower.includes('btn') || lower.includes('mandiri') || lower.includes('bca') || lower.includes('bank') || lower.includes('kpr') || lower.includes('sp3k'))) ||
+      (d.id === 'DIV-NOT' && (lower.includes('notaris') || lower.includes('ppat') || lower.includes('bpn') || lower.includes('sertifikat')))
+    );
+
+    const color = matched ? matched.color : '#38BDF8';
+    const bg = matched ? matched.bg : 'rgba(56, 189, 248, 0.15)';
+
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', background: bg, border: `1px solid ${color}40`, color: color, fontWeight: 700, fontSize: '0.78rem' }}>
+        🏢 {kordinasiText}
+      </div>
+    );
+  };
 
   // 3 Primary Tabs: 'laporan' (Laporan Pekerjaan) | 'instruksi' (Instruksi Pekerjaan) | 'absen' (Presensi GPS)
   const [activeTab, setActiveTab] = useState('laporan');
@@ -1145,11 +1184,9 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                         )}
                       </td>
 
-                      {/* 4. Kolom Kordinasi */}
+                      {/* 4. Kolom Kordinasi Divisi */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#38BDF8' }}>
-                          {item.kordinasi || '-'}
-                        </div>
+                        {getDivisionBadge(item.kordinasi)}
                       </td>
 
                       {/* 5. Kolom PIC */}
@@ -1397,8 +1434,8 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                             {ins.instruction}
                           </div>
                           {ins.kordinasi && (
-                            <div style={{ fontSize: '0.75rem', color: '#38BDF8', marginTop: '4px' }}>
-                              🤝 Koordinasi: {ins.kordinasi}
+                            <div style={{ marginTop: '6px' }}>
+                              {getDivisionBadge(ins.kordinasi)}
                             </div>
                           )}
 
@@ -1637,14 +1674,56 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Kordinasi (Pihak Terkait)</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Koordinasi Divisi Terkait</label>
+                  
+                  {/* Select Dropdown Divisi */}
+                  <select
+                    className="form-control"
+                    value={COMPANY_DIVISIONS.some(d => d.name === newKordinasi) ? newKordinasi : ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setNewKordinasi(e.target.value);
+                      }
+                    }}
+                    style={{ marginBottom: '0.4rem', fontWeight: 700, borderColor: '#38BDF8' }}
+                  >
+                    <option value="">-- Pilih Divisi Perusahaan --</option>
+                    {COMPANY_DIVISIONS.map(d => (
+                      <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                    ))}
+                  </select>
+
+                  {/* Input Teks Divisi / Catatan Pihak Terkait */}
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: Bank BTN, Notaris, Tim Marketing, Konsumen Cluster..."
+                    placeholder="Atau ketik divisi / pihak terkait (misal: Finance, Direktur Utama, Marketing, Notaris)..."
                     value={newKordinasi}
                     onChange={(e) => setNewKordinasi(e.target.value)}
                   />
+
+                  {/* Quick Pill Buttons */}
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                    {COMPANY_DIVISIONS.slice(0, 6).map(d => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => setNewKordinasi(d.name)}
+                        style={{
+                          background: newKordinasi === d.name ? d.color : 'rgba(255,255,255,0.05)',
+                          color: newKordinasi === d.name ? '#0F172A' : d.color,
+                          border: `1px solid ${d.color}60`,
+                          borderRadius: '4px',
+                          padding: '2px 6px',
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + {d.short}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -1816,14 +1895,56 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Koordinasi Terkait</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Koordinasi Divisi Terkait</label>
+                  
+                  {/* Select Dropdown Divisi */}
+                  <select
+                    className="form-control"
+                    value={COMPANY_DIVISIONS.some(d => d.name === insKordinasi) ? insKordinasi : ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setInsKordinasi(e.target.value);
+                      }
+                    }}
+                    style={{ marginBottom: '0.4rem', fontWeight: 700, borderColor: '#38BDF8' }}
+                  >
+                    <option value="">-- Pilih Divisi Perusahaan --</option>
+                    {COMPANY_DIVISIONS.map(d => (
+                      <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                    ))}
+                  </select>
+
+                  {/* Input Teks Divisi / Catatan Pihak Terkait */}
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: Bank BTN, Tim Pajak, Mandor Lapangan..."
+                    placeholder="Atau ketik divisi / pihak terkait (misal: Finance, Direktur Utama, Marketing, Notaris)..."
                     value={insKordinasi}
                     onChange={(e) => setInsKordinasi(e.target.value)}
                   />
+
+                  {/* Quick Pill Buttons */}
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                    {COMPANY_DIVISIONS.slice(0, 6).map(d => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => setInsKordinasi(d.name)}
+                        style={{
+                          background: insKordinasi === d.name ? d.color : 'rgba(255,255,255,0.05)',
+                          color: insKordinasi === d.name ? '#0F172A' : d.color,
+                          border: `1px solid ${d.color}60`,
+                          borderRadius: '4px',
+                          padding: '2px 6px',
+                          fontSize: '0.68rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        + {d.short}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.75rem' }}>
