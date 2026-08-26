@@ -229,8 +229,8 @@ export const CustomerRelationModule = () => {
     setIsDocModalOpen(true);
   };
 
-  // Pillar 1: Complaints & Warranty Tickets Data
-  const [tickets, setTickets] = useState([
+  // Pillar 1: Complaints & Warranty Tickets Data (Persistent Store with Full CRUD)
+  const initialTickets = [
     {
       id: 'CR-TCK-001',
       unitNo: 'A-01',
@@ -273,7 +273,33 @@ export const CustomerRelationModule = () => {
       reportDate: '2025-08-10',
       targetCompletion: '2025-08-18'
     }
-  ]);
+  ];
+
+  const getSavedTickets = () => {
+    try {
+      const saved = localStorage.getItem('ams_cr_tickets_v3');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialTickets;
+  };
+
+  const [tickets, setTickets] = useState(getSavedTickets);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('ams_cr_tickets_v3', JSON.stringify(tickets));
+    } catch (e) {}
+  }, [tickets]);
+
+  const handleDeleteTicket = (id, customerName) => {
+    if (window.confirm(`Hapus tiket komplain ${id} (${customerName})?`)) {
+      setTickets(prev => prev.filter(t => t.id !== id));
+      showNotification(`Tiket komplain ${id} untuk ${customerName} berhasil dihapus.`, 'warning');
+    }
+  };
 
   // Pillar 2: BAST Handover & Utilities Data (Persistent Store with Full CRUD)
   const initialHandovers = [
@@ -444,18 +470,125 @@ export const CustomerRelationModule = () => {
     }
   };
 
-  // Pillar 3: CSAT & Loyalty Referral Data
-  const [reviews] = useState([
+  // Pillar 3: CSAT & Loyalty Referral Data (Persistent Store with Full CRUD)
+  const initialReviews = [
     { id: 1, customer: 'Budi Santoso (A-01)', rating: 5, comment: 'Sangat puas dengan respon cepat tim CRM Ashoka dalam perbaikan atap. Pelayanan sangat ramah!', date: '05 Ags 2025' },
     { id: 2, customer: 'Rian Perdana (A-06)', rating: 5, comment: 'Proses BAST serah terima kunci lancar dan penataan fasilitas cluster sangat bersih.', date: '30 Jul 2025' }
-  ]);
+  ];
 
-  // Pillar 4: IPL Estate Management Billing Data
-  const [iplList, setIplList] = useState([
+  const getSavedReviews = () => {
+    try {
+      const saved = localStorage.getItem('ams_cr_csat_v3');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialReviews;
+  };
+
+  const [reviews, setReviews] = useState(getSavedReviews);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('ams_cr_csat_v3', JSON.stringify(reviews));
+    } catch (e) {}
+  }, [reviews]);
+
+  const [isCsatModalOpen, setIsCsatModalOpen] = useState(false);
+  const [csatForm, setCsatForm] = useState({
+    customer: '',
+    rating: 5,
+    comment: ''
+  });
+
+  const handleOpenAddReview = () => {
+    setCsatForm({ customer: '', rating: 5, comment: '' });
+    setIsCsatModalOpen(true);
+  };
+
+  const handleSaveReview = (e) => {
+    e.preventDefault();
+    const newRev = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+      ...csatForm
+    };
+    setReviews(prev => [newRev, ...prev]);
+    showNotification(`Ulasan kepuasan dari ${csatForm.customer} berhasil ditambahkan!`, 'success');
+    setIsCsatModalOpen(false);
+  };
+
+  const handleDeleteReview = (id, customer) => {
+    if (window.confirm(`Hapus ulasan kepuasan dari ${customer}?`)) {
+      setReviews(prev => prev.filter(r => r.id !== id));
+      showNotification(`Ulasan dari ${customer} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // Pillar 4: IPL Estate Management Billing Data (Persistent Store with Full CRUD)
+  const initialIplList = [
     { id: 'IPL-08-A01', unitNo: 'A-01', customerName: 'Budi Santoso', month: 'Agustus 2025', amount: 250000, status: 'LUNAS (Verified)' },
     { id: 'IPL-08-A06', unitNo: 'A-06', customerName: 'Rian Perdana', month: 'Agustus 2025', amount: 250000, status: 'Belum Bayar' },
     { id: 'IPL-08-B01', unitNo: 'B-01', customerName: 'Dr. Tri Handoko', month: 'Agustus 2025', amount: 350000, status: 'LUNAS (Verified)' }
-  ]);
+  ];
+
+  const getSavedIplList = () => {
+    try {
+      const saved = localStorage.getItem('ams_cr_ipl_v3');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialIplList;
+  };
+
+  const [iplList, setIplList] = useState(getSavedIplList);
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('ams_cr_ipl_v3', JSON.stringify(iplList));
+    } catch (e) {}
+  }, [iplList]);
+
+  const [isIplModalOpen, setIsIplModalOpen] = useState(false);
+  const [iplForm, setIplForm] = useState({
+    unitNo: 'A-01',
+    customerName: '',
+    month: 'Agustus 2025',
+    amount: 250000,
+    status: 'Belum Bayar'
+  });
+
+  const handleOpenAddIpl = () => {
+    setIplForm({
+      unitNo: 'A-01',
+      customerName: '',
+      month: 'Agustus 2025',
+      amount: 250000,
+      status: 'Belum Bayar'
+    });
+    setIsIplModalOpen(true);
+  };
+
+  const handleSaveIpl = (e) => {
+    e.preventDefault();
+    const newIpl = {
+      id: `IPL-08-${iplForm.unitNo.replace(/[^a-zA-Z0-9]/g, '')}-${Math.floor(100 + Math.random() * 900)}`,
+      ...iplForm
+    };
+    setIplList(prev => [newIpl, ...prev]);
+    showNotification(`Tagihan IPL Unit ${iplForm.unitNo} berhasil diterbitkan!`, 'success');
+    setIsIplModalOpen(false);
+  };
+
+  const handleDeleteIpl = (id, unitNo) => {
+    if (window.confirm(`Hapus data tagihan ${id} untuk Unit ${unitNo}?`)) {
+      setIplList(prev => prev.filter(i => i.id !== id));
+      showNotification(`Tagihan IPL ${id} berhasil dihapus.`, 'warning');
+    }
+  };
 
   // Modal State for New Complaint Ticket
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
@@ -480,13 +613,13 @@ export const CustomerRelationModule = () => {
       ...ticketForm
     };
     setTickets([newTck, ...tickets]);
-    showNotification(`Tiket Komplain Baru ${newTck.id} berhasil diterbitkan & didisposisi!`);
+    showNotification(`Tiket Komplain Baru ${newTck.id} berhasil diterbitkan & didisposisi!`, 'success');
     setIsTicketModalOpen(false);
   };
 
   const handleCompleteTicket = (id) => {
     setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Completed (Selesai)' } : t));
-    showNotification(`Tiket Komplain ${id} dinyatakan SELESAI & Lolos Inspeksi!`);
+    showNotification(`Tiket Komplain ${id} dinyatakan SELESAI & Lolos Inspeksi!`, 'success');
   };
 
   // Pillar 5: Penyerahan Berkas Asli Konsumen (SHM, PBG, Polis) Data
@@ -833,13 +966,23 @@ export const CustomerRelationModule = () => {
                         <td><span className="badge badge-info">{t.warrantyDaysLeft} Hari</span></td>
                         <td>{t.contractorAssigned}</td>
                         <td>
-                          {(t.status || '').includes('Completed') ? (
-                            <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
-                          ) : (
-                            <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)}>
-                              <CheckCircle2 size={13} /> Selesaikan Tiket
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            {(t.status || '').includes('Completed') ? (
+                              <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
+                            ) : (
+                              <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)} style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }}>
+                                <CheckCircle2 size={13} /> Selesaikan
+                              </button>
+                            )}
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteTicket(t.id, t.customerName)}
+                              style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                              title="Hapus Tiket Komplain"
+                            >
+                              <Trash2 size={13} /> Hapus
                             </button>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1024,7 +1167,15 @@ export const CustomerRelationModule = () => {
         const filteredReviews = reviews.filter(r => !searchCsat || [r.customer, r.comment, r.date].some(val => (val || '').toLowerCase().includes(searchCsat.toLowerCase().trim())));
         return (
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Ulasan Kepuasan Pelanggan (CSAT & NPS Ratings)</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Ulasan Kepuasan Pelanggan (CSAT & NPS Ratings)</h3>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>Monitoring kepuasan konsumen perumahan, ulasan pelayanan, & testimoni.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={handleOpenAddReview} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
+                <Plus size={14} /> + Tambah Ulasan Konsumen (CSAT)
+              </button>
+            </div>
 
             {/* Search Bar CSAT */}
             <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -1061,13 +1212,23 @@ export const CustomerRelationModule = () => {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {filteredReviews.map((r) => (
-                  <div key={r.id} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{r.customer}</div>
-                      <div style={{ color: '#F59E0B', fontWeight: 900 }}>{'★'.repeat(r.rating)}</div>
+                  <div key={r.id} style={{ padding: '1.25rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '240px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{r.customer}</div>
+                        <div style={{ color: '#F59E0B', fontWeight: 900, fontSize: '1.1rem' }}>{'★'.repeat(r.rating || 5)}</div>
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--text-main)', fontStyle: 'italic', lineHeight: 1.5 }}>"{r.comment}"</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: '8px' }}>Tgl: {r.date}</div>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontStyle: 'italic' }}>"{r.comment}"</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', marginTop: '6px' }}>{r.date}</div>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleDeleteReview(r.id, r.customer)}
+                      style={{ color: 'var(--danger)', padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                      title="Hapus Testimoni"
+                    >
+                      <Trash2 size={13} /> Hapus
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1081,7 +1242,15 @@ export const CustomerRelationModule = () => {
         const filteredIplList = iplList.filter(i => !searchIpl || [i.id, i.unitNo, i.customerName, i.month, i.status, i.amount?.toString()].some(val => (val || '').toLowerCase().includes(searchIpl.toLowerCase().trim())));
         return (
           <div className="glass-card">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Tagihan & Kolektibilitas IPL Lingkungan Cluster</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Tagihan & Kolektibilitas IPL Lingkungan Cluster</h3>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>Manajemen iuran kebersihan, keamanan satpam 24 jam, & penerangan jalan cluster.</p>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={handleOpenAddIpl} style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}>
+                <Plus size={14} /> + Terbitkan Tagihan IPL Baru
+              </button>
+            </div>
 
             {/* Search Bar IPL */}
             <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -1125,7 +1294,7 @@ export const CustomerRelationModule = () => {
                       <th>Bulan Tagihan</th>
                       <th>Nominal IPL (Rp)</th>
                       <th>Status Pembayaran</th>
-                      <th>Aksi Verifikasi</th>
+                      <th>Aksi Verifikasi & Hapus</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1144,11 +1313,23 @@ export const CustomerRelationModule = () => {
                           </span>
                         </td>
                         <td>
-                          {!(i.status || '').includes('LUNAS') && (
-                            <button className="btn btn-primary btn-sm" onClick={() => handlePayIPL(i.id)}>
-                              <CheckCircle2 size={13} /> Bayar IPL
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            {!(i.status || '').includes('LUNAS') ? (
+                              <button className="btn btn-primary btn-sm" onClick={() => handlePayIPL(i.id)} style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem', background: '#10B981', border: 'none' }}>
+                                <CheckCircle2 size={13} /> Bayar IPL
+                              </button>
+                            ) : (
+                              <span style={{ fontSize: '0.72rem', color: 'var(--success)', fontWeight: 700 }}>Kwitansi Lunas</span>
+                            )}
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteIpl(i.id, i.unitNo)}
+                              style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                              title="Hapus Tagihan IPL"
+                            >
+                              <Trash2 size={13} />
                             </button>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -2320,6 +2501,159 @@ export const CustomerRelationModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHelpdeskModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800 }}>
                   Simpan Tiket Helpdesk
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE CSAT REVIEW MODAL */}
+      {isCsatModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Star size={20} color="#F59E0B" /> Tambah Ulasan Kepuasan Konsumen (CSAT)
+              </h3>
+              <button onClick={() => setIsCsatModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveReview}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Nama Konsumen & Unit</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Budi Santoso (Unit A-01)"
+                    value={csatForm.customer}
+                    onChange={(e) => setCsatForm({ ...csatForm, customer: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Rating Kepuasan Bintang (1 - 5 Bintang)</label>
+                  <select
+                    className="form-control"
+                    value={csatForm.rating}
+                    onChange={(e) => setCsatForm({ ...csatForm, rating: Number(e.target.value) })}
+                  >
+                    <option value={5}>⭐⭐⭐⭐⭐ (5 Bintang - Sangat Puas)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4 Bintang - Puas)</option>
+                    <option value={3}>⭐⭐⭐ (3 Bintang - Cukup)</option>
+                    <option value={2}>⭐⭐ (2 Bintang - Kurang Puas)</option>
+                    <option value={1}>⭐ (1 Bintang - Tidak Puas)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Testimoni & Komentar Konsumen</label>
+                  <textarea
+                    rows="3"
+                    className="form-control"
+                    placeholder="Tuliskan testimoni atau ulasan konsumen..."
+                    value={csatForm.comment}
+                    onChange={(e) => setCsatForm({ ...csatForm, comment: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsCsatModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
+                  Simpan Ulasan CSAT
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE IPL BILLING MODAL */}
+      {isIplModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Building2 size={20} color="#10B981" /> Terbitkan Tagihan IPL Warga Baru
+              </h3>
+              <button onClick={() => setIsIplModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveIpl}>
+              <div className="modal-body">
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nomor Kavling Unit</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: A-01"
+                      value={iplForm.unitNo}
+                      onChange={(e) => setIplForm({ ...iplForm, unitNo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nama Penghuni</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Budi Santoso"
+                      value={iplForm.customerName}
+                      onChange={(e) => setIplForm({ ...iplForm, customerName: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Bulan Tagihan</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Agustus 2025"
+                      value={iplForm.month}
+                      onChange={(e) => setIplForm({ ...iplForm, month: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nominal IPL (Rp)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="250000"
+                      value={iplForm.amount}
+                      onChange={(e) => setIplForm({ ...iplForm, amount: Number(e.target.value) })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Status Pembayaran Awal</label>
+                  <select
+                    className="form-control"
+                    value={iplForm.status}
+                    onChange={(e) => setIplForm({ ...iplForm, status: e.target.value })}
+                  >
+                    <option value="Belum Bayar">Belum Bayar (Menunggu Pembayaran)</option>
+                    <option value="LUNAS (Verified)">LUNAS (Verified)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsIplModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}>
+                  Terbitkan Tagihan IPL
                 </button>
               </div>
             </form>
