@@ -409,7 +409,7 @@ export const TodoAttendanceModule = () => {
     setNewWaktu('08:00 - 10:00');
     setNewLaporan('');
     setNewKordinasi('');
-    setNewPic(safeUsers[0]?.name || 'Syamsul Dahari');
+    setNewPic(isBoss ? (safeUsers[0]?.name || 'Syamsul Dahari') : (currentUser?.name || ''));
     setNewPriority('Sedang');
     setIsAddModalOpen(true);
   };
@@ -420,20 +420,31 @@ export const TodoAttendanceModule = () => {
     setNewWaktu(item.waktu || '08:00 - 10:00');
     setNewLaporan(item.laporan || item.text || '');
     setNewKordinasi(item.kordinasi || '');
-    setNewPic(item.pic || item.assignee || (safeUsers[0]?.name || ''));
+    setNewPic(item.pic || item.assignee || (currentUser?.name || ''));
     setNewPriority(item.priority || 'Sedang');
     setIsAddModalOpen(true);
   };
 
   const handleSaveTodo = (e) => {
     e.preventDefault();
-    if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Direktur Utama, General Manager, atau Bu Yulieka (Head Marketing) yang berhak menerbitkan laporan pekerjaan!`, 'danger');
-      return;
-    }
     if (!newLaporan.trim()) return;
 
-    const targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers[0];
+    // Determine target user / PIC
+    let targetUser;
+    let finalPic;
+    let finalPicId;
+    let finalAssignedBy;
+
+    if (isBoss) {
+      targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers[0];
+      finalPic = targetUser ? targetUser.name : newPic;
+      finalPicId = targetUser ? targetUser.id : '';
+      finalAssignedBy = `${currentUser?.name} (${currentUser?.role})`;
+    } else {
+      finalPic = currentUser?.name || 'Staf';
+      finalPicId = currentUser?.id || '';
+      finalAssignedBy = `${currentUser?.name} (Laporan Mandiri)`;
+    }
 
     if (editingItem) {
       setTodos(safeTodos.map(t => {
@@ -445,9 +456,9 @@ export const TodoAttendanceModule = () => {
             laporan: newLaporan.trim(),
             text: newLaporan.trim(),
             kordinasi: newKordinasi.trim(),
-            pic: targetUser ? targetUser.name : newPic,
-            assignee: targetUser ? targetUser.name : newPic,
-            picId: targetUser ? targetUser.id : '',
+            pic: isBoss ? finalPic : t.pic,
+            assignee: isBoss ? finalPic : t.assignee,
+            picId: isBoss ? finalPicId : t.picId,
             priority: newPriority
           };
         }
@@ -462,26 +473,31 @@ export const TodoAttendanceModule = () => {
         laporan: newLaporan.trim(),
         text: newLaporan.trim(),
         kordinasi: newKordinasi.trim(),
-        pic: targetUser ? targetUser.name : newPic,
-        assignee: targetUser ? targetUser.name : newPic,
-        picId: targetUser ? targetUser.id : '',
+        pic: finalPic,
+        assignee: finalPic,
+        picId: finalPicId,
         priority: newPriority,
         completed: false,
         notes: '',
-        assignedBy: `${currentUser?.name} (${currentUser?.role})`
+        assignedBy: finalAssignedBy
       };
       setTodos([newItem, ...safeTodos]);
-      showNotification(`BARIS PEKERJAAN HARIAN DITAMBAHKAN! Ditugaskan ke ${newItem.pic}.`, 'success');
+      showNotification(`Laporan pekerjaan harian berhasil ditambahkan atas nama ${newItem.pic}!`, 'success');
     }
 
     setIsAddModalOpen(false);
   };
 
   const handleDeleteTodo = (id) => {
-    if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Manager atau Direktur yang berhak menghapus baris laporan!`, 'danger');
+    const itemToDelete = safeTodos.find(t => t.id === id);
+    if (!itemToDelete) return;
+
+    const canDelete = isBoss || isTaskAssignedToUser(itemToDelete, currentUser);
+    if (!canDelete) {
+      showNotification(`Akses Terbatas: Anda hanya berhak menghapus baris laporan pekerjaan milik Anda sendiri!`, 'danger');
       return;
     }
+
     if (window.confirm('Hapus baris laporan pekerjaan ini?')) {
       setTodos(safeTodos.filter(t => t.id !== id));
       showNotification('Baris laporan pekerjaan berhasil dihapus.', 'warning');
@@ -783,15 +799,13 @@ export const TodoAttendanceModule = () => {
                 </>
               )}
 
-              {isBoss && (
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleOpenAddModal}
-                  style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}
-                >
-                  <Plus size={16} /> + Tambah Baris Laporan
-                </button>
-              )}
+              <button 
+                className="btn btn-primary"
+                onClick={handleOpenAddModal}
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}
+              >
+                <Plus size={16} /> + Tambah Baris Laporan
+              </button>
             </div>
           </div>
 
@@ -830,7 +844,7 @@ export const TodoAttendanceModule = () => {
                       </div>
                       <p style={{ fontSize: '0.825rem', marginTop: '4px' }}>
                         {showAllDates ? 'Belum ada data laporan.' : `Tidak ada pekerjaan tercatat pada tanggal ${selectedDateFilter}.`}
-                        {isBoss && ' Klik tombol "+ Tambah Baris Laporan" di atas untuk menambah.'}
+                        {' '}Klik tombol "+ Tambah Baris Laporan" di atas untuk mengisi.
                       </p>
                     </td>
                   </tr>
@@ -911,7 +925,7 @@ export const TodoAttendanceModule = () => {
                             {item.completed ? <Check size={12} /> : null} {item.completed ? 'Selesai' : 'Pending'}
                           </button>
 
-                          {isBoss && (
+                          {(isBoss || isTaskAssignedToUser(item, currentUser)) && (
                             <>
                               <button
                                 className="btn btn-secondary btn-sm"
@@ -1100,16 +1114,26 @@ export const TodoAttendanceModule = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div>
                     <label className="form-label" style={{ fontWeight: 800 }}>👤 PIC (Person In Charge)</label>
-                    <select
-                      className="form-control"
-                      value={newPic}
-                      onChange={(e) => setNewPic(e.target.value)}
-                      required
-                    >
-                      {safeUsers.map(u => (
-                        <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
-                      ))}
-                    </select>
+                    {isBoss ? (
+                      <select
+                        className="form-control"
+                        value={newPic}
+                        onChange={(e) => setNewPic(e.target.value)}
+                        required
+                      >
+                        {safeUsers.map(u => (
+                          <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={`${currentUser?.name || ''} (${currentUser?.role || ''})`}
+                        readOnly
+                        style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: '#38BDF8', fontWeight: 700 }}
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="form-label" style={{ fontWeight: 800 }}>🚩 Prioritas</label>
