@@ -38,8 +38,30 @@ import {
 } from 'lucide-react';
 
 export const CustomerRelationModule = () => {
-  const { showNotification, activeSubTab, setActiveSubTab } = useApp();
+  const { showNotification, activeSubTab, setActiveSubTab, currentUser, users, units } = useApp();
   const [activeTab, setActiveTab] = useState(activeSubTab && activeSubTab !== 'default' ? activeSubTab : 'tickets');
+
+  const safeUnits = Array.isArray(units) && units.length > 0 ? units : [
+    { no: 'A-01', cluster: 'Cluster Emerald', customer: 'Budi Santoso', phone: '0812-9988-7766' },
+    { no: 'A-02', cluster: 'Cluster Emerald', customer: 'Siti Rahmawati', phone: '0812-3344-5566' },
+    { no: 'A-03', cluster: 'Cluster Emerald', customer: 'Hendra Gunawan', phone: '0811-2233-4455' },
+    { no: 'A-04', cluster: 'Cluster Emerald', customer: 'Dewi Lestari', phone: '0819-8877-6655' },
+    { no: 'A-05', cluster: 'Cluster Emerald', customer: 'Agus Setiawan', phone: '0857-1122-3344' },
+    { no: 'A-06', cluster: 'Cluster Emerald', customer: 'Rian Perdana', phone: '0813-4455-6677' },
+    { no: 'B-01', cluster: 'Cluster Sapphire', customer: 'Dr. Tri Handoko', phone: '0811-2233-4455' },
+    { no: 'B-02', cluster: 'Cluster Sapphire', customer: 'Bambang Sudiro', phone: '0812-5566-7788' },
+    { no: 'B-03', cluster: 'Cluster Sapphire', customer: 'Maya Indah', phone: '0813-9900-1122' },
+    { no: 'B-04', cluster: 'Cluster Sapphire', customer: 'Siti Aminah', phone: '0813-4455-6677' }
+  ];
+
+  const VENDOR_LIST = [
+    'PT Bangun Jaya Perdana',
+    'CV Karya Mandiri Teknik',
+    'CV Sinar Abadi Konstruksi',
+    'PT Tata Griya Mandiri',
+    'Vendor Sanitasi & Pipa Prima',
+    'Vendor Elektrikal & Panel Nusantara'
+  ];
 
   React.useEffect(() => {
     if (activeSubTab && activeSubTab !== 'default') {
@@ -232,7 +254,7 @@ export const CustomerRelationModule = () => {
   // Pillar 1: Complaints & Warranty Tickets Data (Persistent Store with Full CRUD)
   const initialTickets = [
     {
-      id: 'CR-TCK-001',
+      id: 'TCK-001',
       unitNo: 'A-01',
       cluster: 'Cluster Emerald',
       customerName: 'Budi Santoso',
@@ -241,12 +263,15 @@ export const CustomerRelationModule = () => {
       description: 'Ada rembesan air di plafon kamar utama saat hujan deras.',
       status: 'In Progress (Perbaikan)',
       warrantyDaysLeft: 45,
+      vendor: 'PT Bangun Jaya Perdana',
       contractorAssigned: 'PT Bangun Jaya Perdana',
-      reportDate: '2025-08-01',
+      tanggalKomplain: '2025-08-01',
+      tanggalInput: '2025-08-01',
+      inputBy: 'Syamsul Dahari (Customer Care)',
       targetCompletion: '2025-08-15'
     },
     {
-      id: 'CR-TCK-002',
+      id: 'TCK-002',
       unitNo: 'A-06',
       cluster: 'Cluster Emerald',
       customerName: 'Rian Perdana',
@@ -255,12 +280,15 @@ export const CustomerRelationModule = () => {
       description: 'Engsel pintu kamar mandi perlu distel kencang.',
       status: 'Completed (Selesai)',
       warrantyDaysLeft: 90,
+      vendor: 'PT Bangun Jaya Perdana',
       contractorAssigned: 'PT Bangun Jaya Perdana',
-      reportDate: '2025-07-25',
+      tanggalKomplain: '2025-07-25',
+      tanggalInput: '2025-07-25',
+      inputBy: 'Tarkum Aditya (Finance/CRM)',
       targetCompletion: '2025-07-28'
     },
     {
-      id: 'CR-TCK-003',
+      id: 'TCK-003',
       unitNo: 'B-01',
       cluster: 'Cluster Sapphire',
       customerName: 'Dr. Tri Handoko',
@@ -269,18 +297,36 @@ export const CustomerRelationModule = () => {
       description: 'Dinding teras depan mengelupas karena lembab.',
       status: 'Pending (Disposisi)',
       warrantyDaysLeft: 120,
+      vendor: 'CV Karya Mandiri Teknik',
       contractorAssigned: 'CV Karya Mandiri Teknik',
-      reportDate: '2025-08-10',
+      tanggalKomplain: '2025-08-10',
+      tanggalInput: '2025-08-10',
+      inputBy: 'Fresda Destifani (CRM Staff)',
       targetCompletion: '2025-08-18'
     }
   ];
 
   const getSavedTickets = () => {
     try {
-      const saved = localStorage.getItem('ams_cr_tickets_v3');
+      const saved = localStorage.getItem('ams_cr_tickets_v4');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      const old = localStorage.getItem('ams_cr_tickets_v3');
+      if (old) {
+        const parsedOld = JSON.parse(old);
+        if (Array.isArray(parsedOld) && parsedOld.length > 0) {
+          return parsedOld.map((t, idx) => ({
+            ...t,
+            id: t.id ? t.id.replace('CR-TCK-', 'TCK-') : `TCK-${String(idx + 1).padStart(3, '0')}`,
+            vendor: t.vendor || t.contractorAssigned || 'PT Bangun Jaya Perdana',
+            contractorAssigned: t.vendor || t.contractorAssigned || 'PT Bangun Jaya Perdana',
+            tanggalKomplain: t.tanggalKomplain || t.reportDate || '2025-08-01',
+            tanggalInput: t.tanggalInput || t.reportDate || '2025-08-01',
+            inputBy: t.inputBy || 'Customer Relation (Admin)'
+          }));
+        }
       }
     } catch (e) {}
     return initialTickets;
@@ -290,7 +336,7 @@ export const CustomerRelationModule = () => {
 
   React.useEffect(() => {
     try {
-      localStorage.setItem('ams_cr_tickets_v3', JSON.stringify(tickets));
+      localStorage.setItem('ams_cr_tickets_v4', JSON.stringify(tickets));
     } catch (e) {}
   }, [tickets]);
 
@@ -590,30 +636,109 @@ export const CustomerRelationModule = () => {
     }
   };
 
-  // Modal State for New Complaint Ticket
+  // Modal State for New/Edit Complaint Ticket (Pilar 1)
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [editingTicket, setEditingTicket] = useState(null);
   const [ticketForm, setTicketForm] = useState({
+    ticketNo: 'TCK-001',
     unitNo: 'A-01',
     customerName: 'Budi Santoso',
     phone: '0812-9988-7766',
     category: 'Kebocoran Plafon',
     description: '',
-    contractorAssigned: 'PT Bangun Jaya Perdana'
+    vendor: 'PT Bangun Jaya Perdana',
+    tanggalKomplain: new Date().toISOString().split('T')[0],
+    tanggalInput: new Date().toISOString().split('T')[0],
+    inputBy: ''
   });
 
-  const handleCreateTicket = (e) => {
+  const handleOpenAddTicket = () => {
+    setEditingTicket(null);
+    const nextSeq = tickets.length + 1;
+    const nextTicketId = `TCK-${String(nextSeq).padStart(3, '0')}`;
+    const firstUnit = safeUnits[0]?.no || 'A-01';
+    const matchedCustomer = safeUnits[0]?.customer || 'Budi Santoso';
+    const matchedPhone = safeUnits[0]?.phone || '0812-9988-7766';
+
+    setTicketForm({
+      ticketNo: nextTicketId,
+      unitNo: firstUnit,
+      customerName: matchedCustomer,
+      phone: matchedPhone,
+      category: 'Kebocoran Plafon',
+      description: '',
+      vendor: 'PT Bangun Jaya Perdana',
+      tanggalKomplain: new Date().toISOString().split('T')[0],
+      tanggalInput: new Date().toISOString().split('T')[0],
+      inputBy: currentUser?.name ? `${currentUser.name} (${currentUser.role || 'Staf'})` : 'Customer Relation'
+    });
+    setIsTicketModalOpen(true);
+  };
+
+  const handleOpenEditTicket = (t) => {
+    setEditingTicket(t);
+    setTicketForm({
+      ticketNo: t.id,
+      unitNo: t.unitNo || 'A-01',
+      customerName: t.customerName || '',
+      phone: t.phone || '',
+      category: t.category || 'Kebocoran Plafon',
+      description: t.description || '',
+      vendor: t.vendor || t.contractorAssigned || 'PT Bangun Jaya Perdana',
+      tanggalKomplain: t.tanggalKomplain || t.reportDate || new Date().toISOString().split('T')[0],
+      tanggalInput: t.tanggalInput || t.reportDate || new Date().toISOString().split('T')[0],
+      inputBy: t.inputBy || (currentUser?.name ? `${currentUser.name} (${currentUser.role || 'Staf'})` : 'Customer Relation')
+    });
+    setIsTicketModalOpen(true);
+  };
+
+  const handleSaveTicket = (e) => {
     e.preventDefault();
-    const newTck = {
-      id: `CR-TCK-00${tickets.length + 1}`,
-      cluster: 'Cluster Emerald',
-      status: 'Pending (Disposisi)',
-      warrantyDaysLeft: 90,
-      reportDate: new Date().toISOString().split('T')[0],
-      targetCompletion: '2025-08-20',
-      ...ticketForm
-    };
-    setTickets([newTck, ...tickets]);
-    showNotification(`Tiket Komplain Baru ${newTck.id} berhasil diterbitkan & didisposisi!`, 'success');
+    if (!ticketForm.description.trim()) return;
+
+    if (editingTicket) {
+      setTickets(tickets.map(t => {
+        if (t.id === editingTicket.id) {
+          return {
+            ...t,
+            unitNo: ticketForm.unitNo,
+            customerName: ticketForm.customerName,
+            phone: ticketForm.phone,
+            category: ticketForm.category,
+            description: ticketForm.description,
+            vendor: ticketForm.vendor,
+            contractorAssigned: ticketForm.vendor,
+            tanggalKomplain: ticketForm.tanggalKomplain,
+            tanggalInput: ticketForm.tanggalInput,
+            inputBy: ticketForm.inputBy
+          };
+        }
+        return t;
+      }));
+      showNotification(`Tiket ${editingTicket.id} berhasil diperbarui!`, 'success');
+    } else {
+      const nextSeq = tickets.length + 1;
+      const finalId = ticketForm.ticketNo || `TCK-${String(nextSeq).padStart(3, '0')}`;
+      const newTck = {
+        id: finalId,
+        cluster: 'Cluster Emerald',
+        status: 'Pending (Disposisi)',
+        warrantyDaysLeft: 90,
+        targetCompletion: '2025-09-15',
+        unitNo: ticketForm.unitNo,
+        customerName: ticketForm.customerName,
+        phone: ticketForm.phone,
+        category: ticketForm.category,
+        description: ticketForm.description,
+        vendor: ticketForm.vendor,
+        contractorAssigned: ticketForm.vendor,
+        tanggalKomplain: ticketForm.tanggalKomplain,
+        tanggalInput: ticketForm.tanggalInput,
+        inputBy: ticketForm.inputBy || (currentUser?.name ? `${currentUser.name} (${currentUser.role || 'Staf'})` : 'Customer Relation')
+      };
+      setTickets([newTck, ...tickets]);
+      showNotification(`Tiket Keluhan ${newTck.id} berhasil dicatat oleh ${newTck.inputBy}!`, 'success');
+    }
     setIsTicketModalOpen(false);
   };
 
@@ -822,7 +947,7 @@ export const CustomerRelationModule = () => {
           <p className="page-subtitle">Pusat penanganan keluhan garansi retensi, serah terima BAST, survei CSAT, IPL lingkungan, & helpdesk konsumen.</p>
         </div>
 
-        <button className="btn btn-primary" onClick={() => setIsTicketModalOpen(true)}>
+        <button className="btn btn-primary" onClick={handleOpenAddTicket}>
           <Plus size={16} /> Buat Tiket Komplain Konsumen Baru
         </button>
       </div>
@@ -894,12 +1019,12 @@ export const CustomerRelationModule = () => {
 
       {/* PILAR 1: KELUHAN & GARANSI RETENSI */}
       {activeTab === 'tickets' && (() => {
-        const filteredTickets = tickets.filter(t => !searchTicket || [t.id, t.unitNo, t.cluster, t.customerName, t.phone, t.category, t.description, t.contractorAssigned, t.status].some(val => (val || '').toLowerCase().includes(searchTicket.toLowerCase().trim())));
+        const filteredTickets = tickets.filter(t => !searchTicket || [t.id, t.unitNo, t.cluster, t.customerName, t.phone, t.category, t.description, t.vendor, t.contractorAssigned, t.inputBy, t.status].some(val => (val || '').toLowerCase().includes(searchTicket.toLowerCase().trim())));
         return (
           <div className="glass-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Daftar Tiket Keluhan & Pemeliharaan Garansi Retensi</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => setIsTicketModalOpen(true)}>
+              <button className="btn btn-primary btn-sm" onClick={handleOpenAddTicket}>
                 <Plus size={14} /> Buat Tiket Keluhan Baru
               </button>
             </div>
@@ -912,7 +1037,7 @@ export const CustomerRelationModule = () => {
                   type="text"
                   className="form-control"
                   style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
-                  placeholder="Cari no tiket, kavling unit, nama konsumen, kontraktor, kategori keluhan..."
+                  placeholder="Cari no tiket, kavling unit, nama konsumen, vendor, petugas input..."
                   value={searchTicket}
                   onChange={(e) => setSearchTicket(e.target.value)}
                 />
@@ -941,46 +1066,86 @@ export const CustomerRelationModule = () => {
                 <table className="custom-table">
                   <thead>
                     <tr>
-                      <th>No Tiket & Unit</th>
-                      <th>Nama Konsumen & WA</th>
-                      <th>Kategori Keluhan</th>
-                      <th>Deskripsi Perbaikan</th>
-                      <th>Sisa Garansi</th>
-                      <th>Kontraktor Penanggung Jawab</th>
-                      <th>Status & Aksi</th>
+                      <th style={{ width: '45px', textAlign: 'center' }}>No</th>
+                      <th style={{ width: '130px' }}>No Tiket & Unit</th>
+                      <th style={{ width: '155px' }}>Tanggal Komplain & Input</th>
+                      <th style={{ width: '160px' }}>Konsumen & WA</th>
+                      <th>Kategori & Deskripsi Keluhan</th>
+                      <th style={{ width: '160px' }}>Vendor</th>
+                      <th style={{ width: '150px' }}>Petugas Input</th>
+                      <th style={{ width: '135px', textAlign: 'center' }}>Status & Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredTickets.map((t) => (
-                      <tr key={t.id}>
-                        <td>
-                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{t.id}</div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>Unit {t.unitNo} &bull; {t.cluster}</div>
+                    {filteredTickets.map((t, idx) => (
+                      <tr key={t.id || idx}>
+                        <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--text-muted)' }}>
+                          {idx + 1}
                         </td>
                         <td>
-                          <div style={{ fontWeight: 700 }}>{t.customerName}</div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.phone}</div>
+                          <div style={{ fontWeight: 900, color: 'var(--accent-primary)', fontSize: '0.85rem' }}>{t.id}</div>
+                          <span className="badge badge-secondary" style={{ fontSize: '0.72rem', fontWeight: 800, marginTop: '3px', display: 'inline-block' }}>
+                            Unit {t.unitNo}
+                          </span>
                         </td>
-                        <td><span className="badge badge-warning">{t.category}</span></td>
-                        <td><div style={{ fontSize: '0.825rem' }}>{t.description}</div></td>
-                        <td><span className="badge badge-info">{t.warrantyDaysLeft} Hari</span></td>
-                        <td>{t.contractorAssigned}</td>
                         <td>
-                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                          <div style={{ fontWeight: 800, color: '#F59E0B', fontSize: '0.78rem' }}>
+                            📅 Komplain: {t.tanggalKomplain || t.reportDate || '-'}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            ⏱️ Input: {t.tanggalInput || t.reportDate || '-'}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t.customerName}</div>
+                          <div 
+                            style={{ fontSize: '0.72rem', color: '#10B981', cursor: 'pointer', marginTop: '2px', fontWeight: 600 }}
+                            onClick={() => handleSendWaDirect(t.phone, t.customerName, t.category, t.unitNo)}
+                            title="Klik untuk chat WhatsApp ke konsumen"
+                          >
+                            📱 {t.phone}
+                          </div>
+                        </td>
+                        <td>
+                          <div>
+                            <span className="badge badge-warning" style={{ fontSize: '0.72rem', fontWeight: 800 }}>{t.category}</span>
+                          </div>
+                          <div style={{ fontSize: '0.825rem', marginTop: '4px', lineHeight: 1.4 }}>{t.description}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 800, color: '#38BDF8', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.78rem', display: 'inline-block' }}>
+                            🔧 {t.vendor || t.contractorAssigned || 'PT Bangun Jaya Perdana'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 700, color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', display: 'inline-block' }}>
+                            👤 {t.inputBy || 'Customer Relation'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                             {(t.status || '').includes('Completed') ? (
-                              <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
+                              <span className="badge badge-success" style={{ fontSize: '0.7rem' }}><CheckCircle2 size={12} /> Selesai</span>
                             ) : (
-                              <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)} style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }}>
-                                <CheckCircle2 size={13} /> Selesaikan
+                              <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)} style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }}>
+                                <CheckCircle2 size={12} /> Selesaikan
                               </button>
                             )}
                             <button
                               className="btn btn-secondary btn-sm"
+                              onClick={() => handleOpenEditTicket(t)}
+                              style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
+                              title="Edit Data Tiket"
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
                               onClick={() => handleDeleteTicket(t.id, t.customerName)}
-                              style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                              style={{ color: 'var(--danger)', padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
                               title="Hapus Tiket Komplain"
                             >
-                              <Trash2 size={13} /> Hapus
+                              <Trash2 size={12} />
                             </button>
                           </div>
                         </td>
@@ -1698,69 +1863,164 @@ export const CustomerRelationModule = () => {
         );
       })()}
 
-      {/* CREATE COMPLAINT TICKET MODAL */}
+      {/* CREATE / EDIT COMPLAINT TICKET MODAL */}
       {isTicketModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content">
+          <div className="modal-content" style={{ maxWidth: '600px' }}>
             <div className="modal-header">
-              <h3 className="modal-title">Buat Tiket Komplain & Garansi Retensi Baru</h3>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Wrench size={20} color="#F59E0B" /> {editingTicket ? `Edit Tiket Komplain (${editingTicket.id})` : 'Buat Tiket Komplain & Garansi Retensi Baru'}
+              </h3>
               <button onClick={() => setIsTicketModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateTicket}>
+            <form onSubmit={handleSaveTicket}>
               <div className="modal-body">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* Row 1: No Tiket (Otomatis) & Unit Kavling (Otomatis Pilih) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Unit Kavling (mis: A-01)</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🏷️ No. Tiket (Otomatis)</label>
                     <input
                       type="text"
                       className="form-control"
-                      value={ticketForm.unitNo}
-                      onChange={(e) => setTicketForm({ ...ticketForm, unitNo: e.target.value })}
-                      required
+                      value={ticketForm.ticketNo}
+                      readOnly
+                      style={{ fontWeight: 800, color: 'var(--accent-primary)', background: 'rgba(99, 102, 241, 0.1)', cursor: 'not-allowed' }}
                     />
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                      ✓ Terbit berurutan otomatis
+                    </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Nama Konsumen Pelapor</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🏠 Unit Kavling (Pilih)</label>
+                    <select
+                      className="form-control"
+                      value={ticketForm.unitNo}
+                      onChange={(e) => {
+                        const selectedNo = e.target.value;
+                        const matched = safeUnits.find(u => u.no === selectedNo);
+                        setTicketForm({
+                          ...ticketForm,
+                          unitNo: selectedNo,
+                          customerName: matched ? matched.customer : ticketForm.customerName,
+                          phone: matched ? matched.phone : ticketForm.phone
+                        });
+                      }}
+                      required
+                      style={{ fontWeight: 800, borderColor: '#38BDF8' }}
+                    >
+                      {safeUnits.map((u, i) => (
+                        <option key={u.no || i} value={u.no}>
+                          Unit {u.no} {u.cluster ? `(${u.cluster})` : ''} - {u.customer || 'Ready'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 2: Nama Konsumen & No WhatsApp */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>👤 Nama Konsumen Pelapor</label>
                     <input
                       type="text"
                       className="form-control"
                       value={ticketForm.customerName}
                       onChange={(e) => setTicketForm({ ...ticketForm, customerName: e.target.value })}
+                      placeholder="Nama pemilik / penghuni..."
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>📱 No. WhatsApp Konsumen</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={ticketForm.phone}
+                      onChange={(e) => setTicketForm({ ...ticketForm, phone: e.target.value })}
+                      placeholder="0812..."
                       required
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* Row 3: Tanggal Komplain & Tanggal Input Sistem */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Kategori Komplain Keluhan</label>
-                    <select
+                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Komplain</label>
+                    <input
+                      type="date"
                       className="form-control"
-                      value={ticketForm.category}
-                      onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value })}
-                    >
-                      <option value="Kebocoran Plafon">Kebocoran Plafon / Atap</option>
-                      <option value="Kusen Pintu Agak Macet">Kusen Pintu / Engsel Jendela</option>
-                      <option value="Cat Dinding Mengelupas">Cat Dinding Mengelupas</option>
-                      <option value="Sanitari & Pipa Air">Sanitari & Pipa Air PDAM</option>
-                      <option value="Listrik & Saklar">Instalasi Listrik PLN</option>
-                    </select>
+                      value={ticketForm.tanggalKomplain}
+                      onChange={(e) => setTicketForm({ ...ticketForm, tanggalKomplain: e.target.value })}
+                      required
+                      style={{ fontWeight: 700 }}
+                    />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Kontraktor Penanggung Jawab</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>⏱️ Tanggal Input Data</label>
                     <input
-                      type="text"
+                      type="date"
                       className="form-control"
-                      value={ticketForm.contractorAssigned}
-                      onChange={(e) => setTicketForm({ ...ticketForm, contractorAssigned: e.target.value })}
+                      value={ticketForm.tanggalInput}
+                      onChange={(e) => setTicketForm({ ...ticketForm, tanggalInput: e.target.value })}
+                      required
+                      style={{ fontWeight: 700, color: '#10B981' }}
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Detail Deskripsi Komplain Keluhan</label>
+                {/* Row 4: Petugas Yang Menginput Data & Vendor */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>✍️ Nama Yang Input Data</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={ticketForm.inputBy}
+                      onChange={(e) => setTicketForm({ ...ticketForm, inputBy: e.target.value })}
+                      placeholder="Nama Petugas CRM..."
+                      required
+                      style={{ fontWeight: 700, color: '#38BDF8' }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>🔧 Vendor</label>
+                    <select
+                      className="form-control"
+                      value={ticketForm.vendor}
+                      onChange={(e) => setTicketForm({ ...ticketForm, vendor: e.target.value })}
+                      style={{ fontWeight: 700 }}
+                    >
+                      {VENDOR_LIST.map((v, i) => (
+                        <option key={i} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 5: Kategori Komplain Keluhan */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🛠️ Kategori Komplain Keluhan</label>
+                  <select
+                    className="form-control"
+                    value={ticketForm.category}
+                    onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value })}
+                    style={{ fontWeight: 700 }}
+                  >
+                    <option value="Kebocoran Plafon">Kebocoran Plafon / Atap</option>
+                    <option value="Kusen Pintu Agak Macet">Kusen Pintu / Engsel Jendela</option>
+                    <option value="Cat Dinding Mengelupas">Cat Dinding Mengelupas</option>
+                    <option value="Sanitari & Pipa Air">Sanitari & Pipa Air PDAM</option>
+                    <option value="Listrik & Saklar">Instalasi Listrik PLN</option>
+                    <option value="Keramik Retak / Popping">Keramik Lantai Retak / Popping</option>
+                  </select>
+                </div>
+
+                {/* Row 6: Detail Deskripsi Komplain Keluhan */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>📝 Detail Deskripsi Komplain Keluhan</label>
                   <textarea
                     rows="3"
                     className="form-control"
@@ -1773,7 +2033,9 @@ export const CustomerRelationModule = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsTicketModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary">Terbitkan Tiket Komplain</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
+                  {editingTicket ? '💾 Simpan Perubahan Tiket' : '🚀 Terbitkan Tiket Komplain'}
+                </button>
               </div>
             </form>
           </div>
