@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { DocumentGeneratorModal } from '../components/DocumentGeneratorModal';
 import { 
@@ -582,7 +582,7 @@ export const CustomerRelationModule = () => {
 
   const [documentHandovers, setDocumentHandovers] = useState(getSavedDocHandovers);
 
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       localStorage.setItem('ams_doc_handover_records_v1', JSON.stringify(documentHandovers));
     } catch (e) {}
@@ -833,7 +833,7 @@ export const CustomerRelationModule = () => {
                         <td><span className="badge badge-info">{t.warrantyDaysLeft} Hari</span></td>
                         <td>{t.contractorAssigned}</td>
                         <td>
-                          {t.status.includes('Completed') ? (
+                          {(t.status || '').includes('Completed') ? (
                             <span className="badge badge-success"><CheckCircle2 size={12} /> Selesai</span>
                           ) : (
                             <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)}>
@@ -882,7 +882,7 @@ export const CustomerRelationModule = () => {
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700 }}>Kunci Diserahkan</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
-                  {handovers.filter(h => h.statusBAST.includes('Selesai')).length} Unit
+                  {handovers.filter(h => (h.statusBAST || '').includes('Selesai')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rumah Aktif Dihuni Warga</div>
               </div>
@@ -890,7 +890,7 @@ export const CustomerRelationModule = () => {
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>PLN & PDAM Aktif</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
-                  {handovers.filter(h => h.statusPLN.includes('Aktif')).length} Unit
+                  {handovers.filter(h => (h.statusPLN || '').includes('Aktif')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Meteran Mandiri Terpasang</div>
               </div>
@@ -898,7 +898,7 @@ export const CustomerRelationModule = () => {
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Jadwal Undangan</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
-                  {handovers.filter(h => !h.statusBAST.includes('Selesai')).length} Unit
+                  {handovers.filter(h => !(h.statusBAST || '').includes('Selesai')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Menunggu Serah Terima Kunci</div>
               </div>
@@ -951,7 +951,7 @@ export const CustomerRelationModule = () => {
                   </thead>
                   <tbody>
                     {filteredHandovers.map((h) => {
-                      const isHandoverDone = h.statusBAST.includes('Selesai');
+                      const isHandoverDone = (h.statusBAST || '').includes('Selesai');
                       return (
                         <tr key={h.id}>
                           <td>
@@ -1139,12 +1139,12 @@ export const CustomerRelationModule = () => {
                         <td>{i.month}</td>
                         <td><div style={{ fontWeight: 800 }}>{formatRupiah(i.amount)}</div></td>
                         <td>
-                          <span className={`badge ${i.status.includes('LUNAS') ? 'badge-success' : 'badge-danger'}`}>
+                          <span className={`badge ${(i.status || '').includes('LUNAS') ? 'badge-success' : 'badge-danger'}`}>
                             {i.status}
                           </span>
                         </td>
                         <td>
-                          {!i.status.includes('LUNAS') && (
+                          {!(i.status || '').includes('LUNAS') && (
                             <button className="btn btn-primary btn-sm" onClick={() => handlePayIPL(i.id)}>
                               <CheckCircle2 size={13} /> Bayar IPL
                             </button>
@@ -1188,10 +1188,10 @@ export const CustomerRelationModule = () => {
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Terdata di Buku Tanah Legal</div>
               </div>
 
-              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 700 }}>Lengkap & Diserahkan</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
-                  {documentHandovers.filter(d => d.status.includes('Lengkap')).length} Unit
+                  {documentHandovers.filter(d => (d.status || '').includes('Lengkap')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tuntas BAST Konsumen</div>
               </div>
@@ -1199,7 +1199,7 @@ export const CustomerRelationModule = () => {
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>Siap Diambil di Kantor</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
-                  {documentHandovers.filter(d => d.status.includes('Siap Diambil')).length} Unit
+                  {documentHandovers.filter(d => (d.status || '').includes('Siap Diambil')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Undangan Pengambilan Terkirim</div>
               </div>
@@ -1207,7 +1207,7 @@ export const CustomerRelationModule = () => {
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
                 <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Proses Splitzing / Vault</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
-                  {documentHandovers.filter(d => !d.status.includes('Lengkap') && !d.status.includes('Siap Diambil')).length} Unit
+                  {documentHandovers.filter(d => !(d.status || '').includes('Lengkap') && !(d.status || '').includes('Siap Diambil')).length} Unit
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>BPN & Bank KPR Mitra</div>
               </div>
@@ -1261,8 +1261,8 @@ export const CustomerRelationModule = () => {
                   </thead>
                   <tbody>
                     {filteredDocumentHandovers.map((doc) => {
-                      const isDone = doc.status.includes('Lengkap');
-                      const isReady = doc.status.includes('Siap Diambil');
+                      const isDone = (doc.status || '').includes('Lengkap');
+                      const isReady = (doc.status || '').includes('Siap Diambil');
                       return (
                         <tr key={doc.id}>
                           <td>
