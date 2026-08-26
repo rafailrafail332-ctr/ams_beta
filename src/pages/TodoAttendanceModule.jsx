@@ -39,26 +39,24 @@ export const TodoAttendanceModule = () => {
   const { currentUser, users, attendances, setAttendances, approveAttendancePhoto, rejectAttendancePhoto, getAvatarUrl, showNotification } = useApp();
   const [activeTab, setActiveTab] = useState('todo'); // 'todo', 'absen'
 
-  // Helper Check Role Can Assign / Reset / ACC (Manager, Director, Super Admin, Head Marketing - Bu Yulieka)
+  // Helper Check Role Can Assign / Reset / ACC:
+  // KHUSUS PIMPINAN: Direktur Utama (Ahmad Rafail & Yazid Hizbullah), General Manager (Adhi Himawan), dan Head Marketing (Bu Yulieka Rachmawati)
   const isManagerOrDirectorOrAdmin = () => {
     if (!currentUser) return false;
     const r = (currentUser.role || '').toLowerCase();
     const name = (currentUser.name || '').toLowerCase();
     const email = (currentUser.email || '').toLowerCase();
-    return (
-      r.includes('direktur') || 
-      r.includes('manager') || 
-      r.includes('admin') || 
-      r.includes('gm') ||
-      r.includes('head') ||
-      r.includes('marketing') ||
-      r.includes('yulie') ||
-      r.includes('yuli') ||
-      name.includes('yulie') ||
-      name.includes('yuli') ||
-      email.includes('yulie') ||
-      email.includes('yuli')
-    );
+
+    // 1. Direktur Utama & Super Admin (Ahmad Rafail, Yazid Hizbullah)
+    const isDirectorOrAdmin = r.includes('super admin') || r.includes('direktur');
+
+    // 2. General Manager (Adhi Himawan)
+    const isGeneralManager = r.includes('general manager') || r === 'manager' || r.includes('gm');
+
+    // 3. Head Marketing (Bu Yulieka Rachmawati) - Pastikan bukan staf marketing lain (Fresda, Amanda, Bambang)
+    const isHeadMarketing = (r.includes('head marketing') || name.includes('yulie') || name.includes('yuli') || email.includes('yulie')) && !r.includes('staf');
+
+    return isDirectorOrAdmin || isGeneralManager || isHeadMarketing;
   };
 
   const isBoss = isManagerOrDirectorOrAdmin();
@@ -267,14 +265,26 @@ export const TodoAttendanceModule = () => {
   const [selectedPhotoAtt, setSelectedPhotoAtt] = useState(null);
   const [isDetailPhotoModalOpen, setIsDetailPhotoModalOpen] = useState(false);
 
-  // STRICT TASK VISIBILITY FILTERING
+  // STRICT TASK VISIBILITY FILTERING:
+  // - Pimpinan (Direktur Utama, General Manager, Bu Yulieka): Memantau seluruh task proyek
+  // - Staf Karyawan Lainnya: HANYA BISA MELIHAT TUGASNYA SENDIRI (Tidak bisa melihat tugas orang lain)
   const visibleTodos = todos.filter((t) => {
     if (isBoss) return true;
     if (!currentUser) return false;
     
-    const cleanEmpName = (currentUser.name || '').split(',')[0].toLowerCase().trim();
-    const cleanAssignee = (t.assignee || '').split(',')[0].toLowerCase().trim();
-    return cleanAssignee.includes(cleanEmpName) || cleanEmpName.includes(cleanAssignee);
+    const userFullName = (currentUser.name || '').toLowerCase().trim();
+    const taskAssignee = (t.assignee || '').toLowerCase().trim();
+    
+    const cleanUserName = userFullName.split(',')[0].trim();
+    const cleanAssignee = taskAssignee.split(',')[0].trim();
+    const userFirstName = cleanUserName.split(' ')[0];
+    
+    return (
+      cleanAssignee === cleanUserName ||
+      cleanAssignee.includes(cleanUserName) ||
+      cleanUserName.includes(cleanAssignee) ||
+      (userFirstName.length >= 3 && cleanAssignee.includes(userFirstName))
+    );
   });
 
   const handleToggleTodo = (id) => {
@@ -291,7 +301,7 @@ export const TodoAttendanceModule = () => {
   const handleAddTodo = (e) => {
     e.preventDefault();
     if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Manager, Direktur Utama, atau Super Admin yang berhak menugaskan To-Do List!`, 'danger');
+      showNotification(`Akses Terbatas: Hanya Direktur Utama, General Manager, atau Bu Yulieka (Head Marketing) yang berhak menugaskan To-Do List!`, 'danger');
       return;
     }
     if (!newTodoText.trim()) return;
@@ -610,7 +620,7 @@ export const TodoAttendanceModule = () => {
             <input
               type="text"
               className="form-control"
-              placeholder={isBoss ? "Ketikkan tugas baru yang ditugaskan kepada staf..." : "Hanya Manager, Direktur, & Head Marketing (Bu Yulieka) yang dapat menambah tugas..."}
+              placeholder={isBoss ? "Ketikkan tugas baru yang ditugaskan kepada staf..." : "Hanya Direktur Utama, GM, & Bu Yulieka (Head Marketing) yang berhak menambah tugas..."}
               value={newTodoText}
               onChange={(e) => setNewTodoText(e.target.value)}
               style={{ flex: 1, minWidth: '220px' }}
