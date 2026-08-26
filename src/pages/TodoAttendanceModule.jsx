@@ -41,7 +41,11 @@ import {
   Users,
   Briefcase,
   Layers,
-  ArrowRight
+  ArrowRight,
+  MessageSquare,
+  Share2,
+  ExternalLink,
+  PhoneCall
 } from 'lucide-react';
 
 export const TodoAttendanceModule = () => {
@@ -282,6 +286,62 @@ export const TodoAttendanceModule = () => {
   const [insKordinasi, setInsKordinasi] = useState('');
   const [insAssignee, setInsAssignee] = useState(() => (safeUsers[0]?.name || 'Syamsul Dahari'));
   const [insPriority, setInsPriority] = useState('Tinggi');
+  const [autoSendWa, setAutoSendWa] = useState(true);
+
+  // Pak Yazid Official WhatsApp Phone Number (Configurable & Persistent)
+  const [yazidWaNumber, setYazidWaNumber] = useState(() => {
+    try {
+      return localStorage.getItem('ams_yazid_wa_phone') || '6281288889999';
+    } catch (e) {
+      return '6281288889999';
+    }
+  });
+  const [isWaConfigOpen, setIsWaConfigOpen] = useState(false);
+  const [tempWaNumber, setTempWaNumber] = useState(yazidWaNumber);
+
+  const handleSaveWaNumber = (e) => {
+    e.preventDefault();
+    let clean = tempWaNumber.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0')) clean = '62' + clean.slice(1);
+    if (!clean.startsWith('62')) clean = '62' + clean;
+    setYazidWaNumber(clean);
+    try {
+      localStorage.setItem('ams_yazid_wa_phone', clean);
+    } catch (e) {}
+    showNotification(`Nomor WhatsApp Pak Yazid (+${clean}) berhasil disimpan!`, 'success');
+    setIsWaConfigOpen(false);
+  };
+
+  // Direct WhatsApp Sender Helper to Pak Yazid
+  const handleSendToYazidWhatsApp = (ins, customNote = null) => {
+    let cleanPhone = (yazidWaNumber || '6281288889999').replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+    if (!cleanPhone.startsWith('62')) cleanPhone = '62' + cleanPhone;
+
+    const isSelesai = ins.status === 'Selesai';
+    const statusHeader = isSelesai ? '✅ LAPORAN PENYELESAIAN TUGAS' : '📢 NOTIFIKASI INSTRUKSI PEKERJAAN';
+
+    const msg = `*${statusHeader}*
+*ASHOKA PROPERTY MANAGEMENT SYSTEM*
+--------------------------------------------------
+📌 *No. Instruksi:* ${ins.id}
+📅 *Tanggal Diterbitkan:* ${ins.date}
+⏰ *Batas Waktu (Deadline):* ${ins.dueDate} pk ${ins.dueTime || '17:00'} WIB
+📜 *Uraian Instruksi:* 
+"${ins.instruction}"
+
+🤝 *Koordinasi:* ${ins.kordinasi || '-'}
+👤 *Ditugaskan Kepada (PIC):* ${ins.assignee}
+🏢 *Pemberi Instruksi:* ${ins.assignedBy || 'Direktur Utama'}
+🚩 *Prioritas:* ${ins.priority || 'Tinggi'}
+📊 *Status Saat Ini:* ${isSelesai ? '✅ SELESAI (DONE)' : '⏳ DALAM PROSES / PENDING'}
+${ins.reportNotes || customNote ? `\n📝 *Bukti Hasil Tindak Lanjut:*\n"${customNote || ins.reportNotes}"\n⏱️ Waktu Selesai: ${ins.completionDate || 'Hari ini'}\n` : ''}--------------------------------------------------
+_Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
+
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, '_blank');
+    showNotification(`Membuka WhatsApp ke Pak Yazid (+${cleanPhone})...`, 'info');
+  };
 
   // Modal Input Tindak Lanjut / Laporan Penyelesaian Staf
   const [isActionReportModalOpen, setIsActionReportModalOpen] = useState(false);
@@ -325,6 +385,7 @@ export const TodoAttendanceModule = () => {
     setInsKordinasi('');
     setInsAssignee(safeUsers[0]?.name || 'Syamsul Dahari');
     setInsPriority('Tinggi');
+    setAutoSendWa(true);
     setIsInstructionModalOpen(true);
   };
 
@@ -388,6 +449,10 @@ export const TodoAttendanceModule = () => {
       };
       setInstructions([newIns, ...safeInstructions]);
       showNotification(`INSTRUKSI PEKERJAAN DITERBITKAN! Ditugaskan resmi kepada ${newIns.assignee}.`, 'success');
+
+      if (autoSendWa) {
+        handleSendToYazidWhatsApp(newIns);
+      }
     }
 
     setIsInstructionModalOpen(false);
@@ -415,20 +480,25 @@ export const TodoAttendanceModule = () => {
     if (!selectedInstructionForAction) return;
 
     const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const updatedIns = {
+      ...selectedInstructionForAction,
+      status: 'Selesai',
+      reportNotes: actionReportText.trim(),
+      completionDate: nowStr
+    };
+
     setInstructions(safeInstructions.map(ins => {
       if (ins.id === selectedInstructionForAction.id) {
-        return {
-          ...ins,
-          status: 'Selesai',
-          reportNotes: actionReportText.trim(),
-          completionDate: nowStr
-        };
+        return updatedIns;
       }
       return ins;
     }));
 
-    showNotification(`Laporan bukti tindak lanjut untuk "${selectedInstructionForAction.instruction}" berhasil dikirim & ditandai selesai!`, 'success');
+    showNotification(`Laporan bukti tindak lanjut berhasil disimpan & langsung diarahkan ke WhatsApp Pak Yazid!`, 'success');
     setIsActionReportModalOpen(false);
+
+    // Otomatis buka WhatsApp Pak Yazid
+    handleSendToYazidWhatsApp(updatedIns, actionReportText.trim());
   };
 
   // -----------------------------------------------------------------
@@ -1096,7 +1166,7 @@ export const TodoAttendanceModule = () => {
         <div className="glass-card" style={{ padding: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Briefcase size={22} color="#38BDF8" /> Instruksi & Penugasan Resmi Pimpinan
                 </h3>
@@ -1109,6 +1179,9 @@ export const TodoAttendanceModule = () => {
                     <UserCheck size={12} /> Menampilkan Tugas Untuk: {currentUser?.name}
                   </span>
                 )}
+                <span className="badge badge-success" style={{ fontSize: '0.72rem', background: 'rgba(37, 211, 102, 0.15)', color: '#25D366', border: '1px solid #25D366' }}>
+                  📲 WA Pak Yazid Terhubung (+{yazidWaNumber})
+                </span>
               </div>
               <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>
                 {isBoss
@@ -1117,15 +1190,26 @@ export const TodoAttendanceModule = () => {
               </p>
             </div>
 
-            {isBoss && (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <button 
-                className="btn btn-primary"
-                onClick={handleOpenAddInstructionModal}
-                style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800 }}
+                className="btn btn-secondary btn-sm"
+                onClick={() => { setTempWaNumber(yazidWaNumber); setIsWaConfigOpen(true); }}
+                style={{ fontSize: '0.75rem', height: '38px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                title="Ubah nomor WhatsApp tujuan Pak Yazid"
               >
-                <Plus size={16} /> + Terbitkan Instruksi Baru
+                <PhoneCall size={14} color="#25D366" /> No. WA Pak Yazid (+{yazidWaNumber})
               </button>
-            )}
+
+              {isBoss && (
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleOpenAddInstructionModal}
+                  style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800, height: '38px' }}
+                >
+                  <Plus size={16} /> + Terbitkan Instruksi Baru
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Sub-Filter Tab Selector untuk Instruksi */}
@@ -1170,16 +1254,17 @@ export const TodoAttendanceModule = () => {
                   <th style={{ width: '110px', padding: '0.85rem 1rem', fontWeight: 800 }}>No. & Tanggal</th>
                   <th style={{ width: '150px', padding: '0.85rem 1rem', fontWeight: 800, color: '#EF4444' }}>Batas Waktu (Deadline)</th>
                   <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Uraian Instruksi Pekerjaan</th>
-                  <th style={{ width: '180px', padding: '0.85rem 1rem', fontWeight: 800 }}>Ditugaskan Kepada</th>
-                  <th style={{ width: '180px', padding: '0.85rem 1rem', fontWeight: 800 }}>Pemberi Instruksi</th>
-                  <th style={{ width: '150px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Status & Laporan</th>
-                  {isBoss && <th style={{ width: '90px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Aksi</th>}
+                  <th style={{ width: '160px', padding: '0.85rem 1rem', fontWeight: 800 }}>Ditugaskan Kepada</th>
+                  <th style={{ width: '160px', padding: '0.85rem 1rem', fontWeight: 800 }}>Pemberi Instruksi</th>
+                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Status & Laporan</th>
+                  <th style={{ width: '130px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center', color: '#25D366' }}>Lapor WA Pak Yazid</th>
+                  {isBoss && <th style={{ width: '80px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
                 {visibleInstructions.length === 0 ? (
                   <tr>
-                    <td colSpan={isBoss ? 7 : 6} style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                    <td colSpan={isBoss ? 8 : 7} style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
                       <CheckCircle2 size={36} color="var(--success)" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
                       <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
                         Tidak Ada Instruksi Pekerjaan
@@ -1266,7 +1351,31 @@ export const TodoAttendanceModule = () => {
                           )}
                         </td>
 
-                        {/* 7. Aksi (Pimpinan) */}
+                        {/* 7. Direct WhatsApp Button to Pak Yazid */}
+                        <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
+                          <button
+                            className="btn btn-sm"
+                            onClick={() => handleSendToYazidWhatsApp(ins)}
+                            style={{ 
+                              background: '#25D366', 
+                              color: '#FFFFFF', 
+                              fontWeight: 800, 
+                              fontSize: '0.72rem',
+                              padding: '0.35rem 0.6rem',
+                              border: 'none',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              boxShadow: '0 2px 4px rgba(37, 211, 102, 0.3)'
+                            }}
+                            title={`Kirim laporan instruksi ini langsung ke WhatsApp Pak Yazid (+${yazidWaNumber})`}
+                          >
+                            <MessageSquare size={13} /> Kirim ke WA
+                          </button>
+                        </td>
+
+                        {/* 8. Aksi (Pimpinan) */}
                         {isBoss && (
                           <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
                             <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
@@ -1594,11 +1703,25 @@ export const TodoAttendanceModule = () => {
                     </select>
                   </div>
                 </div>
+
+                {/* WhatsApp Auto-Send Option */}
+                <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(37, 211, 102, 0.1)', borderRadius: '8px', border: '1px solid rgba(37, 211, 102, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', margin: 0, fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    <input
+                      type="checkbox"
+                      checked={autoSendWa}
+                      onChange={(e) => setAutoSendWa(e.target.checked)}
+                      style={{ width: '16px', height: '16px', accentColor: '#25D366' }}
+                    />
+                    📲 Buka WhatsApp Pak Yazid (+{yazidWaNumber}) Langsung
+                  </label>
+                  <span style={{ fontSize: '0.72rem', color: '#25D366', fontWeight: 800 }}>Otomatis</span>
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsInstructionModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800 }}>
-                  <Send size={15} /> {editingInstructionItem ? 'Simpan Perubahan' : 'Terbitkan Instruksi Sekarang'}
+                  <Send size={15} /> {editingInstructionItem ? 'Simpan Perubahan' : 'Terbitkan & Kirim ke WA Pak Yazid'}
                 </button>
               </div>
             </form>
@@ -1611,7 +1734,7 @@ export const TodoAttendanceModule = () => {
       {/* ------------------------------------------------------------- */}
       {isActionReportModalOpen && selectedInstructionForAction && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px' }}>
+          <div className="modal-content" style={{ maxWidth: '540px' }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Send size={20} color="#10B981" /> Laporan Penyelesaian Instruksi Pekerjaan
@@ -1622,7 +1745,7 @@ export const TodoAttendanceModule = () => {
             </div>
             <form onSubmit={handleSaveActionReport}>
               <div className="modal-body">
-                <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', marginBottom: '0.75rem' }}>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>INSTRUKSI PIMPINAN:</div>
                   <div style={{ fontWeight: 800, fontSize: '0.925rem', color: 'var(--text-main)', marginTop: '2px' }}>
                     {selectedInstructionForAction.instruction}
@@ -1632,7 +1755,7 @@ export const TodoAttendanceModule = () => {
                   </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <label className="form-label" style={{ fontWeight: 800 }}>Uraian Bukti Hasil Tindak Lanjut & Keterangan Selesai</label>
                   <textarea
                     rows="4"
@@ -1643,11 +1766,62 @@ export const TodoAttendanceModule = () => {
                     required
                   />
                 </div>
+
+                <div style={{ padding: '0.65rem 0.85rem', background: 'rgba(37, 211, 102, 0.12)', borderRadius: '8px', border: '1px solid rgba(37, 211, 102, 0.3)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-main)' }}>
+                  <MessageSquare size={16} color="#25D366" />
+                  <div>
+                    Laporan ini akan <strong>otomatis langsung diteruskan ke WhatsApp Pak Yazid</strong> (+{yazidWaNumber}) saat Anda menekan tombol di bawah.
+                  </div>
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsActionReportModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}>
-                  <Check size={16} /> Simpan & Tandai Selesai
+                  <Check size={16} /> Simpan & Kirim ke WA Pak Yazid
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: PENGATURAN NOMOR WHATSAPP PAK YAZID                     */}
+      {/* ------------------------------------------------------------- */}
+      {isWaConfigOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '460px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <PhoneCall size={20} color="#25D366" /> Atur Nomor WhatsApp Pak Yazid
+              </h3>
+              <button onClick={() => setIsWaConfigOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveWaNumber}>
+              <div className="modal-body">
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                  Masukkan nomor WhatsApp resmi Pak Yazid (Direktur Utama) yang akan menerima laporan hasil kerja dan notifikasi instruksi pekerjaan staf secara otomatis.
+                </p>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800 }}>Nomor WhatsApp (Awali 62 atau 08)</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: 081288889999 atau 6281288889999"
+                    value={tempWaNumber}
+                    onChange={(e) => setTempWaNumber(e.target.value)}
+                    required
+                    style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.5px' }}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsWaConfigOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', border: 'none', fontWeight: 800 }}>
+                  <Check size={16} /> Simpan Nomor WA
                 </button>
               </div>
             </form>
