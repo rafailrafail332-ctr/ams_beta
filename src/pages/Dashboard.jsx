@@ -31,43 +31,32 @@ import {
 } from 'lucide-react';
 
 export const Dashboard = ({ setCurrentTab }) => {
-  const { units, addUnit, updateUnit, deleteUnit, currentUser, showNotification } = useApp();
+  const { units, addUnit, updateUnit, deleteUnit, currentUser, showNotification, workingHours, updateWorkingHours } = useApp();
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docType, setDocType] = useState('BATP');
 
   // -------------------------------------------------------------
-  // 1. WORKING HOURS (CRUD)
+  // 1. WORKING HOURS FORM & MODAL STATE
   // -------------------------------------------------------------
-  const initialWorkingHours = {
-    status: 'Jam Kerja Operasional Berlangsung (OPEN)',
-    isOpen: true,
-    headOffice: { hours: '08:00 - 17:00 WIB', days: 'Senin - Jumat • Toleransi 15m' },
-    siteOffice: { hours: '07:30 - 16:30 WIB', days: 'Senin - Sabtu • Overtime 2.0x' },
-    security: { hours: '24 Jam (3 Rotasi Shift)', days: '7 Hari / Minggu • Siaga Pos' }
-  };
-
-  const [workingHours, setWorkingHours] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_working_hours_v2');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return initialWorkingHours;
-  });
+  const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
+  const [hoursForm, setHoursForm] = useState(() => JSON.parse(JSON.stringify(workingHours || {})));
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_working_hours_v2', JSON.stringify(workingHours));
-    } catch (e) {}
+    if (workingHours) {
+      setHoursForm(JSON.parse(JSON.stringify(workingHours)));
+    }
   }, [workingHours]);
 
-  const [isHoursModalOpen, setIsHoursModalOpen] = useState(false);
-  const [hoursForm, setHoursForm] = useState(workingHours);
+  const handleOpenHoursModal = () => {
+    setHoursForm(JSON.parse(JSON.stringify(workingHours)));
+    setIsHoursModalOpen(true);
+  };
 
   const handleSaveWorkingHours = (e) => {
     e.preventDefault();
-    setWorkingHours(hoursForm);
-    showNotification('Jadwal Jam Kerja Operasional berhasil diperbarui!');
+    updateWorkingHours(hoursForm);
+    showNotification('Jadwal Jam Kerja Operasional berhasil diperbarui & disimpan permanen!', 'success');
     setIsHoursModalOpen(false);
   };
 
@@ -297,7 +286,7 @@ export const Dashboard = ({ setCurrentTab }) => {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => { setHoursForm(workingHours); setIsHoursModalOpen(true); }}>
+          <button className="btn btn-secondary" onClick={handleOpenHoursModal}>
             <Clock size={16} /> Edit Jam Kerja Operasional
           </button>
           <button className="btn btn-primary" onClick={() => handleOpenDocGen('BATP')}>
@@ -322,7 +311,7 @@ export const Dashboard = ({ setCurrentTab }) => {
             <span className={`badge ${workingHours.isOpen ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.825rem', padding: '0.4rem 0.8rem' }}>
               {workingHours.isOpen ? <CheckCircle2 size={14} /> : <ShieldAlert size={14} />} {workingHours.status}
             </span>
-            <button className="btn btn-secondary btn-sm" onClick={() => { setHoursForm(workingHours); setIsHoursModalOpen(true); }}>
+            <button className="btn btn-secondary btn-sm" onClick={handleOpenHoursModal}>
               <Edit3 size={13} /> Edit Jam Kerja
             </button>
           </div>

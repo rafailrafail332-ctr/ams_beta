@@ -539,6 +539,43 @@ export const AppProvider = ({ children }) => {
     showNotification(`UNIT DIHAPUS! Data Unit ${target?.unitNo || id} berhasil dihapus dari sistem.`, 'warning');
   };
 
+  // -------------------------------------------------------------
+  // OPERATIONAL WORKING HOURS (GLOBAL PERSISTENT STORE)
+  // -------------------------------------------------------------
+  const initialWorkingHours = {
+    status: 'Jam Kerja Operasional Berlangsung (OPEN)',
+    isOpen: true,
+    headOffice: { hours: '08:00 - 17:00 WIB', days: 'Senin - Jumat • Toleransi 15m' },
+    siteOffice: { hours: '07:30 - 16:30 WIB', days: 'Senin - Sabtu • Overtime 2.0x' },
+    security: { hours: '24 Jam (3 Rotasi Shift)', days: '7 Hari / Minggu • Siaga Pos' }
+  };
+
+  const [workingHours, setWorkingHours] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_working_hours_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && parsed.headOffice && parsed.siteOffice && parsed.security) {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return initialWorkingHours;
+  });
+
+  const updateWorkingHours = (newHours) => {
+    setWorkingHours(newHours);
+    try {
+      localStorage.setItem('ams_working_hours_v2', JSON.stringify(newHours));
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_working_hours_v2', JSON.stringify(workingHours));
+    } catch (e) {}
+  }, [workingHours]);
+
   const canAccessModule = (moduleKey, userOverride = null) => {
     const user = userOverride || currentUser;
     if (!user) return false;
@@ -623,7 +660,10 @@ export const AppProvider = ({ children }) => {
         deleteUtility,
         notifications,
         showNotification,
-        canAccessModule
+        canAccessModule,
+        workingHours,
+        setWorkingHours,
+        updateWorkingHours
       }}
     >
       {children}
