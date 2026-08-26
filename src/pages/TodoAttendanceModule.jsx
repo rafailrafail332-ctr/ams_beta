@@ -289,21 +289,10 @@ export const TodoAttendanceModule = () => {
     e.preventDefault();
     if (!newLaporan.trim()) return;
 
-    let targetUser;
-    let finalPic;
-    let finalPicId;
-    let finalAssignedBy;
-
-    if (isBoss) {
-      targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers[0];
-      finalPic = targetUser ? targetUser.name : newPic;
-      finalPicId = targetUser ? targetUser.id : '';
-      finalAssignedBy = `${currentUser?.name} (${currentUser?.role})`;
-    } else {
-      finalPic = currentUser?.name || 'Staf';
-      finalPicId = currentUser?.id || '';
-      finalAssignedBy = `${currentUser?.name} (Laporan Mandiri)`;
-    }
+    let targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers.find(u => u.name === currentUser?.name) || safeUsers[0];
+    let finalPic = targetUser ? targetUser.name : newPic;
+    let finalPicId = targetUser ? targetUser.id : '';
+    let finalAssignedBy = isBoss ? `${currentUser?.name} (${currentUser?.role})` : `${currentUser?.name} (Staf)`;
 
     if (editingReportItem) {
       setTodos(safeTodos.map(t => {
@@ -315,9 +304,9 @@ export const TodoAttendanceModule = () => {
             laporan: newLaporan.trim(),
             text: newLaporan.trim(),
             kordinasi: newKordinasi.trim(),
-            pic: isBoss ? finalPic : t.pic,
-            assignee: isBoss ? finalPic : t.assignee,
-            picId: isBoss ? finalPicId : t.picId,
+            pic: finalPic,
+            assignee: finalPic,
+            picId: finalPicId,
             priority: newPriority,
             photo: reportPhoto || t.photo || null
           };
@@ -1726,42 +1715,72 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>👤 PIC (Person In Charge)</label>
-                    {isBoss ? (
-                      <select
-                        className="form-control"
-                        value={newPic}
-                        onChange={(e) => setNewPic(e.target.value)}
-                        required
-                      >
-                        {safeUsers.map(u => (
-                          <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={`${currentUser?.name || ''} (${currentUser?.role || ''})`}
-                        readOnly
-                        style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: '#38BDF8', fontWeight: 700 }}
-                      />
-                    )}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, margin: 0 }}>
+                      👤 PIC Pelaksana & Tujuan Laporan (Klik Nama Karyawan)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700 }}>
+                      🎯 Terpilih: {newPic}
+                    </span>
                   </div>
-                  <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>🚩 Prioritas</label>
-                    <select
-                      className="form-control"
-                      value={newPriority}
-                      onChange={(e) => setNewPriority(e.target.value)}
-                    >
-                      <option value="Tinggi">🔴 Tinggi</option>
-                      <option value="Sedang">🟡 Sedang</option>
-                      <option value="Rendah">🟢 Rendah</option>
-                    </select>
+
+                  {/* Select Dropdown */}
+                  <select
+                    className="form-control"
+                    value={newPic}
+                    onChange={(e) => setNewPic(e.target.value)}
+                    required
+                    style={{ marginBottom: '0.4rem', fontWeight: 700, borderColor: '#38BDF8' }}
+                  >
+                    {safeUsers.map(u => (
+                      <option key={u.id} value={u.name}>{u.name} — {u.role}</option>
+                    ))}
+                  </select>
+
+                  {/* Clickable Quick Employee Pills Grid */}
+                  <div style={{ maxHeight: '115px', overflowY: 'auto', padding: '6px', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                    {safeUsers.map(u => {
+                      const isSelected = newPic === u.name;
+                      return (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => setNewPic(u.name)}
+                          style={{
+                            background: isSelected ? 'linear-gradient(135deg, #38BDF8, #0284C7)' : 'rgba(255,255,255,0.06)',
+                            color: isSelected ? '#0F172A' : 'var(--text-main)',
+                            border: isSelected ? '1.5px solid #38BDF8' : '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            padding: '3px 8px',
+                            fontSize: '0.72rem',
+                            fontWeight: isSelected ? 900 : 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span>👤</span> {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
+                          {isSelected && <Check size={11} strokeWidth={3} />}
+                        </button>
+                      );
+                    })}
                   </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🚩 Prioritas</label>
+                  <select
+                    className="form-control"
+                    value={newPriority}
+                    onChange={(e) => setNewPriority(e.target.value)}
+                  >
+                    <option value="Tinggi">🔴 Tinggi</option>
+                    <option value="Sedang">🟡 Sedang</option>
+                    <option value="Rendah">🟢 Rendah</option>
+                  </select>
                 </div>
 
                 {/* Upload Foto Bukti Pekerjaan */}
@@ -1947,32 +1966,72 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>👤 Ditugaskan Kepada (Staf PIC)</label>
-                    <select
-                      className="form-control"
-                      value={insAssignee}
-                      onChange={(e) => setInsAssignee(e.target.value)}
-                      required
-                    >
-                      {safeUsers.map(u => (
-                        <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
-                      ))}
-                    </select>
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, margin: 0 }}>
+                      👤 Ditugaskan Kepada / Tujuan Instruksi (Klik Nama Karyawan)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700 }}>
+                      🎯 Terpilih: {insAssignee}
+                    </span>
                   </div>
-                  <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>🚩 Tingkat Prioritas</label>
-                    <select
-                      className="form-control"
-                      value={insPriority}
-                      onChange={(e) => setInsPriority(e.target.value)}
-                    >
-                      <option value="Tinggi">🔴 Tinggi (Urgent)</option>
-                      <option value="Sedang">🟡 Sedang</option>
-                      <option value="Rendah">🟢 Rendah</option>
-                    </select>
+
+                  {/* Select Dropdown */}
+                  <select
+                    className="form-control"
+                    value={insAssignee}
+                    onChange={(e) => setInsAssignee(e.target.value)}
+                    required
+                    style={{ marginBottom: '0.4rem', fontWeight: 700, borderColor: '#38BDF8' }}
+                  >
+                    {safeUsers.map(u => (
+                      <option key={u.id} value={u.name}>{u.name} — {u.role}</option>
+                    ))}
+                  </select>
+
+                  {/* Clickable Quick Employee Pills Grid */}
+                  <div style={{ maxHeight: '115px', overflowY: 'auto', padding: '6px', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                    {safeUsers.map(u => {
+                      const isSelected = insAssignee === u.name;
+                      return (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => setInsAssignee(u.name)}
+                          style={{
+                            background: isSelected ? 'linear-gradient(135deg, #38BDF8, #0284C7)' : 'rgba(255,255,255,0.06)',
+                            color: isSelected ? '#0F172A' : 'var(--text-main)',
+                            border: isSelected ? '1.5px solid #38BDF8' : '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            padding: '3px 8px',
+                            fontSize: '0.72rem',
+                            fontWeight: isSelected ? 900 : 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span>👤</span> {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
+                          {isSelected && <Check size={11} strokeWidth={3} />}
+                        </button>
+                      );
+                    })}
                   </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🚩 Tingkat Prioritas</label>
+                  <select
+                    className="form-control"
+                    value={insPriority}
+                    onChange={(e) => setInsPriority(e.target.value)}
+                  >
+                    <option value="Tinggi">🔴 Tinggi (Urgent)</option>
+                    <option value="Sedang">🟡 Sedang</option>
+                    <option value="Rendah">🟢 Rendah</option>
+                  </select>
                 </div>
 
                 {/* WhatsApp Auto-Send Option */}
