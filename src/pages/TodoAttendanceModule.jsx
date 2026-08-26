@@ -136,8 +136,34 @@ export const TodoAttendanceModule = () => {
 
   // Active Date Selector (Format: YYYY-MM-DD)
   const todayDateStr = new Date().toISOString().split('T')[0];
-  const [selectedDateFilter, setSelectedDateFilter] = useState(todayDateStr);
+  const [startDateFilter, setStartDateFilter] = useState(todayDateStr);
+  const [endDateFilter, setEndDateFilter] = useState(todayDateStr);
   const [showAllDates, setShowAllDates] = useState(false);
+
+  // Quick Preset Handlers for Date Range
+  const handleSetDateToday = () => {
+    setStartDateFilter(todayDateStr);
+    setEndDateFilter(todayDateStr);
+    setShowAllDates(false);
+  };
+
+  const handleSetDate7Days = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    const pastStr = d.toISOString().split('T')[0];
+    setStartDateFilter(pastStr);
+    setEndDateFilter(todayDateStr);
+    setShowAllDates(false);
+  };
+
+  const handleSetDateThisMonth = () => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    setStartDateFilter(firstDay);
+    setEndDateFilter(lastDay);
+    setShowAllDates(false);
+  };
 
   // -----------------------------------------------------------------
   // 1. STATE & HANDLERS UNTUK TAB 1: LAPORAN PEKERJAAN HARIAN
@@ -270,12 +296,13 @@ export const TodoAttendanceModule = () => {
     return false;
   };
 
-  // FILTERED REPORTS: By Date, By PIC, By Division, By Status, and By Related Employee Name
+  // FILTERED REPORTS: By Date Range, By PIC, By Division, By Status, and By Related Employee Name
   const visibleReports = safeTodos.filter((t) => {
-    if (!showAllDates && selectedDateFilter) {
-      const taskDate = t.date || t.assignDate;
-      if (taskDate && taskDate !== selectedDateFilter) {
-        return false;
+    if (!showAllDates) {
+      const taskDate = t.date || t.assignDate || '';
+      if (taskDate) {
+        if (startDateFilter && taskDate < startDateFilter) return false;
+        if (endDateFilter && taskDate > endDateFilter) return false;
       }
     }
 
@@ -314,7 +341,7 @@ export const TodoAttendanceModule = () => {
 
   const handleOpenAddReportModal = () => {
     setEditingReportItem(null);
-    setNewDate(selectedDateFilter || todayDateStr);
+    setNewDate(endDateFilter || todayDateStr);
     setNewWaktu('08:00 - 10:00');
     setNewLaporan('');
     setNewKordinasi('');
@@ -1112,49 +1139,84 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
 
           {/* TOP CONTROLS & DATE SELECTOR */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-            {/* Box Header Tanggal */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            {/* Box Header Rentang Tanggal */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', background: 'rgba(234, 179, 8, 0.08)', padding: '0.4rem 0.65rem', borderRadius: '8px', border: '1px solid rgba(234, 179, 8, 0.25)' }}>
               <div style={{
                 background: '#FDE047',
                 color: '#1E293B',
                 fontWeight: 900,
-                fontSize: '0.9rem',
-                padding: '0.45rem 0.85rem',
+                fontSize: '0.85rem',
+                padding: '0.3rem 0.6rem',
                 borderRadius: '6px',
                 border: '1.5px solid #EAB308',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem'
+                gap: '0.35rem'
               }}>
-                <Calendar size={16} /> Tanggal :
+                <Calendar size={15} /> Rentang Tanggal:
               </div>
 
-              <input
-                type="date"
-                className="form-control"
-                value={selectedDateFilter}
-                onChange={(e) => {
-                  setSelectedDateFilter(e.target.value);
-                  setShowAllDates(false);
-                }}
-                style={{ width: '150px', height: '36px', fontWeight: 700, fontSize: '0.875rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>Dari:</span>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={startDateFilter}
+                  onChange={(e) => {
+                    setStartDateFilter(e.target.value);
+                    setShowAllDates(false);
+                  }}
+                  style={{ width: '135px', height: '34px', fontWeight: 700, fontSize: '0.8rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
+                />
+              </div>
 
-              <button 
-                className={`btn btn-sm ${!showAllDates && selectedDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => { setSelectedDateFilter(todayDateStr); setShowAllDates(false); }}
-                style={{ height: '36px', fontSize: '0.8rem' }}
-              >
-                Hari Ini
-              </button>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#EAB308' }}>s/d</span>
 
-              <button 
-                className={`btn btn-sm ${showAllDates ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setShowAllDates(!showAllDates)}
-                style={{ height: '36px', fontSize: '0.8rem' }}
-              >
-                {showAllDates ? '✓ Semua Tanggal' : 'Semua Tanggal'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>Sampai:</span>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={endDateFilter}
+                  onChange={(e) => {
+                    setEndDateFilter(e.target.value);
+                    setShowAllDates(false);
+                  }}
+                  style={{ width: '135px', height: '34px', fontWeight: 700, fontSize: '0.8rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
+                />
+              </div>
+
+              {/* Quick Presets */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <button 
+                  className={`btn btn-sm ${!showAllDates && startDateFilter === todayDateStr && endDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={handleSetDateToday}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                >
+                  Hari Ini
+                </button>
+                <button 
+                  className={`btn btn-sm ${!showAllDates && startDateFilter !== todayDateStr && startDateFilter !== endDateFilter ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={handleSetDate7Days}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                >
+                  7 Hari
+                </button>
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleSetDateThisMonth}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                >
+                  Bulan Ini
+                </button>
+                <button 
+                  className={`btn btn-sm ${showAllDates ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setShowAllDates(!showAllDates)}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                >
+                  {showAllDates ? '✓ Semua' : 'Semua'}
+                </button>
+              </div>
             </div>
 
             {/* Filter PIC, Divisi & Tambah Baris */}
