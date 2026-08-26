@@ -83,9 +83,11 @@ export const CustomerRelationModule = () => {
     }
   }, [activeSubTab]);
 
-  // Search Filter States across all Customer Relation Tabs
+  // Search & Project/Date Filter States across Customer Relation Tabs
   const [searchTicket, setSearchTicket] = useState('');
   const [searchHandover, setSearchHandover] = useState('');
+  const [stkProjectFilter, setStkProjectFilter] = useState('ALL');
+  const [stkDateFilter, setStkDateFilter] = useState('');
   const [searchCsat, setSearchCsat] = useState('');
   const [searchIpl, setSearchIpl] = useState('');
   const [searchDoc, setSearchDoc] = useState('');
@@ -1119,7 +1121,7 @@ export const CustomerRelationModule = () => {
           <Wrench size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Keluhan & Garansi Retensi ({tickets.length})
         </button>
         <button className={`tab-item ${activeTab === 'handover' ? 'active' : ''}`} onClick={() => setActiveTab('handover')}>
-          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. BAST & PLN/PDAM ({handovers.length})
+          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. STK ({handovers.length})
         </button>
         <button className={`tab-item ${activeTab === 'csat' ? 'active' : ''}`} onClick={() => setActiveTab('csat')}>
           <Star size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Survei CSAT & Referal ({reviews.length})
@@ -1297,18 +1299,42 @@ export const CustomerRelationModule = () => {
         );
       })()}
 
-      {/* PILAR 2: BAST SERAH TERIMA & UTILITIES (FULL CRUD) */}
+      {/* PILAR 2: STK (SERAH TERIMA KUNCI) & CHECKLIST FISIK */}
       {activeTab === 'handover' && (() => {
-        const filteredHandovers = handovers.filter(h => !searchHandover || [h.id, h.unitNo, h.customerName, h.cluster, h.bastDate, h.statusPLN, h.statusPDAM, h.statusBAST, h.meteranPLNNo, h.meteranPDAMNo].some(val => (val || '').toLowerCase().includes(searchHandover.toLowerCase().trim())));
+        const filteredHandovers = handovers.filter(h => {
+          // 1. Search text filter
+          const matchSearch = !searchHandover || [
+            h.id, h.unitNo, h.customerName, h.cluster, h.proyek, h.tglStk, h.bastDate, h.blok, h.no, h.type, h.lbLt, h.phone,
+            h.statusBAST, h.notes
+          ].some(val => (val || '').toLowerCase().includes(searchHandover.toLowerCase().trim()));
+
+          // 2. Project filter
+          const pStr = (h.proyek || h.cluster || '').toLowerCase();
+          const matchProject = stkProjectFilter === 'ALL' || (
+            stkProjectFilter === 'Ashoka Park' ? pStr.includes('park') || pStr.includes('emerald') :
+            stkProjectFilter === 'Ashoka View' ? pStr.includes('view') || pStr.includes('sapphire') :
+            pStr.includes(stkProjectFilter.toLowerCase())
+          );
+
+          // 3. Date filter
+          let matchDate = true;
+          if (stkDateFilter) {
+            const rawDate = h.tglStk || h.bastDate || '';
+            matchDate = rawDate.includes(stkDateFilter) || (h.tglStk && h.tglStk === stkDateFilter);
+          }
+
+          return matchSearch && matchProject && matchDate;
+        });
+
         return (
           <div className="glass-card">
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '1rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <KeyRound color="#F59E0B" size={24} /> Manajemen BAST Serah Terima Kunci & Balik Nama Meteran
+                  <KeyRound color="#b8860b" size={24} /> Manajemen STK (Serah Terima Kunci) & Checklist Fisik
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Pusat pencatatan resmi serah terima kunci fisik rumah, garansi retensi, & status aktivasi meteran PLN / PDAM warga.
+                  Pusat pencatatan data serah terima kunci (STK), pemeriksaan fisik unit properti (Listrik, Air, Cat, Pintu, Sanitari, Kebersihan), & pencetakan dokumen.
                 </p>
               </div>
 
@@ -1317,12 +1343,12 @@ export const CustomerRelationModule = () => {
               </button>
             </div>
 
-            {/* KPI Mini Cards for BAST */}
+            {/* KPI Mini Cards for STK */}
             <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
-              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Total BAST Terdaftar</div>
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(184, 134, 11, 0.1)', border: '1px solid rgba(184, 134, 11, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#b8860b', fontWeight: 700 }}>Total Unit STK</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>{handovers.length} Unit</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Kavling Siap / Selesai Handover</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Portofolio Serah Kunci</div>
               </div>
 
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
@@ -1330,56 +1356,153 @@ export const CustomerRelationModule = () => {
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#10B981' }}>
                   {handovers.filter(h => (h.statusBAST || '').includes('Selesai')).length} Unit
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rumah Aktif Dihuni Warga</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Rumah Siap & Dihuni Warga</div>
               </div>
 
               <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>PLN & PDAM Aktif</div>
+                <div style={{ fontSize: '0.78rem', color: '#3B82F6', fontWeight: 700 }}>Ashoka Park</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3B82F6' }}>
-                  {handovers.filter(h => (h.statusPLN || '').includes('Aktif')).length} Unit
+                  {handovers.filter(h => (h.proyek || '').toLowerCase().includes('park') || (h.cluster || '').toLowerCase().includes('emerald')).length} Unit
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Meteran Mandiri Terpasang</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Proyek Kawasan 1</div>
               </div>
 
-              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
-                <div style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 700 }}>Jadwal Undangan</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#A855F7' }}>
-                  {handovers.filter(h => !(h.statusBAST || '').includes('Selesai')).length} Unit
+              <div style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 700 }}>Ashoka View</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#F59E0B' }}>
+                  {handovers.filter(h => (h.proyek || '').toLowerCase().includes('view') || (h.cluster || '').toLowerCase().includes('sapphire')).length} Unit
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Menunggu Serah Terima Kunci</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Proyek Kawasan 2</div>
               </div>
             </div>
 
-            {/* Search Bar BAST */}
-            <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
-                <Search size={16} color="var(--accent-primary)" />
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '36px' }}
-                  placeholder="Cari nomor unit (A-01), nama konsumen, tanggal BAST, status meteran PLN/PDAM..."
-                  value={searchHandover}
-                  onChange={(e) => setSearchHandover(e.target.value)}
-                />
-                {searchHandover && (
-                  <button onClick={() => setSearchHandover('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                    <X size={14} />
+            {/* Filter Toolbar: Project Chips + Date Filter + Search Bar (Just like Todo List) */}
+            <div className="glass-card" style={{ padding: '1rem', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              
+              {/* Row 1: Proyek Chips Filter & Date Filter */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)', marginRight: '4px' }}>
+                    🏢 Filter Proyek:
+                  </span>
+                  
+                  <button 
+                    type="button"
+                    onClick={() => setStkProjectFilter('ALL')}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: stkProjectFilter === 'ALL' ? '2px solid #b8860b' : '1px solid var(--border-color)',
+                      background: stkProjectFilter === 'ALL' ? '#b8860b' : 'rgba(255,255,255,0.05)',
+                      color: stkProjectFilter === 'ALL' ? '#ffffff' : 'var(--text-main)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Semua Proyek ({handovers.length})
                   </button>
-                )}
+
+                  <button 
+                    type="button"
+                    onClick={() => setStkProjectFilter('Ashoka Park')}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: stkProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.3)',
+                      background: stkProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.1)',
+                      color: stkProjectFilter === 'Ashoka Park' ? '#ffffff' : '#10B981',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🌳 Ashoka Park ({handovers.filter(h => (h.proyek || '').toLowerCase().includes('park') || (h.cluster || '').toLowerCase().includes('emerald')).length})
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => setStkProjectFilter('Ashoka View')}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: stkProjectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.3)',
+                      background: stkProjectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.1)',
+                      color: stkProjectFilter === 'Ashoka View' ? '#ffffff' : '#F59E0B',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🏔️ Ashoka View ({handovers.filter(h => (h.proyek || '').toLowerCase().includes('view') || (h.cluster || '').toLowerCase().includes('sapphire')).length})
+                  </button>
+                </div>
+
+                {/* Right: Date Filter & Reset Button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-card)', padding: '3px 8px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>📅 Tgl STK:</span>
+                    <input 
+                      type="date"
+                      value={stkDateFilter}
+                      onChange={(e) => setStkDateFilter(e.target.value)}
+                      style={{ fontSize: '0.78rem', padding: '2px 4px', border: 'none', background: 'transparent', color: 'var(--text-main)', fontWeight: 700, outline: 'none' }}
+                    />
+                    {stkDateFilter && (
+                      <button onClick={() => setStkDateFilter('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }} title="Hapus filter tanggal">
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  {(searchHandover || stkProjectFilter !== 'ALL' || stkDateFilter) && (
+                    <button 
+                      className="btn btn-secondary btn-sm" 
+                      onClick={() => { setSearchHandover(''); setStkProjectFilter('ALL'); setStkDateFilter(''); }}
+                      style={{ fontSize: '0.75rem', padding: '4px 8px', color: 'var(--danger)' }}
+                      title="Reset semua filter"
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </div>
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                Menampilkan <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>{filteredHandovers.length}</span> dari {handovers.length} Handover
+
+              {/* Row 2: Search Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
+                  <Search size={16} color="#b8860b" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ paddingLeft: '0.5rem', background: 'transparent', border: 'none', borderBottom: '1px solid var(--border-color)', borderRadius: 0, height: '34px', fontSize: '0.85rem' }}
+                    placeholder="Cari nomor unit (A-01), nama konsumen, blok, type rumah, no HP/WA..."
+                    value={searchHandover}
+                    onChange={(e) => setSearchHandover(e.target.value)}
+                  />
+                  {searchHandover && (
+                    <button onClick={() => setSearchHandover('')} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  Menampilkan <span style={{ color: '#b8860b', fontWeight: 800 }}>{filteredHandovers.length}</span> dari {handovers.length} Unit STK
+                </div>
               </div>
+
             </div>
 
             {filteredHandovers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
                 <KeyRound size={40} color="var(--text-muted)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data serah terima yang sesuai</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba kata kunci lain atau reset filter pencarian Anda.</p>
-                <button className="btn btn-secondary btn-sm" onClick={() => setSearchHandover('')} style={{ marginTop: '0.75rem' }}>
-                  Reset Pencarian
+                <h4 style={{ fontWeight: 700, margin: 0 }}>Tidak ada data STK yang sesuai</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Coba ubah tanggal, proyek, atau reset filter pencarian Anda.</p>
+                <button className="btn btn-secondary btn-sm" onClick={() => { setSearchHandover(''); setStkProjectFilter('ALL'); setStkDateFilter(''); }} style={{ marginTop: '0.75rem' }}>
+                  Reset Semua Filter
                 </button>
               </div>
             ) : (
