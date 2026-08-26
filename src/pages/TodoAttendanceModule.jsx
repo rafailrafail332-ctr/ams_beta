@@ -39,11 +39,26 @@ export const TodoAttendanceModule = () => {
   const { currentUser, users, attendances, setAttendances, approveAttendancePhoto, rejectAttendancePhoto, getAvatarUrl, showNotification } = useApp();
   const [activeTab, setActiveTab] = useState('todo'); // 'todo', 'absen'
 
-  // Helper Check Role Can Assign / Reset / ACC (Only Manager, Director, Super Admin)
+  // Helper Check Role Can Assign / Reset / ACC (Manager, Director, Super Admin, Head Marketing - Bu Yulieka)
   const isManagerOrDirectorOrAdmin = () => {
     if (!currentUser) return false;
-    const r = currentUser.role.toLowerCase();
-    return r.includes('direktur') || r.includes('manager') || r.includes('admin') || r.includes('gm');
+    const r = (currentUser.role || '').toLowerCase();
+    const name = (currentUser.name || '').toLowerCase();
+    const email = (currentUser.email || '').toLowerCase();
+    return (
+      r.includes('direktur') || 
+      r.includes('manager') || 
+      r.includes('admin') || 
+      r.includes('gm') ||
+      r.includes('head') ||
+      r.includes('marketing') ||
+      r.includes('yulie') ||
+      r.includes('yuli') ||
+      name.includes('yulie') ||
+      name.includes('yuli') ||
+      email.includes('yulie') ||
+      email.includes('yuli')
+    );
   };
 
   const isBoss = isManagerOrDirectorOrAdmin();
@@ -595,7 +610,7 @@ export const TodoAttendanceModule = () => {
             <input
               type="text"
               className="form-control"
-              placeholder={isBoss ? "Ketikkan tugas baru yang ditugaskan kepada staf..." : "Hanya Manager & Direktur yang dapat menambah tugas..."}
+              placeholder={isBoss ? "Ketikkan tugas baru yang ditugaskan kepada staf..." : "Hanya Manager, Direktur, & Head Marketing (Bu Yulieka) yang dapat menambah tugas..."}
               value={newTodoText}
               onChange={(e) => setNewTodoText(e.target.value)}
               style={{ flex: 1, minWidth: '220px' }}
