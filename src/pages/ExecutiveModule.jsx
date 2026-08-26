@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Building2, 
@@ -20,7 +20,9 @@ import {
   Printer,
   ChevronRight,
   ShieldAlert,
-  ArrowUpRight
+  ArrowUpRight,
+  Trash2,
+  Plus
 } from 'lucide-react';
 
 export const ExecutiveModule = () => {
@@ -44,11 +46,25 @@ export const ExecutiveModule = () => {
     roiPercentage: '28.5% p.a'
   });
 
-  // Pilar 6: BOD Meeting Minutes & Action Items
-  const [bodMinutes] = useState([
+  // Pilar 6: BOD Meeting Minutes & Action Items (Persistent Store)
+  const initialBodMinutes = [
     { id: 'BOD-M-01', date: '05 Agustus 2025', topic: 'Rapat Evaluasi S-Curve Proyek & Ekspansi Fase 3', decision: 'Direksi menyetujui percepatan pembebasan lahan 2 Ha untuk Cluster Ruby Fase 3.' },
     { id: 'BOD-M-02', date: '20 Juli 2025', topic: 'Penyertaan Modal KPR Bank Syariah BSI', decision: 'Penandatanganan PKS Mitra KPR BSI disetujui Direktur Utama.' }
-  ]);
+  ];
+
+  const [bodMinutes, setBodMinutes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_bod_minutes_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialBodMinutes;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_bod_minutes_v1', JSON.stringify(bodMinutes));
+    } catch (e) {}
+  }, [bodMinutes]);
 
   const handleApproveDirector = (id) => {
     if (!isManagerOrDirectorOrAdmin()) {
@@ -67,7 +83,21 @@ export const ExecutiveModule = () => {
       return a;
     }));
 
-    showNotification(`PERSETUJUAN DIREKSI SAH! Executive Approval ${id} disahkan oleh Direktur Utama. Terhubung ke Modul Teknik, Finance & CRM!`);
+    showNotification(`PERSETUJUAN DIREKSI SAH! Executive Approval ${id} disahkan oleh Direktur Utama. Terhubung ke Modul Teknik, Finance & CRM!`, 'success');
+  };
+
+  const handleDeleteApproval = (id, title) => {
+    if (window.confirm(`Hapus pengajuan approval ${id} (${title})?`)) {
+      setExecutiveApprovals(prev => prev.filter(a => a.id !== id));
+      showNotification(`Pengajuan ${id} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteMinute = (id, topic) => {
+    if (window.confirm(`Hapus risalah rapat ${topic}?`)) {
+      setBodMinutes(prev => prev.filter(m => m.id !== id));
+      showNotification(`Risalah rapat ${topic} berhasil dihapus.`, 'warning');
+    }
   };
 
   const handleRejectDirector = (id) => {
@@ -210,18 +240,28 @@ export const ExecutiveModule = () => {
                         </span>
                       </td>
                       <td>
-                        {!isApproved && !isRejected ? (
-                          <div style={{ display: 'flex', gap: '0.35rem' }}>
-                            <button className="btn btn-primary btn-sm" onClick={() => handleApproveDirector(a.id)}>
-                              <Check size={13} /> ACC Direktur
-                            </button>
-                            <button className="btn btn-outline-danger btn-sm" onClick={() => handleRejectDirector(a.id)}>
-                              <X size={13} /> Tolak
-                            </button>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: '0.78rem', color: 'var(--success)', fontWeight: 700 }}>✓ Decision Final (Saling Terhubung)</span>
-                        )}
+                        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                          {!isApproved && !isRejected ? (
+                            <>
+                              <button className="btn btn-primary btn-sm" onClick={() => handleApproveDirector(a.id)}>
+                                <Check size={13} /> ACC Direktur
+                              </button>
+                              <button className="btn btn-outline-danger btn-sm" onClick={() => handleRejectDirector(a.id)}>
+                                <X size={13} /> Tolak
+                              </button>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: '0.78rem', color: 'var(--success)', fontWeight: 700 }}>✓ Decision Final</span>
+                          )}
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleDeleteApproval(a.id, a.title)}
+                            style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                            title="Hapus Pengajuan"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -282,12 +322,22 @@ export const ExecutiveModule = () => {
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Risalah Rapat Direksi (Board of Directors Minutes) & Komitmen Action Items</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             {bodMinutes.map((m) => (
-              <div key={m.id} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{m.topic}</div>
-                  <span className="badge badge-info">{m.date}</span>
+              <div key={m.id} style={{ padding: '1rem', borderRadius: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{m.topic}</div>
+                    <span className="badge badge-info">{m.date}</span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{m.decision}</div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{m.decision}</div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => handleDeleteMinute(m.id, m.topic)}
+                  style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                  title="Hapus Risalah Rapat"
+                >
+                  <Trash2 size={13} />
+                </button>
               </div>
             ))}
           </div>

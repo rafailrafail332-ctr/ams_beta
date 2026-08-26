@@ -226,8 +226,22 @@ export const FinanceModule = () => {
       verifiedBy: `${currentUser?.name || 'Tarkum Aditya'} (${currentUser?.role || 'Accounting Tax Staf'})`
     } : t));
 
-    showNotification(`REKONSILIASI PAJAK TER-RECORD! Data e-Faktur & NTPN Pajak Unit ${selectedTaxItem.unitNo} diverifikasi oleh Pak Tarkum Aditya.`);
+    showNotification(`REKONSILIASI PAJAK TER-RECORD! Data e-Faktur & NTPN Pajak Unit ${selectedTaxItem.unitNo} diverifikasi oleh Pak Tarkum Aditya.`, 'success');
     setIsTaxModalOpen(false);
+  };
+
+  const handleDeleteTax = (id, unitNo) => {
+    if (window.confirm(`Hapus data audit pajak ${id} untuk Unit ${unitNo}?`)) {
+      setTaxLedger(prev => prev.filter(t => t.id !== id));
+      showNotification(`Data audit pajak Unit ${unitNo} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeletePricelist = (id, type) => {
+    if (window.confirm(`Hapus daftar harga ${type}?`)) {
+      setPricelists(prev => prev.filter(p => p.id !== id));
+      showNotification(`Pricelist ${type} berhasil dihapus.`, 'warning');
+    }
   };
 
   const handleOpenEditPrice = (prc) => {
@@ -747,9 +761,19 @@ export const FinanceModule = () => {
                       <td><span className="badge badge-success">{prc.marginProfit}</span></td>
                       <td><span className="badge badge-info">{prc.status}</span></td>
                       <td>
-                        <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEditPrice(prc)}>
-                          <Edit3 size={13} /> Edit Harga Finance
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEditPrice(prc)}>
+                            <Edit3 size={13} /> Edit Harga
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleDeletePricelist(prc.id, prc.type)}
+                            style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                            title="Hapus Pricelist"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1027,13 +1051,23 @@ export const FinanceModule = () => {
                           </span>
                         </td>
                         <td>
-                          <button 
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleOpenEditTax(t)}
-                            style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}
-                          >
-                            <FileCheck2 size={13} /> Edit e-Faktur / NTPN
-                          </button>
+                          <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                            <button 
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleOpenEditTax(t)}
+                              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}
+                            >
+                              <FileCheck2 size={13} /> Edit e-Faktur
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteTax(t.id, t.unitNo)}
+                              style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                              title="Hapus Data Pajak"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

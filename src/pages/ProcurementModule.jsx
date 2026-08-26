@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   ShoppingBag, 
@@ -20,15 +20,16 @@ import {
   X,
   FileCheck2,
   Boxes,
-  Briefcase
+  Briefcase,
+  Trash2
 } from 'lucide-react';
 
 export const ProcurementModule = () => {
   const { showNotification } = useApp();
   const [activeTab, setActiveTab] = useState('vendors'); // 'vendors', 'po', 'tender', 'gr', 'contracts', 'matching'
 
-  // Pilar 1: Vendor & Contractor Directory Data
-  const [vendors, setVendors] = useState([
+  // Pilar 1: Vendor & Contractor Directory Data (Persistent Store)
+  const initialVendors = [
     {
       id: 'VND-001',
       name: 'PT Bangun Jaya Perdana',
@@ -59,10 +60,24 @@ export const ProcurementModule = () => {
       status: 'Terverifikasi (Kontrak Payung)',
       completedProjects: 25
     }
-  ]);
+  ];
 
-  // Pilar 2: PR & PO Purchase Order Data
-  const [orders, setOrders] = useState([
+  const [vendors, setVendors] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_proc_vendors_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialVendors;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_proc_vendors_v1', JSON.stringify(vendors));
+    } catch (e) {}
+  }, [vendors]);
+
+  // Pilar 2: PR & PO Purchase Order Data (Persistent Store)
+  const initialOrders = [
     {
       id: 'PO-2025-081',
       prNo: 'PR-TECH-102',
@@ -83,10 +98,24 @@ export const ProcurementModule = () => {
       status: 'In Review Procurement',
       approvedBy: '-'
     }
-  ]);
+  ];
 
-  // Pilar 3: E-Tendering & Bidding Data
-  const [tenders] = useState([
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_proc_orders_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialOrders;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_proc_orders_v1', JSON.stringify(orders));
+    } catch (e) {}
+  }, [orders]);
+
+  // Pilar 3: E-Tendering & Bidding Data (Persistent Store)
+  const initialTenders = [
     {
       id: 'TND-2025-03',
       title: 'Tender Pembangunan Main Road Boulevard & Drainase U-Ditch 12m',
@@ -99,10 +128,24 @@ export const ProcurementModule = () => {
       winner: 'PT Bangun Jaya Perdana',
       status: 'Penetapan Pemenang'
     }
-  ]);
+  ];
 
-  // Pilar 4: Goods Receipt (GR) & Gudang Material
-  const [goodsReceipts, setGoodsReceipts] = useState([
+  const [tenders, setTenders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_proc_tenders_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialTenders;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_proc_tenders_v1', JSON.stringify(tenders));
+    } catch (e) {}
+  }, [tenders]);
+
+  // Pilar 4: Goods Receipt (GR) & Gudang Material (Persistent Store)
+  const initialGoodsReceipts = [
     {
       id: 'GR-2025-44',
       poNo: 'PO-2025-081',
@@ -111,10 +154,24 @@ export const ProcurementModule = () => {
       inspector: 'Agus Subekti (Gudang Site Office)',
       qcStatus: 'Lolos QC 100% (Bebas Rusak)'
     }
-  ]);
+  ];
 
-  // Pilar 6: 3-Way Matching Invoice Payment Data
-  const [invoices, setInvoices] = useState([
+  const [goodsReceipts, setGoodsReceipts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_proc_gr_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialGoodsReceipts;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_proc_gr_v1', JSON.stringify(goodsReceipts));
+    } catch (e) {}
+  }, [goodsReceipts]);
+
+  // Pilar 6: 3-Way Matching Invoice Payment Data (Persistent Store)
+  const initialInvoices = [
     {
       id: 'INV-VND-88',
       vendorName: 'PT Semen Gresik Distributor',
@@ -124,7 +181,57 @@ export const ProcurementModule = () => {
       matchingStatus: '3-Way Match Verified (Valid)',
       paymentStatus: 'Approved Payment Release'
     }
-  ]);
+  ];
+
+  const [invoices, setInvoices] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_proc_invoices_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialInvoices;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_proc_invoices_v1', JSON.stringify(invoices));
+    } catch (e) {}
+  }, [invoices]);
+
+  // Delete Handlers
+  const handleDeleteVendor = (id, name) => {
+    if (window.confirm(`Hapus data vendor ${name}?`)) {
+      setVendors(prev => prev.filter(v => v.id !== id));
+      showNotification(`Vendor ${name} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteOrder = (id, prNo) => {
+    if (window.confirm(`Hapus Purchase Order ${id} (${prNo})?`)) {
+      setOrders(prev => prev.filter(o => o.id !== id));
+      showNotification(`Purchase Order ${id} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteTender = (id, title) => {
+    if (window.confirm(`Hapus data lelang tender ${title}?`)) {
+      setTenders(prev => prev.filter(t => t.id !== id));
+      showNotification(`Tender ${id} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteGR = (id, item) => {
+    if (window.confirm(`Hapus catatan Goods Receipt ${id} (${item})?`)) {
+      setGoodsReceipts(prev => prev.filter(g => g.id !== id));
+      showNotification(`Goods Receipt ${id} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteInvoice = (id, vendorName) => {
+    if (window.confirm(`Hapus invoice ${id} dari ${vendorName}?`)) {
+      setInvoices(prev => prev.filter(inv => inv.id !== id));
+      showNotification(`Invoice ${id} berhasil dihapus.`, 'warning');
+    }
+  };
 
   // Modal State Add Vendor
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
@@ -145,7 +252,7 @@ export const ProcurementModule = () => {
       ...vendorForm
     };
     setVendors([newV, ...vendors]);
-    showNotification(`Vendor Baru ${newV.name} berhasil didaftarkan!`);
+    showNotification(`Vendor Baru ${newV.name} berhasil didaftarkan!`, 'success');
     setIsVendorModalOpen(false);
   };
 
@@ -256,7 +363,7 @@ export const ProcurementModule = () => {
                   <th>Rating KPI Performa</th>
                   <th>Proyek Selesai</th>
                   <th>Status Kualifikasi</th>
-                  <th>Aksi Kontrak</th>
+                  <th>Aksi Kontrak & Hapus</th>
                 </tr>
               </thead>
               <tbody>
@@ -279,9 +386,19 @@ export const ProcurementModule = () => {
                     <td><div style={{ fontWeight: 700 }}>{v.completedProjects} Proyek</div></td>
                     <td><span className="badge badge-success">{v.status}</span></td>
                     <td>
-                      <button className="btn btn-secondary btn-sm" onClick={() => alert(`Detail Kontrak Kerjasama Vendor ${v.name}`)}>
-                        <FileText size={13} /> Lihat SPK
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => alert(`Detail Kontrak Kerjasama Vendor ${v.name}`)}>
+                          <FileText size={13} /> SPK
+                        </button>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleDeleteVendor(v.id, v.name)}
+                          style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                          title="Hapus Vendor"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -305,7 +422,7 @@ export const ProcurementModule = () => {
                   <th>Total Biaya (Rp)</th>
                   <th>Tanggal Usulan</th>
                   <th>Status Approval</th>
-                  <th>Aksi Approval PO</th>
+                  <th>Aksi Approval & Hapus</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,15 +442,25 @@ export const ProcurementModule = () => {
                       </span>
                     </td>
                     <td>
-                      {o.status.includes('Approved') ? (
-                        <button className="btn btn-secondary btn-sm" onClick={() => alert(`Cetak Dokumen PO ${o.id}`)}>
-                          <Printer size={13} /> Cetak PO
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        {o.status.includes('Approved') ? (
+                          <button className="btn btn-secondary btn-sm" onClick={() => alert(`Cetak Dokumen PO ${o.id}`)}>
+                            <Printer size={13} /> Cetak
+                          </button>
+                        ) : (
+                          <button className="btn btn-primary btn-sm" onClick={() => handleApprovePO(o.id)}>
+                            <CheckCircle2 size={13} /> Setujui
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleDeleteOrder(o.id, o.prNo)}
+                          style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                          title="Hapus PO"
+                        >
+                          <Trash2 size={13} />
                         </button>
-                      ) : (
-                        <button className="btn btn-primary btn-sm" onClick={() => handleApprovePO(o.id)}>
-                          <CheckCircle2 size={13} /> Setujui PO
-                        </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -349,13 +476,23 @@ export const ProcurementModule = () => {
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Matriks Bidding Tender Proyek Konstruksi</h3>
           {tenders.map((t) => (
             <div key={t.id} style={{ marginBottom: '1.5rem', padding: '1.25rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', fontWeight: 700 }}>LELANG TENDER PROYEK: {t.id}</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-main)' }}>{t.title}</div>
                   <div style={{ fontSize: '0.85rem', color: '#F59E0B', fontWeight: 700, marginTop: '2px' }}>Pagu RAB: {formatRupiah(t.budgetRAB)}</div>
                 </div>
-                <span className="badge badge-success" style={{ fontSize: '0.85rem' }}>Pemenang: {t.winner}</span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span className="badge badge-success" style={{ fontSize: '0.85rem' }}>Pemenang: {t.winner}</span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleDeleteTender(t.id, t.title)}
+                    style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                    title="Hapus Tender"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
 
               <div className="table-container">
@@ -413,6 +550,7 @@ export const ProcurementModule = () => {
                   <th>Tanggal Tiba di Site</th>
                   <th>Petugas Inspeksi Gudang</th>
                   <th>Status QC & Volume Check</th>
+                  <th>Aksi Hapus</th>
                 </tr>
               </thead>
               <tbody>
@@ -426,6 +564,16 @@ export const ProcurementModule = () => {
                     <td>{g.receivedDate}</td>
                     <td>{g.inspector}</td>
                     <td><span className="badge badge-success">{g.qcStatus}</span></td>
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleDeleteGR(g.id, g.item)}
+                        style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                        title="Hapus Catatan GR"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -462,7 +610,7 @@ export const ProcurementModule = () => {
                   <th>Nominal Tagihan (Rp)</th>
                   <th>Status 3-Way Matching</th>
                   <th>Status Pencairan Finance</th>
-                  <th>Aksi Release Payment</th>
+                  <th>Aksi Release & Hapus</th>
                 </tr>
               </thead>
               <tbody>
@@ -478,13 +626,23 @@ export const ProcurementModule = () => {
                     <td><span className="badge badge-success">{inv.matchingStatus}</span></td>
                     <td><span className="badge badge-info">{inv.paymentStatus}</span></td>
                     <td>
-                      {inv.paymentStatus.includes('Approved') ? (
-                        <button className="btn btn-primary btn-sm" onClick={() => handleReleasePayment(inv.id)}>
-                          <CheckCircle2 size={13} /> Cairkan ke Finance
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        {inv.paymentStatus.includes('Approved') ? (
+                          <button className="btn btn-primary btn-sm" onClick={() => handleReleasePayment(inv.id)}>
+                            <CheckCircle2 size={13} /> Cairkan
+                          </button>
+                        ) : (
+                          <span className="badge badge-success"><CheckCircle2 size={12} /> Lunas</span>
+                        )}
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleDeleteInvoice(inv.id, inv.vendorName)}
+                          style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                          title="Hapus Invoice"
+                        >
+                          <Trash2 size={13} />
                         </button>
-                      ) : (
-                        <span className="badge badge-success"><CheckCircle2 size={12} /> Lunas Transfer</span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}

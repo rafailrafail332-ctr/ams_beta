@@ -33,7 +33,8 @@ import {
   PieChart,
   Briefcase,
   ChevronRight,
-  Send
+  Send,
+  Trash2
 } from 'lucide-react';
 
 export const MarketingModule = () => {
@@ -362,6 +363,20 @@ export const MarketingModule = () => {
       prev.map((l) => (l.id === lead.id ? { ...l, commissionStatus: 'Cair Rekening Sales (ACC Finance)' } : l))
     );
     showNotification(`KLAIM KOMISI DIKIRIM! Komisi Rp ${new Intl.NumberFormat('id-ID').format(nominal)} (Unit ${lead.unitInterest}) diteruskan ke Direksi & Finance untuk dicairkan ke ${lead.salesPerson}.`);
+  };
+
+  const handleDeleteLead = (id, name) => {
+    if (window.confirm(`Hapus data prospek lead ${name}?`)) {
+      setLeadsList(prev => prev.filter(l => l.id !== id));
+      showNotification(`Prospek ${name} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleDeleteSale = (id, unitNo) => {
+    if (window.confirm(`Hapus data transaksi penjualan unit ${unitNo}?`)) {
+      setSalesList(prev => prev.filter(s => s.id !== id));
+      showNotification(`Data transaksi unit ${unitNo} berhasil dihapus.`, 'warning');
+    }
   };
 
   const handleOpenWALeadTracker = (lead) => {
@@ -711,6 +726,14 @@ export const MarketingModule = () => {
                             <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEditLead(l)}>
                               <Edit3 size={13} /> Edit
                             </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteLead(l.id, l.customerName)}
+                              style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                              title="Hapus Lead"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -889,6 +912,15 @@ export const MarketingModule = () => {
                               <Printer size={13} /> Cetak Form
                             </button>
                           )}
+
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleDeleteSale(item.id, item.unitNo)}
+                            style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
+                            title="Hapus Transaksi"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </td>
                     </tr>

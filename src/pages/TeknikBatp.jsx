@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { CostOverrunInspector } from '../components/CostOverrunInspector';
 import { 
@@ -13,14 +13,15 @@ import {
   Building2, 
   Check, 
   X,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 export const TeknikBatp = () => {
   const { showNotification } = useApp();
   const [searchBatp, setSearchBatp] = useState('');
 
-  const [batpList, setBatpList] = useState([
+  const initialBatpList = [
     {
       id: 'BATP-2025-01',
       unitNo: 'A-01',
@@ -57,7 +58,28 @@ export const TeknikBatp = () => {
       submitDate: '2025-08-02',
       approvalDate: '-'
     }
-  ]);
+  ];
+
+  const [batpList, setBatpList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_batp_list_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return initialBatpList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_batp_list_v1', JSON.stringify(batpList));
+    } catch (e) {}
+  }, [batpList]);
+
+  const handleDeleteBatp = (id, unitNo) => {
+    if (window.confirm(`Hapus pengajuan termin BATP ${id} untuk Unit ${unitNo}?`)) {
+      setBatpList(prev => prev.filter(b => b.id !== id));
+      showNotification(`Pengajuan BATP ${id} berhasil dihapus.`, 'warning');
+    }
+  };
 
   const filteredBatpList = batpList.filter((b) => {
     if (!searchBatp) return true;
@@ -77,7 +99,7 @@ export const TeknikBatp = () => {
     setBatpList((prev) =>
       prev.map((b) => (b.id === id ? { ...b, status: 'In Review Finance', approvalDate: new Date().toISOString().split('T')[0] } : b))
     );
-    showNotification(`Verifikasi Teknik BATP ${id} disetujui! Berkas diteruskan ke Finance.`);
+    showNotification(`Verifikasi Teknik BATP ${id} disetujui! Berkas diteruskan ke Finance.`, 'success');
   };
 
   const formatRupiah = (val) => {
@@ -168,13 +190,23 @@ export const TeknikBatp = () => {
                       </span>
                     </td>
                     <td>
-                      {b.status.includes('Pending') ? (
-                        <button className="btn btn-primary btn-sm" onClick={() => handleApproveTeknik(b.id)}>
-                          <CheckCircle2 size={13} /> Verifikasi ACC Teknik
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        {b.status.includes('Pending') ? (
+                          <button className="btn btn-primary btn-sm" onClick={() => handleApproveTeknik(b.id)}>
+                            <CheckCircle2 size={13} /> ACC Teknik
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Selesai</span>
+                        )}
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleDeleteBatp(b.id, b.unitNo)}
+                          style={{ color: 'var(--danger)', padding: '0.25rem 0.5rem' }}
+                          title="Hapus BATP"
+                        >
+                          <Trash2 size={13} />
                         </button>
-                      ) : (
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Selesai Verifikasi</span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}
