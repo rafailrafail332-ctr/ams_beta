@@ -1387,60 +1387,151 @@ export const CustomerRelationModule = () => {
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
                     <tr style={{ background: '#b8860b', color: '#ffffff', textAlign: 'center' }}>
-                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '90px' }}>Tgl STK</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '95px', textAlign: 'center' }}>Tgl STK</th>
                       <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '140px' }}>Nama Konsumen</th>
-                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px' }}>Blok</th>
-                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px' }}>No.</th>
-                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px' }}>Type</th>
-                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px' }}>LB/LT</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px', textAlign: 'center' }}>Blok</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px', textAlign: 'center' }}>No.</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px', textAlign: 'center' }}>Type</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px', textAlign: 'center' }}>LB/LT</th>
                       <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '130px' }}>No. HP / WA</th>
-                      <th colSpan={6} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px', textAlign: 'center', fontWeight: 800, letterSpacing: '0.5px' }}>pengecekan</th>
+                      <th colSpan={6} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px', textAlign: 'center', fontWeight: 800, letterSpacing: '1px' }}>pengecekan</th>
                       <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '120px', textAlign: 'center' }}>Aksi</th>
                     </tr>
                     <tr style={{ background: '#a0780a', color: '#ffffff', textAlign: 'center' }}>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Listrik</th>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Air</th>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '75px' }}>Pengecatan</th>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '85px' }}>Handel Pintu</th>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Sanitari</th>
-                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '75px' }}>Kebersihan</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '85px', minWidth: '85px', textAlign: 'center' }}>Listrik</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '85px', minWidth: '85px', textAlign: 'center' }}>Air</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '95px', minWidth: '95px', textAlign: 'center' }}>Pengecatan</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '100px', minWidth: '100px', textAlign: 'center' }}>Handel Pintu</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '85px', minWidth: '85px', textAlign: 'center' }}>Sanitari</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 4px', fontWeight: 700, fontSize: '0.78rem', width: '95px', minWidth: '95px', textAlign: 'center' }}>Kebersihan</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredHandovers.map((h, idx) => {
+                      const formatNumericDate = (val) => {
+                        if (!val) return '-';
+                        const clean = String(val).trim();
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+                          const [y, m, d] = clean.split('-');
+                          return `${d}/${m}/${y}`;
+                        }
+                        const months = {
+                          'januari': '01', 'jan': '01',
+                          'februari': '02', 'feb': '02',
+                          'maret': '03', 'mar': '03',
+                          'april': '04', 'apr': '04',
+                          'mei': '05', 'may': '05',
+                          'juni': '06', 'jun': '06',
+                          'juli': '07', 'jul': '07',
+                          'agustus': '08', 'aug': '08', 'ags': '08',
+                          'september': '09', 'sep': '09',
+                          'oktober': '10', 'okt': '10', 'oct': '10',
+                          'november': '11', 'nov': '11',
+                          'desember': '12', 'des': '12', 'dec': '12'
+                        };
+                        const parts = clean.toLowerCase().replace(/,/g, '').split(' ').filter(Boolean);
+                        if (parts.length === 3) {
+                          const d = parts[0].padStart(2, '0');
+                          const m = months[parts[1]] || '01';
+                          const y = parts[2];
+                          return `${d}/${m}/${y}`;
+                        }
+                        return clean;
+                      };
+
                       const renderCheckBadge = (val) => {
-                        const v = (val || 'ok').toLowerCase();
+                        const v = (val || 'ok').toLowerCase().trim();
                         if (v === 'ok' || v === 'baik' || v === 'siap' || v === 'bersih' || v === 'nyala') {
-                          return <span style={{ color: '#10B981', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(16,185,129,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>✓ ok</span>;
+                          return (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                              <span style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                width: '42px', 
+                                height: '24px', 
+                                borderRadius: '4px', 
+                                background: 'rgba(16, 185, 129, 0.12)', 
+                                color: '#059669', 
+                                fontWeight: 800, 
+                                fontSize: '0.78rem',
+                                textTransform: 'lowercase',
+                                textAlign: 'center',
+                                boxSizing: 'border-box'
+                              }}>
+                                ok
+                              </span>
+                            </div>
+                          );
                         }
                         if (v.includes('pending') || v.includes('belum')) {
-                          return <span style={{ color: '#EF4444', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(239,68,68,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>⏳ pending</span>;
+                          return (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                              <span style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                minWidth: '54px', 
+                                height: '24px', 
+                                padding: '0 6px',
+                                borderRadius: '4px', 
+                                background: 'rgba(239, 68, 68, 0.12)', 
+                                color: '#dc2626', 
+                                fontWeight: 800, 
+                                fontSize: '0.74rem',
+                                textAlign: 'center',
+                                boxSizing: 'border-box'
+                              }}>
+                                pending
+                              </span>
+                            </div>
+                          );
                         }
-                        return <span style={{ color: '#F59E0B', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(245,158,11,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>⚠️ {val}</span>;
+                        return (
+                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                            <span style={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              minWidth: '42px', 
+                              height: '24px', 
+                              padding: '0 6px',
+                              borderRadius: '4px', 
+                              background: 'rgba(245, 158, 11, 0.12)', 
+                              color: '#d97706', 
+                              fontWeight: 800, 
+                              fontSize: '0.74rem',
+                              textAlign: 'center',
+                              boxSizing: 'border-box'
+                            }}>
+                              {val}
+                            </span>
+                          </div>
+                        );
                       };
 
                       return (
                         <tr key={h.id || idx}>
-                          <td style={{ fontWeight: 700, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-                            📅 {h.tglStk || h.bastDate || '-'}
+                          <td style={{ fontWeight: 800, fontSize: '0.82rem', whiteSpace: 'nowrap', textAlign: 'center', verticalAlign: 'middle', letterSpacing: '0.3px' }}>
+                            {formatNumericDate(h.tglStk || h.bastDate)}
                           </td>
-                          <td>
+                          <td style={{ verticalAlign: 'middle' }}>
                             <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{h.customerName}</div>
                             <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>{h.proyek || h.cluster || ''}</div>
                           </td>
-                          <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--accent-primary)' }}>
+                          <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--accent-primary)', verticalAlign: 'middle' }}>
                             {h.blok || (h.unitNo ? h.unitNo.split('-')[0] : 'A')}
                           </td>
-                          <td style={{ textAlign: 'center', fontWeight: 800 }}>
+                          <td style={{ textAlign: 'center', fontWeight: 800, verticalAlign: 'middle' }}>
                             {h.no || (h.unitNo ? h.unitNo.split('-')[1] : '01')}
                           </td>
-                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, verticalAlign: 'middle' }}>
                             {h.type || h.tipe || 'Type 45'}
                           </td>
-                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, verticalAlign: 'middle' }}>
                             {h.lbLt || '45/90'}
                           </td>
-                          <td>
+                          <td style={{ verticalAlign: 'middle' }}>
                             <div 
                               style={{ fontSize: '0.75rem', color: '#10B981', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}
                               onClick={() => handleSendWaDirect(h.phone, h.customerName, 'Serah Terima Kunci (BAST)', h.unitNo)}
@@ -1449,13 +1540,13 @@ export const CustomerRelationModule = () => {
                               📱 {h.phone || '-'}
                             </div>
                           </td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkListrik)}</td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkAir)}</td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkPengecatan)}</td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkHandelPintu || h.checkPintu)}</td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkSanitari)}</td>
-                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkKebersihan)}</td>
-                          <td style={{ textAlign: 'center' }}>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkListrik)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkAir)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkPengecatan)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkHandelPintu || h.checkPintu)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkSanitari)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '6px 2px' }}>{renderCheckBadge(h.checkKebersihan)}</td>
+                          <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                             <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                               <button 
                                 className="btn btn-secondary btn-sm" 
