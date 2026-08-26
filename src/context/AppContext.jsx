@@ -321,14 +321,16 @@ export const AppProvider = ({ children }) => {
     } catch (e) {}
   }, [units]);
 
-  // 4. CLEAN TO-DO LIST STORE (FORMAT LAPORAN PEKERJAAN HARIAN: TANGGAL, WAKTU, LAPORAN, KORDINASI, PIC)
+  // 4. CLEAN TO-DO LIST STORE (FORMAT LAPORAN PEKERJAAN HARIAN: TANGGAL, WAKTU, PROYEK, LAPORAN, KORDINASI, PIC)
   const defaultInitialTodos = [
     { 
       id: 1, 
       date: '2025-08-26',
       waktu: '08:00 - 10:00',
-      laporan: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek',
-      text: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek',
+      proyek: 'Ashoka Park',
+      project: 'Ashoka Park',
+      laporan: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek Ashoka Park',
+      text: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek Ashoka Park',
       kordinasi: 'Bank BTN Cabang & Pimpinan Finance',
       pic: 'Syamsul Dahari',
       assignee: 'Syamsul Dahari',
@@ -342,8 +344,10 @@ export const AppProvider = ({ children }) => {
       id: 2, 
       date: '2025-08-26',
       waktu: '10:00 - 12:00',
-      laporan: 'Audit Faktur Pajak PPN & PPh Final Properti Bulan Ini',
-      text: 'Audit Faktur Pajak PPN & PPh Final Properti Bulan Ini',
+      proyek: 'Ashoka View',
+      project: 'Ashoka View',
+      laporan: 'Audit Faktur Pajak PPN & PPh Final Properti Kavling Ashoka View Tahap 2',
+      text: 'Audit Faktur Pajak PPN & PPh Final Properti Kavling Ashoka View Tahap 2',
       kordinasi: 'Konsultan Pajak & Kantor Pajak Pratama',
       pic: 'Tarkum Aditya',
       assignee: 'Tarkum Aditya',
@@ -357,8 +361,10 @@ export const AppProvider = ({ children }) => {
       id: 3, 
       date: '2025-08-26',
       waktu: '13:00 - 15:00',
-      laporan: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02',
-      text: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02',
+      proyek: 'Ashoka View',
+      project: 'Ashoka View',
+      laporan: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02 Ashoka View',
+      text: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02 Ashoka View',
       kordinasi: 'Konsumen Bapak Hendra & Notaris',
       pic: 'Jezen',
       assignee: 'Jezen',
@@ -372,8 +378,10 @@ export const AppProvider = ({ children }) => {
       id: 4, 
       date: '2025-08-26',
       waktu: '15:00 - 17:00',
-      laporan: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02',
-      text: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02',
+      proyek: 'Ashoka Park',
+      project: 'Ashoka Park',
+      laporan: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02 Ashoka Park',
+      text: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02 Ashoka Park',
       kordinasi: 'Mandor Sipil & Tim Pengawas Teknik',
       pic: 'Adhi Himawan, S.E.Sy',
       assignee: 'Adhi Himawan, S.E.Sy',
@@ -387,15 +395,21 @@ export const AppProvider = ({ children }) => {
 
   const getInitialTodos = () => {
     try {
-      const saved = localStorage.getItem('ams_todos_master_v4');
+      const saved = localStorage.getItem('ams_todos_master_v5');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-      const old1 = localStorage.getItem('ams_todos_master_v3');
-      if (old1) {
-        const parsedOld = JSON.parse(old1);
-        if (Array.isArray(parsedOld) && parsedOld.length > 0) return parsedOld;
+      const old4 = localStorage.getItem('ams_todos_master_v4');
+      if (old4) {
+        const parsedOld = JSON.parse(old4);
+        if (Array.isArray(parsedOld) && parsedOld.length > 0) {
+          return parsedOld.map((item, idx) => ({
+            ...item,
+            proyek: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View'),
+            project: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View')
+          }));
+        }
       }
     } catch (e) {}
     return defaultInitialTodos;
@@ -405,7 +419,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_todos_master_v4', JSON.stringify(todos));
+      localStorage.setItem('ams_todos_master_v5', JSON.stringify(todos));
     } catch (e) {}
   }, [todos]);
 
@@ -416,7 +430,9 @@ export const AppProvider = ({ children }) => {
       date: '2025-08-26',
       dueDate: '2025-08-27',
       dueTime: '17:00',
-      instruction: 'Koordinasikan dengan Bank Mandiri & BTN untuk percepatan SP3K 12 unit konsumen Cluster Emerald',
+      proyek: 'Ashoka Park',
+      project: 'Ashoka Park',
+      instruction: 'Koordinasikan dengan Bank Mandiri & BTN untuk percepatan SP3K 12 unit konsumen Cluster Emerald Ashoka Park',
       kordinasi: 'Bank BTN, Bank Mandiri, Konsumen',
       assignee: 'Syamsul Dahari',
       assigneeId: 'USR-015',
@@ -432,7 +448,9 @@ export const AppProvider = ({ children }) => {
       date: '2025-08-26',
       dueDate: '2025-08-28',
       dueTime: '15:00',
-      instruction: 'Lakukan survei harga material semen & besi beton ke 3 vendor baru untuk tender Cluster Sapphire',
+      proyek: 'Ashoka View',
+      project: 'Ashoka View',
+      instruction: 'Lakukan survei harga material semen & besi beton ke 3 vendor baru untuk tender Cluster Sapphire Ashoka View',
       kordinasi: 'Vendor Material, Procurement',
       assignee: 'Tarkum Aditya',
       assigneeId: 'USR-016',
@@ -448,6 +466,8 @@ export const AppProvider = ({ children }) => {
       date: '2025-08-25',
       dueDate: '2025-08-26',
       dueTime: '16:00',
+      proyek: 'Ashoka Park',
+      project: 'Ashoka Park',
       instruction: 'Siapkan draf brosur dan price list promo DP 0% untuk pameran properti mall weekend ini',
       kordinasi: 'Percetakan & Event Organizer',
       assignee: 'Fresda Destifani',
@@ -463,8 +483,19 @@ export const AppProvider = ({ children }) => {
 
   const getInitialInstructions = () => {
     try {
-      const saved = localStorage.getItem('ams_work_instructions_v1');
+      const saved = localStorage.getItem('ams_work_instructions_v2');
       if (saved) return JSON.parse(saved);
+      const old = localStorage.getItem('ams_work_instructions_v1');
+      if (old) {
+        const parsed = JSON.parse(old);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((item, idx) => ({
+            ...item,
+            proyek: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View'),
+            project: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View')
+          }));
+        }
+      }
     } catch (e) {}
     return defaultInitialInstructions;
   };
@@ -473,7 +504,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_work_instructions_v1', JSON.stringify(instructions));
+      localStorage.setItem('ams_work_instructions_v2', JSON.stringify(instructions));
     } catch (e) {}
   }, [instructions]);
 

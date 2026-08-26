@@ -77,6 +77,13 @@ export const MEDIA_CATEGORIES = [
   { id: 'CAT-EVENT', label: 'Acara & Agenda', icon: '🎉', color: '#EC4899' }
 ];
 
+export const COMPANY_PROJECTS = [
+  { id: 'PROJ-ALL', name: 'Semua Proyek', short: 'Semua Proyek', icon: '🏗️', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.15)' },
+  { id: 'PROJ-PARK', name: 'Ashoka Park (Lokasi 1)', short: 'Ashoka Park', icon: '🌳', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
+  { id: 'PROJ-VIEW', name: 'Ashoka View (Lokasi 2)', short: 'Ashoka View', icon: '🏔️', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
+  { id: 'PROJ-HO', name: 'Kantor Pusat / Head Office', short: 'Kantor Pusat', icon: '🏢', color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)' }
+];
+
 export const TodoAttendanceModule = () => {
   const { 
     currentUser, 
@@ -94,6 +101,42 @@ export const TodoAttendanceModule = () => {
     mediaInfoList,
     setMediaInfoList
   } = useApp();
+
+  // Helper to render Project Badge
+  const getProjectBadge = (proyekName) => {
+    const pStr = (proyekName || '').toLowerCase();
+    if (pStr.includes('view')) {
+      return (
+        <span 
+          onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Ashoka View'); }}
+          style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+          title="Klik untuk menyaring laporan proyek Ashoka View"
+        >
+          🏔️ Ashoka View
+        </span>
+      );
+    }
+    if (pStr.includes('park')) {
+      return (
+        <span 
+          onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Ashoka Park'); }}
+          style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+          title="Klik untuk menyaring laporan proyek Ashoka Park"
+        >
+          🌳 Ashoka Park
+        </span>
+      );
+    }
+    return (
+      <span 
+        onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Kantor Pusat'); }}
+        style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+        title="Klik untuk menyaring Kantor Pusat / Umum"
+      >
+        🏢 {proyekName || 'Kantor Pusat'}
+      </span>
+    );
+  };
 
   // Helper to render Division Badge
   const getDivisionBadge = (kordinasiText) => {
@@ -200,6 +243,7 @@ export const TodoAttendanceModule = () => {
 
   // Sub-filter for reports: 'all' | 'for_me' (Default 'all' agar seluruh staf & pimpinan bisa melihat rekapitulasi)
   const [reportPicFilter, setReportPicFilter] = useState('all');
+  const [reportProjectFilter, setReportProjectFilter] = useState('all');
   const [reportDivisionFilter, setReportDivisionFilter] = useState('all');
   const [reportStatusFilter, setReportStatusFilter] = useState('all');
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState('all');
@@ -207,6 +251,7 @@ export const TodoAttendanceModule = () => {
   // Modal State for Adding/Editing Daily Work Report Item
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [editingReportItem, setEditingReportItem] = useState(null);
+  const [newProject, setNewProject] = useState('Ashoka Park');
 
   const handleReportPhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -313,13 +358,23 @@ export const TodoAttendanceModule = () => {
     return false;
   };
 
-  // FILTERED REPORTS: By Date Range, By PIC, By Division, By Status, and By Related Employee Name
+  // FILTERED REPORTS: By Date Range, By Project (Park/View), By PIC, By Division, By Status, and By Related Employee Name
   const visibleReports = safeTodos.filter((t) => {
     if (!showAllDates) {
       const taskDate = t.date || t.assignDate || '';
       if (taskDate) {
         if (startDateFilter && taskDate < startDateFilter) return false;
         if (endDateFilter && taskDate > endDateFilter) return false;
+      }
+    }
+
+    if (reportProjectFilter !== 'all') {
+      const proj = (t.proyek || t.project || '').toLowerCase();
+      const filter = reportProjectFilter.toLowerCase();
+      if (!proj.includes(filter)) {
+        const lap = (t.laporan || t.text || '').toLowerCase();
+        const kor = (t.kordinasi || '').toLowerCase();
+        if (!lap.includes(filter) && !kor.includes(filter)) return false;
       }
     }
 
@@ -367,6 +422,7 @@ export const TodoAttendanceModule = () => {
     setEditingReportItem(null);
     setNewDate(todayDateStr);
     setNewWaktu('08:00 - 10:00');
+    setNewProject('Ashoka Park');
     setNewLaporan('');
     setNewKordinasi('');
     setNewPic(isBoss ? (safeUsers[0]?.name || 'Syamsul Dahari') : (currentUser?.name || ''));
@@ -385,6 +441,7 @@ export const TodoAttendanceModule = () => {
     setEditingReportItem(item);
     setNewDate(item.date || item.assignDate || todayDateStr);
     setNewWaktu(item.waktu || '08:00 - 10:00');
+    setNewProject(item.proyek || item.project || 'Ashoka Park');
     setNewLaporan(item.laporan || item.text || '');
     setNewKordinasi(item.kordinasi || '');
     setNewPic(item.pic || item.assignee || (currentUser?.name || ''));
@@ -420,6 +477,8 @@ export const TodoAttendanceModule = () => {
             ...t,
             date: newDate,
             waktu: newWaktu,
+            proyek: newProject,
+            project: newProject,
             laporan: newLaporan.trim(),
             text: newLaporan.trim(),
             kordinasi: newKordinasi.trim(),
@@ -438,6 +497,8 @@ export const TodoAttendanceModule = () => {
         id: Date.now(),
         date: newDate,
         waktu: newWaktu,
+        proyek: newProject,
+        project: newProject,
         laporan: newLaporan.trim(),
         text: newLaporan.trim(),
         kordinasi: newKordinasi.trim(),
@@ -451,7 +512,7 @@ export const TodoAttendanceModule = () => {
         assignedBy: finalAssignedBy
       };
       setTodos([newItem, ...safeTodos]);
-      showNotification(`Laporan pekerjaan harian (${newItem.date}) berhasil ditambahkan atas nama ${newItem.pic}!`, 'success');
+      showNotification(`Laporan pekerjaan harian (${newItem.proyek}) berhasil ditambahkan atas nama ${newItem.pic}!`, 'success');
     }
 
     setIsReportModalOpen(false);
@@ -479,18 +540,19 @@ export const TodoAttendanceModule = () => {
   };
 
   // -----------------------------------------------------------------
-  // 2. STATE & HANDLERS UNTUK TAB 2: INSTRUKSI PEKERJAAN PIMPINAN
-  // -----------------------------------------------------------------
-  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
-  const [editingInstructionItem, setEditingInstructionItem] = useState(null);
-  const [insDate, setInsDate] = useState(todayDateStr);
-  const [insDueDate, setInsDueDate] = useState(todayDateStr);
-  const [insDueTime, setInsDueTime] = useState('17:00');
-  const [insText, setInsText] = useState('');
-  const [insKordinasi, setInsKordinasi] = useState('');
-  const [insAssignee, setInsAssignee] = useState(() => (safeUsers[0]?.name || 'Syamsul Dahari'));
-  const [insPriority, setInsPriority] = useState('Tinggi');
-  const [autoSendWa, setAutoSendWa] = useState(true);
+    // 2. STATE & HANDLERS UNTUK TAB 2: INSTRUKSI PEKERJAAN PIMPINAN
+    // -----------------------------------------------------------------
+    const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
+    const [editingInstructionItem, setEditingInstructionItem] = useState(null);
+    const [insDate, setInsDate] = useState(todayDateStr);
+    const [insDueDate, setInsDueDate] = useState(todayDateStr);
+    const [insDueTime, setInsDueTime] = useState('17:00');
+    const [insText, setInsText] = useState('');
+    const [insProject, setInsProject] = useState('Ashoka Park');
+    const [insKordinasi, setInsKordinasi] = useState('');
+    const [insAssignee, setInsAssignee] = useState(() => (safeUsers[0]?.name || 'Syamsul Dahari'));
+    const [insPriority, setInsPriority] = useState('Tinggi');
+    const [autoSendWa, setAutoSendWa] = useState(true);
 
   // Pak Yazid Official WhatsApp Phone Number (Configurable & Persistent)
   const [yazidWaNumber, setYazidWaNumber] = useState(() => {
@@ -529,21 +591,22 @@ export const TodoAttendanceModule = () => {
 *ASHOKA PROPERTY MANAGEMENT SYSTEM*
 --------------------------------------------------
 📌 *No. Instruksi:* ${ins.id}
+🏗️ *Lokasi Proyek:* ${ins.proyek || 'Ashoka Park'}
 📅 *Tanggal Diterbitkan:* ${ins.date}
 ⏰ *Batas Waktu (Deadline):* ${ins.dueDate} pk ${ins.dueTime || '17:00'} WIB
 📜 *Uraian Instruksi:* 
 "${ins.instruction}"
 
 🤝 *Koordinasi:* ${ins.kordinasi || '-'}
-👤 *Ditugaskan Kepada (PIC):* ${ins.assignee}
-🏢 *Pemberi Instruksi:* ${ins.assignedBy || 'Direktur Utama'}
-🚩 *Prioritas:* ${ins.priority || 'Tinggi'}
-📊 *Status Saat Ini:* ${isSelesai ? '✅ SELESAI (DONE)' : '⏳ DALAM PROSES / PENDING'}
-${ins.reportNotes || customNote ? `\n📝 *Bukti Hasil Tindak Lanjut:*\n"${customNote || ins.reportNotes}"\n⏱️ Waktu Selesai: ${ins.completionDate || 'Hari ini'}\n` : ''}--------------------------------------------------
-_Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
+👤 *Ditugaskan Kepada:* ${ins.assignee}
+👑 *Pemberi Instruksi:* ${ins.assignedBy}
+${isSelesai ? `\n📝 *Laporan Hasil:* \n"${customNote || ins.reportNotes || 'Telah diselesaikan'}"\n🕒 *Selesai Pada:* ${ins.completionDate || 'Hari ini'}` : ''}
+--------------------------------------------------
+_Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
-    const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/${cleanPhone}?text=${encoded}`, '_blank');
+    const encodedMsg = encodeURIComponent(msg);
+    const waUrl = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
+    window.open(waUrl, '_blank');
     showNotification(`Membuka WhatsApp ke Pak Yazid (+${cleanPhone})...`, 'info');
   };
 
@@ -578,30 +641,31 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
 
   const handleOpenAddInstructionModal = () => {
     if (!isBoss) {
-      showNotification('Akses Terbatas: Hanya Direktur Utama, General Manager, atau Bu Yulieka (Head Marketing) yang berhak menerbitkan Instruksi Pekerjaan!', 'danger');
+      showNotification('Akses Terbatas: Hanya Pimpinan yang berhak menerbitkan Instruksi Pekerjaan!', 'danger');
       return;
     }
     setEditingInstructionItem(null);
     setInsDate(todayDateStr);
     setInsDueDate(todayDateStr);
     setInsDueTime('17:00');
+    setInsProject('Ashoka Park');
     setInsText('');
     setInsKordinasi('');
     setInsAssignee(safeUsers[0]?.name || 'Syamsul Dahari');
     setInsPriority('Tinggi');
-    setAutoSendWa(true);
     setIsInstructionModalOpen(true);
   };
 
   const handleOpenEditInstructionModal = (ins) => {
     if (!isBoss) {
-      showNotification('Akses Terbatas: Hanya Pimpinan yang berhak mengedit Instruksi Pekerjaan!', 'danger');
+      showNotification('Akses Terbatas: Hanya Pimpinan yang berhak mengubah Instruksi Pekerjaan!', 'danger');
       return;
     }
     setEditingInstructionItem(ins);
     setInsDate(ins.date || todayDateStr);
     setInsDueDate(ins.dueDate || todayDateStr);
     setInsDueTime(ins.dueTime || '17:00');
+    setInsProject(ins.proyek || ins.project || 'Ashoka Park');
     setInsText(ins.instruction || '');
     setInsKordinasi(ins.kordinasi || '');
     setInsAssignee(ins.assignee || '');
@@ -624,6 +688,8 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
             date: insDate,
             dueDate: insDueDate,
             dueTime: insDueTime,
+            proyek: insProject,
+            project: insProject,
             instruction: insText.trim(),
             kordinasi: insKordinasi.trim(),
             assignee: targetUser ? targetUser.name : insAssignee,
@@ -640,6 +706,8 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
         date: insDate,
         dueDate: insDueDate,
         dueTime: insDueTime,
+        proyek: insProject,
+        project: insProject,
         instruction: insText.trim(),
         kordinasi: insKordinasi.trim(),
         assignee: targetUser ? targetUser.name : insAssignee,
@@ -652,7 +720,7 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
         completionDate: ''
       };
       setInstructions([newIns, ...safeInstructions]);
-      showNotification(`INSTRUKSI PEKERJAAN DITERBITKAN! Ditugaskan resmi kepada ${newIns.assignee}.`, 'success');
+      showNotification(`INSTRUKSI PEKERJAAN (${newIns.proyek}) DITERBITKAN! Ditugaskan resmi kepada ${newIns.assignee}.`, 'success');
 
       if (autoSendWa) {
         handleSendToYazidWhatsApp(newIns);
@@ -1458,6 +1526,27 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 👤 PIC Saya ({safeTodos.filter(t => isTaskAssignedToUser(t, currentUser)).length})
               </button>
 
+              {/* Filter Lokasi Proyek (Ashoka Park vs Ashoka View) */}
+              <select
+                className="form-control"
+                value={reportProjectFilter}
+                onChange={(e) => setReportProjectFilter(e.target.value)}
+                style={{ 
+                  width: '170px', 
+                  height: '36px', 
+                  fontSize: '0.8rem', 
+                  fontWeight: 800,
+                  borderColor: reportProjectFilter !== 'all' ? (reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981') : '#EAB308', 
+                  background: reportProjectFilter !== 'all' ? (reportProjectFilter.includes('View') ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)') : 'rgba(234, 179, 8, 0.08)',
+                  color: reportProjectFilter !== 'all' ? (reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981') : 'var(--text-main)' 
+                }}
+              >
+                <option value="all">🏗️ Semua Proyek</option>
+                <option value="Ashoka Park">🌳 Ashoka Park (Lokasi 1)</option>
+                <option value="Ashoka View">🏔️ Ashoka View (Lokasi 2)</option>
+                <option value="Kantor Pusat">🏢 Kantor Pusat / HO</option>
+              </select>
+
               {/* Filter Nama Karyawan Terkait / PIC */}
               <select
                 className="form-control"
@@ -1514,6 +1603,26 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
             </div>
           </div>
 
+          {/* ACTIVE PROJECT FILTER NOTIFICATION BADGE */}
+          {reportProjectFilter !== 'all' && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.85rem', marginBottom: '0.75rem', background: reportProjectFilter.includes('View') ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.12)', border: `1px solid ${reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981'}`, borderRadius: '6px', fontSize: '0.825rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981' }}>
+                <span>🏗️ Menyaring Laporan Proyek:</span>
+                <span style={{ color: 'var(--text-main)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                  {reportProjectFilter.includes('View') ? '🏔️ Ashoka View (Lokasi 2)' : reportProjectFilter.includes('Park') ? '🌳 Ashoka Park (Lokasi 1)' : '🏢 ' + reportProjectFilter}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({visibleReports.length} baris pekerjaan ditemukan)</span>
+              </div>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                onClick={() => setReportProjectFilter('all')}
+                style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+              >
+                ✕ Reset Filter Proyek
+              </button>
+            </div>
+          )}
+
           {/* ACTIVE EMPLOYEE FILTER NOTIFICATION BADGE */}
           {selectedEmployeeFilter !== 'all' && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.85rem', marginBottom: '1rem', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid #38BDF8', borderRadius: '6px', fontSize: '0.825rem' }}>
@@ -1525,7 +1634,7 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({visibleReports.length} pekerjaan ditemukan)</span>
               </div>
               <button 
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary btn-sm" 
                 onClick={() => setSelectedEmployeeFilter('all')}
                 style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
               >
@@ -1539,14 +1648,14 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
             <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#FDE047', color: '#0F172A', borderBottom: '2px solid #CA8A04' }}>
-                  <th style={{ width: '130px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                  <th style={{ width: '125px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
                     Tanggal
                   </th>
-                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                  <th style={{ width: '135px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
                     Waktu
                   </th>
                   <th style={{ padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Laporan harian
+                    Laporan harian & Proyek
                   </th>
                   <th style={{ width: '220px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
                     Kordinasi
@@ -1568,7 +1677,7 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                         Tidak Ada Baris Laporan Pekerjaan Harian
                       </div>
                       <p style={{ fontSize: '0.825rem', marginTop: '4px' }}>
-                        {showAllDates ? 'Belum ada data laporan.' : `Tidak ada pekerjaan tercatat pada tanggal ${selectedDateFilter}.`}
+                        {showAllDates ? 'Belum ada data laporan.' : `Tidak ada pekerjaan tercatat pada tanggal ${startDateFilter} s/d ${endDateFilter}.`}
                         {' '}Klik tombol "+ Tambah Baris Laporan" di atas untuk mengisi.
                       </p>
                     </td>
@@ -1597,8 +1706,11 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                         </div>
                       </td>
 
-                      {/* 3. Kolom Laporan harian */}
+                      {/* 3. Kolom Laporan harian & Proyek */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ marginBottom: '5px' }}>
+                          {getProjectBadge(item.proyek || item.project)}
+                        </div>
                         <div style={{ 
                           fontWeight: 700, 
                           fontSize: '0.9rem', 
@@ -2401,6 +2513,72 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                   </div>
                 </div>
 
+                {/* 1-Click Interactive Project Selector */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>🏗️ Lokasi Proyek</span>
+                    <span style={{ fontSize: '0.72rem', color: newProject.includes('View') ? '#F59E0B' : newProject.includes('Park') ? '#10B981' : '#C084FC', fontWeight: 800 }}>
+                      🎯 Terpilih: {newProject}
+                    </span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setNewProject('Ashoka Park')}
+                      className={`btn btn-sm ${newProject === 'Ashoka Park' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: newProject === 'Ashoka Park' ? 'linear-gradient(135deg, #10B981, #059669)' : undefined, 
+                        border: newProject === 'Ashoka Park' ? '1.5px solid #10B981' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🌳 Ashoka Park
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewProject('Ashoka View')}
+                      className={`btn btn-sm ${newProject === 'Ashoka View' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: newProject === 'Ashoka View' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : undefined, 
+                        border: newProject === 'Ashoka View' ? '1.5px solid #F59E0B' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🏔️ Ashoka View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewProject('Kantor Pusat')}
+                      className={`btn btn-sm ${newProject === 'Kantor Pusat' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: newProject === 'Kantor Pusat' ? 'linear-gradient(135deg, #A855F7, #9333EA)' : undefined, 
+                        border: newProject === 'Kantor Pusat' ? '1.5px solid #A855F7' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🏢 Kantor Pusat
+                    </button>
+                  </div>
+                </div>
+
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <label className="form-label" style={{ fontWeight: 800 }}>📝 Laporan Pekerjaan Harian</label>
                   <textarea
@@ -2649,6 +2827,72 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                       onChange={(e) => setInsDueTime(e.target.value)}
                       required
                     />
+                  </div>
+                </div>
+
+                {/* 1-Click Interactive Project Selector for Instruction */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>🏗️ Lokasi Proyek</span>
+                    <span style={{ fontSize: '0.72rem', color: insProject.includes('View') ? '#F59E0B' : insProject.includes('Park') ? '#10B981' : '#C084FC', fontWeight: 800 }}>
+                      🎯 Terpilih: {insProject}
+                    </span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setInsProject('Ashoka Park')}
+                      className={`btn btn-sm ${insProject === 'Ashoka Park' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: insProject === 'Ashoka Park' ? 'linear-gradient(135deg, #10B981, #059669)' : undefined, 
+                        border: insProject === 'Ashoka Park' ? '1.5px solid #10B981' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🌳 Ashoka Park
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInsProject('Ashoka View')}
+                      className={`btn btn-sm ${insProject === 'Ashoka View' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: insProject === 'Ashoka View' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : undefined, 
+                        border: insProject === 'Ashoka View' ? '1.5px solid #F59E0B' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🏔️ Ashoka View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInsProject('Kantor Pusat')}
+                      className={`btn btn-sm ${insProject === 'Kantor Pusat' ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ 
+                        padding: '0.45rem', 
+                        fontSize: '0.78rem', 
+                        fontWeight: 800, 
+                        background: insProject === 'Kantor Pusat' ? 'linear-gradient(135deg, #A855F7, #9333EA)' : undefined, 
+                        border: insProject === 'Kantor Pusat' ? '1.5px solid #A855F7' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🏢 Kantor Pusat
+                    </button>
                   </div>
                 </div>
 
