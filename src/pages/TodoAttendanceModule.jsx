@@ -698,8 +698,26 @@ export const TodoAttendanceModule = () => {
 
       {/* TAB 1: LAPORAN PEKERJAAN HARIAN (EXACT FORMAT MATCHING USER SPREADSHEET) */}
       {activeTab === 'todo' && (
-        <div className="glass-card" style={{ padding: '1.5rem' }}>
-          {/* TOP CONTROLS & DATE SELECTOR (PERSIS SEPERTI GAMBAR: TANGGAL : [ ... ]) */}
+        <div className="glass-card" style={{ padding: '1.75rem' }}>
+          {/* CENTERED TITLE PERSIS SEPERTI GAMBAR */}
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ 
+              fontSize: '1.4rem', 
+              fontWeight: 900, 
+              color: 'var(--text-main)', 
+              textDecoration: 'underline',
+              textUnderlineOffset: '6px',
+              letterSpacing: '0.5px',
+              margin: '0 0 4px 0'
+            }}>
+              Laporan Pekerjaan Harian
+            </h2>
+            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              To Do List
+            </div>
+          </div>
+
+          {/* TOP CONTROLS & DATE SELECTOR */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             {/* Box Header Tanggal */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -777,16 +795,19 @@ export const TodoAttendanceModule = () => {
             </div>
           </div>
 
-          {/* EXACT SPREADSHEET TABLE: WAKTU | LAPORAN PEKERJAAN HARIAN | KORDINASI | PIC */}
+          {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
           <div className="table-container" style={{ border: '1.5px solid #EAB308', borderRadius: '8px', overflow: 'hidden' }}>
             <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#FDE047', color: '#0F172A', borderBottom: '2px solid #CA8A04' }}>
-                  <th style={{ width: '150px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                  <th style={{ width: '130px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                    Tanggal
+                  </th>
+                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
                     Waktu
                   </th>
                   <th style={{ padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Laporan pekerjaan harian
+                    Laporan harian
                   </th>
                   <th style={{ width: '220px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
                     Kordinasi
@@ -802,7 +823,7 @@ export const TodoAttendanceModule = () => {
               <tbody>
                 {visibleTodos.length === 0 ? (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', background: 'var(--bg-card)' }}>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', background: 'var(--bg-card)' }}>
                       <CheckCircle2 size={36} color="#EAB308" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
                       <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
                         Tidak Ada Baris Laporan Pekerjaan Harian
@@ -823,17 +844,21 @@ export const TodoAttendanceModule = () => {
                         transition: 'background 0.15s ease'
                       }}
                     >
-                      {/* 1. Kolom Waktu */}
+                      {/* 1. Kolom Tanggal */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                          {item.date || item.assignDate || todayDateStr}
+                        </div>
+                      </td>
+
+                      {/* 2. Kolom Waktu */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div style={{ fontWeight: 800, color: '#F59E0B', fontSize: '0.875rem' }}>
                           {item.waktu || '08:00 - 17:00'}
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', marginTop: '2px' }}>
-                          📅 {item.date || item.assignDate || todayDateStr}
-                        </div>
                       </td>
 
-                      {/* 2. Kolom Laporan Pekerjaan Harian */}
+                      {/* 3. Kolom Laporan harian */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div style={{ 
                           fontWeight: 700, 
@@ -851,14 +876,14 @@ export const TodoAttendanceModule = () => {
                         )}
                       </td>
 
-                      {/* 3. Kolom Kordinasi */}
+                      {/* 4. Kolom Kordinasi */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#38BDF8' }}>
                           {item.kordinasi || '-'}
                         </div>
                       </td>
 
-                      {/* 4. Kolom PIC */}
+                      {/* 5. Kolom PIC */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>
                           {item.pic || item.assignee || '-'}
@@ -868,7 +893,7 @@ export const TodoAttendanceModule = () => {
                         </div>
                       </td>
 
-                      {/* 5. Kolom Status & Aksi */}
+                      {/* 6. Kolom Status & Aksi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <button
