@@ -341,7 +341,7 @@ export const TodoAttendanceModule = () => {
 
   const handleOpenAddReportModal = () => {
     setEditingReportItem(null);
-    setNewDate(endDateFilter || todayDateStr);
+    setNewDate(todayDateStr);
     setNewWaktu('08:00 - 10:00');
     setNewLaporan('');
     setNewKordinasi('');
@@ -352,6 +352,12 @@ export const TodoAttendanceModule = () => {
   };
 
   const handleOpenEditReportModal = (item) => {
+    // Jika bukan pimpinan dan tanggal laporan adalah hari kemarin/lampau, kunci pengeditan
+    if (!isBoss && item.date && item.date < todayDateStr) {
+      showNotification(`Laporan tanggal lampau (${item.date}) telah dikunci dan tidak dapat diubah lagi oleh staf.`, 'danger');
+      return;
+    }
+
     setEditingReportItem(item);
     setNewDate(item.date || item.assignDate || todayDateStr);
     setNewWaktu(item.waktu || '08:00 - 10:00');
@@ -367,6 +373,12 @@ export const TodoAttendanceModule = () => {
     e.preventDefault();
     if (!newLaporan.trim()) return;
 
+    // Strict Rule: Staf hanya boleh mengisi laporan untuk tanggal hari ini (tanggal kemarin dikunci)
+    if (!isBoss && newDate !== todayDateStr) {
+      showNotification(`Pengisian laporan tanggal lampau/kemarin sudah ditutup. Anda hanya dapat mengisi laporan untuk tanggal hari ini (${todayDateStr}).`, 'danger');
+      return;
+    }
+
     let targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers.find(u => u.name === currentUser?.name) || safeUsers[0];
     let finalPic = targetUser ? targetUser.name : newPic;
     let finalPicId = targetUser ? targetUser.id : '';
@@ -377,7 +389,7 @@ export const TodoAttendanceModule = () => {
         if (t.id === editingReportItem.id) {
           return {
             ...t,
-            date: newDate,
+            date: isBoss ? newDate : t.date,
             waktu: newWaktu,
             laporan: newLaporan.trim(),
             text: newLaporan.trim(),
@@ -395,7 +407,7 @@ export const TodoAttendanceModule = () => {
     } else {
       const newItem = {
         id: Date.now(),
-        date: newDate,
+        date: isBoss ? newDate : todayDateStr,
         waktu: newWaktu,
         laporan: newLaporan.trim(),
         text: newLaporan.trim(),
@@ -410,7 +422,7 @@ export const TodoAttendanceModule = () => {
         assignedBy: finalAssignedBy
       };
       setTodos([newItem, ...safeTodos]);
-      showNotification(`Laporan pekerjaan harian berhasil ditambahkan atas nama ${newItem.pic}!`, 'success');
+      showNotification(`Laporan pekerjaan harian (${newItem.date}) berhasil ditambahkan atas nama ${newItem.pic}!`, 'success');
     }
 
     setIsReportModalOpen(false);
@@ -419,6 +431,11 @@ export const TodoAttendanceModule = () => {
   const handleDeleteReport = (id) => {
     const itemToDelete = safeTodos.find(t => t.id === id);
     if (!itemToDelete) return;
+
+    if (!isBoss && itemToDelete.date && itemToDelete.date < todayDateStr) {
+      showNotification(`Laporan tanggal lampau (${itemToDelete.date}) telah terkunci dan tidak dapat dihapus oleh staf.`, 'danger');
+      return;
+    }
 
     const canDelete = isBoss || isTaskAssignedToUser(itemToDelete, currentUser);
     if (!canDelete) {
@@ -1863,14 +1880,30 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
               <div className="modal-body">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={newDate}
-                      onChange={(e) => setNewDate(e.target.value)}
-                      required
-                    />
+                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Laporan</label>
+                    {isBoss ? (
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={newDate}
+                        onChange={(e) => setNewDate(e.target.value)}
+                        required
+                        style={{ fontWeight: 700 }}
+                      />
+                    ) : (
+                      <div>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={todayDateStr}
+                          readOnly
+                          style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: '#10B981', fontWeight: 800 }}
+                        />
+                        <div style={{ fontSize: '0.68rem', color: '#10B981', marginTop: '3px', fontWeight: 700 }}>
+                          🔒 Terkunci Hari Ini ({todayDateStr}) • Pengisian tanggal kemarin telah ditutup
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="form-label" style={{ fontWeight: 800 }}>⏰ Waktu (Rentang Jam)</label>
