@@ -409,6 +409,74 @@ export const AppProvider = ({ children }) => {
     } catch (e) {}
   }, [todos]);
 
+  // 4B. WORK INSTRUCTIONS STORE (INSTRUKSI PEKERJAAN PIMPINAN KEPADA STAF)
+  const defaultInitialInstructions = [
+    {
+      id: 'INS-001',
+      date: '2025-08-26',
+      dueDate: '2025-08-27',
+      dueTime: '17:00',
+      instruction: 'Koordinasikan dengan Bank Mandiri & BTN untuk percepatan SP3K 12 unit konsumen Cluster Emerald',
+      kordinasi: 'Bank BTN, Bank Mandiri, Konsumen',
+      assignee: 'Syamsul Dahari',
+      assigneeId: 'USR-015',
+      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)',
+      assignedById: 'USR-002',
+      priority: 'Tinggi',
+      status: 'Pending',
+      reportNotes: '',
+      completionDate: ''
+    },
+    {
+      id: 'INS-002',
+      date: '2025-08-26',
+      dueDate: '2025-08-28',
+      dueTime: '15:00',
+      instruction: 'Lakukan survei harga material semen & besi beton ke 3 vendor baru untuk tender Cluster Sapphire',
+      kordinasi: 'Vendor Material, Procurement',
+      assignee: 'Tarkum Aditya',
+      assigneeId: 'USR-016',
+      assignedBy: 'Adhi Himawan, S.E.Sy (General Manager)',
+      assignedById: 'USR-004',
+      priority: 'Tinggi',
+      status: 'Pending',
+      reportNotes: '',
+      completionDate: ''
+    },
+    {
+      id: 'INS-003',
+      date: '2025-08-25',
+      dueDate: '2025-08-26',
+      dueTime: '16:00',
+      instruction: 'Siapkan draf brosur dan price list promo DP 0% untuk pameran properti mall weekend ini',
+      kordinasi: 'Percetakan & Event Organizer',
+      assignee: 'Fresda Destifani',
+      assigneeId: 'USR-012',
+      assignedBy: 'Yulieka Rachmawati, S.Si (Head Marketing)',
+      assignedById: 'USR-011',
+      priority: 'Tinggi',
+      status: 'Selesai',
+      reportNotes: 'Brosur telah dicetak 500 eksemplar & materi digital siap tayang.',
+      completionDate: '2025-08-26 14:30'
+    }
+  ];
+
+  const getInitialInstructions = () => {
+    try {
+      const saved = localStorage.getItem('ams_work_instructions_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultInitialInstructions;
+  };
+
+  const [instructions, setInstructions] = useState(getInitialInstructions);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_work_instructions_v1', JSON.stringify(instructions));
+    } catch (e) {}
+  }, [instructions]);
+
   // 5. CLEAN ATTENDANCE LOGS STORE (EMPTY LIST READY FOR MANUAL TESTING)
   const getInitialAttendances = () => {
     try {
@@ -707,6 +775,8 @@ export const AppProvider = ({ children }) => {
         updateUnitProgress,
         todos,
         setTodos,
+        instructions,
+        setInstructions,
         executiveApprovals,
         setExecutiveApprovals,
         attendances,
