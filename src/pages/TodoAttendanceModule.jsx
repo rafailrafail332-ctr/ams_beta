@@ -339,6 +339,13 @@ export const TodoAttendanceModule = () => {
     }));
   };
 
+  // Calculate 2-Day Allowed Window (Hari Ini & Kemarin)
+  const yesterdayDateStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+  })();
+
   const handleOpenAddReportModal = () => {
     setEditingReportItem(null);
     setNewDate(todayDateStr);
@@ -352,9 +359,9 @@ export const TodoAttendanceModule = () => {
   };
 
   const handleOpenEditReportModal = (item) => {
-    // Jika bukan pimpinan dan tanggal laporan adalah hari kemarin/lampau, kunci pengeditan
-    if (!isBoss && item.date && item.date < todayDateStr) {
-      showNotification(`Laporan tanggal lampau (${item.date}) telah dikunci dan tidak dapat diubah lagi oleh staf.`, 'danger');
+    // Jika bukan pimpinan dan tanggal laporan lebih lampau dari 2 hari (sebelum kemarin), kunci pengeditan
+    if (!isBoss && item.date && item.date < yesterdayDateStr) {
+      showNotification(`Laporan tanggal lampau (${item.date}) telah melewati batas toleransi 2 hari dan tidak dapat diubah lagi oleh staf.`, 'danger');
       return;
     }
 
@@ -373,9 +380,14 @@ export const TodoAttendanceModule = () => {
     e.preventDefault();
     if (!newLaporan.trim()) return;
 
-    // Strict Rule: Staf hanya boleh mengisi laporan untuk tanggal hari ini (tanggal kemarin dikunci)
-    if (!isBoss && newDate !== todayDateStr) {
-      showNotification(`Pengisian laporan tanggal lampau/kemarin sudah ditutup. Anda hanya dapat mengisi laporan untuk tanggal hari ini (${todayDateStr}).`, 'danger');
+    // Strict Rule: Toleransi 2 hari (H & H-1). Tanggal sebelum kemarin (H-2) dikunci
+    if (!isBoss && newDate < yesterdayDateStr) {
+      showNotification(`Pengisian laporan sebelum tanggal ${yesterdayDateStr} sudah ditutup. Batas maksimal pengisian adalah 2 hari (Hari Ini & Kemarin).`, 'danger');
+      return;
+    }
+
+    if (!isBoss && newDate > todayDateStr) {
+      showNotification(`Tidak dapat mengisi laporan untuk tanggal masa depan (${newDate}).`, 'danger');
       return;
     }
 
@@ -389,7 +401,7 @@ export const TodoAttendanceModule = () => {
         if (t.id === editingReportItem.id) {
           return {
             ...t,
-            date: isBoss ? newDate : t.date,
+            date: newDate,
             waktu: newWaktu,
             laporan: newLaporan.trim(),
             text: newLaporan.trim(),
@@ -407,7 +419,7 @@ export const TodoAttendanceModule = () => {
     } else {
       const newItem = {
         id: Date.now(),
-        date: isBoss ? newDate : todayDateStr,
+        date: newDate,
         waktu: newWaktu,
         laporan: newLaporan.trim(),
         text: newLaporan.trim(),
@@ -432,8 +444,8 @@ export const TodoAttendanceModule = () => {
     const itemToDelete = safeTodos.find(t => t.id === id);
     if (!itemToDelete) return;
 
-    if (!isBoss && itemToDelete.date && itemToDelete.date < todayDateStr) {
-      showNotification(`Laporan tanggal lampau (${itemToDelete.date}) telah terkunci dan tidak dapat dihapus oleh staf.`, 'danger');
+    if (!isBoss && itemToDelete.date && itemToDelete.date < yesterdayDateStr) {
+      showNotification(`Laporan tanggal lampau (${itemToDelete.date}) telah melewati batas toleransi 2 hari dan tidak dapat dihapus oleh staf.`, 'danger');
       return;
     }
 
@@ -1880,7 +1892,7 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
               <div className="modal-body">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Laporan</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Laporan (Maks. 2 Hari)</label>
                     {isBoss ? (
                       <input
                         type="date"
@@ -1892,15 +1904,36 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                       />
                     ) : (
                       <div>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setNewDate(todayDateStr)}
+                            className={`btn btn-sm ${newDate === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ flex: 1, padding: '0.25rem', fontSize: '0.72rem', fontWeight: 800 }}
+                          >
+                            📅 Hari Ini ({todayDateStr.split('-')[2]}/{todayDateStr.split('-')[1]})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setNewDate(yesterdayDateStr)}
+                            className={`btn btn-sm ${newDate === yesterdayDateStr ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ flex: 1, padding: '0.25rem', fontSize: '0.72rem', fontWeight: 800 }}
+                          >
+                            ⏳ Kemarin ({yesterdayDateStr.split('-')[2]}/{yesterdayDateStr.split('-')[1]})
+                          </button>
+                        </div>
                         <input
                           type="date"
                           className="form-control"
-                          value={todayDateStr}
-                          readOnly
-                          style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: '#10B981', fontWeight: 800 }}
+                          value={newDate}
+                          min={yesterdayDateStr}
+                          max={todayDateStr}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          required
+                          style={{ fontWeight: 800, color: '#38BDF8', height: '34px' }}
                         />
                         <div style={{ fontSize: '0.68rem', color: '#10B981', marginTop: '3px', fontWeight: 700 }}>
-                          🔒 Terkunci Hari Ini ({todayDateStr}) • Pengisian tanggal kemarin telah ditutup
+                          ✓ Toleransi 2 Hari Aktif (Hari Ini & Kemarin). Laporan sebelum H-2 ditutup otomatis.
                         </div>
                       </div>
                     )}
