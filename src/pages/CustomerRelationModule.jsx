@@ -1312,8 +1312,8 @@ export const CustomerRelationModule = () => {
                 </p>
               </div>
 
-              <button className="btn btn-primary" onClick={handleOpenAddHandover} style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none' }}>
-                <Plus size={16} /> Catat BAST Serah Terima Kunci Baru
+              <button className="btn btn-primary" onClick={handleOpenAddHandover} style={{ background: 'linear-gradient(135deg, #b8860b, #d4af37)', border: 'none', fontWeight: 800, color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(184, 134, 11, 0.3)' }}>
+                <Plus size={18} /> Input Data STK
               </button>
             </div>
 
@@ -2719,7 +2719,7 @@ export const CustomerRelationModule = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <KeyRound size={22} color="#b8860b" />
                 <h3 className="modal-title" style={{ fontWeight: 800, color: '#0f172a', margin: 0, fontSize: '1.2rem' }}>
-                  {editingHandover ? `Edit BAST STK - Unit ${handoverForm.blok}-${handoverForm.no}` : 'Form Input BAST Serah Terima Kunci'}
+                  {editingHandover ? `Edit Data STK - Unit ${handoverForm.blok}-${handoverForm.no}` : 'Form Input Data STK'}
                 </h3>
               </div>
               <button onClick={() => setIsHandoverModalOpen(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
@@ -3002,8 +3002,8 @@ export const CustomerRelationModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '0.85rem 1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', background: '#f8fafc' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHandoverModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #b8860b, #d4af37)', border: 'none', fontWeight: 800, color: '#fff', padding: '0.5rem 1.25rem' }}>
-                  {editingHandover ? '💾 Simpan Perubahan BAST' : '🚀 Simpan Data BAST STK'}
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #b8860b, #d4af37)', border: 'none', fontWeight: 800, color: '#fff', padding: '0.5rem 1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {editingHandover ? '💾 Simpan Perubahan Data STK' : '🚀 Simpan Input Data STK'}
                 </button>
               </div>
             </form>
