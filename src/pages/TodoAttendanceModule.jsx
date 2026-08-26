@@ -11,32 +11,34 @@ import {
   Calendar, 
   Sparkles, 
   User, 
-  CheckCircle2,
-  AlertCircle,
-  X,
-  UserCheck,
-  Lock,
-  RotateCcw,
-  ShieldCheck,
-  CheckCircle,
-  Clock3,
-  XCircle,
-  ThumbsUp,
-  ThumbsDown,
-  Eye,
-  Filter,
-  Shield,
-  Upload,
-  Image as ImageIcon,
-  Compass,
-  AlertTriangle,
-  Settings,
-  Navigation,
-  Building2,
-  FileText,
-  Send,
-  CalendarDays,
-  Timer
+  CheckCircle2, 
+  AlertCircle, 
+  X, 
+  UserCheck, 
+  Lock, 
+  RotateCcw, 
+  ShieldCheck, 
+  CheckCircle, 
+  Clock3, 
+  XCircle, 
+  ThumbsUp, 
+  ThumbsDown, 
+  Eye, 
+  Filter, 
+  Shield, 
+  Upload, 
+  Image as ImageIcon, 
+  Compass, 
+  AlertTriangle, 
+  Settings, 
+  Navigation, 
+  Building2, 
+  FileText, 
+  Send, 
+  CalendarDays, 
+  Timer,
+  Edit2,
+  Users
 } from 'lucide-react';
 
 export const TodoAttendanceModule = () => {
@@ -81,53 +83,31 @@ export const TodoAttendanceModule = () => {
   const safeTodos = Array.isArray(todos) ? todos : [];
   const safeAttendances = Array.isArray(attendances) ? attendances : [];
 
-  // Date and Time Helper Defaults
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [newTodoText, setNewTodoText] = useState('');
-  const [newAssignee, setNewAssignee] = useState(() => (users && users[0] ? users[0].name : 'Syamsul Dahari'));
-  const [newPriority, setNewPriority] = useState('Sedang');
-  const [newAssignDate, setNewAssignDate] = useState(todayStr);
-  const [newDueDate, setNewDueDate] = useState(todayStr);
-  const [newDueTime, setNewDueTime] = useState('17:00');
+  // Active Date Selector (Format: YYYY-MM-DD)
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  const [selectedDateFilter, setSelectedDateFilter] = useState(todayDateStr);
+  const [showAllDates, setShowAllDates] = useState(false);
 
-  // Sub-filter for tasks: 'for_me' | 'all' | 'by_me' | 'overdue'
-  const [todoFilter, setTodoFilter] = useState(() => isBoss ? 'all' : 'for_me');
+  // Form State for Adding/Editing Daily Work Report Row
+  const [newDate, setNewDate] = useState(todayDateStr);
+  const [newWaktu, setNewWaktu] = useState('08:00 - 10:00');
+  const [newLaporan, setNewLaporan] = useState('');
+  const [newKordinasi, setNewKordinasi] = useState('');
+  const [newPic, setNewPic] = useState(() => (safeUsers[0]?.name || 'Syamsul Dahari'));
+  const [newPriority, setNewPriority] = useState('Sedang');
+
+  // Sub-filter for tasks: 'all' | 'for_me'
+  const [todoPicFilter, setTodoPicFilter] = useState(() => isBoss ? 'all' : 'for_me');
 
   useEffect(() => {
-    if (!isBoss && todoFilter === 'all') {
-      setTodoFilter('for_me');
+    if (!isBoss && todoPicFilter === 'all') {
+      setTodoPicFilter('for_me');
     }
   }, [isBoss]);
 
-  // Modal Input Laporan Hasil Kerja Staf
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [selectedTaskForReport, setSelectedTaskForReport] = useState(null);
-  const [reportNotesInput, setReportNotesInput] = useState('');
-
-  const handleOpenReportModal = (task) => {
-    setSelectedTaskForReport(task);
-    setReportNotesInput(task.reportNotes || '');
-    setIsReportModalOpen(true);
-  };
-
-  const handleSaveTaskReport = (e) => {
-    e.preventDefault();
-    if (!selectedTaskForReport) return;
-    const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    setTodos(todos.map(t => {
-      if (t.id === selectedTaskForReport.id) {
-        return {
-          ...t,
-          completed: true,
-          reportNotes: reportNotesInput.trim(),
-          completionDate: nowStr
-        };
-      }
-      return t;
-    }));
-    showNotification(`Laporan hasil pekerjaan "${selectedTaskForReport.text}" berhasil dikirim & ditandai selesai!`, 'success');
-    setIsReportModalOpen(false);
-  };
+  // Modal State for Adding/Editing Item
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   // MULTI-SITE GEOFENCING CONFIGURATION (Mendukung Banyak Titik Lokasi Presensi)
   const defaultLocations = [
@@ -361,6 +341,7 @@ export const TodoAttendanceModule = () => {
     if (!task || !user) return false;
 
     // 1. Match by Assignee ID if present
+    if (task.picId && user.id && task.picId === user.id) return true;
     if (task.assigneeId && user.id && task.assigneeId === user.id) return true;
 
     const normalize = (str) => (str || '')
@@ -369,61 +350,42 @@ export const TodoAttendanceModule = () => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const taskAssignee = normalize(task.assignee || '');
+    const taskPic = normalize(task.pic || task.assignee || '');
     const userName = normalize(user.name || '');
 
-    if (!taskAssignee || !userName) return false;
+    if (!taskPic || !userName) return false;
 
     // 2. Direct string contains
-    if (taskAssignee.includes(userName) || userName.includes(taskAssignee)) return true;
+    if (taskPic.includes(userName) || userName.includes(taskPic)) return true;
 
     // 3. Match individual significant words
     const ignoredWords = ['staf', 'staff', 'head', 'manager', 'direktur', 'utama', 'general', 'super', 'admin', 'se', 'st', 'sh', 'ssi', 'mba', 'mm', 'pt', 'cv'];
     const userTokens = userName.split(' ').filter(w => w.length >= 3 && !ignoredWords.includes(w));
-    const assigneeTokens = taskAssignee.split(' ').filter(w => w.length >= 3 && !ignoredWords.includes(w));
+    const picTokens = taskPic.split(' ').filter(w => w.length >= 3 && !ignoredWords.includes(w));
 
-    if (userTokens.length > 0 && assigneeTokens.length > 0) {
-      if (userTokens.some(ut => assigneeTokens.includes(ut))) return true;
+    if (userTokens.length > 0 && picTokens.length > 0) {
+      if (userTokens.some(ut => picTokens.includes(ut))) return true;
     }
 
     return false;
   };
 
-  // Helper to match if task was assigned BY the user
-  const isTaskAssignedByUser = (task, user) => {
-    if (!task || !user) return false;
-    if (task.assignedById && user.id && task.assignedById === user.id) return true;
-    const taskAssignedBy = (task.assignedBy || '').toLowerCase();
-    const userName = (user.name || '').toLowerCase().split(',')[0].trim();
-    return taskAssignedBy.includes(userName);
-  };
-
-  // Helper to check if task is overdue
-  const isTaskOverdue = (task) => {
-    if (task.completed) return false;
-    if (!task.dueDate) return false;
-    const dueDateTimeStr = `${task.dueDate}T${task.dueTime || '23:59'}:00`;
-    const dueDateObj = new Date(dueDateTimeStr);
-    return !isNaN(dueDateObj.getTime()) && new Date() > dueDateObj;
-  };
-
-  // Pre-calculated filtered lists
-  const todosForMe = safeTodos.filter(t => isTaskAssignedToUser(t, currentUser));
-  const todosByMe = safeTodos.filter(t => isTaskAssignedByUser(t, currentUser));
-  const overdueTodos = safeTodos.filter(t => isTaskOverdue(t));
-
-  // STRICT TASK VISIBILITY FILTERING BASED ON ACTIVE FILTER TAB
+  // FILTERED TODOS: By Date and By PIC
   const visibleTodos = safeTodos.filter((t) => {
-    if (todoFilter === 'for_me') {
+    // 1. Date Filter
+    if (!showAllDates && selectedDateFilter) {
+      const taskDate = t.date || t.assignDate;
+      if (taskDate && taskDate !== selectedDateFilter) {
+        return false;
+      }
+    }
+
+    // 2. PIC / Access Restriction Filter
+    if (todoPicFilter === 'for_me') {
       return isTaskAssignedToUser(t, currentUser);
     }
-    if (todoFilter === 'by_me') {
-      return isTaskAssignedByUser(t, currentUser);
-    }
-    if (todoFilter === 'overdue') {
-      return isTaskOverdue(t);
-    }
-    // 'all' filter (Available for Bosses)
+
+    // If 'all' (Pimpinan can see all tasks)
     return isBoss ? true : isTaskAssignedToUser(t, currentUser);
   });
 
@@ -431,81 +393,111 @@ export const TodoAttendanceModule = () => {
     setTodos(safeTodos.map(t => {
       if (t.id === id) {
         const nextState = !t.completed;
-        const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        showNotification(nextState ? `Tugas "${t.text}" berhasil diselesaikan oleh ${currentUser?.name}!` : `Tugas "${t.text}" diubah menjadi pending.`);
+        showNotification(nextState ? `Pekerjaan "${t.laporan || t.text}" berhasil diselesaikan!` : `Pekerjaan diubah menjadi pending.`);
         return { 
           ...t, 
-          completed: nextState,
-          completionDate: nextState ? (t.completionDate || nowStr) : ''
+          completed: nextState
         };
       }
       return t;
     }));
   };
 
-  const handleAddTodo = (e) => {
+  const handleOpenAddModal = () => {
+    setEditingItem(null);
+    setNewDate(selectedDateFilter || todayDateStr);
+    setNewWaktu('08:00 - 10:00');
+    setNewLaporan('');
+    setNewKordinasi('');
+    setNewPic(safeUsers[0]?.name || 'Syamsul Dahari');
+    setNewPriority('Sedang');
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenEditModal = (item) => {
+    setEditingItem(item);
+    setNewDate(item.date || item.assignDate || todayDateStr);
+    setNewWaktu(item.waktu || '08:00 - 10:00');
+    setNewLaporan(item.laporan || item.text || '');
+    setNewKordinasi(item.kordinasi || '');
+    setNewPic(item.pic || item.assignee || (safeUsers[0]?.name || ''));
+    setNewPriority(item.priority || 'Sedang');
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveTodo = (e) => {
     e.preventDefault();
     if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Direktur Utama, General Manager, atau Bu Yulieka (Head Marketing) yang berhak menugaskan To-Do List!`, 'danger');
+      showNotification(`Akses Terbatas: Hanya Direktur Utama, General Manager, atau Bu Yulieka (Head Marketing) yang berhak menerbitkan laporan pekerjaan!`, 'danger');
       return;
     }
-    if (!newTodoText.trim()) return;
+    if (!newLaporan.trim()) return;
 
-    // Lookup selected user from users list
-    const targetUser = safeUsers.find(u => u.name === newAssignee || u.id === newAssignee) || safeUsers[0];
+    const targetUser = safeUsers.find(u => u.name === newPic || u.id === newPic) || safeUsers[0];
 
-    const newItem = {
-      id: Date.now(),
-      text: newTodoText.trim(),
-      department: targetUser?.role || 'Pekerjaan Proyek',
-      priority: newPriority,
-      completed: false,
-      assignee: targetUser ? targetUser.name : newAssignee,
-      assigneeId: targetUser ? targetUser.id : '',
-      assignedBy: `${currentUser?.name} (${currentUser?.role})`,
-      assignedById: currentUser?.id || '',
-      assignDate: newAssignDate || todayStr,
-      dueDate: newDueDate || todayStr,
-      dueTime: newDueTime || '17:00',
-      reportNotes: '',
-      completionDate: '',
-      createdAt: new Date().toISOString()
-    };
+    if (editingItem) {
+      setTodos(safeTodos.map(t => {
+        if (t.id === editingItem.id) {
+          return {
+            ...t,
+            date: newDate,
+            waktu: newWaktu,
+            laporan: newLaporan.trim(),
+            text: newLaporan.trim(),
+            kordinasi: newKordinasi.trim(),
+            pic: targetUser ? targetUser.name : newPic,
+            assignee: targetUser ? targetUser.name : newPic,
+            picId: targetUser ? targetUser.id : '',
+            priority: newPriority
+          };
+        }
+        return t;
+      }));
+      showNotification('Baris Laporan Pekerjaan Harian berhasil diperbarui!', 'success');
+    } else {
+      const newItem = {
+        id: Date.now(),
+        date: newDate,
+        waktu: newWaktu,
+        laporan: newLaporan.trim(),
+        text: newLaporan.trim(),
+        kordinasi: newKordinasi.trim(),
+        pic: targetUser ? targetUser.name : newPic,
+        assignee: targetUser ? targetUser.name : newPic,
+        picId: targetUser ? targetUser.id : '',
+        priority: newPriority,
+        completed: false,
+        notes: '',
+        assignedBy: `${currentUser?.name} (${currentUser?.role})`
+      };
+      setTodos([newItem, ...safeTodos]);
+      showNotification(`BARIS PEKERJAAN HARIAN DITAMBAHKAN! Ditugaskan ke ${newItem.pic}.`, 'success');
+    }
 
-    setTodos([newItem, ...safeTodos]);
-    setNewTodoText('');
-    showNotification(`TUGAS DITERBITKAN OLEH ${currentUser?.role.toUpperCase()}! Diserahkan ke ${newItem.assignee} (Batas Waktu: ${newItem.dueDate} pk ${newItem.dueTime} WIB).`, 'success');
+    setIsAddModalOpen(false);
   };
 
   const handleDeleteTodo = (id) => {
     if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Manager atau Direktur yang berhak menghapus To-Do List!`, 'danger');
+      showNotification(`Akses Terbatas: Hanya Manager atau Direktur yang berhak menghapus baris laporan!`, 'danger');
       return;
     }
-    setTodos(safeTodos.filter(t => t.id !== id));
-    showNotification('Tugas berhasil dihapus oleh Manager/Direktur.', 'warning');
+    if (window.confirm('Hapus baris laporan pekerjaan ini?')) {
+      setTodos(safeTodos.filter(t => t.id !== id));
+      showNotification('Baris laporan pekerjaan berhasil dihapus.', 'warning');
+    }
   };
 
   const handleResetTodoList = () => {
     if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Manager, Direktur Utama, atau Super Admin yang berhak mereset To-Do List!`, 'danger');
+      showNotification(`Akses Terbatas: Hanya Manager, Direktur Utama, atau Super Admin yang berhak mereset laporan!`, 'danger');
       return;
     }
 
-    if (window.confirm('Apakah Anda yakin ingin mereset To-Do List Harian untuk memulai periode/hari kerja baru?')) {
+    if (window.confirm('Apakah Anda yakin ingin mereset seluruh Laporan Pekerjaan Harian?')) {
       setTodos([]);
-      showNotification(`TO-DO LIST HARIAN BERHASIL DI-RESET OLEH ${currentUser?.role.toUpperCase()}! Silakan terbitkan daftar tugas baru.`, 'info');
+      showNotification(`LAPORAN PEKERJAAN HARIAN BERHASIL DI-RESET!`, 'info');
     }
-  };
-
-  const handleClearCompletedTodos = () => {
-    if (!isBoss) {
-      showNotification(`Akses Terbatas: Hanya Manager, Direktur Utama, atau Super Admin yang berhak mereset tugas!`, 'danger');
-      return;
-    }
-
-    setTodos(safeTodos.filter(t => !t.completed));
-    showNotification('Seluruh tugas yang telah selesai [ ✅ Done ] berhasil dibersihkan.', 'info');
   };
 
   // SUBMIT PRESENSI WITH MULTI-SITE GEOFENCING VERIFICATION
@@ -557,7 +549,7 @@ export const TodoAttendanceModule = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Laporan Pekerjaan Harian & Presensi Geofencing GPS</h1>
-          <p className="page-subtitle">Sistem penugasan pekerjaan harian dengan tanggal & batas waktu (deadline), pelaporan hasil kerja staf, dan presensi multi-koordinat.</p>
+          <p className="page-subtitle">Format tabel kerja harian: Tanggal, Waktu, Laporan Pekerjaan Harian, Kordinasi, dan PIC.</p>
         </div>
         
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -652,7 +644,7 @@ export const TodoAttendanceModule = () => {
           <div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Tugas Selesai / Total</div>
             <div style={{ fontSize: '1.35rem', fontWeight: 900 }}>
-              {safeTodos.filter(t => t.completed).length} / {safeTodos.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Task</span>
+              {safeTodos.filter(t => t.completed).length} / {safeTodos.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Baris</span>
             </div>
           </div>
         </div>
@@ -670,13 +662,13 @@ export const TodoAttendanceModule = () => {
         </div>
 
         <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Timer size={24} />
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CalendarDays size={24} />
           </div>
           <div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Melewati Batas Waktu</div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: overdueTodos.length > 0 ? '#EF4444' : 'var(--success)' }}>
-              {overdueTodos.length} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Task</span>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Tanggal Terpilih</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38BDF8' }}>
+              {showAllDates ? 'Semua Tanggal' : selectedDateFilter}
             </div>
           </div>
         </div>
@@ -688,7 +680,7 @@ export const TodoAttendanceModule = () => {
           <div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Mode Tampilan Task</div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isBoss ? '#F59E0B' : 'var(--success)' }}>
-              {isBoss ? 'BOD / Head Overview' : 'Khusus Task Saya'}
+              {isBoss ? 'Pimpinan (Semua PIC)' : 'Khusus PIC Saya'}
             </div>
           </div>
         </div>
@@ -697,313 +689,231 @@ export const TodoAttendanceModule = () => {
       {/* Tabs Menu */}
       <div className="tab-list">
         <button className={`tab-item ${activeTab === 'todo' ? 'active' : ''}`} onClick={() => setActiveTab('todo')}>
-          <CheckSquare size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Laporan & Penugasan Pekerjaan Harian ({visibleTodos.length})
+          <CheckSquare size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Laporan Pekerjaan Harian ({visibleTodos.length})
         </button>
         <button className={`tab-item ${activeTab === 'absen' ? 'active' : ''}`} onClick={() => setActiveTab('absen')}>
           <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. Log Presensi Geofencing Multi-Koordinat ({safeAttendances.length})
         </button>
       </div>
 
-      {/* TAB 1: TO-DO LIST & LAPORAN PEKERJAAN HARIAN */}
+      {/* TAB 1: LAPORAN PEKERJAAN HARIAN (EXACT FORMAT MATCHING USER SPREADSHEET) */}
       {activeTab === 'todo' && (
-        <div className="glass-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CalendarDays size={20} color="#F59E0B" /> Laporan & Penugasan Pekerjaan Harian
-                </h3>
-                {isBoss ? (
-                  <span className="badge badge-warning" style={{ fontSize: '0.72rem' }}>
-                    <Eye size={12} /> Mode Pimpinan (Melihat Seluruh Task Proyek)
-                  </span>
-                ) : (
-                  <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>
-                    <Shield size={12} /> Restriksi Akses: Menampilkan Khusus Tugas {currentUser?.name}
-                  </span>
-                )}
+        <div className="glass-card" style={{ padding: '1.5rem' }}>
+          {/* TOP CONTROLS & DATE SELECTOR (PERSIS SEPERTI GAMBAR: TANGGAL : [ ... ]) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            {/* Box Header Tanggal */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{
+                background: '#FDE047',
+                color: '#1E293B',
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: '1.5px solid #EAB308',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <Calendar size={16} /> Tanggal :
               </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>
-                {isBoss 
-                  ? 'Pimpinan dapat menerbitkan instruksi pekerjaan harian dengan tanggal, batas waktu (deadline), dan memantau laporan staf.'
-                  : `Tugas pekerjaan harian yang ditugaskan khusus kepada Anda. Mohon laporkan hasil pekerjaan sebelum batas waktu.`
-                }
-              </p>
-            </div>
 
-            {isBoss && (
-              <div style={{ display: 'flex', gap: '0.35rem' }}>
-                <button className="btn btn-secondary btn-sm" onClick={handleClearCompletedTodos}>
-                  <CheckCircle2 size={13} /> Bersihkan Task Selesai
-                </button>
-                <button className="btn btn-secondary btn-sm" onClick={handleResetTodoList} style={{ color: '#ef4444' }}>
-                  <RotateCcw size={13} /> Reset Semua To-Do List
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Form Add New Todo with Tanggal & Batas Waktu (Pimpinan Access) */}
-          <form onSubmit={handleAddTodo} style={{ padding: '1.25rem', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '0.825rem', fontWeight: 800, color: 'var(--accent-primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Plus size={14} /> Penerbitan Instruksi & Laporan Pekerjaan Harian Baru
-            </div>
-
-            <div className="form-group" style={{ marginBottom: '0.75rem' }}>
               <input
-                type="text"
+                type="date"
                 className="form-control"
-                placeholder={isBoss ? "Ketikkan rincian tugas / uraian pekerjaan harian yang wajib dikerjakan..." : "Hanya Direktur Utama, GM, & Bu Yulieka (Head Marketing) yang berhak menerbitkan tugas..."}
-                value={newTodoText}
-                onChange={(e) => setNewTodoText(e.target.value)}
-                disabled={!isBoss}
-                required
+                value={selectedDateFilter}
+                onChange={(e) => {
+                  setSelectedDateFilter(e.target.value);
+                  setShowAllDates(false);
+                }}
+                style={{ width: '160px', height: '38px', fontWeight: 700, fontSize: '0.9rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
               />
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', alignItems: 'flex-end' }}>
-              <div>
-                <label style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                  👤 Staf Pelaksana
-                </label>
-                <select
-                  className="form-control"
-                  value={newAssignee}
-                  onChange={(e) => setNewAssignee(e.target.value)}
-                  disabled={!isBoss}
-                  style={{ height: '38px', fontSize: '0.825rem' }}
-                >
-                  {users.map(u => (
-                    <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                  📅 Tanggal Diberikan
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={newAssignDate}
-                  onChange={(e) => setNewAssignDate(e.target.value)}
-                  disabled={!isBoss}
-                  style={{ height: '38px', fontSize: '0.825rem' }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.72rem', color: '#EF4444', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
-                  ⏰ Batas Waktu (Tanggal)
-                </label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={newDueDate}
-                  onChange={(e) => setNewDueDate(e.target.value)}
-                  disabled={!isBoss}
-                  style={{ height: '38px', fontSize: '0.825rem' }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.72rem', color: '#EF4444', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
-                  🕒 Jam Batas Waktu
-                </label>
-                <input
-                  type="time"
-                  className="form-control"
-                  value={newDueTime}
-                  onChange={(e) => setNewDueTime(e.target.value)}
-                  disabled={!isBoss}
-                  style={{ height: '38px', fontSize: '0.825rem' }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                  🚩 Tingkat Prioritas
-                </label>
-                <select
-                  className="form-control"
-                  value={newPriority}
-                  onChange={(e) => setNewPriority(e.target.value)}
-                  disabled={!isBoss}
-                  style={{ height: '38px', fontSize: '0.825rem' }}
-                >
-                  <option value="Tinggi">🔴 Tinggi (Urgent)</option>
-                  <option value="Sedang">🟡 Sedang</option>
-                  <option value="Rendah">🟢 Rendah</option>
-                </select>
-              </div>
-
-              <div>
-                <button type="submit" className={`btn ${isBoss ? 'btn-primary' : 'btn-secondary'}`} disabled={!isBoss} style={{ width: '100%', height: '38px', fontWeight: 800 }}>
-                  {isBoss ? <Plus size={16} /> : <Lock size={14} />} {isBoss ? 'Terbitkan Tugas' : 'Akses Terbatas'}
-                </button>
-              </div>
-            </div>
-          </form>
-
-          {/* Sub-Filter Tab Selector */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className={`btn btn-sm ${todoFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setTodoFilter('for_me')}
-              style={{ fontSize: '0.78rem', fontWeight: todoFilter === 'for_me' ? 800 : 500 }}
-            >
-              🎯 Ditugaskan Untuk Saya ({todosForMe.length})
-            </button>
-            {isBoss && (
-              <button
-                type="button"
-                className={`btn btn-sm ${todoFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setTodoFilter('all')}
-                style={{ fontSize: '0.78rem', fontWeight: todoFilter === 'all' ? 800 : 500 }}
+              <button 
+                className={`btn btn-sm ${!showAllDates && selectedDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => { setSelectedDateFilter(todayDateStr); setShowAllDates(false); }}
+                style={{ height: '38px' }}
               >
-                📋 Semua Laporan & Tugas Proyek ({todos.length})
+                Hari Ini
               </button>
-            )}
-            <button
-              type="button"
-              className={`btn btn-sm ${todoFilter === 'by_me' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setTodoFilter('by_me')}
-              style={{ fontSize: '0.78rem', fontWeight: todoFilter === 'by_me' ? 800 : 500 }}
-            >
-              📤 Yang Saya Terbitkan ({todosByMe.length})
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ${todoFilter === 'overdue' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setTodoFilter('overdue')}
-              style={{ fontSize: '0.78rem', fontWeight: todoFilter === 'overdue' ? 800 : 500, color: overdueTodos.length > 0 ? '#EF4444' : 'inherit' }}
-            >
-              ⚠️ Melewati Batas Waktu ({overdueTodos.length})
-            </button>
+
+              <button 
+                className={`btn btn-sm ${showAllDates ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setShowAllDates(!showAllDates)}
+                style={{ height: '38px' }}
+              >
+                {showAllDates ? '✓ Tampilkan Semua Tanggal' : 'Tampilkan Semua Tanggal'}
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {isBoss && (
+                <>
+                  <button 
+                    className={`btn btn-sm ${todoPicFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setTodoPicFilter('all')}
+                  >
+                    Semua PIC ({safeTodos.length})
+                  </button>
+                  <button 
+                    className={`btn btn-sm ${todoPicFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setTodoPicFilter('for_me')}
+                  >
+                    PIC Saya
+                  </button>
+                </>
+              )}
+
+              {isBoss && (
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleOpenAddModal}
+                  style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}
+                >
+                  <Plus size={16} /> + Tambah Baris Laporan
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Todo List Items */}
-          {visibleTodos.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
-              <CheckCircle2 size={40} color="var(--success)" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
-              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>
-                {todoFilter === 'for_me' ? `Tidak Ada Tugas Khusus Untuk ${currentUser?.name}` : todoFilter === 'by_me' ? 'Belum Ada Tugas yang Anda Terbitkan' : todoFilter === 'overdue' ? 'Tidak Ada Tugas yang Terlambat (Semua Selesai / On-Track)' : 'Tidak Ada Tugas Terdaftar'}
-              </div>
-              <p style={{ fontSize: '0.825rem', marginTop: '4px' }}>
-                {todoFilter === 'for_me' 
-                  ? 'Seluruh tugas kerja harian Anda telah selesai atau belum ada instruksi baru dari pimpinan.'
-                  : 'Gunakan form di atas untuk menerbitkan tugas baru kepada staf.'}
-              </p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {visibleTodos.map((item) => {
-                const overdue = isTaskOverdue(item);
+          {/* EXACT SPREADSHEET TABLE: WAKTU | LAPORAN PEKERJAAN HARIAN | KORDINASI | PIC */}
+          <div className="table-container" style={{ border: '1.5px solid #EAB308', borderRadius: '8px', overflow: 'hidden' }}>
+            <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#FDE047', color: '#0F172A', borderBottom: '2px solid #CA8A04' }}>
+                  <th style={{ width: '150px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                    Waktu
+                  </th>
+                  <th style={{ padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                    Laporan pekerjaan harian
+                  </th>
+                  <th style={{ width: '220px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                    Kordinasi
+                  </th>
+                  <th style={{ width: '180px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
+                    PIC
+                  </th>
+                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', textAlign: 'center' }}>
+                    Status & Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleTodos.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', background: 'var(--bg-card)' }}>
+                      <CheckCircle2 size={36} color="#EAB308" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
+                        Tidak Ada Baris Laporan Pekerjaan Harian
+                      </div>
+                      <p style={{ fontSize: '0.825rem', marginTop: '4px' }}>
+                        {showAllDates ? 'Belum ada data laporan.' : `Tidak ada pekerjaan tercatat pada tanggal ${selectedDateFilter}.`}
+                        {isBoss && ' Klik tombol "+ Tambah Baris Laporan" di atas untuk menambah.'}
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  visibleTodos.map((item, index) => (
+                    <tr 
+                      key={item.id || index}
+                      style={{ 
+                        background: item.completed ? 'rgba(16, 185, 129, 0.06)' : index % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                        borderBottom: '1px solid var(--border-color)',
+                        transition: 'background 0.15s ease'
+                      }}
+                    >
+                      {/* 1. Kolom Waktu */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: 800, color: '#F59E0B', fontSize: '0.875rem' }}>
+                          {item.waktu || '08:00 - 17:00'}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', marginTop: '2px' }}>
+                          📅 {item.date || item.assignDate || todayDateStr}
+                        </div>
+                      </td>
 
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: '1rem',
-                      borderRadius: '10px',
-                      background: item.completed 
-                        ? 'rgba(16, 185, 129, 0.08)' 
-                        : overdue 
-                        ? 'rgba(239, 68, 68, 0.08)' 
-                        : 'var(--bg-card)',
-                      border: item.completed 
-                        ? '1px solid rgba(16, 185, 129, 0.3)' 
-                        : overdue 
-                        ? '1px solid rgba(239, 68, 68, 0.4)' 
-                        : '1px solid var(--border-color)',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', flex: 1, minWidth: '260px' }}>
-                        <input
-                          type="checkbox"
-                          checked={item.completed}
-                          onChange={() => handleToggleTodo(item.id)}
-                          style={{ width: '20px', height: '20px', marginTop: '2px', cursor: 'pointer', accentColor: 'var(--success)' }}
-                          title="Klik untuk menyelesaikan tugas ini"
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{
-                            fontWeight: 800,
-                            fontSize: '0.95rem',
-                            color: item.completed ? 'var(--text-muted)' : 'var(--text-main)',
-                            textDecoration: item.completed ? 'line-through' : 'none',
-                            lineHeight: 1.4
-                          }}>
-                            {item.text}
+                      {/* 2. Kolom Laporan Pekerjaan Harian */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ 
+                          fontWeight: 700, 
+                          fontSize: '0.9rem', 
+                          color: item.completed ? 'var(--text-muted)' : 'var(--text-main)',
+                          textDecoration: item.completed ? 'line-through' : 'none',
+                          lineHeight: 1.45
+                        }}>
+                          {item.laporan || item.text}
+                        </div>
+                        {item.notes && (
+                          <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '3px 6px', borderRadius: '4px' }}>
+                            Catatan: {item.notes}
                           </div>
+                        )}
+                      </td>
 
-                          {/* Date & Deadline Meta Information */}
-                          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.4rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
-                            <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Calendar size={13} color="var(--accent-primary)" /> Diberikan: <strong style={{ color: 'var(--text-main)' }}>{item.assignDate || '-'}</strong>
-                            </div>
-                            <div style={{ color: overdue ? '#EF4444' : '#F59E0B', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
-                              <Clock size={13} /> Batas Waktu: <strong>{item.dueDate || '-'} pk {item.dueTime || '17:00'} WIB</strong>
-                            </div>
-                            <div style={{ color: 'var(--text-subtle)' }}>
-                              Pelaksana: <strong style={{ color: '#38BDF8' }}>{item.assignee}</strong>
-                            </div>
-                            <div style={{ color: 'var(--text-subtle)' }}>
-                              Pemberi Tugas: <span style={{ color: '#F59E0B', fontWeight: 600 }}>{item.assignedBy || 'Pimpinan'}</span>
-                            </div>
-                          </div>
+                      {/* 3. Kolom Kordinasi */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#38BDF8' }}>
+                          {item.kordinasi || '-'}
+                        </div>
+                      </td>
 
-                          {/* Report Note Callout (If Staf Has Submitted Report) */}
-                          {item.reportNotes && (
-                            <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.75rem', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.12)', borderLeft: '3px solid #10B981', fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                              <div style={{ fontWeight: 800, color: '#10B981', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <FileText size={13} /> Laporan Hasil Pekerjaan ({item.completionDate || 'Selesai'}):
-                              </div>
-                              <div>{item.reportNotes}</div>
-                            </div>
+                      {/* 4. Kolom PIC */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                          {item.pic || item.assignee || '-'}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>
+                          {item.assignedBy ? `Oleh: ${item.assignedBy.split(' ')[0]}` : ''}
+                        </div>
+                      </td>
+
+                      {/* 5. Kolom Status & Aksi */}
+                      <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <button
+                            onClick={() => handleToggleTodo(item.id)}
+                            className={`btn btn-sm ${item.completed ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ 
+                              padding: '0.25rem 0.5rem', 
+                              fontSize: '0.72rem', 
+                              fontWeight: 800,
+                              background: item.completed ? '#10B981' : undefined,
+                              borderColor: item.completed ? '#059669' : undefined
+                            }}
+                            title="Klik untuk menyelesaikan"
+                          >
+                            {item.completed ? <Check size={12} /> : null} {item.completed ? 'Selesai' : 'Pending'}
+                          </button>
+
+                          {isBoss && (
+                            <>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleOpenEditModal(item)}
+                                style={{ padding: '0.25rem 0.4rem' }}
+                                title="Edit Baris"
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleDeleteTodo(item.id)}
+                                style={{ padding: '0.25rem 0.4rem', color: '#ef4444' }}
+                                title="Hapus Baris"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </>
                           )}
                         </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        {overdue && (
-                          <span className="badge badge-danger" style={{ fontWeight: 800, fontSize: '0.72rem' }}>
-                            <AlertTriangle size={11} /> Melewati Batas Waktu
-                          </span>
-                        )}
-                        <span className={`badge ${item.priority === 'Tinggi' ? 'badge-danger' : item.priority === 'Sedang' ? 'badge-warning' : 'badge-success'}`}>
-                          Prioritas {item.priority}
-                        </span>
-
-                        {/* Button Kirim Laporan Hasil Kerja */}
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleOpenReportModal(item)}
-                          style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          title="Tulis Laporan Hasil Pekerjaan"
-                        >
-                          <FileText size={13} /> {item.reportNotes ? 'Edit Laporan' : 'Kirim Laporan'}
-                        </button>
-
-                        {isBoss && (
-                          <button className="btn btn-secondary btn-sm" onClick={() => handleDeleteTodo(item.id)} style={{ padding: '0.25rem 0.5rem' }} title="Hapus Tugas">
-                            <Trash2 size={13} color="#ef4444" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -1033,14 +943,14 @@ export const TodoAttendanceModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {attendances.length === 0 ? (
+                {safeAttendances.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                       Belum ada log presensi GPS yang tercatat hari ini.
                     </td>
                   </tr>
                 ) : (
-                  attendances.map((att) => (
+                  safeAttendances.map((att) => (
                     <tr key={att.id}>
                       <td>
                         <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{att.name}</div>
@@ -1100,48 +1010,100 @@ export const TodoAttendanceModule = () => {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* MODAL: INPUT / KIRIM LAPORAN HASIL PEKERJAAN HARIAN           */}
+      {/* MODAL: TAMBAH / EDIT BARIS LAPORAN PEKERJAAN HARIAN           */}
       {/* ------------------------------------------------------------- */}
-      {isReportModalOpen && selectedTaskForReport && (
+      {isAddModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px' }}>
+          <div className="modal-content" style={{ maxWidth: '560px' }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FileText size={20} color="#10B981" /> Laporan Hasil Pekerjaan Harian
+                <CalendarDays size={20} color="#F59E0B" /> {editingItem ? 'Edit Baris Laporan Pekerjaan' : 'Tambah Baris Laporan Pekerjaan Harian'}
               </h3>
-              <button onClick={() => setIsReportModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleSaveTaskReport}>
+            <form onSubmit={handleSaveTodo}>
               <div className="modal-body">
-                <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>TUGAS PEKERJAAN:</div>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginTop: '2px' }}>{selectedTaskForReport.text}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#F59E0B', marginTop: '4px' }}>
-                    ⏰ Batas Waktu: {selectedTaskForReport.dueDate} pk {selectedTaskForReport.dueTime} WIB &bull; Pelaksana: {selectedTaskForReport.assignee}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={newDate}
+                      onChange={(e) => setNewDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>⏰ Waktu (Rentang Jam)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: 08:00 - 10:00"
+                      value={newWaktu}
+                      onChange={(e) => setNewWaktu(e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 800 }}>Uraian & Rincian Laporan Hasil Pekerjaan</label>
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>📝 Laporan Pekerjaan Harian</label>
                   <textarea
-                    rows="4"
+                    rows="3"
                     className="form-control"
-                    placeholder="Tuliskan bukti pelaksanaan, hasil yang dicapai, kendala, atau keterangan selesai..."
-                    value={reportNotesInput}
-                    onChange={(e) => setReportNotesInput(e.target.value)}
+                    placeholder="Uraian pekerjaan harian yang dilakukan / ditugaskan..."
+                    value={newLaporan}
+                    onChange={(e) => setNewLaporan(e.target.value)}
                     required
                   />
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    *Menyimpan laporan ini otomatis menandai status tugas menjadi <strong>Selesai (Done)</strong>.
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Kordinasi (Pihak Terkait)</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Bank BTN, Notaris, Tim Marketing, Konsumen Cluster..."
+                    value={newKordinasi}
+                    onChange={(e) => setNewKordinasi(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>👤 PIC (Person In Charge)</label>
+                    <select
+                      className="form-control"
+                      value={newPic}
+                      onChange={(e) => setNewPic(e.target.value)}
+                      required
+                    >
+                      {safeUsers.map(u => (
+                        <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🚩 Prioritas</label>
+                    <select
+                      className="form-control"
+                      value={newPriority}
+                      onChange={(e) => setNewPriority(e.target.value)}
+                    >
+                      <option value="Tinggi">🔴 Tinggi</option>
+                      <option value="Sedang">🟡 Sedang</option>
+                      <option value="Rendah">🟢 Rendah</option>
+                    </select>
                   </div>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsReportModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', fontWeight: 800 }}>
-                  <Send size={15} /> Kirim Laporan & Selesaikan Tugas
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
+                  <Check size={16} /> {editingItem ? 'Simpan Perubahan' : 'Terbitkan Baris Laporan'}
                 </button>
               </div>
             </form>

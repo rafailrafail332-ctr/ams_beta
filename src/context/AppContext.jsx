@@ -321,78 +321,78 @@ export const AppProvider = ({ children }) => {
     } catch (e) {}
   }, [units]);
 
-  // 4. CLEAN TO-DO LIST STORE (GLOBAL PERSISTENCE DENGAN TANGGAL & BATAS WAKTU)
+  // 4. CLEAN TO-DO LIST STORE (FORMAT LAPORAN PEKERJAAN HARIAN: TANGGAL, WAKTU, LAPORAN, KORDINASI, PIC)
   const defaultInitialTodos = [
     { 
       id: 1, 
-      text: 'Penyusunan Laporan Cash-In & Rekapitulasi Tagihan KPR', 
-      department: 'Finance', 
-      priority: 'Tinggi', 
-      completed: false, 
+      date: '2025-08-26',
+      waktu: '08:00 - 10:00',
+      laporan: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek',
+      text: 'Penyusunan Rekapitulasi Tagihan KPR Bank BTN & Laporan Cash-In Proyek',
+      kordinasi: 'Bank BTN Cabang & Pimpinan Finance',
+      pic: 'Syamsul Dahari',
       assignee: 'Syamsul Dahari',
-      assigneeId: 'USR-015',
-      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)',
-      assignDate: '2025-08-26',
-      dueDate: '2025-08-27',
-      dueTime: '17:00',
-      reportNotes: '',
-      completionDate: ''
+      picId: 'USR-015',
+      priority: 'Tinggi',
+      completed: true,
+      notes: 'Selesai direkap, 8 berkas konsumen disetujui.',
+      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)'
     },
     { 
       id: 2, 
-      text: 'Audit Faktur Pajak PPN & PPh Properti Bulan Ini', 
-      department: 'Accounting', 
-      priority: 'Tinggi', 
-      completed: false, 
+      date: '2025-08-26',
+      waktu: '10:00 - 12:00',
+      laporan: 'Audit Faktur Pajak PPN & PPh Final Properti Bulan Ini',
+      text: 'Audit Faktur Pajak PPN & PPh Final Properti Bulan Ini',
+      kordinasi: 'Konsultan Pajak & Kantor Pajak Pratama',
+      pic: 'Tarkum Aditya',
       assignee: 'Tarkum Aditya',
-      assigneeId: 'USR-016',
-      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)',
-      assignDate: '2025-08-26',
-      dueDate: '2025-08-28',
-      dueTime: '15:00',
-      reportNotes: '',
-      completionDate: ''
+      picId: 'USR-016',
+      priority: 'Tinggi',
+      completed: false,
+      notes: '',
+      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)'
     },
     { 
       id: 3, 
-      text: 'Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02', 
-      department: 'Collection', 
-      priority: 'Sedang', 
-      completed: false, 
+      date: '2025-08-26',
+      waktu: '13:00 - 15:00',
+      laporan: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02',
+      text: 'Follow-up Penagihan Tunggakan DP Konsumen Cluster Emerald Unit A-02',
+      kordinasi: 'Konsumen Bapak Hendra & Notaris',
+      pic: 'Jezen',
       assignee: 'Jezen',
-      assigneeId: 'USR-017',
-      assignedBy: 'Adhi Himawan, S.E.Sy (General Manager)',
-      assignDate: '2025-08-25',
-      dueDate: '2025-08-27',
-      dueTime: '16:00',
-      reportNotes: '',
-      completionDate: ''
+      picId: 'USR-017',
+      priority: 'Sedang',
+      completed: false,
+      notes: '',
+      assignedBy: 'Adhi Himawan, S.E.Sy (General Manager)'
     },
     { 
       id: 4, 
-      text: 'Inspeksi pengecoran beton atap Kavling Unit A-02', 
-      department: 'Teknik', 
-      priority: 'Tinggi', 
-      completed: true, 
+      date: '2025-08-26',
+      waktu: '15:00 - 17:00',
+      laporan: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02',
+      text: 'Inspeksi & Pengawasan Pengecoran Beton Atap Kavling Unit A-02',
+      kordinasi: 'Mandor Sipil & Tim Pengawas Teknik',
+      pic: 'Adhi Himawan, S.E.Sy',
       assignee: 'Adhi Himawan, S.E.Sy',
-      assigneeId: 'USR-004',
-      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)',
-      assignDate: '2025-08-25',
-      dueDate: '2025-08-26',
-      dueTime: '12:00',
-      reportNotes: 'Inspeksi selesai 100%, uji slump beton K-250 lolos standar QC.',
-      completionDate: '2025-08-26 11:30'
+      picId: 'USR-004',
+      priority: 'Tinggi',
+      completed: true,
+      notes: 'Slump test K-250 lolos uji standar QC.',
+      assignedBy: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)'
     }
   ];
 
   const getInitialTodos = () => {
     try {
-      const saved = localStorage.getItem('ams_todos_master_v3');
+      const saved = localStorage.getItem('ams_todos_master_v4');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-      const old1 = localStorage.getItem('ams_todos_list_v1');
+      const old1 = localStorage.getItem('ams_todos_master_v3');
       if (old1) {
         const parsedOld = JSON.parse(old1);
         if (Array.isArray(parsedOld) && parsedOld.length > 0) return parsedOld;
@@ -405,7 +405,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_todos_master_v3', JSON.stringify(todos));
+      localStorage.setItem('ams_todos_master_v4', JSON.stringify(todos));
     } catch (e) {}
   }, [todos]);
 
