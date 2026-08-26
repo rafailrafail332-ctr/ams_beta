@@ -155,8 +155,10 @@ export const TodoAttendanceModule = () => {
   const [selectedReportForPhotoModal, setSelectedReportForPhotoModal] = useState(null);
   const [isReportPhotoModalOpen, setIsReportPhotoModalOpen] = useState(false);
 
-  // Sub-filter for reports: 'all' | 'for_me'
-  const [reportPicFilter, setReportPicFilter] = useState(() => isBoss ? 'all' : 'for_me');
+  // Sub-filter for reports: 'all' | 'for_me' (Default 'all' agar seluruh staf & pimpinan bisa melihat rekapitulasi)
+  const [reportPicFilter, setReportPicFilter] = useState('all');
+  const [reportDivisionFilter, setReportDivisionFilter] = useState('all');
+  const [reportStatusFilter, setReportStatusFilter] = useState('all');
 
   // Modal State for Adding/Editing Daily Work Report Item
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -234,7 +236,7 @@ export const TodoAttendanceModule = () => {
     return false;
   };
 
-  // FILTERED REPORTS: By Date and By PIC
+  // FILTERED REPORTS: By Date, By PIC, By Division, and By Status (DAPAT DILIHAT OLEH SEMUA KARYAWAN)
   const visibleReports = safeTodos.filter((t) => {
     if (!showAllDates && selectedDateFilter) {
       const taskDate = t.date || t.assignDate;
@@ -244,10 +246,21 @@ export const TodoAttendanceModule = () => {
     }
 
     if (reportPicFilter === 'for_me') {
-      return isTaskAssignedToUser(t, currentUser);
+      if (!isTaskAssignedToUser(t, currentUser)) return false;
     }
 
-    return isBoss ? true : isTaskAssignedToUser(t, currentUser);
+    if (reportStatusFilter === 'completed' && !t.completed) return false;
+    if (reportStatusFilter === 'pending' && t.completed) return false;
+
+    if (reportDivisionFilter !== 'all') {
+      const kordinasi = (t.kordinasi || '').toLowerCase();
+      if (!kordinasi.includes(reportDivisionFilter.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Rekapitulasi penuh dapat dilihat oleh seluruh karyawan
+    return true;
   });
 
   const handleToggleReport = (id) => {
@@ -1016,21 +1029,64 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
             </div>
           </div>
 
+          {/* REKAPITULASI SUMMARY CARDS (BISA DILIHAT OLEH SEMUA KARYAWAN) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FDE047', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                📋
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Total Rekap Laporan</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>{visibleReports.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pekerjaan</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#10B981', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                ✓
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700, textTransform: 'uppercase' }}>Pekerjaan Selesai</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10B981' }}>{visibleReports.filter(r => r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Selesai</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#F59E0B', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                ⏳
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, textTransform: 'uppercase' }}>Dalam Proses / Pending</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#F59E0B' }}>{visibleReports.filter(r => !r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pending</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#38BDF8', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                👥
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700, textTransform: 'uppercase' }}>PIC Terlibat</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38BDF8' }}>{new Set(visibleReports.map(r => r.pic || r.assignee)).size} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Karyawan</span></div>
+              </div>
+            </div>
+          </div>
+
           {/* TOP CONTROLS & DATE SELECTOR */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             {/* Box Header Tanggal */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
               <div style={{
                 background: '#FDE047',
                 color: '#1E293B',
                 fontWeight: 900,
-                fontSize: '0.95rem',
-                padding: '0.5rem 1rem',
+                fontSize: '0.9rem',
+                padding: '0.45rem 0.85rem',
                 borderRadius: '6px',
                 border: '1.5px solid #EAB308',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.4rem'
               }}>
                 <Calendar size={16} /> Tanggal :
               </div>
@@ -1043,13 +1099,13 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
                   setSelectedDateFilter(e.target.value);
                   setShowAllDates(false);
                 }}
-                style={{ width: '160px', height: '38px', fontWeight: 700, fontSize: '0.9rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
+                style={{ width: '150px', height: '36px', fontWeight: 700, fontSize: '0.875rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
               />
 
               <button 
                 className={`btn btn-sm ${!showAllDates && selectedDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => { setSelectedDateFilter(todayDateStr); setShowAllDates(false); }}
-                style={{ height: '38px' }}
+                style={{ height: '36px', fontSize: '0.8rem' }}
               >
                 Hari Ini
               </button>
@@ -1057,37 +1113,61 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
               <button 
                 className={`btn btn-sm ${showAllDates ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setShowAllDates(!showAllDates)}
-                style={{ height: '38px' }}
+                style={{ height: '36px', fontSize: '0.8rem' }}
               >
-                {showAllDates ? '✓ Tampilkan Semua Tanggal' : 'Tampilkan Semua Tanggal'}
+                {showAllDates ? '✓ Semua Tanggal' : 'Semua Tanggal'}
               </button>
             </div>
 
-            {/* Action Buttons */}
+            {/* Filter PIC, Divisi & Tambah Baris */}
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              {isBoss && (
-                <>
-                  <button 
-                    className={`btn btn-sm ${reportPicFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setReportPicFilter('all')}
-                  >
-                    Semua PIC ({safeTodos.length})
-                  </button>
-                  <button 
-                    className={`btn btn-sm ${reportPicFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setReportPicFilter('for_me')}
-                  >
-                    PIC Saya
-                  </button>
-                </>
-              )}
+              {/* Filter Semua Rekap vs PIC Saya untuk SEMUA ORANG */}
+              <button 
+                className={`btn btn-sm ${reportPicFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setReportPicFilter('all')}
+                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'all' ? 800 : 500 }}
+              >
+                📋 Semua Rekap ({safeTodos.length})
+              </button>
+              <button 
+                className={`btn btn-sm ${reportPicFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setReportPicFilter('for_me')}
+                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'for_me' ? 800 : 500 }}
+              >
+                👤 PIC Saya ({safeTodos.filter(t => isTaskAssignedToUser(t, currentUser)).length})
+              </button>
+
+              {/* Filter Status */}
+              <select
+                className="form-control"
+                value={reportStatusFilter}
+                onChange={(e) => setReportStatusFilter(e.target.value)}
+                style={{ width: '130px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
+              >
+                <option value="all">Semua Status</option>
+                <option value="completed">✓ Selesai</option>
+                <option value="pending">⏳ Pending</option>
+              </select>
+
+              {/* Filter Divisi */}
+              <select
+                className="form-control"
+                value={reportDivisionFilter}
+                onChange={(e) => setReportDivisionFilter(e.target.value)}
+                style={{ width: '150px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
+              >
+                <option value="all">🏢 Semua Divisi</option>
+                {COMPANY_DIVISIONS.map(d => (
+                  <option key={d.id} value={d.short}>{d.short}</option>
+                ))}
+              </select>
 
               <button 
                 className="btn btn-primary"
                 onClick={handleOpenAddReportModal}
-                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800, height: '36px', fontSize: '0.85rem' }}
               >
-                <Plus size={16} /> + Tambah Baris Laporan
+                <Plus size={16} /> + Tambah Baris
               </button>
             </div>
           </div>
