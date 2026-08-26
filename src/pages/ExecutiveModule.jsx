@@ -917,14 +917,7 @@ export const ExecutiveModule = () => {
                   ASHOKA Property Management System &bull; Laporan Laba Rugi Konsolidasi Proyek Perumahan
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => window.print()}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem' }}
-                >
-                  <Printer size={14} /> Cetak / Print PDF
-                </button>
+              <div>
                 <button onClick={() => setIsPlReportModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                   <X size={22} />
                 </button>
@@ -1040,7 +1033,7 @@ export const ExecutiveModule = () => {
 
             <div className="modal-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
               <button type="button" className="btn btn-secondary" onClick={() => setIsPlReportModalOpen(false)}>Tutup</button>
-              <button type="button" className="btn btn-primary" onClick={() => { alert('Laporan Resmi Siap Diekspor ke Excel / PDF.'); setIsPlReportModalOpen(false); }}>
+              <button type="button" className="btn btn-primary" onClick={() => { showNotification('Laporan Finansial Proyeksi Laba Rugi disahkan oleh Direktur Utama!', 'success'); setIsPlReportModalOpen(false); }}>
                 <CheckCircle2 size={16} /> Verifikasi & Sahkan Laporan BOD
               </button>
             </div>
