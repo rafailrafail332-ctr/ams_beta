@@ -76,10 +76,15 @@ export const TodoAttendanceModule = () => {
 
   const isBoss = isManagerOrDirectorOrAdmin();
 
+  // Safety Guards for array states
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeTodos = Array.isArray(todos) ? todos : [];
+  const safeAttendances = Array.isArray(attendances) ? attendances : [];
+
   // Date and Time Helper Defaults
   const todayStr = new Date().toISOString().split('T')[0];
   const [newTodoText, setNewTodoText] = useState('');
-  const [newAssignee, setNewAssignee] = useState(() => users[0]?.name || 'Syamsul Dahari');
+  const [newAssignee, setNewAssignee] = useState(() => (users && users[0] ? users[0].name : 'Syamsul Dahari'));
   const [newPriority, setNewPriority] = useState('Sedang');
   const [newAssignDate, setNewAssignDate] = useState(todayStr);
   const [newDueDate, setNewDueDate] = useState(todayStr);
@@ -403,12 +408,12 @@ export const TodoAttendanceModule = () => {
   };
 
   // Pre-calculated filtered lists
-  const todosForMe = todos.filter(t => isTaskAssignedToUser(t, currentUser));
-  const todosByMe = todos.filter(t => isTaskAssignedByUser(t, currentUser));
-  const overdueTodos = todos.filter(t => isTaskOverdue(t));
+  const todosForMe = safeTodos.filter(t => isTaskAssignedToUser(t, currentUser));
+  const todosByMe = safeTodos.filter(t => isTaskAssignedByUser(t, currentUser));
+  const overdueTodos = safeTodos.filter(t => isTaskOverdue(t));
 
   // STRICT TASK VISIBILITY FILTERING BASED ON ACTIVE FILTER TAB
-  const visibleTodos = todos.filter((t) => {
+  const visibleTodos = safeTodos.filter((t) => {
     if (todoFilter === 'for_me') {
       return isTaskAssignedToUser(t, currentUser);
     }
@@ -423,7 +428,7 @@ export const TodoAttendanceModule = () => {
   });
 
   const handleToggleTodo = (id) => {
-    setTodos(todos.map(t => {
+    setTodos(safeTodos.map(t => {
       if (t.id === id) {
         const nextState = !t.completed;
         const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -447,7 +452,7 @@ export const TodoAttendanceModule = () => {
     if (!newTodoText.trim()) return;
 
     // Lookup selected user from users list
-    const targetUser = users.find(u => u.name === newAssignee || u.id === newAssignee) || users[0];
+    const targetUser = safeUsers.find(u => u.name === newAssignee || u.id === newAssignee) || safeUsers[0];
 
     const newItem = {
       id: Date.now(),
@@ -467,7 +472,7 @@ export const TodoAttendanceModule = () => {
       createdAt: new Date().toISOString()
     };
 
-    setTodos([newItem, ...todos]);
+    setTodos([newItem, ...safeTodos]);
     setNewTodoText('');
     showNotification(`TUGAS DITERBITKAN OLEH ${currentUser?.role.toUpperCase()}! Diserahkan ke ${newItem.assignee} (Batas Waktu: ${newItem.dueDate} pk ${newItem.dueTime} WIB).`, 'success');
   };
@@ -477,7 +482,7 @@ export const TodoAttendanceModule = () => {
       showNotification(`Akses Terbatas: Hanya Manager atau Direktur yang berhak menghapus To-Do List!`, 'danger');
       return;
     }
-    setTodos(todos.filter(t => t.id !== id));
+    setTodos(safeTodos.filter(t => t.id !== id));
     showNotification('Tugas berhasil dihapus oleh Manager/Direktur.', 'warning');
   };
 
@@ -499,7 +504,7 @@ export const TodoAttendanceModule = () => {
       return;
     }
 
-    setTodos(todos.filter(t => !t.completed));
+    setTodos(safeTodos.filter(t => !t.completed));
     showNotification('Seluruh tugas yang telah selesai [ ✅ Done ] berhasil dibersihkan.', 'info');
   };
 
@@ -647,7 +652,7 @@ export const TodoAttendanceModule = () => {
           <div>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Tugas Selesai / Total</div>
             <div style={{ fontSize: '1.35rem', fontWeight: 900 }}>
-              {todos.filter(t => t.completed).length} / {todos.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Task</span>
+              {safeTodos.filter(t => t.completed).length} / {safeTodos.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Task</span>
             </div>
           </div>
         </div>
@@ -695,7 +700,7 @@ export const TodoAttendanceModule = () => {
           <CheckSquare size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Laporan & Penugasan Pekerjaan Harian ({visibleTodos.length})
         </button>
         <button className={`tab-item ${activeTab === 'absen' ? 'active' : ''}`} onClick={() => setActiveTab('absen')}>
-          <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. Log Presensi Geofencing Multi-Koordinat ({attendances.length})
+          <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. Log Presensi Geofencing Multi-Koordinat ({safeAttendances.length})
         </button>
       </div>
 
