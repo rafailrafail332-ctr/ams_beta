@@ -340,10 +340,32 @@ export const CustomerRelationModule = () => {
     } catch (e) {}
   }, [tickets]);
 
+  // Helper Check Role: Khusus Pak Yazid (Direktur Utama / Super Admin) dan Manager (General Manager / Manager / Adhi Himawan)
+  const isManagerOrYazidOrAdmin = () => {
+    if (!currentUser) return false;
+    const r = (currentUser.role || '').toLowerCase();
+    const name = (currentUser.name || '').toLowerCase();
+    const email = (currentUser.email || '').toLowerCase();
+
+    // 1. Pak Yazid & Direktur / Super Admin
+    const isYazidOrAdmin = r.includes('super admin') || r.includes('direktur') || name.includes('yazid') || name.includes('rafail') || email.includes('yazid');
+
+    // 2. Manager (General Manager / Adhi Himawan / Manager / GM)
+    const isManager = r.includes('general manager') || r.includes('manager') || r.includes('gm') || name.includes('adhi') || email.includes('adhi');
+
+    return isYazidOrAdmin || isManager;
+  };
+
+  const canDeleteTicket = isManagerOrYazidOrAdmin();
+
   const handleDeleteTicket = (id, customerName) => {
-    if (window.confirm(`Hapus tiket komplain ${id} (${customerName})?`)) {
+    if (!canDeleteTicket) {
+      showNotification('Akses Terbatas: Hanya Pak Yazid (Direktur Utama) dan General Manager yang berhak menghapus data tiket komplain!', 'danger');
+      return;
+    }
+    if (window.confirm(`Hapus tiket komplain ${id} (${customerName})? Tindakan ini hanya dapat dilakukan oleh Pak Yazid dan Manager.`)) {
       setTickets(prev => prev.filter(t => t.id !== id));
-      showNotification(`Tiket komplain ${id} untuk ${customerName} berhasil dihapus.`, 'warning');
+      showNotification(`Tiket komplain ${id} untuk ${customerName} berhasil dihapus oleh pimpinan.`, 'warning');
     }
   };
 
@@ -1125,28 +1147,48 @@ export const CustomerRelationModule = () => {
                         <td style={{ textAlign: 'center' }}>
                           <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                             {(t.status || '').includes('Completed') ? (
-                              <span className="badge badge-success" style={{ fontSize: '0.7rem' }}><CheckCircle2 size={12} /> Selesai</span>
+                              <span className="badge badge-success" style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }}>
+                                <CheckCircle2 size={12} /> Selesai
+                              </span>
                             ) : (
-                              <button className="btn btn-primary btn-sm" onClick={() => handleCompleteTicket(t.id)} style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }}>
-                                <CheckCircle2 size={12} /> Selesaikan
+                              <button 
+                                className="btn btn-primary btn-sm" 
+                                onClick={() => handleCompleteTicket(t.id)} 
+                                style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem' }}
+                                title="Tandai Selesai"
+                              >
+                                <CheckCircle2 size={12} /> Selesai
                               </button>
                             )}
+
+                            {/* Tombol Edit (Tersedia untuk Seluruh Staf & Pimpinan) */}
                             <button
                               className="btn btn-secondary btn-sm"
                               onClick={() => handleOpenEditTicket(t)}
-                              style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
-                              title="Edit Data Tiket"
+                              style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                              title="Edit Data Tiket Komplain"
                             >
-                              <Edit3 size={12} />
+                              <Edit3 size={12} /> Edit
                             </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleDeleteTicket(t.id, t.customerName)}
-                              style={{ color: 'var(--danger)', padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
-                              title="Hapus Tiket Komplain"
-                            >
-                              <Trash2 size={12} />
-                            </button>
+
+                            {/* Tombol Hapus (KHUSUS PAK YAZID & MANAGER) */}
+                            {canDeleteTicket ? (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleDeleteTicket(t.id, t.customerName)}
+                                style={{ color: 'var(--danger)', padding: '0.2rem 0.45rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                title="Hapus Tiket Komplain (Akses Pak Yazid & Manager)"
+                              >
+                                <Trash2 size={12} /> Hapus
+                              </button>
+                            ) : (
+                              <span 
+                                style={{ fontSize: '0.65rem', color: 'var(--text-subtle)', fontStyle: 'italic', padding: '2px 4px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}
+                                title="Akses Hapus hanya untuk Pak Yazid (Direktur) & Manager"
+                              >
+                                🔒 Kunci Hapus
+                              </span>
+                            )}
                           </div>
                         </td>
                       </tr>
