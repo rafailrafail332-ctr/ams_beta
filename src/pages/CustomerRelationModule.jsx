@@ -54,6 +54,20 @@ export const CustomerRelationModule = () => {
     { no: 'B-04', cluster: 'Cluster Sapphire', customer: 'Siti Aminah', phone: '0813-4455-6677' }
   ];
 
+  const safeUsers = Array.isArray(users) && users.length > 0 ? users : [
+    { id: 'USR-001', name: 'Ahmad Rafail, S.E', role: 'Direktur Utama' },
+    { id: 'USR-002', name: 'Yazid Hizbullah, S.E.,S.T', role: 'Direktur Utama' },
+    { id: 'USR-004', name: 'Adhi Himawan, S.E.Sy', role: 'General Manager' },
+    { id: 'USR-011', name: 'Yulieka Rachmawati, S.Si', role: 'Head Marketing' },
+    { id: 'USR-012', name: 'Fresda Destifani', role: 'Staf Marketing' },
+    { id: 'USR-013', name: 'Amanda Amelia', role: 'Staf Marketing' },
+    { id: 'USR-014', name: 'Bambang Irawan', role: 'Staf Marketing' },
+    { id: 'USR-015', name: 'Syamsul Dahari', role: 'Staf Finance & CRM' },
+    { id: 'USR-016', name: 'Tarkum Aditya', role: 'Staf Pajak & Keuangan' },
+    { id: 'USR-017', name: 'Jezen', role: 'Staf Penagihan & Kasir' },
+    { id: 'USR-018', name: 'Dodi Syaiful Nugroho', role: 'Customer Service' }
+  ];
+
   const VENDOR_LIST = [
     'PT Bangun Jaya Perdana',
     'CV Karya Mandiri Teknik',
@@ -267,7 +281,7 @@ export const CustomerRelationModule = () => {
       contractorAssigned: 'PT Bangun Jaya Perdana',
       tanggalKomplain: '2025-08-01',
       tanggalInput: '2025-08-01',
-      inputBy: 'Syamsul Dahari (Customer Care)',
+      inputBy: 'Syamsul Dahari',
       targetCompletion: '2025-08-15'
     },
     {
@@ -284,7 +298,7 @@ export const CustomerRelationModule = () => {
       contractorAssigned: 'PT Bangun Jaya Perdana',
       tanggalKomplain: '2025-07-25',
       tanggalInput: '2025-07-25',
-      inputBy: 'Tarkum Aditya (Finance/CRM)',
+      inputBy: 'Tarkum Aditya',
       targetCompletion: '2025-07-28'
     },
     {
@@ -301,7 +315,7 @@ export const CustomerRelationModule = () => {
       contractorAssigned: 'CV Karya Mandiri Teknik',
       tanggalKomplain: '2025-08-10',
       tanggalInput: '2025-08-10',
-      inputBy: 'Fresda Destifani (CRM Staff)',
+      inputBy: 'Fresda Destifani',
       targetCompletion: '2025-08-18'
     }
   ];
@@ -680,7 +694,7 @@ export const CustomerRelationModule = () => {
     const nextTicketId = `TCK-${String(nextSeq).padStart(3, '0')}`;
     const firstUnit = safeUnits[0]?.no || 'A-01';
     const matchedCustomer = safeUnits[0]?.customer || 'Budi Santoso';
-    const matchedPhone = safeUnits[0]?.phone || '0812-9988-7766';
+    const defaultInputName = currentUser?.name || safeUsers[0]?.name || 'Syamsul Dahari';
 
     setTicketForm({
       ticketNo: nextTicketId,
@@ -692,7 +706,7 @@ export const CustomerRelationModule = () => {
       vendor: 'PT Bangun Jaya Perdana',
       tanggalKomplain: new Date().toISOString().split('T')[0],
       tanggalInput: new Date().toISOString().split('T')[0],
-      inputBy: currentUser?.name ? `${currentUser.name} (${currentUser.role || 'Staf'})` : 'Customer Relation'
+      inputBy: defaultInputName
     });
     setIsTicketModalOpen(true);
   };
@@ -709,7 +723,7 @@ export const CustomerRelationModule = () => {
       vendor: t.vendor || t.contractorAssigned || 'PT Bangun Jaya Perdana',
       tanggalKomplain: t.tanggalKomplain || t.reportDate || new Date().toISOString().split('T')[0],
       tanggalInput: t.tanggalInput || t.reportDate || new Date().toISOString().split('T')[0],
-      inputBy: t.inputBy || (currentUser?.name ? `${currentUser.name} (${currentUser.role || 'Staf'})` : 'Customer Relation')
+      inputBy: t.inputBy || currentUser?.name || 'Syamsul Dahari'
     });
     setIsTicketModalOpen(true);
   };
@@ -2016,15 +2030,30 @@ export const CustomerRelationModule = () => {
                 {/* Row 4: Petugas Yang Menginput Data & Vendor */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800 }}>✍️ Nama Yang Input Data</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>✍️ Petugas Yang Input Data</label>
+                    <select
+                      className="form-control"
+                      value={safeUsers.some(u => u.name === ticketForm.inputBy) ? ticketForm.inputBy : ''}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setTicketForm({ ...ticketForm, inputBy: e.target.value });
+                        }
+                      }}
+                      style={{ fontWeight: 700, color: '#38BDF8', borderColor: '#38BDF8', marginBottom: '4px' }}
+                    >
+                      <option value="">-- Pilih Nama Karyawan --</option>
+                      {safeUsers.map(u => (
+                        <option key={u.id} value={u.name}>👤 {u.name} ({u.role})</option>
+                      ))}
+                    </select>
                     <input
                       type="text"
                       className="form-control"
                       value={ticketForm.inputBy}
                       onChange={(e) => setTicketForm({ ...ticketForm, inputBy: e.target.value })}
-                      placeholder="Nama Petugas CRM..."
+                      placeholder="Atau ketik nama petugas..."
                       required
-                      style={{ fontWeight: 700, color: '#38BDF8' }}
+                      style={{ fontWeight: 700, color: '#38BDF8', fontSize: '0.8rem' }}
                     />
                   </div>
                   <div className="form-group">
