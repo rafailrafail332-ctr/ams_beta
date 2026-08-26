@@ -383,80 +383,125 @@ export const CustomerRelationModule = () => {
     }
   };
 
-  // Pillar 2: BAST Handover & Utilities Data (Persistent Store with Full CRUD)
+  // Pillar 2: BAST Handover (STK - Serah Terima Kunci) Checklist & Utilities Data
   const initialHandovers = [
     {
-      id: 'HO-001',
-      unitNo: 'A-01',
+      id: 'BAST-001',
+      tglStk: '2025-08-01',
+      bastDate: '01 Agustus 2025',
       customerName: 'Budi Santoso',
+      blok: 'A',
+      no: '01',
+      unitNo: 'A-01',
+      type: 'Type 45',
+      lbLt: '45/90',
       phone: '0812-9988-7766',
       cluster: 'Grand Harmoni - Cluster Emerald',
-      tipe: '45/90 (Standard Emerald)',
-      bastDate: '01 Agustus 2025',
-      statusPLN: 'Aktif 1300W',
-      meteranPLNNo: '5412-9900-1123',
-      dayaPLN: '1300 VA',
-      statusPDAM: 'Aktif PDAM Tirta',
-      meteranPDAMNo: 'PDAM-TIRTA-8871',
+      checkListrik: 'OK',
+      checkAir: 'OK',
+      checkSanitari: 'OK',
+      checkPintu: 'OK',
+      checkPengecatan: 'OK',
+      checkKebersihan: 'OK',
       statusBAST: 'Selesai BAST (Kunci Diserahkan)',
-      notes: 'Serah terima 3 set kunci utama, kartu garansi retensi 100 hari, & meteran PLN/PDAM aktif.'
+      notes: 'Serah terima 3 set kunci utama, kartu garansi retensi 100 hari, seluruh pengecekan fisik tuntas OK.'
     },
     {
-      id: 'HO-002',
-      unitNo: 'A-02',
+      id: 'BAST-002',
+      tglStk: '2025-08-25',
+      bastDate: '25 Agustus 2025',
       customerName: 'Siti Rahmawati',
+      blok: 'A',
+      no: '02',
+      unitNo: 'A-02',
+      type: 'Type 45',
+      lbLt: '45/90',
       phone: '0812-3344-5566',
       cluster: 'Grand Harmoni - Cluster Emerald',
-      tipe: '45/90 (Standard Emerald)',
-      bastDate: '25 Agustus 2025 (Undangan)',
-      statusPLN: 'Proses Pemasangan Meteran PLN',
-      meteranPLNNo: 'Menunggu Token Pemasangan',
-      dayaPLN: '1300 VA',
-      statusPDAM: 'Proses Sambungan Pipa PDAM',
-      meteranPDAMNo: 'Proses Sambung',
+      checkListrik: 'OK',
+      checkAir: 'OK',
+      checkSanitari: 'OK',
+      checkPintu: 'OK',
+      checkPengecatan: 'OK',
+      checkKebersihan: 'OK',
       statusBAST: 'Jadwal Undangan Serah Terima',
       notes: 'Undangan resmi serah terima kunci telah terkirim via WhatsApp Customer Care.'
     },
     {
-      id: 'HO-003',
-      unitNo: 'A-06',
+      id: 'BAST-003',
+      tglStk: '2025-07-28',
+      bastDate: '28 Juli 2025',
       customerName: 'Rian Perdana',
+      blok: 'A',
+      no: '06',
+      unitNo: 'A-06',
+      type: 'Type 60',
+      lbLt: '60/120',
       phone: '0813-4455-6677',
       cluster: 'Grand Harmoni - Cluster Emerald',
-      tipe: '60/120 (Corner Emerald)',
-      bastDate: '28 Juli 2025',
-      statusPLN: 'Aktif 2200W',
-      meteranPLNNo: '5412-9921-8840',
-      dayaPLN: '2200 VA',
-      statusPDAM: 'Aktif PDAM Tirta',
-      meteranPDAMNo: 'PDAM-TIRTA-8902',
+      checkListrik: 'OK',
+      checkAir: 'OK',
+      checkSanitari: 'OK',
+      checkPintu: 'OK',
+      checkPengecatan: 'OK',
+      checkKebersihan: 'OK',
       statusBAST: 'Selesai BAST (Kunci Diserahkan)',
       notes: 'Serah terima kunci lengkap tuntas, rumah dihuni langsung oleh konsumen.'
     },
     {
-      id: 'HO-004',
-      unitNo: 'B-01',
+      id: 'BAST-004',
+      tglStk: '2025-09-15',
+      bastDate: '15 September 2025',
       customerName: 'Dr. Tri Handoko',
+      blok: 'B',
+      no: '01',
+      unitNo: 'B-01',
+      type: 'Type 75',
+      lbLt: '75/150',
       phone: '0811-2233-4455',
       cluster: 'Grand Harmoni - Cluster Sapphire',
-      tipe: '75/150 (Sapphire Luxury)',
-      bastDate: '15 September 2025 (Jadwal)',
-      statusPLN: 'Pengajuan PLN Sub-station',
-      meteranPLNNo: 'Proses Antrian PLN',
-      dayaPLN: '2200 VA',
-      statusPDAM: 'Pipa Sambungan Induk Ready',
-      meteranPDAMNo: 'Proses Registrasi',
+      checkListrik: 'Pending',
+      checkAir: 'OK',
+      checkSanitari: 'OK',
+      checkPintu: 'OK',
+      checkPengecatan: 'Cek',
+      checkKebersihan: 'Pending',
       statusBAST: 'Dalam Persiapan Finishing Akhir',
-      notes: 'Finishing cat dan instalasi carport sedang diselesaikan oleh kontraktor pelaksana.'
+      notes: 'Finishing cat teras dan instalasi carport sedang diselesaikan oleh kontraktor.'
     }
   ];
 
   const getSavedHandovers = () => {
     try {
-      const saved = localStorage.getItem('ams_bast_handovers_clean_v2');
+      const saved = localStorage.getItem('ams_bast_handovers_table_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      const old = localStorage.getItem('ams_bast_handovers_clean_v2');
+      if (old) {
+        const parsedOld = JSON.parse(old);
+        if (Array.isArray(parsedOld) && parsedOld.length > 0) {
+          return parsedOld.map(h => {
+            const parts = (h.unitNo || 'A-01').split('-');
+            const blok = parts[0] || 'A';
+            const no = parts[1] || '01';
+            return {
+              ...h,
+              tglStk: h.tglStk || h.bastDate || '2025-08-01',
+              blok: h.blok || blok,
+              no: h.no || no,
+              type: h.type || h.tipe || 'Type 45',
+              lbLt: h.lbLt || (h.tipe && h.tipe.includes('/') ? h.tipe.split(' ')[0] : '45/90'),
+              checkListrik: h.checkListrik || 'OK',
+              checkAir: h.checkAir || 'OK',
+              checkSanitari: h.checkSanitari || 'OK',
+              checkPintu: h.checkPintu || 'OK',
+              checkPengecatan: h.checkPengecatan || 'OK',
+              checkKebersihan: h.checkKebersihan || 'OK'
+            };
+          });
+        }
       }
     } catch (e) {}
     return initialHandovers;
@@ -466,7 +511,7 @@ export const CustomerRelationModule = () => {
 
   React.useEffect(() => {
     try {
-      localStorage.setItem('ams_bast_handovers_clean_v2', JSON.stringify(handovers));
+      localStorage.setItem('ams_bast_handovers_table_v3', JSON.stringify(handovers));
     } catch (e) {}
   }, [handovers]);
 
@@ -474,55 +519,73 @@ export const CustomerRelationModule = () => {
   const [isHandoverModalOpen, setIsHandoverModalOpen] = useState(false);
   const [editingHandover, setEditingHandover] = useState(null);
   const [handoverForm, setHandoverForm] = useState({
-    unitNo: 'A-01',
+    tglStk: new Date().toISOString().split('T')[0],
     customerName: '',
+    blok: 'A',
+    no: '01',
+    unitNo: 'A-01',
+    type: 'Type 45',
+    lbLt: '45/90',
     phone: '',
     cluster: 'Grand Harmoni - Cluster Emerald',
-    tipe: '45/90',
-    bastDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
-    statusPLN: 'Aktif 1300W',
-    meteranPLNNo: '',
-    dayaPLN: '1300 VA',
-    statusPDAM: 'Aktif PDAM Tirta',
-    meteranPDAMNo: '',
+    checkListrik: 'OK',
+    checkAir: 'OK',
+    checkSanitari: 'OK',
+    checkPintu: 'OK',
+    checkPengecatan: 'OK',
+    checkKebersihan: 'OK',
     statusBAST: 'Selesai BAST (Kunci Diserahkan)',
     notes: ''
   });
 
   const handleOpenAddHandover = () => {
     setEditingHandover(null);
+    const firstUnit = safeUnits[0]?.no || 'A-01';
+    const parts = firstUnit.split('-');
+    const matchedCustomer = safeUnits[0]?.customer || 'Budi Santoso';
+    const matchedPhone = safeUnits[0]?.phone || '0812-9988-7766';
+
     setHandoverForm({
-      unitNo: 'A-01',
-      customerName: '',
-      phone: '',
+      tglStk: new Date().toISOString().split('T')[0],
+      customerName: matchedCustomer,
+      blok: parts[0] || 'A',
+      no: parts[1] || '01',
+      unitNo: firstUnit,
+      type: 'Type 45',
+      lbLt: '45/90',
+      phone: matchedPhone,
       cluster: 'Grand Harmoni - Cluster Emerald',
-      tipe: '45/90',
-      bastDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
-      statusPLN: 'Aktif 1300W',
-      meteranPLNNo: '',
-      dayaPLN: '1300 VA',
-      statusPDAM: 'Aktif PDAM Tirta',
-      meteranPDAMNo: '',
+      checkListrik: 'OK',
+      checkAir: 'OK',
+      checkSanitari: 'OK',
+      checkPintu: 'OK',
+      checkPengecatan: 'OK',
+      checkKebersihan: 'OK',
       statusBAST: 'Selesai BAST (Kunci Diserahkan)',
-      notes: ''
+      notes: 'Pemeriksaan fisik unit selesai, siap serah terima kunci.'
     });
     setIsHandoverModalOpen(true);
   };
 
   const handleOpenEditHandover = (h) => {
     setEditingHandover(h);
+    const parts = (h.unitNo || 'A-01').split('-');
     setHandoverForm({
-      unitNo: h.unitNo || '',
+      tglStk: h.tglStk || h.bastDate || new Date().toISOString().split('T')[0],
       customerName: h.customerName || '',
+      blok: h.blok || parts[0] || 'A',
+      no: h.no || parts[1] || '01',
+      unitNo: h.unitNo || `${parts[0] || 'A'}-${parts[1] || '01'}`,
+      type: h.type || h.tipe || 'Type 45',
+      lbLt: h.lbLt || '45/90',
       phone: h.phone || '',
       cluster: h.cluster || 'Grand Harmoni - Cluster Emerald',
-      tipe: h.tipe || '45/90',
-      bastDate: h.bastDate || '',
-      statusPLN: h.statusPLN || 'Aktif 1300W',
-      meteranPLNNo: h.meteranPLNNo || '',
-      dayaPLN: h.dayaPLN || '1300 VA',
-      statusPDAM: h.statusPDAM || 'Aktif PDAM Tirta',
-      meteranPDAMNo: h.meteranPDAMNo || '',
+      checkListrik: h.checkListrik || 'OK',
+      checkAir: h.checkAir || 'OK',
+      checkSanitari: h.checkSanitari || 'OK',
+      checkPintu: h.checkPintu || 'OK',
+      checkPengecatan: h.checkPengecatan || 'OK',
+      checkKebersihan: h.checkKebersihan || 'OK',
       statusBAST: h.statusBAST || 'Selesai BAST (Kunci Diserahkan)',
       notes: h.notes || ''
     });
@@ -531,22 +594,33 @@ export const CustomerRelationModule = () => {
 
   const handleSaveHandover = (e) => {
     e.preventDefault();
+    const computedUnitNo = `${handoverForm.blok}-${handoverForm.no}`;
+    const payload = {
+      ...handoverForm,
+      unitNo: computedUnitNo,
+      bastDate: handoverForm.tglStk
+    };
+
     if (editingHandover) {
-      setHandovers(handovers.map(h => h.id === editingHandover.id ? { ...h, ...handoverForm } : h));
-      showNotification(`BAST Unit ${handoverForm.unitNo} (${handoverForm.customerName}) berhasil diperbarui!`, 'success');
+      setHandovers(handovers.map(h => h.id === editingHandover.id ? { ...h, ...payload } : h));
+      showNotification(`BAST STK Unit ${computedUnitNo} (${handoverForm.customerName}) berhasil diperbarui!`, 'success');
     } else {
       const newHo = {
-        id: `HO-00${handovers.length + 1}`,
-        ...handoverForm
+        id: `BAST-00${handovers.length + 1}`,
+        ...payload
       };
       setHandovers([newHo, ...handovers]);
-      showNotification(`BAST Serah Terima Kunci Unit ${handoverForm.unitNo} berhasil dicatat!`, 'success');
+      showNotification(`Data BAST Serah Terima Kunci Unit ${computedUnitNo} berhasil dicatat!`, 'success');
     }
     setIsHandoverModalOpen(false);
   };
 
   const handleDeleteHandover = (id, unitNo) => {
-    if (window.confirm(`Hapus catatan BAST Serah Terima Kunci Unit ${unitNo}?`)) {
+    if (!canDeleteTicket) {
+      showNotification('Akses Terbatas: Hanya Pak Yazid (Direktur Utama) dan General Manager yang berhak menghapus data BAST!', 'danger');
+      return;
+    }
+    if (window.confirm(`Hapus catatan BAST Serah Terima Kunci Unit ${unitNo}? Tindakan ini hanya dapat dilakukan oleh Pak Yazid dan Manager.`)) {
       setHandovers(handovers.filter(h => h.id !== id));
       showNotification(`Catatan BAST Unit ${unitNo} berhasil dihapus.`, 'warning');
     }
@@ -1301,75 +1375,113 @@ export const CustomerRelationModule = () => {
                 </button>
               </div>
             ) : (
-              <div className="table-container">
-                <table className="custom-table">
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid rgba(184, 134, 11, 0.4)' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
-                    <tr>
-                      <th>Kavling Unit & Konsumen</th>
-                      <th>Tanggal BAST</th>
-                      <th>Sambungan Listrik (PLN)</th>
-                      <th>Sambungan Air (PDAM)</th>
-                      <th>Status BAST Kunci</th>
-                      <th>Aksi Serah Terima</th>
+                    <tr style={{ background: '#b8860b', color: '#ffffff', textAlign: 'center' }}>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '90px' }}>Tgl STK</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '140px' }}>Nama Konsumen</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px' }}>Blok</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '50px' }}>No.</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px' }}>Type</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '80px' }}>LB/LT</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '130px' }}>No. HP / WA</th>
+                      <th colSpan={6} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px', textAlign: 'center', fontWeight: 800, letterSpacing: '0.5px' }}>pengecekan</th>
+                      <th rowSpan={2} style={{ background: '#b8860b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 8px', verticalAlign: 'middle', fontWeight: 800, minWidth: '120px', textAlign: 'center' }}>Aksi</th>
+                    </tr>
+                    <tr style={{ background: '#a0780a', color: '#ffffff', textAlign: 'center' }}>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Listrik</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Air</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Sanitari</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '65px' }}>Pintu</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '75px' }}>Pengecatan</th>
+                      <th style={{ background: '#a0780a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 6px', fontWeight: 700, fontSize: '0.78rem', minWidth: '75px' }}>Kebersihan</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredHandovers.map((h) => {
-                      const isHandoverDone = (h.statusBAST || '').includes('Selesai');
+                    {filteredHandovers.map((h, idx) => {
+                      const renderCheckBadge = (val) => {
+                        const v = (val || 'OK').toUpperCase();
+                        if (v === 'OK' || v === 'BAIK' || v === 'SIAP' || v === 'BERSIH' || v === 'NYALA') {
+                          return <span style={{ color: '#10B981', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(16,185,129,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>✓ OK</span>;
+                        }
+                        if (v.includes('PENDING') || v.includes('BELUM')) {
+                          return <span style={{ color: '#EF4444', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(239,68,68,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>⏳ Pending</span>;
+                        }
+                        return <span style={{ color: '#F59E0B', fontWeight: 800, fontSize: '0.75rem', background: 'rgba(245,158,11,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>⚠️ {val}</span>;
+                      };
+
                       return (
-                        <tr key={h.id}>
-                          <td>
-                            <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>Unit {h.unitNo}</div>
-                            <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.85rem' }}>{h.customerName}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{h.cluster} &bull; {h.phone || '-'}</div>
+                        <tr key={h.id || idx}>
+                          <td style={{ fontWeight: 700, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                            📅 {h.tglStk || h.bastDate || '-'}
                           </td>
                           <td>
-                            <div style={{ fontWeight: 700 }}>{h.bastDate}</div>
-                            {h.notes && (
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {h.notes}
-                              </div>
-                            )}
+                            <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{h.customerName}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>{h.cluster || ''}</div>
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--accent-primary)' }}>
+                            {h.blok || (h.unitNo ? h.unitNo.split('-')[0] : 'A')}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 800 }}>
+                            {h.no || (h.unitNo ? h.unitNo.split('-')[1] : '01')}
+                          </td>
+                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                            {h.type || h.tipe || 'Type 45'}
+                          </td>
+                          <td style={{ textAlign: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                            {h.lbLt || '45/90'}
                           </td>
                           <td>
-                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{h.statusPLN}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>No: {h.meteranPLNNo || '-'} ({h.dayaPLN || '1300 VA'})</div>
+                            <div 
+                              style={{ fontSize: '0.75rem', color: '#10B981', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}
+                              onClick={() => handleSendWaDirect(h.phone, h.customerName, 'Serah Terima Kunci (BAST)', h.unitNo)}
+                              title="Klik untuk chat WhatsApp konsumen"
+                            >
+                              📱 {h.phone || '-'}
+                            </div>
                           </td>
-                          <td>
-                            <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>{h.statusPDAM}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>No: {h.meteranPDAMNo || '-'}</div>
-                          </td>
-                          <td>
-                            <span className={`badge ${isHandoverDone ? 'badge-success' : 'badge-info'}`}>
-                              {isHandoverDone ? <CheckCircle2 size={12} /> : <Clock size={12} />} {h.statusBAST}
-                            </span>
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '0.35rem' }}>
-                              <button 
-                                className="btn btn-primary btn-sm" 
-                                onClick={() => handleOpenPrintBast(h)} 
-                                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#000', fontWeight: 800, border: 'none', padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
-                                title="Cetak Dokumen BAST Serah Terima Kunci"
-                              >
-                                <Printer size={13} /> Cetak BAST
-                              </button>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkListrik)}</td>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkAir)}</td>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkSanitari)}</td>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkPintu)}</td>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkPengecatan)}</td>
+                          <td style={{ textAlign: 'center' }}>{renderCheckBadge(h.checkKebersihan)}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                               <button 
                                 className="btn btn-secondary btn-sm" 
                                 onClick={() => handleOpenEditHandover(h)}
-                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}
-                                title="Edit Data BAST"
+                                style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                title="Edit Data BAST / Checklist"
                               >
-                                <Edit3 size={13} /> Edit
+                                <Edit3 size={12} /> Edit
                               </button>
                               <button 
-                                className="btn btn-secondary btn-sm" 
-                                onClick={() => handleDeleteHandover(h.id, h.unitNo)}
-                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: 'var(--danger)' }}
-                                title="Hapus"
+                                className="btn btn-primary btn-sm" 
+                                onClick={() => handleOpenPrintBast(h)} 
+                                style={{ background: 'linear-gradient(135deg, #b8860b, #d4af37)', color: '#fff', border: 'none', padding: '0.2rem 0.45rem', fontSize: '0.7rem' }}
+                                title="Cetak Berita Acara Serah Terima Kunci"
                               >
-                                <Trash2 size={13} />
+                                <Printer size={12} /> Cetak
                               </button>
+                              {canDeleteTicket ? (
+                                <button 
+                                  className="btn btn-secondary btn-sm" 
+                                  onClick={() => handleDeleteHandover(h.id, h.unitNo || `${h.blok}-${h.no}`)}
+                                  style={{ padding: '0.2rem 0.45rem', fontSize: '0.7rem', color: 'var(--danger)' }}
+                                  title="Hapus Data BAST (Khusus Pimpinan)"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              ) : (
+                                <span 
+                                  style={{ fontSize: '0.62rem', color: 'var(--text-subtle)', fontStyle: 'italic', padding: '2px 4px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}
+                                  title="Hapus hanya dapat dilakukan oleh Pak Yazid & Manager"
+                                >
+                                  🔒 Kunci
+                                </span>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -2500,15 +2612,15 @@ export const CustomerRelationModule = () => {
         </div>
       )}
 
-      {/* MODAL: CATAT / EDIT BAST SERAH TERIMA KUNCI & METERAN */}
+      {/* MODAL: CATAT / EDIT BAST SERAH TERIMA KUNCI (STK) & PENGECEKAN */}
       {isHandoverModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '650px', width: '95%' }}>
+          <div className="modal-content" style={{ maxWidth: '680px', width: '95%' }}>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <KeyRound size={20} color="#F59E0B" />
-                <h3 className="modal-title">
-                  {editingHandover ? `Edit BAST Serah Terima - Unit ${editingHandover.unitNo}` : 'Catat BAST Serah Terima Kunci Baru'}
+                <KeyRound size={20} color="#b8860b" />
+                <h3 className="modal-title" style={{ fontWeight: 800 }}>
+                  {editingHandover ? `Edit BAST STK - Unit ${handoverForm.blok}-${handoverForm.no}` : 'Catat Berita Acara Serah Terima Kunci (STK) Baru'}
                 </h3>
               </div>
               <button onClick={() => setIsHandoverModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -2518,36 +2630,53 @@ export const CustomerRelationModule = () => {
 
             <form onSubmit={handleSaveHandover}>
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-                <div className="grid-2">
+                {/* Row 1: Pilih Unit & Tanggal STK */}
+                <div className="grid-2" style={{ marginBottom: '0.75rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Nomor Kavling Unit</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Contoh: A-01, B-03"
-                      value={handoverForm.unitNo}
-                      onChange={(e) => setHandoverForm({ ...handoverForm, unitNo: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Cluster Perumahan</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🏠 Pilih Unit Kavling (Otomatis)</label>
                     <select
                       className="form-control"
-                      value={handoverForm.cluster}
-                      onChange={(e) => setHandoverForm({ ...handoverForm, cluster: e.target.value })}
+                      value={`${handoverForm.blok}-${handoverForm.no}`}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const matched = safeUnits.find(u => u.no === val);
+                        const parts = val.split('-');
+                        setHandoverForm({
+                          ...handoverForm,
+                          blok: parts[0] || 'A',
+                          no: parts[1] || '01',
+                          unitNo: val,
+                          customerName: matched ? matched.customer : handoverForm.customerName,
+                          phone: matched ? matched.phone : handoverForm.phone,
+                          cluster: matched?.cluster || handoverForm.cluster
+                        });
+                      }}
+                      style={{ fontWeight: 800, borderColor: '#b8860b' }}
                     >
-                      <option value="Grand Harmoni - Cluster Emerald">Grand Harmoni - Cluster Emerald</option>
-                      <option value="Grand Harmoni - Cluster Sapphire">Grand Harmoni - Cluster Sapphire</option>
-                      <option value="Grand Harmoni - Cluster Diamond">Grand Harmoni - Cluster Diamond</option>
-                      <option value="Cluster Ruby">Cluster Ruby</option>
+                      {safeUnits.map((u, i) => (
+                        <option key={u.no || i} value={u.no}>
+                          Unit {u.no} {u.cluster ? `(${u.cluster})` : ''} - {u.customer || 'Ready'}
+                        </option>
+                      ))}
                     </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal STK (Serah Kunci)</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={handoverForm.tglStk}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, tglStk: e.target.value })}
+                      required
+                      style={{ fontWeight: 700 }}
+                    />
                   </div>
                 </div>
 
-                <div className="grid-2">
+                {/* Row 2: Nama Konsumen & No HP / WA */}
+                <div className="grid-2" style={{ marginBottom: '0.75rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Nama Pemilik Konsumen</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>👤 Nama Konsumen</label>
                     <input
                       type="text"
                       className="form-control"
@@ -2555,131 +2684,196 @@ export const CustomerRelationModule = () => {
                       value={handoverForm.customerName}
                       onChange={(e) => setHandoverForm({ ...handoverForm, customerName: e.target.value })}
                       required
+                      style={{ fontWeight: 700 }}
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">No. Telepon / WhatsApp Konsumen</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>📱 No. HP / WA</label>
                     <input
                       type="text"
                       className="form-control"
                       placeholder="0812-xxxx-xxxx"
                       value={handoverForm.phone}
                       onChange={(e) => setHandoverForm({ ...handoverForm, phone: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Tipe Rumah Unit</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Contoh: 45/90 Standard"
-                      value={handoverForm.tipe}
-                      onChange={(e) => setHandoverForm({ ...handoverForm, tipe: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Tanggal BAST Serah Kunci</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Contoh: 01 Agustus 2025"
-                      value={handoverForm.bastDate}
-                      onChange={(e) => setHandoverForm({ ...handoverForm, bastDate: e.target.value })}
                       required
+                      style={{ fontWeight: 700 }}
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Status Serah Terima Kunci (BAST)</label>
-                  <select
-                    className="form-control"
-                    value={handoverForm.statusBAST}
-                    onChange={(e) => setHandoverForm({ ...handoverForm, statusBAST: e.target.value })}
-                  >
-                    <option value="Selesai BAST (Kunci Diserahkan)">Selesai BAST (Kunci Diserahkan)</option>
-                    <option value="Jadwal Undangan Serah Terima">Jadwal Undangan Serah Terima</option>
-                    <option value="Dalam Persiapan Finishing Akhir">Dalam Persiapan Finishing Akhir</option>
-                  </select>
+                {/* Row 3: Blok, No, Type, LB/LT */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.5fr 1.5fr', gap: '0.65rem', marginBottom: '0.75rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>Blok</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="A"
+                      value={handoverForm.blok}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, blok: e.target.value.toUpperCase() })}
+                      required
+                      style={{ fontWeight: 800, textAlign: 'center' }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>No.</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="01"
+                      value={handoverForm.no}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, no: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, textAlign: 'center' }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>Type</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Type 45"
+                      value={handoverForm.type}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, type: e.target.value })}
+                      style={{ fontWeight: 700 }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>LB/LT</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="45/90"
+                      value={handoverForm.lbLt}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, lbLt: e.target.value })}
+                      style={{ fontWeight: 700 }}
+                    />
+                  </div>
                 </div>
 
-                <div style={{ padding: '0.75rem', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '1rem' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#38BDF8', marginBottom: '0.5rem' }}>
-                    ⚡ Utilitas Listrik PLN & Air PDAM
+                {/* Row 4: 6 Checklist Pengecekan STK (Listrik, Air, Sanitari, Pintu, Pengecatan, Kebersihan) */}
+                <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(184, 134, 11, 0.08)', border: '1px solid rgba(184, 134, 11, 0.3)', marginBottom: '0.85rem' }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#b8860b', marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    🔍 Checklist Pengecekan Fisik Unit Properti
                   </div>
                   
-                  <div className="grid-2">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.65rem', marginBottom: '0.65rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Status Listrik PLN</label>
+                      <label className="form-label" style={{ fontWeight: 700 }}>⚡ Listrik</label>
                       <select
                         className="form-control"
-                        value={handoverForm.statusPLN}
-                        onChange={(e) => setHandoverForm({ ...handoverForm, statusPLN: e.target.value })}
+                        value={handoverForm.checkListrik}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkListrik: e.target.value })}
+                        style={{ fontWeight: 700 }}
                       >
-                        <option value="Aktif 1300W">Aktif 1300W</option>
-                        <option value="Aktif 2200W">Aktif 2200W</option>
-                        <option value="Proses Pemasangan Meteran PLN">Proses Pemasangan Meteran PLN</option>
-                        <option value="Pengajuan PLN Sub-station">Pengajuan PLN Sub-station</option>
+                        <option value="OK">✓ OK / Nyala</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">No. ID Pelanggan / Seri Meteran PLN</label>
-                      <input
-                        type="text"
+                      <label className="form-label" style={{ fontWeight: 700 }}>💧 Air</label>
+                      <select
                         className="form-control"
-                        placeholder="Contoh: 5412-9900-1123"
-                        value={handoverForm.meteranPLNNo}
-                        onChange={(e) => setHandoverForm({ ...handoverForm, meteranPLNNo: e.target.value })}
-                      />
+                        value={handoverForm.checkAir}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkAir: e.target.value })}
+                        style={{ fontWeight: 700 }}
+                      >
+                        <option value="OK">✓ OK / Mengalir</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700 }}>🚽 Sanitari</label>
+                      <select
+                        className="form-control"
+                        value={handoverForm.checkSanitari}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkSanitari: e.target.value })}
+                        style={{ fontWeight: 700 }}
+                      >
+                        <option value="OK">✓ OK / Bersih</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
+                      </select>
                     </div>
                   </div>
 
-                  <div className="grid-2">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.65rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Status Air Bersih (PDAM / WTP)</label>
+                      <label className="form-label" style={{ fontWeight: 700 }}>🚪 Pintu & Jendela</label>
                       <select
                         className="form-control"
-                        value={handoverForm.statusPDAM}
-                        onChange={(e) => setHandoverForm({ ...handoverForm, statusPDAM: e.target.value })}
+                        value={handoverForm.checkPintu}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkPintu: e.target.value })}
+                        style={{ fontWeight: 700 }}
                       >
-                        <option value="Aktif PDAM Tirta">Aktif PDAM Tirta</option>
-                        <option value="Proses Sambungan Pipa PDAM">Proses Sambungan Pipa PDAM</option>
-                        <option value="Pipa Sambungan Induk Ready">Pipa Sambungan Induk Ready</option>
-                        <option value="Sumur Bor Terpadu">Sumur Bor Terpadu</option>
+                        <option value="OK">✓ OK / Presisi</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">No. Seri Pelanggan PDAM</label>
-                      <input
-                        type="text"
+                      <label className="form-label" style={{ fontWeight: 700 }}>🎨 Pengecatan</label>
+                      <select
                         className="form-control"
-                        placeholder="Contoh: PDAM-TIRTA-8871"
-                        value={handoverForm.meteranPDAMNo}
-                        onChange={(e) => setHandoverForm({ ...handoverForm, meteranPDAMNo: e.target.value })}
-                      />
+                        value={handoverForm.checkPengecatan}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkPengecatan: e.target.value })}
+                        style={{ fontWeight: 700 }}
+                      >
+                        <option value="OK">✓ OK / Rapi</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700 }}>🧹 Kebersihan</label>
+                      <select
+                        className="form-control"
+                        value={handoverForm.checkKebersihan}
+                        onChange={(e) => setHandoverForm({ ...handoverForm, checkKebersihan: e.target.value })}
+                        style={{ fontWeight: 700 }}
+                      >
+                        <option value="OK">✓ OK / Bersih</option>
+                        <option value="Pending">⏳ Pending</option>
+                        <option value="Cek">⚠️ Perlu Cek</option>
+                      </select>
                     </div>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Catatan Kelengkapan Serah Terima (Kunci / Remote / Garansi)</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Serah terima 3 set kunci utama, kartu garansi 100 hari, & kartu IPL."
-                    value={handoverForm.notes}
-                    onChange={(e) => setHandoverForm({ ...handoverForm, notes: e.target.value })}
-                  />
+                {/* Status BAST & Catatan */}
+                <div className="grid-2" style={{ marginBottom: '0.5rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>Status Serah Terima Kunci (BAST)</label>
+                    <select
+                      className="form-control"
+                      value={handoverForm.statusBAST}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, statusBAST: e.target.value })}
+                      style={{ fontWeight: 700 }}
+                    >
+                      <option value="Selesai BAST (Kunci Diserahkan)">Selesai BAST (Kunci Diserahkan)</option>
+                      <option value="Jadwal Undangan Serah Terima">Jadwal Undangan Serah Terima</option>
+                      <option value="Dalam Persiapan Finishing Akhir">Dalam Persiapan Finishing Akhir</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800 }}>Catatan Tambahan BAST</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Kunci 3 set, garansi 100 hari..."
+                      value={handoverForm.notes}
+                      onChange={(e) => setHandoverForm({ ...handoverForm, notes: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHandoverModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
-                  Simpan Catatan BAST
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #b8860b, #d4af37)', border: 'none', fontWeight: 800, color: '#fff' }}>
+                  {editingHandover ? '💾 Simpan Perubahan BAST' : '🚀 Simpan Data BAST STK'}
                 </button>
               </div>
             </form>
