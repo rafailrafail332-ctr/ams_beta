@@ -45,7 +45,12 @@ import {
   MessageSquare,
   Share2,
   ExternalLink,
-  PhoneCall
+  PhoneCall,
+  Megaphone,
+  Pin,
+  Search,
+  Heart,
+  Bookmark
 } from 'lucide-react';
 
 export const COMPANY_DIVISIONS = [
@@ -62,6 +67,16 @@ export const COMPANY_DIVISIONS = [
   { id: 'DIV-EKS', name: 'Pihak Eksternal / Konsumen', short: 'Eksternal', color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.15)' }
 ];
 
+export const MEDIA_CATEGORIES = [
+  { id: 'CAT-ALL', label: 'Semua Informasi', icon: '📢', color: '#38BDF8' },
+  { id: 'CAT-OFFICE', label: 'Pengumuman Kantor', icon: '🏢', color: '#38BDF8' },
+  { id: 'CAT-SITE', label: 'Update Lapangan', icon: '🏗️', color: '#EAB308' },
+  { id: 'CAT-MKT', label: 'Marketing & Promo', icon: '💡', color: '#10B981' },
+  { id: 'CAT-URGENT', label: 'Peringatan Penting', icon: '⚠️', color: '#EF4444' },
+  { id: 'CAT-VENDOR', label: 'Vendor & Logistik', icon: '📦', color: '#A855F7' },
+  { id: 'CAT-EVENT', label: 'Acara & Agenda', icon: '🎉', color: '#EC4899' }
+];
+
 export const TodoAttendanceModule = () => {
   const { 
     currentUser, 
@@ -75,7 +90,9 @@ export const TodoAttendanceModule = () => {
     todos,
     setTodos,
     instructions,
-    setInstructions
+    setInstructions,
+    mediaInfoList,
+    setMediaInfoList
   } = useApp();
 
   // Helper to render Division Badge
@@ -689,6 +706,178 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
   };
 
   // -----------------------------------------------------------------
+  // 4. STATE & HANDLERS UNTUK TAB 4: MEDIA INFORMASI & PENGUMUMAN
+  // (DAPAT DIBACA OLEH SEMUA KARYAWAN & SEMUA ORANG DAPAT MENGISI/POSTING)
+  // -----------------------------------------------------------------
+  const safeMediaInfo = Array.isArray(mediaInfoList) ? mediaInfoList : [];
+  const [mediaCategoryFilter, setMediaCategoryFilter] = useState('all');
+  const [mediaSearchQuery, setMediaSearchQuery] = useState('');
+  
+  // Modal State for Adding/Editing Media Info
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [editingMediaItem, setEditingMediaItem] = useState(null);
+  const [mediaTitle, setMediaTitle] = useState('');
+  const [mediaCategory, setMediaCategory] = useState('Pengumuman Kantor');
+  const [mediaTargetDivision, setMediaTargetDivision] = useState('Seluruh Karyawan & Divisi');
+  const [mediaContent, setMediaContent] = useState('');
+  const [mediaIsPinned, setMediaIsPinned] = useState(false);
+  const [mediaPhoto, setMediaPhoto] = useState(null);
+  const mediaFileInputRef = useRef(null);
+
+  // Detail Modal State
+  const [selectedMediaDetail, setSelectedMediaDetail] = useState(null);
+  const [isMediaDetailModalOpen, setIsMediaDetailModalOpen] = useState(false);
+
+  const handleMediaPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        setMediaPhoto(dataUrl);
+      };
+      img.src = uploadEvent.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOpenAddMediaModal = () => {
+    setEditingMediaItem(null);
+    setMediaTitle('');
+    setMediaCategory('Pengumuman Kantor');
+    setMediaTargetDivision('Seluruh Karyawan & Divisi');
+    setMediaContent('');
+    setMediaIsPinned(false);
+    setMediaPhoto(null);
+    setIsMediaModalOpen(true);
+  };
+
+  const handleOpenEditMediaModal = (item) => {
+    setEditingMediaItem(item);
+    setMediaTitle(item.title || '');
+    setMediaCategory(item.category || 'Pengumuman Kantor');
+    setMediaTargetDivision(item.targetDivision || 'Seluruh Karyawan & Divisi');
+    setMediaContent(item.content || '');
+    setMediaIsPinned(!!item.isPinned);
+    setMediaPhoto(item.photo || null);
+    setIsMediaModalOpen(true);
+  };
+
+  const handleSaveMedia = (e) => {
+    e.preventDefault();
+    if (!mediaTitle.trim() || !mediaContent.trim()) return;
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    const dateStr = now.toISOString().split('T')[0];
+
+    const matchedCat = MEDIA_CATEGORIES.find(c => c.label === mediaCategory);
+    const catColor = matchedCat ? matchedCat.color : '#38BDF8';
+
+    if (editingMediaItem) {
+      setMediaInfoList(safeMediaInfo.map(m => {
+        if (m.id === editingMediaItem.id) {
+          return {
+            ...m,
+            title: mediaTitle.trim(),
+            category: mediaCategory,
+            categoryColor: catColor,
+            targetDivision: mediaTargetDivision,
+            content: mediaContent.trim(),
+            isPinned: mediaIsPinned,
+            photo: mediaPhoto || m.photo || null
+          };
+        }
+        return m;
+      }));
+      showNotification('Informasi / Pengumuman berhasil diperbarui!', 'success');
+    } else {
+      const newNotice = {
+        id: `INFO-${Date.now().toString().slice(-4)}`,
+        title: mediaTitle.trim(),
+        category: mediaCategory,
+        categoryColor: catColor,
+        targetDivision: mediaTargetDivision,
+        content: mediaContent.trim(),
+        author: currentUser?.name || 'Staf AMS',
+        authorRole: currentUser?.role || 'Karyawan',
+        date: dateStr,
+        time: timeStr,
+        isPinned: mediaIsPinned,
+        likesCount: 1,
+        likedBy: [currentUser?.id || 'USR-001'],
+        readBy: [currentUser?.name || 'Staf'],
+        photo: mediaPhoto || null
+      };
+      setMediaInfoList([newNotice, ...safeMediaInfo]);
+      showNotification('Pengumuman / Informasi baru berhasil diterbitkan untuk seluruh tim!', 'success');
+    }
+    setIsMediaModalOpen(false);
+  };
+
+  const handleDeleteMedia = (id) => {
+    if (window.confirm('Hapus postingan informasi ini?')) {
+      setMediaInfoList(safeMediaInfo.filter(m => m.id !== id));
+      showNotification('Informasi berhasil dihapus.', 'warning');
+    }
+  };
+
+  const handleToggleLikeMedia = (id) => {
+    const myId = currentUser?.id || 'USR-001';
+    setMediaInfoList(safeMediaInfo.map(m => {
+      if (m.id === id) {
+        const liked = Array.isArray(m.likedBy) && m.likedBy.includes(myId);
+        const nextLikedBy = liked ? m.likedBy.filter(x => x !== myId) : [...(m.likedBy || []), myId];
+        return {
+          ...m,
+          likedBy: nextLikedBy,
+          likesCount: nextLikedBy.length
+        };
+      }
+      return m;
+    }));
+  };
+
+  const handleMarkAsReadMedia = (id) => {
+    const myName = currentUser?.name || 'Staf';
+    setMediaInfoList(safeMediaInfo.map(m => {
+      if (m.id === id) {
+        const reads = Array.isArray(m.readBy) ? m.readBy : [];
+        if (!reads.includes(myName)) {
+          return { ...m, readBy: [...reads, myName] };
+        }
+      }
+      return m;
+    }));
+  };
+
+  // Filtered Media Information List
+  const visibleMediaList = safeMediaInfo.filter(m => {
+    if (mediaCategoryFilter !== 'all' && m.category !== mediaCategoryFilter) return false;
+    if (mediaSearchQuery.trim()) {
+      const q = mediaSearchQuery.toLowerCase();
+      const titleMatch = (m.title || '').toLowerCase().includes(q);
+      const contentMatch = (m.content || '').toLowerCase().includes(q);
+      const authorMatch = (m.author || '').toLowerCase().includes(q);
+      const catMatch = (m.category || '').toLowerCase().includes(q);
+      if (!titleMatch && !contentMatch && !authorMatch && !catMatch) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return (b.id > a.id ? 1 : -1);
+  });
+
+  // -----------------------------------------------------------------
   // 3. MULTI-SITE GEOFENCING CONFIGURATION & LOGS PRESENSI
   // -----------------------------------------------------------------
   const defaultLocations = [
@@ -1097,6 +1286,9 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
         </button>
         <button className={`tab-item ${activeTab === 'absen' ? 'active' : ''}`} onClick={() => setActiveTab('absen')}>
           <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Log Presensi Geofencing GPS ({safeAttendances.length})
+        </button>
+        <button className={`tab-item ${activeTab === 'media-info' ? 'active' : ''}`} onClick={() => setActiveTab('media-info')} style={{ borderColor: activeTab === 'media-info' ? '#38BDF8' : undefined }}>
+          <Megaphone size={16} style={{ display: 'inline', marginRight: '6px', color: '#38BDF8' }} /> 4. 📢 Media Informasi & Mading Tim ({safeMediaInfo.length})
         </button>
       </div>
 
@@ -1874,6 +2066,264 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
         </div>
       )}
 
+      {/* ================================================================= */}
+      {/* TAB 4: MEDIA INFORMASI & PENGUMUMAN (DAPAT DIBACA & DIISI SEMUA)  */}
+      {/* ================================================================= */}
+      {activeTab === 'media-info' && (
+        <div className="glass-card" style={{ padding: '1.75rem' }}>
+          {/* Header Banner */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(56, 189, 248, 0.3)' }}>
+                  <Megaphone size={22} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
+                    Media Informasi & Mading Tim Perusahaan
+                  </h2>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                    🌐 Portal informasi, memo resmi, update proyek lapangan, dan berita tim &bull; <strong>Dapat dibaca dan diisi oleh seluruh staf & manajemen</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              className="btn btn-primary"
+              onClick={handleOpenAddMediaModal}
+              style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800, padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(56, 189, 248, 0.3)' }}
+            >
+              <Plus size={18} /> + Terbitkan Informasi Baru
+            </button>
+          </div>
+
+          {/* Search & Category Filter Pills */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            {/* Category Filter Pills */}
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {MEDIA_CATEGORIES.map(cat => {
+                const isActive = (cat.id === 'CAT-ALL' && mediaCategoryFilter === 'all') || (mediaCategoryFilter === cat.label);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setMediaCategoryFilter(cat.id === 'CAT-ALL' ? 'all' : cat.label)}
+                    style={{
+                      background: isActive ? cat.color : 'rgba(255,255,255,0.05)',
+                      color: isActive ? '#0F172A' : 'var(--text-main)',
+                      border: isActive ? `1.5px solid ${cat.color}` : '1px solid var(--border-color)',
+                      borderRadius: '20px',
+                      padding: '0.35rem 0.85rem',
+                      fontSize: '0.8rem',
+                      fontWeight: isActive ? 900 : 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{cat.icon}</span> {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Input */}
+            <div style={{ position: 'relative', width: '260px' }}>
+              <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Cari pengumuman..."
+                value={mediaSearchQuery}
+                onChange={(e) => setMediaSearchQuery(e.target.value)}
+                style={{ paddingLeft: '32px', height: '36px', fontSize: '0.825rem' }}
+              />
+              {mediaSearchQuery && (
+                <button
+                  onClick={() => setMediaSearchQuery('')}
+                  style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Media Info Cards Grid */}
+          {visibleMediaList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+              <Megaphone size={40} color="#38BDF8" style={{ marginBottom: '0.75rem', opacity: 0.8 }} />
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>Belum Ada Informasi / Pengumuman</div>
+              <p style={{ fontSize: '0.85rem', marginTop: '4px', maxWidth: '400px', margin: '4px auto 1rem' }}>
+                Jadilah yang pertama menerbitkan memo resmi, berita proyek, atau pengumuman tim!
+              </p>
+              <button 
+                className="btn btn-primary btn-sm" 
+                onClick={handleOpenAddMediaModal}
+                style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800 }}
+              >
+                <Plus size={15} /> + Terbitkan Informasi Sekarang
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem' }}>
+              {visibleMediaList.map((item) => {
+                const isAuthor = currentUser?.name && item.author && item.author.toLowerCase().includes(currentUser.name.toLowerCase());
+                const canManage = isBoss || isAuthor;
+                const isLiked = Array.isArray(item.likedBy) && item.likedBy.includes(currentUser?.id || 'USR-001');
+                const isRead = Array.isArray(item.readBy) && item.readBy.includes(currentUser?.name || '');
+
+                return (
+                  <div
+                    key={item.id}
+                    className="glass-card"
+                    style={{
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      position: 'relative',
+                      border: item.isPinned ? '2px solid #F59E0B' : '1px solid var(--border-color)',
+                      boxShadow: item.isPinned ? '0 0 15px rgba(245, 158, 11, 0.2)' : undefined,
+                      background: item.isPinned ? 'rgba(245, 158, 11, 0.04)' : undefined
+                    }}
+                  >
+                    <div>
+                      {/* Top Header Row: Category Badge + Pinned + Actions */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span 
+                            style={{ 
+                              background: `${item.categoryColor || '#38BDF8'}20`, 
+                              color: item.categoryColor || '#38BDF8', 
+                              border: `1px solid ${item.categoryColor || '#38BDF8'}50`, 
+                              padding: '2px 8px', 
+                              borderRadius: '6px', 
+                              fontSize: '0.72rem', 
+                              fontWeight: 800 
+                            }}
+                          >
+                            {item.category}
+                          </span>
+                          {item.isPinned && (
+                            <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B', border: '1px solid #F59E0B', padding: '2px 7px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                              <Pin size={11} /> PINNED
+                            </span>
+                          )}
+                        </div>
+
+                        {canManage && (
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleOpenEditMediaModal(item)}
+                              style={{ padding: '0.2rem 0.4rem' }}
+                              title="Edit Pengumuman"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleDeleteMedia(item.id)}
+                              style={{ padding: '0.2rem 0.4rem', color: '#ef4444' }}
+                              title="Hapus Pengumuman"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: 1.4 }}>
+                        {item.title}
+                      </h3>
+
+                      {/* Author & Timestamp */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.75rem' }}>
+                          {item.author?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{item.author}</span> &bull; <span style={{ color: 'var(--text-subtle)' }}>{item.authorRole}</span>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>📅 {item.date} &bull; ⏰ {item.time}</div>
+                        </div>
+                      </div>
+
+                      {/* Target Division */}
+                      {item.targetDivision && item.targetDivision !== 'Seluruh Karyawan & Divisi' && (
+                        <div style={{ fontSize: '0.72rem', color: '#38BDF8', background: 'rgba(56, 189, 248, 0.08)', padding: '3px 8px', borderRadius: '4px', marginBottom: '0.75rem', display: 'inline-block' }}>
+                          🎯 Target: {item.targetDivision}
+                        </div>
+                      )}
+
+                      {/* Content Text */}
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.55, whiteSpace: 'pre-line', marginBottom: '0.85rem' }}>
+                        {item.content}
+                      </div>
+
+                      {/* Photo Attachment */}
+                      {item.photo && (
+                        <div 
+                          onClick={() => { setSelectedMediaDetail(item); setIsMediaDetailModalOpen(true); }}
+                          style={{ marginBottom: '0.85rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', cursor: 'pointer', maxHeight: '180px' }}
+                        >
+                          <img src={item.photo} alt="Lampiran Informasi" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom Interactions: Like & Read Status */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', marginTop: '0.5rem' }}>
+                      <button
+                        onClick={() => handleToggleLikeMedia(item.id)}
+                        style={{
+                          background: isLiked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255,255,255,0.05)',
+                          color: isLiked ? '#EF4444' : 'var(--text-muted)',
+                          border: isLiked ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Heart size={13} fill={isLiked ? '#EF4444' : 'none'} /> {item.likesCount || 0} Suka
+                      </button>
+
+                      <button
+                        onClick={() => handleMarkAsReadMedia(item.id)}
+                        style={{
+                          background: isRead ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255,255,255,0.05)',
+                          color: isRead ? '#10B981' : 'var(--text-muted)',
+                          border: isRead ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        title={item.readBy ? `Dibaca oleh: ${item.readBy.join(', ')}` : 'Tandai sudah membaca'}
+                      >
+                        <Eye size={12} /> {isRead ? `✓ Dibaca (${item.readBy?.length || 1})` : `Tandai Dibaca (${item.readBy?.length || 0})`}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ------------------------------------------------------------- */}
       {/* MODAL: TAMBAH / EDIT BARIS LAPORAN PEKERJAAN HARIAN           */}
       {/* ------------------------------------------------------------- */}
@@ -2602,6 +3052,220 @@ _Laporan otomatis terverifikasi sistem AMS Ashoka Enterprise_`;
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setIsDetailPhotoModalOpen(false)}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: TERBITKAN / EDIT INFORMASI (SEMUA KARYAWAN BISA ISI)   */}
+      {/* ------------------------------------------------------------- */}
+      {isMediaModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '580px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Megaphone size={20} color="#38BDF8" /> {editingMediaItem ? 'Edit Informasi / Pengumuman' : 'Terbitkan Informasi / Pengumuman Baru'}
+              </h3>
+              <button onClick={() => setIsMediaModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveMedia}>
+              <div className="modal-body">
+                {/* Author Info Pill */}
+                <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '8px', padding: '0.5rem 0.75rem', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem' }}>
+                  <UserCheck size={16} color="#38BDF8" />
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>Penerbit:</span> <strong>{currentUser?.name || 'Staf AMS'}</strong> ({currentUser?.role || 'Karyawan'}) &bull; <span style={{ color: '#10B981', fontWeight: 700 }}>Terbuka untuk Semua Tim</span>
+                  </div>
+                </div>
+
+                {/* Judul Pengumuman */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>📢 Judul Informasi / Pengumuman</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Update Jadwal Pengecoran Blok A / Memo Libur Nasional..."
+                    value={mediaTitle}
+                    onChange={(e) => setMediaTitle(e.target.value)}
+                    required
+                    style={{ fontWeight: 700 }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  {/* Kategori Informasi */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🏷️ Kategori Informasi</label>
+                    <select
+                      className="form-control"
+                      value={mediaCategory}
+                      onChange={(e) => setMediaCategory(e.target.value)}
+                      style={{ fontWeight: 700 }}
+                    >
+                      {MEDIA_CATEGORIES.filter(c => c.id !== 'CAT-ALL').map(c => (
+                        <option key={c.id} value={c.label}>{c.icon} {c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Target Divisi */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800 }}>🎯 Target Pembaca</label>
+                    <select
+                      className="form-control"
+                      value={mediaTargetDivision}
+                      onChange={(e) => setMediaTargetDivision(e.target.value)}
+                      style={{ fontWeight: 700 }}
+                    >
+                      <option value="Seluruh Karyawan & Divisi">🌐 Seluruh Karyawan & Divisi</option>
+                      {COMPANY_DIVISIONS.map(d => (
+                        <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Isi Informasi Lengkap */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>📝 Isi Pesan / Uraian Lengkap</label>
+                  <textarea
+                    rows="4"
+                    className="form-control"
+                    placeholder="Tuliskan isi pengumuman, detail teknis, instruksi koordinasi, atau informasi penting di sini..."
+                    value={mediaContent}
+                    onChange={(e) => setMediaContent(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Upload Foto / Brosur Lampiran */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>📸 Lampiran Foto / Gambar / Brosur (Opsional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={mediaFileInputRef}
+                    onChange={handleMediaPhotoUpload}
+                    style={{ display: 'none' }}
+                  />
+
+                  {mediaPhoto ? (
+                    <div style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)', maxHeight: '160px' }}>
+                      <img src={mediaPhoto} alt="Lampiran" style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }} />
+                      <button
+                        type="button"
+                        onClick={() => setMediaPhoto(null)}
+                        style={{
+                          position: 'absolute',
+                          top: '6px',
+                          right: '6px',
+                          background: 'rgba(239, 68, 68, 0.9)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => mediaFileInputRef.current && mediaFileInputRef.current.click()}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}
+                    >
+                      <Upload size={14} /> Pilih Foto / Gambar dari Galeri
+                    </button>
+                  )}
+                </div>
+
+                {/* Pin Notice Checkbox */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <input
+                    type="checkbox"
+                    id="pinNoticeCheckbox"
+                    checked={mediaIsPinned}
+                    onChange={(e) => setMediaIsPinned(e.target.checked)}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="pinNoticeCheckbox" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Pin size={13} color="#F59E0B" /> Sematkan Pengumuman di Paling Atas (Pinned Notice)
+                  </label>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMediaModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', fontWeight: 800 }}>
+                  <Send size={15} /> {editingMediaItem ? 'Simpan Perubahan' : '🚀 Terbitkan Sekarang'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: DETAIL & ZOOM FOTO PENGUMUMAN                          */}
+      {/* ------------------------------------------------------------- */}
+      {isMediaDetailModalOpen && selectedMediaDetail && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '680px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem' }}>
+                <Megaphone size={18} color="#38BDF8" /> {selectedMediaDetail.title}
+              </h3>
+              <button onClick={() => setIsMediaDetailModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {selectedMediaDetail.photo && (
+                <div style={{ marginBottom: '1rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)', background: '#000' }}>
+                  <img src={selectedMediaDetail.photo} alt="Lampiran" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', display: 'block' }} />
+                </div>
+              )}
+
+              <div style={{ padding: '0.85rem', borderRadius: '8px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                  <span style={{ background: `${selectedMediaDetail.categoryColor || '#38BDF8'}20`, color: selectedMediaDetail.categoryColor || '#38BDF8', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
+                    {selectedMediaDetail.category}
+                  </span>
+                  {selectedMediaDetail.targetDivision && (
+                    <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>
+                      🎯 {selectedMediaDetail.targetDivision}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6, color: 'var(--text-main)', marginBottom: '0.85rem' }}>
+                  {selectedMediaDetail.content}
+                </div>
+
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '0.65rem' }}>
+                  <div><strong>👤 Diterbitkan Oleh:</strong> {selectedMediaDetail.author} ({selectedMediaDetail.authorRole})</div>
+                  <div><strong>📅 Waktu Terbit:</strong> {selectedMediaDetail.date} &bull; {selectedMediaDetail.time}</div>
+                  {selectedMediaDetail.readBy && (
+                    <div style={{ marginTop: '4px', color: '#10B981' }}>
+                      <strong>👁️ Telah Dibaca ({selectedMediaDetail.readBy.length} Orang):</strong> {selectedMediaDetail.readBy.join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setIsMediaDetailModalOpen(false)}>Tutup</button>
             </div>
           </div>
         </div>

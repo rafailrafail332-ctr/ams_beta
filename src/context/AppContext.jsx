@@ -477,6 +477,77 @@ export const AppProvider = ({ children }) => {
     } catch (e) {}
   }, [instructions]);
 
+  // 6. MEDIA INFORMASI & PENGUMUMAN PERUSAHAAN (BISA DIBACA & DIISI OLEH SEMUA KARYAWAN)
+  const defaultInitialMediaInfo = [
+    {
+      id: 'INFO-001',
+      title: '📢 Sosialisasi SOP Prosedur Serah Terima Kunci & KPR Bank BTN Periode Q3',
+      category: 'Pengumuman Kantor',
+      categoryColor: '#38BDF8',
+      content: 'Diberitahukan kepada seluruh staf Marketing, Legal, dan Finance bahwa proses akad massal KPR Bank BTN untuk Cluster Sapphire dan Emerald akan dilaksanakan pada hari Jumat pk 09:00 WIB di Kantor Pusat. Harap seluruh berkas konsumen dipersiapkan secara lengkap.',
+      author: 'Yazid Hizbullah, S.E.,S.T',
+      authorRole: 'Direktur Utama',
+      targetDivision: 'Seluruh Karyawan & Divisi',
+      date: '2026-08-26',
+      time: '08:30 WIB',
+      isPinned: true,
+      likesCount: 5,
+      likedBy: ['USR-001', 'USR-002', 'USR-004'],
+      readBy: ['Ahmad Rafail', 'Adhi Himawan', 'Yulieka Rachmawati', 'Syamsul Dahari', 'Fresda Destifani'],
+      photo: null
+    },
+    {
+      id: 'INFO-002',
+      title: '🏗️ Update Progres Pengecoran Jalan Utama & Drainase Site Emerald Hill',
+      category: 'Update Lapangan',
+      categoryColor: '#EAB308',
+      content: 'Pekerjaan perataan tanah dan pengecoran drainase blok C telah mencapai 85%. Kendaraan logistik berat mohon diarahkan melalui gerbang timur selama proses pengeringan beton berlangsung.',
+      author: 'Hapip Alamsyah',
+      authorRole: 'Head Operation Site',
+      targetDivision: 'Teknik, Logistik & Pengawas',
+      date: '2026-08-26',
+      time: '11:15 WIB',
+      isPinned: false,
+      likesCount: 3,
+      likedBy: ['USR-004', 'USR-005'],
+      readBy: ['Hapip Alamsyah', 'Bagas', 'Rangga'],
+      photo: null
+    },
+    {
+      id: 'INFO-003',
+      title: '💡 Promo Marketing Akhir Bulan: Free Biaya BPHTB & Notaris Akad Merdeka',
+      category: 'Marketing & Promo',
+      categoryColor: '#10B981',
+      content: 'Materi flyer dan banner promo diskon DP serta cashback akad sudah tersedia di link drive internal. Tim promosi dan sales agent lapangan dapat segera membagikan ke prospek konsumen.',
+      author: 'Yulieka Rachmawati, S.Si',
+      authorRole: 'Head Marketing',
+      targetDivision: 'Marketing & Promosi',
+      date: '2026-08-25',
+      time: '14:00 WIB',
+      isPinned: false,
+      likesCount: 6,
+      likedBy: ['USR-001', 'USR-011', 'USR-012'],
+      readBy: ['Fresda Destifani', 'Amanda', 'Bambang'],
+      photo: null
+    }
+  ];
+
+  const getInitialMediaInfo = () => {
+    try {
+      const saved = localStorage.getItem('ams_media_info_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultInitialMediaInfo;
+  };
+
+  const [mediaInfoList, setMediaInfoList] = useState(getInitialMediaInfo);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_media_info_v1', JSON.stringify(mediaInfoList));
+    } catch (e) {}
+  }, [mediaInfoList]);
+
   // 5. CLEAN ATTENDANCE LOGS STORE (EMPTY LIST READY FOR MANUAL TESTING)
   const getInitialAttendances = () => {
     try {
@@ -777,6 +848,8 @@ export const AppProvider = ({ children }) => {
         setTodos,
         instructions,
         setInstructions,
+        mediaInfoList,
+        setMediaInfoList,
         executiveApprovals,
         setExecutiveApprovals,
         attendances,
