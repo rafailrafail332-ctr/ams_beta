@@ -289,6 +289,11 @@ export const TeknikModule = () => {
     .filter(val => val > 0)
     .sort((a, b) => a - b);
 
+  // Worker status counts
+  const countMandor = databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length;
+  const countTukang = databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length;
+  const countKenek = databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('kenek')).length;
+
   // OPEN MASTER WORKER MODAL IN ADD MODE
   const handleOpenMasterWorkerModal = () => {
     setEditingWorkerId(null);
@@ -1688,7 +1693,7 @@ export const TeknikModule = () => {
                     style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#38bdf8' }}
                   >
                     <option value="">-- Pilih Nama Pekerja Terdaftar --</option>
-                    {sortedWorkerRows.map(w => (
+                    {sortedAndFilteredDatabaseRows.map(w => (
                       <option key={w.id} value={w.nama}>
                         {w.nama} ({w.status} - Rp {formatRupiahDesimal(w.upah)}/hari)
                       </option>
