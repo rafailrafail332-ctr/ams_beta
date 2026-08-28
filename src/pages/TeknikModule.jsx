@@ -1170,28 +1170,28 @@ export const TeknikModule = () => {
                             />
                           </td>
 
-                          {/* 3. Status */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px' }}>
-                            <select
-                              value={row.status || 'Tukang'}
-                              onChange={(e) => handleUpdateRekapCell(row.id, 'status', e.target.value)}
-                              style={{
-                                background: '#0f172a',
-                                border: '1px solid #475569',
-                                color: row.status === 'Mandor' ? '#fbbf24' : (row.status === 'Kenek' ? '#a78bfa' : '#34d399'),
-                                borderRadius: '4px',
-                                padding: '2px 6px',
-                                fontSize: '0.8rem',
-                                fontWeight: 800,
-                                outline: 'none'
-                              }}
-                            >
-                              <option value="Tukang">Tukang</option>
-                              <option value="Kenek">Kenek</option>
-                              <option value="Mandor">Mandor</option>
-                              <option value="Kepala Tukang">Kepala Tukang</option>
-                              <option value="Borongan">Borongan</option>
-                            </select>
+                          {/* 3. Status (Permanen / Read-only / Tidak bisa diubah setelah diinput) */}
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.8rem',
+                              fontWeight: 900,
+                              background: row.status === 'Mandor' 
+                                ? 'rgba(245, 158, 11, 0.2)' 
+                                : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(16, 185, 129, 0.2)'),
+                              color: row.status === 'Mandor' 
+                                ? '#fbbf24' 
+                                : (row.status === 'Kenek' ? '#c084fc' : '#34d399'),
+                              border: `1px solid ${
+                                row.status === 'Mandor' 
+                                  ? '#f59e0b' 
+                                  : (row.status === 'Kenek' ? '#a855f7' : '#10b981')
+                              }`
+                            }}>
+                              {row.status || 'Tukang'}
+                            </span>
                           </td>
 
                           {/* 4. Hari Kerja (Inline Editable) */}
