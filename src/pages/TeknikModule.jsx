@@ -866,6 +866,7 @@ export const TeknikModule = () => {
   // OPNAME PEKERJAAN (CEK FISIK & REALISASI PROGRES LAPANGAN)
   // =========================================================================
   const [hasilOpnameSearch, setHasilOpnameSearch] = useState('');
+  const [hasilOpnameDateSearch, setHasilOpnameDateSearch] = useState('');
   const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
   const [opnameTargetSheet, setOpnameTargetSheet] = useState(null);
   const [opnameFormData, setOpnameFormData] = useState({
@@ -876,16 +877,28 @@ export const TeknikModule = () => {
   });
 
   const filteredHasilOpnameSheets = useMemo(() => {
-    if (!hasilOpnameSearch.trim()) return rabSheets;
-    const q = hasilOpnameSearch.toLowerCase().trim();
     return rabSheets.filter(s => {
-      const vendorMatch = (s.namaVendor || '').toLowerCase().includes(q);
-      const dateMatch = (s.tanggal || '').toLowerCase().includes(q);
-      const noMatch = (s.noInput || '').toLowerCase().includes(q);
-      const proyekMatch = (s.proyek || '').toLowerCase().includes(q);
-      return vendorMatch || dateMatch || noMatch || proyekMatch;
+      const q = hasilOpnameSearch.toLowerCase().trim();
+      const d = hasilOpnameDateSearch.toLowerCase().trim();
+
+      // 1. Text filter (Nama vendor, no input, proyek, pekerjaan)
+      const textMatch = !q || (
+        (s.namaVendor || '').toLowerCase().includes(q) ||
+        (s.noInput || '').toLowerCase().includes(q) ||
+        (s.proyek || '').toLowerCase().includes(q) ||
+        (s.pekerjaan || '').toLowerCase().includes(q)
+      );
+
+      // 2. Date filter (Tanggal RAB atau riwayat Tanggal Opname)
+      const hasHistoryDate = (s.opnameHistory || []).some(h => (h.tanggal || '').toLowerCase().includes(d));
+      const dateMatch = !d || (
+        (s.tanggal || '').toLowerCase().includes(d) ||
+        hasHistoryDate
+      );
+
+      return textMatch && dateMatch;
     });
-  }, [rabSheets, hasilOpnameSearch]);
+  }, [rabSheets, hasilOpnameSearch, hasilOpnameDateSearch]);
 
   const handleOpenOpnameModal = (sheet) => {
     setOpnameTargetSheet(sheet);
@@ -2624,11 +2637,11 @@ export const TeknikModule = () => {
                 <Search size={17} /> Cari Lembar RAB:
               </div>
 
-              {/* INPUT SEARCH BY NAMA VENDOR / TANGGAL / NO INPUT */}
-              <div style={{ position: 'relative', minWidth: '260px', flex: '1 1 260px', maxWidth: '420px' }}>
+              {/* 1. INPUT SEARCH BY NAMA VENDOR / NO RAB */}
+              <div style={{ position: 'relative', minWidth: '220px', flex: '1 1 220px', maxWidth: '320px' }}>
                 <input
                   type="text"
-                  placeholder="Ketik nama vendor atau tanggal (misal: Joko / 28/08/26)..."
+                  placeholder="Cari Nama Vendor / No RAB..."
                   value={hasilOpnameSearch}
                   onChange={(e) => setHasilOpnameSearch(e.target.value)}
                   style={{
@@ -2655,11 +2668,42 @@ export const TeknikModule = () => {
                 )}
               </div>
 
+              {/* 2. INPUT SEARCH BY TANGGAL OPNAME */}
+              <div style={{ position: 'relative', minWidth: '180px', flex: '1 1 180px', maxWidth: '240px' }}>
+                <input
+                  type="text"
+                  placeholder="Cari Tgl Opname (mis: 28/08/26)..."
+                  value={hasilOpnameDateSearch}
+                  onChange={(e) => setHasilOpnameDateSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#1e293b',
+                    border: '1.5px solid #10b981',
+                    borderRadius: '8px',
+                    color: '#34d399',
+                    padding: '7px 12px 7px 32px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    outline: 'none'
+                  }}
+                />
+                <Calendar size={15} color="#10b981" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                {hasilOpnameDateSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setHasilOpnameDateSearch('')}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 900 }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
               {/* CHIPS HASIL PENCARIAN (HANYA MUNCUL YANG SESUAI DENGAN PENCARIAN) */}
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 {filteredHasilOpnameSheets.length === 0 ? (
                   <span style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>
-                    Tidak ditemukan RAB dengan nama/tanggal "{hasilOpnameSearch}"
+                    Tidak ditemukan RAB untuk filter tersebut
                   </span>
                 ) : (
                   filteredHasilOpnameSheets.map((sheet, sIdx) => {
