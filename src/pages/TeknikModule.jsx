@@ -2787,31 +2787,9 @@ export const TeknikModule = () => {
                         {formatDecimal(row.bobotRatio, 2)}
                       </td>
 
-                      {/* 9. Progress (Bisa diupdate langsung / inline) */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px', background: 'rgba(16, 185, 129, 0.08)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="5"
-                            value={row.progress || 0}
-                            onChange={(e) => handleUpdateCell(row.id, 'progress', Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
-                            style={{
-                              width: '58px',
-                              background: '#0f172a',
-                              border: '1.5px solid #10b981',
-                              borderRadius: '4px',
-                              color: '#34d399',
-                              fontWeight: 900,
-                              fontSize: '0.85rem',
-                              padding: '2px 4px',
-                              textAlign: 'center',
-                              outline: 'none'
-                            }}
-                          />
-                          <span style={{ fontWeight: 900, color: '#34d399', fontSize: '0.82rem' }}>%</span>
-                        </div>
+                      {/* 9. Progress (Read-Only dari Hasil Opname) */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399' }}>
+                        {formatDecimal(row.progress || 0, 2)}%
                       </td>
 
                       {/* 10. Bobot Progress */}
