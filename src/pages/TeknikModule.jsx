@@ -32,7 +32,8 @@ import {
   ExternalLink,
   Zap,
   Award,
-  TrendingUp
+  TrendingUp,
+  Coins
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -59,6 +60,11 @@ function angkaTerbilang(nilai) {
 
 const formatRupiah = (val) => {
   const num = Number(val) || 0;
+  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+};
+
+const formatRupiahDesimal = (val) => {
+  const num = Number(val) || 0;
   return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
 };
 
@@ -71,7 +77,7 @@ export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
   // Active Sub-Tabs:
-  // 'absen'   : 1. Absen Tenaga Kerja
+  // 'absen'   : 1. Absen Tenaga Kerja & Rekap Upah
   // 'input'   : 2. Input Lembar RAB (Spreadsheet Excel View)
   // 'laporan' : 3. Laporan Rekapitulasi RAB & Progress (Tabel Laporan Gambar media_1787930910161.png)
   const [activeTab, setActiveTab] = useState(() => {
@@ -100,7 +106,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v8';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v9';
 
   const defaultAttendance = [
     {
@@ -115,7 +121,7 @@ export const TeknikModule = () => {
       no: '01',
       umum: '-',
       catatan: 'Pemasangan bata ringan dinding lantai 1 & plester acian',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-16'
     },
     {
       id: 'ABS-2025-002',
@@ -129,7 +135,7 @@ export const TeknikModule = () => {
       no: '01',
       umum: '-',
       catatan: 'Pembesian kolom praktis & pengecoran balok lintel',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-16'
     },
     {
       id: 'ABS-2025-003',
@@ -143,7 +149,7 @@ export const TeknikModule = () => {
       no: '-',
       umum: 'Gerbang & Saluran',
       catatan: 'Pengecoran plat jembatan masuk & perapihan drainase jalan utama',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-17'
     },
     {
       id: 'ABS-2025-004',
@@ -157,7 +163,7 @@ export const TeknikModule = () => {
       no: '05',
       umum: '-',
       catatan: 'Pemasangan keramik lantai 60x60 ruang tamu & teras depan',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-17'
     },
     {
       id: 'ABS-2025-005',
@@ -171,7 +177,7 @@ export const TeknikModule = () => {
       no: '05',
       umum: '-',
       catatan: 'Pengecatan dasar dinding interior (alkali sealer primer)',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-18'
     },
     {
       id: 'ABS-2025-006',
@@ -185,7 +191,7 @@ export const TeknikModule = () => {
       no: '-',
       umum: 'Fasum Taman',
       catatan: 'Perataan tanah taman bermain & penanaman rumput gajah mini',
-      tanggal: '2025-08-28'
+      tanggal: '2026-08-18'
     }
   ];
 
@@ -206,64 +212,134 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [attendanceList]);
 
-  // Absen Filter States (Search, Proyek, Nama, Lembur, Date, Location)
+  // Absen Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('ALL');
   const [nameFilter, setNameFilter] = useState('ALL');
-  const [lemburFilter, setLemburFilter] = useState('ALL'); // 'ALL' | 'LEMBUR' | 'NORMAL'
-  const [dateFilter, setDateFilter] = useState('2025-08-28');
+  const [lemburFilter, setLemburFilter] = useState('ALL');
+  const [dateFilter, setDateFilter] = useState('');
   const [locationTypeFilter, setLocationTypeFilter] = useState('ALL');
   const [isRekapExpanded, setIsRekapExpanded] = useState(true);
 
-  // Extract unique worker names for the filter dropdown
+  // Extract unique worker names
   const uniqueWorkerNames = Array.from(new Set(attendanceList.map(a => a.nama).filter(Boolean))).sort();
 
   // =========================================================================
-  // SUMMARY DATA: REKAPITULASI ABSEN SESUAI NAMA & SEMUANYA (GROUP BY WORKER)
+  // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png)
+  // Columns: No. | Nama | Hari kerja | Upah | Total
+  // Header: Tanggal : [Tanggal Awal] s/d [Tanggal Akhir]
   // =========================================================================
-  const workerSummaryList = uniqueWorkerNames.map(workerName => {
-    const workerRecords = attendanceList.filter(a => a.nama === workerName);
-    
-    // Filtered by project if projectFilter is set
-    const applicableRecords = projectFilter === 'ALL' 
-      ? workerRecords 
-      : workerRecords.filter(a => a.proyek === projectFilter);
+  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v9';
 
-    const totalHadir = applicableRecords.length;
-    const totalJamLembur = applicableRecords.reduce((sum, r) => sum + (Number(r.lembur) || 0), 0);
-    const totalHariLembur = applicableRecords.filter(r => (Number(r.lembur) || 0) > 0).length;
-    
-    // Projects active in
-    const projects = Array.from(new Set(applicableRecords.map(r => r.proyek).filter(Boolean)));
-    
-    // Units active in
-    const units = Array.from(new Set(applicableRecords.map(r => {
-      if (r.blok && r.blok !== '-') return `Blok ${r.blok}-${r.no}`;
-      if (r.umum && r.umum !== '-') return r.umum;
-      return null;
-    }).filter(Boolean)));
+  const defaultRekapPeriode = {
+    tanggalAwal: '16/08/2026',
+    tanggalAkhir: '18/08/2026'
+  };
 
-    // Latest work
-    const latestRecord = applicableRecords[0] || workerRecords[0];
+  const defaultRekapUpahRows = [
+    { id: 'RKP-01', nama: 'Slamet Riyadi', hariKerja: 7, upah: 150000 },
+    { id: 'RKP-02', nama: 'Bambang Supeno', hariKerja: 7, upah: 150000 },
+    { id: 'RKP-03', nama: 'Joko Susanto', hariKerja: 6, upah: 150000 },
+    { id: 'RKP-04', nama: 'Agus Triono', hariKerja: 7, upah: 150000 },
+    { id: 'RKP-05', nama: 'Dedi Kurniawan', hariKerja: 6, upah: 140000 },
+    { id: 'RKP-06', nama: 'Sunarto', hariKerja: 5, upah: 130000 }
+  ];
 
-    return {
-      nama: workerName,
-      proyekText: projects.join(', ') || '-',
-      projects,
-      totalHadir,
-      totalJamLembur,
-      totalHariLembur,
-      lokasiAktif: units.join(', ') || '-',
-      pekerjaanTerakhir: latestRecord ? latestRecord.catatan : '-',
-      tanggalTerakhir: latestRecord ? latestRecord.tanggal : '-'
-    };
-  }).filter(item => {
-    if (projectFilter !== 'ALL' && !item.projects.includes(projectFilter)) return false;
-    if (nameFilter !== 'ALL' && item.nama !== nameFilter) return false;
-    if (lemburFilter === 'LEMBUR' && item.totalJamLembur === 0) return false;
-    if (lemburFilter === 'NORMAL' && item.totalJamLembur > 0) return false;
-    return true;
+  const [rekapPeriode, setRekapPeriode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_teknik_rekap_periode_v9');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultRekapPeriode;
   });
+
+  const [rekapUpahRows, setRekapUpahRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_REKAP_UPAH);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultRekapUpahRows;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_teknik_rekap_periode_v9', JSON.stringify(rekapPeriode));
+    } catch (e) {}
+  }, [rekapPeriode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_REKAP_UPAH, JSON.stringify(rekapUpahRows));
+    } catch (e) {}
+  }, [rekapUpahRows]);
+
+  // UPDATE CELL IN REKAP UPAH
+  const handleUpdateRekapCell = (rowId, field, value) => {
+    setRekapUpahRows(prev => prev.map(r => {
+      if (r.id === rowId) {
+        return { ...r, [field]: value };
+      }
+      return r;
+    }));
+  };
+
+  // ADD NEW ROW TO REKAP UPAH
+  const handleAddRekapRow = () => {
+    const newRow = {
+      id: `RKP-${Date.now().toString().slice(-4)}`,
+      nama: '',
+      hariKerja: 1,
+      upah: 150000
+    };
+    setRekapUpahRows([...rekapUpahRows, newRow]);
+    showNotification('Baris rekap pekerja baru berhasil ditambahkan.', 'info');
+  };
+
+  // DELETE ROW FROM REKAP UPAH
+  const handleDeleteRekapRow = (rowId) => {
+    setRekapUpahRows(rekapUpahRows.filter(r => r.id !== rowId));
+    showNotification('Baris pekerja berhasil dihapus.', 'warning');
+  };
+
+  // AUTO-SYNC WORKERS FROM DAILY ATTENDANCE
+  const handleSyncWorkersFromDaily = () => {
+    const currentNames = new Set(rekapUpahRows.map(r => r.nama.toLowerCase().trim()));
+    const newRows = [...rekapUpahRows];
+    
+    uniqueWorkerNames.forEach(workerName => {
+      if (!currentNames.has(workerName.toLowerCase().trim())) {
+        const workerLogs = attendanceList.filter(a => a.nama.toLowerCase().trim() === workerName.toLowerCase().trim());
+        newRows.push({
+          id: `RKP-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`,
+          nama: workerName,
+          hariKerja: workerLogs.length || 1,
+          upah: 150000
+        });
+      }
+    });
+
+    setRekapUpahRows(newRows);
+    showNotification('Daftar tenaga kerja berhasil disinkronkan dari log harian!', 'success');
+  };
+
+  // Calculations for Rekap Upah
+  const computedRekapRows = rekapUpahRows.map(row => {
+    const hariKerja = Number(row.hariKerja) || 0;
+    const upah = Number(row.upah) || 0;
+    const total = hariKerja * upah;
+    return {
+      ...row,
+      hariKerja,
+      upah,
+      total
+    };
+  });
+
+  const totalRekapHariKerja = computedRekapRows.reduce((sum, r) => sum + r.hariKerja, 0);
+  const totalRekapBiayaUpah = computedRekapRows.reduce((sum, r) => sum + r.total, 0);
 
   // Absen Modal State
   const [isAbsenModalOpen, setIsAbsenModalOpen] = useState(false);
@@ -279,7 +355,7 @@ export const TeknikModule = () => {
     no: '01',
     umum: '-',
     catatan: '',
-    tanggal: '2025-08-28'
+    tanggal: '2026-08-16'
   });
 
   const handleOpenAddAbsen = () => {
@@ -313,7 +389,7 @@ export const TeknikModule = () => {
       no: item.no || '-',
       umum: item.umum || '-',
       catatan: item.catatan || '',
-      tanggal: item.tanggal || '2025-08-28'
+      tanggal: item.tanggal || '2026-08-16'
     });
     setIsAbsenModalOpen(true);
   };
@@ -388,7 +464,7 @@ export const TeknikModule = () => {
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // (EXACT STRUCTURE OF media_1787930910161.png, media_1787930804198.jpg, media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v8';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v9';
 
   const defaultRabSheets = [
     {
@@ -693,7 +769,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran & rekapitulasi lembur tenaga kerja, lembar input spreadsheet RAB, & laporan rekapitulasi progres.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & rekapitulasi upah tenaga kerja, lembar input spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
 
@@ -721,7 +797,7 @@ export const TeknikModule = () => {
                 boxShadow: '0 4px 14px rgba(234, 88, 12, 0.45)'
               }}
             >
-              <Plus size={18} /> + Input Absen Tenaga Kerja
+              <Plus size={18} /> + Input Absen Harian
             </button>
           ) : (
             <button 
@@ -767,7 +843,7 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={17} /> 1. Absen & Rekap Tenaga Kerja ({attendanceList.length})
+          <Users size={17} /> 1. Absen & Rekap Upah Tenaga Kerja ({attendanceList.length})
         </button>
 
         {/* Tab 2: Input RAB Sheet */}
@@ -819,60 +895,70 @@ export const TeknikModule = () => {
 
       {/* ========================================================================= */}
       {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
-      {/* 1. REKAPITULASI ABSEN SESUAI NAMA & SEMUANYA (DI ATAS)                   */}
-      {/* 2. TABEL HARIAN ABSEN & LEMBUR TENAGA KERJA (DI BAWAH)                   */}
+      {/* 1. TABEL REKAP ABSEN & UPAH (EXACT MATCHING media_1787931569751.png)     */}
+      {/* 2. TABEL LOG DETAIL HARIAN & LEMBUR (DI BAWAH)                           */}
       {/* ========================================================================= */}
       {activeTab === 'absen' && (
         <div className="module-animated-view">
           
-          {/* KPI Cards */}
-          <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f97316', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Terdaftar</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{uniqueWorkerNames.length} Orang</div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total {attendanceList.length} Log Kehadiran</div>
-            </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #eab308', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Total Jam Lembur</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#facc15', marginTop: '2px' }}>
-                {attendanceList.reduce((acc, a) => acc + (Number(a.lembur) || 0), 0)} Jam
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{attendanceList.filter(a => Number(a.lembur) > 0).length} Kali Sesi Lembur</div>
-            </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981', marginTop: '2px' }}>
-                {attendanceList.filter(a => (a.proyek || '').includes('Park')).length} Sesi Kerja
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja di Park</div>
-            </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Ashoka View</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
-                {attendanceList.filter(a => (a.proyek || '').includes('View')).length} Sesi Kerja
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja di View</div>
-            </div>
-          </div>
-
           {/* ===================================================================== */}
-          {/* TABEL REKAPITULASI ABSEN & LEMBUR SESUAI NAMA (DITAMPILKAN DI ATAS)    */}
+          {/* TABEL REKAPITULASI UPAH (PERSIS FORMAT GAMBAR media_1787931569751.png)  */}
+          {/* Header Tanggal Range + No | Nama | Hari kerja | Upah | Total          */}
           {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #ea580c', overflow: 'hidden' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #f59e0b', overflow: 'hidden' }}>
+            
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <span style={{ background: '#ea580c', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  REKAP
+                <span style={{ background: '#f59e0b', color: '#000000', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
+                  SPREADSHEET REKAP UPAH
                 </span>
                 <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Award size={20} color="#fb923c" /> Rekapitulasi Absensi & Lembur Sesuai Nama Tenaga Kerja
+                  <Coins size={20} color="#fbbf24" /> Rekapitulasi Hari Kerja & Upah Tenaga Kerja
                 </h3>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleSyncWorkersFromDaily}
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid #38bdf8',
+                    color: '#38bdf8',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Tarik nama tukang baru dari log harian"
+                >
+                  <RotateCcw size={13} /> Sinkron dari Log Harian
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddRekapRow}
+                  style={{
+                    background: '#f59e0b',
+                    color: '#000000',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 900,
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Plus size={14} /> + Tambah Baris
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setIsRekapExpanded(!isRekapExpanded)}
@@ -891,128 +977,200 @@ export const TeknikModule = () => {
                   }}
                 >
                   {isRekapExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  {isRekapExpanded ? 'Sembunyikan Rekap' : 'Tampilkan Rekap'}
+                  {isRekapExpanded ? 'Tutup' : 'Buka'}
                 </button>
               </div>
             </div>
 
             {isRekapExpanded && (
               <div>
-                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                  Ringkasan akumulasi seluruh kehadiran, total jam lembur, dan lokasi penugasan tiap tenaga kerja. Klik pada baris nama untuk memfilter log harian di bawah.
+                {/* TANGGAL RANGE HEADER (PERSIS DI GAMBAR: "Tanggal : 16/08/2026  18/08/2026") */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem', background: '#0f172a', padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #334155', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 900, color: '#f8fafc', fontSize: '0.9rem' }}>Tanggal :</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <input
+                      type="text"
+                      value={rekapPeriode.tanggalAwal}
+                      onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAwal: e.target.value })}
+                      placeholder="16/08/2026"
+                      style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.86rem', fontWeight: 800, width: '110px', textAlign: 'center', outline: 'none' }}
+                    />
+                    <span style={{ color: '#94a3b8', fontWeight: 800 }}>s/d</span>
+                    <input
+                      type="text"
+                      value={rekapPeriode.tanggalAkhir}
+                      onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAkhir: e.target.value })}
+                      placeholder="18/08/2026"
+                      style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.86rem', fontWeight: 800, width: '110px', textAlign: 'center', outline: 'none' }}
+                    />
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: 'auto' }}>
+                    💡 Klik langsung di kolom <strong>Hari kerja</strong> dan <strong>Upah</strong> untuk mengubah angka (Total otomatis terhitung).
+                  </span>
                 </div>
 
-                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #78350f' }}>
-                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px', textAlign: 'left' }}>
+                {/* SPREADSHEET TABLE (EXACT 5 COLUMNS: No. | Nama | Hari kerja | Upah | Total) */}
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '780px', textAlign: 'left' }}>
                     <thead>
                       <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                        <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>No.</th>
-                        <th style={{ width: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Nama Tenaga Kerja</th>
-                        <th style={{ width: '130px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Penugasan Proyek</th>
-                        <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Total Kehadiran</th>
-                        <th style={{ width: '140px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Total Jam Lembur</th>
-                        <th style={{ width: '170px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Lokasi / Unit Aktif</th>
-                        <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Pekerjaan Terakhir</th>
-                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Aksi Filter</th>
+                        <th style={{ width: '55px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 6px' }}>
+                          No.
+                        </th>
+                        <th style={{ minWidth: '240px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
+                          Nama
+                        </th>
+                        <th style={{ width: '130px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
+                          Hari kerja
+                        </th>
+                        <th style={{ width: '160px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
+                          Upah
+                        </th>
+                        <th style={{ width: '190px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
+                          Total
+                        </th>
+                        <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
+                          
+                        </th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {workerSummaryList.map((worker, idx) => (
+                      {computedRekapRows.map((row, idx) => (
                         <tr 
-                          key={worker.nama || idx} 
+                          key={row.id || idx} 
                           style={{ 
                             backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
-                            color: '#f8fafc',
-                            cursor: 'pointer'
+                            color: '#f8fafc'
                           }}
-                          onClick={() => setNameFilter(nameFilter === worker.nama ? 'ALL' : worker.nama)}
                         >
-                          <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>
+                          {/* 1. No. */}
+                          <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
                             {idx + 1}
                           </td>
-                          <td style={{ fontWeight: 900, color: '#ffffff', border: '1px solid #334155', fontSize: '0.88rem', padding: '8px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
-                                {worker.nama.charAt(0).toUpperCase()}
-                              </div>
-                              <span style={{ color: nameFilter === worker.nama ? '#fb923c' : '#ffffff' }}>
-                                {worker.nama} {nameFilter === worker.nama ? '🎯' : ''}
-                              </span>
+
+                          {/* 2. Nama (Inline Editable) */}
+                          <td style={{ border: '1px solid #334155', padding: '4px 8px' }}>
+                            <input
+                              type="text"
+                              value={row.nama || ''}
+                              onChange={(e) => handleUpdateRekapCell(row.id, 'nama', e.target.value)}
+                              placeholder="Nama Tenaga Kerja..."
+                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#ffffff', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
+                            />
+                          </td>
+
+                          {/* 3. Hari Kerja (Inline Editable) */}
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={row.hariKerja !== undefined ? row.hariKerja : ''}
+                              onChange={(e) => handleUpdateRekapCell(row.id, 'hariKerja', Number(e.target.value) || 0)}
+                              style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
+                            />
+                          </td>
+
+                          {/* 4. Upah (Inline Editable) */}
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                              <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700 }}>Rp</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="5000"
+                                value={row.upah !== undefined ? row.upah : ''}
+                                onChange={(e) => handleUpdateRekapCell(row.id, 'upah', Number(e.target.value) || 0)}
+                                style={{ width: '90px', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
+                              />
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', padding: '8px 8px', fontWeight: 800 }}>
-                            <span style={{ color: worker.proyekText.includes('Park') ? '#34d399' : '#fbbf24' }}>
-                              {worker.proyekText}
-                            </span>
+
+                          {/* 5. Total (Auto Calculated = Hari Kerja * Upah) */}
+                          <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 10px', fontSize: '0.94rem' }}>
+                            Rp {formatRupiah(row.total)}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
-                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-block' }}>
-                              📅 {worker.totalHadir} Hari
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
-                            {worker.totalJamLembur > 0 ? (
-                              <span style={{ background: 'rgba(234, 88, 12, 0.25)', color: '#fb923c', border: '1.5px solid #ea580c', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-block' }}>
-                                ⚡ {worker.totalJamLembur} Jam ({worker.totalHariLembur}x)
-                              </span>
-                            ) : (
-                              <span style={{ color: '#64748b', fontSize: '0.82rem' }}>- (0 Jam)</span>
-                            )}
-                          </td>
-                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', color: '#818cf8', fontWeight: 800, padding: '8px 8px' }}>
-                            {worker.lokasiAktif}
-                          </td>
-                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', color: '#cbd5e1', padding: '8px 8px' }}>
-                            {worker.pekerjaanTerakhir}
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+
+                          {/* 6. Aksi Hapus */}
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setNameFilter(nameFilter === worker.nama ? 'ALL' : worker.nama);
-                              }}
-                              style={{
-                                background: nameFilter === worker.nama ? '#ea580c' : '#0284c7',
-                                color: '#ffffff',
-                                border: 'none',
-                                padding: '3px 8px',
-                                borderRadius: '4px',
-                                fontSize: '0.72rem',
-                                fontWeight: 800,
-                                cursor: 'pointer'
-                              }}
+                              onClick={() => handleDeleteRekapRow(row.id)}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                              title="Hapus Baris"
                             >
-                              {nameFilter === worker.nama ? 'Reset' : 'Filter'}
+                              <Trash2 size={13} />
                             </button>
                           </td>
                         </tr>
                       ))}
 
-                      {/* TOTAL BAR DI PALING BAWAH REKAP */}
+                      {/* TOTAL ROW DI PALING BAWAH */}
                       <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                        <td colSpan={3} style={{ textAlign: 'left', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                          Total Akumulasi ({workerSummaryList.length} Tenaga Kerja)
+                        <td colSpan={2} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          Total ({computedRekapRows.length} Tenaga Kerja)
                         </td>
-                        <td style={{ textAlign: 'center', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                          {workerSummaryList.reduce((acc, w) => acc + w.totalHadir, 0)} Hari Kerja
+                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          {totalRekapHariKerja} Hari
                         </td>
-                        <td style={{ textAlign: 'center', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                          ⚡ {workerSummaryList.reduce((acc, w) => acc + w.totalJamLembur, 0)} Jam Lembur
+                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                          -
                         </td>
-                        <td colSpan={3} style={{ border: '1.5px solid #78350f' }}></td>
+                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.96rem', color: '#000000' }}>
+                          Rp {formatRupiah(totalRekapBiayaUpah)}
+                        </td>
+                        <td style={{ border: '1.5px solid #78350f' }}></td>
                       </tr>
                     </tbody>
                   </table>
+                </div>
+
+                {/* TERBILANG TOTAL BIAYA UPAH */}
+                <div style={{ background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.88rem' }}>Terbilang Total Upah:</span>
+                  <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem', fontStyle: 'italic' }}>
+                    {angkaTerbilang(totalRekapBiayaUpah)}
+                  </span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ===================================================================== */}
-          {/* FILTER TOOLBAR: PROYEK, NAMA, LEMBUR, TANGGAL & SEARCH                */}
-          {/* ===================================================================== */}
+          {/* KPI Cards */}
+          <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f97316', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Hadir</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredAttendanceList.length} Orang</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{dateFilter ? `Tanggal: ${dateFilter}` : 'Semua tanggal'}</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #eab308', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Tenaga Kerja Lembur</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#facc15', marginTop: '2px' }}>
+                {totalLemburCount} Orang
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total: {totalLemburHours} Jam Lembur</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981', marginTop: '2px' }}>
+                {filteredAttendanceList.filter(a => (a.proyek || '').includes('Park')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di Park</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Ashoka View</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
+                {filteredAttendanceList.filter(a => (a.proyek || '').includes('View')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di View</div>
+            </div>
+          </div>
+
+          {/* FILTER TOOLBAR FOR DAILY ATTENDANCE */}
           <div className="glass-card" style={{ padding: '1.1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             
             {/* ROW 1: Filter Proyek Buttons */}
@@ -1080,7 +1238,7 @@ export const TeknikModule = () => {
               {/* Date & Reset Filter */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '4px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Harian:</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal:</span>
                   <input 
                     type="date"
                     value={dateFilter}
@@ -1088,16 +1246,16 @@ export const TeknikModule = () => {
                     style={{ fontSize: '0.82rem', padding: '2px 4px', border: 'none', background: 'transparent', color: '#ffffff', fontWeight: 800, outline: 'none' }}
                   />
                   {dateFilter && (
-                    <button onClick={() => setDateFilter('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }} title="Hapus filter tanggal (lihat semua tanggal)">
+                    <button onClick={() => setDateFilter('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }} title="Hapus filter tanggal (lihat semua)">
                       <X size={14} />
                     </button>
                   )}
                 </div>
 
-                {(searchQuery || projectFilter !== 'ALL' || nameFilter !== 'ALL' || lemburFilter !== 'ALL' || !dateFilter) && (
+                {(searchQuery || projectFilter !== 'ALL' || nameFilter !== 'ALL' || lemburFilter !== 'ALL' || dateFilter) && (
                   <button 
                     className="btn btn-secondary btn-sm" 
-                    onClick={() => { setSearchQuery(''); setProjectFilter('ALL'); setNameFilter('ALL'); setLemburFilter('ALL'); setDateFilter('2025-08-28'); setLocationTypeFilter('ALL'); }}
+                    onClick={() => { setSearchQuery(''); setProjectFilter('ALL'); setNameFilter('ALL'); setLemburFilter('ALL'); setDateFilter(''); setLocationTypeFilter('ALL'); }}
                     style={{ fontSize: '0.78rem', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
                   >
                     Reset Filter
@@ -1210,14 +1368,12 @@ export const TeknikModule = () => {
             </div>
           </div>
 
-          {/* ===================================================================== */}
-          {/* TABEL HARIAN: ABSEN TENAGA KERJA & JAM LEMBUR (DI BAWAH)              */}
-          {/* ===================================================================== */}
+          {/* ABSEN TABLE (WITH LEMBUR COLUMN IN JAM KERJA) */}
           <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>Log Harian</span>
-                Detail Kehadiran Harian & Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
+                Detail Absen Tenaga Kerja & Jam Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
                 PT Ashoka Enterprise Development &bull; Divisi Teknik
@@ -1229,7 +1385,7 @@ export const TeknikModule = () => {
                 <Users size={44} color="#94a3b8" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
                 <h4 style={{ fontWeight: 800, margin: 0, color: '#ffffff' }}>Belum ada data absen harian yang sesuai dengan filter</h4>
                 <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
-                  Silakan ubah filter tanggal atau klik tombol <strong>"+ Input Absen Tenaga Kerja"</strong>.
+                  Silakan ubah filter pencarian atau klik tombol <strong>"+ Input Absen Harian"</strong>.
                 </p>
               </div>
             ) : (
@@ -1694,7 +1850,7 @@ export const TeknikModule = () => {
 
                       {/* Jumlah = Vol * Harga Satuan */}
                       <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
-                        {formatRupiah(row.jumlah)}
+                        {formatRupiahDesimal(row.jumlah)}
                       </td>
 
                       {/* Bobot = Jumlah / Total */}
@@ -1759,7 +1915,7 @@ export const TeknikModule = () => {
                       Total
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatRupiah(activeSheetCalc.totalHargaRab)}
+                      {formatRupiahDesimal(activeSheetCalc.totalHargaRab)}
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                       {activeSheetCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
@@ -1829,7 +1985,7 @@ export const TeknikModule = () => {
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #34d399', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Harga RAB</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
-                Rp {formatRupiah(grandTotalHargaRab)}
+                Rp {formatRupiahDesimal(grandTotalHargaRab)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Seluruh Nilai Kontrak</div>
             </div>
@@ -1837,7 +1993,7 @@ export const TeknikModule = () => {
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #c084fc', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Retensi (5%)</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#c084fc', marginTop: '2px' }}>
-                Rp {formatRupiah(grandTotalRetensi)}
+                Rp {formatRupiahDesimal(grandTotalRetensi)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Jaminan Masa Pemeliharaan</div>
             </div>
@@ -1845,7 +2001,7 @@ export const TeknikModule = () => {
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #60a5fa', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#60a5fa', fontWeight: 800 }}>Total Nilai Progress</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#60a5fa', marginTop: '2px' }}>
-                Rp {formatRupiah(grandTotalNilaiProgress)}
+                Rp {formatRupiahDesimal(grandTotalNilaiProgress)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Realisasi Progres Fisik Lapangan</div>
             </div>
@@ -2069,7 +2225,7 @@ export const TeknikModule = () => {
 
                         {/* 9. Harga RAB */}
                         <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
-                          {formatRupiah(row.totalHargaRab)}
+                          {formatRupiahDesimal(row.totalHargaRab)}
                         </td>
 
                         {/* 10. Progress */}
@@ -2090,12 +2246,12 @@ export const TeknikModule = () => {
 
                         {/* 11. Retensi */}
                         <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.85rem', fontWeight: 800, color: '#c084fc' }}>
-                          {formatRupiah(row.retensiNilai)}
+                          {formatRupiahDesimal(row.retensiNilai)}
                         </td>
 
                         {/* 12. Nilai Progress */}
                         <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
-                          {formatRupiah(row.nilaiProgres)}
+                          {formatRupiahDesimal(row.nilaiProgres)}
                         </td>
 
                         {/* 13. Aksi */}
@@ -2160,16 +2316,16 @@ export const TeknikModule = () => {
                         Total Keseluruhan ({filteredLaporanSheets.length} Proyek)
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                        {formatRupiah(grandTotalHargaRab)}
+                        {formatRupiahDesimal(grandTotalHargaRab)}
                       </td>
                       <td style={{ textAlign: 'center', padding: '10px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
                         -
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                        {formatRupiah(grandTotalRetensi)}
+                        {formatRupiahDesimal(grandTotalRetensi)}
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                        {formatRupiah(grandTotalNilaiProgress)}
+                        {formatRupiahDesimal(grandTotalNilaiProgress)}
                       </td>
                       <td style={{ border: '1.5px solid #78350f' }}></td>
                     </tr>
