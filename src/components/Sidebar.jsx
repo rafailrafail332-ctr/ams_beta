@@ -159,19 +159,19 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
 
   // FULL MULTI-MODULE LIST FOR BOSS ROLES (USER CONTROL EXCLUSIVELY FOR SUPER ADMIN AHMAD RAFAIL)
   const fullBossModules = [
-    { id: 'todo-attendance', mainTitle: 'TO-DO LIST HARIAN', subtitle: 'Universal (Bisa Diakses Semua)', tab: 'todo-attendance', color: '#F59E0B' },
-    { id: 'executive', mainTitle: 'EKSEKUTIF & DIREKSI', subtitle: 'Direktur Utama & BOD Suite', tab: 'executive', color: '#F59E0B' },
-    { id: 'manager', mainTitle: 'MANAJER OPERASIONAL', subtitle: 'Pusat Approval Ops Manager', tab: 'manager', color: '#38BDF8' },
-    { id: 'teknik', mainTitle: 'TEKNIK & KONSTRUKSI', subtitle: 'Progress Unit & Serah Terima', tab: 'teknik-rumah', color: '#FBBF24' },
-    { id: 'marketing', mainTitle: 'MARKETING & SALES', subtitle: 'Penjualan Unit & Prospek Lead', tab: 'marketing', color: '#FBBF24' },
-    { id: 'legal', mainTitle: 'LEGAL & PERIZINAN', subtitle: 'Sertifikat SHGB/SHM & PBG', tab: 'legal', color: '#C084FC' },
-    { id: 'finance', mainTitle: 'FINANCE & PAYMENT', subtitle: 'Pembayaran, DP & KPR', tab: 'finance', color: '#60A5FA' },
-    { id: 'ga', mainTitle: 'GENERAL AFFAIR', subtitle: 'Aset, Maintenance & Operasional', tab: 'ga', color: '#38BDF8' },
-    { id: 'hr', mainTitle: 'HUMAN RESOURCES', subtitle: 'SDM, Payroll, K3 & Retensi Talent', tab: 'hr', color: '#F87171' },
-    { id: 'cr', mainTitle: 'CUSTOMER RELATION', subtitle: 'Komplain, BAST, CSAT & IPL', tab: 'customer-relation', color: '#FB7185' },
-    { id: 'procurement', mainTitle: 'PROCUREMENT & VENDOR', subtitle: 'Pengadaan, PO & Tender Proyek', tab: 'procurement', color: '#34D399' },
+    { id: 'todo-attendance', mainTitle: 'To-Do List Harian', tab: 'todo-attendance', icon: CheckSquare, color: '#F59E0B' },
+    { id: 'executive', mainTitle: 'Eksekutif & Direksi', tab: 'executive', icon: Award, color: '#F59E0B' },
+    { id: 'manager', mainTitle: 'Manajer Operasional', tab: 'manager', icon: Briefcase, color: '#38BDF8' },
+    { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik-rumah', icon: Building2, color: '#FBBF24' },
+    { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
+    { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
+    { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
+    { id: 'ga', mainTitle: 'General Affair', tab: 'ga', icon: ShieldCheck, color: '#38BDF8' },
+    { id: 'hr', mainTitle: 'Human Resources', tab: 'hr', icon: Users, color: '#F87171' },
+    { id: 'cr', mainTitle: 'Customer Relation (STK)', tab: 'customer-relation', icon: HeartHandshake, color: '#FB7185' },
+    { id: 'procurement', mainTitle: 'Procurement & Vendor', tab: 'procurement', icon: ShoppingCart, color: '#34D399' },
     // USER CONTROL ONLY VISIBLE TO SUPER ADMIN (AHMAD RAFAIL)
-    ...(isSuperAdmin() ? [{ id: 'users', mainTitle: 'USER CONTROL', subtitle: 'Otorisasi Access & Audit Security', tab: 'users', color: '#F59E0B' }] : [])
+    ...(isSuperAdmin() ? [{ id: 'users', mainTitle: 'User Control', tab: 'users', icon: ShieldCheck, color: '#F59E0B' }] : [])
   ];
 
   const isBoss = isBossRole();
@@ -205,35 +205,35 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           display: 'flex',
           alignItems: 'center',
           gap: '0.75rem',
-          padding: '0 1.25rem',
+          padding: '0 1rem',
           borderBottom: '1px solid var(--border-color)'
         }}>
           <img 
             src="/company-logo.png" 
             alt="Ashoka Logo" 
             style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
+              width: '34px',
+              height: '34px',
+              borderRadius: '8px',
               objectFit: 'contain',
               background: '#ffffff',
-              padding: '3px',
+              padding: '2px',
               boxShadow: 'var(--shadow-glow)',
               border: '1px solid rgba(245, 158, 11, 0.5)'
             }}
           />
           <div>
-            <div style={{ fontWeight: '900', fontSize: '1.15rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
+            <div style={{ fontWeight: '900', fontSize: '1.05rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
               ASHOKA
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#F59E0B', fontWeight: 700 }}>
+            <div style={{ fontSize: '0.65rem', color: '#F59E0B', fontWeight: 700 }}>
               {isBoss ? 'Pusat Pengawasan Direksi' : `Modul ${currentUser?.role || 'Staf'}`}
             </div>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <div style={{ flex: 1, padding: '1.25rem 1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        <div style={{ flex: 1, padding: '0.75rem 0.65rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
           
           {/* Main Dashboard Button (Always Visible for All Users) */}
           <button
@@ -242,30 +242,34 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
               width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.85rem 1rem',
+              gap: '0.65rem',
+              padding: '0.55rem 0.75rem',
               borderRadius: 'var(--radius-md)',
-              border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-              backgroundColor: currentTab === 'dashboard' ? 'var(--accent-primary)' : 'var(--bg-card)',
+              border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.06)',
+              backgroundColor: currentTab === 'dashboard' ? 'var(--accent-primary)' : 'rgba(30, 41, 59, 0.6)',
               color: currentTab === 'dashboard' ? '#ffffff' : 'var(--text-muted)',
               fontWeight: 700,
+              fontSize: '0.82rem',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              marginBottom: '0.5rem'
+              marginBottom: '0.2rem'
             }}
           >
-            <LayoutDashboard size={18} />
+            <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.2)' : 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTab === 'dashboard' ? '#fff' : '#818CF8' }}>
+              <LayoutDashboard size={15} />
+            </div>
             <span>Dashboard Utama</span>
           </button>
 
-          <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0.2rem 0.25rem 0.4rem' }}>
-            SEMUA MODUL DEPARTEMEN PERUSAHAAN
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0.2rem 0.25rem 0.15rem' }}>
+            MODUL DEPARTEMEN
           </div>
 
           {/* RENDER ALL CORE COMPANY MODULES PERMANENTLY FOR ALL ACCOUNTS */}
           {fullBossModules.map((card) => {
             const isActive = currentTab === card.tab;
             const hasAccess = canAccessModule(card.tab);
+            const IconComp = card.icon || Building2;
 
             return (
               <div
@@ -273,29 +277,42 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
                 onClick={() => handleNavClick(card.tab)}
                 style={{
                   width: '100%',
-                  padding: '0.8rem 0.9rem',
+                  padding: '0.5rem 0.65rem',
                   borderRadius: 'var(--radius-md)',
-                  border: isActive ? `1.5px solid ${card.color}` : '1px solid var(--border-color)',
-                  backgroundColor: isActive ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-                  boxShadow: isActive ? `0 0 16px ${card.color}33` : 'none',
+                  border: isActive ? `1.5px solid ${card.color}` : '1px solid rgba(255,255,255,0.06)',
+                  backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'rgba(30, 41, 59, 0.5)',
+                  boxShadow: isActive ? `0 0 12px ${card.color}25` : 'none',
                   cursor: hasAccess ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  transition: 'all 0.25s ease',
-                  borderLeft: `4px solid ${card.color}`,
+                  transition: 'all 0.2s ease',
+                  borderLeft: `3.5px solid ${card.color}`,
                   opacity: hasAccess ? 1 : 0.45
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '5px',
+                    background: `${card.color}18`,
+                    color: card.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <IconComp size={13} />
+                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: isActive ? 800 : 600, color: isActive ? '#ffffff' : 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {card.mainTitle}
                   </div>
                 </div>
                 {hasAccess ? (
-                  <ChevronRight size={16} color={card.color} style={{ opacity: isActive ? 1 : 0.4 }} />
+                  <ChevronRight size={13} color={card.color} style={{ opacity: isActive ? 1 : 0.3 }} />
                 ) : (
-                  <Lock size={14} color="var(--danger)" title="Restriksi Hak Akses Role" />
+                  <Lock size={12} color="var(--danger)" title="Restriksi Hak Akses Role" />
                 )}
               </div>
             );
