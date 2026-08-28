@@ -24,7 +24,9 @@ import {
   DollarSign,
   Briefcase,
   Layers,
-  FileText
+  FileText,
+  Eye,
+  ArrowLeft
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -38,7 +40,7 @@ function angkaTerbilang(nilai) {
     if (n < 20) return sebut(n - 10) + ' Belas';
     if (n < 100) return sebut(Math.floor(n / 10)) + ' Puluh ' + sebut(n % 10);
     if (n < 200) return 'Seratus ' + sebut(n - 100);
-    if (n < 1000) return sebut(Math.floor(n / 1000)) + ' Ratus ' + sebut(n % 100);
+    if (n < 1000) return sebut(Math.floor(n / 100)) + ' Ratus ' + sebut(n % 100);
     if (n < 2000) return 'Seribu ' + sebut(n - 1000);
     if (n < 1000000) return sebut(Math.floor(n / 1000)) + ' Ribu ' + sebut(n % 1000);
     if (n < 1000000000) return sebut(Math.floor(n / 1000000)) + ' Juta ' + sebut(n % 1000000);
@@ -299,92 +301,103 @@ export const TeknikModule = () => {
     return matchSearch && matchProject && matchDate && matchLocType;
   });
 
-  // ==========================================
-  // 2. SUB-MODUL 2: INPUT RAB & MONITORING PROGRESS STORE
-  // ==========================================
-  const STORAGE_KEY_RAB = 'ams_teknik_rab_sheets_v2';
+  // =========================================================================
+  // 2. SUB-MODUL 2: DAFTAR REKAPITULASI RAB & MASTER-DETAIL INPUT SPREADSHEET
+  // =========================================================================
+  const STORAGE_KEY_RAB_LIST = 'ams_teknik_rab_master_list_v3';
 
-  const defaultRabHeader = {
-    proyek: 'Ashoka Park',
-    tanggal: '2025-08-28',
-    namaVendor: 'CV Karya Mandiri Teknik',
-    pekerjaan: 'Pekerjaan Struktur & Arsitektur Rumah Contoh Type 45/90'
-  };
-
-  const defaultRabItems = [
+  const defaultRabProjects = [
     {
-      id: 'RAB-ITEM-001',
-      itemPekerjaan: 'Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian',
-      spesifikasi: 'Bata Hebel 10cm, Mortar Utama MU-380, Pasir Pasang Ayak',
-      vol: 10.00,
-      sat: 'm2',
-      hargaSatuan: 100000.00,
-      progress: 80 // 80%
+      id: 'RAB-2025-001',
+      proyek: 'Ashoka Park',
+      tanggalInput: '2025-08-28',
+      namaVendor: 'CV Karya Mandiri Teknik',
+      pekerjaan: 'Pekerjaan Struktur & Arsitektur Rumah Type 45/90 - Blok A01',
+      retensiPersen: 5, // 5%
+      items: [
+        {
+          id: 'ITEM-01',
+          itemPekerjaan: 'Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian',
+          spesifikasi: 'Bata Hebel 10cm, Mortar Utama MU-380, Pasir Pasang Ayak',
+          vol: 10.00,
+          sat: 'm2',
+          hargaSatuan: 100000.00,
+          progress: 80
+        },
+        {
+          id: 'ITEM-02',
+          itemPekerjaan: 'Pekerjaan Rangka Atap Baja Ringan & Penutup Genteng Metal',
+          spesifikasi: 'Truss C75.75 SNI, Reng 32.45, Genteng Metal Pasir 0.35mm',
+          vol: 5.00,
+          sat: 'ls',
+          hargaSatuan: 200000.00,
+          progress: 50
+        }
+      ]
     },
     {
-      id: 'RAB-ITEM-002',
-      itemPekerjaan: 'Pekerjaan Rangka Atap Baja Ringan & Penutup Genteng Metal',
-      spesifikasi: 'Truss C75.75 SNI, Reng 32.45, Genteng Metal Pasir 0.35mm',
-      vol: 5.00,
-      sat: 'ls',
-      hargaSatuan: 200000.00,
-      progress: 50 // 50%
+      id: 'RAB-2025-002',
+      proyek: 'Ashoka View',
+      tanggalInput: '2025-08-28',
+      namaVendor: 'PT Wijaya Bangun Perkasa',
+      pekerjaan: 'Pembangunan Gerbang Utama & Pos Keamanan Kawasan',
+      retensiPersen: 5,
+      items: [
+        {
+          id: 'ITEM-03',
+          itemPekerjaan: 'Pengecoran Pondasi Footplat & Balok Sloof Beton Bertulang',
+          spesifikasi: 'Beton Ready Mix K-250, Besi Ulir D13 SNI',
+          vol: 8.00,
+          sat: 'm3',
+          hargaSatuan: 850000.00,
+          progress: 100
+        },
+        {
+          id: 'ITEM-04',
+          itemPekerjaan: 'Pekerjaan Dinding Ornamen Granit & Profil ACP',
+          spesifikasi: 'Granite Tile 60x120 Black Gold, ACP Seven 4mm',
+          vol: 15.00,
+          sat: 'm2',
+          hargaSatuan: 450000.00,
+          progress: 40
+        }
+      ]
     }
   ];
 
-  const [rabHeader, setRabHeader] = useState(() => {
+  const [rabProjects, setRabProjects] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_RAB + '_header');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return defaultRabHeader;
-  });
-
-  const [rabItems, setRabItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_RAB + '_items');
+      const saved = localStorage.getItem(STORAGE_KEY_RAB_LIST);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return defaultRabItems;
+    return defaultRabProjects;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_RAB + '_header', JSON.stringify(rabHeader));
-      localStorage.setItem(STORAGE_KEY_RAB + '_items', JSON.stringify(rabItems));
+      localStorage.setItem(STORAGE_KEY_RAB_LIST, JSON.stringify(rabProjects));
     } catch (e) {}
-  }, [rabHeader, rabItems]);
+  }, [rabProjects]);
 
-  // Dynamic RAB Computations
-  // 1. Total RAB = Sum of (vol * hargaSatuan)
-  const totalRabAmount = rabItems.reduce((acc, item) => acc + ((Number(item.vol) || 0) * (Number(item.hargaSatuan) || 0)), 0);
-
-  // 2. Computed Items with Bobot and Bobot Progress
-  const computedRabItems = rabItems.map(item => {
-    const jumlah = (Number(item.vol) || 0) * (Number(item.hargaSatuan) || 0);
-    const bobotRatio = totalRabAmount > 0 ? (jumlah / totalRabAmount) : 0; // e.g. 0.50
-    const progressPercent = Number(item.progress) || 0; // e.g. 80%
-    const bobotProgress = (progressPercent / 100) * (bobotRatio * 100); // e.g. 40%
-
-    return {
-      ...item,
-      jumlah,
-      bobotRatio,
-      bobotPercent: bobotRatio * 100,
-      bobotProgress
-    };
+  // Selected Active RAB for Sheet Modal View / Full Editor View
+  const [selectedRabForSheet, setSelectedRabForSheet] = useState(null);
+  const [isRabProjectModalOpen, setIsRabProjectModalOpen] = useState(false);
+  const [editingRabProject, setEditingRabProject] = useState(null);
+  const [rabProjectForm, setRabProjectForm] = useState({
+    proyek: 'Ashoka Park',
+    tanggalInput: '2025-08-28',
+    namaVendor: '',
+    pekerjaan: '',
+    retensiPersen: 5
   });
 
-  // 3. Total Bobot Progress (Cumulative Physical Realization)
-  const totalBobotProgress = computedRabItems.reduce((acc, item) => acc + item.bobotProgress, 0);
-
-  // RAB Modal State for Add / Edit Item
-  const [isRabModalOpen, setIsRabModalOpen] = useState(false);
-  const [editingRabItem, setEditingRabItem] = useState(null);
-  const [rabFormData, setRabFormData] = useState({
+  // Modal for Adding/Editing Line Item inside a Sheet
+  const [isSheetItemModalOpen, setIsSheetItemModalOpen] = useState(false);
+  const [editingSheetItem, setEditingSheetItem] = useState(null);
+  const [sheetItemForm, setSheetItemForm] = useState({
     itemPekerjaan: '',
     spesifikasi: '',
     vol: 10,
@@ -393,22 +406,143 @@ export const TeknikModule = () => {
     progress: 0
   });
 
-  const handleOpenAddRabItem = () => {
-    setEditingRabItem(null);
-    setRabFormData({
-      itemPekerjaan: '',
-      spesifikasi: '',
-      vol: 1,
-      sat: 'm2',
-      hargaSatuan: 0,
-      progress: 0
+  // Helper Calculations for each RAB Project
+  const getCalculatedRab = (project) => {
+    const items = project.items || [];
+    const totalHargaRab = items.reduce((acc, it) => acc + ((Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0)), 0);
+
+    const computedItems = items.map(it => {
+      const jumlah = (Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0);
+      const bobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const progressPercent = Number(it.progress) || 0;
+      const bobotProgress = (progressPercent / 100) * (bobotRatio * 100);
+
+      return {
+        ...it,
+        jumlah,
+        bobotRatio,
+        bobotPercent: bobotRatio * 100,
+        bobotProgress
+      };
     });
-    setIsRabModalOpen(true);
+
+    const progresPersen = computedItems.reduce((acc, it) => acc + it.bobotProgress, 0);
+    const retensiPersen = Number(project.retensiPersen) || 5;
+    const retensiNilai = (retensiPersen / 100) * totalHargaRab;
+    const nilaiProgres = (progresPersen / 100) * totalHargaRab;
+
+    return {
+      ...project,
+      items: computedItems,
+      totalHargaRab,
+      progresPersen,
+      retensiPersen,
+      retensiNilai,
+      nilaiProgres
+    };
   };
 
-  const handleOpenEditRabItem = (item) => {
-    setEditingRabItem(item);
-    setRabFormData({
+  const calculatedRabProjects = rabProjects.map(getCalculatedRab);
+
+  // Filtered Front Table Records
+  const [rabSearchQuery, setRabSearchQuery] = useState('');
+  const [rabProjectFilter, setRabProjectFilter] = useState('ALL');
+
+  const filteredRabProjects = calculatedRabProjects.filter(p => {
+    const matchSearch = !rabSearchQuery || [
+      p.namaVendor,
+      p.pekerjaan,
+      p.proyek,
+      p.tanggalInput
+    ].some(val => (val || '').toLowerCase().includes(rabSearchQuery.toLowerCase().trim()));
+
+    const matchProject = rabProjectFilter === 'ALL' || p.proyek === rabProjectFilter;
+    return matchSearch && matchProject;
+  });
+
+  // Open New Project RAB Form Modal
+  const handleOpenAddRabProject = () => {
+    setEditingRabProject(null);
+    setRabProjectForm({
+      proyek: rabProjectFilter !== 'ALL' ? rabProjectFilter : 'Ashoka Park',
+      tanggalInput: new Date().toISOString().split('T')[0],
+      namaVendor: '',
+      pekerjaan: '',
+      retensiPersen: 5
+    });
+    setIsRabProjectModalOpen(true);
+  };
+
+  // Open Edit Project RAB Header Modal
+  const handleOpenEditRabProject = (project) => {
+    setEditingRabProject(project);
+    setRabProjectForm({
+      proyek: project.proyek || 'Ashoka Park',
+      tanggalInput: project.tanggalInput || '2025-08-28',
+      namaVendor: project.namaVendor || '',
+      pekerjaan: project.pekerjaan || '',
+      retensiPersen: project.retensiPersen || 5
+    });
+    setIsRabProjectModalOpen(true);
+  };
+
+  // Save Project RAB Header
+  const handleSaveRabProject = (e) => {
+    e.preventDefault();
+    if (!rabProjectForm.namaVendor.trim() || !rabProjectForm.pekerjaan.trim()) {
+      alert('Silakan lengkapi Nama Vendor dan Nama Pekerjaan!');
+      return;
+    }
+
+    if (editingRabProject) {
+      setRabProjects(rabProjects.map(p => p.id === editingRabProject.id ? { ...p, ...rabProjectForm } : p));
+      showNotification(`Data RAB "${rabProjectForm.pekerjaan}" berhasil diperbarui!`, 'success');
+      if (selectedRabForSheet && selectedRabForSheet.id === editingRabProject.id) {
+        setSelectedRabForSheet(prev => ({ ...prev, ...rabProjectForm }));
+      }
+    } else {
+      const newProject = {
+        ...rabProjectForm,
+        id: `RAB-${Date.now().toString().slice(-4)}`,
+        items: []
+      };
+      setRabProjects([newProject, ...rabProjects]);
+      showNotification(`RAB baru "${rabProjectForm.pekerjaan}" berhasil dibuat! Silakan isi rincian item pekerjaan.`, 'success');
+      // Automatically open the sheet editor for the new project
+      setSelectedRabForSheet(newProject);
+    }
+
+    setIsRabProjectModalOpen(false);
+  };
+
+  // Delete Project RAB
+  const handleDeleteRabProject = (project) => {
+    if (window.confirm(`Hapus seluruh data RAB "${project.pekerjaan}" (${project.namaVendor})?`)) {
+      setRabProjects(rabProjects.filter(p => p.id !== project.id));
+      if (selectedRabForSheet && selectedRabForSheet.id === project.id) {
+        setSelectedRabForSheet(null);
+      }
+      showNotification(`RAB "${project.pekerjaan}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // Handle Sheet Items CRUD
+  const handleOpenAddSheetItem = () => {
+    setEditingSheetItem(null);
+    setSheetItemForm({
+      itemPekerjaan: '',
+      spesifikasi: '',
+      vol: 10,
+      sat: 'm2',
+      hargaSatuan: 100000,
+      progress: 0
+    });
+    setIsSheetItemModalOpen(true);
+  };
+
+  const handleOpenEditSheetItem = (item) => {
+    setEditingSheetItem(item);
+    setSheetItemForm({
       itemPekerjaan: item.itemPekerjaan || '',
       spesifikasi: item.spesifikasi || '',
       vol: item.vol || 1,
@@ -416,46 +550,55 @@ export const TeknikModule = () => {
       hargaSatuan: item.hargaSatuan || 0,
       progress: item.progress || 0
     });
-    setIsRabModalOpen(true);
+    setIsSheetItemModalOpen(true);
   };
 
-  const handleDeleteRabItem = (item) => {
-    if (window.confirm(`Hapus baris item pekerjaan: "${item.itemPekerjaan}"?`)) {
-      setRabItems(rabItems.filter(r => r.id !== item.id));
-      showNotification(`Item "${item.itemPekerjaan}" berhasil dihapus dari lembar RAB.`, 'warning');
+  const handleDeleteSheetItem = (itemId) => {
+    if (!selectedRabForSheet) return;
+    if (window.confirm('Hapus baris item pekerjaan ini dari RAB?')) {
+      const updatedItems = (selectedRabForSheet.items || []).filter(it => it.id !== itemId);
+      const updatedProj = { ...selectedRabForSheet, items: updatedItems };
+      setRabProjects(rabProjects.map(p => p.id === selectedRabForSheet.id ? updatedProj : p));
+      setSelectedRabForSheet(updatedProj);
+      showNotification('Baris item pekerjaan berhasil dihapus dari lembar RAB.', 'warning');
     }
   };
 
-  const handleSaveRabItem = (e) => {
+  const handleSaveSheetItem = (e) => {
     e.preventDefault();
-    if (!rabFormData.itemPekerjaan.trim()) {
-      alert('Silakan isi uraian Item Pekerjaan!');
+    if (!selectedRabForSheet) return;
+    if (!sheetItemForm.itemPekerjaan.trim()) {
+      alert('Silakan masukkan uraian Item Pekerjaan!');
       return;
     }
 
     const payload = {
-      ...rabFormData,
-      itemPekerjaan: rabFormData.itemPekerjaan.trim(),
-      spesifikasi: rabFormData.spesifikasi.trim(),
-      vol: Number(rabFormData.vol) || 0,
-      sat: rabFormData.sat.trim(),
-      hargaSatuan: Number(rabFormData.hargaSatuan) || 0,
-      progress: Math.min(100, Math.max(0, Number(rabFormData.progress) || 0))
+      ...sheetItemForm,
+      itemPekerjaan: sheetItemForm.itemPekerjaan.trim(),
+      spesifikasi: sheetItemForm.spesifikasi.trim(),
+      vol: Number(sheetItemForm.vol) || 0,
+      sat: sheetItemForm.sat.trim(),
+      hargaSatuan: Number(sheetItemForm.hargaSatuan) || 0,
+      progress: Math.min(100, Math.max(0, Number(sheetItemForm.progress) || 0))
     };
 
-    if (editingRabItem) {
-      setRabItems(rabItems.map(r => r.id === editingRabItem.id ? { ...payload, id: editingRabItem.id } : r));
-      showNotification(`Item pekerjaan "${payload.itemPekerjaan}" berhasil diperbarui!`, 'success');
+    let updatedItems;
+    if (editingSheetItem) {
+      updatedItems = (selectedRabForSheet.items || []).map(it => it.id === editingSheetItem.id ? { ...payload, id: editingSheetItem.id } : it);
+      showNotification(`Item "${payload.itemPekerjaan}" berhasil diperbarui!`, 'success');
     } else {
       const newItem = {
         ...payload,
-        id: `RAB-${Date.now().toString().slice(-4)}`
+        id: `ITEM-${Date.now().toString().slice(-4)}`
       };
-      setRabItems([...rabItems, newItem]);
-      showNotification(`Item pekerjaan "${payload.itemPekerjaan}" berhasil ditambahkan ke RAB!`, 'success');
+      updatedItems = [...(selectedRabForSheet.items || []), newItem];
+      showNotification(`Item "${payload.itemPekerjaan}" berhasil ditambahkan ke lembar RAB!`, 'success');
     }
 
-    setIsRabModalOpen(false);
+    const updatedProj = { ...selectedRabForSheet, items: updatedItems };
+    setRabProjects(rabProjects.map(p => p.id === selectedRabForSheet.id ? updatedProj : p));
+    setSelectedRabForSheet(updatedProj);
+    setIsSheetItemModalOpen(false);
   };
 
   const handlePrint = () => {
@@ -471,7 +614,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran tenaga kerja lapangan, & penyusunan Rencana Anggaran Biaya (RAB) proyek.
+            Pusat operasional manajemen konstruksi, absensi kehadiran tenaga kerja lapangan, & monitoring Rencana Anggaran Biaya (RAB) proyek.
           </p>
         </div>
 
@@ -481,7 +624,7 @@ export const TeknikModule = () => {
             onClick={handlePrint}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#f8fafc', border: '1px solid #475569' }}
           >
-            <Printer size={16} /> Cetak Lembar {activeTab === 'absen' ? 'Absen' : 'RAB'}
+            <Printer size={16} /> Cetak Laporan
           </button>
           
           {activeTab === 'absen' ? (
@@ -504,19 +647,19 @@ export const TeknikModule = () => {
           ) : (
             <button 
               className="btn btn-primary" 
-              onClick={handleOpenAddRabItem}
+              onClick={handleOpenAddRabProject}
               style={{
-                background: 'linear-gradient(135deg, #ea580c, #c2410c)',
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                 border: 'none',
-                fontWeight: 800,
+                fontWeight: 900,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.4rem',
-                color: '#ffffff',
-                boxShadow: '0 4px 14px rgba(234, 88, 12, 0.45)'
+                color: '#000000',
+                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)'
               }}
             >
-              <Plus size={18} /> + Tambah Item Pekerjaan RAB
+              <Plus size={18} /> + Input RAB Proyek Baru
             </button>
           )}
         </div>
@@ -526,7 +669,7 @@ export const TeknikModule = () => {
       <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem' }}>
         <button
           type="button"
-          onClick={() => setActiveTab('absen')}
+          onClick={() => switchTab('absen')}
           style={{
             padding: '0.65rem 1.25rem',
             borderRadius: '10px',
@@ -548,7 +691,7 @@ export const TeknikModule = () => {
 
         <button
           type="button"
-          onClick={() => setActiveTab('rab')}
+          onClick={() => switchTab('rab')}
           style={{
             padding: '0.65rem 1.25rem',
             borderRadius: '10px',
@@ -565,7 +708,7 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Calculator size={18} /> 2. Input RAB & Monitoring Progress ({rabItems.length} Item)
+          <Calculator size={18} /> 2. Rekapitulasi & Input RAB ({rabProjects.length} Proyek)
         </button>
       </div>
 
@@ -837,290 +980,780 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 2: SUB-MODUL INPUT RAB & MONITORING PROGRESS (EXACT REPLICA OF FOTO) */}
+      {/* VIEW 2: SUB-MODUL REKAPITULASI RAB & MONITORING PROGRES (FRONT TABLE)    */}
+      {/* TAMPILAN DEPAN: NO | TANGGAL INPUT | NAMA VENDOR | PEKERJAAN | TOTAL HARGA RAB | PROGRES | RETENSI | NILAI PROGRES | AKSI */}
       {/* ========================================================================= */}
       {activeTab === 'rab' && (
         <div className="module-animated-view">
-          {/* RAB SPREADSHEET CARD */}
-          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)' }}>
-            
-            {/* Title exact as photo with Big Action Button */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1.5px solid #334155', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Calculator size={24} color="#f59e0b" />
-                <span>Input RAB & Rencana Anggaran Biaya</span>
+          
+          {/* KPI Summary Cards */}
+          <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Proyek / Kontrak RAB</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredRabProjects.length} Proyek</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Kontrak Kerja Terdaftar</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #34d399', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Nilai Anggaran RAB</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
+                Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.totalHargaRab, 0))}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Seluruh Nilai Kontrak</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #60a5fa', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#60a5fa', fontWeight: 800 }}>Total Nilai Progres Terealisasi</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#60a5fa', marginTop: '2px' }}>
+                Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.nilaiProgres, 0))}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Realisasi Progres Fisik Lapangan</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #c084fc', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Dana Retensi (5%)</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#c084fc', marginTop: '2px' }}>
+                Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.retensiNilai, 0))}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Jaminan Masa Pemeliharaan Vendor</div>
+            </div>
+          </div>
+
+          {/* FILTER & SEARCH TOOLBAR */}
+          <div className="glass-card" style={{ padding: '1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
+                  🏢 Filter Proyek:
+                </span>
+                
+                <button 
+                  type="button"
+                  onClick={() => setRabProjectFilter('ALL')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: rabProjectFilter === 'ALL' ? '2px solid #f59e0b' : '1px solid #475569',
+                    background: rabProjectFilter === 'ALL' ? '#f59e0b' : '#0f172a',
+                    color: rabProjectFilter === 'ALL' ? '#000000' : '#ffffff',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Semua Proyek ({rabProjects.length})
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setRabProjectFilter('Ashoka Park')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: rabProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
+                    background: rabProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
+                    color: rabProjectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🌳 Ashoka Park ({rabProjects.filter(a => (a.proyek || '').includes('Park')).length})
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setRabProjectFilter('Ashoka View')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: rabProjectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
+                    background: rabProjectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
+                    color: rabProjectFilter === 'Ashoka View' ? '#ffffff' : '#fbbf24',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🏔️ Ashoka View ({rabProjects.filter(a => (a.proyek || '').includes('View')).length})
+                </button>
               </div>
 
               <button 
                 type="button"
                 className="btn btn-primary"
-                onClick={handleOpenAddRabItem}
+                onClick={handleOpenAddRabProject}
                 style={{
                   background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                   border: 'none',
                   fontWeight: 900,
                   color: '#000000',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.55rem 1.15rem',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                  gap: '5px',
                   cursor: 'pointer'
                 }}
               >
-                <Plus size={18} /> + Tambah Item Pekerjaan RAB Baru
+                <Plus size={16} /> + Tambah Proyek RAB Baru
               </button>
             </div>
 
-            {/* SPREADSHEET HEADER FORM (Proyek, Tanggal, Nama Vendor, Pekerjaan) */}
-            <div style={{ maxWidth: '580px', marginBottom: '1.5rem', background: '#0f172a', padding: '1.1rem', borderRadius: '10px', border: '1px solid #334155' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '130px 15px 1fr', rowGap: '0.6rem', alignItems: 'center' }}>
-                
-                {/* Proyek */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
-                  <select
-                    className="form-control"
-                    value={rabHeader.proyek}
-                    onChange={(e) => setRabHeader({ ...rabHeader, proyek: e.target.value })}
-                    style={{ background: '#1e293b', color: '#ffffff', fontWeight: 800, height: '34px', fontSize: '0.85rem', borderColor: '#ea580c' }}
-                  >
-                    <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
-                    <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
-                  </select>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', position: 'relative', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
+              <Search size={18} color="#f59e0b" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff', flex: 1 }}
+                placeholder="Cari nama vendor, nama paket pekerjaan, atau proyek..."
+                value={rabSearchQuery}
+                onChange={(e) => setRabSearchQuery(e.target.value)}
+              />
+              {rabSearchQuery && (
+                <button onClick={() => setRabSearchQuery('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
 
-                {/* Tanggal */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Tanggal</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={rabHeader.tanggal}
-                    onChange={(e) => setRabHeader({ ...rabHeader, tanggal: e.target.value })}
-                    style={{ background: '#1e293b', color: '#ffffff', fontWeight: 800, height: '34px', fontSize: '0.85rem', borderColor: '#475569' }}
-                  />
-                </div>
-
-                {/* Nama Vendor */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama Vendor</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: CV Karya Mandiri Teknik / PT Wijaya Bangun..."
-                    value={rabHeader.namaVendor}
-                    onChange={(e) => setRabHeader({ ...rabHeader, namaVendor: e.target.value })}
-                    style={{ background: '#1e293b', color: '#ffffff', fontWeight: 800, height: '34px', fontSize: '0.85rem', borderColor: '#38bdf8' }}
-                  />
-                </div>
-
-                {/* Pekerjaan */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Pekerjaan</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Pekerjaan Pembangunan Unit Rumah Type 45/90 / Infrastruktur Jalan..."
-                    value={rabHeader.pekerjaan}
-                    onChange={(e) => setRabHeader({ ...rabHeader, pekerjaan: e.target.value })}
-                    style={{ background: '#1e293b', color: '#ffffff', fontWeight: 800, height: '34px', fontSize: '0.85rem', borderColor: '#f59e0b' }}
-                  />
-                </div>
+          {/* FRONT TABLE: REKAPITULASI RAB & MONITORING PROGRES */}
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 900 }}>Tabel Depan</span>
+                Daftar Rekapitulasi RAB & Monitoring Progres Proyek
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
+                PT Ashoka Enterprise Development &bull; Divisi Teknik
               </div>
             </div>
 
-            {/* SPREADSHEET TABLE: INPUT RAB (EXACT REPLICA OF media_1787929388918.jpg) */}
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309', marginBottom: '0.75rem' }}>
-              <table 
-                className="custom-table" 
-                style={{ 
-                  borderCollapse: 'collapse', 
-                  width: '100%', 
-                  minWidth: '1050px',
-                  textAlign: 'left'
-                }}
-              >
-                <thead>
-                  {/* HEADER ROW - PEACH/ORANGE COLOR WITH DEEP BLACK TEXT */}
-                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                    <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>
-                      No.
-                    </th>
-                    <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Item Pekerjaan
-                    </th>
-                    <th style={{ minWidth: '200px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Spesifikasi
-                    </th>
-                    <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Vol
-                    </th>
-                    <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
-                      Sat
-                    </th>
-                    <th style={{ width: '135px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Harga Satuan
-                    </th>
-                    <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Jumlah
-                    </th>
-                    <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Bobot
-                    </th>
-                    <th style={{ width: '85px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Progress
-                    </th>
-                    <th style={{ width: '105px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
-                      Bobot Progress
-                    </th>
-                    <th style={{ width: '100px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {computedRabItems.map((row, idx) => (
-                    <tr 
-                      key={row.id || idx}
-                      style={{ 
-                        backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
-                        color: '#f8fafc'
-                      }}
-                    >
-                      {/* No. */}
-                      <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>
-                        {idx + 1}
-                      </td>
-
-                      {/* Item Pekerjaan */}
-                      <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {row.itemPekerjaan}
-                      </td>
-
-                      {/* Spesifikasi */}
-                      <td style={{ color: '#cbd5e1', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.82rem' }}>
-                        {row.spesifikasi || '-'}
-                      </td>
-
-                      {/* Vol */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#38bdf8', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {formatDecimal(row.vol)}
-                      </td>
-
-                      {/* Sat */}
-                      <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '8px 6px', fontSize: '0.82rem' }}>
-                        {row.sat}
-                      </td>
-
-                      {/* Harga Satuan */}
-                      <td style={{ textAlign: 'right', fontWeight: 800, color: '#f8fafc', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {formatRupiah(row.hargaSatuan)}
-                      </td>
-
-                      {/* Jumlah (Vol * Harga Satuan) */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
-                        {formatRupiah(row.jumlah)}
-                      </td>
-
-                      {/* Bobot Ratio (e.g. 0,50) */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {formatDecimal(row.bobotRatio)}
-                      </td>
-
-                      {/* Progress % */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {row.progress ? `${row.progress}%` : '0%'}
-                      </td>
-
-                      {/* Bobot Progress % */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>
-                        {formatDecimal(row.bobotProgress)}%
-                      </td>
-
-                      {/* Aksi */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditRabItem(row)}
-                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '3px 7px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}
-                            title="Edit Item RAB"
-                          >
-                            <Edit3 size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteRabItem(row)}
-                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '3px 6px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}
-                            title="Hapus Item"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </td>
+            {filteredRabProjects.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#0f172a', borderRadius: '10px' }}>
+                <Calculator size={48} color="#f59e0b" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 900, margin: 0, color: '#ffffff' }}>Belum ada data proyek RAB yang terdaftar</h4>
+                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
+                  Klik tombol <strong>"+ Input RAB Proyek Baru"</strong> untuk mulai menyusun Rencana Anggaran Biaya proyek.
+                </p>
+                <button className="btn btn-primary btn-sm" onClick={handleOpenAddRabProject} style={{ marginTop: '0.75rem', background: '#f59e0b', color: '#000', fontWeight: 900, border: 'none' }}>
+                  + Input RAB Proyek Baru
+                </button>
+              </div>
+            ) : (
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1080px', textAlign: 'left' }}>
+                  <thead>
+                    {/* FRONT TABLE HEADER */}
+                    <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>
+                        No.
+                      </th>
+                      <th style={{ width: '115px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
+                        Tanggal Input
+                      </th>
+                      <th style={{ width: '190px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                        Nama Vendor
+                      </th>
+                      <th style={{ minWidth: '240px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                        Pekerjaan
+                      </th>
+                      <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                        Total Harga RAB
+                      </th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
+                        Progres
+                      </th>
+                      <th style={{ width: '140px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                        Retensi
+                      </th>
+                      <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                        Nilai Progres
+                      </th>
+                      <th style={{ width: '150px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
+                        Aksi
+                      </th>
                     </tr>
-                  ))}
+                  </thead>
 
-                  {/* EMPTY ROWS PLACEHOLDER IF LESS THAN 6 ITEMS */}
-                  {computedRabItems.length < 6 && Array.from({ length: 6 - computedRabItems.length }).map((_, rIdx) => (
-                    <tr key={`empty-${rIdx}`} style={{ height: '32px', backgroundColor: (computedRabItems.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
+                  <tbody>
+                    {filteredRabProjects.map((row, idx) => (
+                      <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
+                        {/* 1. No */}
+                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '9px 4px' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. Tanggal Input */}
+                        <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '9px 6px' }}>
+                          📅 {row.tanggalInput ? row.tanggalInput.split('-').reverse().join('/') : '-'}
+                        </td>
+
+                        {/* 3. Nama Vendor */}
+                        <td style={{ fontWeight: 900, color: '#38bdf8', border: '1px solid #334155', fontSize: '0.88rem', padding: '9px 8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Briefcase size={15} color="#38bdf8" />
+                            <span>{row.namaVendor}</span>
+                          </div>
+                        </td>
+
+                        {/* 4. Pekerjaan */}
+                        <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', fontSize: '0.88rem', padding: '9px 8px' }}>
+                          <div>{row.pekerjaan}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', fontWeight: 800 }}>
+                              {(row.proyek || '').includes('Park') ? '🌳' : '🏔️'} {row.proyek}
+                            </span>
+                            <span>&bull;</span>
+                            <span>{row.items?.length || 0} Item Pekerjaan</span>
+                          </div>
+                        </td>
+
+                        {/* 5. Total Harga RAB */}
+                        <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '9px 8px', fontSize: '0.9rem' }}>
+                          Rp {formatRupiah(row.totalHargaRab)}
+                        </td>
+
+                        {/* 6. Progres */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '9px 6px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontWeight: 900,
+                            fontSize: '0.82rem',
+                            background: row.progresPersen >= 100 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                            color: row.progresPersen >= 100 ? '#34d399' : '#60a5fa',
+                            border: `1px solid ${row.progresPersen >= 100 ? '#10b981' : '#3b82f6'}`
+                          }}>
+                            {formatDecimal(row.progresPersen)}%
+                          </span>
+                        </td>
+
+                        {/* 7. Retensi */}
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '9px 8px', fontSize: '0.84rem' }}>
+                          <div style={{ fontWeight: 800, color: '#c084fc' }}>Rp {formatRupiah(row.retensiNilai)}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>({row.retensiPersen}% Retensi)</div>
+                        </td>
+
+                        {/* 8. Nilai Progres */}
+                        <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '9px 8px', fontSize: '0.9rem' }}>
+                          Rp {formatRupiah(row.nilaiProgres)}
+                        </td>
+
+                        {/* 9. Aksi */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '9px 6px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                            {/* Tombol Buka Sheet RAB */}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedRabForSheet(row)}
+                              style={{
+                                background: '#f59e0b',
+                                color: '#000000',
+                                border: 'none',
+                                padding: '4px 9px',
+                                borderRadius: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer'
+                              }}
+                              title="Buka Lembar Spreadsheet Input RAB"
+                            >
+                              <Calculator size={13} /> Input RAB
+                            </button>
+
+                            {/* Tombol Edit Header */}
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditRabProject(row)}
+                              style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 6px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}
+                              title="Edit Header Proyek"
+                            >
+                              <Edit3 size={12} />
+                            </button>
+
+                            {/* Tombol Hapus */}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRabProject(row)}
+                              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}
+                              title="Hapus Proyek RAB"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* TOTAL BOTTOM BAR */}
+                    <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                      <td colSpan={4} style={{ textAlign: 'left', padding: '10px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        Total Keseluruhan Proyek ({filteredRabProjects.length} Proyek)
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.totalHargaRab, 0))}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '10px 6px', border: '1.5px solid #78350f', fontSize: '0.88rem', color: '#000000' }}>
+                        -
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.retensiNilai, 0))}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.nilaiProgres, 0))}
+                      </td>
+                      <td style={{ border: '1.5px solid #78350f' }}></td>
                     </tr>
-                  ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-                  {/* SUMMARY ROW TOTAL - EXACT AS IMAGE */}
-                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                    <td colSpan={6} style={{ textAlign: 'left', padding: '8px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      Total
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '8px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatRupiah(totalRabAmount)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '8px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {totalRabAmount > 0 ? '1,00' : '0,00'}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '8px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
-                      -
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '8px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatDecimal(totalBobotProgress)}%
-                    </td>
-                    <td style={{ border: '1.5px solid #78350f' }}></td>
-                  </tr>
-                </tbody>
-              </table>
+      {/* ========================================================================= */}
+      {/* SPREADSHEET DETAIL MODAL: EXACT REPLICA OF media_1787929388918.jpg        */}
+      {/* DIBUKA SAAT KLIK TOMBOL "Input RAB" DI TABEL DEPAN                         */}
+      {/* ========================================================================= */}
+      {selectedRabForSheet && (
+        <div className="modal-backdrop" style={{ zIndex: 100 }}>
+          <div className="modal-content" style={{ maxWidth: '1100px', width: '96vw', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', maxHeight: '92vh', overflowY: 'auto' }}>
+            
+            {/* Modal Top Nav Bar */}
+            <div className="modal-header" style={{ borderBottom: '1.5px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <button 
+                  onClick={() => setSelectedRabForSheet(null)}
+                  style={{ background: '#1e293b', border: '1px solid #475569', color: '#f8fafc', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, fontSize: '0.8rem' }}
+                >
+                  <ArrowLeft size={15} /> Kembali ke Rekapitulasi
+                </button>
+                <h3 className="modal-title" style={{ color: '#ffffff', fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Calculator size={22} color="#f59e0b" />
+                  Lembar Spreadsheet Input RAB
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm"
+                  onClick={handlePrint}
+                  style={{ background: '#1e293b', color: '#fff', border: '1px solid #475569', fontWeight: 800 }}
+                >
+                  <Printer size={15} /> Cetak Sheet RAB
+                </button>
+                <button 
+                  onClick={() => setSelectedRabForSheet(null)} 
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
-            {/* TERBILANG SECTION - EXACT REPLICA OF IMAGE */}
-            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '8px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.9rem' }}>Terbilang :</span>
-              <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                {angkaTerbilang(totalRabAmount)}
-              </span>
+            <div className="modal-body" style={{ padding: '1.25rem' }}>
+              
+              {/* SPREADSHEET HEADER FORM EXACT AS EXCEL IMAGE */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem', background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1px solid #334155' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.5rem', alignItems: 'center', minWidth: '320px', flex: 1 }}>
+                  
+                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
+                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                  <div style={{ fontWeight: 900, color: '#34d399', fontSize: '0.9rem' }}>{selectedRabForSheet.proyek}</div>
+
+                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Tanggal</div>
+                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                  <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{selectedRabForSheet.tanggalInput}</div>
+
+                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama Vendor</div>
+                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                  <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.9rem' }}>{selectedRabForSheet.namaVendor}</div>
+
+                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Pekerjaan</div>
+                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                  <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.9rem' }}>{selectedRabForSheet.pekerjaan}</div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleOpenAddSheetItem}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    border: 'none',
+                    fontWeight: 900,
+                    color: '#000000',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.6rem 1.15rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Plus size={18} /> + Tambah Baris Item Pekerjaan
+                </button>
+              </div>
+
+              {/* SPREADSHEET TABLE WITH PEACH HEADER */}
+              {(() => {
+                const currentCalc = getCalculatedRab(selectedRabForSheet);
+                return (
+                  <div>
+                    <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309', marginBottom: '0.75rem' }}>
+                      <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px', textAlign: 'left' }}>
+                        <thead>
+                          {/* HEADER ROW - PEACH COLOR */}
+                          <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                            <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>No.</th>
+                            <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Item Pekerjaan</th>
+                            <th style={{ minWidth: '200px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Spesifikasi</th>
+                            <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Vol</th>
+                            <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>Sat</th>
+                            <th style={{ width: '135px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Harga Satuan</th>
+                            <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Jumlah</th>
+                            <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Bobot</th>
+                            <th style={{ width: '85px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Progress</th>
+                            <th style={{ width: '105px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Bobot Progress</th>
+                            <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>Aksi</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {currentCalc.items.map((row, idx) => (
+                            <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>{idx + 1}</td>
+                              <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{row.itemPekerjaan}</td>
+                              <td style={{ color: '#cbd5e1', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.82rem' }}>{row.spesifikasi || '-'}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#38bdf8', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{formatDecimal(row.vol)}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '8px 6px', fontSize: '0.82rem' }}>{row.sat}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 800, color: '#f8fafc', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{formatRupiah(row.hargaSatuan)}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>{formatRupiah(row.jumlah)}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{formatDecimal(row.bobotRatio)}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{row.progress ? `${row.progress}%` : '0%'}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.86rem' }}>{formatDecimal(row.bobotProgress)}%</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                  <button type="button" onClick={() => handleOpenEditSheetItem(row)} style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '3px 7px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}>
+                                    <Edit3 size={12} />
+                                  </button>
+                                  <button type="button" onClick={() => handleDeleteSheetItem(row.id)} style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '3px 6px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}>
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+
+                          {/* SUMMARY ROW TOTAL */}
+                          <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                            <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                              Total
+                            </td>
+                            <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                              {formatRupiah(currentCalc.totalHargaRab)}
+                            </td>
+                            <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                              {currentCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
+                            </td>
+                            <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                              -
+                            </td>
+                            <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                              {formatDecimal(currentCalc.progresPersen)}%
+                            </td>
+                            <td style={{ border: '1.5px solid #78350f' }}></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* TERBILANG BOX */}
+                    <div style={{ background: '#1e293b', padding: '0.85rem 1.1rem', borderRadius: '8px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.9rem' }}>Terbilang :</span>
+                      <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                        {angkaTerbilang(currentCalc.totalHargaRab)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1.5px solid #334155', padding: '1rem 1.25rem' }}>
+              <button 
+                type="button" 
+                className="btn btn-primary"
+                onClick={() => setSelectedRabForSheet(null)}
+                style={{ background: '#f59e0b', color: '#000', fontWeight: 900, border: 'none' }}
+              >
+                💾 Selesai & Simpan ke Rekapitulasi Depan
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: INPUT / EDIT ABSEN TENAGA KERJA                                 */}
+      {/* MODAL: INPUT / EDIT PROYEK RAB (HEADER FORM)                             */}
+      {/* ========================================================================= */}
+      {isRabProjectModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Calculator size={22} color="#f59e0b" /> 
+                {editingRabProject ? 'Edit Proyek / Kontrak RAB' : 'Input Proyek RAB Baru'}
+              </h3>
+              <button onClick={() => setIsRabProjectModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveRabProject}>
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏢 Proyek Perumahan</label>
+                    <select
+                      className="form-control"
+                      value={rabProjectForm.proyek}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, proyek: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#ea580c' }}
+                    >
+                      <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
+                      <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Input</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={rabProjectForm.tanggalInput}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, tanggalInput: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>🏢 Nama Vendor / Kontraktor</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: CV Karya Mandiri Teknik / PT Wijaya Bangun..."
+                    value={rabProjectForm.namaVendor}
+                    onChange={(e) => setRabProjectForm({ ...rabProjectForm, namaVendor: e.target.value })}
+                    required
+                    style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#fbbf24' }}>🏗️ Nama Pekerjaan</label>
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    placeholder="Contoh: Pekerjaan Struktur & Arsitektur Rumah Type 45/90 - Blok A01"
+                    value={rabProjectForm.pekerjaan}
+                    onChange={(e) => setRabProjectForm({ ...rabProjectForm, pekerjaan: e.target.value })}
+                    required
+                    style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#f59e0b' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.5rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#c084fc' }}>🛡️ Persentase Retensi Pemeliharaan (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="form-control"
+                    value={rabProjectForm.retensiPersen}
+                    onChange={(e) => setRabProjectForm({ ...rabProjectForm, retensiPersen: Number(e.target.value) || 0 })}
+                    required
+                    style={{ fontWeight: 900, background: '#1e293b', color: '#c084fc', borderColor: '#c084fc' }}
+                  />
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>Standar industri properti adalah 5% dari Total Nilai Kontrak.</div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsRabProjectModalOpen(false)}>
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000' }}
+                >
+                  {editingRabProject ? '💾 Simpan Perubahan' : '🚀 Lanjut ke Input Spreadsheet RAB'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: INPUT / EDIT BARIS ITEM DI DALAM SPREADSHEET                      */}
+      {/* ========================================================================= */}
+      {isSheetItemModalOpen && (
+        <div className="modal-backdrop" style={{ zIndex: 110 }}>
+          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Calculator size={20} color="#f59e0b" /> 
+                {editingSheetItem ? 'Edit Baris Item Pekerjaan' : 'Tambah Baris Item Pekerjaan'}
+              </h3>
+              <button onClick={() => setIsSheetItemModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSheetItem}>
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏗️ Item Pekerjaan</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian"
+                    value={sheetItemForm.itemPekerjaan}
+                    onChange={(e) => setSheetItemForm({ ...sheetItemForm, itemPekerjaan: e.target.value })}
+                    required
+                    style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#f59e0b' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📋 Spesifikasi Material / Mutu</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Bata Hebel 10cm, Mortar Utama MU-380"
+                    value={sheetItemForm.spesifikasi}
+                    onChange={(e) => setSheetItemForm({ ...sheetItemForm, spesifikasi: e.target.value })}
+                    style={{ background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>📐 Volume (Vol)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="form-control"
+                      value={sheetItemForm.vol}
+                      onChange={(e) => setSheetItemForm({ ...sheetItemForm, vol: e.target.value })}
+                      required
+                      style={{ fontWeight: 900, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>📦 Satuan (Sat)</label>
+                    <select
+                      className="form-control"
+                      value={sheetItemForm.sat}
+                      onChange={(e) => setSheetItemForm({ ...sheetItemForm, sat: e.target.value })}
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
+                    >
+                      <option value="m1">m1</option>
+                      <option value="m2">m2</option>
+                      <option value="m3">m3</option>
+                      <option value="pcs">pcs</option>
+                      <option value="unit">unit</option>
+                      <option value="ls">ls</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>💰 Harga Satuan (Rp)</label>
+                  <input
+                    type="number"
+                    step="1000"
+                    min="0"
+                    className="form-control"
+                    value={sheetItemForm.hargaSatuan}
+                    onChange={(e) => setSheetItemForm({ ...sheetItemForm, hargaSatuan: e.target.value })}
+                    required
+                    style={{ fontWeight: 900, fontSize: '1rem', background: '#1e293b', color: '#34d399', borderColor: '#10b981' }}
+                  />
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+                    Subtotal Item: <strong style={{ color: '#ffffff' }}>Rp {formatRupiah((Number(sheetItemForm.vol) || 0) * (Number(sheetItemForm.hargaSatuan) || 0))}</strong>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0.5rem', background: '#1e293b', padding: '0.85rem', borderRadius: '8px', border: '1px solid #475569' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#60a5fa', margin: 0 }}>
+                      📊 Progress Realisasi Fisik Lapangan (%)
+                    </label>
+                    <span style={{ fontWeight: 900, color: '#60a5fa', fontSize: '1rem' }}>
+                      {sheetItemForm.progress}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sheetItemForm.progress}
+                    onChange={(e) => setSheetItemForm({ ...sheetItemForm, progress: e.target.value })}
+                    style={{ width: '100%', accentColor: '#3b82f6', cursor: 'pointer' }}
+                  />
+                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '6px' }}>
+                    {[0, 25, 50, 75, 100].map(pct => (
+                      <button
+                        type="button"
+                        key={pct}
+                        onClick={() => setSheetItemForm({ ...sheetItemForm, progress: pct })}
+                        style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: '#0f172a', border: '1px solid #475569', color: '#cbd5e1', cursor: 'pointer' }}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsSheetItemModalOpen(false)}>
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000' }}
+                >
+                  {editingSheetItem ? '💾 Simpan Item' : '🚀 Masukkan Item ke Sheet'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: INPUT / EDIT ABSEN TENAGA KERJA                                   */}
       {/* ========================================================================= */}
       {isAbsenModalOpen && (
         <div className="modal-backdrop">
@@ -1299,154 +1932,6 @@ export const TeknikModule = () => {
                   style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', fontWeight: 800, color: '#ffffff' }}
                 >
                   {editingAbsenItem ? '💾 Simpan Perubahan Absen' : '🚀 Simpan Absen Tenaga Kerja'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL 2: INPUT / EDIT ITEM RAB PEKERJAAN                                 */}
-      {/* ========================================================================= */}
-      {isRabModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
-            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
-              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Calculator size={22} color="#f59e0b" /> 
-                {editingRabItem ? 'Edit Item Pekerjaan RAB' : 'Tambah Item Pekerjaan RAB Baru'}
-              </h3>
-              <button onClick={() => setIsRabModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveRabItem}>
-              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto' }}>
-                
-                {/* Item Pekerjaan */}
-                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏗️ Item Pekerjaan</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian"
-                    value={rabFormData.itemPekerjaan}
-                    onChange={(e) => setRabFormData({ ...rabFormData, itemPekerjaan: e.target.value })}
-                    required
-                    style={{ fontWeight: 800, fontSize: '0.92rem', background: '#1e293b', color: '#ffffff', borderColor: '#f59e0b' }}
-                  />
-                </div>
-
-                {/* Spesifikasi Material / Teknis */}
-                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📋 Spesifikasi Material / Mutu</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Bata Hebel 10cm, Mortar Utama MU-380, Pasir Pasang Ayak"
-                    value={rabFormData.spesifikasi}
-                    onChange={(e) => setRabFormData({ ...rabFormData, spesifikasi: e.target.value })}
-                    style={{ background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
-                  />
-                </div>
-
-                {/* Vol & Satuan */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>📐 Volume (Vol)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className="form-control"
-                      value={rabFormData.vol}
-                      onChange={(e) => setRabFormData({ ...rabFormData, vol: e.target.value })}
-                      required
-                      style={{ fontWeight: 900, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>📦 Satuan (Sat)</label>
-                    <select
-                      className="form-control"
-                      value={rabFormData.sat}
-                      onChange={(e) => setRabFormData({ ...rabFormData, sat: e.target.value })}
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
-                    >
-                      <option value="m1">m1</option>
-                      <option value="m2">m2</option>
-                      <option value="m3">m3</option>
-                      <option value="pcs">pcs</option>
-                      <option value="unit">unit</option>
-                      <option value="ls">ls</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Harga Satuan (Rp) */}
-                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>💰 Harga Satuan (Rp)</label>
-                  <input
-                    type="number"
-                    step="1000"
-                    min="0"
-                    className="form-control"
-                    value={rabFormData.hargaSatuan}
-                    onChange={(e) => setRabFormData({ ...rabFormData, hargaSatuan: e.target.value })}
-                    required
-                    style={{ fontWeight: 900, fontSize: '1rem', background: '#1e293b', color: '#34d399', borderColor: '#10b981' }}
-                  />
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
-                    Subtotal Item: <strong style={{ color: '#ffffff' }}>Rp {formatRupiah((Number(rabFormData.vol) || 0) * (Number(rabFormData.hargaSatuan) || 0))}</strong>
-                  </div>
-                </div>
-
-                {/* Progress Lapangan (%) */}
-                <div className="form-group" style={{ marginBottom: '0.5rem', background: '#1e293b', padding: '0.85rem', borderRadius: '8px', border: '1px solid #475569' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label className="form-label" style={{ fontWeight: 800, color: '#60a5fa', margin: 0 }}>
-                      📊 Progress Realisasi Fisik Lapangan (%)
-                    </label>
-                    <span style={{ fontWeight: 900, color: '#60a5fa', fontSize: '1rem' }}>
-                      {rabFormData.progress}%
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={rabFormData.progress}
-                    onChange={(e) => setRabFormData({ ...rabFormData, progress: e.target.value })}
-                    style={{ width: '100%', accentColor: '#3b82f6', cursor: 'pointer' }}
-                  />
-                  <div style={{ display: 'flex', gap: '0.4rem', marginTop: '6px' }}>
-                    {[0, 25, 50, 75, 100].map(pct => (
-                      <button
-                        type="button"
-                        key={pct}
-                        onClick={() => setRabFormData({ ...rabFormData, progress: pct })}
-                        style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: '#0f172a', border: '1px solid #475569', color: '#cbd5e1', cursor: 'pointer' }}
-                      >
-                        {pct}%
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsRabModalOpen(false)}>
-                  Batal
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000000' }}
-                >
-                  {editingRabItem ? '💾 Simpan Perubahan Item' : '🚀 Tambahkan Item ke RAB'}
                 </button>
               </div>
             </form>
