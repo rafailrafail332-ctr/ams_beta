@@ -1287,58 +1287,58 @@ export const TeknikModule = () => {
             )}
           </div>
 
-          {/* KPI Cards Berdasarkan STATUS Tenaga Kerja (Mandor, Tukang, Kenek, Total Terdaftar) */}
+          {/* KPI Cards Berdasarkan STATUS Tenaga Kerja (Total Tenaga Kerja, Mandor, Tukang, Kenek) */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
             
-            {/* Card 1: Total Tenaga Kerja Terdaftar */}
+            {/* Card 1: Total Tenaga Kerja */}
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #0284c7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.82rem', color: '#38bdf8', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Database size={15} color="#38bdf8" /> Total Database Tenaga Kerja
+                <Users size={15} color="#38bdf8" /> Total Tenaga Kerja
               </div>
               <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
                 {databasePekerjaRows.length} Orang
               </div>
               <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
-                Seluruh Tenaga Kerja Terdaftar
+                Total Keseluruhan Tenaga Kerja
               </div>
             </div>
 
             {/* Card 2: Status Mandor */}
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                👑 Status Mandor
+                👑 Mandor
               </div>
               <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#fbbf24', marginTop: '3px' }}>
                 {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length} Orang
               </div>
               <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
-                Pengawas & Penanggung Jawab Lapangan
+                Status Mandor
               </div>
             </div>
 
-            {/* Card 3: Status Tukang & Kepala Tukang */}
+            {/* Card 3: Status Tukang */}
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                🔨 Status Tukang
+                🔨 Tukang
               </div>
               <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#34d399', marginTop: '3px' }}>
                 {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length} Orang
               </div>
               <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
-                Tenaga Ahli & Kepala Tukang Konstruksi
+                Status Tukang & Ahli
               </div>
             </div>
 
-            {/* Card 4: Status Kenek / Pembantu */}
+            {/* Card 4: Status Kenek */}
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #a855f7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                🧱 Status Kenek / Pembantu
+                🧱 Kenek
               </div>
               <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#c084fc', marginTop: '3px' }}>
                 {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('kenek') || (r.status || '').toLowerCase().includes('pembantu') || (r.status || '').toLowerCase().includes('borongan')).length} Orang
               </div>
               <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
-                Pembantu Tukang & Pekerja Lapangan
+                Status Kenek / Pembantu
               </div>
             </div>
           </div>
