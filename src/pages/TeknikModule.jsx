@@ -2654,26 +2654,6 @@ export const TeknikModule = () => {
               >
                 <Printer size={14} /> Cetak Hasil Opname
               </button>
-              
-              <button
-                type="button"
-                onClick={() => setSubTabBorongan('input_rab')}
-                style={{
-                  background: '#f59e0b',
-                  color: '#000000',
-                  border: 'none',
-                  fontWeight: 900,
-                  fontSize: '0.78rem',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                <Calculator size={14} /> Edit Input RAB &rarr;
-              </button>
             </div>
           </div>
 
