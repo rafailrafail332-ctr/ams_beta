@@ -35,7 +35,8 @@ import {
   TrendingUp,
   Coins,
   AlertCircle,
-  UserCheck
+  UserCheck,
+  UserPlus
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -108,7 +109,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v10';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v11';
 
   const defaultAttendance = [
     {
@@ -224,17 +225,10 @@ export const TeknikModule = () => {
   const [isRekapExpanded, setIsRekapExpanded] = useState(true);
 
   // =========================================================================
-  // MASTER FORM INPUT TENAGA KERJA (GAMBAR media_1787931802518.png)
-  // Fields: Nama, Status, Upah (DENGAN VALIDASI TIDAK BOLEH ADA NAMA YANG SAMA)
+  // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png)
+  // Master input box appears only in modal popup when "+ Daftarkan Tenaga Kerja Baru" is clicked
   // =========================================================================
-  const [masterWorkerInput, setMasterWorkerInput] = useState({
-    nama: '',
-    status: 'Tukang',
-    upah: 150000
-  });
-
-  // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png & media_1787931802518.png)
-  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v10';
+  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v11';
 
   const defaultRekapPeriode = {
     tanggalAwal: '16/08/2026',
@@ -252,7 +246,7 @@ export const TeknikModule = () => {
 
   const [rekapPeriode, setRekapPeriode] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_teknik_rekap_periode_v10');
+      const saved = localStorage.getItem('ams_teknik_rekap_periode_v11');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return defaultRekapPeriode;
@@ -271,7 +265,7 @@ export const TeknikModule = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_teknik_rekap_periode_v10', JSON.stringify(rekapPeriode));
+      localStorage.setItem('ams_teknik_rekap_periode_v11', JSON.stringify(rekapPeriode));
     } catch (e) {}
   }, [rekapPeriode]);
 
@@ -281,13 +275,31 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [rekapUpahRows]);
 
+  // Master Data Modal State (Opens ONLY when clicking "+ Daftarkan Tenaga Kerja Baru")
+  const [isMasterWorkerModalOpen, setIsMasterWorkerModalOpen] = useState(false);
+  const [masterWorkerInput, setMasterWorkerInput] = useState({
+    nama: '',
+    status: 'Tukang',
+    upah: 75000
+  });
+
   // Extract unique registered worker names
   const uniqueWorkerNames = Array.from(new Set([
     ...rekapUpahRows.map(r => r.nama),
     ...attendanceList.map(a => a.nama)
   ].filter(Boolean))).sort();
 
-  // HANDLER: DAFTARKAN TENAGA KERJA BARU DENGAN VALIDASI NAMA UNIK
+  // OPEN MASTER WORKER REGISTRATION MODAL
+  const handleOpenMasterWorkerModal = () => {
+    setMasterWorkerInput({
+      nama: '',
+      status: 'Tukang',
+      upah: 75000
+    });
+    setIsMasterWorkerModalOpen(true);
+  };
+
+  // HANDLER: DAFTARKAN TENAGA KERJA BARU DENGAN VALIDASI NAMA UNIK (ANTI DUPLIKAT)
   const handleRegisterMasterWorker = (e) => {
     e.preventDefault();
     const cleanName = masterWorkerInput.nama.trim();
@@ -313,12 +325,12 @@ export const TeknikModule = () => {
       nama: cleanName,
       status: masterWorkerInput.status.trim() || 'Tukang',
       hariKerja: 1,
-      upah: Number(masterWorkerInput.upah) || 150000
+      upah: Number(masterWorkerInput.upah) || 75000
     };
 
     setRekapUpahRows([...rekapUpahRows, newWorker]);
-    setMasterWorkerInput({ nama: '', status: 'Tukang', upah: 150000 });
-    showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status}) berhasil didaftarkan!`, 'success');
+    setIsMasterWorkerModalOpen(false);
+    showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil didaftarkan!`, 'success');
   };
 
   // UPDATE CELL IN REKAP UPAH WITH UNIQUE NAME VALIDATION
@@ -367,7 +379,7 @@ export const TeknikModule = () => {
           nama: workerName,
           status: 'Tukang',
           hariKerja: workerLogs.length || 1,
-          upah: 150000
+          upah: 75000
         });
         currentNames.add(workerName.toLowerCase().trim());
         addedCount++;
@@ -496,7 +508,7 @@ export const TeknikModule = () => {
             nama: payload.nama,
             status: 'Tukang',
             hariKerja: 1,
-            upah: 150000
+            upah: 75000
           }
         ]);
       }
@@ -537,9 +549,8 @@ export const TeknikModule = () => {
 
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
-  // (EXACT STRUCTURE OF media_1787930910161.png, media_1787930804198.jpg, media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v10';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v11';
 
   const defaultRabSheets = [
     {
@@ -858,22 +869,41 @@ export const TeknikModule = () => {
           </button>
           
           {activeTab === 'absen' ? (
-            <button 
-              className="btn btn-primary" 
-              onClick={handleOpenAddAbsen}
-              style={{
-                background: 'linear-gradient(135deg, #ea580c, #c2410c)',
-                border: 'none',
-                fontWeight: 800,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#ffffff',
-                boxShadow: '0 4px 14px rgba(234, 88, 12, 0.45)'
-              }}
-            >
-              <Plus size={18} /> + Input Absen Harian
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleOpenMasterWorkerModal}
+                style={{
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  border: 'none',
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
+                }}
+              >
+                <UserPlus size={18} /> + Daftarkan Tenaga Kerja
+              </button>
+
+              <button 
+                className="btn btn-primary" 
+                onClick={handleOpenAddAbsen}
+                style={{
+                  background: 'linear-gradient(135deg, #ea580c, #c2410c)',
+                  border: 'none',
+                  fontWeight: 800,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 14px rgba(234, 88, 12, 0.45)'
+                }}
+              >
+                <Plus size={18} /> + Input Absen Harian
+              </button>
+            </div>
           ) : (
             <button 
               className="btn btn-primary" 
@@ -970,138 +1000,12 @@ export const TeknikModule = () => {
 
       {/* ========================================================================= */}
       {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
-      {/* 1. MASTER FORM INPUT TENAGA KERJA (GAMBAR media_1787931802518.png)       */}
-      {/* 2. TABEL REKAP ABSEN & UPAH (GAMBAR media_1787931569751.png)             */}
-      {/* 3. TABEL LOG DETAIL HARIAN & LEMBUR (DI BAWAH)                           */}
+      {/* 1. TABEL REKAP ABSEN & UPAH (GAMBAR media_1787931569751.png)             */}
+      {/* 2. TABEL LOG DETAIL HARIAN & LEMBUR (DI BAWAH)                           */}
       {/* ========================================================================= */}
       {activeTab === 'absen' && (
         <div className="module-animated-view">
           
-          {/* ===================================================================== */}
-          {/* BOX 1: MASTER INPUT FORM (EXACT REPLICA OF media_1787931802518.png)   */}
-          {/* Form with: Nama :, Status :, Upah : (Validasi: Nama Tidak Boleh Sama) */}
-          {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.25rem', background: '#1e293b', border: '2px solid #38bdf8', borderRadius: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ background: '#0284c7', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
-                  MASTER DATA
-                </span>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <UserCheck size={18} color="#38bdf8" /> Daftarkan Tenaga Kerja Baru
-                </h3>
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <AlertCircle size={14} /> Aturan: Nama tidak boleh sama / duplikat
-              </div>
-            </div>
-
-            <form onSubmit={handleRegisterMasterWorker}>
-              <div style={{ background: '#0f172a', padding: '1rem 1.25rem', borderRadius: '8px', border: '1px solid #334155', maxWidth: '560px', marginBottom: '0.85rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '90px 15px 1fr', rowGap: '0.5rem', alignItems: 'center' }}>
-                  
-                  {/* Nama */}
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Masukkan nama tenaga kerja..."
-                      value={masterWorkerInput.nama}
-                      onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, nama: e.target.value })}
-                      required
-                      style={{
-                        width: '100%',
-                        background: '#1e293b',
-                        border: '1.5px solid #38bdf8',
-                        borderRadius: '6px',
-                        color: '#ffffff',
-                        fontWeight: 900,
-                        fontSize: '0.88rem',
-                        padding: '5px 10px',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Status</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div>
-                    <select
-                      value={masterWorkerInput.status}
-                      onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, status: e.target.value })}
-                      style={{
-                        width: '100%',
-                        background: '#1e293b',
-                        border: '1.5px solid #10b981',
-                        borderRadius: '6px',
-                        color: '#34d399',
-                        fontWeight: 900,
-                        fontSize: '0.88rem',
-                        padding: '5px 10px',
-                        outline: 'none'
-                      }}
-                    >
-                      <option value="Tukang">Tukang</option>
-                      <option value="Kenek">Kenek / Pembantu Tukang</option>
-                      <option value="Mandor">Mandor</option>
-                      <option value="Kepala Tukang">Kepala Tukang</option>
-                      <option value="Borongan">Borongan</option>
-                    </select>
-                  </div>
-
-                  {/* Upah */}
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Upah</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.85rem' }}>Rp</span>
-                    <input
-                      type="number"
-                      step="5000"
-                      min="0"
-                      placeholder="150000"
-                      value={masterWorkerInput.upah}
-                      onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, upah: Number(e.target.value) || 0 })}
-                      required
-                      style={{
-                        width: '100%',
-                        background: '#1e293b',
-                        border: '1.5px solid #f59e0b',
-                        borderRadius: '6px',
-                        color: '#fbbf24',
-                        fontWeight: 900,
-                        fontSize: '0.88rem',
-                        padding: '5px 10px',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontWeight: 900,
-                  fontSize: '0.84rem',
-                  padding: '7px 16px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
-                }}
-              >
-                <Plus size={16} /> + Simpan & Masukkan ke Rekap Upah
-              </button>
-            </form>
-          </div>
-
           {/* ===================================================================== */}
           {/* TABEL REKAPITULASI UPAH (PERSIS FORMAT GAMBAR media_1787931569751.png)  */}
           {/* Header Tanggal Range + No | Nama | Status | Hari kerja | Upah | Total  */}
@@ -1111,7 +1015,7 @@ export const TeknikModule = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <span style={{ background: '#f59e0b', color: '#000000', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  TABEL REKAP
+                  TABEL REKAP UPAH
                 </span>
                 <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Coins size={20} color="#fbbf24" /> Rekapitulasi Hari Kerja & Upah Tenaga Kerja
@@ -1119,6 +1023,28 @@ export const TeknikModule = () => {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenMasterWorkerModal}
+                  style={{
+                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 900,
+                    fontSize: '0.78rem',
+                    padding: '5px 12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
+                  }}
+                  title="Daftarkan nama tukang baru dengan status & upah"
+                >
+                  <UserPlus size={14} /> + Daftarkan Tenaga Kerja Baru
+                </button>
+
                 <button
                   type="button"
                   onClick={handleSyncWorkersFromDaily}
@@ -1137,7 +1063,7 @@ export const TeknikModule = () => {
                   }}
                   title="Tarik nama tukang baru dari log harian tanpa duplikat"
                 >
-                  <RotateCcw size={13} /> Sinkron dari Log Harian
+                  <RotateCcw size={13} /> Sinkron dari Log
                 </button>
 
                 <button
@@ -1186,7 +1112,7 @@ export const TeknikModule = () => {
                     />
                   </div>
                   <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: 'auto' }}>
-                    💡 Klik di sel <strong>Hari kerja</strong> dan <strong>Upah</strong> untuk edit inline (Total otomatis terhitung).
+                    💡 Klik langsung di sel <strong>Hari kerja</strong> dan <strong>Upah</strong> untuk edit inline (Total otomatis terhitung).
                   </span>
                 </div>
 
@@ -2459,7 +2385,7 @@ export const TeknikModule = () => {
 
                         {/* 12. Nilai Progress */}
                         <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
-                          {formatRupiahDesimal(row.nilaiProgres)}
+                          {formatRupiahDesimal(row.nilaiProgress || row.nilaiProgres)}
                         </td>
 
                         {/* 13. Aksi */}
@@ -2546,7 +2472,131 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: INPUT / EDIT ABSEN TENAGA KERJA (DENGAN FIELD LEMBUR)              */}
+      {/* MODAL 1: DAFTARKAN TENAGA KERJA BARU (GAMBAR media_1787931802518.png)     */}
+      {/* Pop up form: Nama :, Status :, Upah : (Validasi: Nama Tidak Boleh Sama)   */}
+      {/* ========================================================================= */}
+      {isMasterWorkerModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <UserCheck size={22} color="#38bdf8" /> Daftarkan Tenaga Kerja Baru
+              </h3>
+              <button onClick={() => setIsMasterWorkerModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterMasterWorker}>
+              <div className="modal-body">
+                <div style={{ background: 'rgba(234, 88, 12, 0.15)', border: '1px solid #ea580c', padding: '0.6rem 0.85rem', borderRadius: '6px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>
+                  <AlertCircle size={16} /> Aturan: Nama tidak boleh sama / duplikat
+                </div>
+
+                <div style={{ background: '#1e293b', padding: '1rem 1.25rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '0.85rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '80px 15px 1fr', rowGap: '0.75rem', alignItems: 'center' }}>
+                    
+                    {/* Nama */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Masukkan nama tenaga kerja..."
+                        value={masterWorkerInput.nama}
+                        onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, nama: e.target.value })}
+                        required
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #38bdf8',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 900,
+                          fontSize: '0.88rem',
+                          padding: '6px 10px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    {/* Status */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Status</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <select
+                        value={masterWorkerInput.status}
+                        onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, status: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #10b981',
+                          borderRadius: '6px',
+                          color: '#34d399',
+                          fontWeight: 900,
+                          fontSize: '0.88rem',
+                          padding: '6px 10px',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="Tukang">Tukang</option>
+                        <option value="Kenek">Kenek / Pembantu Tukang</option>
+                        <option value="Mandor">Mandor</option>
+                        <option value="Kepala Tukang">Kepala Tukang</option>
+                        <option value="Borongan">Borongan</option>
+                      </select>
+                    </div>
+
+                    {/* Upah */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Upah</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.85rem' }}>Rp</span>
+                      <input
+                        type="number"
+                        step="5000"
+                        min="0"
+                        placeholder="75000"
+                        value={masterWorkerInput.upah}
+                        onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, upah: Number(e.target.value) || 0 })}
+                        required
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #f59e0b',
+                          borderRadius: '6px',
+                          color: '#fbbf24',
+                          fontWeight: 900,
+                          fontSize: '0.9rem',
+                          padding: '6px 10px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMasterWorkerModalOpen(false)}>
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 900, color: '#ffffff' }}
+                >
+                  + Simpan & Masukkan ke Rekap Upah
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: INPUT / EDIT ABSEN HARIAN TENAGA KERJA (DENGAN FIELD LEMBUR)     */}
       {/* ========================================================================= */}
       {isAbsenModalOpen && (
         <div className="modal-backdrop">
