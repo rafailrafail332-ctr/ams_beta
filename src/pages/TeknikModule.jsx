@@ -82,9 +82,9 @@ export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
   // Active Sub-Tabs:
-  // 'absen'   : 1. Absen Tenaga Kerja & Rekap Upah
+  // 'absen'   : 1. Absen & Database Tenaga Kerja
   // 'input'   : 2. Input Lembar RAB (Spreadsheet Excel View)
-  // 'laporan' : 3. Laporan Rekapitulasi RAB & Progress (Tabel Laporan Gambar media_1787930910161.png)
+  // 'laporan' : 3. Laporan Rekapitulasi RAB & Progress
   const [activeTab, setActiveTab] = useState(() => {
     if (activeSubTab === 'rab') return 'input';
     if (activeSubTab === 'laporan') return 'laporan';
@@ -111,7 +111,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v13';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v14';
 
   const defaultAttendance = [
     {
@@ -227,42 +227,28 @@ export const TeknikModule = () => {
   const [isRekapExpanded, setIsRekapExpanded] = useState(true);
 
   // =========================================================================
-  // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png)
-  // Master input box appears in modal popup when "Database Tenaga Kerja" is clicked
+  // DATABASE TENAGA KERJA STORE (NAMA UNIK, STATUS, UPAH)
   // =========================================================================
-  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v13';
+  const STORAGE_KEY_DATABASE_PEKERJA = 'ams_teknik_database_tenaga_kerja_v14';
 
-  const defaultRekapPeriode = {
-    tanggalAwal: '16/08/2026',
-    tanggalAkhir: '18/08/2026'
-  };
-
-  const defaultRekapUpahRows = [
-    { id: 'RKP-01', nama: 'Agus Triono', status: 'Tukang', hariKerja: 7, upah: 150000 },
-    { id: 'RKP-02', nama: 'Bambang Supeno', status: 'Tukang', hariKerja: 7, upah: 150000 },
-    { id: 'RKP-03', nama: 'Dedi Kurniawan', status: 'Kenek', hariKerja: 6, upah: 130000 },
-    { id: 'RKP-04', nama: 'Joko Susanto', status: 'Mandor', hariKerja: 6, upah: 160000 },
-    { id: 'RKP-05', nama: 'Slamet Riyadi', status: 'Tukang', hariKerja: 7, upah: 150000 },
-    { id: 'RKP-06', nama: 'Sunarto', status: 'Kenek', hariKerja: 5, upah: 130000 }
+  const defaultDatabasePekerja = [
+    { id: 'WRK-01', nama: 'Agus Triono', status: 'Tukang', upah: 150000 },
+    { id: 'WRK-02', nama: 'Bambang Supeno', status: 'Tukang', upah: 150000 },
+    { id: 'WRK-03', nama: 'Dedi Kurniawan', status: 'Kenek', upah: 130000 },
+    { id: 'WRK-04', nama: 'Joko Susanto', status: 'Mandor', upah: 160000 },
+    { id: 'WRK-05', nama: 'Slamet Riyadi', status: 'Tukang', upah: 150000 },
+    { id: 'WRK-06', nama: 'Sunarto', status: 'Kenek', upah: 130000 }
   ];
 
-  const [rekapPeriode, setRekapPeriode] = useState(() => {
+  const [databasePekerjaRows, setDatabasePekerjaRows] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_teknik_rekap_periode_v13');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return defaultRekapPeriode;
-  });
-
-  const [rekapUpahRows, setRekapUpahRows] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_REKAP_UPAH);
+      const saved = localStorage.getItem(STORAGE_KEY_DATABASE_PEKERJA);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return defaultRekapUpahRows;
+    return defaultDatabasePekerja;
   });
 
   // Filter Upah & Search Rekap States
@@ -271,15 +257,9 @@ export const TeknikModule = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_teknik_rekap_periode_v13', JSON.stringify(rekapPeriode));
+      localStorage.setItem(STORAGE_KEY_DATABASE_PEKERJA, JSON.stringify(databasePekerjaRows));
     } catch (e) {}
-  }, [rekapPeriode]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_REKAP_UPAH, JSON.stringify(rekapUpahRows));
-    } catch (e) {}
-  }, [rekapUpahRows]);
+  }, [databasePekerjaRows]);
 
   // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
   const [isMasterWorkerModalOpen, setIsMasterWorkerModalOpen] = useState(false);
@@ -287,17 +267,17 @@ export const TeknikModule = () => {
   const [masterWorkerInput, setMasterWorkerInput] = useState({
     nama: '',
     status: 'Tukang',
-    upah: 75000
+    upah: 150000
   });
 
   // Extract unique registered worker names
   const uniqueWorkerNames = Array.from(new Set([
-    ...rekapUpahRows.map(r => r.nama),
+    ...databasePekerjaRows.map(r => r.nama),
     ...attendanceList.map(a => a.nama)
   ].filter(Boolean))).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
 
   // Extract unique upah amounts for filter
-  const uniqueUpahAmounts = Array.from(new Set(rekapUpahRows.map(r => Number(r.upah) || 0)))
+  const uniqueUpahAmounts = Array.from(new Set(databasePekerjaRows.map(r => Number(r.upah) || 0)))
     .filter(val => val > 0)
     .sort((a, b) => a - b);
 
@@ -307,23 +287,23 @@ export const TeknikModule = () => {
     setMasterWorkerInput({
       nama: '',
       status: 'Tukang',
-      upah: 75000
+      upah: 150000
     });
     setIsMasterWorkerModalOpen(true);
   };
 
-  // OPEN MASTER WORKER MODAL IN EDIT MODE FROM TABLE ROW
+  // OPEN MASTER WORKER MODAL IN EDIT MODE FROM TABLE ROW (FITUR EDIT AKTIF)
   const handleOpenEditMasterWorker = (worker) => {
     setEditingWorkerId(worker.id);
     setMasterWorkerInput({
       nama: worker.nama || '',
       status: worker.status || 'Tukang',
-      upah: Number(worker.upah) || 75000
+      upah: Number(worker.upah) || 150000
     });
     setIsMasterWorkerModalOpen(true);
   };
 
-  // HANDLER: SIMPAN DATABASE TENAGA KERJA (ADD / EDIT DENGAN VALIDASI NAMA UNIK)
+  // HANDLER: SIMPAN DATABASE TENAGA KERJA (ADD & EDIT DENGAN VALIDASI NAMA UNIK)
   const handleRegisterMasterWorker = (e) => {
     e.preventDefault();
     const cleanName = masterWorkerInput.nama.trim();
@@ -334,7 +314,7 @@ export const TeknikModule = () => {
     }
 
     // VALIDASI: TIDAK BOLEH ADA NAMA YANG SAMA DENGAN PEKERJA LAIN
-    const isDuplicate = rekapUpahRows.some(
+    const isDuplicate = databasePekerjaRows.some(
       r => r.id !== editingWorkerId && r.nama.toLowerCase().trim() === cleanName.toLowerCase()
     );
 
@@ -346,75 +326,71 @@ export const TeknikModule = () => {
 
     if (editingWorkerId) {
       // EDIT MODE
-      setRekapUpahRows(prev => prev.map(r => {
+      const prevWorker = databasePekerjaRows.find(r => r.id === editingWorkerId);
+      const oldName = prevWorker?.nama;
+
+      setDatabasePekerjaRows(prev => prev.map(r => {
         if (r.id === editingWorkerId) {
           return {
             ...r,
             nama: cleanName,
             status: masterWorkerInput.status.trim() || 'Tukang',
-            upah: Number(masterWorkerInput.upah) || 75000
+            upah: Number(masterWorkerInput.upah) || 150000
           };
         }
         return r;
       }));
-      showNotification(`Database tenaga kerja "${cleanName}" berhasil diperbarui!`, 'success');
+
+      // Update name in attendance list if changed
+      if (oldName && oldName !== cleanName) {
+        setAttendanceList(prev => prev.map(a => a.nama === oldName ? { ...a, nama: cleanName } : a));
+      }
+
+      showNotification(`Data tenaga kerja "${cleanName}" (${masterWorkerInput.status} - Rp ${formatRupiah(masterWorkerInput.upah)}) berhasil diperbarui!`, 'success');
     } else {
       // ADD MODE
       const newWorker = {
-        id: `RKP-${Date.now().toString().slice(-4)}`,
+        id: `WRK-${Date.now().toString().slice(-4)}`,
         nama: cleanName,
         status: masterWorkerInput.status.trim() || 'Tukang',
-        hariKerja: 1,
-        upah: Number(masterWorkerInput.upah) || 75000
+        upah: Number(masterWorkerInput.upah) || 150000
       };
-      setRekapUpahRows([...rekapUpahRows, newWorker]);
-      showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil ditambahkan ke Database!`, 'success');
+      setDatabasePekerjaRows([...databasePekerjaRows, newWorker]);
+      showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil didaftarkan ke Database!`, 'success');
     }
 
     setIsMasterWorkerModalOpen(false);
   };
 
-  // UPDATE CELL IN REKAP UPAH
-  const handleUpdateRekapCell = (rowId, field, value) => {
-    setRekapUpahRows(prev => prev.map(r => {
-      if (r.id === rowId) {
-        return { ...r, [field]: value };
-      }
-      return r;
-    }));
-  };
-
-  // DELETE ROW FROM REKAP UPAH
-  const handleDeleteRekapRow = (rowId) => {
-    const target = rekapUpahRows.find(r => r.id === rowId);
-    if (window.confirm(`Hapus baris data upah untuk "${target?.nama || 'Tenaga Kerja'}"?`)) {
-      setRekapUpahRows(rekapUpahRows.filter(r => r.id !== rowId));
+  // DELETE ROW FROM DATABASE TENAGA KERJA
+  const handleDeleteWorkerRow = (rowId) => {
+    const target = databasePekerjaRows.find(r => r.id === rowId);
+    if (window.confirm(`Hapus data tenaga kerja "${target?.nama || 'Tenaga Kerja'}" dari Database?`)) {
+      setDatabasePekerjaRows(databasePekerjaRows.filter(r => r.id !== rowId));
       showNotification(`Data tenaga kerja "${target?.nama}" berhasil dihapus dari Database.`, 'warning');
     }
   };
 
   // AUTO-SYNC WORKERS FROM DAILY ATTENDANCE (ENSURING NO DUPLICATE NAMES)
   const handleSyncWorkersFromDaily = () => {
-    const currentNames = new Set(rekapUpahRows.map(r => r.nama.toLowerCase().trim()));
-    const newRows = [...rekapUpahRows];
+    const currentNames = new Set(databasePekerjaRows.map(r => r.nama.toLowerCase().trim()));
+    const newRows = [...databasePekerjaRows];
     let addedCount = 0;
     
     uniqueWorkerNames.forEach(workerName => {
       if (!currentNames.has(workerName.toLowerCase().trim())) {
-        const workerLogs = attendanceList.filter(a => a.nama.toLowerCase().trim() === workerName.toLowerCase().trim());
         newRows.push({
-          id: `RKP-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`,
+          id: `WRK-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`,
           nama: workerName,
           status: 'Tukang',
-          hariKerja: workerLogs.length || 1,
-          upah: 75000
+          upah: 150000
         });
         currentNames.add(workerName.toLowerCase().trim());
         addedCount++;
       }
     });
 
-    setRekapUpahRows(newRows);
+    setDatabasePekerjaRows(newRows);
     if (addedCount > 0) {
       showNotification(`${addedCount} nama tenaga kerja baru berhasil disinkronkan ke Database tanpa duplikat!`, 'success');
     } else {
@@ -422,21 +398,8 @@ export const TeknikModule = () => {
     }
   };
 
-  // Calculations for Rekap Upah
-  const computedRekapRows = rekapUpahRows.map(row => {
-    const hariKerja = Number(row.hariKerja) || 0;
-    const upah = Number(row.upah) || 0;
-    const total = hariKerja * upah;
-    return {
-      ...row,
-      hariKerja,
-      upah,
-      total
-    };
-  });
-
   // FILTER UPAH & URUTAN OTOMATIS BERDASARKAN ABJAD NAMA (A - Z)
-  const sortedAndFilteredRekapRows = computedRekapRows
+  const sortedAndFilteredDatabaseRows = databasePekerjaRows
     .filter(row => {
       const matchUpah = rekapUpahFilter === 'ALL' || Number(row.upah) === Number(rekapUpahFilter);
       const matchSearch = !rekapSearchText || [row.nama, row.status].some(val => (val || '').toLowerCase().includes(rekapSearchText.toLowerCase().trim()));
@@ -444,9 +407,6 @@ export const TeknikModule = () => {
     })
     // URUTAN OTOMATIS BERDASARKAN ABJAD NAMA (A - Z)
     .sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
-
-  const totalRekapHariKerja = sortedAndFilteredRekapRows.reduce((sum, r) => sum + r.hariKerja, 0);
-  const totalRekapBiayaUpah = sortedAndFilteredRekapRows.reduce((sum, r) => sum + r.total, 0);
 
   // Absen Modal State
   const [isAbsenModalOpen, setIsAbsenModalOpen] = useState(false);
@@ -535,18 +495,17 @@ export const TeknikModule = () => {
       setAttendanceList([newItem, ...attendanceList]);
 
       // Automatically register worker to unique list if not yet there
-      const isAlreadyInRekap = rekapUpahRows.some(
+      const isAlreadyInDb = databasePekerjaRows.some(
         r => r.nama.toLowerCase().trim() === payload.nama.toLowerCase().trim()
       );
-      if (!isAlreadyInRekap) {
-        setRekapUpahRows(prev => [
+      if (!isAlreadyInDb) {
+        setDatabasePekerjaRows(prev => [
           ...prev,
           {
-            id: `RKP-${Date.now().toString().slice(-4)}`,
+            id: `WRK-${Date.now().toString().slice(-4)}`,
             nama: payload.nama,
             status: 'Tukang',
-            hariKerja: 1,
-            upah: 75000
+            upah: 150000
           }
         ]);
       }
@@ -588,7 +547,7 @@ export const TeknikModule = () => {
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v13';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v14';
 
   const defaultRabSheets = [
     {
@@ -922,7 +881,7 @@ export const TeknikModule = () => {
                   boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
                 }}
               >
-                <Database size={17} /> Database Tenaga Kerja
+                <Database size={17} /> + Tambah Database Tenaga Kerja
               </button>
 
               <button 
@@ -966,7 +925,7 @@ export const TeknikModule = () => {
       {/* 3 SUB-MODUL TAB SWITCHER BAR */}
       <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
         
-        {/* Tab 1: Absen */}
+        {/* Tab 1: Absen & Database Tenaga Kerja */}
         <button
           type="button"
           onClick={() => switchTab('absen')}
@@ -986,7 +945,7 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={17} /> 1. Absen & Rekap Upah Tenaga Kerja ({rekapUpahRows.length} Terdaftar)
+          <Users size={17} /> 1. Absen & Database Tenaga Kerja ({databasePekerjaRows.length} Terdaftar)
         </button>
 
         {/* Tab 2: Input RAB Sheet */}
@@ -1038,22 +997,21 @@ export const TeknikModule = () => {
 
       {/* ========================================================================= */}
       {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
-      {/* 1. TABEL REKAP ABSEN & UPAH (GAMBAR media_1787931569751.png)             */}
+      {/* 1. TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
       {/* 2. TABEL LOG DETAIL HARIAN & LEMBUR (DI BAWAH)                           */}
       {/* ========================================================================= */}
       {activeTab === 'absen' && (
         <div className="module-animated-view">
           
           {/* ===================================================================== */}
-          {/* TABEL REKAPITULASI UPAH (PERSIS FORMAT GAMBAR media_1787931569751.png)  */}
-          {/* Header Tanggal Range + No | Nama | Status | Hari kerja | Upah | Total  */}
+          {/* TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
           {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #f59e0b', overflow: 'hidden' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #0284c7', overflow: 'hidden' }}>
             
-            {/* ROW 1: HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI TABEL REKAP */}
+            {/* HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.65rem' }}>
               
-              {/* SISI KIRI: TOMBOL DATABASE TENAGA KERJA + JUDUL TABEL REKAP */}
+              {/* SISI KIRI: TOMBOL DATABASE TENAGA KERJA + JUDUL TABEL */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
@@ -1073,17 +1031,17 @@ export const TeknikModule = () => {
                     boxShadow: '0 2px 10px rgba(2, 132, 199, 0.45)',
                     transition: 'transform 0.15s ease'
                   }}
-                  title="Buka / Tambah Database Tenaga Kerja"
+                  title="Tambah Pekerja Baru ke Database"
                 >
-                  <Database size={16} /> Database Tenaga Kerja
+                  <Plus size={16} /> Database Tenaga Kerja
                 </button>
 
-                <span style={{ background: '#f59e0b', color: '#000000', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  TABEL REKAP UPAH
+                <span style={{ background: '#0284c7', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
+                  DATABASE MASTER
                 </span>
                 
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Coins size={18} color="#fbbf24" /> Rekapitulasi Hari Kerja & Upah Tenaga Kerja
+                  <Database size={18} color="#38bdf8" /> Database Tenaga Kerja ({sortedAndFilteredDatabaseRows.length} Orang)
                 </h3>
               </div>
 
@@ -1135,74 +1093,51 @@ export const TeknikModule = () => {
 
             {isRekapExpanded && (
               <div>
-                {/* ROW 2: TANGGAL RANGE & FILTER UPAH & URUTAN ABJAD NAMA (A-Z) */}
+                {/* TOOLBAR FILTER UPAH & PENCARIAN & URUTAN ABJAD NAMA (A-Z) */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.85rem', background: '#0f172a', padding: '0.65rem 1rem', borderRadius: '8px', border: '1px solid #334155', flexWrap: 'wrap' }}>
                   
-                  {/* Tanggal Range */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 900, color: '#f8fafc', fontSize: '0.88rem' }}>📅 Tanggal :</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <input
-                        type="text"
-                        value={rekapPeriode.tanggalAwal}
-                        onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAwal: e.target.value })}
-                        placeholder="16/08/2026"
-                        style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.84rem', fontWeight: 800, width: '105px', textAlign: 'center', outline: 'none' }}
-                      />
-                      <span style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.82rem' }}>s/d</span>
-                      <input
-                        type="text"
-                        value={rekapPeriode.tanggalAkhir}
-                        onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAkhir: e.target.value })}
-                        placeholder="18/08/2026"
-                        style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.84rem', fontWeight: 800, width: '105px', textAlign: 'center', outline: 'none' }}
-                      />
-                    </div>
+                  {/* FILTER UPAH DROPDOWN */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 900, color: '#fbbf24' }}>💰 Filter Upah:</span>
+                    <select
+                      value={rekapUpahFilter}
+                      onChange={(e) => setRekapUpahFilter(e.target.value)}
+                      style={{
+                        background: '#1e293b',
+                        border: '1.5px solid #f59e0b',
+                        color: '#fbbf24',
+                        borderRadius: '6px',
+                        padding: '4px 10px',
+                        fontSize: '0.82rem',
+                        fontWeight: 900,
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="ALL">Semua Besaran Upah ({databasePekerjaRows.length} Orang)</option>
+                      {uniqueUpahAmounts.map(val => (
+                        <option key={val} value={val}>
+                          Rp {formatRupiah(val)} ({databasePekerjaRows.filter(r => Number(r.upah) === val).length} Orang)
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* FILTER UPAH & URUTAN ABJAD */}
+                  {/* SISI KANAN: BADGE URUTAN ABJAD & PENCARIAN */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                    
-                    {/* FILTER UPAH DROPDOWN */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#fbbf24' }}>💰 Filter Upah:</span>
-                      <select
-                        value={rekapUpahFilter}
-                        onChange={(e) => setRekapUpahFilter(e.target.value)}
-                        style={{
-                          background: '#1e293b',
-                          border: '1.5px solid #f59e0b',
-                          color: '#fbbf24',
-                          borderRadius: '6px',
-                          padding: '4px 8px',
-                          fontSize: '0.82rem',
-                          fontWeight: 900,
-                          outline: 'none'
-                        }}
-                      >
-                        <option value="ALL">Semua Besaran Upah ({rekapUpahRows.length} Orang)</option>
-                        {uniqueUpahAmounts.map(val => (
-                          <option key={val} value={val}>
-                            Rp {formatRupiah(val)} ({rekapUpahRows.filter(r => Number(r.upah) === val).length} Orang)
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
                     {/* BADGE URUTAN ABJAD A-Z */}
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 800 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '4px 9px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 800 }}>
                       <ArrowDownAZ size={14} /> Urutan Abjad Nama (A - Z)
                     </div>
 
-                    {/* SEARCH IN REKAP */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#1e293b', padding: '3px 8px', borderRadius: '6px', border: '1px solid #475569' }}>
+                    {/* SEARCH */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#1e293b', padding: '4px 8px', borderRadius: '6px', border: '1px solid #475569' }}>
                       <Search size={13} color="#94a3b8" />
                       <input
                         type="text"
-                        placeholder="Cari nama pekerja..."
+                        placeholder="Cari nama / status..."
                         value={rekapSearchText}
                         onChange={(e) => setRekapSearchText(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.78rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '130px', outline: 'none' }}
                       />
                       {rekapSearchText && (
                         <button onClick={() => setRekapSearchText('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
@@ -1213,46 +1148,40 @@ export const TeknikModule = () => {
                   </div>
                 </div>
 
-                {/* SPREADSHEET TABLE: No. | Nama | Status | Hari kerja | Upah | Total | Aksi */}
-                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
-                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '880px', textAlign: 'left' }}>
+                {/* TABLE: No. | Nama | Status | Upah | Aksi */}
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '0.5rem' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '640px', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                        <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
+                      <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                        <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                           No.
                         </th>
-                        <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            Nama <ArrowDownAZ size={14} />
+                        <th style={{ minWidth: '220px', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            Nama Tenaga Kerja <ArrowDownAZ size={15} />
                           </span>
                         </th>
-                        <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 8px' }}>
+                        <th style={{ width: '160px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                           Status
                         </th>
-                        <th style={{ width: '110px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
-                          Hari kerja
+                        <th style={{ width: '180px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
+                          Upah Harian
                         </th>
-                        <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
-                          Upah
-                        </th>
-                        <th style={{ width: '180px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
-                          Total
-                        </th>
-                        <th style={{ width: '110px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
+                        <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                           Aksi
                         </th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {sortedAndFilteredRekapRows.length === 0 ? (
+                      {sortedAndFilteredDatabaseRows.length === 0 ? (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: 'center', padding: '2rem 1rem', background: '#0f172a', color: '#94a3b8', fontWeight: 800 }}>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', background: '#0f172a', color: '#94a3b8', fontWeight: 800 }}>
                             Tidak ada data tenaga kerja yang sesuai dengan filter upah / pencarian.
                           </td>
                         </tr>
                       ) : (
-                        sortedAndFilteredRekapRows.map((row, idx) => (
+                        sortedAndFilteredDatabaseRows.map((row, idx) => (
                           <tr 
                             key={row.id || idx} 
                             style={{ 
@@ -1261,79 +1190,52 @@ export const TeknikModule = () => {
                             }}
                           >
                             {/* 1. No. */}
-                            <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>
                               {idx + 1}
                             </td>
 
                             {/* 2. Nama */}
-                            <td style={{ border: '1px solid #334155', padding: '6px 10px', fontWeight: 900, color: '#ffffff', fontSize: '0.88rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
+                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff', fontSize: '0.9rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.74rem', fontWeight: 900 }}>
                                   {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
                                 </div>
                                 <span>{row.nama}</span>
                               </div>
                             </td>
 
-                            {/* 3. Status (Terkunci permanen di tabel, dapat diedit via modal aksi) */}
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px' }}>
+                            {/* 3. Status */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px' }}>
                               <span style={{
                                 display: 'inline-block',
-                                padding: '3px 10px',
+                                padding: '3px 12px',
                                 borderRadius: '6px',
-                                fontSize: '0.8rem',
+                                fontSize: '0.82rem',
                                 fontWeight: 900,
                                 background: row.status === 'Mandor' 
                                   ? 'rgba(245, 158, 11, 0.2)' 
-                                  : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(16, 185, 129, 0.2)'),
+                                  : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : (row.status === 'Kepala Tukang' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)')),
                                 color: row.status === 'Mandor' 
                                   ? '#fbbf24' 
-                                  : (row.status === 'Kenek' ? '#c084fc' : '#34d399'),
+                                  : (row.status === 'Kenek' ? '#c084fc' : (row.status === 'Kepala Tukang' ? '#60a5fa' : '#34d399')),
                                 border: `1px solid ${
                                   row.status === 'Mandor' 
                                     ? '#f59e0b' 
-                                    : (row.status === 'Kenek' ? '#a855f7' : '#10b981')
+                                    : (row.status === 'Kenek' ? '#a855f7' : (row.status === 'Kepala Tukang' ? '#3b82f6' : '#10b981'))
                                 }`
                               }}>
                                 {row.status || 'Tukang'}
                               </span>
                             </td>
 
-                            {/* 4. Hari Kerja (Inline Editable) */}
-                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={row.hariKerja !== undefined ? row.hariKerja : ''}
-                                onChange={(e) => handleUpdateRekapCell(row.id, 'hariKerja', Number(e.target.value) || 0)}
-                                style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
-                              />
+                            {/* 4. Upah */}
+                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '8px 12px', fontSize: '0.92rem' }}>
+                              Rp {formatRupiah(row.upah)}
                             </td>
 
-                            {/* 5. Upah (Inline Editable) */}
-                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-                                <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700 }}>Rp</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="5000"
-                                  value={row.upah !== undefined ? row.upah : ''}
-                                  onChange={(e) => handleUpdateRekapCell(row.id, 'upah', Number(e.target.value) || 0)}
-                                  style={{ width: '90px', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
-                                />
-                              </div>
-                            </td>
-
-                            {/* 6. Total (Auto Calculated = Hari Kerja * Upah) */}
-                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 10px', fontSize: '0.94rem' }}>
-                              Rp {formatRupiah(row.total)}
-                            </td>
-
-                            {/* 7. Aksi Edit & Hapus */}
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                            {/* 5. Aksi Edit & Hapus */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditMasterWorker(row)}
@@ -1341,69 +1243,45 @@ export const TeknikModule = () => {
                                     background: '#2563eb',
                                     color: '#ffffff',
                                     border: 'none',
-                                    padding: '3px 8px',
+                                    padding: '4px 10px',
                                     borderRadius: '5px',
-                                    fontSize: '0.74rem',
-                                    fontWeight: 800,
+                                    fontSize: '0.78rem',
+                                    fontWeight: 900,
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '3px',
-                                    cursor: 'pointer'
+                                    gap: '4px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
                                   }}
-                                  title="Edit Data Database Tenaga Kerja (Nama, Status, Upah)"
+                                  title="Edit Data Tenaga Kerja (Nama, Status, Upah)"
                                 >
-                                  <Edit3 size={11} /> Edit
+                                  <Edit3 size={13} /> Edit
                                 </button>
 
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteRekapRow(row.id)}
+                                  onClick={() => handleDeleteWorkerRow(row.id)}
                                   style={{
                                     background: 'rgba(239, 68, 68, 0.2)',
                                     color: '#f87171',
                                     border: '1px solid #ef4444',
-                                    padding: '3px 6px',
+                                    padding: '4px 8px',
                                     borderRadius: '5px',
-                                    fontSize: '0.74rem',
-                                    fontWeight: 800,
+                                    fontSize: '0.78rem',
+                                    fontWeight: 900,
                                     cursor: 'pointer'
                                   }}
                                   title="Hapus Data"
                                 >
-                                  <Trash2 size={12} />
+                                  <Trash2 size={13} />
                                 </button>
                               </div>
                             </td>
                           </tr>
                         ))
                       )}
-
-                      {/* TOTAL ROW DI PALING BAWAH */}
-                      <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                        <td colSpan={3} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                          Total ({sortedAndFilteredRekapRows.length} Tenaga Kerja)
-                        </td>
-                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                          {totalRekapHariKerja} Hari
-                        </td>
-                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
-                          -
-                        </td>
-                        <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.96rem', color: '#000000' }}>
-                          Rp {formatRupiah(totalRekapBiayaUpah)}
-                        </td>
-                        <td style={{ border: '1.5px solid #78350f' }}></td>
-                      </tr>
                     </tbody>
                   </table>
-                </div>
-
-                {/* TERBILANG TOTAL BIAYA UPAH */}
-                <div style={{ background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.88rem' }}>Terbilang Total Upah:</span>
-                  <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem', fontStyle: 'italic' }}>
-                    {angkaTerbilang(totalRekapBiayaUpah)}
-                  </span>
                 </div>
               </div>
             )}
@@ -2298,7 +2176,7 @@ export const TeknikModule = () => {
                     cursor: 'pointer',
                     border: laporanProjectFilter === 'ALL' ? '2px solid #f59e0b' : '1px solid #475569',
                     background: laporanProjectFilter === 'ALL' ? '#f59e0b' : '#0f172a',
-                    color: laporanProjectFilter === 'ALL' ? '#000000' : '#ffffff',
+                    color: '#000000',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -2316,7 +2194,7 @@ export const TeknikModule = () => {
                     cursor: 'pointer',
                     border: laporanProjectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
                     background: laporanProjectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                    color: laporanProjectFilter === 'Ashoka View' ? '#ffffff' : '#fbbf24',
+                    color: '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -2334,7 +2212,7 @@ export const TeknikModule = () => {
                     cursor: 'pointer',
                     border: laporanProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
                     background: laporanProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
-                    color: laporanProjectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
+                    color: '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -2696,7 +2574,7 @@ export const TeknikModule = () => {
                         type="number"
                         step="5000"
                         min="0"
-                        placeholder="75000"
+                        placeholder="150000"
                         value={masterWorkerInput.upah}
                         onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, upah: Number(e.target.value) || 0 })}
                         required
@@ -2726,7 +2604,7 @@ export const TeknikModule = () => {
                   className="btn btn-primary"
                   style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 900, color: '#ffffff' }}
                 >
-                  {editingWorkerId ? '💾 Simpan Perubahan' : '+ Simpan & Masukkan ke Database'}
+                  {editingWorkerId ? '💾 Simpan Perubahan' : '+ Simpan ke Database Tenaga Kerja'}
                 </button>
               </div>
             </form>
