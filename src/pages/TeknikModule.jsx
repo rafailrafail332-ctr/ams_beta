@@ -36,7 +36,8 @@ import {
   Coins,
   AlertCircle,
   UserCheck,
-  UserPlus
+  UserPlus,
+  Database
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -109,7 +110,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v11';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v12';
 
   const defaultAttendance = [
     {
@@ -226,9 +227,9 @@ export const TeknikModule = () => {
 
   // =========================================================================
   // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png)
-  // Master input box appears only in modal popup when "+ Daftarkan Tenaga Kerja Baru" is clicked
+  // Master input box appears only in modal popup when "Database Tenaga Kerja" is clicked
   // =========================================================================
-  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v11';
+  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v12';
 
   const defaultRekapPeriode = {
     tanggalAwal: '16/08/2026',
@@ -246,7 +247,7 @@ export const TeknikModule = () => {
 
   const [rekapPeriode, setRekapPeriode] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_teknik_rekap_periode_v11');
+      const saved = localStorage.getItem('ams_teknik_rekap_periode_v12');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return defaultRekapPeriode;
@@ -265,7 +266,7 @@ export const TeknikModule = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_teknik_rekap_periode_v11', JSON.stringify(rekapPeriode));
+      localStorage.setItem('ams_teknik_rekap_periode_v12', JSON.stringify(rekapPeriode));
     } catch (e) {}
   }, [rekapPeriode]);
 
@@ -275,8 +276,9 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [rekapUpahRows]);
 
-  // Master Data Modal State (Opens ONLY when clicking "+ Daftarkan Tenaga Kerja Baru")
+  // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
   const [isMasterWorkerModalOpen, setIsMasterWorkerModalOpen] = useState(false);
+  const [editingWorkerId, setEditingWorkerId] = useState(null);
   const [masterWorkerInput, setMasterWorkerInput] = useState({
     nama: '',
     status: 'Tukang',
@@ -289,8 +291,9 @@ export const TeknikModule = () => {
     ...attendanceList.map(a => a.nama)
   ].filter(Boolean))).sort();
 
-  // OPEN MASTER WORKER REGISTRATION MODAL
+  // OPEN MASTER WORKER MODAL IN ADD MODE
   const handleOpenMasterWorkerModal = () => {
+    setEditingWorkerId(null);
     setMasterWorkerInput({
       nama: '',
       status: 'Tukang',
@@ -299,7 +302,18 @@ export const TeknikModule = () => {
     setIsMasterWorkerModalOpen(true);
   };
 
-  // HANDLER: DAFTARKAN TENAGA KERJA BARU DENGAN VALIDASI NAMA UNIK (ANTI DUPLIKAT)
+  // OPEN MASTER WORKER MODAL IN EDIT MODE FROM TABLE ROW
+  const handleOpenEditMasterWorker = (worker) => {
+    setEditingWorkerId(worker.id);
+    setMasterWorkerInput({
+      nama: worker.nama || '',
+      status: worker.status || 'Tukang',
+      upah: Number(worker.upah) || 75000
+    });
+    setIsMasterWorkerModalOpen(true);
+  };
+
+  // HANDLER: SIMPAN DATABASE TENAGA KERJA (ADD / EDIT DENGAN VALIDASI NAMA UNIK)
   const handleRegisterMasterWorker = (e) => {
     e.preventDefault();
     const cleanName = masterWorkerInput.nama.trim();
@@ -309,28 +323,45 @@ export const TeknikModule = () => {
       return;
     }
 
-    // VALIDASI: TIDAK BOLEH ADA NAMA YANG SAMA
+    // VALIDASI: TIDAK BOLEH ADA NAMA YANG SAMA DENGAN PEKERJA LAIN
     const isDuplicate = rekapUpahRows.some(
-      r => r.nama.toLowerCase().trim() === cleanName.toLowerCase()
+      r => r.id !== editingWorkerId && r.nama.toLowerCase().trim() === cleanName.toLowerCase()
     );
 
     if (isDuplicate) {
       alert(`⚠️ PERINGATAN: Nama "${cleanName}" sudah terdaftar!\nTidak boleh ada nama tenaga kerja yang sama.`);
-      showNotification(`Nama "${cleanName}" sudah ada dalam daftar. Tidak boleh duplikat!`, 'error');
+      showNotification(`Nama "${cleanName}" sudah ada dalam daftar database. Tidak boleh duplikat!`, 'error');
       return;
     }
 
-    const newWorker = {
-      id: `RKP-${Date.now().toString().slice(-4)}`,
-      nama: cleanName,
-      status: masterWorkerInput.status.trim() || 'Tukang',
-      hariKerja: 1,
-      upah: Number(masterWorkerInput.upah) || 75000
-    };
+    if (editingWorkerId) {
+      // EDIT MODE
+      setRekapUpahRows(prev => prev.map(r => {
+        if (r.id === editingWorkerId) {
+          return {
+            ...r,
+            nama: cleanName,
+            status: masterWorkerInput.status.trim() || 'Tukang',
+            upah: Number(masterWorkerInput.upah) || 75000
+          };
+        }
+        return r;
+      }));
+      showNotification(`Database tenaga kerja "${cleanName}" berhasil diperbarui!`, 'success');
+    } else {
+      // ADD MODE
+      const newWorker = {
+        id: `RKP-${Date.now().toString().slice(-4)}`,
+        nama: cleanName,
+        status: masterWorkerInput.status.trim() || 'Tukang',
+        hariKerja: 1,
+        upah: Number(masterWorkerInput.upah) || 75000
+      };
+      setRekapUpahRows([...rekapUpahRows, newWorker]);
+      showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil ditambahkan ke Database!`, 'success');
+    }
 
-    setRekapUpahRows([...rekapUpahRows, newWorker]);
     setIsMasterWorkerModalOpen(false);
-    showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil didaftarkan!`, 'success');
   };
 
   // UPDATE CELL IN REKAP UPAH WITH UNIQUE NAME VALIDATION
@@ -361,7 +392,7 @@ export const TeknikModule = () => {
     const target = rekapUpahRows.find(r => r.id === rowId);
     if (window.confirm(`Hapus baris data upah untuk "${target?.nama || 'Tenaga Kerja'}"?`)) {
       setRekapUpahRows(rekapUpahRows.filter(r => r.id !== rowId));
-      showNotification(`Data tenaga kerja "${target?.nama}" berhasil dihapus.`, 'warning');
+      showNotification(`Data tenaga kerja "${target?.nama}" berhasil dihapus dari Database.`, 'warning');
     }
   };
 
@@ -388,7 +419,7 @@ export const TeknikModule = () => {
 
     setRekapUpahRows(newRows);
     if (addedCount > 0) {
-      showNotification(`${addedCount} nama tenaga kerja baru berhasil disinkronkan tanpa duplikat!`, 'success');
+      showNotification(`${addedCount} nama tenaga kerja baru berhasil disinkronkan ke Database tanpa duplikat!`, 'success');
     } else {
       showNotification('Semua nama tenaga kerja sudah terdaftar secara unik.', 'info');
     }
@@ -550,7 +581,7 @@ export const TeknikModule = () => {
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v11';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v12';
 
   const defaultRabSheets = [
     {
@@ -855,7 +886,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran & rekapitulasi upah tenaga kerja (nama unik anti-duplikat), spreadsheet RAB, & laporan rekapitulasi progres.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja (nama unik anti-duplikat), spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
 
@@ -884,7 +915,7 @@ export const TeknikModule = () => {
                   boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
                 }}
               >
-                <UserPlus size={18} /> + Daftarkan Tenaga Kerja
+                <Database size={17} /> Database Tenaga Kerja
               </button>
 
               <button 
@@ -1012,17 +1043,11 @@ export const TeknikModule = () => {
           {/* ===================================================================== */}
           <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #f59e0b', overflow: 'hidden' }}>
             
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <span style={{ background: '#f59e0b', color: '#000000', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  TABEL REKAP UPAH
-                </span>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Coins size={20} color="#fbbf24" /> Rekapitulasi Hari Kerja & Upah Tenaga Kerja
-                </h3>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {/* HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI TABEL REKAP */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+              
+              {/* SISI KIRI: TOMBOL DATABASE TENAGA KERJA + JUDUL TABEL REKAP */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleOpenMasterWorkerModal}
@@ -1030,21 +1055,33 @@ export const TeknikModule = () => {
                     background: 'linear-gradient(135deg, #0284c7, #0369a1)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     fontWeight: 900,
-                    fontSize: '0.78rem',
-                    padding: '5px 12px',
+                    fontSize: '0.82rem',
+                    padding: '6px 14px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '6px',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
+                    boxShadow: '0 2px 10px rgba(2, 132, 199, 0.45)',
+                    transition: 'transform 0.15s ease'
                   }}
-                  title="Daftarkan nama tukang baru dengan status & upah"
+                  title="Buka / Tambah Database Tenaga Kerja"
                 >
-                  <UserPlus size={14} /> + Daftarkan Tenaga Kerja Baru
+                  <Database size={16} /> Database Tenaga Kerja
                 </button>
 
+                <span style={{ background: '#f59e0b', color: '#000000', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
+                  TABEL REKAP UPAH
+                </span>
+                
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Coins size={18} color="#fbbf24" /> Rekapitulasi Hari Kerja & Upah Tenaga Kerja
+                </h3>
+              </div>
+
+              {/* SISI KANAN: SINKRON & EXPAND/COLLAPSE */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleSyncWorkersFromDaily}
@@ -1054,7 +1091,7 @@ export const TeknikModule = () => {
                     color: '#38bdf8',
                     fontSize: '0.78rem',
                     fontWeight: 800,
-                    padding: '4px 10px',
+                    padding: '5px 10px',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     display: 'inline-flex',
@@ -1075,7 +1112,7 @@ export const TeknikModule = () => {
                     color: '#cbd5e1',
                     fontSize: '0.78rem',
                     fontWeight: 800,
-                    padding: '4px 10px',
+                    padding: '5px 10px',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     display: 'inline-flex',
@@ -1112,13 +1149,13 @@ export const TeknikModule = () => {
                     />
                   </div>
                   <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: 'auto' }}>
-                    💡 Klik langsung di sel <strong>Hari kerja</strong> dan <strong>Upah</strong> untuk edit inline (Total otomatis terhitung).
+                    💡 Klik tombol <strong>Edit</strong> di kolom Aksi untuk mengubah data nama, status & upah di Database Tenaga Kerja.
                   </span>
                 </div>
 
-                {/* SPREADSHEET TABLE: No. | Nama | Status | Hari kerja | Upah | Total */}
+                {/* SPREADSHEET TABLE: No. | Nama | Status | Hari kerja | Upah | Total | Aksi */}
                 <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
-                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '860px', textAlign: 'left' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '880px', textAlign: 'left' }}>
                     <thead>
                       <tr style={{ background: '#f6b26b', color: '#000000' }}>
                         <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
@@ -1139,8 +1176,8 @@ export const TeknikModule = () => {
                         <th style={{ width: '180px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
                           Total
                         </th>
-                        <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
-                          
+                        <th style={{ width: '110px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 4px' }}>
+                          Aksi
                         </th>
                       </tr>
                     </thead>
@@ -1159,18 +1196,17 @@ export const TeknikModule = () => {
                             {idx + 1}
                           </td>
 
-                          {/* 2. Nama (Inline Editable) */}
-                          <td style={{ border: '1px solid #334155', padding: '4px 8px' }}>
-                            <input
-                              type="text"
-                              value={row.nama || ''}
-                              onChange={(e) => handleUpdateRekapCell(row.id, 'nama', e.target.value)}
-                              placeholder="Nama Tenaga Kerja..."
-                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#ffffff', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                            />
+                          {/* 2. Nama */}
+                          <td style={{ border: '1px solid #334155', padding: '6px 10px', fontWeight: 900, color: '#ffffff', fontSize: '0.88rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
+                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
+                              </div>
+                              <span>{row.nama}</span>
+                            </div>
                           </td>
 
-                          {/* 3. Status (Permanen / Read-only / Tidak bisa diubah setelah diinput) */}
+                          {/* 3. Status (Terkunci permanen di tabel, dapat diedit via modal aksi) */}
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px' }}>
                             <span style={{
                               display: 'inline-block',
@@ -1226,16 +1262,48 @@ export const TeknikModule = () => {
                             Rp {formatRupiah(row.total)}
                           </td>
 
-                          {/* 7. Aksi Hapus */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteRekapRow(row.id)}
-                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
-                              title="Hapus Baris"
-                            >
-                              <Trash2 size={13} />
-                            </button>
+                          {/* 7. Aksi Edit & Hapus */}
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditMasterWorker(row)}
+                                style={{
+                                  background: '#2563eb',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '3px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  cursor: 'pointer'
+                                }}
+                                title="Edit Data Database Tenaga Kerja (Nama, Status, Upah)"
+                              >
+                                <Edit3 size={11} /> Edit
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteRekapRow(row.id)}
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.2)',
+                                  color: '#f87171',
+                                  border: '1px solid #ef4444',
+                                  padding: '3px 6px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer'
+                                }}
+                                title="Hapus Data"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1458,7 +1526,7 @@ export const TeknikModule = () => {
                     cursor: 'pointer',
                     border: lemburFilter === 'LEMBUR' ? '2px solid #f97316' : '1px solid rgba(249, 115, 22, 0.4)',
                     background: lemburFilter === 'LEMBUR' ? '#ea580c' : 'rgba(249, 115, 22, 0.15)',
-                    color: lemburFilter === 'LEMBUR' ? '#ffffff' : '#fb923c'
+                    color: lemburFilter === 'LEMBUR' ? '#ffffff' : '#fbbf24'
                   }}
                 >
                   ⚡ Hanya Lembur ({attendanceList.filter(a => Number(a.lembur) > 0).length})
@@ -2472,7 +2540,7 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: DAFTARKAN TENAGA KERJA BARU (GAMBAR media_1787931802518.png)     */}
+      {/* MODAL 1: DATABASE TENAGA KERJA (ADD & EDIT WORKER POPUP)                  */}
       {/* Pop up form: Nama :, Status :, Upah : (Validasi: Nama Tidak Boleh Sama)   */}
       {/* ========================================================================= */}
       {isMasterWorkerModalOpen && (
@@ -2480,7 +2548,8 @@ export const TeknikModule = () => {
           <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <UserCheck size={22} color="#38bdf8" /> Daftarkan Tenaga Kerja Baru
+                <Database size={22} color="#38bdf8" /> 
+                {editingWorkerId ? 'Edit Database Tenaga Kerja' : 'Database Tenaga Kerja (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsMasterWorkerModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -2587,7 +2656,7 @@ export const TeknikModule = () => {
                   className="btn btn-primary"
                   style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 900, color: '#ffffff' }}
                 >
-                  + Simpan & Masukkan ke Rekap Upah
+                  {editingWorkerId ? '💾 Simpan Perubahan' : '+ Simpan & Masukkan ke Database'}
                 </button>
               </div>
             </form>
@@ -2650,7 +2719,7 @@ export const TeknikModule = () => {
                       onChange={(e) => setAbsenFormData({ ...absenFormData, nama: e.target.value })}
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8', flex: 1 }}
                     >
-                      <option value="">-- Pilih dari Daftar Pekerja Terdaftar --</option>
+                      <option value="">-- Pilih dari Database Tenaga Kerja --</option>
                       {uniqueWorkerNames.map(name => (
                         <option key={name} value={name}>{name}</option>
                       ))}
