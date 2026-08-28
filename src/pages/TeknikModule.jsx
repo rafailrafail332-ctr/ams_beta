@@ -3263,31 +3263,6 @@ export const TeknikModule = () => {
                             >
                               <ClipboardCheck size={12} /> Opname
                             </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                  setActiveSheetId(row.id);
-                                  setMainCategory('borongan');
-                                  setSubTabBorongan('hasil_opname');
-                                }}
-                                style={{
-                                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  padding: '3px 8px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 900,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)'
-                                }}
-                                title="Buka Spreadsheet Hasil Opname & Pembayaran"
-                              >
-                                <FileSpreadsheet size={12} /> Hasil Opname
-                              </button>
 
                             <button
                               type="button"
