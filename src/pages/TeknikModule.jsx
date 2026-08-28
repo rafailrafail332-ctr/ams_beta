@@ -683,8 +683,11 @@ export const TeknikModule = () => {
 
     const progresPersen = computedItems.reduce((acc, it) => acc + it.bobotProgress, 0);
     const retensiPersen = Number(sheet.retensiPersen) || 5;
-    const retensiNilai = (retensiPersen / 100) * totalHargaRab;
-    const nilaiProgres = (progresPersen / 100) * totalHargaRab;
+    const nilaiOpname = (progresPersen / 100) * totalHargaRab;
+    const retensiNilai = (retensiPersen / 100) * nilaiOpname;
+    const nilaiProgress = nilaiOpname - retensiNilai;
+    const pembayaranSebelumnya = Number(sheet.pembayaranSebelumnya) || 0;
+    const pembayaranSaatIni = nilaiProgress - pembayaranSebelumnya;
 
     return {
       ...sheet,
@@ -692,8 +695,12 @@ export const TeknikModule = () => {
       totalHargaRab,
       progresPersen,
       retensiPersen,
+      nilaiOpname,
       retensiNilai,
-      nilaiProgres
+      nilaiProgress,
+      nilaiProgres: nilaiProgress,
+      pembayaranSebelumnya,
+      pembayaranSaatIni
     };
   };
 
@@ -988,7 +995,7 @@ export const TeknikModule = () => {
         </div>
       </div>
 
-      {/* 3 SUB-MODUL TAB SWITCHER BAR */}
+      {/* 4 SUB-MODUL TAB SWITCHER BAR */}
       <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
         
         {/* Tab 1: Absen & Database Tenaga Kerja */}
@@ -1037,7 +1044,30 @@ export const TeknikModule = () => {
           <Calculator size={17} /> 2. Input Lembar RAB (Spreadsheet)
         </button>
 
-        {/* Tab 3: Laporan Rekapitulasi */}
+        {/* Tab 3: Hasil Opname (Mengambil Data Dari RAB) */}
+        <button
+          type="button"
+          onClick={() => switchTab('hasil_opname')}
+          style={{
+            padding: '0.65rem 1.15rem',
+            borderRadius: '10px',
+            fontSize: '0.86rem',
+            fontWeight: 900,
+            cursor: 'pointer',
+            border: activeTab === 'hasil_opname' ? '2px solid #10b981' : '1px solid #334155',
+            background: activeTab === 'hasil_opname' ? '#10b981' : '#1e293b',
+            color: '#ffffff',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: activeTab === 'hasil_opname' ? '0 4px 12px rgba(16, 185, 129, 0.35)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <ClipboardCheck size={17} /> 3. Hasil Opname
+        </button>
+
+        {/* Tab 4: Laporan Rekapitulasi */}
         <button
           type="button"
           onClick={() => switchTab('laporan')}
@@ -1057,7 +1087,7 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <BarChart3 size={17} /> 3. Laporan Rekapitulasi RAB & Progress ({rabSheets.length} Proyek)
+          <BarChart3 size={17} /> 4. Laporan Rekapitulasi RAB & Progress ({rabSheets.length} Proyek)
         </button>
       </div>
 
@@ -2271,7 +2301,343 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 3: TABEL LAPORAN REKAPITULASI RAB & PROGRESS                         */}
+      {/* VIEW 3: SUB-MODUL HASIL OPNAME (PERSIS FOTO EXCEL media_1787935124854.png)*/}
+      {/* ========================================================================= */}
+      {activeTab === 'hasil_opname' && (
+        <div className="module-animated-view">
+          
+          {/* SHEET TAB SWITCHER TOOLBAR (PILIH LEMBAR RAB UNTUK HASIL OPNAME) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #334155' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#10b981', marginRight: '4px' }}>
+                📑 Pilih Lembar RAB Opname:
+              </span>
+              
+              {rabSheets.map((sheet, sIdx) => {
+                const isActive = sheet.id === activeSheet.id;
+                const sCalc = computeSheetSummary(sheet);
+                return (
+                  <button
+                    key={sheet.id}
+                    type="button"
+                    onClick={() => setActiveSheetId(sheet.id)}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      border: isActive ? '2px solid #10b981' : '1px solid #475569',
+                      background: isActive ? '#10b981' : '#1e293b',
+                      color: isActive ? '#ffffff' : '#cbd5e1',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      boxShadow: isActive ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <span>{sheet.noInput || `RAB - ${sIdx + 1}`}</span>
+                    <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>({sheet.namaVendor || 'Vendor'})</span>
+                    <span style={{ fontSize: '0.72rem', background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(16, 185, 129, 0.2)', color: isActive ? '#ffffff' : '#34d399', padding: '1px 5px', borderRadius: '4px' }}>
+                      {formatDecimal(sCalc.progresPersen)}%
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handlePrint}
+                style={{ background: '#1e293b', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, fontSize: '0.78rem' }}
+              >
+                <Printer size={14} /> Cetak Hasil Opname
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => switchTab('input')}
+                style={{
+                  background: '#f59e0b',
+                  color: '#000000',
+                  border: 'none',
+                  fontWeight: 900,
+                  fontSize: '0.78rem',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Calculator size={14} /> Edit Input RAB &rarr;
+              </button>
+            </div>
+          </div>
+
+          {/* SPREADSHEET HASIL OPNAME (PERSIS FOTO EXCEL media_1787935124854.png) */}
+          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', overflowX: 'auto' }}>
+            
+            {/* Header Title & Info */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ClipboardCheck size={22} color="#10b981" /> Hasil Opname Pekerjaan: {activeSheet.noInput}
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#94a3b8', fontWeight: 700 }}>
+                  🏢 {activeSheet.proyek} {activeSheet.blok ? `(Blok ${activeSheet.blok} No ${activeSheet.noUnit})` : ''} | 👤 Vendor: <strong style={{ color: '#38bdf8' }}>{activeSheet.namaVendor || '-'}</strong> | 🔨 {activeSheet.pekerjaan || 'RAB'}
+                </p>
+              </div>
+
+              <div style={{ background: '#0f172a', padding: '6px 14px', borderRadius: '8px', border: '1px solid #10b981', textAlign: 'right' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>Total Bobot Progres Opname:</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#34d399' }}>
+                  {formatDecimal(activeSheetCalc.progresPersen)}%
+                </div>
+              </div>
+            </div>
+
+            {/* TABEL HASIL OPNAME PERSIS SEPERTI FOTO EXCEL */}
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '1.25rem' }}>
+              <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px', textAlign: 'left' }}>
+                <thead>
+                  {/* Peach / Orange Header (Same as photo) */}
+                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 4px' }}>
+                      No.
+                    </th>
+                    <th style={{ minWidth: '220px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                      Item Pekerjaan
+                    </th>
+                    <th style={{ width: '150px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Spesifikasi
+                    </th>
+                    <th style={{ width: '75px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Vol
+                    </th>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 4px' }}>
+                      Sat
+                    </th>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Harga Satuan
+                    </th>
+                    <th style={{ width: '140px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Jumlah
+                    </th>
+                    <th style={{ width: '80px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Bobot
+                    </th>
+                    <th style={{ width: '130px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Progress
+                    </th>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                      Bobot Progress
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {activeSheetCalc.items.map((row, idx) => (
+                    <tr 
+                      key={row.id || idx} 
+                      style={{ 
+                        backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
+                        color: '#f8fafc'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#cbd5e1', padding: '8px 4px' }}>
+                        {idx + 1}
+                      </td>
+
+                      {/* 2. Item Pekerjaan */}
+                      <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 800, color: '#ffffff' }}>
+                        {row.itemPekerjaan || '-'}
+                      </td>
+
+                      {/* 3. Spesifikasi */}
+                      <td style={{ border: '1px solid #334155', padding: '8px 8px', color: '#cbd5e1', fontSize: '0.84rem' }}>
+                        {row.spesifikasi || '-'}
+                      </td>
+
+                      {/* 4. Vol */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#f8fafc' }}>
+                        {formatDecimal(row.vol)}
+                      </td>
+
+                      {/* 5. Sat */}
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', fontWeight: 800, color: '#94a3b8' }}>
+                        {row.sat || '-'}
+                      </td>
+
+                      {/* 6. Harga Satuan */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', color: '#fbbf24', fontWeight: 800 }}>
+                        {formatRupiahDesimal(row.hargaSatuan)}
+                      </td>
+
+                      {/* 7. Jumlah */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#ffffff' }}>
+                        {formatRupiahDesimal(row.jumlah)}
+                      </td>
+
+                      {/* 8. Bobot */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', color: '#60a5fa', fontWeight: 800 }}>
+                        {formatDecimal(row.bobotRatio, 2)}
+                      </td>
+
+                      {/* 9. Progress (Bisa diupdate langsung / inline) */}
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px', background: 'rgba(16, 185, 129, 0.08)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value={row.progress || 0}
+                            onChange={(e) => handleUpdateCell(row.id, 'progress', Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                            style={{
+                              width: '58px',
+                              background: '#0f172a',
+                              border: '1.5px solid #10b981',
+                              borderRadius: '4px',
+                              color: '#34d399',
+                              fontWeight: 900,
+                              fontSize: '0.85rem',
+                              padding: '2px 4px',
+                              textAlign: 'center',
+                              outline: 'none'
+                            }}
+                          />
+                          <span style={{ fontWeight: 900, color: '#34d399', fontSize: '0.82rem' }}>%</span>
+                        </div>
+                      </td>
+
+                      {/* 10. Bobot Progress */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399' }}>
+                        {formatDecimal(row.bobotProgress)}%
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* EMPTY ROWS PLACEHOLDER IF LESS THAN 6 (MATCHING PHOTO) */}
+                  {activeSheetCalc.items.length < 6 && Array.from({ length: 6 - activeSheetCalc.items.length }).map((_, rIdx) => (
+                    <tr key={`empty-opn-${rIdx}`} style={{ height: '32px', backgroundColor: (activeSheetCalc.items.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  ))}
+
+                  {/* BARIS TOTAL (MATCHING PHOTO media_1787935124854.png) */}
+                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      Total
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      {formatRupiahDesimal(activeSheetCalc.totalHargaRab)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.88rem', color: '#000000' }}>
+                      1,00
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                      -
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.95rem', color: '#000000' }}>
+                      {formatDecimal(activeSheetCalc.progresPersen)}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* REKAPITULASI PEMBAYARAN OPNAME DI BAWAH (PERSIS FOTO EXCEL media_1787935124854.png) */}
+            <div style={{ maxWidth: '680px', background: '#0f172a', borderRadius: '8px', border: '1.5px solid #334155', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '220px 20px 1fr', rowGap: '0.5rem', alignItems: 'center' }}>
+                
+                {/* 1. Nilai Opname */}
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Nilai Opname</div>
+                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#ffffff', textAlign: 'right' }}>
+                  {formatRupiahDesimal(activeSheetCalc.nilaiOpname)}
+                </div>
+
+                {/* 2. Retensi 5% */}
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>
+                  Retensi {activeSheet.retensiPersen || 5}%
+                </div>
+                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#c084fc', textAlign: 'right' }}>
+                  {formatRupiahDesimal(activeSheetCalc.retensiNilai)}
+                </div>
+
+                {/* 3. Nilai Progress */}
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Nilai Progress</div>
+                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#60a5fa', textAlign: 'right' }}>
+                  {formatRupiahDesimal(activeSheetCalc.nilaiProgress)}
+                </div>
+
+                {/* 4. Pembayaran sebelumnya */}
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Pembayaran sebelumnya</div>
+                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="10000"
+                    placeholder="0"
+                    value={activeSheet.pembayaranSebelumnya || ''}
+                    onChange={(e) => handleUpdateHeaderField('pembayaranSebelumnya', Number(e.target.value) || 0)}
+                    style={{
+                      width: '180px',
+                      background: '#1e293b',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#fbbf24',
+                      fontWeight: 900,
+                      fontSize: '0.9rem',
+                      padding: '3px 8px',
+                      textAlign: 'right',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* 5. Pembayaran saat ini (Garis tebal atas) */}
+                <div style={{ fontWeight: 900, fontSize: '0.92rem', color: '#34d399', paddingTop: '6px', borderTop: '1px solid #334155' }}>
+                  Pembayaran saat ini
+                </div>
+                <div style={{ fontWeight: 900, color: '#94a3b8', paddingTop: '6px', borderTop: '1px solid #334155' }}>:</div>
+                <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#34d399', textAlign: 'right', paddingTop: '6px', borderTop: '1px solid #334155' }}>
+                  Rp {formatRupiahDesimal(activeSheetCalc.pembayaranSaatIni)}
+                </div>
+              </div>
+            </div>
+
+            {/* TERBILANG PEMBAYARAN SAAT INI BOX */}
+            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1px solid #10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 900, color: '#10b981', fontSize: '0.9rem' }}>Terbilang Pembayaran Saat Ini :</span>
+              <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                {angkaTerbilang(activeSheetCalc.pembayaranSaatIni)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW 4: TABEL LAPORAN REKAPITULASI RAB & PROGRESS                         */}
       {/* EXACT REPLICA OF media_1787930910161.png + TOTAL DI PALING BAWAH LAPORAN  */}
       {/* ========================================================================= */}
       {activeTab === 'laporan' && (
