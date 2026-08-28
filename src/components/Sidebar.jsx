@@ -31,7 +31,8 @@ import {
   Headphones,
   KeyRound,
   Wrench,
-  HardHat
+  HardHat,
+  Calculator
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -132,7 +133,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('teknik') || roleLower.includes('site') || roleLower.includes('hapip')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'teknik-absen', title: 'Absen Tenaga Kerja Lapangan', moduleKey: 'teknik', subTabKey: 'default', icon: HardHat, color: '#F97316' },
+        { id: 'teknik-absen', title: '1. Absen Tenaga Kerja', moduleKey: 'teknik', subTabKey: 'absen', icon: HardHat, color: '#F97316' },
+        { id: 'teknik-rab', title: '2. Input RAB & Monitoring Progress', moduleKey: 'teknik', subTabKey: 'rab', icon: Calculator, color: '#F59E0B' },
         { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
     }

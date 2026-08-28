@@ -60,10 +60,28 @@ const formatDecimal = (val) => {
 };
 
 export const TeknikModule = () => {
-  const { currentUser, showNotification } = useApp();
+  const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
   // Active Sub-Tab: 'absen' (Absen Tenaga Kerja) | 'rab' (Input RAB & Monitoring Progress)
-  const [activeTab, setActiveTab] = useState('absen');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (activeSubTab === 'rab') return 'rab';
+    return 'absen';
+  });
+
+  useEffect(() => {
+    if (activeSubTab === 'rab') {
+      setActiveTab('rab');
+    } else if (activeSubTab === 'absen') {
+      setActiveTab('absen');
+    }
+  }, [activeSubTab]);
+
+  const switchTab = (tabName) => {
+    setActiveTab(tabName);
+    if (setActiveSubTab) {
+      setActiveSubTab(tabName);
+    }
+  };
 
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
@@ -826,15 +844,33 @@ export const TeknikModule = () => {
           {/* RAB SPREADSHEET CARD */}
           <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)' }}>
             
-            {/* Title exact as photo */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1.5px solid #334155', paddingBottom: '0.75rem' }}>
+            {/* Title exact as photo with Big Action Button */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1.5px solid #334155', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <Calculator size={24} color="#f59e0b" />
                 <span>Input RAB & Rencana Anggaran Biaya</span>
               </div>
-              <div style={{ fontSize: '0.85rem', color: '#f59e0b', fontWeight: 800 }}>
-                PT Ashoka Enterprise Development &bull; Divisi Teknik
-              </div>
+
+              <button 
+                type="button"
+                className="btn btn-primary"
+                onClick={handleOpenAddRabItem}
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  border: 'none',
+                  fontWeight: 900,
+                  color: '#000000',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Plus size={18} /> + Tambah Item Pekerjaan RAB Baru
+              </button>
             </div>
 
             {/* SPREADSHEET HEADER FORM (Proyek, Tanggal, Nama Vendor, Pekerjaan) */}
