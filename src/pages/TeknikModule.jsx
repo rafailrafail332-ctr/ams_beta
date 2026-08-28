@@ -1376,15 +1376,12 @@ export const TeknikModule = () => {
                       onChange={(e) => setRabFormData({ ...rabFormData, sat: e.target.value })}
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
                     >
-                      <option value="m2">m2 (Meter Persegi)</option>
-                      <option value="ls">ls (Lump Sum / Borongan)</option>
-                      <option value="m3">m3 (Meter Kubik)</option>
-                      <option value="m'">m' (Meter Lari)</option>
-                      <option value="unit">unit (Unit)</option>
-                      <option value="ttk">ttk (Titik Instalasi)</option>
-                      <option value="kg">kg (Kilogram)</option>
-                      <option value="sak">sak (Zak Semen)</option>
-                      <option value="btg">btg (Batang)</option>
+                      <option value="m1">m1</option>
+                      <option value="m2">m2</option>
+                      <option value="m3">m3</option>
+                      <option value="pcs">pcs</option>
+                      <option value="unit">unit</option>
+                      <option value="ls">ls</option>
                     </select>
                   </div>
                 </div>
