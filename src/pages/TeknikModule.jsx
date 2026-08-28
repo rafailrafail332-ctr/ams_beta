@@ -2742,42 +2742,6 @@ export const TeknikModule = () => {
                   </button>
                 )}
               </div>
-
-              {/* 3. DROPDOWN PILIH LEMBAR HASIL PENCARIAN (BERSIH & PRAKTIS) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
-                  📑 Pilih Lembar:
-                </label>
-                <select
-                  value={activeSheet.id || ''}
-                  onChange={(e) => setActiveSheetId(e.target.value)}
-                  style={{
-                    background: '#1e293b',
-                    border: '1.5px solid #10b981',
-                    borderRadius: '8px',
-                    color: '#ffffff',
-                    fontWeight: 900,
-                    fontSize: '0.84rem',
-                    padding: '6px 12px',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    minWidth: '240px'
-                  }}
-                >
-                  {filteredHasilOpnameSheets.length === 0 ? (
-                    <option value="">(Tidak ada RAB yang cocok)</option>
-                  ) : (
-                    filteredHasilOpnameSheets.map(s => {
-                      const sCalc = computeSheetSummary(s);
-                      return (
-                        <option key={s.id} value={s.id}>
-                          {s.noInput || 'RAB'} - {s.namaVendor || 'Vendor'} | Tgl: {s.tanggalOpname || s.tanggal || '-'} | Progres: {formatDecimal(sCalc.progresPersen)}%
-                        </option>
-                      );
-                    })
-                  )}
-                </select>
-              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
