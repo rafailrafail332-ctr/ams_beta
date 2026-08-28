@@ -1287,36 +1287,59 @@ export const TeknikModule = () => {
             )}
           </div>
 
-          {/* KPI Cards */}
+          {/* KPI Cards Berdasarkan STATUS Tenaga Kerja (Mandor, Tukang, Kenek, Total Terdaftar) */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f97316', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Hadir</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredAttendanceList.length} Orang</div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{dateFilter ? `Tanggal: ${dateFilter}` : 'Semua tanggal'}</div>
-            </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #eab308', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Tenaga Kerja Lembur</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#facc15', marginTop: '2px' }}>
-                {totalLemburCount} Orang
+            
+            {/* Card 1: Total Tenaga Kerja Terdaftar */}
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #0284c7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.82rem', color: '#38bdf8', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Database size={15} color="#38bdf8" /> Total Database Tenaga Kerja
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total: {totalLemburHours} Jam Lembur</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
+                {databasePekerjaRows.length} Orang
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                Seluruh Tenaga Kerja Terdaftar
+              </div>
             </div>
 
+            {/* Card 2: Status Mandor */}
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.82rem', color: '#fbbf24', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                👑 Status Mandor
+              </div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#fbbf24', marginTop: '3px' }}>
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                Pengawas & Penanggung Jawab Lapangan
+              </div>
+            </div>
+
+            {/* Card 3: Status Tukang & Kepala Tukang */}
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981', marginTop: '2px' }}>
-                {filteredAttendanceList.filter(a => (a.proyek || '').includes('Park')).length} Orang
+              <div style={{ fontSize: '0.82rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                🔨 Status Tukang
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di Park</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#34d399', marginTop: '3px' }}>
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                Tenaga Ahli & Kepala Tukang Konstruksi
+              </div>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Ashoka View</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
-                {filteredAttendanceList.filter(a => (a.proyek || '').includes('View')).length} Orang
+            {/* Card 4: Status Kenek / Pembantu */}
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #a855f7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                🧱 Status Kenek / Pembantu
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di View</div>
+              <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#c084fc', marginTop: '3px' }}>
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('kenek') || (r.status || '').toLowerCase().includes('pembantu') || (r.status || '').toLowerCase().includes('borongan')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                Pembantu Tukang & Pekerja Lapangan
+              </div>
             </div>
           </div>
 
