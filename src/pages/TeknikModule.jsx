@@ -1322,10 +1322,10 @@ export const TeknikModule = () => {
                 🧱 Total Kenek
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#c084fc', marginTop: '4px' }}>
-                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('kenek') || (r.status || '').toLowerCase().includes('pembantu') || (r.status || '').toLowerCase().includes('borongan')).length} Orang
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length} Orang
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
-                Pembantu Tukang & Pekerja Lapangan
+                Status Kenek
               </div>
             </div>
           </div>
@@ -2567,11 +2567,9 @@ export const TeknikModule = () => {
                           outline: 'none'
                         }}
                       >
-                        <option value="Tukang">Tukang</option>
-                        <option value="Kenek">Kenek / Pembantu Tukang</option>
                         <option value="Mandor">Mandor</option>
-                        <option value="Kepala Tukang">Kepala Tukang</option>
-                        <option value="Borongan">Borongan</option>
+                        <option value="Tukang">Tukang</option>
+                        <option value="Kenek">Kenek</option>
                       </select>
                     </div>
 
