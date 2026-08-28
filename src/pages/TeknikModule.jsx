@@ -3782,11 +3782,28 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* INFO TERKUNCI: PROYEK, VENDOR, PENGAWAS & TANGGAL */}
-                  <div style={{ background: 'rgba(15, 23, 42, 0.75)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.82rem' }}>
-                    <div>
-                      <span style={{ color: '#94a3b8', fontWeight: 800 }}>🔒 Tanggal Opname:</span>
-                      <span style={{ color: '#f8fafc', fontWeight: 900, marginLeft: '6px' }}>{opnameFormData.tanggal || 'Hari Ini'}</span>
+                  {/* PENGATURAN TANGGAL OPNAME (BISA DIINPUT) & PENGAWAS */}
+                  <div style={{ background: 'rgba(15, 23, 42, 0.75)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', alignItems: 'center', fontSize: '0.82rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <label style={{ color: '#10b981', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px', margin: 0, fontSize: '0.84rem' }}>
+                        <Calendar size={16} /> Tanggal Opname:
+                      </label>
+                      <input
+                        type="date"
+                        value={opnameFormData.tanggal || ''}
+                        onChange={(e) => setOpnameFormData(prev => ({ ...prev, tanggal: e.target.value }))}
+                        style={{
+                          background: '#1e293b',
+                          border: '1.5px solid #10b981',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.82rem',
+                          padding: '4px 8px',
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                      />
                     </div>
                     <div>
                       <span style={{ color: '#94a3b8', fontWeight: 800 }}>🔒 Pengawas:</span>
