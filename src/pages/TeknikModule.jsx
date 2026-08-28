@@ -1037,7 +1037,7 @@ export const TeknikModule = () => {
                 </button>
 
                 <span style={{ background: '#0284c7', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  DATABASE MASTER
+                  DATABASE TENAGA KERJA
                 </span>
                 
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -1290,16 +1290,16 @@ export const TeknikModule = () => {
           {/* KPI Cards (Total Tenaga Kerja, Total Tukang, Total Kenek) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
             
-            {/* Card 1: Total Tenaga Kerja */}
+            {/* Card 1: Database Tenaga Kerja */}
             <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #0284c7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.84rem', color: '#38bdf8', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Users size={16} color="#38bdf8" /> Total Tenaga Kerja
+                <Database size={16} color="#38bdf8" /> Database Tenaga Kerja
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
                 {databasePekerjaRows.length} Orang
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
-                Total Keseluruhan Tenaga Kerja
+                Total Seluruh Tenaga Kerja
               </div>
             </div>
 
