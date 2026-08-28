@@ -2925,67 +2925,123 @@ export const TeknikModule = () => {
               </table>
             </div>
 
-            {/* REKAPITULASI PEMBAYARAN OPNAME DI BAWAH (PERSIS FOTO EXCEL media_1787935124854.png) */}
-            <div style={{ maxWidth: '680px', background: '#0f172a', borderRadius: '8px', border: '1.5px solid #334155', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 20px 1fr', rowGap: '0.5rem', alignItems: 'center' }}>
-                
-                {/* 1. Nilai Opname */}
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Nilai Opname</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#ffffff', textAlign: 'right' }}>
-                  {formatRupiahDesimal(activeSheetCalc.nilaiOpname)}
-                </div>
+            {/* ========================================================================= */}
+            {/* TABEL 2: REKAPITULASI PEMBAYARAN OPNAME (PERSIS FOTO media_1787936346890.png) */}
+            {/* ========================================================================= */}
+            <div style={{ marginTop: '1.5rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#f8fafc', margin: 0, display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <BarChart3 size={18} color="#10b981" /> Tabel Rekapitulasi Pembayaran Opname
+                </h4>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800 }}>
+                  Dihitung Otomatis dari Hasil Opname & Retensi ({activeSheet.retensiPersen || 5}%)
+                </span>
+              </div>
 
-                {/* 2. Retensi 5% */}
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>
-                  Retensi {activeSheet.retensiPersen || 5}%
-                </div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#c084fc', textAlign: 'right' }}>
-                  {formatRupiahDesimal(activeSheetCalc.retensiNilai)}
-                </div>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.75rem' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                      <th style={{ minWidth: '160px', textAlign: 'right', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                        Nilai Opname
+                      </th>
+                      <th style={{ width: '140px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                        Retensi {activeSheet.retensiPersen || 5}%
+                      </th>
+                      <th style={{ width: '160px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                        Nilai Progress
+                      </th>
+                      <th style={{ width: '190px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                        Pembayaran sebelumnya
+                      </th>
+                      <th style={{ width: '190px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                        Pembayaran saat ini
+                      </th>
+                    </tr>
+                  </thead>
 
-                {/* 3. Nilai Progress */}
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Nilai Progress</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#60a5fa', textAlign: 'right' }}>
-                  {formatRupiahDesimal(activeSheetCalc.nilaiProgress)}
-                </div>
+                  <tbody>
+                    {/* BARIS UTAMA DATA OPNAME */}
+                    <tr style={{ backgroundColor: '#1e293b', color: '#f8fafc' }}>
+                      {/* 1. Nilai Opname */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '9px 12px', fontWeight: 900, color: '#ffffff', fontSize: '0.9rem' }}>
+                        {formatRupiahDesimal(activeSheetCalc.nilaiOpname)}
+                      </td>
 
-                {/* 4. Pembayaran sebelumnya */}
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>Pembayaran sebelumnya</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <input
-                    type="number"
-                    min="0"
-                    step="10000"
-                    placeholder="0"
-                    value={activeSheet.pembayaranSebelumnya || ''}
-                    onChange={(e) => handleUpdateHeaderField('pembayaranSebelumnya', Number(e.target.value) || 0)}
-                    style={{
-                      width: '180px',
-                      background: '#1e293b',
-                      border: '1px solid #475569',
-                      borderRadius: '6px',
-                      color: '#fbbf24',
-                      fontWeight: 900,
-                      fontSize: '0.9rem',
-                      padding: '3px 8px',
-                      textAlign: 'right',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
+                      {/* 2. Retensi 5% */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '9px 12px', fontWeight: 900, color: '#c084fc', fontSize: '0.9rem' }}>
+                        {formatRupiahDesimal(activeSheetCalc.retensiNilai)}
+                      </td>
 
-                {/* 5. Pembayaran saat ini (Garis tebal atas) */}
-                <div style={{ fontWeight: 900, fontSize: '0.92rem', color: '#34d399', paddingTop: '6px', borderTop: '1px solid #334155' }}>
-                  Pembayaran saat ini
-                </div>
-                <div style={{ fontWeight: 900, color: '#94a3b8', paddingTop: '6px', borderTop: '1px solid #334155' }}>:</div>
-                <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#34d399', textAlign: 'right', paddingTop: '6px', borderTop: '1px solid #334155' }}>
-                  Rp {formatRupiahDesimal(activeSheetCalc.pembayaranSaatIni)}
-                </div>
+                      {/* 3. Nilai Progress */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '9px 12px', fontWeight: 900, color: '#60a5fa', fontSize: '0.9rem' }}>
+                        {formatRupiahDesimal(activeSheetCalc.nilaiProgress)}
+                      </td>
+
+                      {/* 4. Pembayaran sebelumnya (Editable Input) */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 10px', background: 'rgba(245, 158, 11, 0.08)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                          <span style={{ color: '#fbbf24', fontSize: '0.8rem', fontWeight: 800 }}>Rp</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="10000"
+                            placeholder="0"
+                            value={activeSheet.pembayaranSebelumnya || ''}
+                            onChange={(e) => handleUpdateHeaderField('pembayaranSebelumnya', Number(e.target.value) || 0)}
+                            style={{
+                              width: '130px',
+                              background: '#0f172a',
+                              border: '1.5px solid #f59e0b',
+                              borderRadius: '4px',
+                              color: '#fbbf24',
+                              fontWeight: 900,
+                              fontSize: '0.88rem',
+                              padding: '3px 6px',
+                              textAlign: 'right',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+                      </td>
+
+                      {/* 5. Pembayaran saat ini */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '9px 12px', fontWeight: 900, color: '#34d399', fontSize: '0.95rem' }}>
+                        {formatRupiahDesimal(activeSheetCalc.pembayaranSaatIni)}
+                      </td>
+                    </tr>
+
+                    {/* EMPTY ROWS PLACEHOLDER (PERSIS FOTO EXCEL) */}
+                    {Array.from({ length: 4 }).map((_, rIdx) => (
+                      <tr key={`empty-rekap-${rIdx}`} style={{ height: '32px', backgroundColor: rIdx % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                      </tr>
+                    ))}
+
+                    {/* BARIS TOTAL REKAP (PERSIS FOTO media_1787936346890.png) */}
+                    <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                      <td style={{ textAlign: 'right', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiahDesimal(activeSheetCalc.nilaiOpname)}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiahDesimal(activeSheetCalc.retensiNilai)}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiahDesimal(activeSheetCalc.nilaiProgress)}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiahDesimal(activeSheetCalc.pembayaranSebelumnya)}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.98rem', color: '#000000' }}>
+                        {formatRupiahDesimal(activeSheetCalc.pembayaranSaatIni)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
