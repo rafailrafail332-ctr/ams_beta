@@ -37,7 +37,8 @@ import {
   AlertCircle,
   UserCheck,
   UserPlus,
-  Database
+  Database,
+  ArrowDownAZ
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -110,7 +111,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v12';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v13';
 
   const defaultAttendance = [
     {
@@ -227,9 +228,9 @@ export const TeknikModule = () => {
 
   // =========================================================================
   // REKAPITULASI UPAH TENAGA KERJA (EXACT REPLICA OF media_1787931569751.png)
-  // Master input box appears only in modal popup when "Database Tenaga Kerja" is clicked
+  // Master input box appears in modal popup when "Database Tenaga Kerja" is clicked
   // =========================================================================
-  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v12';
+  const STORAGE_KEY_REKAP_UPAH = 'ams_teknik_rekap_upah_v13';
 
   const defaultRekapPeriode = {
     tanggalAwal: '16/08/2026',
@@ -237,17 +238,17 @@ export const TeknikModule = () => {
   };
 
   const defaultRekapUpahRows = [
-    { id: 'RKP-01', nama: 'Slamet Riyadi', status: 'Tukang', hariKerja: 7, upah: 150000 },
+    { id: 'RKP-01', nama: 'Agus Triono', status: 'Tukang', hariKerja: 7, upah: 150000 },
     { id: 'RKP-02', nama: 'Bambang Supeno', status: 'Tukang', hariKerja: 7, upah: 150000 },
-    { id: 'RKP-03', nama: 'Joko Susanto', status: 'Mandor', hariKerja: 6, upah: 160000 },
-    { id: 'RKP-04', nama: 'Agus Triono', status: 'Tukang', hariKerja: 7, upah: 150000 },
-    { id: 'RKP-05', nama: 'Dedi Kurniawan', status: 'Kenek', hariKerja: 6, upah: 130000 },
+    { id: 'RKP-03', nama: 'Dedi Kurniawan', status: 'Kenek', hariKerja: 6, upah: 130000 },
+    { id: 'RKP-04', nama: 'Joko Susanto', status: 'Mandor', hariKerja: 6, upah: 160000 },
+    { id: 'RKP-05', nama: 'Slamet Riyadi', status: 'Tukang', hariKerja: 7, upah: 150000 },
     { id: 'RKP-06', nama: 'Sunarto', status: 'Kenek', hariKerja: 5, upah: 130000 }
   ];
 
   const [rekapPeriode, setRekapPeriode] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_teknik_rekap_periode_v12');
+      const saved = localStorage.getItem('ams_teknik_rekap_periode_v13');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return defaultRekapPeriode;
@@ -264,9 +265,13 @@ export const TeknikModule = () => {
     return defaultRekapUpahRows;
   });
 
+  // Filter Upah & Search Rekap States
+  const [rekapUpahFilter, setRekapUpahFilter] = useState('ALL');
+  const [rekapSearchText, setRekapSearchText] = useState('');
+
   useEffect(() => {
     try {
-      localStorage.setItem('ams_teknik_rekap_periode_v12', JSON.stringify(rekapPeriode));
+      localStorage.setItem('ams_teknik_rekap_periode_v13', JSON.stringify(rekapPeriode));
     } catch (e) {}
   }, [rekapPeriode]);
 
@@ -289,7 +294,12 @@ export const TeknikModule = () => {
   const uniqueWorkerNames = Array.from(new Set([
     ...rekapUpahRows.map(r => r.nama),
     ...attendanceList.map(a => a.nama)
-  ].filter(Boolean))).sort();
+  ].filter(Boolean))).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+
+  // Extract unique upah amounts for filter
+  const uniqueUpahAmounts = Array.from(new Set(rekapUpahRows.map(r => Number(r.upah) || 0)))
+    .filter(val => val > 0)
+    .sort((a, b) => a - b);
 
   // OPEN MASTER WORKER MODAL IN ADD MODE
   const handleOpenMasterWorkerModal = () => {
@@ -364,21 +374,8 @@ export const TeknikModule = () => {
     setIsMasterWorkerModalOpen(false);
   };
 
-  // UPDATE CELL IN REKAP UPAH WITH UNIQUE NAME VALIDATION
+  // UPDATE CELL IN REKAP UPAH
   const handleUpdateRekapCell = (rowId, field, value) => {
-    if (field === 'nama') {
-      const cleanValue = (value || '').trim();
-      if (cleanValue) {
-        const isDuplicate = rekapUpahRows.some(
-          r => r.id !== rowId && r.nama.toLowerCase().trim() === cleanValue.toLowerCase()
-        );
-        if (isDuplicate) {
-          alert(`⚠️ Nama "${cleanValue}" sudah digunakan oleh baris lain. Tidak boleh ada nama yang sama!`);
-          return;
-        }
-      }
-    }
-
     setRekapUpahRows(prev => prev.map(r => {
       if (r.id === rowId) {
         return { ...r, [field]: value };
@@ -438,8 +435,18 @@ export const TeknikModule = () => {
     };
   });
 
-  const totalRekapHariKerja = computedRekapRows.reduce((sum, r) => sum + r.hariKerja, 0);
-  const totalRekapBiayaUpah = computedRekapRows.reduce((sum, r) => sum + r.total, 0);
+  // FILTER UPAH & URUTAN OTOMATIS BERDASARKAN ABJAD NAMA (A - Z)
+  const sortedAndFilteredRekapRows = computedRekapRows
+    .filter(row => {
+      const matchUpah = rekapUpahFilter === 'ALL' || Number(row.upah) === Number(rekapUpahFilter);
+      const matchSearch = !rekapSearchText || [row.nama, row.status].some(val => (val || '').toLowerCase().includes(rekapSearchText.toLowerCase().trim()));
+      return matchUpah && matchSearch;
+    })
+    // URUTAN OTOMATIS BERDASARKAN ABJAD NAMA (A - Z)
+    .sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+
+  const totalRekapHariKerja = sortedAndFilteredRekapRows.reduce((sum, r) => sum + r.hariKerja, 0);
+  const totalRekapBiayaUpah = sortedAndFilteredRekapRows.reduce((sum, r) => sum + r.total, 0);
 
   // Absen Modal State
   const [isAbsenModalOpen, setIsAbsenModalOpen] = useState(false);
@@ -581,7 +588,7 @@ export const TeknikModule = () => {
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v12';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v13';
 
   const defaultRabSheets = [
     {
@@ -886,7 +893,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja (nama unik anti-duplikat), spreadsheet RAB, & laporan rekapitulasi progres.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja (nama unik anti-duplikat, urutan abjad A-Z & filter upah), spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
 
@@ -1043,7 +1050,7 @@ export const TeknikModule = () => {
           {/* ===================================================================== */}
           <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #f59e0b', overflow: 'hidden' }}>
             
-            {/* HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI TABEL REKAP */}
+            {/* ROW 1: HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI TABEL REKAP */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.65rem' }}>
               
               {/* SISI KIRI: TOMBOL DATABASE TENAGA KERJA + JUDUL TABEL REKAP */}
@@ -1128,29 +1135,82 @@ export const TeknikModule = () => {
 
             {isRekapExpanded && (
               <div>
-                {/* TANGGAL RANGE HEADER (PERSIS DI GAMBAR: "Tanggal : 16/08/2026  18/08/2026") */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem', background: '#0f172a', padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #334155', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 900, color: '#f8fafc', fontSize: '0.9rem' }}>Tanggal :</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <input
-                      type="text"
-                      value={rekapPeriode.tanggalAwal}
-                      onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAwal: e.target.value })}
-                      placeholder="16/08/2026"
-                      style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.86rem', fontWeight: 800, width: '110px', textAlign: 'center', outline: 'none' }}
-                    />
-                    <span style={{ color: '#94a3b8', fontWeight: 800 }}>s/d</span>
-                    <input
-                      type="text"
-                      value={rekapPeriode.tanggalAkhir}
-                      onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAkhir: e.target.value })}
-                      placeholder="18/08/2026"
-                      style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.86rem', fontWeight: 800, width: '110px', textAlign: 'center', outline: 'none' }}
-                    />
+                {/* ROW 2: TANGGAL RANGE & FILTER UPAH & URUTAN ABJAD NAMA (A-Z) */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.85rem', background: '#0f172a', padding: '0.65rem 1rem', borderRadius: '8px', border: '1px solid #334155', flexWrap: 'wrap' }}>
+                  
+                  {/* Tanggal Range */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 900, color: '#f8fafc', fontSize: '0.88rem' }}>📅 Tanggal :</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <input
+                        type="text"
+                        value={rekapPeriode.tanggalAwal}
+                        onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAwal: e.target.value })}
+                        placeholder="16/08/2026"
+                        style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.84rem', fontWeight: 800, width: '105px', textAlign: 'center', outline: 'none' }}
+                      />
+                      <span style={{ color: '#94a3b8', fontWeight: 800, fontSize: '0.82rem' }}>s/d</span>
+                      <input
+                        type="text"
+                        value={rekapPeriode.tanggalAkhir}
+                        onChange={(e) => setRekapPeriode({ ...rekapPeriode, tanggalAkhir: e.target.value })}
+                        placeholder="18/08/2026"
+                        style={{ background: '#1e293b', border: '1.5px solid #475569', color: '#ffffff', borderRadius: '4px', padding: '3px 8px', fontSize: '0.84rem', fontWeight: 800, width: '105px', textAlign: 'center', outline: 'none' }}
+                      />
+                    </div>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: 'auto' }}>
-                    💡 Klik tombol <strong>Edit</strong> di kolom Aksi untuk mengubah data nama, status & upah di Database Tenaga Kerja.
-                  </span>
+
+                  {/* FILTER UPAH & URUTAN ABJAD */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    
+                    {/* FILTER UPAH DROPDOWN */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#fbbf24' }}>💰 Filter Upah:</span>
+                      <select
+                        value={rekapUpahFilter}
+                        onChange={(e) => setRekapUpahFilter(e.target.value)}
+                        style={{
+                          background: '#1e293b',
+                          border: '1.5px solid #f59e0b',
+                          color: '#fbbf24',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 900,
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="ALL">Semua Besaran Upah ({rekapUpahRows.length} Orang)</option>
+                        {uniqueUpahAmounts.map(val => (
+                          <option key={val} value={val}>
+                            Rp {formatRupiah(val)} ({rekapUpahRows.filter(r => Number(r.upah) === val).length} Orang)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* BADGE URUTAN ABJAD A-Z */}
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 800 }}>
+                      <ArrowDownAZ size={14} /> Urutan Abjad Nama (A - Z)
+                    </div>
+
+                    {/* SEARCH IN REKAP */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#1e293b', padding: '3px 8px', borderRadius: '6px', border: '1px solid #475569' }}>
+                      <Search size={13} color="#94a3b8" />
+                      <input
+                        type="text"
+                        placeholder="Cari nama pekerja..."
+                        value={rekapSearchText}
+                        onChange={(e) => setRekapSearchText(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.78rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                      />
+                      {rekapSearchText && (
+                        <button onClick={() => setRekapSearchText('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* SPREADSHEET TABLE: No. | Nama | Status | Hari kerja | Upah | Total | Aksi */}
@@ -1162,7 +1222,9 @@ export const TeknikModule = () => {
                           No.
                         </th>
                         <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 10px' }}>
-                          Nama
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            Nama <ArrowDownAZ size={14} />
+                          </span>
                         </th>
                         <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.9rem', color: '#000000', padding: '8px 8px' }}>
                           Status
@@ -1183,135 +1245,143 @@ export const TeknikModule = () => {
                     </thead>
 
                     <tbody>
-                      {computedRekapRows.map((row, idx) => (
-                        <tr 
-                          key={row.id || idx} 
-                          style={{ 
-                            backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
-                            color: '#f8fafc'
-                          }}
-                        >
-                          {/* 1. No. */}
-                          <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
-                            {idx + 1}
+                      {sortedAndFilteredRekapRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ textAlign: 'center', padding: '2rem 1rem', background: '#0f172a', color: '#94a3b8', fontWeight: 800 }}>
+                            Tidak ada data tenaga kerja yang sesuai dengan filter upah / pencarian.
                           </td>
+                        </tr>
+                      ) : (
+                        sortedAndFilteredRekapRows.map((row, idx) => (
+                          <tr 
+                            key={row.id || idx} 
+                            style={{ 
+                              backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
+                              color: '#f8fafc'
+                            }}
+                          >
+                            {/* 1. No. */}
+                            <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
+                              {idx + 1}
+                            </td>
 
-                          {/* 2. Nama */}
-                          <td style={{ border: '1px solid #334155', padding: '6px 10px', fontWeight: 900, color: '#ffffff', fontSize: '0.88rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
-                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
+                            {/* 2. Nama */}
+                            <td style={{ border: '1px solid #334155', padding: '6px 10px', fontWeight: 900, color: '#ffffff', fontSize: '0.88rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
+                                  {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
+                                </div>
+                                <span>{row.nama}</span>
                               </div>
-                              <span>{row.nama}</span>
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* 3. Status (Terkunci permanen di tabel, dapat diedit via modal aksi) */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px' }}>
-                            <span style={{
-                              display: 'inline-block',
-                              padding: '3px 10px',
-                              borderRadius: '6px',
-                              fontSize: '0.8rem',
-                              fontWeight: 900,
-                              background: row.status === 'Mandor' 
-                                ? 'rgba(245, 158, 11, 0.2)' 
-                                : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(16, 185, 129, 0.2)'),
-                              color: row.status === 'Mandor' 
-                                ? '#fbbf24' 
-                                : (row.status === 'Kenek' ? '#c084fc' : '#34d399'),
-                              border: `1px solid ${
-                                row.status === 'Mandor' 
-                                  ? '#f59e0b' 
-                                  : (row.status === 'Kenek' ? '#a855f7' : '#10b981')
-                              }`
-                            }}>
-                              {row.status || 'Tukang'}
-                            </span>
-                          </td>
+                            {/* 3. Status (Terkunci permanen di tabel, dapat diedit via modal aksi) */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px' }}>
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '3px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.8rem',
+                                fontWeight: 900,
+                                background: row.status === 'Mandor' 
+                                  ? 'rgba(245, 158, 11, 0.2)' 
+                                  : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(16, 185, 129, 0.2)'),
+                                color: row.status === 'Mandor' 
+                                  ? '#fbbf24' 
+                                  : (row.status === 'Kenek' ? '#c084fc' : '#34d399'),
+                                border: `1px solid ${
+                                  row.status === 'Mandor' 
+                                    ? '#f59e0b' 
+                                    : (row.status === 'Kenek' ? '#a855f7' : '#10b981')
+                                }`
+                              }}>
+                                {row.status || 'Tukang'}
+                              </span>
+                            </td>
 
-                          {/* 4. Hari Kerja (Inline Editable) */}
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
-                            <input
-                              type="number"
-                              min="0"
-                              step="1"
-                              value={row.hariKerja !== undefined ? row.hariKerja : ''}
-                              onChange={(e) => handleUpdateRekapCell(row.id, 'hariKerja', Number(e.target.value) || 0)}
-                              style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
-                            />
-                          </td>
-
-                          {/* 5. Upah (Inline Editable) */}
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-                              <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700 }}>Rp</span>
+                            {/* 4. Hari Kerja (Inline Editable) */}
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
                               <input
                                 type="number"
                                 min="0"
-                                step="5000"
-                                value={row.upah !== undefined ? row.upah : ''}
-                                onChange={(e) => handleUpdateRekapCell(row.id, 'upah', Number(e.target.value) || 0)}
-                                style={{ width: '90px', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
+                                step="1"
+                                value={row.hariKerja !== undefined ? row.hariKerja : ''}
+                                onChange={(e) => handleUpdateRekapCell(row.id, 'hariKerja', Number(e.target.value) || 0)}
+                                style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
                               />
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* 6. Total (Auto Calculated = Hari Kerja * Upah) */}
-                          <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 10px', fontSize: '0.94rem' }}>
-                            Rp {formatRupiah(row.total)}
-                          </td>
+                            {/* 5. Upah (Inline Editable) */}
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                                <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700 }}>Rp</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="5000"
+                                  value={row.upah !== undefined ? row.upah : ''}
+                                  onChange={(e) => handleUpdateRekapCell(row.id, 'upah', Number(e.target.value) || 0)}
+                                  style={{ width: '90px', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.92rem', outline: 'none' }}
+                                />
+                              </div>
+                            </td>
 
-                          {/* 7. Aksi Edit & Hapus */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEditMasterWorker(row)}
-                                style={{
-                                  background: '#2563eb',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  padding: '3px 8px',
-                                  borderRadius: '5px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 800,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  cursor: 'pointer'
-                                }}
-                                title="Edit Data Database Tenaga Kerja (Nama, Status, Upah)"
-                              >
-                                <Edit3 size={11} /> Edit
-                              </button>
+                            {/* 6. Total (Auto Calculated = Hari Kerja * Upah) */}
+                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 10px', fontSize: '0.94rem' }}>
+                              Rp {formatRupiah(row.total)}
+                            </td>
 
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteRekapRow(row.id)}
-                                style={{
-                                  background: 'rgba(239, 68, 68, 0.2)',
-                                  color: '#f87171',
-                                  border: '1px solid #ef4444',
-                                  padding: '3px 6px',
-                                  borderRadius: '5px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 800,
-                                  cursor: 'pointer'
-                                }}
-                                title="Hapus Data"
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            {/* 7. Aksi Edit & Hapus */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditMasterWorker(row)}
+                                  style={{
+                                    background: '#2563eb',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    padding: '3px 8px',
+                                    borderRadius: '5px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 800,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Edit Data Database Tenaga Kerja (Nama, Status, Upah)"
+                                >
+                                  <Edit3 size={11} /> Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteRekapRow(row.id)}
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.2)',
+                                    color: '#f87171',
+                                    border: '1px solid #ef4444',
+                                    padding: '3px 6px',
+                                    borderRadius: '5px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Hapus Data"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
 
                       {/* TOTAL ROW DI PALING BAWAH */}
                       <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
                         <td colSpan={3} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                          Total ({computedRekapRows.length} Tenaga Kerja)
+                          Total ({sortedAndFilteredRekapRows.length} Tenaga Kerja)
                         </td>
                         <td style={{ textAlign: 'right', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                           {totalRekapHariKerja} Hari
