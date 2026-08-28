@@ -918,6 +918,34 @@ export const TeknikModule = () => {
     }
   }, [filteredHasilOpnameSheets, activeSheetId]);
 
+  const grandSummaryOpname = useMemo(() => {
+    let totHargaRab = 0;
+    let totNilaiOpname = 0;
+    let totRetensi = 0;
+    let totNilaiProgress = 0;
+    let totBayarSeb = 0;
+    let totBayarSaatIni = 0;
+
+    filteredHasilOpnameSheets.forEach(s => {
+      const c = computeSheetSummary(s);
+      totHargaRab += c.totalHargaRab || 0;
+      totNilaiOpname += c.nilaiOpname || 0;
+      totRetensi += c.retensiNilai || 0;
+      totNilaiProgress += c.nilaiProgress || 0;
+      totBayarSeb += Number(s.pembayaranSebelumnya) || 0;
+      totBayarSaatIni += c.pembayaranSaatIni || 0;
+    });
+
+    return {
+      totHargaRab,
+      totNilaiOpname,
+      totRetensi,
+      totNilaiProgress,
+      totBayarSeb,
+      totBayarSaatIni
+    };
+  }, [filteredHasilOpnameSheets]);
+
   const handleOpenOpnameModal = (sheet) => {
     setOpnameTargetSheet(sheet);
     const initialProgress = {};
@@ -2764,7 +2792,182 @@ export const TeknikModule = () => {
             </div>
           </div>
 
-          {/* SPREADSHEET HASIL OPNAME (PERSIS FOTO EXCEL media_1787935124854.png) */}
+          {/* ========================================================================= */}
+          {/* 1. TABEL UTAMA ATAS: REKAPITULASI OPNAME (PERSIS FOTO media_1787938735917.jpg) */}
+          {/* ========================================================================= */}
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem', overflowX: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BarChart3 size={20} color="#f59e0b" /> Rekapitulasi Opname
+              </h3>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 800 }}>
+                💡 Klik baris pada tabel untuk membuka rincian lembar Hasil Opname di bawah
+              </span>
+            </div>
+
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.5rem' }}>
+              <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                    <th style={{ width: '80px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
+                      No. Input
+                    </th>
+                    <th style={{ width: '85px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
+                      Tanggal
+                    </th>
+                    <th style={{ minWidth: '120px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Proyek
+                    </th>
+                    <th style={{ minWidth: '110px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Nama Vendor
+                    </th>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                      Blok
+                    </th>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                      No.
+                    </th>
+                    <th style={{ minWidth: '100px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Fasum
+                    </th>
+                    <th style={{ minWidth: '170px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Pekerjaan
+                    </th>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Harga RAB
+                    </th>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Nilai Opname
+                    </th>
+                    <th style={{ width: '95px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Retensi 5%
+                    </th>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Nilai Progress
+                    </th>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Pembayaran sebelumnya
+                    </th>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                      Pembyaran saat ini
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredHasilOpnameSheets.map((sheet, idx) => {
+                    const isSelected = sheet.id === activeSheet.id;
+                    const c = computeSheetSummary(sheet);
+                    return (
+                      <tr
+                        key={sheet.id || idx}
+                        onClick={() => setActiveSheetId(sheet.id)}
+                        style={{
+                          backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a'),
+                          color: '#f8fafc',
+                          cursor: 'pointer',
+                          borderLeft: isSelected ? '4px solid #10b981' : 'none'
+                        }}
+                        title="Klik untuk melihat rincian spreadsheet opname di bawah"
+                      >
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#cbd5e1' }}>
+                          {sheet.noInput || `RAB - ${idx + 1}`}
+                        </td>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', fontSize: '0.82rem' }}>
+                          {sheet.tanggalOpname || sheet.tanggal || '-'}
+                        </td>
+                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800 }}>
+                          {sheet.proyek || '-'}
+                        </td>
+                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#38bdf8' }}>
+                          {sheet.namaVendor || '-'}
+                        </td>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                          {sheet.blok || '-'}
+                        </td>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                          {sheet.noUnit || '-'}
+                        </td>
+                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontSize: '0.82rem' }}>
+                          {sheet.fasum || '-'}
+                        </td>
+                        <td style={{ border: '1px solid #334155', padding: '7px 8px' }}>
+                          {sheet.pekerjaan || 'RAB'}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800 }}>
+                          {formatRupiahDesimal(c.totalHargaRab)}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#ffffff' }}>
+                          {c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#c084fc' }}>
+                          {c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#60a5fa' }}>
+                          {c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#fbbf24' }}>
+                          {Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}
+                        </td>
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
+                          {c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {/* EMPTY ROWS PLACEHOLDER (PERSIS FOTO EXCEL media_1787938735917.jpg) */}
+                  {filteredHasilOpnameSheets.length < 6 && Array.from({ length: 6 - filteredHasilOpnameSheets.length }).map((_, rIdx) => (
+                    <tr key={`empty-rekap-top-${rIdx}`} style={{ height: '30px', backgroundColor: (filteredHasilOpnameSheets.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  ))}
+
+                  {/* BARIS TOTAL (PERSIS FOTO media_1787938735917.jpg) */}
+                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                    <td colSpan={8} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      Total
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totHargaRab)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totNilaiOpname)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totRetensi)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totNilaiProgress)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totBayarSeb)}
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.95rem', color: '#000000' }}>
+                      {formatRupiahDesimal(grandSummaryOpname.totBayarSaatIni)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 2. TABEL RINCIAN HASIL OPNAME & PEMBAYARAN (PERSIS FOTO media_1787936577245.png) */}
+          {/* ========================================================================= */}
           <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', overflowX: 'auto' }}>
             
             {/* Header Title & Info */}
