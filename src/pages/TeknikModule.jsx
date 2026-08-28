@@ -1004,7 +1004,52 @@ export const TeknikModule = () => {
         <div className="module-animated-view">
           
           {/* ===================================================================== */}
-          {/* TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
+          {/* 1. KPI CARDS (DI PALING ATAS: DATABASE TENAGA KERJA, TOTAL TUKANG, KENEK) */}
+          {/* ===================================================================== */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+            
+            {/* Card 1: Database Tenaga Kerja */}
+            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #0284c7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.84rem', color: '#38bdf8', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Database size={16} color="#38bdf8" /> Database Tenaga Kerja
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
+                {databasePekerjaRows.length} Orang
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
+                Total Seluruh Tenaga Kerja
+              </div>
+            </div>
+
+            {/* Card 2: Total Tukang */}
+            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.84rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🔨 Total Tukang
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#34d399', marginTop: '4px' }}>
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length} Orang
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
+                Tenaga Ahli & Tukang Konstruksi
+              </div>
+            </div>
+
+            {/* Card 3: Total Kenek */}
+            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #a855f7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.84rem', color: '#c084fc', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🧱 Total Kenek
+              </div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#c084fc', marginTop: '4px' }}>
+                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length} Orang
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
+                Status Kenek
+              </div>
+            </div>
+          </div>
+
+          {/* ===================================================================== */}
+          {/* 2. TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
           {/* ===================================================================== */}
           <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #0284c7', overflow: 'hidden' }}>
             
@@ -1214,14 +1259,14 @@ export const TeknikModule = () => {
                                 fontWeight: 900,
                                 background: row.status === 'Mandor' 
                                   ? 'rgba(245, 158, 11, 0.2)' 
-                                  : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : (row.status === 'Kepala Tukang' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)')),
+                                  : (row.status === 'Kenek' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(16, 185, 129, 0.2)'),
                                 color: row.status === 'Mandor' 
                                   ? '#fbbf24' 
-                                  : (row.status === 'Kenek' ? '#c084fc' : (row.status === 'Kepala Tukang' ? '#60a5fa' : '#34d399')),
+                                  : (row.status === 'Kenek' ? '#c084fc' : '#34d399'),
                                 border: `1px solid ${
                                   row.status === 'Mandor' 
                                     ? '#f59e0b' 
-                                    : (row.status === 'Kenek' ? '#a855f7' : (row.status === 'Kepala Tukang' ? '#3b82f6' : '#10b981'))
+                                    : (row.status === 'Kenek' ? '#a855f7' : '#10b981')
                                 }`
                               }}>
                                 {row.status || 'Tukang'}
@@ -1285,49 +1330,6 @@ export const TeknikModule = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* KPI Cards (Total Tenaga Kerja, Total Tukang, Total Kenek) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-            
-            {/* Card 1: Database Tenaga Kerja */}
-            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #0284c7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.84rem', color: '#38bdf8', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Database size={16} color="#38bdf8" /> Database Tenaga Kerja
-              </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
-                {databasePekerjaRows.length} Orang
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
-                Total Seluruh Tenaga Kerja
-              </div>
-            </div>
-
-            {/* Card 2: Total Tukang */}
-            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.84rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                🔨 Total Tukang
-              </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#34d399', marginTop: '4px' }}>
-                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length} Orang
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
-                Tenaga Ahli & Tukang Konstruksi
-              </div>
-            </div>
-
-            {/* Card 3: Total Kenek */}
-            <div style={{ padding: '1.1rem 1.25rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #a855f7', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.84rem', color: '#c084fc', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                🧱 Total Kenek
-              </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#c084fc', marginTop: '4px' }}>
-                {databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length} Orang
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700 }}>
-                Status Kenek
-              </div>
-            </div>
           </div>
 
           {/* FILTER TOOLBAR FOR DAILY ATTENDANCE */}
