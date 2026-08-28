@@ -2898,26 +2898,27 @@ export const TeknikModule = () => {
                   {/* 4. Pembayaran sebelumnya */}
                   <tr style={{ backgroundColor: '#1e293b', color: '#f8fafc' }}>
                     <td colSpan={6} style={{ fontWeight: 800, padding: '8px 12px', border: '1px solid #334155', color: '#f8fafc', fontSize: '0.88rem' }}>
-                      Pembaran sebelumnya
+                      Pembayaran sebelumnya :
                     </td>
                     <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px', background: 'rgba(245, 158, 11, 0.08)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '3px' }}>
                         <input
-                          type="number"
-                          min="0"
-                          step="10000"
+                          type="text"
                           placeholder="-"
-                          value={activeSheet.pembayaranSebelumnya || ''}
-                          onChange={(e) => handleUpdateHeaderField('pembayaranSebelumnya', Number(e.target.value) || 0)}
+                          value={activeSheet.pembayaranSebelumnya ? formatRupiahDesimal(activeSheet.pembayaranSebelumnya) : ''}
+                          onChange={(e) => {
+                            const cleanNum = e.target.value.replace(/[^0-9]/g, '');
+                            handleUpdateHeaderField('pembayaranSebelumnya', Number(cleanNum) || 0);
+                          }}
                           style={{
-                            width: '110px',
+                            width: '130px',
                             background: '#0f172a',
                             border: '1.5px solid #f59e0b',
                             borderRadius: '4px',
                             color: '#fbbf24',
                             fontWeight: 900,
-                            fontSize: '0.85rem',
-                            padding: '2px 4px',
+                            fontSize: '0.88rem',
+                            padding: '3px 6px',
                             textAlign: 'right',
                             outline: 'none'
                           }}
