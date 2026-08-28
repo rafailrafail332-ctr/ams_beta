@@ -1006,15 +1006,15 @@ export const TeknikModule = () => {
         <div className="module-animated-view">
           
           {/* ===================================================================== */}
-          {/* 1. STATUS TENAGA KERJA (UKURAN & TAMPILAN PERSIS FILTER PROYEK)       */}
+          {/* 1. STATUS TENAGA KERJA (PERSIS UKURAN & TAMPILAN FILTER PROYEK)       */}
           {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.65rem' }}>
+          <div className="glass-card" style={{ padding: '0.65rem 1rem', marginBottom: '1rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
                 👷 Status Tenaga Kerja:
               </span>
 
-              {/* Total Tenaga Kerja */}
+              {/* Semua Tenaga Kerja (6) */}
               <button 
                 type="button"
                 onClick={() => setStatusFilter('ALL')}
@@ -1024,19 +1024,16 @@ export const TeknikModule = () => {
                   fontSize: '0.8rem',
                   fontWeight: 800,
                   cursor: 'pointer',
-                  border: statusFilter === 'ALL' ? '2px solid #0284c7' : '1px solid #475569',
-                  background: statusFilter === 'ALL' ? '#0284c7' : '#0f172a',
+                  border: statusFilter === 'ALL' ? '2px solid #ea580c' : '1px solid #475569',
+                  background: statusFilter === 'ALL' ? '#ea580c' : '#0f172a',
                   color: '#ffffff',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                👥 Total Tenaga Kerja ({databasePekerjaRows.length})
+                Semua Tenaga Kerja ({databasePekerjaRows.length})
               </button>
 
-              {/* Total Mandor */}
+              {/* Mandor (1) */}
               <button 
                 type="button"
                 onClick={() => setStatusFilter(statusFilter === 'Mandor' ? 'ALL' : 'Mandor')}
@@ -1048,17 +1045,14 @@ export const TeknikModule = () => {
                   cursor: 'pointer',
                   border: statusFilter === 'Mandor' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
                   background: statusFilter === 'Mandor' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                  color: statusFilter === 'Mandor' ? '#000000' : '#fbbf24',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
+                  color: statusFilter === 'Mandor' ? '#ffffff' : '#fbbf24',
                   transition: 'all 0.2s ease'
                 }}
               >
-                👑 Total Mandor ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length})
+                👑 Mandor ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length})
               </button>
 
-              {/* Total Tukang */}
+              {/* Tukang (3) */}
               <button 
                 type="button"
                 onClick={() => setStatusFilter(statusFilter === 'Tukang' ? 'ALL' : 'Tukang')}
@@ -1071,16 +1065,13 @@ export const TeknikModule = () => {
                   border: statusFilter === 'Tukang' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
                   background: statusFilter === 'Tukang' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
                   color: statusFilter === 'Tukang' ? '#ffffff' : '#34d399',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                🔨 Total Tukang ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length})
+                🔨 Tukang ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length})
               </button>
 
-              {/* Total Kenek */}
+              {/* Kenek (2) */}
               <button 
                 type="button"
                 onClick={() => setStatusFilter(statusFilter === 'Kenek' ? 'ALL' : 'Kenek')}
@@ -1093,13 +1084,10 @@ export const TeknikModule = () => {
                   border: statusFilter === 'Kenek' ? '2px solid #a855f7' : '1px solid rgba(168, 85, 247, 0.4)',
                   background: statusFilter === 'Kenek' ? '#a855f7' : 'rgba(168, 85, 247, 0.15)',
                   color: statusFilter === 'Kenek' ? '#ffffff' : '#c084fc',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                🧱 Total Kenek ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length})
+                🧱 Kenek ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length})
               </button>
             </div>
 
@@ -1108,9 +1096,9 @@ export const TeknikModule = () => {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setStatusFilter('ALL')}
-                style={{ fontSize: '0.76rem', padding: '4px 8px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
+                style={{ fontSize: '0.78rem', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
               >
-                Reset Filter Status
+                Reset Filter
               </button>
             )}
           </div>
