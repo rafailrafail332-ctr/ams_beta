@@ -1286,35 +1286,8 @@ export const TeknikModule = () => {
             {/* HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.65rem' }}>
               
-              {/* SISI KIRI: TOMBOL DATABASE TENAGA KERJA + JUDUL TABEL */}
+              {/* SISI KIRI: JUDUL TABEL */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={handleOpenMasterWorkerModal}
-                  style={{
-                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 900,
-                    fontSize: '0.82rem',
-                    padding: '6px 14px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 10px rgba(2, 132, 199, 0.45)',
-                    transition: 'transform 0.15s ease'
-                  }}
-                  title="Tambah Pekerja Baru ke Database"
-                >
-                  <Plus size={16} /> Database Tenaga Kerja
-                </button>
-
-                <span style={{ background: '#0284c7', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
-                  DATABASE TENAGA KERJA
-                </span>
-                
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Database size={18} color="#38bdf8" /> Database Tenaga Kerja ({sortedAndFilteredDatabaseRows.length} Orang)
                 </h3>
@@ -1557,6 +1530,32 @@ export const TeknikModule = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+
+                {/* TOMBOL PLUS TAMBAH TENAGA KERJA DI BAWAH TABEL */}
+                <div style={{ marginTop: '0.85rem', display: 'flex', justifyContent: 'flex-start' }}>
+                  <button
+                    type="button"
+                    onClick={handleOpenMasterWorkerModal}
+                    style={{
+                      background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 900,
+                      fontSize: '0.85rem',
+                      padding: '8px 18px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(2, 132, 199, 0.45)',
+                      transition: 'transform 0.15s ease'
+                    }}
+                    title="Tambah Tenaga Kerja Baru"
+                  >
+                    <Plus size={18} /> Tambah Tenaga Kerja
+                  </button>
                 </div>
               </div>
             )}
