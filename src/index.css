@@ -112,11 +112,9 @@ body {
 @keyframes fadeInBackdrop {
   from {
     opacity: 0;
-    backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
-    backdrop-filter: blur(10px);
   }
 }
 
@@ -421,7 +419,8 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   z-index: 100;
   display: flex;
   align-items: center;

@@ -190,8 +190,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
             zIndex: 40
           }} 
         />
@@ -204,8 +205,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           left: 0,
           bottom: 0,
           width: 'var(--sidebar-width)',
-          backgroundColor: 'var(--bg-glass)',
-          backdropFilter: 'blur(16px)',
+          backgroundColor: '#0f172a',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
           borderRight: '1px solid var(--border-color)',
           zIndex: 50,
           display: 'flex',
