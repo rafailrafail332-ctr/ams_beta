@@ -3204,11 +3204,70 @@ export const TeknikModule = () => {
             </div>
 
             {/* TERBILANG PEMBAYARAN SAAT INI BOX */}
-            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1.5px solid #10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1.5px solid #10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <span style={{ fontWeight: 900, color: '#10b981', fontSize: '0.9rem' }}>Terbilang Pembayaran Saat Ini :</span>
               <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
                 {angkaTerbilang(activeSheetCalc.pembayaranSaatIni)}
               </span>
+            </div>
+
+            {/* ACTION BUTTONS BAWAH: EDIT & SIMPAN */}
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end', paddingTop: '0.5rem', borderTop: '1px solid #334155' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMainCategory('borongan');
+                  setSubTabBorongan('input_rab');
+                  showNotification(`Membuka lembar kerja ${activeSheet.noInput} untuk di-edit...`, 'info');
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#1e40af',
+                  color: '#ffffff',
+                  border: '1.5px solid #3b82f6',
+                  borderRadius: '8px',
+                  padding: '8px 18px',
+                  fontWeight: 900,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+                }}
+              >
+                <Edit size={15} /> Edit Input RAB
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const val = Number(activeSheet.pembayaranSebelumnya || 0);
+                  const updatedSheets = rabSheets.map(s =>
+                    s.id === activeSheet.id ? { ...s, pembayaranSebelumnya: val } : s
+                  );
+                  setRabSheets(updatedSheets);
+                  try {
+                    localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                  } catch(e) {}
+                  showNotification(`Data Hasil Opname ${activeSheet.noInput} berhasil disimpan ke Rekapitulasi!`, 'success');
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#10b981',
+                  color: '#ffffff',
+                  border: '1.5px solid #34d399',
+                  borderRadius: '8px',
+                  padding: '8px 20px',
+                  fontWeight: 900,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                <Save size={15} /> Simpan ke Rekapitulasi
+              </button>
             </div>
           </div>
         </div>
