@@ -18,6 +18,7 @@ import {
   FileSpreadsheet, 
   HardHat,
   ChevronRight,
+  ChevronDown,
   Sparkles,
   Check,
   Calculator,
@@ -29,7 +30,9 @@ import {
   RotateCcw,
   BarChart3,
   ExternalLink,
-  Zap
+  Zap,
+  Award,
+  TrendingUp
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -97,7 +100,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v7';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v8';
 
   const defaultAttendance = [
     {
@@ -111,7 +114,7 @@ export const TeknikModule = () => {
       blok: 'A',
       no: '01',
       umum: '-',
-      catatan: 'Pemasangan bata ringan dinding lantai 1 & plester acian (Lembur cor balok)',
+      catatan: 'Pemasangan bata ringan dinding lantai 1 & plester acian',
       tanggal: '2025-08-28'
     },
     {
@@ -153,7 +156,7 @@ export const TeknikModule = () => {
       blok: 'B',
       no: '05',
       umum: '-',
-      catatan: 'Pemasangan keramik lantai 60x60 ruang tamu & teras depan (Lembur nat keramik)',
+      catatan: 'Pemasangan keramik lantai 60x60 ruang tamu & teras depan',
       tanggal: '2025-08-28'
     },
     {
@@ -210,9 +213,57 @@ export const TeknikModule = () => {
   const [lemburFilter, setLemburFilter] = useState('ALL'); // 'ALL' | 'LEMBUR' | 'NORMAL'
   const [dateFilter, setDateFilter] = useState('2025-08-28');
   const [locationTypeFilter, setLocationTypeFilter] = useState('ALL');
+  const [isRekapExpanded, setIsRekapExpanded] = useState(true);
 
   // Extract unique worker names for the filter dropdown
   const uniqueWorkerNames = Array.from(new Set(attendanceList.map(a => a.nama).filter(Boolean))).sort();
+
+  // =========================================================================
+  // SUMMARY DATA: REKAPITULASI ABSEN SESUAI NAMA & SEMUANYA (GROUP BY WORKER)
+  // =========================================================================
+  const workerSummaryList = uniqueWorkerNames.map(workerName => {
+    const workerRecords = attendanceList.filter(a => a.nama === workerName);
+    
+    // Filtered by project if projectFilter is set
+    const applicableRecords = projectFilter === 'ALL' 
+      ? workerRecords 
+      : workerRecords.filter(a => a.proyek === projectFilter);
+
+    const totalHadir = applicableRecords.length;
+    const totalJamLembur = applicableRecords.reduce((sum, r) => sum + (Number(r.lembur) || 0), 0);
+    const totalHariLembur = applicableRecords.filter(r => (Number(r.lembur) || 0) > 0).length;
+    
+    // Projects active in
+    const projects = Array.from(new Set(applicableRecords.map(r => r.proyek).filter(Boolean)));
+    
+    // Units active in
+    const units = Array.from(new Set(applicableRecords.map(r => {
+      if (r.blok && r.blok !== '-') return `Blok ${r.blok}-${r.no}`;
+      if (r.umum && r.umum !== '-') return r.umum;
+      return null;
+    }).filter(Boolean)));
+
+    // Latest work
+    const latestRecord = applicableRecords[0] || workerRecords[0];
+
+    return {
+      nama: workerName,
+      proyekText: projects.join(', ') || '-',
+      projects,
+      totalHadir,
+      totalJamLembur,
+      totalHariLembur,
+      lokasiAktif: units.join(', ') || '-',
+      pekerjaanTerakhir: latestRecord ? latestRecord.catatan : '-',
+      tanggalTerakhir: latestRecord ? latestRecord.tanggal : '-'
+    };
+  }).filter(item => {
+    if (projectFilter !== 'ALL' && !item.projects.includes(projectFilter)) return false;
+    if (nameFilter !== 'ALL' && item.nama !== nameFilter) return false;
+    if (lemburFilter === 'LEMBUR' && item.totalJamLembur === 0) return false;
+    if (lemburFilter === 'NORMAL' && item.totalJamLembur > 0) return false;
+    return true;
+  });
 
   // Absen Modal State
   const [isAbsenModalOpen, setIsAbsenModalOpen] = useState(false);
@@ -337,7 +388,7 @@ export const TeknikModule = () => {
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // (EXACT STRUCTURE OF media_1787930910161.png, media_1787930804198.jpg, media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v7';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v8';
 
   const defaultRabSheets = [
     {
@@ -642,7 +693,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran & jam lembur tenaga kerja lapangan, lembar input spreadsheet RAB, & laporan rekapitulasi progres.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & rekapitulasi lembur tenaga kerja, lembar input spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
 
@@ -716,7 +767,7 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={17} /> 1. Absen Tenaga Kerja ({attendanceList.length})
+          <Users size={17} /> 1. Absen & Rekap Tenaga Kerja ({attendanceList.length})
         </button>
 
         {/* Tab 2: Input RAB Sheet */}
@@ -767,45 +818,201 @@ export const TeknikModule = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA + LEMBUR + FILTER NAMA & PROYEK     */}
+      {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
+      {/* 1. REKAPITULASI ABSEN SESUAI NAMA & SEMUANYA (DI ATAS)                   */}
+      {/* 2. TABEL HARIAN ABSEN & LEMBUR TENAGA KERJA (DI BAWAH)                   */}
       {/* ========================================================================= */}
       {activeTab === 'absen' && (
         <div className="module-animated-view">
           
-          {/* KPI Cards (Including Overtime Count) */}
+          {/* KPI Cards */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f97316', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Hadir</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredAttendanceList.length} Orang</div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{dateFilter ? `Tanggal: ${dateFilter}` : 'Semua tanggal'}</div>
+              <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Terdaftar</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{uniqueWorkerNames.length} Orang</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total {attendanceList.length} Log Kehadiran</div>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #eab308', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Tenaga Kerja Lembur</div>
+              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Total Jam Lembur</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#facc15', marginTop: '2px' }}>
-                {totalLemburCount} Orang
+                {attendanceList.reduce((acc, a) => acc + (Number(a.lembur) || 0), 0)} Jam
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total: {totalLemburHours} Jam Lembur</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{attendanceList.filter(a => Number(a.lembur) > 0).length} Kali Sesi Lembur</div>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981', marginTop: '2px' }}>
-                {filteredAttendanceList.filter(a => (a.proyek || '').includes('Park')).length} Orang
+                {attendanceList.filter(a => (a.proyek || '').includes('Park')).length} Sesi Kerja
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di Park</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja di Park</div>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Ashoka View</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
-                {filteredAttendanceList.filter(a => (a.proyek || '').includes('View')).length} Orang
+                {attendanceList.filter(a => (a.proyek || '').includes('View')).length} Sesi Kerja
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di View</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja di View</div>
             </div>
           </div>
 
-          {/* FILTER TOOLBAR: PROYEK, NAMA, LEMBUR, TANGGAL & SEARCH */}
+          {/* ===================================================================== */}
+          {/* TABEL REKAPITULASI ABSEN & LEMBUR SESUAI NAMA (DITAMPILKAN DI ATAS)    */}
+          {/* ===================================================================== */}
+          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #ea580c', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ background: '#ea580c', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
+                  REKAP
+                </span>
+                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Award size={20} color="#fb923c" /> Rekapitulasi Absensi & Lembur Sesuai Nama Tenaga Kerja
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsRekapExpanded(!isRekapExpanded)}
+                  style={{
+                    background: '#0f172a',
+                    border: '1px solid #475569',
+                    color: '#cbd5e1',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  {isRekapExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  {isRekapExpanded ? 'Sembunyikan Rekap' : 'Tampilkan Rekap'}
+                </button>
+              </div>
+            </div>
+
+            {isRekapExpanded && (
+              <div>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                  Ringkasan akumulasi seluruh kehadiran, total jam lembur, dan lokasi penugasan tiap tenaga kerja. Klik pada baris nama untuk memfilter log harian di bawah.
+                </div>
+
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #78350f' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                        <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>No.</th>
+                        <th style={{ width: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Nama Tenaga Kerja</th>
+                        <th style={{ width: '130px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Penugasan Proyek</th>
+                        <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Total Kehadiran</th>
+                        <th style={{ width: '140px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Total Jam Lembur</th>
+                        <th style={{ width: '170px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Lokasi / Unit Aktif</th>
+                        <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>Pekerjaan Terakhir</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>Aksi Filter</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {workerSummaryList.map((worker, idx) => (
+                        <tr 
+                          key={worker.nama || idx} 
+                          style={{ 
+                            backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
+                            color: '#f8fafc',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setNameFilter(nameFilter === worker.nama ? 'ALL' : worker.nama)}
+                        >
+                          <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ fontWeight: 900, color: '#ffffff', border: '1px solid #334155', fontSize: '0.88rem', padding: '8px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
+                                {worker.nama.charAt(0).toUpperCase()}
+                              </div>
+                              <span style={{ color: nameFilter === worker.nama ? '#fb923c' : '#ffffff' }}>
+                                {worker.nama} {nameFilter === worker.nama ? '🎯' : ''}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', padding: '8px 8px', fontWeight: 800 }}>
+                            <span style={{ color: worker.proyekText.includes('Park') ? '#34d399' : '#fbbf24' }}>
+                              {worker.proyekText}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                            <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-block' }}>
+                              📅 {worker.totalHadir} Hari
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                            {worker.totalJamLembur > 0 ? (
+                              <span style={{ background: 'rgba(234, 88, 12, 0.25)', color: '#fb923c', border: '1.5px solid #ea580c', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-block' }}>
+                                ⚡ {worker.totalJamLembur} Jam ({worker.totalHariLembur}x)
+                              </span>
+                            ) : (
+                              <span style={{ color: '#64748b', fontSize: '0.82rem' }}>- (0 Jam)</span>
+                            )}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', color: '#818cf8', fontWeight: 800, padding: '8px 8px' }}>
+                            {worker.lokasiAktif}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontSize: '0.82rem', color: '#cbd5e1', padding: '8px 8px' }}>
+                            {worker.pekerjaanTerakhir}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNameFilter(nameFilter === worker.nama ? 'ALL' : worker.nama);
+                              }}
+                              style={{
+                                background: nameFilter === worker.nama ? '#ea580c' : '#0284c7',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {nameFilter === worker.nama ? 'Reset' : 'Filter'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* TOTAL BAR DI PALING BAWAH REKAP */}
+                      <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                        <td colSpan={3} style={{ textAlign: 'left', padding: '9px 10px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                          Total Akumulasi ({workerSummaryList.length} Tenaga Kerja)
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                          {workerSummaryList.reduce((acc, w) => acc + w.totalHadir, 0)} Hari Kerja
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                          ⚡ {workerSummaryList.reduce((acc, w) => acc + w.totalJamLembur, 0)} Jam Lembur
+                        </td>
+                        <td colSpan={3} style={{ border: '1.5px solid #78350f' }}></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ===================================================================== */}
+          {/* FILTER TOOLBAR: PROYEK, NAMA, LEMBUR, TANGGAL & SEARCH                */}
+          {/* ===================================================================== */}
           <div className="glass-card" style={{ padding: '1.1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             
             {/* ROW 1: Filter Proyek Buttons */}
@@ -873,7 +1080,7 @@ export const TeknikModule = () => {
               {/* Date & Reset Filter */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '4px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal:</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Harian:</span>
                   <input 
                     type="date"
                     value={dateFilter}
@@ -881,7 +1088,7 @@ export const TeknikModule = () => {
                     style={{ fontSize: '0.82rem', padding: '2px 4px', border: 'none', background: 'transparent', color: '#ffffff', fontWeight: 800, outline: 'none' }}
                   />
                   {dateFilter && (
-                    <button onClick={() => setDateFilter('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }} title="Hapus filter tanggal (lihat semua)">
+                    <button onClick={() => setDateFilter('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }} title="Hapus filter tanggal (lihat semua tanggal)">
                       <X size={14} />
                     </button>
                   )}
@@ -1003,12 +1210,14 @@ export const TeknikModule = () => {
             </div>
           </div>
 
-          {/* ABSEN TABLE (WITH LEMBUR COLUMN IN JAM KERJA) */}
+          {/* ===================================================================== */}
+          {/* TABEL HARIAN: ABSEN TENAGA KERJA & JAM LEMBUR (DI BAWAH)              */}
+          {/* ===================================================================== */}
           <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>Tabel</span>
-                Absen Tenaga Kerja & Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
+                <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>Log Harian</span>
+                Detail Kehadiran Harian & Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
                 PT Ashoka Enterprise Development &bull; Divisi Teknik
@@ -1018,9 +1227,9 @@ export const TeknikModule = () => {
             {filteredAttendanceList.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: '#0f172a', borderRadius: '10px' }}>
                 <Users size={44} color="#94a3b8" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                <h4 style={{ fontWeight: 800, margin: 0, color: '#ffffff' }}>Belum ada data absen tenaga kerja yang sesuai dengan filter</h4>
+                <h4 style={{ fontWeight: 800, margin: 0, color: '#ffffff' }}>Belum ada data absen harian yang sesuai dengan filter</h4>
                 <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
-                  Silakan ubah filter pencarian atau klik tombol <strong>"+ Input Absen Tenaga Kerja"</strong>.
+                  Silakan ubah filter tanggal atau klik tombol <strong>"+ Input Absen Tenaga Kerja"</strong>.
                 </p>
               </div>
             ) : (
