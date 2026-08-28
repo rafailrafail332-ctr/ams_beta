@@ -82,32 +82,38 @@ const formatDecimal = (val) => {
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
-  // Active Sub-Tabs:
-  // 'absen'   : 1. Absen & Database Tenaga Kerja
-  // 'input'   : 2. Input Lembar RAB (Spreadsheet Excel View)
-  // 'laporan' : 3. Laporan Rekapitulasi RAB & Progress
-  const [activeTab, setActiveTab] = useState(() => {
-    if (activeSubTab === 'rab') return 'input';
-    if (activeSubTab === 'laporan') return 'laporan';
-    return 'absen';
+  // MAIN CATEGORIES (Level 1): 'harian' | 'borongan'
+  // SUB-TABS (Level 2):
+  // - Pekerjaan Harian   : 'database' | 'input_absen' | 'detail_absen'
+  // - Pekerjaan Borongan : 'input_rab' | 'laporan_rab' | 'hasil_opname'
+  const [mainCategory, setMainCategory] = useState(() => {
+    if (activeSubTab === 'rab' || activeSubTab === 'input' || activeSubTab === 'laporan' || activeSubTab === 'opname' || activeSubTab === 'borongan') {
+      return 'borongan';
+    }
+    return 'harian';
+  });
+
+  const [subTabHarian, setSubTabHarian] = useState('database');
+  const [subTabBorongan, setSubTabBorongan] = useState(() => {
+    if (activeSubTab === 'laporan') return 'laporan_rab';
+    if (activeSubTab === 'opname') return 'hasil_opname';
+    return 'input_rab';
   });
 
   useEffect(() => {
     if (activeSubTab === 'rab' || activeSubTab === 'input') {
-      setActiveTab('input');
+      setMainCategory('borongan');
+      setSubTabBorongan('input_rab');
     } else if (activeSubTab === 'laporan') {
-      setActiveTab('laporan');
-    } else if (activeSubTab === 'absen') {
-      setActiveTab('absen');
+      setMainCategory('borongan');
+      setSubTabBorongan('laporan_rab');
+    } else if (activeSubTab === 'opname') {
+      setMainCategory('borongan');
+      setSubTabBorongan('hasil_opname');
+    } else if (activeSubTab === 'absen' || activeSubTab === 'harian') {
+      setMainCategory('harian');
     }
   }, [activeSubTab]);
-
-  const switchTab = (tabName) => {
-    setActiveTab(tabName);
-    if (setActiveSubTab) {
-      setActiveSubTab(tabName);
-    }
-  };
 
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
@@ -823,7 +829,8 @@ export const TeknikModule = () => {
 
     setRabSheets([...rabSheets, newSheet]);
     setActiveSheetId(newSheet.id);
-    setActiveTab('input');
+    setMainCategory('borongan');
+    setSubTabBorongan('input_rab');
     showNotification(`Lembar spreadsheet baru "${nextNo}" berhasil dibuat!`, 'success');
   };
 
@@ -845,7 +852,8 @@ export const TeknikModule = () => {
   // OPEN SPECIFIC SHEET FROM LAPORAN TABLE
   const handleOpenSheetFromLaporan = (sheetId) => {
     setActiveSheetId(sheetId);
-    setActiveTab('input');
+    setMainCategory('borongan');
+    setSubTabBorongan('input_rab');
     showNotification('Membuka lembar kerja input RAB...', 'info');
   };
 
@@ -938,7 +946,7 @@ export const TeknikModule = () => {
             <Printer size={16} /> Cetak Laporan
           </button>
           
-          {activeTab === 'absen' ? (
+          {mainCategory === 'harian' ? (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button 
                 className="btn btn-primary" 
@@ -959,7 +967,7 @@ export const TeknikModule = () => {
 
               <button 
                 className="btn btn-primary" 
-                onClick={handleOpenAddAbsen}
+                onClick={() => setSubTabHarian('input_absen')}
                 style={{
                   background: 'linear-gradient(135deg, #ea580c, #c2410c)',
                   border: 'none',
@@ -995,207 +1003,340 @@ export const TeknikModule = () => {
         </div>
       </div>
 
-      {/* 4 SUB-MODUL TAB SWITCHER BAR */}
-      <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
+      {/* ========================================================================= */}
+      {/* LEVEL 1: DUA KATEGORI UTAMA (PERSIS FOTO 1)                               */}
+      {/* 1. PEKERJAAN HARIAN (Warna Peach #f6b26b)                                 */}
+      {/* 2. PEKERJAAN BORONGAN (Warna Biru Langit #00a2ed)                         */}
+      {/* ========================================================================= */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
         
-        {/* Tab 1: Absen & Database Tenaga Kerja */}
+        {/* Tombol 1: Pekerjaan Harian (Foto 1) */}
         <button
           type="button"
-          onClick={() => switchTab('absen')}
+          onClick={() => {
+            setMainCategory('harian');
+            if (setActiveSubTab) setActiveSubTab('harian');
+          }}
           style={{
-            padding: '0.65rem 1.15rem',
+            padding: '1rem 1.5rem',
             borderRadius: '10px',
-            fontSize: '0.86rem',
+            border: mainCategory === 'harian' ? '3px solid #ea580c' : '1.5px solid #78350f',
+            background: mainCategory === 'harian' ? '#f6b26b' : '#1e293b',
+            color: mainCategory === 'harian' ? '#000000' : '#f6b26b',
             fontWeight: 900,
-            cursor: 'pointer',
-            border: activeTab === 'absen' ? '2px solid #ea580c' : '1px solid #334155',
-            background: activeTab === 'absen' ? '#ea580c' : '#1e293b',
-            color: '#ffffff',
-            display: 'inline-flex',
+            fontSize: '1.15rem',
+            display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: activeTab === 'absen' ? '0 4px 12px rgba(234, 88, 12, 0.35)' : 'none',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            cursor: 'pointer',
+            boxShadow: mainCategory === 'harian' ? '0 4px 16px rgba(246, 178, 107, 0.45)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={17} /> 1. Absen & Database Tenaga Kerja ({databasePekerjaRows.length} Terdaftar)
+          <Users size={24} color={mainCategory === 'harian' ? '#000000' : '#f6b26b'} /> Pekerjaan Harian
         </button>
 
-        {/* Tab 2: Input RAB Sheet */}
+        {/* Tombol 2: Pekerjaan Borongan (Foto 1) */}
         <button
           type="button"
-          onClick={() => switchTab('input')}
+          onClick={() => {
+            setMainCategory('borongan');
+            if (setActiveSubTab) setActiveSubTab('borongan');
+          }}
           style={{
-            padding: '0.65rem 1.15rem',
+            padding: '1rem 1.5rem',
             borderRadius: '10px',
-            fontSize: '0.86rem',
+            border: mainCategory === 'borongan' ? '3px solid #0284c7' : '1.5px solid #0369a1',
+            background: mainCategory === 'borongan' ? '#00a2ed' : '#1e293b',
+            color: mainCategory === 'borongan' ? '#ffffff' : '#38bdf8',
             fontWeight: 900,
-            cursor: 'pointer',
-            border: activeTab === 'input' ? '2px solid #f59e0b' : '1px solid #334155',
-            background: activeTab === 'input' ? '#f59e0b' : '#1e293b',
-            color: activeTab === 'input' ? '#000000' : '#ffffff',
-            display: 'inline-flex',
+            fontSize: '1.15rem',
+            display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: activeTab === 'input' ? '0 4px 12px rgba(245, 158, 11, 0.35)' : 'none',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            cursor: 'pointer',
+            boxShadow: mainCategory === 'borongan' ? '0 4px 16px rgba(0, 162, 237, 0.45)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Calculator size={17} /> 2. Input Lembar RAB (Spreadsheet)
-        </button>
-
-        {/* Tab 3: Hasil Opname (Mengambil Data Dari RAB) */}
-        <button
-          type="button"
-          onClick={() => switchTab('hasil_opname')}
-          style={{
-            padding: '0.65rem 1.15rem',
-            borderRadius: '10px',
-            fontSize: '0.86rem',
-            fontWeight: 900,
-            cursor: 'pointer',
-            border: activeTab === 'hasil_opname' ? '2px solid #10b981' : '1px solid #334155',
-            background: activeTab === 'hasil_opname' ? '#10b981' : '#1e293b',
-            color: '#ffffff',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: activeTab === 'hasil_opname' ? '0 4px 12px rgba(16, 185, 129, 0.35)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <ClipboardCheck size={17} /> 3. Hasil Opname
-        </button>
-
-        {/* Tab 4: Laporan Rekapitulasi */}
-        <button
-          type="button"
-          onClick={() => switchTab('laporan')}
-          style={{
-            padding: '0.65rem 1.15rem',
-            borderRadius: '10px',
-            fontSize: '0.86rem',
-            fontWeight: 900,
-            cursor: 'pointer',
-            border: activeTab === 'laporan' ? '2px solid #38bdf8' : '1px solid #334155',
-            background: activeTab === 'laporan' ? '#0284c7' : '#1e293b',
-            color: '#ffffff',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: activeTab === 'laporan' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <BarChart3 size={17} /> 4. Laporan Rekapitulasi RAB & Progress ({rabSheets.length} Proyek)
+          <Building2 size={24} color={mainCategory === 'borongan' ? '#ffffff' : '#38bdf8'} /> Pekerjaan Borongan
         </button>
       </div>
 
       {/* ========================================================================= */}
-      {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
-      {/* 1. TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
-      {/* 2. TABEL LOG DETAIL HARIAN & LEMBUR (DI BAWAH)                           */}
+      {/* LEVEL 2: SUB-MENU PEKERJAAN HARIAN (PERSIS FOTO 2)                        */}
+      {/* 1. Data Base tenaga kerja                                                 */}
+      {/* 2. Input Absen harian                                                     */}
+      {/* 3. Detail Absen tenaga kerja                                              */}
       {/* ========================================================================= */}
-      {activeTab === 'absen' && (
+      {mainCategory === 'harian' && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #f6b26b', flexWrap: 'wrap' }}>
+            
+            {/* 1. Data Base tenaga kerja */}
+            <button
+              type="button"
+              onClick={() => setSubTabHarian('database')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabHarian === 'database' ? '2px solid #ea580c' : '1px solid #475569',
+                background: subTabHarian === 'database' ? '#f6b26b' : '#1e293b',
+                color: subTabHarian === 'database' ? '#000000' : '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabHarian === 'database' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Database size={16} /> Data Base tenaga kerja ({databasePekerjaRows.length})
+            </button>
+
+            {/* 2. Input Absen harian */}
+            <button
+              type="button"
+              onClick={() => setSubTabHarian('input_absen')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabHarian === 'input_absen' ? '2px solid #ea580c' : '1px solid #475569',
+                background: subTabHarian === 'input_absen' ? '#f6b26b' : '#1e293b',
+                color: subTabHarian === 'input_absen' ? '#000000' : '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabHarian === 'input_absen' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Plus size={16} /> Input Absen harian
+            </button>
+
+            {/* 3. Detail Absen tenaga kerja */}
+            <button
+              type="button"
+              onClick={() => setSubTabHarian('detail_absen')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabHarian === 'detail_absen' ? '2px solid #ea580c' : '1px solid #475569',
+                background: subTabHarian === 'detail_absen' ? '#f6b26b' : '#1e293b',
+                color: subTabHarian === 'detail_absen' ? '#000000' : '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabHarian === 'detail_absen' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Users size={16} /> Detail Absen tenaga kerja ({filteredAttendanceList.length})
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* LEVEL 2: SUB-MENU PEKERJAAN BORONGAN (PERSIS FOTO 3)                      */}
+      {/* 1. Input lembar RAB                                                       */}
+      {/* 2. Laporan Rekapitulasi RAB                                               */}
+      {/* 3. Hasil Opname                                                           */}
+      {/* ========================================================================= */}
+      {mainCategory === 'borongan' && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #00a2ed', flexWrap: 'wrap' }}>
+            
+            {/* 1. Input lembar RAB */}
+            <button
+              type="button"
+              onClick={() => setSubTabBorongan('input_rab')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabBorongan === 'input_rab' ? '2px solid #0284c7' : '1px solid #475569',
+                background: subTabBorongan === 'input_rab' ? '#00a2ed' : '#1e293b',
+                color: subTabBorongan === 'input_rab' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabBorongan === 'input_rab' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Calculator size={16} /> Input lembar RAB
+            </button>
+
+            {/* 2. Laporan Rekapitulasi RAB */}
+            <button
+              type="button"
+              onClick={() => setSubTabBorongan('laporan_rab')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabBorongan === 'laporan_rab' ? '2px solid #0284c7' : '1px solid #475569',
+                background: subTabBorongan === 'laporan_rab' ? '#00a2ed' : '#1e293b',
+                color: subTabBorongan === 'laporan_rab' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabBorongan === 'laporan_rab' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <BarChart3 size={16} /> Laporan Rekapitulasi RAB ({rabSheets.length} Proyek)
+            </button>
+
+            {/* 3. Hasil Opname */}
+            <button
+              type="button"
+              onClick={() => setSubTabBorongan('hasil_opname')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabBorongan === 'hasil_opname' ? '2px solid #10b981' : '1px solid #475569',
+                background: subTabBorongan === 'hasil_opname' ? '#10b981' : '#1e293b',
+                color: subTabBorongan === 'hasil_opname' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabBorongan === 'hasil_opname' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ClipboardCheck size={16} /> Hasil Opname
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW 1: PEKERJAAN HARIAN (FOTO 2: Database, Input Absen, Detail Absen)     */}
+      {/* ========================================================================= */}
+      {mainCategory === 'harian' && (
         <div className="module-animated-view">
           
           {/* ===================================================================== */}
-          {/* 1. STATUS TENAGA KERJA (PERSIS UKURAN & TAMPILAN FILTER PROYEK)       */}
+          {/* 1. SUB-VIEW: DATA BASE TENAGA KERJA (FOTO 2)                          */}
           {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '0.65rem 1rem', marginBottom: '1rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
-                👷 Status Tenaga Kerja:
-              </span>
+          {subTabHarian === 'database' && (
+            <div>
+              {/* STATUS TENAGA KERJA FILTER PILLS */}
+              <div className="glass-card" style={{ padding: '0.65rem 1rem', marginBottom: '1rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
+                    👷 Status Tenaga Kerja:
+                  </span>
 
-              {/* Semua Tenaga Kerja (6) */}
-              <button 
-                type="button"
-                onClick={() => setStatusFilter('ALL')}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  border: statusFilter === 'ALL' ? '2px solid #ea580c' : '1px solid #475569',
-                  background: statusFilter === 'ALL' ? '#ea580c' : '#0f172a',
-                  color: '#ffffff',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                Semua Tenaga Kerja ({databasePekerjaRows.length})
-              </button>
+                  {/* Semua Tenaga Kerja */}
+                  <button 
+                    type="button"
+                    onClick={() => setStatusFilter('ALL')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: statusFilter === 'ALL' ? '2px solid #ea580c' : '1px solid #475569',
+                      background: statusFilter === 'ALL' ? '#ea580c' : '#0f172a',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Semua Tenaga Kerja ({databasePekerjaRows.length})
+                  </button>
 
-              {/* Mandor (1) */}
-              <button 
-                type="button"
-                onClick={() => setStatusFilter(statusFilter === 'Mandor' ? 'ALL' : 'Mandor')}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  border: statusFilter === 'Mandor' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
-                  background: statusFilter === 'Mandor' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                  color: statusFilter === 'Mandor' ? '#ffffff' : '#fbbf24',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                👑 Mandor ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('mandor')).length})
-              </button>
+                  {/* Mandor */}
+                  <button 
+                    type="button"
+                    onClick={() => setStatusFilter(statusFilter === 'Mandor' ? 'ALL' : 'Mandor')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: statusFilter === 'Mandor' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
+                      background: statusFilter === 'Mandor' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
+                      color: statusFilter === 'Mandor' ? '#ffffff' : '#fbbf24',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    👑 Mandor ({countMandor})
+                  </button>
 
-              {/* Tukang (3) */}
-              <button 
-                type="button"
-                onClick={() => setStatusFilter(statusFilter === 'Tukang' ? 'ALL' : 'Tukang')}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  border: statusFilter === 'Tukang' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                  background: statusFilter === 'Tukang' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
-                  color: statusFilter === 'Tukang' ? '#ffffff' : '#34d399',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                🔨 Tukang ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase().includes('tukang')).length})
-              </button>
+                  {/* Tukang */}
+                  <button 
+                    type="button"
+                    onClick={() => setStatusFilter(statusFilter === 'Tukang' ? 'ALL' : 'Tukang')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: statusFilter === 'Tukang' ? '2px solid #38BDF8' : '1px solid rgba(56, 189, 248, 0.4)',
+                      background: statusFilter === 'Tukang' ? '#0284c7' : 'rgba(56, 189, 248, 0.15)',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🔨 Tukang ({countTukang})
+                  </button>
 
-              {/* Kenek (2) */}
-              <button 
-                type="button"
-                onClick={() => setStatusFilter(statusFilter === 'Kenek' ? 'ALL' : 'Kenek')}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  border: statusFilter === 'Kenek' ? '2px solid #a855f7' : '1px solid rgba(168, 85, 247, 0.4)',
-                  background: statusFilter === 'Kenek' ? '#a855f7' : 'rgba(168, 85, 247, 0.15)',
-                  color: statusFilter === 'Kenek' ? '#ffffff' : '#c084fc',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                🧱 Kenek ({databasePekerjaRows.filter(r => (r.status || '').toLowerCase() === 'kenek').length})
-              </button>
-            </div>
+                  {/* Kenek */}
+                  <button 
+                    type="button"
+                    onClick={() => setStatusFilter(statusFilter === 'Kenek' ? 'ALL' : 'Kenek')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: statusFilter === 'Kenek' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
+                      background: statusFilter === 'Kenek' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🧱 Kenek ({countKenek})
+                  </button>
+                </div>
 
-            {statusFilter !== 'ALL' && (
-              <button 
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setStatusFilter('ALL')}
-                style={{ fontSize: '0.78rem', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
-              >
-                Reset Filter
-              </button>
-            )}
-          </div>
+                {statusFilter !== 'ALL' && (
+                  <button 
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setStatusFilter('ALL')}
+                    style={{ fontSize: '0.78rem', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
+                  >
+                    Reset Filter
+                  </button>
+                )}
+              </div>
+
+              {/* TABEL DATABASE TENAGA KERJA */}
 
           {/* ===================================================================== */}
           {/* 2. TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
@@ -1480,9 +1621,225 @@ export const TeknikModule = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
 
-          {/* FILTER TOOLBAR FOR DAILY ATTENDANCE */}
-          <div className="glass-card" style={{ padding: '1.1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* ===================================================================== */}
+          {/* 2. SUB-VIEW: INPUT ABSEN HARIAN (FORM LANGSUNG LENGKAP & CEPAT)       */}
+          {/* ===================================================================== */}
+          {subTabHarian === 'input_absen' && (
+            <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #ea580c', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Plus size={22} color="#ea580c" /> Form Input Absen Harian Tenaga Kerja
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: '#f6b26b', fontWeight: 900, background: 'rgba(246, 178, 107, 0.15)', padding: '3px 8px', borderRadius: '6px' }}>
+                  👷 Pekerjaan Harian
+                </span>
+              </div>
+
+              <form onSubmit={(e) => {
+                handleSaveAbsen(e);
+                setSubTabHarian('detail_absen');
+              }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏢 Proyek Perumahan</label>
+                    <select
+                      className="form-control"
+                      value={absenFormData.proyek}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, proyek: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#ea580c' }}
+                    >
+                      <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
+                      <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Absen</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={absenFormData.tanggal}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, tanggal: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>👷 Pilih Tenaga Kerja (Dari Database)</label>
+                  <select
+                    className="form-control"
+                    value={absenFormData.nama}
+                    onChange={(e) => {
+                      const selectedNama = e.target.value;
+                      const worker = databasePekerjaRows.find(w => w.nama === selectedNama);
+                      setAbsenFormData({
+                        ...absenFormData,
+                        nama: selectedNama,
+                        status: worker ? worker.status : absenFormData.status
+                      });
+                    }}
+                    required
+                    style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#38bdf8' }}
+                  >
+                    <option value="">-- Pilih Nama Pekerja Terdaftar --</option>
+                    {sortedWorkerRows.map(w => (
+                      <option key={w.id} value={w.nama}>
+                        {w.nama} ({w.status} - Rp {formatRupiahDesimal(w.upah)}/hari)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Status Pekerja</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={absenFormData.status}
+                      readOnly
+                      style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#475569' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>🕒 Jam Masuk</label>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={absenFormData.jamMasuk}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamMasuk: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>🕔 Jam Pulang</label>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={absenFormData.jamPulang}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamPulang: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 900, color: '#fbbf24', fontSize: '0.82rem' }}>⚡ Jam Lembur</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="12"
+                      className="form-control"
+                      value={absenFormData.lemburJam}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, lemburJam: Number(e.target.value) || 0 })}
+                      style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#f59e0b' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Lokasi Pengerjaan</label>
+                    <select
+                      className="form-control"
+                      value={absenFormData.lokasiTipe}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, lokasiTipe: e.target.value })}
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                    >
+                      <option value="kavling">Unit Kavling (Blok / No)</option>
+                      <option value="umum">Fasum / Area Umum</option>
+                    </select>
+                  </div>
+
+                  {absenFormData.lokasiTipe === 'kavling' ? (
+                    <>
+                      <div className="form-group">
+                        <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Blok</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Misal: A, B, C"
+                          value={absenFormData.blok}
+                          onChange={(e) => setAbsenFormData({ ...absenFormData, blok: e.target.value })}
+                          style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Nomor Unit</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Misal: 01, 02, 03"
+                          value={absenFormData.no}
+                          onChange={(e) => setAbsenFormData({ ...absenFormData, no: e.target.value })}
+                          style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Nama Fasum / Area</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Misal: Taman, Jalan Utama, Gerbang Masuk"
+                        value={absenFormData.umum}
+                        onChange={(e) => setAbsenFormData({ ...absenFormData, umum: e.target.value })}
+                        style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>📝 Catatan Pekerjaan / Hasil Hari Ini</label>
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    placeholder="Contoh: Plester dinding lantai 1, pasang keramik teras..."
+                    value={absenFormData.catatan}
+                    onChange={(e) => setAbsenFormData({ ...absenFormData, catatan: e.target.value })}
+                    style={{ background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setSubTabHarian('detail_absen')}
+                    style={{ background: '#0f172a', color: '#94a3b8', border: '1px solid #475569' }}
+                  >
+                    Buka Detail Absen &rarr;
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 24px' }}
+                  >
+                    💾 Simpan Absen Tenaga Kerja
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ===================================================================== */}
+          {/* 3. SUB-VIEW: DETAIL ABSEN TENAGA KERJA (FOTO 2)                       */}
+          {/* ===================================================================== */}
+          {subTabHarian === 'detail_absen' && (
+            <div>
+              {/* FILTER TOOLBAR FOR DAILY ATTENDANCE */}
+              <div className="glass-card" style={{ padding: '1.1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             
             {/* ROW 1: Filter Proyek Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -1805,11 +2162,13 @@ export const TeknikModule = () => {
           </div>
         </div>
       )}
+    </div>
+  )}
 
       {/* ========================================================================= */}
-      {/* VIEW 2: SPREADSHEET INPUT LEMBAR RAB (EXACT REPLICA OF USER PHOTOS)       */}
+      {/* PEKERJAAN BORONGAN (FOTO 3: Input RAB, Laporan, Hasil Opname)             */}
       {/* ========================================================================= */}
-      {activeTab === 'input' && (
+      {mainCategory === 'borongan' && subTabBorongan === 'input_rab' && (
         <div className="module-animated-view">
           
           {/* SHEET TAB SWITCHER TOOLBAR (RAB - 01, RAB - 02, etc.) */}
@@ -2301,9 +2660,9 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 3: SUB-MODUL HASIL OPNAME (PERSIS FOTO EXCEL media_1787935124854.png)*/}
+      {/* VIEW 3: SUB-MODUL HASIL OPNAME (PERSIS FOTO 3 & EXCEL)                   */}
       {/* ========================================================================= */}
-      {activeTab === 'hasil_opname' && (
+      {mainCategory === 'borongan' && subTabBorongan === 'hasil_opname' && (
         <div className="module-animated-view">
           
           {/* SHEET TAB SWITCHER TOOLBAR (PILIH LEMBAR RAB UNTUK HASIL OPNAME) */}
@@ -2637,10 +2996,10 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 4: TABEL LAPORAN REKAPITULASI RAB & PROGRESS                         */}
+      {/* VIEW 4: TABEL LAPORAN REKAPITULASI RAB & PROGRESS (PERSIS FOTO 3)         */}
       {/* EXACT REPLICA OF media_1787930910161.png + TOTAL DI PALING BAWAH LAPORAN  */}
       {/* ========================================================================= */}
-      {activeTab === 'laporan' && (
+      {mainCategory === 'borongan' && subTabBorongan === 'laporan_rab' && (
         <div className="module-animated-view">
           
           {/* KPI Summary Cards */}
