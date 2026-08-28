@@ -258,7 +258,7 @@ export const TeknikModule = () => {
       <div className="page-header" style={{ marginBottom: '1.25rem' }}>
         <div>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <HardHat size={28} color="#f97316" /> Absen Tenaga Kerja
+            <HardHat size={28} color="#f97316" /> Teknik & Konstruksi &bull; Absen Tenaga Kerja
           </h1>
           <p className="page-subtitle">
             Pencatatan resmi kehadiran, jam kerja, lokasi penugasan unit/fasum, & catatan pekerjaan harian tenaga kerja di lapangan.

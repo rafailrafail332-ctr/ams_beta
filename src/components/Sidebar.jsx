@@ -161,7 +161,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'todo-attendance', mainTitle: 'To-Do List Harian', tab: 'todo-attendance', icon: CheckSquare, color: '#F59E0B' },
     { id: 'executive', mainTitle: 'Eksekutif & Direksi', tab: 'executive', icon: Award, color: '#F59E0B' },
     { id: 'manager', mainTitle: 'Manajer Operasional', tab: 'manager', icon: Briefcase, color: '#38BDF8' },
-    { id: 'teknik', mainTitle: 'Teknik (Absen Tenaga Kerja)', tab: 'teknik', icon: HardHat, color: '#F97316' },
+    { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#F97316' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
