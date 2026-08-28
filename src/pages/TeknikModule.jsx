@@ -865,6 +865,7 @@ export const TeknikModule = () => {
   // =========================================================================
   // OPNAME PEKERJAAN (CEK FISIK & REALISASI PROGRES LAPANGAN)
   // =========================================================================
+  const [hasilOpnameSearch, setHasilOpnameSearch] = useState('');
   const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
   const [opnameTargetSheet, setOpnameTargetSheet] = useState(null);
   const [opnameFormData, setOpnameFormData] = useState({
@@ -873,6 +874,18 @@ export const TeknikModule = () => {
     catatan: '',
     itemProgress: {}
   });
+
+  const filteredHasilOpnameSheets = useMemo(() => {
+    if (!hasilOpnameSearch.trim()) return rabSheets;
+    const q = hasilOpnameSearch.toLowerCase().trim();
+    return rabSheets.filter(s => {
+      const vendorMatch = (s.namaVendor || '').toLowerCase().includes(q);
+      const dateMatch = (s.tanggal || '').toLowerCase().includes(q);
+      const noMatch = (s.noInput || '').toLowerCase().includes(q);
+      const proyekMatch = (s.proyek || '').toLowerCase().includes(q);
+      return vendorMatch || dateMatch || noMatch || proyekMatch;
+    });
+  }, [rabSheets, hasilOpnameSearch]);
 
   const handleOpenOpnameModal = (sheet) => {
     setOpnameTargetSheet(sheet);
@@ -2604,45 +2617,86 @@ export const TeknikModule = () => {
       {mainCategory === 'borongan' && subTabBorongan === 'hasil_opname' && (
         <div className="module-animated-view">
           
-          {/* SHEET TAB SWITCHER TOOLBAR (PILIH LEMBAR RAB UNTUK HASIL OPNAME) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #334155' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#10b981', marginRight: '4px' }}>
-                📑 Pilih Lembar RAB Opname:
-              </span>
-              
-              {rabSheets.map((sheet, sIdx) => {
-                const isActive = sheet.id === activeSheet.id;
-                const sCalc = computeSheetSummary(sheet);
-                return (
+          {/* SHEET SEARCH & SELECTOR TOOLBAR (SEARCH NAMA VENDOR / TANGGAL / NO INPUT) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1.5px solid #10b981' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 900, fontSize: '0.85rem' }}>
+                <Search size={17} /> Cari Lembar RAB:
+              </div>
+
+              {/* INPUT SEARCH BY NAMA VENDOR / TANGGAL / NO INPUT */}
+              <div style={{ position: 'relative', minWidth: '260px', flex: '1 1 260px', maxWidth: '420px' }}>
+                <input
+                  type="text"
+                  placeholder="Ketik nama vendor atau tanggal (misal: Joko / 28/08/26)..."
+                  value={hasilOpnameSearch}
+                  onChange={(e) => setHasilOpnameSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#1e293b',
+                    border: '1.5px solid #334155',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    padding: '7px 12px 7px 32px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    outline: 'none'
+                  }}
+                />
+                <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                {hasilOpnameSearch && (
                   <button
-                    key={sheet.id}
                     type="button"
-                    onClick={() => setActiveSheetId(sheet.id)}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      border: isActive ? '2px solid #10b981' : '1px solid #475569',
-                      background: isActive ? '#10b981' : '#1e293b',
-                      color: isActive ? '#ffffff' : '#cbd5e1',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      boxShadow: isActive ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
-                      transition: 'all 0.2s ease'
-                    }}
+                    onClick={() => setHasilOpnameSearch('')}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 900 }}
                   >
-                    <span>{sheet.noInput || `RAB - ${sIdx + 1}`}</span>
-                    <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>({sheet.namaVendor || 'Vendor'})</span>
-                    <span style={{ fontSize: '0.72rem', background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(16, 185, 129, 0.2)', color: isActive ? '#ffffff' : '#34d399', padding: '1px 5px', borderRadius: '4px' }}>
-                      {formatDecimal(sCalc.progresPersen)}%
-                    </span>
+                    ✕
                   </button>
-                );
-              })}
+                )}
+              </div>
+
+              {/* CHIPS HASIL PENCARIAN (HANYA MUNCUL YANG SESUAI DENGAN PENCARIAN) */}
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {filteredHasilOpnameSheets.length === 0 ? (
+                  <span style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>
+                    Tidak ditemukan RAB dengan nama/tanggal "{hasilOpnameSearch}"
+                  </span>
+                ) : (
+                  filteredHasilOpnameSheets.map((sheet, sIdx) => {
+                    const isActive = sheet.id === activeSheet.id;
+                    const sCalc = computeSheetSummary(sheet);
+                    return (
+                      <button
+                        key={sheet.id}
+                        type="button"
+                        onClick={() => setActiveSheetId(sheet.id)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                          border: isActive ? '2px solid #10b981' : '1px solid #475569',
+                          background: isActive ? '#10b981' : '#1e293b',
+                          color: isActive ? '#ffffff' : '#cbd5e1',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: isActive ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span>{sheet.noInput || `RAB - ${sIdx + 1}`}</span>
+                        <span style={{ fontSize: '0.72rem', opacity: 0.9 }}>👤 {sheet.namaVendor || 'Vendor'}</span>
+                        {sheet.tanggal && <span style={{ fontSize: '0.7rem', color: isActive ? '#f8fafc' : '#94a3b8' }}>📅 {sheet.tanggal}</span>}
+                        <span style={{ fontSize: '0.72rem', background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(16, 185, 129, 0.2)', color: isActive ? '#ffffff' : '#34d399', padding: '1px 5px', borderRadius: '4px' }}>
+                          {formatDecimal(sCalc.progresPersen)}%
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -3694,11 +3748,17 @@ export const TeknikModule = () => {
                 <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
                   
                   {/* RINGKASAN RAB BOX */}
-                  <div style={{ background: '#1e293b', padding: '0.85rem 1.15rem', borderRadius: '10px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1.15rem', borderRadius: '10px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
                     <div>
                       <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>🏢 Proyek & Lokasi</div>
                       <div style={{ fontSize: '0.88rem', color: '#ffffff', fontWeight: 900 }}>
                         {opnameTargetSheet.proyek} {opnameTargetSheet.blok ? `(Blok ${opnameTargetSheet.blok} No ${opnameTargetSheet.noUnit})` : (opnameTargetSheet.fasum ? `(${opnameTargetSheet.fasum})` : '')}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>📅 Tanggal RAB</div>
+                      <div style={{ fontSize: '0.88rem', color: '#f8fafc', fontWeight: 900 }}>
+                        {opnameTargetSheet.tanggal || '-'}
                       </div>
                     </div>
                     <div>
