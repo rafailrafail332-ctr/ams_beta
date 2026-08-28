@@ -3127,23 +3127,23 @@ export const TeknikModule = () => {
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
                   </tr>
 
-                  {/* 4. Pembayaran sebelumnya */}
+                  {/* 4. Pembayaran sebelumnya (Fixed Bug: Normalisasi angka, bisa diedit & dihapus lancar) */}
                   <tr style={{ backgroundColor: '#1e293b', color: '#f8fafc' }}>
                     <td colSpan={6} style={{ fontWeight: 800, padding: '8px 12px', border: '1px solid #334155', color: '#f8fafc', fontSize: '0.88rem' }}>
                       Pembayaran sebelumnya :
                     </td>
                     <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px', background: 'rgba(245, 158, 11, 0.08)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '3px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }}>
                         <input
                           type="text"
-                          placeholder="-"
-                          value={activeSheet.pembayaranSebelumnya ? formatRupiahDesimal(activeSheet.pembayaranSebelumnya) : ''}
+                          placeholder="0"
+                          value={activeSheet.pembayaranSebelumnya ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID') : ''}
                           onChange={(e) => {
-                            const cleanNum = e.target.value.replace(/[^0-9]/g, '');
-                            handleUpdateHeaderField('pembayaranSebelumnya', Number(cleanNum) || 0);
+                            const clean = e.target.value.replace(/[^0-9]/g, '');
+                            handleUpdateHeaderField('pembayaranSebelumnya', clean === '' ? 0 : Number(clean));
                           }}
                           style={{
-                            width: '130px',
+                            width: '110px',
                             background: '#0f172a',
                             border: '1.5px solid #f59e0b',
                             borderRadius: '4px',
@@ -3155,6 +3155,27 @@ export const TeknikModule = () => {
                             outline: 'none'
                           }}
                         />
+                        <button
+                          type="button"
+                          onClick={() => showNotification(`Nominal pembayaran sebelumnya tersimpan: Rp ${Number(activeSheet.pembayaranSebelumnya || 0).toLocaleString('id-ID')}`, 'success')}
+                          style={{
+                            background: '#10b981',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '4px 8px',
+                            fontSize: '0.72rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                          }}
+                          title="Simpan nominal pembayaran"
+                        >
+                          <Save size={12} /> Simpan
+                        </button>
                       </div>
                     </td>
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
