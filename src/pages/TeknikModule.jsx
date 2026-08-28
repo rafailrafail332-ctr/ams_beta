@@ -26,7 +26,9 @@ import {
   Layers,
   FileText,
   Save,
-  RotateCcw
+  RotateCcw,
+  BarChart3,
+  ExternalLink
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -64,15 +66,21 @@ const formatDecimal = (val) => {
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
-  // Active Sub-Tab: 'absen' (Absen Tenaga Kerja) | 'rab' (Input RAB & Monitoring Progress)
+  // Active Sub-Tabs:
+  // 'absen'   : 1. Absen Tenaga Kerja
+  // 'input'   : 2. Input Lembar RAB (Spreadsheet Excel View)
+  // 'laporan' : 3. Laporan Rekapitulasi RAB & Progress (Tabel Laporan Gambar media_1787930910161.png)
   const [activeTab, setActiveTab] = useState(() => {
-    if (activeSubTab === 'rab') return 'rab';
+    if (activeSubTab === 'rab') return 'input';
+    if (activeSubTab === 'laporan') return 'laporan';
     return 'absen';
   });
 
   useEffect(() => {
-    if (activeSubTab === 'rab') {
-      setActiveTab('rab');
+    if (activeSubTab === 'rab' || activeSubTab === 'input') {
+      setActiveTab('input');
+    } else if (activeSubTab === 'laporan') {
+      setActiveTab('laporan');
     } else if (activeSubTab === 'absen') {
       setActiveTab('absen');
     }
@@ -88,7 +96,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v5';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v6';
 
   const defaultAttendance = [
     {
@@ -302,10 +310,10 @@ export const TeknikModule = () => {
   });
 
   // =========================================================================
-  // 2. SUB-MODUL 2: SPREADSHEET INPUT RAB (EXACT REPLICA OF USER PHOTOS)
-  // media_1787930804198.jpg & media_1787930407537.png
+  // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
+  // (EXACT STRUCTURE OF media_1787930910161.png, media_1787930804198.jpg, media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_live_v5';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v6';
 
   const defaultRabSheets = [
     {
@@ -314,10 +322,11 @@ export const TeknikModule = () => {
       tanggal: '28/08/26',
       proyek: 'Ashoka View',
       namaVendor: 'Joko',
-      pekerjaan: 'Borongan Pemasangan lantai',
       blok: 'B1',
       noUnit: '10',
       fasum: '',
+      pekerjaan: 'Borongan Pemasangan lantai',
+      retensiPersen: 5,
       items: [
         {
           id: 'ITEM-01',
@@ -362,29 +371,30 @@ export const TeknikModule = () => {
       noInput: 'RAB - 02',
       tanggal: '28/08/26',
       proyek: 'Ashoka Park',
-      namaVendor: 'Slamet',
-      pekerjaan: 'Pasangan Dinding Bata Ringan & Plester Acian',
-      blok: 'A',
-      noUnit: '01',
-      fasum: '',
+      namaVendor: 'PT. Sarana',
+      blok: '',
+      noUnit: '',
+      fasum: 'Area Masjid',
+      pekerjaan: 'Pembuatan Turap',
+      retensiPersen: 5,
       items: [
         {
           id: 'ITEM-05',
-          itemPekerjaan: 'Pasangan Dinding Bata Ringan Hebel',
-          spesifikasi: 'Hebel 10cm, Mortar MU-380',
-          vol: 10.00,
-          sat: 'm2',
-          hargaSatuan: 100000.00,
-          progress: 0
+          itemPekerjaan: 'Galian Tanah Pondasi Turap',
+          spesifikasi: 'Tanah Keras / Cadas',
+          vol: 50.00,
+          sat: 'm3',
+          hargaSatuan: 90000.00,
+          progress: 100
         },
         {
           id: 'ITEM-06',
-          itemPekerjaan: 'Plesteran Dinding & Acian Halus',
-          spesifikasi: 'Semen Gresik + Pasir Halus',
-          vol: 5.00,
-          sat: 'ls',
-          hargaSatuan: 200000.00,
-          progress: 0
+          itemPekerjaan: 'Pasangan Batu Kali Turap Belakang',
+          spesifikasi: 'Batu Belah 15/20, Mortar 1:4',
+          vol: 30.00,
+          sat: 'm3',
+          hargaSatuan: 500000.00,
+          progress: 60
         }
       ]
     }
@@ -407,45 +417,83 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [rabSheets]);
 
-  // Currently Selected Sheet ID for Viewing/Editing
+  // Selected Active Sheet for TAB 2 (Input Spreadsheet)
   const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || 'RAB-01'));
-
   const activeSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || defaultRabSheets[0];
 
-  // REAL-TIME COMPUTATIONS FOR CURRENT ACTIVE SHEET
-  const currentTotalAmount = (activeSheet.items || []).reduce((acc, it) => {
-    const v = Number(it.vol) || 0;
-    const h = Number(it.hargaSatuan) || 0;
-    return acc + (v * h);
-  }, 0);
+  // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
+  const computeSheetSummary = (sheet) => {
+    const items = sheet.items || [];
+    const totalHargaRab = items.reduce((acc, it) => {
+      return acc + ((Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0));
+    }, 0);
 
-  const computedItems = (activeSheet.items || []).map(it => {
-    const vol = Number(it.vol) || 0;
-    const hargaSatuan = Number(it.hargaSatuan) || 0;
-    const jumlah = vol * hargaSatuan;
-    
-    // Bobot = Jumlah / Total RAB (Ratio decimal e.g. 0,22, 0,54)
-    const bobotRatio = currentTotalAmount > 0 ? (jumlah / currentTotalAmount) : 0;
-    
-    // Progress % e.g. 0%
-    const progress = Number(it.progress) || 0;
-    
-    // Bobot Progress = Progress% * BobotRatio
-    const bobotProgress = (progress / 100) * (bobotRatio * 100);
+    const computedItems = items.map(it => {
+      const vol = Number(it.vol) || 0;
+      const hargaSatuan = Number(it.hargaSatuan) || 0;
+      const jumlah = vol * hargaSatuan;
+      const bobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const progress = Number(it.progress) || 0;
+      const bobotProgress = (progress / 100) * (bobotRatio * 100);
+
+      return {
+        ...it,
+        jumlah,
+        bobotRatio,
+        bobotProgress
+      };
+    });
+
+    const progresPersen = computedItems.reduce((acc, it) => acc + it.bobotProgress, 0);
+    const retensiPersen = Number(sheet.retensiPersen) || 5;
+    const retensiNilai = (retensiPersen / 100) * totalHargaRab;
+    const nilaiProgres = (progresPersen / 100) * totalHargaRab;
 
     return {
-      ...it,
-      jumlah,
-      bobotRatio,
-      bobotProgress
+      ...sheet,
+      items: computedItems,
+      totalHargaRab,
+      progresPersen,
+      retensiPersen,
+      retensiNilai,
+      nilaiProgres
     };
+  };
+
+  // Computations for Active Sheet in Tab 2
+  const activeSheetCalc = computeSheetSummary(activeSheet);
+
+  // Computations for all sheets in Tab 3 (Laporan Table)
+  const allSheetsCalc = rabSheets.map(computeSheetSummary);
+
+  // Filter for Tab 3 (Laporan)
+  const [laporanSearch, setLaporanSearch] = useState('');
+  const [laporanProjectFilter, setLaporanProjectFilter] = useState('ALL');
+
+  const filteredLaporanSheets = allSheetsCalc.filter(sheet => {
+    const matchSearch = !laporanSearch || [
+      sheet.noInput,
+      sheet.namaVendor,
+      sheet.pekerjaan,
+      sheet.proyek,
+      sheet.blok,
+      sheet.noUnit,
+      sheet.fasum,
+      sheet.tanggal
+    ].some(val => (val || '').toLowerCase().includes(laporanSearch.toLowerCase().trim()));
+
+    const matchProj = laporanProjectFilter === 'ALL' || sheet.proyek === laporanProjectFilter;
+    return matchSearch && matchProj;
   });
 
-  const totalBobotProgress = computedItems.reduce((acc, it) => acc + it.bobotProgress, 0);
+  // GRAND TOTALS FOR TAB 3 LAPORAN
+  const grandTotalHargaRab = filteredLaporanSheets.reduce((acc, s) => acc + s.totalHargaRab, 0);
+  const grandTotalRetensi = filteredLaporanSheets.reduce((acc, s) => acc + s.retensiNilai, 0);
+  const grandTotalNilaiProgress = filteredLaporanSheets.reduce((acc, s) => acc + s.nilaiProgres, 0);
 
-  // DIRECT INLINE UPDATE FOR SHEET HEADER
+  // UPDATE ACTIVE SHEET HEADER INLINE
   const handleUpdateHeaderField = (field, value) => {
-    setRabSheets(prevSheets => prevSheets.map(s => {
+    setRabSheets(prev => prev.map(s => {
       if (s.id === activeSheet.id) {
         return { ...s, [field]: value };
       }
@@ -453,9 +501,9 @@ export const TeknikModule = () => {
     }));
   };
 
-  // DIRECT INLINE UPDATE FOR TABLE CELLS
+  // UPDATE ACTIVE SHEET TABLE CELLS INLINE
   const handleUpdateCell = (itemId, field, value) => {
-    setRabSheets(prevSheets => prevSheets.map(s => {
+    setRabSheets(prev => prev.map(s => {
       if (s.id === activeSheet.id) {
         const updatedItems = (s.items || []).map(it => {
           if (it.id === itemId) {
@@ -469,7 +517,7 @@ export const TeknikModule = () => {
     }));
   };
 
-  // ADD NEW ROW TO SPREADSHEET
+  // ADD NEW ROW TO ACTIVE SHEET
   const handleAddRow = () => {
     const newItem = {
       id: `ITEM-${Date.now().toString().slice(-4)}`,
@@ -481,7 +529,7 @@ export const TeknikModule = () => {
       progress: 0
     };
 
-    setRabSheets(prevSheets => prevSheets.map(s => {
+    setRabSheets(prev => prev.map(s => {
       if (s.id === activeSheet.id) {
         return { ...s, items: [...(s.items || []), newItem] };
       }
@@ -490,9 +538,9 @@ export const TeknikModule = () => {
     showNotification('Baris item pekerjaan baru berhasil ditambahkan.', 'info');
   };
 
-  // DELETE ROW FROM SPREADSHEET
+  // DELETE ROW FROM ACTIVE SHEET
   const handleDeleteRow = (itemId) => {
-    setRabSheets(prevSheets => prevSheets.map(s => {
+    setRabSheets(prev => prev.map(s => {
       if (s.id === activeSheet.id) {
         return { ...s, items: (s.items || []).filter(it => it.id !== itemId) };
       }
@@ -501,7 +549,7 @@ export const TeknikModule = () => {
     showNotification('Baris item pekerjaan berhasil dihapus.', 'warning');
   };
 
-  // CREATE NEW RAB SHEET (RAB - 03, etc.)
+  // CREATE NEW RAB SHEET
   const handleCreateNewSheet = () => {
     const nextIdx = rabSheets.length + 1;
     const nextNo = `RAB - ${nextIdx < 10 ? '0' + nextIdx : nextIdx}`;
@@ -511,10 +559,11 @@ export const TeknikModule = () => {
       tanggal: '28/08/26',
       proyek: 'Ashoka View',
       namaVendor: '',
-      pekerjaan: '',
       blok: '',
       noUnit: '',
       fasum: '',
+      pekerjaan: '',
+      retensiPersen: 5,
       items: [
         {
           id: `ITEM-${Date.now().toString().slice(-4)}-1`,
@@ -530,21 +579,30 @@ export const TeknikModule = () => {
 
     setRabSheets([...rabSheets, newSheet]);
     setActiveSheetId(newSheet.id);
+    setActiveTab('input');
     showNotification(`Lembar spreadsheet baru "${nextNo}" berhasil dibuat!`, 'success');
   };
 
-  // DELETE RAB SHEET
-  const handleDeleteCurrentSheet = () => {
+  // DELETE SHEET
+  const handleDeleteSheet = (sheetId) => {
     if (rabSheets.length <= 1) {
       alert('Minimal harus ada 1 lembar RAB.');
       return;
     }
-    if (window.confirm(`Hapus seluruh lembar "${activeSheet.noInput}" (${activeSheet.pekerjaan || 'Tanpa Judul'})?`)) {
-      const remaining = rabSheets.filter(s => s.id !== activeSheet.id);
+    const target = rabSheets.find(s => s.id === sheetId);
+    if (window.confirm(`Hapus seluruh lembar "${target?.noInput || 'RAB'}" (${target?.pekerjaan || 'Tanpa Judul'})?`)) {
+      const remaining = rabSheets.filter(s => s.id !== sheetId);
       setRabSheets(remaining);
       setActiveSheetId(remaining[0].id);
-      showNotification(`Lembar "${activeSheet.noInput}" berhasil dihapus.`, 'warning');
+      showNotification(`Lembar "${target?.noInput}" berhasil dihapus.`, 'warning');
     }
+  };
+
+  // OPEN SPECIFIC SHEET FROM LAPORAN TABLE
+  const handleOpenSheetFromLaporan = (sheetId) => {
+    setActiveSheetId(sheetId);
+    setActiveTab('input');
+    showNotification('Membuka lembar kerja input RAB...', 'info');
   };
 
   const handlePrint = () => {
@@ -560,7 +618,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran tenaga kerja lapangan, & monitoring Rencana Anggaran Biaya (RAB) proyek.
+            Pusat operasional manajemen konstruksi, absensi kehadiran tenaga kerja lapangan, lembar input spreadsheet RAB, & laporan rekapitulasi progres proyek.
           </p>
         </div>
 
@@ -570,7 +628,7 @@ export const TeknikModule = () => {
             onClick={handlePrint}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#f8fafc', border: '1px solid #475569' }}
           >
-            <Printer size={16} /> Cetak Lembar {activeTab === 'absen' ? 'Absen' : 'RAB'}
+            <Printer size={16} /> Cetak Laporan
           </button>
           
           {activeTab === 'absen' ? (
@@ -611,15 +669,17 @@ export const TeknikModule = () => {
         </div>
       </div>
 
-      {/* SUB-MODUL TAB SWITCHER BAR */}
-      <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem' }}>
+      {/* 3 SUB-MODUL TAB SWITCHER BAR */}
+      <div style={{ display: 'flex', gap: '0.65rem', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
+        
+        {/* Tab 1: Absen */}
         <button
           type="button"
           onClick={() => switchTab('absen')}
           style={{
-            padding: '0.65rem 1.25rem',
+            padding: '0.65rem 1.15rem',
             borderRadius: '10px',
-            fontSize: '0.88rem',
+            fontSize: '0.86rem',
             fontWeight: 900,
             cursor: 'pointer',
             border: activeTab === 'absen' ? '2px solid #ea580c' : '1px solid #334155',
@@ -632,29 +692,53 @@ export const TeknikModule = () => {
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={18} /> 1. Absen Tenaga Kerja ({attendanceList.length})
+          <Users size={17} /> 1. Absen Tenaga Kerja ({attendanceList.length})
         </button>
 
+        {/* Tab 2: Input RAB Sheet */}
         <button
           type="button"
-          onClick={() => switchTab('rab')}
+          onClick={() => switchTab('input')}
           style={{
-            padding: '0.65rem 1.25rem',
+            padding: '0.65rem 1.15rem',
             borderRadius: '10px',
-            fontSize: '0.88rem',
+            fontSize: '0.86rem',
             fontWeight: 900,
             cursor: 'pointer',
-            border: activeTab === 'rab' ? '2px solid #f59e0b' : '1px solid #334155',
-            background: activeTab === 'rab' ? '#f59e0b' : '#1e293b',
-            color: activeTab === 'rab' ? '#000000' : '#ffffff',
+            border: activeTab === 'input' ? '2px solid #f59e0b' : '1px solid #334155',
+            background: activeTab === 'input' ? '#f59e0b' : '#1e293b',
+            color: activeTab === 'input' ? '#000000' : '#ffffff',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            boxShadow: activeTab === 'rab' ? '0 4px 12px rgba(245, 158, 11, 0.35)' : 'none',
+            boxShadow: activeTab === 'input' ? '0 4px 12px rgba(245, 158, 11, 0.35)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Calculator size={18} /> 2. Spreadsheet Input RAB ({rabSheets.length} Lembar)
+          <Calculator size={17} /> 2. Input Lembar RAB (Spreadsheet)
+        </button>
+
+        {/* Tab 3: Laporan Rekapitulasi */}
+        <button
+          type="button"
+          onClick={() => switchTab('laporan')}
+          style={{
+            padding: '0.65rem 1.15rem',
+            borderRadius: '10px',
+            fontSize: '0.86rem',
+            fontWeight: 900,
+            cursor: 'pointer',
+            border: activeTab === 'laporan' ? '2px solid #38bdf8' : '1px solid #334155',
+            background: activeTab === 'laporan' ? '#0284c7' : '#1e293b',
+            color: '#ffffff',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: activeTab === 'laporan' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <BarChart3 size={17} /> 3. Laporan Rekapitulasi RAB & Progress ({rabSheets.length} Proyek)
         </button>
       </div>
 
@@ -926,10 +1010,9 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 2: SPREADSHEET INPUT RAB DIRECTLY ON PAGE                           */}
-      {/* EXACT REPLICA OF media_1787930804198.jpg & media_1787930407537.png       */}
+      {/* VIEW 2: SPREADSHEET INPUT LEMBAR RAB (EXACT REPLICA OF USER PHOTOS)       */}
       {/* ========================================================================= */}
-      {activeTab === 'rab' && (
+      {activeTab === 'input' && (
         <div className="module-animated-view">
           
           {/* SHEET TAB SWITCHER TOOLBAR (RAB - 01, RAB - 02, etc.) */}
@@ -993,31 +1076,51 @@ export const TeknikModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 type="button"
+                onClick={() => switchTab('laporan')}
+                style={{
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.78rem',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                <BarChart3 size={14} /> Lihat di Tabel Laporan &rarr;
+              </button>
+
+              <button
+                type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={handlePrint}
                 style={{ background: '#1e293b', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, fontSize: '0.78rem' }}
               >
-                <Printer size={14} /> Cetak Lembar Ini
+                <Printer size={14} /> Cetak Sheet
               </button>
 
               {rabSheets.length > 1 && (
                 <button
                   type="button"
                   className="btn btn-sm"
-                  onClick={handleDeleteCurrentSheet}
+                  onClick={() => handleDeleteSheet(activeSheet.id)}
                   style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', fontWeight: 800, fontSize: '0.78rem' }}
                   title="Hapus Lembar RAB ini"
                 >
-                  <Trash2 size={14} /> Hapus Lembar
+                  <Trash2 size={14} /> Hapus Sheet
                 </button>
               )}
             </div>
           </div>
 
-          {/* SPREADSHEET CARD (EXACT REPLICA OF media_1787930804198.jpg & media_1787930407537.png) */}
+          {/* SPREADSHEET CARD */}
           <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #f59e0b', overflowX: 'auto' }}>
             
-            {/* Title exact as photo */}
+            {/* Title */}
             <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', marginBottom: '0.75rem' }}>
               Input RAB
             </div>
@@ -1075,7 +1178,7 @@ export const TeknikModule = () => {
                     value={activeSheet.namaVendor || ''}
                     onChange={(e) => handleUpdateHeaderField('namaVendor', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #38bdf8', color: '#38bdf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Joko / Slamet / CV..."
+                    placeholder="Joko / PT. Sarana..."
                   />
                 </div>
 
@@ -1127,7 +1230,7 @@ export const TeknikModule = () => {
                     value={activeSheet.fasum || ''}
                     onChange={(e) => handleUpdateHeaderField('fasum', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#cbd5e1', fontWeight: 700, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Nama Fasum / kosongkan jika unit"
+                    placeholder="Area Masjid / Fasum / Kosong jika unit"
                   />
                 </div>
               </div>
@@ -1184,7 +1287,7 @@ export const TeknikModule = () => {
                 </thead>
 
                 <tbody>
-                  {computedItems.map((row, idx) => (
+                  {activeSheetCalc.items.map((row, idx) => (
                     <tr 
                       key={row.id || idx}
                       style={{ 
@@ -1304,8 +1407,8 @@ export const TeknikModule = () => {
                   ))}
 
                   {/* EMPTY ROWS PLACEHOLDER IF LESS THAN 6 ITEMS */}
-                  {computedItems.length < 6 && Array.from({ length: 6 - computedItems.length }).map((_, rIdx) => (
-                    <tr key={`empty-${rIdx}`} style={{ height: '32px', backgroundColor: (computedItems.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
+                  {activeSheetCalc.items.length < 6 && Array.from({ length: 6 - activeSheetCalc.items.length }).map((_, rIdx) => (
+                    <tr key={`empty-${rIdx}`} style={{ height: '32px', backgroundColor: (activeSheetCalc.items.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
                       <td style={{ border: '1px solid #334155' }}></td>
                       <td style={{ border: '1px solid #334155' }}></td>
                       <td style={{ border: '1px solid #334155' }}></td>
@@ -1326,16 +1429,16 @@ export const TeknikModule = () => {
                       Total
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatRupiah(currentTotalAmount)}
+                      {formatRupiah(activeSheetCalc.totalHargaRab)}
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {currentTotalAmount > 0 ? '1,00' : '0,00'}
+                      {activeSheetCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
                       -
                     </td>
                     <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatDecimal(totalBobotProgress)}%
+                      {formatDecimal(activeSheetCalc.progresPersen)}%
                     </td>
                     <td style={{ border: '1.5px solid #78350f' }}></td>
                   </tr>
@@ -1367,13 +1470,383 @@ export const TeknikModule = () => {
               </button>
             </div>
 
-            {/* TERBILANG BOX (EXACT REPLICA OF EXCEL SCREENSHOT) */}
+            {/* TERBILANG BOX */}
             <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.9rem' }}>Terbilang :</span>
               <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                {angkaTerbilang(currentTotalAmount)}
+                {angkaTerbilang(activeSheetCalc.totalHargaRab)}
               </span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW 3: TABEL LAPORAN REKAPITULASI RAB & PROGRESS                         */}
+      {/* EXACT REPLICA OF media_1787930910161.png + TOTAL DI PALING BAWAH LAPORAN  */}
+      {/* ========================================================================= */}
+      {activeTab === 'laporan' && (
+        <div className="module-animated-view">
+          
+          {/* KPI Summary Cards */}
+          <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Kontrak / No. Input</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanSheets.length} RAB</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Kontrak Kerja Terdaftar</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #34d399', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Harga RAB</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
+                Rp {formatRupiah(grandTotalHargaRab)}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Seluruh Nilai Kontrak</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #c084fc', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Retensi (5%)</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#c084fc', marginTop: '2px' }}>
+                Rp {formatRupiah(grandTotalRetensi)}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Jaminan Masa Pemeliharaan</div>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #60a5fa', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#60a5fa', fontWeight: 800 }}>Total Nilai Progress</div>
+              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#60a5fa', marginTop: '2px' }}>
+                Rp {formatRupiah(grandTotalNilaiProgress)}
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Realisasi Progres Fisik Lapangan</div>
+            </div>
+          </div>
+
+          {/* FILTER & SEARCH TOOLBAR */}
+          <div className="glass-card" style={{ padding: '1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
+                  🏢 Filter Proyek:
+                </span>
+                
+                <button 
+                  type="button"
+                  onClick={() => setLaporanProjectFilter('ALL')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: laporanProjectFilter === 'ALL' ? '2px solid #f59e0b' : '1px solid #475569',
+                    background: laporanProjectFilter === 'ALL' ? '#f59e0b' : '#0f172a',
+                    color: laporanProjectFilter === 'ALL' ? '#000000' : '#ffffff',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Semua Proyek ({rabSheets.length})
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setLaporanProjectFilter('Ashoka View')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: laporanProjectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
+                    background: laporanProjectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
+                    color: laporanProjectFilter === 'Ashoka View' ? '#ffffff' : '#fbbf24',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🏔️ Ashoka View ({rabSheets.filter(a => (a.proyek || '').includes('View')).length})
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setLaporanProjectFilter('Ashoka Park')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: laporanProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
+                    background: laporanProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
+                    color: laporanProjectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🌳 Ashoka Park ({rabSheets.filter(a => (a.proyek || '').includes('Park')).length})
+                </button>
+              </div>
+
+              <button 
+                type="button"
+                className="btn btn-primary"
+                onClick={handleCreateNewSheet}
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  border: 'none',
+                  fontWeight: 900,
+                  color: '#000000',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Plus size={16} /> + Input Lembar RAB Baru
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', position: 'relative', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
+              <Search size={18} color="#0284c7" />
+              <input
+                type="text"
+                className="form-control"
+                style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff', flex: 1 }}
+                placeholder="Cari No. Input (RAB-01), nama vendor, pekerjaan, blok/unit, fasum..."
+                value={laporanSearch}
+                onChange={(e) => setLaporanSearch(e.target.value)}
+              />
+              {laporanSearch && (
+                <button onClick={() => setLaporanSearch('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* EXACT TABLE OF media_1787930910161.png */}
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ background: '#0284c7', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 900 }}>Tabel Laporan</span>
+                Laporan Rekapitulasi RAB & Progress Proyek
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>
+                Data Otomatis Terhubung dari Lembar Input Spreadsheet
+              </div>
+            </div>
+
+            {filteredLaporanSheets.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#0f172a', borderRadius: '10px' }}>
+                <Calculator size={48} color="#f59e0b" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h4 style={{ fontWeight: 900, margin: 0, color: '#ffffff' }}>Belum ada data lembar RAB yang terdaftar</h4>
+                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
+                  Buka tab <strong>"2. Input Lembar RAB"</strong> untuk mengisi data lembar kerja.
+                </p>
+              </div>
+            ) : (
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1150px', textAlign: 'left' }}>
+                  <thead>
+                    {/* EXACT HEADER OF media_1787930910161.png */}
+                    <tr style={{ color: '#000000' }}>
+                      {/* Left tan columns */}
+                      <th style={{ width: '85px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        No. Input
+                      </th>
+                      <th style={{ width: '90px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        Tanggal
+                      </th>
+                      <th style={{ width: '115px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>
+                        Proyek
+                      </th>
+                      <th style={{ width: '125px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>
+                        Nama Vendor
+                      </th>
+                      <th style={{ width: '55px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        Blok
+                      </th>
+                      <th style={{ width: '55px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        No.
+                      </th>
+                      <th style={{ width: '110px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        Fasum
+                      </th>
+                      <th style={{ minWidth: '220px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                        Pekerjaan
+                      </th>
+                      <th style={{ width: '135px', textAlign: 'right', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                        Harga RAB
+                      </th>
+
+                      {/* Right brighter peach columns */}
+                      <th style={{ width: '85px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        Progress
+                      </th>
+                      <th style={{ width: '125px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                        Retensi
+                      </th>
+                      <th style={{ width: '135px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                        Nilai Progress
+                      </th>
+                      <th style={{ width: '100px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredLaporanSheets.map((row, idx) => (
+                      <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
+                        {/* 1. No. Input */}
+                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ea580c', padding: '8px 4px', fontSize: '0.85rem' }}>
+                          {row.noInput}
+                        </td>
+
+                        {/* 2. Tanggal */}
+                        <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '8px 4px' }}>
+                          {row.tanggal}
+                        </td>
+
+                        {/* 3. Proyek */}
+                        <td style={{ fontWeight: 800, border: '1px solid #334155', color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', fontSize: '0.85rem', padding: '8px 6px' }}>
+                          {row.proyek}
+                        </td>
+
+                        {/* 4. Nama Vendor */}
+                        <td style={{ fontWeight: 900, color: '#38bdf8', border: '1px solid #334155', fontSize: '0.86rem', padding: '8px 6px' }}>
+                          {row.namaVendor || '-'}
+                        </td>
+
+                        {/* 5. Blok */}
+                        <td style={{ textAlign: 'center', fontWeight: 900, color: '#818cf8', border: '1px solid #334155', fontSize: '0.85rem', padding: '8px 4px' }}>
+                          {row.blok || ''}
+                        </td>
+
+                        {/* 6. No */}
+                        <td style={{ textAlign: 'center', fontWeight: 900, color: '#818cf8', border: '1px solid #334155', fontSize: '0.85rem', padding: '8px 4px' }}>
+                          {row.noUnit || ''}
+                        </td>
+
+                        {/* 7. Fasum */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '8px 4px' }}>
+                          {row.fasum || ''}
+                        </td>
+
+                        {/* 8. Pekerjaan */}
+                        <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', fontSize: '0.86rem', padding: '8px 8px' }}>
+                          {row.pekerjaan || '-'}
+                        </td>
+
+                        {/* 9. Harga RAB */}
+                        <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
+                          {formatRupiah(row.totalHargaRab)}
+                        </td>
+
+                        {/* 10. Progress */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontWeight: 900,
+                            fontSize: '0.82rem',
+                            background: row.progresPersen >= 100 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                            color: row.progresPersen >= 100 ? '#34d399' : '#60a5fa',
+                            border: `1px solid ${row.progresPersen >= 100 ? '#10b981' : '#3b82f6'}`
+                          }}>
+                            {formatDecimal(row.progresPersen)}%
+                          </span>
+                        </td>
+
+                        {/* 11. Retensi */}
+                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.85rem', fontWeight: 800, color: '#c084fc' }}>
+                          {formatRupiah(row.retensiNilai)}
+                        </td>
+
+                        {/* 12. Nilai Progress */}
+                        <td style={{ textAlign: 'right', fontWeight: 900, color: '#60a5fa', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.88rem' }}>
+                          {formatRupiah(row.nilaiProgres)}
+                        </td>
+
+                        {/* 13. Aksi */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenSheetFromLaporan(row.id)}
+                              style={{
+                                background: '#f59e0b',
+                                color: '#000000',
+                                border: 'none',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 900,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer'
+                              }}
+                              title="Buka Spreadsheet Input"
+                            >
+                              <ExternalLink size={12} /> Buka
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSheet(row.id)}
+                              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '3px 5px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer' }}
+                              title="Hapus RAB"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* EMPTY ROWS PLACEHOLDER IF LESS THAN 6 */}
+                    {filteredLaporanSheets.length < 6 && Array.from({ length: 6 - filteredLaporanSheets.length }).map((_, rIdx) => (
+                      <tr key={`empty-lap-${rIdx}`} style={{ height: '32px', backgroundColor: (filteredLaporanSheets.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                      </tr>
+                    ))}
+
+                    {/* TOTAL DI PALING BAWAH LAPORAN */}
+                    <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                      <td colSpan={8} style={{ textAlign: 'left', padding: '10px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        Total Keseluruhan ({filteredLaporanSheets.length} Proyek)
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiah(grandTotalHargaRab)}
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '10px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                        -
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiah(grandTotalRetensi)}
+                      </td>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                        {formatRupiah(grandTotalNilaiProgress)}
+                      </td>
+                      <td style={{ border: '1.5px solid #78350f' }}></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
