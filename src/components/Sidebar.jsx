@@ -55,9 +55,6 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     }
     setCurrentTab(moduleKey);
     setActiveSubTab(subTabKey);
-    if (window.innerWidth < 1024) {
-      setIsOpen(false);
-    }
   };
 
   // CLEAN SPACIOUS SUB-MODULES NAVIGATION TAILORED FOR SPECIFIC ROLES
