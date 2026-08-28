@@ -40,7 +40,7 @@ function angkaTerbilang(nilai) {
     if (n < 20) return sebut(n - 10) + ' Belas';
     if (n < 100) return sebut(Math.floor(n / 10)) + ' Puluh ' + sebut(n % 10);
     if (n < 200) return 'Seratus ' + sebut(n - 100);
-    if (n < 1000) return sebut(Math.floor(n / 100)) + ' Ratus ' + sebut(n % 100);
+    if (n < 1000) return sebut(Math.floor(n / 1000)) + ' Ratus ' + sebut(n % 100);
     if (n < 2000) return 'Seribu ' + sebut(n - 1000);
     if (n < 1000000) return sebut(Math.floor(n / 1000)) + ' Ribu ' + sebut(n % 1000);
     if (n < 1000000000) return sebut(Math.floor(n / 1000000)) + ' Juta ' + sebut(n % 1000000);
@@ -88,7 +88,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v3';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v4';
 
   const defaultAttendance = [
     {
@@ -303,63 +303,90 @@ export const TeknikModule = () => {
 
   // =========================================================================
   // 2. SUB-MODUL 2: DAFTAR REKAPITULASI RAB & MASTER-DETAIL INPUT SPREADSHEET
+  // (EXACT REPLICA OF media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_LIST = 'ams_teknik_rab_master_list_v3';
+  const STORAGE_KEY_RAB_LIST = 'ams_teknik_rab_master_list_v4';
 
   const defaultRabProjects = [
     {
-      id: 'RAB-2025-001',
-      proyek: 'Ashoka Park',
-      tanggalInput: '2025-08-28',
-      namaVendor: 'CV Karya Mandiri Teknik',
-      pekerjaan: 'Pekerjaan Struktur & Arsitektur Rumah Type 45/90 - Blok A01',
-      retensiPersen: 5, // 5%
+      id: 'RAB-01',
+      noInput: 'RAB - 01',
+      tanggalInput: '28/08/26',
+      proyek: 'Ashoka View',
+      namaVendor: 'Joko',
+      pekerjaan: 'Borongan Pemasangan lantai',
+      blok: 'B1',
+      noUnit: '10',
+      fasum: '-',
+      retensiPersen: 5,
       items: [
         {
           id: 'ITEM-01',
-          itemPekerjaan: 'Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian',
-          spesifikasi: 'Bata Hebel 10cm, Mortar Utama MU-380, Pasir Pasang Ayak',
-          vol: 10.00,
+          itemPekerjaan: 'Perataan tanah',
+          spesifikasi: '-',
+          vol: 50.00,
           sat: 'm2',
-          hargaSatuan: 100000.00,
-          progress: 80
+          hargaSatuan: 15000.00,
+          progress: 0
         },
         {
           id: 'ITEM-02',
-          itemPekerjaan: 'Pekerjaan Rangka Atap Baja Ringan & Penutup Genteng Metal',
-          spesifikasi: 'Truss C75.75 SNI, Reng 32.45, Genteng Metal Pasir 0.35mm',
-          vol: 5.00,
+          itemPekerjaan: 'Pemasangan keramik',
+          spesifikasi: 'keramik 40 x 40',
+          vol: 40.00,
+          sat: 'm2',
+          hargaSatuan: 45000.00,
+          progress: 0
+        },
+        {
+          id: 'ITEM-03',
+          itemPekerjaan: 'Pemasangan Plint lantai',
+          spesifikasi: 'uk. 7 cm',
+          vol: 75.00,
+          sat: 'm1',
+          hargaSatuan: 7500.00,
+          progress: 0
+        },
+        {
+          id: 'ITEM-04',
+          itemPekerjaan: 'Pembersihan',
+          spesifikasi: '-',
+          vol: 1.00,
           sat: 'ls',
-          hargaSatuan: 200000.00,
-          progress: 50
+          hargaSatuan: 250000.00,
+          progress: 0
         }
       ]
     },
     {
-      id: 'RAB-2025-002',
-      proyek: 'Ashoka View',
-      tanggalInput: '2025-08-28',
-      namaVendor: 'PT Wijaya Bangun Perkasa',
-      pekerjaan: 'Pembangunan Gerbang Utama & Pos Keamanan Kawasan',
+      id: 'RAB-02',
+      noInput: 'RAB - 02',
+      tanggalInput: '28/08/26',
+      proyek: 'Ashoka Park',
+      namaVendor: 'Slamet',
+      pekerjaan: 'Pekerjaan Pasangan Dinding & Plester Acian',
+      blok: 'A',
+      noUnit: '01',
+      fasum: '-',
       retensiPersen: 5,
       items: [
         {
-          id: 'ITEM-03',
-          itemPekerjaan: 'Pengecoran Pondasi Footplat & Balok Sloof Beton Bertulang',
-          spesifikasi: 'Beton Ready Mix K-250, Besi Ulir D13 SNI',
-          vol: 8.00,
-          sat: 'm3',
-          hargaSatuan: 850000.00,
-          progress: 100
+          id: 'ITEM-05',
+          itemPekerjaan: 'Pasangan Dinding Bata Ringan Hebel',
+          spesifikasi: 'Hebel 10cm, Mortar MU-380',
+          vol: 65.00,
+          sat: 'm2',
+          hargaSatuan: 95000.00,
+          progress: 80
         },
         {
-          id: 'ITEM-04',
-          itemPekerjaan: 'Pekerjaan Dinding Ornamen Granit & Profil ACP',
-          spesifikasi: 'Granite Tile 60x120 Black Gold, ACP Seven 4mm',
-          vol: 15.00,
+          id: 'ITEM-06',
+          itemPekerjaan: 'Plesteran Dinding & Acian Halus',
+          spesifikasi: 'Semen Gresik + Pasir Halus',
+          vol: 130.00,
           sat: 'm2',
-          hargaSatuan: 450000.00,
-          progress: 40
+          hargaSatuan: 40000.00,
+          progress: 50
         }
       ]
     }
@@ -382,15 +409,20 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [rabProjects]);
 
-  // Selected Active RAB for Sheet Modal View / Full Editor View
+  // Selected Active RAB for Sheet Modal View
   const [selectedRabForSheet, setSelectedRabForSheet] = useState(null);
   const [isRabProjectModalOpen, setIsRabProjectModalOpen] = useState(false);
   const [editingRabProject, setEditingRabProject] = useState(null);
+  
   const [rabProjectForm, setRabProjectForm] = useState({
-    proyek: 'Ashoka Park',
-    tanggalInput: '2025-08-28',
+    noInput: 'RAB - 03',
+    tanggalInput: '28/08/26',
+    proyek: 'Ashoka View',
     namaVendor: '',
     pekerjaan: '',
+    blok: 'B1',
+    noUnit: '10',
+    fasum: '-',
     retensiPersen: 5
   });
 
@@ -399,10 +431,10 @@ export const TeknikModule = () => {
   const [editingSheetItem, setEditingSheetItem] = useState(null);
   const [sheetItemForm, setSheetItemForm] = useState({
     itemPekerjaan: '',
-    spesifikasi: '',
+    spesifikasi: '-',
     vol: 10,
     sat: 'm2',
-    hargaSatuan: 100000,
+    hargaSatuan: 15000,
     progress: 0
   });
 
@@ -450,9 +482,13 @@ export const TeknikModule = () => {
 
   const filteredRabProjects = calculatedRabProjects.filter(p => {
     const matchSearch = !rabSearchQuery || [
+      p.noInput,
       p.namaVendor,
       p.pekerjaan,
       p.proyek,
+      p.blok,
+      p.noUnit,
+      p.fasum,
       p.tanggalInput
     ].some(val => (val || '').toLowerCase().includes(rabSearchQuery.toLowerCase().trim()));
 
@@ -463,11 +499,18 @@ export const TeknikModule = () => {
   // Open New Project RAB Form Modal
   const handleOpenAddRabProject = () => {
     setEditingRabProject(null);
+    const nextIndex = rabProjects.length + 1;
+    const nextNo = `RAB - ${nextIndex < 10 ? '0' + nextIndex : nextIndex}`;
+    
     setRabProjectForm({
-      proyek: rabProjectFilter !== 'ALL' ? rabProjectFilter : 'Ashoka Park',
-      tanggalInput: new Date().toISOString().split('T')[0],
+      noInput: nextNo,
+      tanggalInput: '28/08/26',
+      proyek: rabProjectFilter !== 'ALL' ? rabProjectFilter : 'Ashoka View',
       namaVendor: '',
       pekerjaan: '',
+      blok: 'B1',
+      noUnit: '10',
+      fasum: '-',
       retensiPersen: 5
     });
     setIsRabProjectModalOpen(true);
@@ -477,10 +520,14 @@ export const TeknikModule = () => {
   const handleOpenEditRabProject = (project) => {
     setEditingRabProject(project);
     setRabProjectForm({
-      proyek: project.proyek || 'Ashoka Park',
-      tanggalInput: project.tanggalInput || '2025-08-28',
+      noInput: project.noInput || `RAB - 01`,
+      tanggalInput: project.tanggalInput || '28/08/26',
+      proyek: project.proyek || 'Ashoka View',
       namaVendor: project.namaVendor || '',
       pekerjaan: project.pekerjaan || '',
+      blok: project.blok || 'B1',
+      noUnit: project.noUnit || '10',
+      fasum: project.fasum || '-',
       retensiPersen: project.retensiPersen || 5
     });
     setIsRabProjectModalOpen(true);
@@ -496,7 +543,7 @@ export const TeknikModule = () => {
 
     if (editingRabProject) {
       setRabProjects(rabProjects.map(p => p.id === editingRabProject.id ? { ...p, ...rabProjectForm } : p));
-      showNotification(`Data RAB "${rabProjectForm.pekerjaan}" berhasil diperbarui!`, 'success');
+      showNotification(`Data RAB "${rabProjectForm.noInput}" berhasil diperbarui!`, 'success');
       if (selectedRabForSheet && selectedRabForSheet.id === editingRabProject.id) {
         setSelectedRabForSheet(prev => ({ ...prev, ...rabProjectForm }));
       }
@@ -507,7 +554,7 @@ export const TeknikModule = () => {
         items: []
       };
       setRabProjects([newProject, ...rabProjects]);
-      showNotification(`RAB baru "${rabProjectForm.pekerjaan}" berhasil dibuat! Silakan isi rincian item pekerjaan.`, 'success');
+      showNotification(`RAB "${rabProjectForm.noInput}" berhasil dibuat! Silakan tambahkan baris item pekerjaan.`, 'success');
       // Automatically open the sheet editor for the new project
       setSelectedRabForSheet(newProject);
     }
@@ -517,12 +564,12 @@ export const TeknikModule = () => {
 
   // Delete Project RAB
   const handleDeleteRabProject = (project) => {
-    if (window.confirm(`Hapus seluruh data RAB "${project.pekerjaan}" (${project.namaVendor})?`)) {
+    if (window.confirm(`Hapus seluruh data "${project.noInput}" (${project.pekerjaan} - ${project.namaVendor})?`)) {
       setRabProjects(rabProjects.filter(p => p.id !== project.id));
       if (selectedRabForSheet && selectedRabForSheet.id === project.id) {
         setSelectedRabForSheet(null);
       }
-      showNotification(`RAB "${project.pekerjaan}" berhasil dihapus.`, 'warning');
+      showNotification(`Data "${project.noInput}" berhasil dihapus.`, 'warning');
     }
   };
 
@@ -531,10 +578,10 @@ export const TeknikModule = () => {
     setEditingSheetItem(null);
     setSheetItemForm({
       itemPekerjaan: '',
-      spesifikasi: '',
+      spesifikasi: '-',
       vol: 10,
       sat: 'm2',
-      hargaSatuan: 100000,
+      hargaSatuan: 15000,
       progress: 0
     });
     setIsSheetItemModalOpen(true);
@@ -544,7 +591,7 @@ export const TeknikModule = () => {
     setEditingSheetItem(item);
     setSheetItemForm({
       itemPekerjaan: item.itemPekerjaan || '',
-      spesifikasi: item.spesifikasi || '',
+      spesifikasi: item.spesifikasi || '-',
       vol: item.vol || 1,
       sat: item.sat || 'm2',
       hargaSatuan: item.hargaSatuan || 0,
@@ -575,7 +622,7 @@ export const TeknikModule = () => {
     const payload = {
       ...sheetItemForm,
       itemPekerjaan: sheetItemForm.itemPekerjaan.trim(),
-      spesifikasi: sheetItemForm.spesifikasi.trim(),
+      spesifikasi: sheetItemForm.spesifikasi.trim() || '-',
       vol: Number(sheetItemForm.vol) || 0,
       sat: sheetItemForm.sat.trim(),
       hargaSatuan: Number(sheetItemForm.hargaSatuan) || 0,
@@ -659,7 +706,7 @@ export const TeknikModule = () => {
                 boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)'
               }}
             >
-              <Plus size={18} /> + Input RAB Proyek Baru
+              <Plus size={18} /> + Input RAB Baru
             </button>
           )}
         </div>
@@ -989,9 +1036,9 @@ export const TeknikModule = () => {
           {/* KPI Summary Cards */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Proyek / Kontrak RAB</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredRabProjects.length} Proyek</div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Kontrak Kerja Terdaftar</div>
+              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Kontrak / No. Input</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredRabProjects.length} RAB</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Lembar Kerja Terdaftar</div>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #34d399', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
@@ -1047,24 +1094,6 @@ export const TeknikModule = () => {
 
                 <button 
                   type="button"
-                  onClick={() => setRabProjectFilter('Ashoka Park')}
-                  style={{
-                    padding: '5px 14px',
-                    borderRadius: '8px',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    border: rabProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                    background: rabProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
-                    color: rabProjectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  🌳 Ashoka Park ({rabProjects.filter(a => (a.proyek || '').includes('Park')).length})
-                </button>
-
-                <button 
-                  type="button"
                   onClick={() => setRabProjectFilter('Ashoka View')}
                   style={{
                     padding: '5px 14px',
@@ -1079,6 +1108,24 @@ export const TeknikModule = () => {
                   }}
                 >
                   🏔️ Ashoka View ({rabProjects.filter(a => (a.proyek || '').includes('View')).length})
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setRabProjectFilter('Ashoka Park')}
+                  style={{
+                    padding: '5px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: rabProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
+                    background: rabProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
+                    color: rabProjectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🌳 Ashoka Park ({rabProjects.filter(a => (a.proyek || '').includes('Park')).length})
                 </button>
               </div>
 
@@ -1099,7 +1146,7 @@ export const TeknikModule = () => {
                   cursor: 'pointer'
                 }}
               >
-                <Plus size={16} /> + Tambah Proyek RAB Baru
+                <Plus size={16} /> + Input RAB Baru
               </button>
             </div>
 
@@ -1109,7 +1156,7 @@ export const TeknikModule = () => {
                 type="text"
                 className="form-control"
                 style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff', flex: 1 }}
-                placeholder="Cari nama vendor, nama paket pekerjaan, atau proyek..."
+                placeholder="Cari No. Input (RAB-01), nama vendor, pekerjaan, blok/unit..."
                 value={rabSearchQuery}
                 onChange={(e) => setRabSearchQuery(e.target.value)}
               />
@@ -1126,7 +1173,7 @@ export const TeknikModule = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 900 }}>Tabel Depan</span>
-                Daftar Rekapitulasi RAB & Monitoring Progres Proyek
+                Rekapitulasi RAB & Monitoring Progres Proyek
               </div>
               <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
                 PT Ashoka Enterprise Development &bull; Divisi Teknik
@@ -1136,12 +1183,12 @@ export const TeknikModule = () => {
             {filteredRabProjects.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#0f172a', borderRadius: '10px' }}>
                 <Calculator size={48} color="#f59e0b" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                <h4 style={{ fontWeight: 900, margin: 0, color: '#ffffff' }}>Belum ada data proyek RAB yang terdaftar</h4>
+                <h4 style={{ fontWeight: 900, margin: 0, color: '#ffffff' }}>Belum ada data lembar RAB yang terdaftar</h4>
                 <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
-                  Klik tombol <strong>"+ Input RAB Proyek Baru"</strong> untuk mulai menyusun Rencana Anggaran Biaya proyek.
+                  Klik tombol <strong>"+ Input RAB Baru"</strong> untuk mulai membuat lembar kerja Rencana Anggaran Biaya.
                 </p>
                 <button className="btn btn-primary btn-sm" onClick={handleOpenAddRabProject} style={{ marginTop: '0.75rem', background: '#f59e0b', color: '#000', fontWeight: 900, border: 'none' }}>
-                  + Input RAB Proyek Baru
+                  + Input RAB Baru
                 </button>
               </div>
             ) : (
@@ -1156,10 +1203,10 @@ export const TeknikModule = () => {
                       <th style={{ width: '115px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
                         Tanggal Input
                       </th>
-                      <th style={{ width: '190px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                      <th style={{ width: '170px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
                         Nama Vendor
                       </th>
-                      <th style={{ minWidth: '240px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
+                      <th style={{ minWidth: '250px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
                         Pekerjaan
                       </th>
                       <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
@@ -1174,7 +1221,7 @@ export const TeknikModule = () => {
                       <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>
                         Nilai Progres
                       </th>
-                      <th style={{ width: '150px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
+                      <th style={{ width: '145px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>
                         Aksi
                       </th>
                     </tr>
@@ -1190,26 +1237,38 @@ export const TeknikModule = () => {
 
                         {/* 2. Tanggal Input */}
                         <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '9px 6px' }}>
-                          📅 {row.tanggalInput ? row.tanggalInput.split('-').reverse().join('/') : '-'}
+                          📅 {row.tanggalInput}
                         </td>
 
                         {/* 3. Nama Vendor */}
                         <td style={{ fontWeight: 900, color: '#38bdf8', border: '1px solid #334155', fontSize: '0.88rem', padding: '9px 8px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Briefcase size={15} color="#38bdf8" />
+                            <div style={{ width: '22px', height: '22px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
+                              {row.namaVendor ? row.namaVendor.charAt(0).toUpperCase() : 'V'}
+                            </div>
                             <span>{row.namaVendor}</span>
                           </div>
                         </td>
 
                         {/* 4. Pekerjaan */}
                         <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', fontSize: '0.88rem', padding: '9px 8px' }}>
-                          <div>{row.pekerjaan}</div>
-                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ background: '#ea580c', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 900 }}>{row.noInput}</span>
+                            <span>{row.pekerjaan}</span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', fontWeight: 800 }}>
                               {(row.proyek || '').includes('Park') ? '🌳' : '🏔️'} {row.proyek}
                             </span>
                             <span>&bull;</span>
-                            <span>{row.items?.length || 0} Item Pekerjaan</span>
+                            {row.blok && row.blok !== '-' && (
+                              <span style={{ color: '#818cf8', fontWeight: 700 }}>Blok {row.blok} No. {row.noUnit}</span>
+                            )}
+                            {row.fasum && row.fasum !== '-' && (
+                              <span style={{ color: '#38bdf8', fontWeight: 700 }}>Fasum: {row.fasum}</span>
+                            )}
+                            <span>&bull;</span>
+                            <span>{row.items?.length || 0} Item</span>
                           </div>
                         </td>
 
@@ -1247,7 +1306,7 @@ export const TeknikModule = () => {
 
                         {/* 9. Aksi */}
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '9px 6px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                             {/* Tombol Buka Sheet RAB */}
                             <button
                               type="button"
@@ -1265,7 +1324,7 @@ export const TeknikModule = () => {
                                 gap: '3px',
                                 cursor: 'pointer'
                               }}
-                              title="Buka Lembar Spreadsheet Input RAB"
+                              title="Buka Spreadsheet Input RAB"
                             >
                               <Calculator size={13} /> Input RAB
                             </button>
@@ -1297,7 +1356,7 @@ export const TeknikModule = () => {
                     {/* TOTAL BOTTOM BAR */}
                     <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
                       <td colSpan={4} style={{ textAlign: 'left', padding: '10px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                        Total Keseluruhan Proyek ({filteredRabProjects.length} Proyek)
+                        Total Keseluruhan ({filteredRabProjects.length} Proyek)
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                         Rp {formatRupiah(filteredRabProjects.reduce((acc, p) => acc + p.totalHargaRab, 0))}
@@ -1322,12 +1381,12 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* SPREADSHEET DETAIL MODAL: EXACT REPLICA OF media_1787929388918.jpg        */}
-      {/* DIBUKA SAAT KLIK TOMBOL "Input RAB" DI TABEL DEPAN                         */}
+      {/* SPREADSHEET DETAIL MODAL: EXACT REPLICA OF media_1787930407537.png        */}
+      {/* DIBUKA SAAT KLIK TOMBOL "Input RAB"                                       */}
       {/* ========================================================================= */}
       {selectedRabForSheet && (
         <div className="modal-backdrop" style={{ zIndex: 100 }}>
-          <div className="modal-content" style={{ maxWidth: '1100px', width: '96vw', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', maxHeight: '92vh', overflowY: 'auto' }}>
+          <div className="modal-content" style={{ maxWidth: '1140px', width: '96vw', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', maxHeight: '92vh', overflowY: 'auto' }}>
             
             {/* Modal Top Nav Bar */}
             <div className="modal-header" style={{ borderBottom: '1.5px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1336,7 +1395,7 @@ export const TeknikModule = () => {
                   onClick={() => setSelectedRabForSheet(null)}
                   style={{ background: '#1e293b', border: '1px solid #475569', color: '#f8fafc', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, fontSize: '0.8rem' }}
                 >
-                  <ArrowLeft size={15} /> Kembali ke Rekapitulasi
+                  <ArrowLeft size={15} /> Kembali ke Rekapitulasi Depan
                 </button>
                 <h3 className="modal-title" style={{ color: '#ffffff', fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Calculator size={22} color="#f59e0b" />
@@ -1364,46 +1423,81 @@ export const TeknikModule = () => {
 
             <div className="modal-body" style={{ padding: '1.25rem' }}>
               
-              {/* SPREADSHEET HEADER FORM EXACT AS EXCEL IMAGE */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem', background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1px solid #334155' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.5rem', alignItems: 'center', minWidth: '320px', flex: 1 }}>
-                  
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div style={{ fontWeight: 900, color: '#34d399', fontSize: '0.9rem' }}>{selectedRabForSheet.proyek}</div>
-
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Tanggal</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{selectedRabForSheet.tanggalInput}</div>
-
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama Vendor</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.9rem' }}>{selectedRabForSheet.namaVendor}</div>
-
-                  <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Pekerjaan</div>
-                  <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                  <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.9rem' }}>{selectedRabForSheet.pekerjaan}</div>
+              {/* SPREADSHEET HEADER FORM (EXACT 8 ROWS MATCHING media_1787930407537.png) */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#f59e0b', marginBottom: '0.6rem', borderBottom: '1px solid #334155', paddingBottom: '0.3rem' }}>
+                  Input RAB
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleOpenAddSheetItem}
-                  style={{
-                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    border: 'none',
-                    fontWeight: 900,
-                    color: '#000000',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    padding: '0.6rem 1.15rem',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Plus size={18} /> + Tambah Baris Item Pekerjaan
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', background: '#1e293b', padding: '1.1rem 1.3rem', borderRadius: '10px', border: '1px solid #334155' }}>
+                  
+                  {/* Left 8 Header Key-Value Lines */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '125px 15px 1fr', rowGap: '0.35rem', alignItems: 'center', minWidth: '340px' }}>
+                    
+                    {/* 1. No. Input */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. Input</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 900, color: '#ea580c', fontSize: '0.92rem' }}>{selectedRabForSheet.noInput || 'RAB - 01'}</div>
+
+                    {/* 2. Tanggal */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Tanggal</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{selectedRabForSheet.tanggalInput || '28/08/26'}</div>
+
+                    {/* 3. Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 900, color: '#34d399', fontSize: '0.9rem' }}>{selectedRabForSheet.proyek || 'Ashoka View'}</div>
+
+                    {/* 4. Nama Vendor */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama Vendor</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.9rem' }}>{selectedRabForSheet.namaVendor || 'Joko'}</div>
+
+                    {/* 5. Pekerjaan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Pekerjaan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.9rem' }}>{selectedRabForSheet.pekerjaan || 'Borongan Pemasangan lantai'}</div>
+
+                    {/* 6. Blok */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Blok</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 900, color: '#818cf8', fontSize: '0.9rem' }}>{selectedRabForSheet.blok || 'B1'}</div>
+
+                    {/* 7. No. unit */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. unit</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 900, color: '#818cf8', fontSize: '0.9rem' }}>{selectedRabForSheet.noUnit || '10'}</div>
+
+                    {/* 8. Fasum */}
+                    <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Fasum</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ fontWeight: 800, color: '#94a3b8', fontSize: '0.88rem' }}>{selectedRabForSheet.fasum || '-'}</div>
+                  </div>
+
+                  {/* Right Button */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddSheetItem}
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        border: 'none',
+                        fontWeight: 900,
+                        color: '#000000',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        padding: '0.65rem 1.25rem',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Plus size={18} /> + Tambah Baris Pekerjaan
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* SPREADSHEET TABLE WITH PEACH HEADER */}
@@ -1418,7 +1512,7 @@ export const TeknikModule = () => {
                           <tr style={{ background: '#f6b26b', color: '#000000' }}>
                             <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 4px' }}>No.</th>
                             <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Item Pekerjaan</th>
-                            <th style={{ minWidth: '200px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Spesifikasi</th>
+                            <th style={{ minWidth: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Spesifikasi</th>
                             <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Vol</th>
                             <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 6px' }}>Sat</th>
                             <th style={{ width: '135px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '10px 8px' }}>Harga Satuan</th>
@@ -1510,11 +1604,11 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isRabProjectModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Calculator size={22} color="#f59e0b" /> 
-                {editingRabProject ? 'Edit Proyek / Kontrak RAB' : 'Input Proyek RAB Baru'}
+                {editingRabProject ? `Edit Header ${rabProjectForm.noInput}` : 'Input Lembar RAB Baru'}
               </h3>
               <button onClick={() => setIsRabProjectModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -1522,54 +1616,74 @@ export const TeknikModule = () => {
             </div>
 
             <form onSubmit={handleSaveRabProject}>
-              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto' }}>
+                
+                {/* Row 1: No. Input & Tanggal */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏢 Proyek Perumahan</label>
-                    <select
+                    <label className="form-label" style={{ fontWeight: 800, color: '#ea580c' }}>🏷️ No. Input</label>
+                    <input
+                      type="text"
                       className="form-control"
-                      value={rabProjectForm.proyek}
-                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, proyek: e.target.value })}
+                      value={rabProjectForm.noInput}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, noInput: e.target.value })}
                       required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#ea580c' }}
-                    >
-                      <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
-                      <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
-                    </select>
+                      placeholder="RAB - 01"
+                      style={{ fontWeight: 900, background: '#1e293b', color: '#ffffff', borderColor: '#ea580c' }}
+                    />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Input</label>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal</label>
                     <input
-                      type="date"
+                      type="text"
                       className="form-control"
                       value={rabProjectForm.tanggalInput}
                       onChange={(e) => setRabProjectForm({ ...rabProjectForm, tanggalInput: e.target.value })}
                       required
+                      placeholder="28/08/26"
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
                     />
                   </div>
                 </div>
 
+                {/* Row 2: Proyek & Nama Vendor */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>🏢 Proyek</label>
+                    <select
+                      className="form-control"
+                      value={rabProjectForm.proyek}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, proyek: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#10b981' }}
+                    >
+                      <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
+                      <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>👷 Nama Vendor</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Joko / Slamet / CV Karya..."
+                      value={rabProjectForm.namaVendor}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, namaVendor: e.target.value })}
+                      required
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Pekerjaan */}
                 <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>🏢 Nama Vendor / Kontraktor</label>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#fbbf24' }}>🏗️ Pekerjaan</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: CV Karya Mandiri Teknik / PT Wijaya Bangun..."
-                    value={rabProjectForm.namaVendor}
-                    onChange={(e) => setRabProjectForm({ ...rabProjectForm, namaVendor: e.target.value })}
-                    required
-                    style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
-                  />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#fbbf24' }}>🏗️ Nama Pekerjaan</label>
-                  <textarea
-                    className="form-control"
-                    rows={2}
-                    placeholder="Contoh: Pekerjaan Struktur & Arsitektur Rumah Type 45/90 - Blok A01"
+                    placeholder="Contoh: Borongan Pemasangan lantai / Pasang Bata Ringan..."
                     value={rabProjectForm.pekerjaan}
                     onChange={(e) => setRabProjectForm({ ...rabProjectForm, pekerjaan: e.target.value })}
                     required
@@ -1577,8 +1691,48 @@ export const TeknikModule = () => {
                   />
                 </div>
 
+                {/* Row 4: Blok, No. unit, Fasum */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#818cf8' }}>🏠 Blok</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="B1, A, C..."
+                      value={rabProjectForm.blok}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, blok: e.target.value.toUpperCase() })}
+                      style={{ fontWeight: 900, background: '#1e293b', color: '#ffffff', borderColor: '#6366f1' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#818cf8' }}>🔢 No. unit</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="10, 01, 05..."
+                      value={rabProjectForm.noUnit}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, noUnit: e.target.value })}
+                      style={{ fontWeight: 900, background: '#1e293b', color: '#ffffff', borderColor: '#6366f1' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 800, color: '#94a3b8' }}>🏗️ Fasum (Opsional)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Fasum / Jalan / -"
+                      value={rabProjectForm.fasum}
+                      onChange={(e) => setRabProjectForm({ ...rabProjectForm, fasum: e.target.value })}
+                      style={{ background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 5: Retensi */}
                 <div className="form-group" style={{ marginBottom: '0.5rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#c084fc' }}>🛡️ Persentase Retensi Pemeliharaan (%)</label>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#c084fc' }}>🛡️ Retensi Pemeliharaan (%)</label>
                   <input
                     type="number"
                     min="0"
@@ -1589,7 +1743,6 @@ export const TeknikModule = () => {
                     required
                     style={{ fontWeight: 900, background: '#1e293b', color: '#c084fc', borderColor: '#c084fc' }}
                   />
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>Standar industri properti adalah 5% dari Total Nilai Kontrak.</div>
                 </div>
               </div>
 
@@ -1602,7 +1755,7 @@ export const TeknikModule = () => {
                   className="btn btn-primary"
                   style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000' }}
                 >
-                  {editingRabProject ? '💾 Simpan Perubahan' : '🚀 Lanjut ke Input Spreadsheet RAB'}
+                  {editingRabProject ? '💾 Simpan Perubahan' : '🚀 Lanjut ke Spreadsheet RAB'}
                 </button>
               </div>
             </form>
@@ -1633,7 +1786,7 @@ export const TeknikModule = () => {
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: Pekerjaan Pasangan Dinding Bata Ringan & Plester Acian"
+                    placeholder="Contoh: Perataan tanah / Pemasangan keramik / Plint..."
                     value={sheetItemForm.itemPekerjaan}
                     onChange={(e) => setSheetItemForm({ ...sheetItemForm, itemPekerjaan: e.target.value })}
                     required
@@ -1642,11 +1795,11 @@ export const TeknikModule = () => {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📋 Spesifikasi Material / Mutu</label>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📋 Spesifikasi</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: Bata Hebel 10cm, Mortar Utama MU-380"
+                    placeholder="Contoh: keramik 40 x 40 / uk. 7 cm / -"
                     value={sheetItemForm.spesifikasi}
                     onChange={(e) => setSheetItemForm({ ...sheetItemForm, spesifikasi: e.target.value })}
                     style={{ background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
@@ -1690,7 +1843,7 @@ export const TeknikModule = () => {
                   <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>💰 Harga Satuan (Rp)</label>
                   <input
                     type="number"
-                    step="1000"
+                    step="500"
                     min="0"
                     className="form-control"
                     value={sheetItemForm.hargaSatuan}
@@ -1699,7 +1852,7 @@ export const TeknikModule = () => {
                     style={{ fontWeight: 900, fontSize: '1rem', background: '#1e293b', color: '#34d399', borderColor: '#10b981' }}
                   />
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
-                    Subtotal Item: <strong style={{ color: '#ffffff' }}>Rp {formatRupiah((Number(sheetItemForm.vol) || 0) * (Number(sheetItemForm.hargaSatuan) || 0))}</strong>
+                    Jumlah (Vol x Harga): <strong style={{ color: '#ffffff' }}>Rp {formatRupiah((Number(sheetItemForm.vol) || 0) * (Number(sheetItemForm.hargaSatuan) || 0))}</strong>
                   </div>
                 </div>
 
@@ -1745,193 +1898,6 @@ export const TeknikModule = () => {
                   style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000' }}
                 >
                   {editingSheetItem ? '💾 Simpan Item' : '🚀 Masukkan Item ke Sheet'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL: INPUT / EDIT ABSEN TENAGA KERJA                                   */}
-      {/* ========================================================================= */}
-      {isAbsenModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '2px solid #ea580c', color: '#ffffff' }}>
-            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
-              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <HardHat size={22} color="#ea580c" /> 
-                {editingAbsenItem ? `Edit Absen: ${editingAbsenItem.nama}` : 'Input Absen Tenaga Kerja Baru'}
-              </h3>
-              <button onClick={() => setIsAbsenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveAbsen}>
-              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>🏢 Proyek Perumahan</label>
-                    <select
-                      className="form-control"
-                      value={absenFormData.proyek}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, proyek: e.target.value })}
-                      required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#ea580c' }}
-                    >
-                      <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
-                      <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal Absen</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={absenFormData.tanggal}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, tanggal: e.target.value })}
-                      required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>👷 Nama Tenaga Kerja / Tukang</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Slamet Riyadi / Bambang / Joko..."
-                    value={absenFormData.nama}
-                    onChange={(e) => setAbsenFormData({ ...absenFormData, nama: e.target.value })}
-                    required
-                    style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8' }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>⏱️ Jam Masuk</label>
-                    <input
-                      type="time"
-                      className="form-control"
-                      value={absenFormData.jamMasuk}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamMasuk: e.target.value })}
-                      required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#10b981' }}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800, color: '#fbbf24' }}>🏁 Jam Pulang</label>
-                    <input
-                      type="time"
-                      className="form-control"
-                      value={absenFormData.jamPulang}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamPulang: e.target.value })}
-                      required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#f59e0b' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '0.85rem', background: '#1e293b', padding: '0.85rem', borderRadius: '10px', border: '1px solid #475569' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem', display: 'block' }}>
-                    📍 Lokasi Pekerjaan
-                  </label>
-                  <div style={{ display: 'flex', gap: '1.25rem', marginBottom: '0.75rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 800, color: absenFormData.lokasiTipe === 'unit' ? '#38bdf8' : '#cbd5e1' }}>
-                      <input
-                        type="radio"
-                        name="lokasiTipe"
-                        value="unit"
-                        checked={absenFormData.lokasiTipe === 'unit'}
-                        onChange={() => setAbsenFormData({ ...absenFormData, lokasiTipe: 'unit', umum: '-' })}
-                      />
-                      🏠 Unit Kavling Rumah (Blok & No)
-                    </label>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 800, color: absenFormData.lokasiTipe === 'umum' ? '#38bdf8' : '#cbd5e1' }}>
-                      <input
-                        type="radio"
-                        name="lokasiTipe"
-                        value="umum"
-                        checked={absenFormData.lokasiTipe === 'umum'}
-                        onChange={() => setAbsenFormData({ ...absenFormData, lokasiTipe: 'umum', blok: '-', no: '-' })}
-                      />
-                      🏗️ Area Umum / Fasum
-                    </label>
-                  </div>
-
-                  {absenFormData.lokasiTipe === 'unit' ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Blok</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="A, B, C..."
-                          value={absenFormData.blok === '-' ? '' : absenFormData.blok}
-                          onChange={(e) => setAbsenFormData({ ...absenFormData, blok: e.target.value.toUpperCase() })}
-                          required={absenFormData.lokasiTipe === 'unit'}
-                          style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#3b82f6' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Nomor Unit</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="01, 02, 05..."
-                          value={absenFormData.no === '-' ? '' : absenFormData.no}
-                          onChange={(e) => setAbsenFormData({ ...absenFormData, no: e.target.value })}
-                          required={absenFormData.lokasiTipe === 'unit'}
-                          style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#6366f1' }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Nama Area Umum / Fasum</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Contoh: Gerbang Utama / Saluran Drainase / Taman Fasum..."
-                        value={absenFormData.umum === '-' ? '' : absenFormData.umum}
-                        onChange={(e) => setAbsenFormData({ ...absenFormData, umum: e.target.value })}
-                        required={absenFormData.lokasiTipe === 'umum'}
-                        style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#0284c7' }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '0.5rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>📝 Catatan Pekerjaan</label>
-                  <textarea
-                    className="form-control"
-                    rows={3}
-                    placeholder="Rincian pekerjaan yang dilakukan (Contoh: Pemasangan bata ringan dinding, plester acian, pengecoran balok lintel...)"
-                    value={absenFormData.catatan}
-                    onChange={(e) => setAbsenFormData({ ...absenFormData, catatan: e.target.value })}
-                    required
-                    style={{ fontSize: '0.85rem', background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
-                  />
-                </div>
-              </div>
-
-              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsAbsenModalOpen(false)}>
-                  Batal
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', fontWeight: 800, color: '#ffffff' }}
-                >
-                  {editingAbsenItem ? '💾 Simpan Perubahan Absen' : '🚀 Simpan Absen Tenaga Kerja'}
                 </button>
               </div>
             </form>
