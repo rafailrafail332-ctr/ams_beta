@@ -115,7 +115,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'mkt-leads', title: '1. Pipeline CRM Leads & Komisi Sales', moduleKey: 'marketing', subTabKey: 'leads', icon: Users, color: '#FBBF24' },
         { id: 'mkt-spr', title: '2. Transaksi Unit & Upload Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: FileText, color: '#FBBF24' },
         { id: 'cr-tickets', title: '3. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
-        { id: 'cr-handover', title: '4. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
+        { id: 'cr-handover', title: 'BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
       ];
     }
 
@@ -146,7 +146,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'cr-tickets', title: '1. Komplain & Tiket Garansi Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: Wrench, color: '#FB7185' },
-        { id: 'cr-handover', title: '2. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' },
+        { id: 'cr-handover', title: 'BAST Serah Terima Kunci (STK) & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' },
         { id: 'cr-csat', title: '3. Kepuasan Pelanggan (CSAT) & Review', moduleKey: 'customer-relation', subTabKey: 'csat', icon: HeartHandshake, color: '#FB7185' },
         { id: 'cr-ipl', title: '4. Tagihan IPL & Maintenance Estate', moduleKey: 'customer-relation', subTabKey: 'ipl', icon: DollarSign, color: '#10B981' },
         { id: 'cr-docs', title: '5. Penyerahan Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: FileCheck, color: '#38BDF8' },
@@ -250,123 +250,71 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         {/* Navigation Items */}
         <div style={{ flex: 1, padding: '1.25rem 1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           
-          {/* Main Dashboard Button (Only for Boss Roles) */}
-          {isBoss && (
-            <button
-              onClick={() => handleNavClick('dashboard')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.85rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                backgroundColor: currentTab === 'dashboard' ? 'var(--accent-primary)' : 'var(--bg-card)',
-                color: currentTab === 'dashboard' ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                marginBottom: '0.5rem'
-              }}
-            >
-              <LayoutDashboard size={18} />
-              <span>Dashboard Utama</span>
-            </button>
-          )}
+          {/* Main Dashboard Button (Always Visible for All Users) */}
+          <button
+            onClick={() => handleNavClick('dashboard')}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+              backgroundColor: currentTab === 'dashboard' ? 'var(--accent-primary)' : 'var(--bg-card)',
+              color: currentTab === 'dashboard' ? '#ffffff' : 'var(--text-muted)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: '0.5rem'
+            }}
+          >
+            <LayoutDashboard size={18} />
+            <span>Dashboard Utama</span>
+          </button>
 
           <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0.2rem 0.25rem 0.4rem' }}>
-            {isBoss ? `SEMUA DEPARTEMEN (PIMPINAN)` : `SUB-MODUL (${currentUser?.name})`}
+            SEMUA MODUL DEPARTEMEN PERUSAHAAN
           </div>
 
-          {/* IF STAFF USER: RENDER TAILORED & SPACIOUS SUB-MODULES NAVIGATION WITHOUT "PILAR" */}
-          {!isBoss ? (
-            staffSubModules.map((sub) => {
-              const isActive = currentTab === sub.moduleKey && (activeSubTab === sub.subTabKey || activeSubTab === 'default');
-              const IconComp = sub.icon;
+          {/* RENDER ALL CORE COMPANY MODULES PERMANENTLY FOR ALL ACCOUNTS */}
+          {fullBossModules.map((card) => {
+            const isActive = currentTab === card.tab;
+            const hasAccess = canAccessModule(card.tab);
 
-              return (
-                <div
-                  key={sub.id}
-                  onClick={() => handleNavClick(sub.moduleKey, sub.subTabKey)}
-                  style={{
-                    width: '100%',
-                    padding: '0.9rem 1rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: isActive ? `1.5px solid ${sub.color}` : '1px solid var(--border-color)',
-                    backgroundColor: isActive ? 'rgba(30, 41, 59, 0.9)' : 'var(--bg-card)',
-                    boxShadow: isActive ? `0 4px 18px ${sub.color}33` : 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    borderLeft: `5px solid ${sub.color}`,
-                    marginBottom: '0.2rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', overflow: 'hidden' }}>
-                    <div style={{
-                      width: '34px',
-                      height: '34px',
-                      borderRadius: '10px',
-                      background: `${sub.color}20`,
-                      color: sub.color,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <IconComp size={18} />
-                    </div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: '1.3' }}>
-                      {sub.title}
-                    </div>
+            return (
+              <div
+                key={card.id}
+                onClick={() => handleNavClick(card.tab)}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem 0.9rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: isActive ? `1.5px solid ${card.color}` : '1px solid var(--border-color)',
+                  backgroundColor: isActive ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                  boxShadow: isActive ? `0 0 16px ${card.color}33` : 'none',
+                  cursor: hasAccess ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.25s ease',
+                  borderLeft: `4px solid ${card.color}`,
+                  opacity: hasAccess ? 1 : 0.45
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                    {card.mainTitle}
                   </div>
-                  <ChevronRight size={16} color={sub.color} style={{ opacity: isActive ? 1 : 0.35, flexShrink: 0 }} />
                 </div>
-              );
-            })
-          ) : (
-            /* IF BOSS ROLE: RENDER FULL MULTI-MODULE CARDS */
-            fullBossModules.map((card) => {
-              const isActive = currentTab === card.tab;
-              const hasAccess = canAccessModule(card.tab);
-
-              return (
-                <div
-                  key={card.id}
-                  onClick={() => handleNavClick(card.tab)}
-                  style={{
-                    width: '100%',
-                    padding: '0.8rem 0.9rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: isActive ? `1.5px solid ${card.color}` : '1px solid var(--border-color)',
-                    backgroundColor: isActive ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-                    boxShadow: isActive ? `0 0 16px ${card.color}33` : 'none',
-                    cursor: hasAccess ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.25s ease',
-                    borderLeft: `4px solid ${card.color}`,
-                    opacity: hasAccess ? 1 : 0.45
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-main)' }}>
-                      {card.mainTitle}
-                    </div>
-                  </div>
-                  {hasAccess ? (
-                    <ChevronRight size={16} color={card.color} style={{ opacity: isActive ? 1 : 0.4 }} />
-                  ) : (
-                    <Lock size={14} color="var(--danger)" title="Restriksi Hak Akses Role" />
-                  )}
-                </div>
-              );
-            })
-          )}
+                {hasAccess ? (
+                  <ChevronRight size={16} color={card.color} style={{ opacity: isActive ? 1 : 0.4 }} />
+                ) : (
+                  <Lock size={14} color="var(--danger)" title="Restriksi Hak Akses Role" />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Footer User Profile Card */}

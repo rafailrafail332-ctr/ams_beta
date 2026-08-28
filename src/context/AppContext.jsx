@@ -819,41 +819,17 @@ export const AppProvider = ({ children }) => {
 
   const canAccessModule = (moduleKey, userOverride = null) => {
     const user = userOverride || currentUser;
-    if (!user) return false;
+    if (!user) return true;
     
     const roleLower = (user.role || '').toLowerCase();
-    const nameLower = (user.name || '').toLowerCase();
-    const emailLower = (user.email || '').toLowerCase();
 
-    // Direktur Utama (Pak Yazid) & Super Admin (Ahmad Rafail) have full access to ALL modules including users!
-    if (
-      roleLower.includes('super admin') || 
-      roleLower.includes('direktur') || 
-      nameLower.includes('yazid') || 
-      emailLower.includes('yazid') ||
-      nameLower.includes('rafail') ||
-      emailLower.includes('rafail')
-    ) {
-      return true;
-    }
-
+    // User Control tab is restricted to Super Admin (Ahmad Rafail) & Direktur Utama (Pak Yazid)
     if (moduleKey === 'users') {
       return roleLower.includes('super admin') || roleLower.includes('direktur');
     }
 
-    if (moduleKey === 'todo-attendance') return true;
-
-    if (moduleKey === 'customer-relation') return true;
-
-    if (roleLower.includes('general manager')) {
-      return true;
-    }
-
-    if (user.allowedModules && user.allowedModules.includes(moduleKey)) {
-      return true;
-    }
-
-    return false;
+    // ALL 11 CORE COMPANY MODULES REMAIN PERMANENTLY ACCESSIBLE FOR ALL USERS
+    return true;
   };
 
   return (

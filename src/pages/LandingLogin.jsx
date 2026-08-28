@@ -130,9 +130,10 @@ export const LandingLogin = ({ onLoginSuccess }) => {
         </div>
 
         <div className="glass-card" style={{
-          background: 'rgba(30, 41, 59, 0.75)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: '#1e293b',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(245, 158, 11, 0.15)',
           borderRadius: '20px',
           padding: '1.75rem'

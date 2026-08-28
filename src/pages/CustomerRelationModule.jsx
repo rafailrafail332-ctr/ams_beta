@@ -1121,7 +1121,7 @@ export const CustomerRelationModule = () => {
           <Wrench size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Keluhan & Garansi Retensi ({tickets.length})
         </button>
         <button className={`tab-item ${activeTab === 'handover' ? 'active' : ''}`} onClick={() => setActiveTab('handover')}>
-          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. STK ({handovers.length})
+          <KeyRound size={16} style={{ display: 'inline', marginRight: '6px' }} /> STK ({handovers.length})
         </button>
         <button className={`tab-item ${activeTab === 'csat' ? 'active' : ''}`} onClick={() => setActiveTab('csat')}>
           <Star size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Survei CSAT & Referal ({reviews.length})
@@ -1187,7 +1187,7 @@ export const CustomerRelationModule = () => {
                   <thead>
                     <tr>
                       <th style={{ width: '45px', textAlign: 'center' }}>No</th>
-                      <th style={{ width: '130px' }}>No Tiket & Unit</th>
+                      <th style={{ width: '110px' }}>Unit Kavling</th>
                       <th style={{ width: '155px' }}>Tanggal Komplain & Input</th>
                       <th style={{ width: '160px' }}>Konsumen & WA</th>
                       <th>Kategori & Deskripsi Keluhan</th>
@@ -1203,8 +1203,7 @@ export const CustomerRelationModule = () => {
                           {idx + 1}
                         </td>
                         <td>
-                          <div style={{ fontWeight: 900, color: 'var(--accent-primary)', fontSize: '0.85rem' }}>{t.id}</div>
-                          <span className="badge badge-secondary" style={{ fontSize: '0.72rem', fontWeight: 800, marginTop: '3px', display: 'inline-block' }}>
+                          <span style={{ fontWeight: 900, color: 'var(--accent-primary)', fontSize: '0.88rem', background: 'rgba(99, 102, 241, 0.12)', padding: '4px 8px', borderRadius: '6px', display: 'inline-block', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
                             Unit {t.unitNo}
                           </span>
                         </td>
@@ -2259,7 +2258,7 @@ export const CustomerRelationModule = () => {
           <div className="modal-content" style={{ maxWidth: '600px' }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Wrench size={20} color="#F59E0B" /> {editingTicket ? `Edit Tiket Komplain (${editingTicket.id})` : 'Buat Tiket Komplain & Garansi Retensi Baru'}
+                <Wrench size={20} color="#F59E0B" /> {editingTicket ? `Edit Data Keluhan Unit ${ticketForm.unitNo}` : 'Input Keluhan & Garansi Retensi Baru'}
               </h3>
               <button onClick={() => setIsTicketModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -2267,46 +2266,31 @@ export const CustomerRelationModule = () => {
             </div>
             <form onSubmit={handleSaveTicket}>
               <div className="modal-body">
-                {/* Row 1: No Tiket (Otomatis) & Unit Kavling (Otomatis Pilih) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.75rem' }}>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800 }}>🏷️ No. Tiket (Otomatis)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={ticketForm.ticketNo}
-                      readOnly
-                      style={{ fontWeight: 800, color: 'var(--accent-primary)', background: 'rgba(99, 102, 241, 0.1)', cursor: 'not-allowed' }}
-                    />
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '3px' }}>
-                      ✓ Terbit berurutan otomatis
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 800 }}>🏠 Unit Kavling (Pilih)</label>
-                    <select
-                      className="form-control"
-                      value={ticketForm.unitNo}
-                      onChange={(e) => {
-                        const selectedNo = e.target.value;
-                        const matched = safeUnits.find(u => u.no === selectedNo);
-                        setTicketForm({
-                          ...ticketForm,
-                          unitNo: selectedNo,
-                          customerName: matched ? matched.customer : ticketForm.customerName,
-                          phone: matched ? matched.phone : ticketForm.phone
-                        });
-                      }}
-                      required
-                      style={{ fontWeight: 800, borderColor: '#38BDF8' }}
-                    >
-                      {safeUnits.map((u, i) => (
-                        <option key={u.no || i} value={u.no}>
-                          Unit {u.no} {u.cluster ? `(${u.cluster})` : ''} - {u.customer || 'Ready'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {/* Row 1: Unit Kavling */}
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800 }}>🏠 Unit Kavling (Pilih Unit)</label>
+                  <select
+                    className="form-control"
+                    value={ticketForm.unitNo}
+                    onChange={(e) => {
+                      const selectedNo = e.target.value;
+                      const matched = safeUnits.find(u => u.no === selectedNo);
+                      setTicketForm({
+                        ...ticketForm,
+                        unitNo: selectedNo,
+                        customerName: matched ? matched.customer : ticketForm.customerName,
+                        phone: matched ? matched.phone : ticketForm.phone
+                      });
+                    }}
+                    required
+                    style={{ fontWeight: 800, borderColor: '#38BDF8', fontSize: '0.9rem' }}
+                  >
+                    {safeUnits.map((u, i) => (
+                      <option key={u.no || i} value={u.no}>
+                        Unit {u.no} {u.cluster ? `(${u.cluster})` : ''} - {u.customer || 'Ready'}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Row 2: Nama Konsumen & No WhatsApp */}
@@ -2439,7 +2423,7 @@ export const CustomerRelationModule = () => {
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsTicketModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800 }}>
-                  {editingTicket ? '💾 Simpan Perubahan Tiket' : '🚀 Terbitkan Tiket Komplain'}
+                  {editingTicket ? '💾 Simpan Perubahan Data Keluhan' : '🚀 Simpan Data Keluhan'}
                 </button>
               </div>
             </form>
