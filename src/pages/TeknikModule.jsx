@@ -2478,8 +2478,8 @@ export const TeknikModule = () => {
                               type="button"
                               onClick={() => handleOpenSheetFromLaporan(row.id)}
                               style={{
-                                background: '#f59e0b',
-                                color: '#000000',
+                                background: '#2563eb',
+                                color: '#ffffff',
                                 border: 'none',
                                 padding: '3px 8px',
                                 borderRadius: '4px',
@@ -2490,9 +2490,9 @@ export const TeknikModule = () => {
                                 gap: '3px',
                                 cursor: 'pointer'
                               }}
-                              title="Buka Spreadsheet Input"
+                              title="Edit RAB"
                             >
-                              <ExternalLink size={12} /> Buka
+                              <Edit3 size={12} /> Edit
                             </button>
 
                             <button
