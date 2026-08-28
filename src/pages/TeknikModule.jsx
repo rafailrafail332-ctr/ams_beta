@@ -28,7 +28,8 @@ import {
   Save,
   RotateCcw,
   BarChart3,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -96,7 +97,7 @@ export const TeknikModule = () => {
   // ==========================================
   // 1. SUB-MODUL 1: ABSEN TENAGA KERJA STORE
   // ==========================================
-  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v6';
+  const STORAGE_KEY_ABSEN = 'ams_teknik_absen_tenaga_kerja_v7';
 
   const defaultAttendance = [
     {
@@ -105,11 +106,12 @@ export const TeknikModule = () => {
       nama: 'Slamet Riyadi',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 2, // 2 Jam Lembur
       lokasiTipe: 'unit',
       blok: 'A',
       no: '01',
       umum: '-',
-      catatan: 'Pemasangan bata ringan dinding lantai 1 & plester acian',
+      catatan: 'Pemasangan bata ringan dinding lantai 1 & plester acian (Lembur cor balok)',
       tanggal: '2025-08-28'
     },
     {
@@ -118,6 +120,7 @@ export const TeknikModule = () => {
       nama: 'Bambang Supeno',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 2,
       lokasiTipe: 'unit',
       blok: 'A',
       no: '01',
@@ -131,6 +134,7 @@ export const TeknikModule = () => {
       nama: 'Joko Susanto',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 0,
       lokasiTipe: 'umum',
       blok: '-',
       no: '-',
@@ -144,11 +148,12 @@ export const TeknikModule = () => {
       nama: 'Agus Triono',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 3, // 3 Jam Lembur
       lokasiTipe: 'unit',
       blok: 'B',
       no: '05',
       umum: '-',
-      catatan: 'Pemasangan keramik lantai 60x60 ruang tamu & teras depan',
+      catatan: 'Pemasangan keramik lantai 60x60 ruang tamu & teras depan (Lembur nat keramik)',
       tanggal: '2025-08-28'
     },
     {
@@ -157,6 +162,7 @@ export const TeknikModule = () => {
       nama: 'Dedi Kurniawan',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 0,
       lokasiTipe: 'unit',
       blok: 'B',
       no: '05',
@@ -170,6 +176,7 @@ export const TeknikModule = () => {
       nama: 'Sunarto',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 1, // 1 Jam Lembur
       lokasiTipe: 'umum',
       blok: '-',
       no: '-',
@@ -196,11 +203,16 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [attendanceList]);
 
-  // Absen Filter States
+  // Absen Filter States (Search, Proyek, Nama, Lembur, Date, Location)
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('ALL');
+  const [nameFilter, setNameFilter] = useState('ALL');
+  const [lemburFilter, setLemburFilter] = useState('ALL'); // 'ALL' | 'LEMBUR' | 'NORMAL'
   const [dateFilter, setDateFilter] = useState('2025-08-28');
   const [locationTypeFilter, setLocationTypeFilter] = useState('ALL');
+
+  // Extract unique worker names for the filter dropdown
+  const uniqueWorkerNames = Array.from(new Set(attendanceList.map(a => a.nama).filter(Boolean))).sort();
 
   // Absen Modal State
   const [isAbsenModalOpen, setIsAbsenModalOpen] = useState(false);
@@ -210,6 +222,7 @@ export const TeknikModule = () => {
     nama: '',
     jamMasuk: '08:00',
     jamPulang: '17:00',
+    lembur: 0,
     lokasiTipe: 'unit',
     blok: 'A',
     no: '01',
@@ -225,6 +238,7 @@ export const TeknikModule = () => {
       nama: '',
       jamMasuk: '08:00',
       jamPulang: '17:00',
+      lembur: 0,
       lokasiTipe: 'unit',
       blok: 'A',
       no: '01',
@@ -242,6 +256,7 @@ export const TeknikModule = () => {
       nama: item.nama || '',
       jamMasuk: item.jamMasuk || '08:00',
       jamPulang: item.jamPulang || '17:00',
+      lembur: Number(item.lembur) || 0,
       lokasiTipe: item.lokasiTipe || (item.umum && item.umum !== '-' ? 'umum' : 'unit'),
       blok: item.blok || '-',
       no: item.no || '-',
@@ -269,6 +284,7 @@ export const TeknikModule = () => {
     const payload = {
       ...absenFormData,
       nama: absenFormData.nama.trim(),
+      lembur: Math.max(0, Number(absenFormData.lembur) || 0),
       blok: absenFormData.lokasiTipe === 'unit' ? (absenFormData.blok.trim().toUpperCase() || 'A') : '-',
       no: absenFormData.lokasiTipe === 'unit' ? (absenFormData.no.trim() || '01') : '-',
       umum: absenFormData.lokasiTipe === 'umum' ? (absenFormData.umum.trim() || 'Area Fasum') : '-'
@@ -301,19 +317,27 @@ export const TeknikModule = () => {
     ].some(val => (val || '').toLowerCase().includes(searchQuery.toLowerCase().trim()));
 
     const matchProject = projectFilter === 'ALL' || item.proyek === projectFilter;
+    const matchName = nameFilter === 'ALL' || item.nama === nameFilter;
     const matchDate = !dateFilter || item.tanggal === dateFilter;
+    const matchLembur = lemburFilter === 'ALL' ||
+      (lemburFilter === 'LEMBUR' && Number(item.lembur) > 0) ||
+      (lemburFilter === 'NORMAL' && (!item.lembur || Number(item.lembur) === 0));
     const matchLocType = locationTypeFilter === 'ALL' || 
       (locationTypeFilter === 'unit' && item.blok !== '-') ||
       (locationTypeFilter === 'umum' && item.umum !== '-');
 
-    return matchSearch && matchProject && matchDate && matchLocType;
+    return matchSearch && matchProject && matchName && matchDate && matchLembur && matchLocType;
   });
+
+  // Calculate totals for KPI
+  const totalLemburCount = filteredAttendanceList.filter(a => Number(a.lembur) > 0).length;
+  const totalLemburHours = filteredAttendanceList.reduce((acc, a) => acc + (Number(a.lembur) || 0), 0);
 
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // (EXACT STRUCTURE OF media_1787930910161.png, media_1787930804198.jpg, media_1787930407537.png)
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v6';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v7';
 
   const defaultRabSheets = [
     {
@@ -618,7 +642,7 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran tenaga kerja lapangan, lembar input spreadsheet RAB, & laporan rekapitulasi progres proyek.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & jam lembur tenaga kerja lapangan, lembar input spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
 
@@ -743,11 +767,12 @@ export const TeknikModule = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA                                     */}
+      {/* VIEW 1: SUB-MODUL ABSEN TENAGA KERJA + LEMBUR + FILTER NAMA & PROYEK     */}
       {/* ========================================================================= */}
       {activeTab === 'absen' && (
         <div className="module-animated-view">
-          {/* KPI Cards */}
+          
+          {/* KPI Cards (Including Overtime Count) */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f97316', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
               <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>Total Tenaga Kerja Hadir</div>
@@ -755,33 +780,35 @@ export const TeknikModule = () => {
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{dateFilter ? `Tanggal: ${dateFilter}` : 'Semua tanggal'}</div>
             </div>
 
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #eab308', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#facc15', fontWeight: 800 }}>⚡ Tenaga Kerja Lembur</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#facc15', marginTop: '2px' }}>
+                {totalLemburCount} Orang
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total: {totalLemburHours} Jam Lembur</div>
+            </div>
+
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park (Lokasi 1)</div>
+              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Ashoka Park</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981', marginTop: '2px' }}>
                 {filteredAttendanceList.filter(a => (a.proyek || '').includes('Park')).length} Orang
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di Park</div>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Ashoka View (Lokasi 2)</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f59e0b', marginTop: '2px' }}>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Ashoka View</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
                 {filteredAttendanceList.filter(a => (a.proyek || '').includes('View')).length} Orang
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tenaga kerja aktif di View</div>
             </div>
-
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Kavling vs Area Umum</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
-                {filteredAttendanceList.filter(a => a.blok !== '-').length} : {filteredAttendanceList.filter(a => a.umum !== '-').length}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Unit Rumah : Fasum / Infrastruktur</div>
-            </div>
           </div>
 
-          {/* FILTER TOOLBAR */}
-          <div className="glass-card" style={{ padding: '1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* FILTER TOOLBAR: PROYEK, NAMA, LEMBUR, TANGGAL & SEARCH */}
+          <div className="glass-card" style={{ padding: '1.1rem', marginBottom: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            
+            {/* ROW 1: Filter Proyek Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
@@ -843,6 +870,7 @@ export const TeknikModule = () => {
                 </button>
               </div>
 
+              {/* Date & Reset Filter */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '4px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc' }}>📅 Tanggal:</span>
@@ -859,10 +887,10 @@ export const TeknikModule = () => {
                   )}
                 </div>
 
-                {(searchQuery || projectFilter !== 'ALL' || !dateFilter || locationTypeFilter !== 'ALL') && (
+                {(searchQuery || projectFilter !== 'ALL' || nameFilter !== 'ALL' || lemburFilter !== 'ALL' || !dateFilter) && (
                   <button 
                     className="btn btn-secondary btn-sm" 
-                    onClick={() => { setSearchQuery(''); setProjectFilter('ALL'); setDateFilter('2025-08-28'); setLocationTypeFilter('ALL'); }}
+                    onClick={() => { setSearchQuery(''); setProjectFilter('ALL'); setNameFilter('ALL'); setLemburFilter('ALL'); setDateFilter('2025-08-28'); setLocationTypeFilter('ALL'); }}
                     style={{ fontSize: '0.78rem', padding: '5px 10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5', fontWeight: 800 }}
                   >
                     Reset Filter
@@ -871,14 +899,98 @@ export const TeknikModule = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: '260px', position: 'relative' }}>
-                <Search size={18} color="#ea580c" />
+            {/* ROW 2: Filter Nama Dropdown + Filter Lembur Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
+              
+              {/* Filter Nama Dropdown */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: '220px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#38bdf8' }}>👷 Filter Nama:</span>
+                <select
+                  value={nameFilter}
+                  onChange={(e) => setNameFilter(e.target.value)}
+                  style={{
+                    background: '#0f172a',
+                    border: '1.5px solid #38bdf8',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    padding: '5px 10px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    outline: 'none',
+                    flex: 1
+                  }}
+                >
+                  <option value="ALL">Semua Tenaga Kerja ({uniqueWorkerNames.length})</option>
+                  {uniqueWorkerNames.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filter Lembur Buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#facc15' }}>⚡ Filter Lembur:</span>
+                
+                <button
+                  type="button"
+                  onClick={() => setLemburFilter('ALL')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: lemburFilter === 'ALL' ? '2px solid #eab308' : '1px solid #475569',
+                    background: lemburFilter === 'ALL' ? '#eab308' : '#0f172a',
+                    color: lemburFilter === 'ALL' ? '#000000' : '#ffffff'
+                  }}
+                >
+                  Semua
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setLemburFilter('LEMBUR')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: lemburFilter === 'LEMBUR' ? '2px solid #f97316' : '1px solid rgba(249, 115, 22, 0.4)',
+                    background: lemburFilter === 'LEMBUR' ? '#ea580c' : 'rgba(249, 115, 22, 0.15)',
+                    color: lemburFilter === 'LEMBUR' ? '#ffffff' : '#fb923c'
+                  }}
+                >
+                  ⚡ Hanya Lembur ({attendanceList.filter(a => Number(a.lembur) > 0).length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setLemburFilter('NORMAL')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: lemburFilter === 'NORMAL' ? '2px solid #64748b' : '1px solid #334155',
+                    background: lemburFilter === 'NORMAL' ? '#334155' : '#0f172a',
+                    color: '#ffffff'
+                  }}
+                >
+                  Reguler (Tanpa Lembur)
+                </button>
+              </div>
+
+              {/* Text Search Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '220px', position: 'relative' }}>
+                <Search size={16} color="#ea580c" />
                 <input
                   type="text"
                   className="form-control"
-                  style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff' }}
-                  placeholder="Cari nama tukang / tenaga kerja, pekerjaan, blok-nomor kavling, area umum..."
+                  style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '34px', fontSize: '0.82rem', color: '#ffffff', width: '100%' }}
+                  placeholder="Cari nama, pekerjaan, blok/kavling..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -888,114 +1000,123 @@ export const TeknikModule = () => {
                   </button>
                 )}
               </div>
-
-              <div style={{ fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 700 }}>
-                Menampilkan <span style={{ color: '#fb923c', fontWeight: 900 }}>{filteredAttendanceList.length}</span> dari {attendanceList.length} Tenaga Kerja
-              </div>
             </div>
           </div>
 
-          {/* ABSEN TABLE */}
+          {/* ABSEN TABLE (WITH LEMBUR COLUMN IN JAM KERJA) */}
           <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>Tabel</span>
-                Absen Tenaga Kerja {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
+                Absen Tenaga Kerja & Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
-                PT Ashoka Enterprise Development
+                PT Ashoka Enterprise Development &bull; Divisi Teknik
               </div>
             </div>
 
             {filteredAttendanceList.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: '#0f172a', borderRadius: '10px' }}>
                 <Users size={44} color="#94a3b8" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                <h4 style={{ fontWeight: 800, margin: 0, color: '#ffffff' }}>Belum ada data absen tenaga kerja yang sesuai</h4>
+                <h4 style={{ fontWeight: 800, margin: 0, color: '#ffffff' }}>Belum ada data absen tenaga kerja yang sesuai dengan filter</h4>
                 <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
-                  Klik tombol <strong>"+ Input Absen Tenaga Kerja"</strong> untuk mencatat kehadiran tenaga kerja baru.
+                  Silakan ubah filter pencarian atau klik tombol <strong>"+ Input Absen Tenaga Kerja"</strong>.
                 </p>
               </div>
             ) : (
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px', textAlign: 'left' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1080px', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                      <th rowSpan={2} style={{ width: '50px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>No.</th>
-                      <th rowSpan={2} style={{ width: '140px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 10px' }}>Proyek</th>
-                      <th rowSpan={2} style={{ width: '170px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 10px' }}>Nama</th>
-                      <th colSpan={2} style={{ textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '7px 8px' }}>Jam Kerja</th>
+                      <th rowSpan={2} style={{ width: '45px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>No.</th>
+                      <th rowSpan={2} style={{ width: '135px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>Proyek</th>
+                      <th rowSpan={2} style={{ width: '160px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>Nama</th>
+                      <th colSpan={3} style={{ textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '7px 8px' }}>Jam Kerja</th>
                       <th colSpan={3} style={{ textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '7px 8px' }}>Lokasi</th>
-                      <th rowSpan={2} style={{ verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', minWidth: '260px', padding: '8px 10px' }}>Catatan Pekerjaan</th>
-                      <th rowSpan={2} style={{ width: '120px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 6px' }}>Aksi</th>
+                      <th rowSpan={2} style={{ verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', minWidth: '240px', padding: '8px 8px' }}>Catatan Pekerjaan</th>
+                      <th rowSpan={2} style={{ width: '110px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>Aksi</th>
                     </tr>
                     <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                      <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Masuk</th>
-                      <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Pulang</th>
-                      <th style={{ width: '65px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Blok</th>
-                      <th style={{ width: '65px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>No.</th>
-                      <th style={{ width: '135px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Umum</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Masuk</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Pulang</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Lembur</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Blok</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>No.</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Umum</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAttendanceList.map((row, idx) => (
                       <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
                         <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>{idx + 1}</td>
-                        <td style={{ fontWeight: 800, border: '1px solid #334155', padding: '8px 10px' }}>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 9px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900, background: (row.proyek || '').includes('Park') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', border: `1.5px solid ${(row.proyek || '').includes('Park') ? '#10B981' : '#F59E0B'}` }}>
+                        <td style={{ fontWeight: 800, border: '1px solid #334155', padding: '8px 8px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 900, background: (row.proyek || '').includes('Park') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', border: `1.5px solid ${(row.proyek || '').includes('Park') ? '#10B981' : '#F59E0B'}` }}>
                             {(row.proyek || '').includes('Park') ? '🌳' : '🏔️'} {row.proyek}
                           </span>
                         </td>
-                        <td style={{ fontWeight: 900, color: '#ffffff', border: '1px solid #334155', fontSize: '0.88rem', padding: '8px 10px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                        <td style={{ fontWeight: 900, color: '#ffffff', border: '1px solid #334155', fontSize: '0.86rem', padding: '8px 8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
                               {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
                             </div>
                             <span>{row.nama}</span>
                           </div>
                         </td>
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
-                          <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '3px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.82rem', display: 'inline-block' }}>
+                          <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '2px 6px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-block' }}>
                             ⏱️ {row.jamMasuk || '08:00'}
                           </span>
                         </td>
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
-                          <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '3px 8px', borderRadius: '6px', fontWeight: 900, fontSize: '0.82rem', display: 'inline-block' }}>
+                          <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '2px 6px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-block' }}>
                             🏁 {row.jamPulang || '17:00'}
                           </span>
                         </td>
+
+                        {/* KOLOM LEMBUR */}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                          {Number(row.lembur) > 0 ? (
+                            <span style={{ background: 'rgba(234, 88, 12, 0.25)', color: '#fb923c', border: '1.5px solid #ea580c', padding: '2px 7px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-block' }}>
+                              ⚡ {row.lembur} Jam
+                            </span>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.85rem' }}>-</span>
+                          )}
+                        </td>
+
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
                           {row.blok && row.blok !== '-' ? (
-                            <span style={{ background: '#3b82f6', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', display: 'inline-block' }}>{row.blok}</span>
+                            <span style={{ background: '#3b82f6', color: '#ffffff', padding: '2px 7px', borderRadius: '4px', fontWeight: 900, fontSize: '0.82rem', display: 'inline-block' }}>{row.blok}</span>
                           ) : <span style={{ color: '#64748b' }}>-</span>}
                         </td>
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
                           {row.no && row.no !== '-' ? (
-                            <span style={{ background: '#6366f1', color: '#ffffff', padding: '3px 9px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', display: 'inline-block' }}>{row.no}</span>
+                            <span style={{ background: '#6366f1', color: '#ffffff', padding: '2px 7px', borderRadius: '4px', fontWeight: 900, fontSize: '0.82rem', display: 'inline-block' }}>{row.no}</span>
                           ) : <span style={{ color: '#64748b' }}>-</span>}
                         </td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
                           {row.umum && row.umum !== '-' ? (
-                            <span style={{ background: '#0284c7', color: '#ffffff', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.8rem', display: 'inline-block' }}>🏗️ {row.umum}</span>
+                            <span style={{ background: '#0284c7', color: '#ffffff', padding: '3px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '0.76rem', display: 'inline-block' }}>🏗️ {row.umum}</span>
                           ) : <span style={{ color: '#64748b' }}>-</span>}
                         </td>
-                        <td style={{ border: '1px solid #334155', fontSize: '0.85rem', lineHeight: 1.45, color: '#f8fafc', fontWeight: 600, padding: '8px 10px' }}>
+                        <td style={{ border: '1px solid #334155', fontSize: '0.83rem', lineHeight: 1.4, color: '#f8fafc', fontWeight: 600, padding: '8px 8px' }}>
                           {row.catatan || '-'}
                         </td>
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenEditAbsen(row)}
-                              style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', cursor: 'pointer' }}
+                              style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '3px 7px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px', cursor: 'pointer' }}
                             >
-                              <Edit3 size={12} /> Edit
+                              <Edit3 size={11} /> Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteAbsen(row)}
-                              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 7px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}
+                              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '3px 5px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}
                             >
-                              <Trash2 size={13} />
+                              <Trash2 size={12} />
                             </button>
                           </div>
                         </td>
@@ -1236,7 +1357,7 @@ export const TeknikModule = () => {
               </div>
             </div>
 
-            {/* SPREADSHEET TABLE GRID (EXACT LAYOUT & ACCURATE FORMULAS) */}
+            {/* SPREADSHEET TABLE GRID */}
             <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
               <table 
                 className="custom-table" 
@@ -1300,7 +1421,7 @@ export const TeknikModule = () => {
                         {idx + 1}
                       </td>
 
-                      {/* Item Pekerjaan (Inline Editable Cell) */}
+                      {/* Item Pekerjaan */}
                       <td style={{ border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
@@ -1311,7 +1432,7 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Spesifikasi (Inline Editable Cell) */}
+                      {/* Spesifikasi */}
                       <td style={{ border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
@@ -1322,7 +1443,7 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Vol (Inline Editable Cell) */}
+                      {/* Vol */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="number"
@@ -1334,7 +1455,7 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Sat (Dropdown Select m1, m2, m3, pcs, unit, ls) */}
+                      {/* Sat (Dropdown Select) */}
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 4px' }}>
                         <select
                           value={row.sat || 'm2'}
@@ -1350,7 +1471,7 @@ export const TeknikModule = () => {
                         </select>
                       </td>
 
-                      {/* Harga Satuan (Inline Editable Cell) */}
+                      {/* Harga Satuan */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="number"
@@ -1362,17 +1483,17 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Jumlah = Vol * Harga Satuan (AUTOMATIC) */}
+                      {/* Jumlah = Vol * Harga Satuan */}
                       <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
                         {formatRupiah(row.jumlah)}
                       </td>
 
-                      {/* Bobot = Jumlah / Total (AUTOMATIC e.g. 0,22, 0,54) */}
+                      {/* Bobot = Jumlah / Total */}
                       <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
                         {formatDecimal(row.bobotRatio)}
                       </td>
 
-                      {/* Progress % (Inline Editable Cell e.g. 0% / 50%) */}
+                      {/* Progress % */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
                           <input
@@ -1387,7 +1508,7 @@ export const TeknikModule = () => {
                         </div>
                       </td>
 
-                      {/* Bobot Progress = Progress% * Bobot (AUTOMATIC) */}
+                      {/* Bobot Progress = Progress% * Bobot */}
                       <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
                         {formatDecimal(row.bobotProgress)}%
                       </td>
@@ -1423,7 +1544,7 @@ export const TeknikModule = () => {
                     </tr>
                   ))}
 
-                  {/* SUMMARY ROW TOTAL (EXACT MATCH OF EXCEL SCREENSHOT) */}
+                  {/* SUMMARY ROW TOTAL */}
                   <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
                     <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                       Total
@@ -1852,7 +1973,7 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: INPUT / EDIT ABSEN TENAGA KERJA                                   */}
+      {/* MODAL: INPUT / EDIT ABSEN TENAGA KERJA (DENGAN FIELD LEMBUR)              */}
       {/* ========================================================================= */}
       {isAbsenModalOpen && (
         <div className="modal-backdrop">
@@ -1860,7 +1981,7 @@ export const TeknikModule = () => {
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <HardHat size={22} color="#ea580c" /> 
-                {editingAbsenItem ? `Edit Absen: ${editingAbsenItem.nama}` : 'Input Absen Tenaga Kerja Baru'}
+                {editingAbsenItem ? `Edit Absen: ${editingAbsenItem.nama}` : 'Input Absen & Lembur Tenaga Kerja'}
               </h3>
               <button onClick={() => setIsAbsenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -1898,11 +2019,11 @@ export const TeknikModule = () => {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc' }}>👷 Nama Tenaga Kerja / Tukang</label>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>👷 Nama Tenaga Kerja / Tukang</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Contoh: Slamet Riyadi / Bambang / Joko..."
+                    placeholder="Contoh: Slamet Riyadi / Bambang / Joko / Agus..."
                     value={absenFormData.nama}
                     onChange={(e) => setAbsenFormData({ ...absenFormData, nama: e.target.value })}
                     required
@@ -1910,7 +2031,8 @@ export const TeknikModule = () => {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                {/* JAM MASUK, JAM PULANG & JAM LEMBUR */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 800, color: '#34d399' }}>⏱️ Jam Masuk</label>
                     <input
@@ -1934,8 +2056,47 @@ export const TeknikModule = () => {
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#f59e0b' }}
                     />
                   </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 900, color: '#facc15' }}>⚡ Lembur (Jam)</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="24"
+                      className="form-control"
+                      value={absenFormData.lembur}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, lembur: Number(e.target.value) || 0 })}
+                      style={{ fontWeight: 900, background: '#1e293b', color: '#facc15', borderColor: '#eab308' }}
+                    />
+                  </div>
                 </div>
 
+                {/* QUICK LEMBUR BUTTONS */}
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.85rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Pintasan Lembur:</span>
+                  {[0, 1, 2, 3, 4].map(hours => (
+                    <button
+                      type="button"
+                      key={hours}
+                      onClick={() => setAbsenFormData({ ...absenFormData, lembur: hours })}
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        background: absenFormData.lembur === hours ? '#eab308' : '#0f172a',
+                        color: absenFormData.lembur === hours ? '#000' : '#cbd5e1',
+                        border: '1px solid #475569',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {hours === 0 ? 'Tidak Lembur' : `${hours} Jam`}
+                    </button>
+                  ))}
+                </div>
+
+                {/* LOKASI PEKERJAAN */}
                 <div className="form-group" style={{ marginBottom: '0.85rem', background: '#1e293b', padding: '0.85rem', borderRadius: '10px', border: '1px solid #475569' }}>
                   <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem', display: 'block' }}>
                     📍 Lokasi Pekerjaan
@@ -2012,7 +2173,7 @@ export const TeknikModule = () => {
                   <textarea
                     className="form-control"
                     rows={3}
-                    placeholder="Rincian pekerjaan yang dilakukan (Contoh: Pemasangan bata ringan dinding, plester acian, pengecoran balok lintel...)"
+                    placeholder="Rincian pekerjaan yang dilakukan & catatan lembur jika ada..."
                     value={absenFormData.catatan}
                     onChange={(e) => setAbsenFormData({ ...absenFormData, catatan: e.target.value })}
                     required
