@@ -38,7 +38,8 @@ import {
   UserCheck,
   UserPlus,
   Database,
-  ArrowDownAZ
+  ArrowDownAZ,
+  ClipboardCheck
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -839,6 +840,69 @@ export const TeknikModule = () => {
     setActiveSheetId(sheetId);
     setActiveTab('input');
     showNotification('Membuka lembar kerja input RAB...', 'info');
+  };
+
+  // =========================================================================
+  // OPNAME PEKERJAAN (CEK FISIK & REALISASI PROGRES LAPANGAN)
+  // =========================================================================
+  const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
+  const [opnameTargetSheet, setOpnameTargetSheet] = useState(null);
+  const [opnameFormData, setOpnameFormData] = useState({
+    tanggal: new Date().toISOString().split('T')[0],
+    pengawas: 'Joko Susanto (Mandor)',
+    catatan: '',
+    itemProgress: {}
+  });
+
+  const handleOpenOpnameModal = (sheet) => {
+    setOpnameTargetSheet(sheet);
+    const initialProgress = {};
+    (sheet.items || []).forEach(it => {
+      initialProgress[it.id] = Number(it.progress) || 0;
+    });
+    setOpnameFormData({
+      tanggal: new Date().toISOString().split('T')[0],
+      pengawas: 'Joko Susanto (Mandor)',
+      catatan: '',
+      itemProgress: initialProgress
+    });
+    setIsOpnameModalOpen(true);
+  };
+
+  const handleSaveOpname = (e) => {
+    e.preventDefault();
+    if (!opnameTargetSheet) return;
+
+    const updatedItems = (opnameTargetSheet.items || []).map(it => {
+      const newProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
+      return { ...it, progress: Math.min(100, Math.max(0, newProg)) };
+    });
+
+    const tempSummary = computeSheetSummary({ ...opnameTargetSheet, items: updatedItems });
+    const totalProgResult = tempSummary.progresPersen;
+
+    const opnameEntry = {
+      id: `OPN-${Date.now().toString().slice(-4)}`,
+      tanggal: opnameFormData.tanggal,
+      pengawas: opnameFormData.pengawas,
+      catatan: opnameFormData.catatan,
+      progresHasil: totalProgResult,
+      timestamp: new Date().toLocaleString('id-ID')
+    };
+
+    setRabSheets(prev => prev.map(s => {
+      if (s.id === opnameTargetSheet.id) {
+        return {
+          ...s,
+          items: updatedItems,
+          opnameHistory: [opnameEntry, ...(s.opnameHistory || [])]
+        };
+      }
+      return s;
+    }));
+
+    showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres terupdate: ${formatDecimal(totalProgResult)}%`, 'success');
+    setIsOpnameModalOpen(false);
   };
 
   const handlePrint = () => {
@@ -1776,7 +1840,29 @@ export const TeknikModule = () => {
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleOpenOpnameModal(activeSheet)}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 900,
+                  fontSize: '0.78rem',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                }}
+                title="Input Opname Progres Lapangan"
+              >
+                <ClipboardCheck size={14} /> Opname Pekerjaan
+              </button>
+
               <button
                 type="button"
                 onClick={() => switchTab('laporan')}
@@ -2476,6 +2562,28 @@ export const TeknikModule = () => {
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                             <button
                               type="button"
+                              onClick={() => handleOpenOpnameModal(row)}
+                              style={{
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 900,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 6px rgba(16, 185, 129, 0.35)'
+                              }}
+                              title="Opname Pekerjaan (Cek Fisik & Realisasi Progres)"
+                            >
+                              <ClipboardCheck size={12} /> Opname
+                            </button>
+
+                            <button
+                              type="button"
                               onClick={() => handleOpenSheetFromLaporan(row.id)}
                               style={{
                                 background: '#2563eb',
@@ -2916,6 +3024,239 @@ export const TeknikModule = () => {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: OPNAME PEKERJAAN (CEK FISIK & REALISASI PROGRES LAPANGAN)        */}
+      {/* ========================================================================= */}
+      {isOpnameModalOpen && opnameTargetSheet && (() => {
+        const targetSummary = computeSheetSummary(opnameTargetSheet);
+        const liveItems = (opnameTargetSheet.items || []).map(it => {
+          const newProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
+          return { ...it, progress: newProg };
+        });
+        const liveCalc = computeSheetSummary({ ...opnameTargetSheet, items: liveItems });
+
+        return (
+          <div className="modal-backdrop">
+            <div className="modal-content" style={{ maxWidth: '780px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
+              <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+                <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                  <ClipboardCheck size={24} color="#10b981" /> 
+                  Opname Pekerjaan: {opnameTargetSheet.noInput} - {opnameTargetSheet.pekerjaan || 'RAB'}
+                </h3>
+                <button onClick={() => setIsOpnameModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveOpname}>
+                <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+                  
+                  {/* RINGKASAN RAB BOX */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1.15rem', borderRadius: '10px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>🏢 Proyek & Lokasi</div>
+                      <div style={{ fontSize: '0.88rem', color: '#ffffff', fontWeight: 900 }}>
+                        {opnameTargetSheet.proyek} {opnameTargetSheet.blok ? `(Blok ${opnameTargetSheet.blok} No ${opnameTargetSheet.noUnit})` : (opnameTargetSheet.fasum ? `(${opnameTargetSheet.fasum})` : '')}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>👤 Vendor Pelaksana</div>
+                      <div style={{ fontSize: '0.88rem', color: '#38bdf8', fontWeight: 900 }}>
+                        {opnameTargetSheet.namaVendor || '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>💰 Total Nilai RAB</div>
+                      <div style={{ fontSize: '0.88rem', color: '#fbbf24', fontWeight: 900 }}>
+                        Rp {formatRupiahDesimal(targetSummary.totalHargaRab)}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>📈 Hasil Opname Fisik</div>
+                      <div style={{ fontSize: '1.05rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>{formatDecimal(liveCalc.progresPersen)}%</span>
+                        <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>(Rp {formatRupiahDesimal(liveCalc.nilaiProgres)})</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* INFO TERKUNCI: PROYEK, VENDOR, PENGAWAS & TANGGAL */}
+                  <div style={{ background: 'rgba(15, 23, 42, 0.75)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.82rem' }}>
+                    <div>
+                      <span style={{ color: '#94a3b8', fontWeight: 800 }}>🔒 Tanggal Opname:</span>
+                      <span style={{ color: '#f8fafc', fontWeight: 900, marginLeft: '6px' }}>{opnameFormData.tanggal || 'Hari Ini'}</span>
+                    </div>
+                    <div>
+                      <span style={{ color: '#94a3b8', fontWeight: 800 }}>🔒 Pengawas:</span>
+                      <span style={{ color: '#fbbf24', fontWeight: 900, marginLeft: '6px' }}>{opnameFormData.pengawas}</span>
+                    </div>
+                  </div>
+
+                  {/* DAFTAR ITEM PEKERJAAN & INPUT PROGRES REALISASI (HANYA INI YANG BISA DIUBAH) */}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <label className="form-label" style={{ fontWeight: 900, color: '#34d399', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <ClipboardCheck size={16} /> Ubah Progres Fisik Lapangan (%)
+                      </label>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800 }}>
+                        🔒 Yang lain terkunci, hanya kolom Progres yang dapat diedit
+                      </span>
+                    </div>
+
+                    <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', background: '#0f172a' }}>
+                        <thead>
+                          <tr style={{ background: '#1e293b', color: '#ffffff' }}>
+                            <th style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid #334155', width: '40px' }}>No</th>
+                            <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Item Pekerjaan (🔒 Terkunci)</th>
+                            <th style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #334155', width: '90px' }}>Vol / Sat (🔒)</th>
+                            <th style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #334155', width: '100px' }}>Bobot (🔒)</th>
+                            <th style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid #334155', width: '220px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+                              ✏️ Progres Opname (%)
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(liveCalc.items || []).map((it, iIdx) => {
+                            const curProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
+                            return (
+                              <tr key={it.id || iIdx} style={{ borderBottom: '1px solid #1e293b', background: iIdx % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                <td style={{ padding: '8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800 }}>{iIdx + 1}</td>
+                                <td style={{ padding: '8px' }}>
+                                  <div style={{ fontWeight: 800, color: '#ffffff' }}>{it.itemPekerjaan || '-'}</div>
+                                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>{it.spesifikasi || '-'}</div>
+                                </td>
+                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 800, color: '#cbd5e1' }}>
+                                  {formatDecimal(it.vol)} {it.sat}
+                                </td>
+                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: 800, color: '#60a5fa' }}>
+                                  {formatDecimal(it.bobotRatio * 100)}%
+                                </td>
+                                <td style={{ padding: '8px', background: 'rgba(16, 185, 129, 0.08)' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      step="5"
+                                      value={curProg}
+                                      onChange={(e) => {
+                                        const val = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                                        setOpnameFormData({
+                                          ...opnameFormData,
+                                          itemProgress: {
+                                            ...opnameFormData.itemProgress,
+                                            [it.id]: val
+                                          }
+                                        });
+                                      }}
+                                      style={{
+                                        width: '64px',
+                                        background: '#0f172a',
+                                        border: '2px solid #10b981',
+                                        borderRadius: '6px',
+                                        color: '#34d399',
+                                        fontWeight: 900,
+                                        fontSize: '0.9rem',
+                                        padding: '4px 6px',
+                                        textAlign: 'center',
+                                        outline: 'none'
+                                      }}
+                                    />
+                                    <span style={{ fontWeight: 900, color: '#34d399', fontSize: '0.88rem' }}>%</span>
+
+                                    {/* Quick Buttons */}
+                                    <div style={{ display: 'flex', gap: '3px' }}>
+                                      {[0, 50, 100].map(pVal => (
+                                        <button
+                                          type="button"
+                                          key={pVal}
+                                          onClick={() => {
+                                            setOpnameFormData({
+                                              ...opnameFormData,
+                                              itemProgress: {
+                                                ...opnameFormData.itemProgress,
+                                                [it.id]: pVal
+                                              }
+                                            });
+                                          }}
+                                          style={{
+                                            padding: '3px 6px',
+                                            borderRadius: '4px',
+                                            fontSize: '0.72rem',
+                                            fontWeight: 800,
+                                            background: curProg === pVal ? '#10b981' : '#1e293b',
+                                            color: curProg === pVal ? '#ffffff' : '#94a3b8',
+                                            border: '1px solid #475569',
+                                            cursor: 'pointer'
+                                          }}
+                                        >
+                                          {pVal}%
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* CATATAN EVALUASI OPNAME */}
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>
+                      📝 Catatan Hasil Evaluasi / Mutu Lapangan
+                    </label>
+                    <textarea
+                      className="form-control"
+                      rows={2}
+                      placeholder="Contoh: Pekerjaan pasangan keramik rapi, nat terisi sempurna, siap dilakukan serah terima tahap 1..."
+                      value={opnameFormData.catatan}
+                      onChange={(e) => setOpnameFormData({ ...opnameFormData, catatan: e.target.value })}
+                      style={{ fontSize: '0.85rem', background: '#1e293b', color: '#ffffff', borderColor: '#475569' }}
+                    />
+                  </div>
+
+                  {/* RIWAYAT LOG OPNAME */}
+                  {Array.isArray(opnameTargetSheet.opnameHistory) && opnameTargetSheet.opnameHistory.length > 0 && (
+                    <div style={{ marginTop: '1rem', background: '#0f172a', padding: '0.75rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 900, color: '#fbbf24', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Clock size={13} /> Riwayat Log Opname Sebelumnya:
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {opnameTargetSheet.opnameHistory.map((hist, hIdx) => (
+                          <div key={hist.id || hIdx} style={{ fontSize: '0.75rem', background: '#1e293b', padding: '4px 8px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', color: '#cbd5e1' }}>
+                            <span>📅 {hist.tanggal} - <strong>{hist.pengawas}</strong> ({hist.catatan || 'Tanpa catatan'})</span>
+                            <span style={{ fontWeight: 900, color: '#34d399' }}>Progres: {formatDecimal(hist.progresHasil)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setIsOpnameModalOpen(false)}>
+                    Batal
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 900, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <ClipboardCheck size={16} /> 💾 Simpan & Terapkan Hasil Opname ({formatDecimal(liveCalc.progresPersen)}%)
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
