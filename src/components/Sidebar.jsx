@@ -203,36 +203,36 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           height: 'var(--header-height)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0 1rem',
+          gap: '0.85rem',
+          padding: '0 1.25rem',
           borderBottom: '1px solid var(--border-color)'
         }}>
           <img 
             src="/company-logo.png" 
             alt="Ashoka Logo" 
             style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '8px',
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
               objectFit: 'contain',
               background: '#ffffff',
-              padding: '2px',
+              padding: '3px',
               boxShadow: 'var(--shadow-glow)',
               border: '1px solid rgba(245, 158, 11, 0.5)'
             }}
           />
           <div>
-            <div style={{ fontWeight: '900', fontSize: '1.05rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
+            <div style={{ fontWeight: '900', fontSize: '1.18rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
               ASHOKA
             </div>
-            <div style={{ fontSize: '0.65rem', color: '#F59E0B', fontWeight: 700 }}>
+            <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 800 }}>
               {isBoss ? 'Pusat Pengawasan Direksi' : `Modul ${currentUser?.role || 'Staf'}`}
             </div>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <div style={{ flex: 1, padding: '0.75rem 0.65rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+        <div style={{ flex: 1, padding: '0.9rem 0.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           
           {/* Main Dashboard Button (Always Visible for All Users) */}
           <button
@@ -241,26 +241,26 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
               width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.65rem',
-              padding: '0.55rem 0.75rem',
+              gap: '0.75rem',
+              padding: '0.65rem 0.85rem',
               borderRadius: 'var(--radius-md)',
-              border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.06)',
+              border: currentTab === 'dashboard' ? '1px solid var(--accent-primary)' : '1px solid rgba(255,255,255,0.08)',
               backgroundColor: currentTab === 'dashboard' ? 'var(--accent-primary)' : 'rgba(30, 41, 59, 0.6)',
               color: currentTab === 'dashboard' ? '#ffffff' : 'var(--text-muted)',
-              fontWeight: 700,
-              fontSize: '0.82rem',
+              fontWeight: 800,
+              fontSize: '0.86rem',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              marginBottom: '0.2rem'
+              marginBottom: '0.25rem'
             }}
           >
-            <div style={{ width: '26px', height: '26px', borderRadius: '6px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.2)' : 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTab === 'dashboard' ? '#fff' : '#818CF8' }}>
-              <LayoutDashboard size={15} />
+            <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: currentTab === 'dashboard' ? 'rgba(255,255,255,0.2)' : 'rgba(99, 102, 241, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTab === 'dashboard' ? '#fff' : '#818CF8' }}>
+              <LayoutDashboard size={16} />
             </div>
             <span>Dashboard Utama</span>
           </button>
 
-          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '0.2rem 0.25rem 0.15rem' }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0.25rem 0.25rem 0.2rem' }}>
             MODUL DEPARTEMEN
           </div>
 
@@ -276,42 +276,42 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
                 onClick={() => handleNavClick(card.tab)}
                 style={{
                   width: '100%',
-                  padding: '0.5rem 0.65rem',
+                  padding: '0.58rem 0.75rem',
                   borderRadius: 'var(--radius-md)',
                   border: isActive ? `1.5px solid ${card.color}` : '1px solid rgba(255,255,255,0.06)',
-                  backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'rgba(30, 41, 59, 0.5)',
-                  boxShadow: isActive ? `0 0 12px ${card.color}25` : 'none',
+                  backgroundColor: isActive ? 'rgba(255,255,255,0.09)' : 'rgba(30, 41, 59, 0.55)',
+                  boxShadow: isActive ? `0 0 14px ${card.color}28` : 'none',
                   cursor: hasAccess ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   transition: 'all 0.2s ease',
-                  borderLeft: `3.5px solid ${card.color}`,
+                  borderLeft: `4px solid ${card.color}`,
                   opacity: hasAccess ? 1 : 0.45
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', overflow: 'hidden' }}>
                   <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '5px',
-                    background: `${card.color}18`,
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    background: `${card.color}20`,
                     color: card.color,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <IconComp size={13} />
+                    <IconComp size={15} />
                   </div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: isActive ? 800 : 600, color: isActive ? '#ffffff' : 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: '0.83rem', fontWeight: isActive ? 900 : 700, color: isActive ? '#ffffff' : 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {card.mainTitle}
                   </div>
                 </div>
                 {hasAccess ? (
-                  <ChevronRight size={13} color={card.color} style={{ opacity: isActive ? 1 : 0.3 }} />
+                  <ChevronRight size={14} color={card.color} style={{ opacity: isActive ? 1 : 0.35 }} />
                 ) : (
-                  <Lock size={12} color="var(--danger)" title="Restriksi Hak Akses Role" />
+                  <Lock size={13} color="var(--danger)" title="Restriksi Hak Akses Role" />
                 )}
               </div>
             );
@@ -323,7 +323,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           onClick={onOpenProfile}
           title="Klik untuk membuka Profil Pengguna & Hak Akses"
           style={{
-            padding: '0.85rem 1rem',
+            padding: '0.9rem 1.1rem',
             borderTop: '1px solid var(--border-color)',
             display: 'flex',
             alignItems: 'center',
@@ -337,8 +337,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
             <div style={{
-              width: '36px',
-              height: '36px',
+              width: '38px',
+              height: '38px',
               borderRadius: '50%',
               overflow: 'hidden',
               border: '2px solid #F59E0B',
@@ -347,8 +347,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
               <img src={avatarUrl} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontWeight: '800', fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', color: '#ffffff' }}>{currentUser?.name || 'User'}</div>
-              <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser?.role || 'Staff'}</div>
+              <div style={{ fontWeight: '800', fontSize: '0.88rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', color: '#ffffff' }}>{currentUser?.name || 'User'}</div>
+              <div style={{ fontSize: '0.74rem', color: '#F59E0B', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser?.role || 'Staff'}</div>
             </div>
           </div>
           <ChevronRight size={16} color="#F59E0B" />
