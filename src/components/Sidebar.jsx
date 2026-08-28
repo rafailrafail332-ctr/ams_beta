@@ -180,21 +180,6 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
 
   return (
     <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div 
-          onClick={() => setIsOpen(false)} 
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'none',
-            WebkitBackdropFilter: 'none',
-            zIndex: 40
-          }} 
-        />
-      )}
-
       <aside 
         style={{
           position: 'fixed',
@@ -209,8 +194,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: isOpen ? 'translateX(0)' : 'translateX(-100%)'
+          transform: 'translateX(0)',
+          visibility: 'visible',
+          opacity: 1
         }}
       >
         {/* Logo Section */}

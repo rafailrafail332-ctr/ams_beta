@@ -528,12 +528,10 @@ body {
   padding: 2rem;
   min-height: calc(100vh - var(--header-height));
   margin-top: var(--header-height);
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .main-content {
-    margin-left: 0 !important;
     padding: 1rem;
   }
 }

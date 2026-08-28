@@ -108,12 +108,12 @@ function AppContent() {
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
+        isOpen={true}
+        setIsOpen={() => {}}
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
       <Header 
-        onToggleSidebar={toggleSidebar} 
+        onToggleSidebar={() => {}} 
         activeTitle={getActiveTitle()} 
         onLogout={handleLogout}
         onOpenProfile={() => setIsProfileModalOpen(true)}
@@ -122,7 +122,9 @@ function AppContent() {
       <main
         className="main-content"
         style={{
-          marginLeft: isSidebarOpen ? 'var(--sidebar-width)' : '0'
+          marginLeft: 'var(--sidebar-width)',
+          minHeight: 'calc(100vh - var(--header-height))',
+          padding: '2rem'
         }}
       >
         {!isAllowed ? (
