@@ -1097,30 +1097,7 @@ export const TeknikModule = () => {
         <div style={{ marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #00a2ed', flexWrap: 'wrap' }}>
             
-            {/* 1. Input lembar RAB */}
-            <button
-              type="button"
-              onClick={() => setSubTabBorongan('input_rab')}
-              style={{
-                padding: '7px 16px',
-                borderRadius: '8px',
-                fontSize: '0.86rem',
-                fontWeight: 900,
-                cursor: 'pointer',
-                border: subTabBorongan === 'input_rab' ? '2px solid #0284c7' : '1px solid #475569',
-                background: subTabBorongan === 'input_rab' ? '#00a2ed' : '#1e293b',
-                color: subTabBorongan === 'input_rab' ? '#ffffff' : '#cbd5e1',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: subTabBorongan === 'input_rab' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Calculator size={16} /> Input lembar RAB
-            </button>
-
-            {/* 2. Laporan Rekapitulasi RAB */}
+            {/* 1. PERTAMA (PALING KIRI): Laporan Rekapitulasi RAB */}
             <button
               type="button"
               onClick={() => setSubTabBorongan('laporan_rab')}
@@ -1130,7 +1107,7 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabBorongan === 'laporan_rab' ? '2px solid #0284c7' : '1px solid #475569',
+                border: subTabBorongan === 'laporan_rab' ? '2px solid #00a2ed' : '1px solid #475569',
                 background: subTabBorongan === 'laporan_rab' ? '#00a2ed' : '#1e293b',
                 color: subTabBorongan === 'laporan_rab' ? '#ffffff' : '#cbd5e1',
                 display: 'inline-flex',
@@ -1143,7 +1120,7 @@ export const TeknikModule = () => {
               <BarChart3 size={16} /> Laporan Rekapitulasi RAB ({rabSheets.length} Proyek)
             </button>
 
-            {/* 3. Hasil Opname */}
+            {/* 2. DI TENGAH: Hasil Opname */}
             <button
               type="button"
               onClick={() => setSubTabBorongan('hasil_opname')}
@@ -1164,6 +1141,29 @@ export const TeknikModule = () => {
               }}
             >
               <ClipboardCheck size={16} /> Hasil Opname
+            </button>
+
+            {/* 3. PALING KANAN: Input lembar RAB */}
+            <button
+              type="button"
+              onClick={() => setSubTabBorongan('input_rab')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabBorongan === 'input_rab' ? '2px solid #f59e0b' : '1px solid #475569',
+                background: subTabBorongan === 'input_rab' ? '#f59e0b' : '#1e293b',
+                color: subTabBorongan === 'input_rab' ? '#000000' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabBorongan === 'input_rab' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Calculator size={16} /> Input lembar RAB
             </button>
           </div>
         </div>
