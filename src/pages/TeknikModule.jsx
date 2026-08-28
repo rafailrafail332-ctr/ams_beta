@@ -938,73 +938,8 @@ export const TeknikModule = () => {
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
-            Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja (nama unik anti-duplikat, urutan abjad A-Z & filter upah), spreadsheet RAB, & laporan rekapitulasi progres.
+            Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja, spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={handlePrint}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#f8fafc', border: '1px solid #475569' }}
-          >
-            <Printer size={16} /> Cetak Laporan
-          </button>
-          
-          {mainCategory === 'harian' ? (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleOpenMasterWorkerModal}
-                style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                  border: 'none',
-                  fontWeight: 900,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
-                }}
-              >
-                <Database size={17} /> + Tambah Database Tenaga Kerja
-              </button>
-
-              <button 
-                className="btn btn-primary" 
-                onClick={() => setSubTabHarian('input_absen')}
-                style={{
-                  background: 'linear-gradient(135deg, #ea580c, #c2410c)',
-                  border: 'none',
-                  fontWeight: 800,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 14px rgba(234, 88, 12, 0.45)'
-                }}
-              >
-                <Plus size={18} /> + Input Absen Harian
-              </button>
-            </div>
-          ) : (
-            <button 
-              className="btn btn-primary" 
-              onClick={handleCreateNewSheet}
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                border: 'none',
-                fontWeight: 900,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#000000',
-                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.45)'
-              }}
-            >
-              <Plus size={18} /> + Buat Lembar RAB Baru
-            </button>
-          )}
         </div>
       </div>
 
