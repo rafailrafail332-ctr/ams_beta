@@ -8,9 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { TodoAttendanceModule } from './pages/TodoAttendanceModule';
 import { ExecutiveModule } from './pages/ExecutiveModule';
 import { ManagerModule } from './pages/ManagerModule';
-import { TeknikUnitRumah } from './pages/TeknikUnitRumah';
-import { TeknikKomersilFasilitas } from './pages/TeknikKomersilFasilitas';
-import { TeknikBatp } from './pages/TeknikBatp';
+import { TeknikModule } from './pages/TeknikModule';
 import { MarketingModule } from './pages/MarketingModule';
 import { LegalModule } from './pages/LegalModule';
 import { FinanceModule } from './pages/FinanceModule';
@@ -70,12 +68,11 @@ function AppContent() {
         return 'Eksekutif & Direksi Utama (BOD Executive Suite)';
       case 'manager':
         return 'Manajer Operasional (Manager Suite)';
+      case 'teknik':
       case 'teknik-rumah':
-        return 'Teknik - Update Unit Rumah';
       case 'teknik-fasilitas':
-        return 'Teknik - Komersil & Utilitas';
       case 'teknik-batp':
-        return 'Teknik - BATP Kontraktor';
+        return 'Teknik & Konstruksi - Absen Tenaga Kerja';
       case 'marketing':
         return 'Marketing & Sales Penjualan Unit';
       case 'legal':
@@ -159,9 +156,7 @@ function AppContent() {
               {currentTab === 'todo-attendance' && <TodoAttendanceModule />}
               {currentTab === 'executive' && <ExecutiveModule />}
               {currentTab === 'manager' && <ManagerModule />}
-              {currentTab === 'teknik-rumah' && <TeknikUnitRumah />}
-              {currentTab === 'teknik-fasilitas' && <TeknikKomersilFasilitas />}
-              {currentTab === 'teknik-batp' && <TeknikBatp />}
+              {(currentTab === 'teknik' || currentTab === 'teknik-rumah' || currentTab === 'teknik-fasilitas' || currentTab === 'teknik-batp') && <TeknikModule />}
               {currentTab === 'marketing' && <MarketingModule />}
               {currentTab === 'legal' && <LegalModule />}
               {currentTab === 'finance' && <FinanceModule />}

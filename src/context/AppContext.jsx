@@ -7,6 +7,7 @@ export const ALL_MODULE_KEYS = [
   'todo-attendance',
   'executive',
   'manager',
+  'teknik',
   'teknik-rumah',
   'teknik-fasilitas',
   'teknik-batp',

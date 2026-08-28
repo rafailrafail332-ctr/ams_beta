@@ -30,7 +30,8 @@ import {
   Landmark,
   Headphones,
   KeyRound,
-  Wrench
+  Wrench,
+  HardHat
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -131,9 +132,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('teknik') || roleLower.includes('site') || roleLower.includes('hapip')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'teknik-rumah', title: 'Progress Kavling Unit Rumah & WA Tracker', moduleKey: 'teknik-rumah', subTabKey: 'rumah', icon: Building2, color: '#FBBF24' },
-        { id: 'teknik-fasilitas', title: 'Utilitas & Komersil (Fasum/Fasos)', moduleKey: 'teknik-fasilitas', subTabKey: 'fasilitas', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'teknik-batp', title: 'Berita Acara BATP Kontraktor Utama', moduleKey: 'teknik-batp', subTabKey: 'batp', icon: FileCheck, color: '#10B981' },
+        { id: 'teknik-absen', title: 'Absen Tenaga Kerja Lapangan', moduleKey: 'teknik', subTabKey: 'default', icon: HardHat, color: '#F97316' },
         { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
     }
@@ -162,7 +161,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'todo-attendance', mainTitle: 'To-Do List Harian', tab: 'todo-attendance', icon: CheckSquare, color: '#F59E0B' },
     { id: 'executive', mainTitle: 'Eksekutif & Direksi', tab: 'executive', icon: Award, color: '#F59E0B' },
     { id: 'manager', mainTitle: 'Manajer Operasional', tab: 'manager', icon: Briefcase, color: '#38BDF8' },
-    { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik-rumah', icon: Building2, color: '#FBBF24' },
+    { id: 'teknik', mainTitle: 'Teknik (Absen Tenaga Kerja)', tab: 'teknik', icon: HardHat, color: '#F97316' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
