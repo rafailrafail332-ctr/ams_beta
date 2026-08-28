@@ -3157,7 +3157,15 @@ export const TeknikModule = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => showNotification(`Nominal pembayaran sebelumnya tersimpan: Rp ${Number(activeSheet.pembayaranSebelumnya || 0).toLocaleString('id-ID')}`, 'success')}
+                          onClick={() => {
+                            const val = Number(activeSheet.pembayaranSebelumnya || 0);
+                            const updatedSheets = rabSheets.map(s => s.id === activeSheet.id ? { ...s, pembayaranSebelumnya: val } : s);
+                            setRabSheets(updatedSheets);
+                            try {
+                              localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                            } catch(e) {}
+                            showNotification(`Nominal pembayaran sebelumnya tersimpan: Rp ${val.toLocaleString('id-ID')}`, 'success');
+                          }}
                           style={{
                             background: '#10b981',
                             color: '#ffffff',
