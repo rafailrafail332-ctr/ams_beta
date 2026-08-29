@@ -2596,7 +2596,7 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Jumlah (Input Manual) */}
+                      {/* Jumlah (Input Manual Tanpa Titik Pemisah / Desimal) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
@@ -2607,11 +2607,15 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Bobot (Input Manual) */}
+                      {/* Bobot (Tepat 2 Digit di Belakang Koma Tanpa Simbol %) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
-                          value={row.bobotRatio !== undefined ? row.bobotRatio : (row.bobot !== undefined ? row.bobot : '')}
+                          value={
+                            row.bobotRatio !== undefined && row.bobotRatio !== ''
+                              ? (typeof row.bobotRatio === 'number' ? formatDecimal(row.bobotRatio, 2) : row.bobotRatio)
+                              : (row.bobot !== undefined && row.bobot !== '' ? (typeof row.bobot === 'number' ? formatDecimal(row.bobot, 2) : row.bobot) : '')
+                          }
                           onChange={(e) => {
                             handleUpdateCell(row.id, 'bobotRatio', e.target.value);
                             handleUpdateCell(row.id, 'bobot', e.target.value);
