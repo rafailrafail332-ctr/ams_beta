@@ -626,13 +626,26 @@ export const TeknikModule = () => {
     if (val === undefined || val === null || val === '') return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
     let s = String(val).trim();
-    // Jika ada koma sebagai desimal (contoh "0,35" atau "12,5")
-    if (s.includes(',') && !s.includes('.')) {
-      s = s.replace(',', '.');
-    } else if (s.includes('.') && s.includes(',')) {
-      // Format Indonesia 1.000.000,50 -> 1000000.50
+    
+    // Jika string berformat Rupiah / Ribuan Indonesia
+    // Kasus 1: Mengandung titik dan koma -> "10.000.000,50" -> "10000000.50"
+    if (s.includes('.') && s.includes(',')) {
       s = s.replace(/\./g, '').replace(',', '.');
     }
+    // Kasus 2: Hanya mengandung koma desimal -> "0,35" -> "0.35"
+    else if (s.includes(',') && !s.includes('.')) {
+      s = s.replace(',', '.');
+    }
+    // Kasus 3: Hanya mengandung titik (pemisah ribuan Indonesia atau desimal)
+    else if (s.includes('.') && !s.includes(',')) {
+      // Jika titik digunakan sebagai pemisah ribuan (misal "50.000" atau "10.000.000" atau "5.000")
+      // Cek apakah ada lebih dari 1 titik atau titik diikuti 3 digit (format ribuan standar)
+      const parts = s.split('.');
+      if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+        s = s.replace(/\./g, '');
+      }
+    }
+
     const cleaned = s.replace(/[^0-9.-]/g, '');
     const num = parseFloat(cleaned);
     return isNaN(num) ? 0 : num;
@@ -4330,13 +4343,13 @@ export const TeknikModule = () => {
                           setOpnameFormData(prev => ({ ...prev, pembayaranSebelumnya: val }));
                         }}
                         style={{
-                          width: '110px',
+                          width: '160px',
                           background: '#1e293b',
                           border: '1.5px solid #f59e0b',
                           borderRadius: '6px',
                           color: '#fbbf24',
                           fontWeight: 900,
-                          fontSize: '0.84rem',
+                          fontSize: '0.86rem',
                           padding: '4px 8px',
                           textAlign: 'right',
                           outline: 'none'
