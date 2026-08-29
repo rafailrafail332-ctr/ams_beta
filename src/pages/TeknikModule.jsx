@@ -726,14 +726,15 @@ export const TeknikModule = () => {
   // UPDATE ACTIVE SHEET HEADER INLINE
   const handleUpdateHeaderField = (field, value) => {
     setRabSheets(prev => {
-      const exists = prev.some(s => s.id === activeSheet.id);
-      if (!exists) {
-        const newSheet = { ...emptyTemplateSheet, id: `RAB-${Date.now().toString().slice(-4)}`, [field]: value };
-        setActiveSheetId(newSheet.id);
+      const targetId = activeSheetId || (prev[0] ? prev[0].id : null);
+      if (!targetId || !prev.some(s => s.id === targetId)) {
+        const newSheetId = `RAB-${Date.now().toString().slice(-4)}`;
+        const newSheet = { ...emptyTemplateSheet, id: newSheetId, [field]: value };
+        setActiveSheetId(newSheetId);
         return [newSheet];
       }
       return prev.map(s => {
-        if (s.id === activeSheet.id) {
+        if (s.id === targetId) {
           return { ...s, [field]: value };
         }
         return s;
@@ -744,40 +745,83 @@ export const TeknikModule = () => {
   // UPDATE ACTIVE SHEET TABLE CELLS INLINE
   const handleUpdateCell = (itemId, field, value) => {
     setRabSheets(prev => {
-      const exists = prev.some(s => s.id === activeSheet.id);
-      if (!exists) {
+      const targetId = activeSheetId || (prev[0] ? prev[0].id : null);
+      if (!targetId || !prev.some(s => s.id === targetId)) {
+        const newSheetId = `RAB-${Date.now().toString().slice(-4)}`;
+        const volVal = field === 'vol' ? value : 1;
+        const hrgVal = field === 'hargaSatuan' ? value : 0;
+        const autoJml = (parseNum(volVal)) * (parseNum(hrgVal));
+        const jmlVal = field === 'jumlah' ? value : autoJml;
+        const newItem = { 
+          id: itemId, 
+          itemPekerjaan: field === 'itemPekerjaan' ? value : '', 
+          spesifikasi: field === 'spesifikasi' ? value : '-', 
+          vol: volVal, 
+          sat: field === 'sat' ? value : 'm2', 
+          hargaSatuan: hrgVal, 
+          jumlah: jmlVal,
+          bobotRatio: field === 'bobotRatio' || field === 'bobot' ? value : '',
+          progress: field === 'progress' ? value : 0,
+          bobotProgress: field === 'bobotProgress' ? value : 0,
+          [field]: value 
+        };
         const newSheet = { 
           ...emptyTemplateSheet, 
-          id: `RAB-${Date.now().toString().slice(-4)}`,
-          items: [{ id: itemId, itemPekerjaan: '', spesifikasi: '-', vol: 1, sat: 'm2', hargaSatuan: 0, progress: 0, [field]: value }]
+          id: newSheetId,
+          items: [newItem]
         };
-        setActiveSheetId(newSheet.id);
+        setActiveSheetId(newSheetId);
         return [newSheet];
       }
       return prev.map(s => {
-        if (s.id === activeSheet.id) {
-          const updatedItems = (s.items || []).map(it => {
-            if (it.id === itemId) {
-              const updated = { ...it, [field]: value };
+        if (s.id === targetId) {
+          const currentItems = s.items || [];
+          const itemExists = currentItems.some(it => it.id === itemId);
+          let updatedItems = [];
 
-              // Otomatis hitung Jumlah saat Vol atau Harga Satuan diubah
-              if (field === 'vol' || field === 'hargaSatuan') {
-                const volNum = Number(field === 'vol' ? value : updated.vol) || 0;
-                const hrgNum = Number(field === 'hargaSatuan' ? value : updated.hargaSatuan) || 0;
-                updated.jumlah = volNum * hrgNum;
-              }
-
-              // Otomatis hitung ulang bobotProgress jika edit progress atau bobot
-              if (field === 'progress' || field === 'bobotRatio' || field === 'bobot') {
-                const progNum = Number(field === 'progress' ? value : updated.progress) || 0;
-                const bobotNum = Number(field === 'bobotRatio' || field === 'bobot' ? value : (updated.bobotRatio || updated.bobot || 0));
-                updated.bobotProgress = progNum > 0 ? (bobotNum * progNum) : 0;
-              }
-
-              return updated;
+          if (!itemExists) {
+            const newItem = {
+              id: itemId,
+              itemPekerjaan: '',
+              spesifikasi: '-',
+              vol: 1,
+              sat: 'm2',
+              hargaSatuan: 0,
+              jumlah: 0,
+              bobotRatio: '',
+              progress: 0,
+              bobotProgress: 0,
+              [field]: value
+            };
+            if (field === 'vol' || field === 'hargaSatuan') {
+              newItem.jumlah = (parseNum(newItem.vol)) * (parseNum(newItem.hargaSatuan));
             }
-            return it;
-          });
+            updatedItems = [...currentItems, newItem];
+          } else {
+            updatedItems = currentItems.map(it => {
+              if (it.id === itemId) {
+                const updated = { ...it, [field]: value };
+
+                // Otomatis hitung Jumlah saat Vol atau Harga Satuan diubah
+                if (field === 'vol' || field === 'hargaSatuan') {
+                  const volNum = parseNum(field === 'vol' ? value : updated.vol);
+                  const hrgNum = parseNum(field === 'hargaSatuan' ? value : updated.hargaSatuan);
+                  updated.jumlah = volNum * hrgNum;
+                }
+
+                // Otomatis hitung ulang bobotProgress jika edit progress atau bobot
+                if (field === 'progress' || field === 'bobotRatio' || field === 'bobot') {
+                  const progNum = parseNum(field === 'progress' ? value : updated.progress);
+                  const bobotNum = parseNum(field === 'bobotRatio' || field === 'bobot' ? value : (updated.bobotRatio || updated.bobot || 0));
+                  updated.bobotProgress = progNum > 0 ? (bobotNum * progNum) : 0;
+                }
+
+                return updated;
+              }
+              return it;
+            });
+          }
+
           return { ...s, items: updatedItems };
         }
         return s;
