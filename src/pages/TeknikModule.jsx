@@ -3331,14 +3331,18 @@ export const TeknikModule = () => {
                       <input
                         type="text"
                         placeholder="0"
+                        maxLength={18}
                         value={
-                          activeSheet.pembayaranSebelumnya !== undefined && activeSheet.pembayaranSebelumnya !== '' && activeSheet.pembayaranSebelumnya !== 0
-                            ? formatRupiah(parseNum(activeSheet.pembayaranSebelumnya))
-                            : (activeSheet.pembayaranSebelumnya === 0 ? '0' : (activeSheet.pembayaranSebelumnya || ''))
+                          activeSheet.pembayaranSebelumnya !== undefined && activeSheet.pembayaranSebelumnya !== ''
+                            ? (typeof activeSheet.pembayaranSebelumnya === 'number'
+                                ? (activeSheet.pembayaranSebelumnya > 0 ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID') : '0')
+                                : activeSheet.pembayaranSebelumnya)
+                            : ''
                         }
                         onChange={(e) => {
-                          const val = e.target.value;
-                          handleUpdateHeaderField('pembayaranSebelumnya', val);
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          const num = raw === '' ? '' : Number(raw);
+                          handleUpdateHeaderField('pembayaranSebelumnya', raw === '' ? '' : num.toLocaleString('id-ID'));
                         }}
                         style={{
                           width: '100%',
@@ -4333,23 +4337,27 @@ export const TeknikModule = () => {
                       <input
                         type="text"
                         placeholder="0"
+                        maxLength={18}
                         value={
-                          opnameFormData.pembayaranSebelumnya !== undefined && opnameFormData.pembayaranSebelumnya !== '' && opnameFormData.pembayaranSebelumnya !== 0
-                            ? formatRupiah(parseNum(opnameFormData.pembayaranSebelumnya))
-                            : (opnameFormData.pembayaranSebelumnya === 0 ? '0' : (opnameFormData.pembayaranSebelumnya || ''))
+                          opnameFormData.pembayaranSebelumnya !== undefined && opnameFormData.pembayaranSebelumnya !== ''
+                            ? (typeof opnameFormData.pembayaranSebelumnya === 'number'
+                                ? (opnameFormData.pembayaranSebelumnya > 0 ? Number(opnameFormData.pembayaranSebelumnya).toLocaleString('id-ID') : '0')
+                                : opnameFormData.pembayaranSebelumnya)
+                            : ''
                         }
                         onChange={(e) => {
-                          const val = e.target.value;
-                          setOpnameFormData(prev => ({ ...prev, pembayaranSebelumnya: val }));
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          const num = raw === '' ? '' : Number(raw);
+                          setOpnameFormData(prev => ({ ...prev, pembayaranSebelumnya: raw === '' ? '' : num.toLocaleString('id-ID') }));
                         }}
                         style={{
-                          width: '160px',
+                          width: '180px',
                           background: '#1e293b',
                           border: '1.5px solid #f59e0b',
                           borderRadius: '6px',
                           color: '#fbbf24',
                           fontWeight: 900,
-                          fontSize: '0.86rem',
+                          fontSize: '0.9rem',
                           padding: '4px 8px',
                           textAlign: 'right',
                           outline: 'none'
