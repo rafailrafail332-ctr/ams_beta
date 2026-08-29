@@ -2271,18 +2271,17 @@ export const TeknikModule = () => {
                   />
                 </div>
 
-                {/* 3. Proyek */}
+                {/* 3. Proyek (Input Manual Tanpa Panah Dropdown) */}
                 <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
                 <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                 <div>
-                  <select
-                    value={activeSheet.proyek || 'Ashoka View'}
+                  <input
+                    type="text"
+                    value={activeSheet.proyek || ''}
                     onChange={(e) => handleUpdateHeaderField('proyek', e.target.value)}
-                    style={{ width: '100%', background: '#0f172a', border: 'none', borderBottom: '1.5px solid #10b981', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                  >
-                    <option value="Ashoka View">Ashoka View</option>
-                    <option value="Ashoka Park">Ashoka Park</option>
-                  </select>
+                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #10b981', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
+                    placeholder=""
+                  />
                 </div>
 
                 {/* 4. Nama Vendor */}
