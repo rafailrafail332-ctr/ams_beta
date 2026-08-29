@@ -2932,30 +2932,7 @@ export const TeknikModule = () => {
                     </tr>
                   ))}
 
-                  {/* BARIS TOTAL (PERSIS FOTO media_1787938735917.jpg) */}
-                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                    <td colSpan={8} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      Total
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totHargaRab)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totNilaiOpname)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totRetensi)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totNilaiProgress)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totBayarSeb)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.95rem', color: '#000000' }}>
-                      {formatRupiahDesimal(grandSummaryOpname.totBayarSaatIni)}
-                    </td>
-                  </tr>
+
                 </tbody>
               </table>
             </div>
