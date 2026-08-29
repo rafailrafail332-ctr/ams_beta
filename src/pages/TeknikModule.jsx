@@ -2839,32 +2839,26 @@ export const TeknikModule = () => {
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#cbd5e1' }}>
                           {sheet.noInput || `RAB - ${idx + 1}`}
                         </td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 6px', fontSize: '0.78rem', verticalAlign: 'top', minWidth: '100px' }}>
-                          {/* Tanggal Opname Terakhir */}
+                        <td style={{ border: '1px solid #334155', padding: '5px 6px', fontSize: '0.75rem', verticalAlign: 'middle' }}>
                           {(sheet.opnameHistory && sheet.opnameHistory.length > 0) ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', alignItems: 'center' }}>
-                              {sheet.opnameHistory.slice(0, 3).map((hist, hIdx) => (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', alignItems: 'center' }}>
+                              {sheet.opnameHistory.map((hist, hIdx) => (
                                 <span
                                   key={hIdx}
                                   style={{
                                     display: 'inline-block',
-                                    background: hIdx === 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(100, 116, 139, 0.15)',
+                                    background: hIdx === 0 ? 'rgba(16, 185, 129, 0.18)' : 'rgba(100, 116, 139, 0.13)',
                                     color: hIdx === 0 ? '#34d399' : '#94a3b8',
                                     borderRadius: '4px',
-                                    padding: '1px 6px',
-                                    fontSize: '0.72rem',
-                                    fontWeight: hIdx === 0 ? 900 : 700,
+                                    padding: '1px 5px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: hIdx === 0 ? 900 : 600,
                                     whiteSpace: 'nowrap'
                                   }}
                                 >
                                   📅 {hist.tanggal}
                                 </span>
                               ))}
-                              {sheet.opnameHistory.length > 3 && (
-                                <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
-                                  +{sheet.opnameHistory.length - 3} lainnya
-                                </span>
-                              )}
                             </div>
                           ) : (
                             <span style={{ color: '#475569', fontSize: '0.75rem' }}>
