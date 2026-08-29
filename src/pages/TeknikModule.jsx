@@ -2824,13 +2824,15 @@ export const TeknikModule = () => {
                 </thead>
 
                 <tbody>
-                  {filteredHasilOpnameSheets.flatMap((sheet, idx) => {
+                  {filteredHasilOpnameSheets
+                    .filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== ''))
+                    .flatMap((sheet, idx) => {
                     const isSelected = sheet.id === activeSheet.id;
                     const c = computeSheetSummary(sheet);
                     const bgBase = isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a');
                     const rows = (sheet.opnameHistory && sheet.opnameHistory.length > 0)
                       ? sheet.opnameHistory
-                      : [{ tanggal: sheet.tanggalOpname || sheet.tanggal || '-' }];
+                      : [{ tanggal: sheet.tanggalOpname }];
                     return rows.map((hist, hIdx) => (
                       <tr
                         key={`${sheet.id}-${hIdx}`}
