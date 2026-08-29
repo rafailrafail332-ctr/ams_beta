@@ -636,12 +636,13 @@ export const TeknikModule = () => {
       const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? Number(it.jumlah) : autoJumlah;
       const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
       const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? Number(it.bobotRatio) : autoBobotRatio;
-      const progress = Number(it.progress) || 0;
-      const autoBobotProgress = (progress / 100) * (bobotRatio > 1 ? bobotRatio : (bobotRatio * 100));
-      const bobotProgress = it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress;
+      const progress = it.progress !== undefined && it.progress !== '' ? Number(it.progress) : 0;
+      const autoBobotProgress = progress > 0 ? ((progress / 100) * (bobotRatio > 1 ? bobotRatio : (bobotRatio * 100))) : 0;
+      const bobotProgress = progress === 0 ? 0 : (it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress);
 
       return {
         ...it,
+        progress,
         jumlah,
         bobotRatio,
         bobotProgress
