@@ -608,7 +608,8 @@ export const TeknikModule = () => {
   const computeSheetSummary = (sheet) => {
     const items = sheet.items || [];
     const totalHargaRab = items.reduce((acc, it) => {
-      return acc + ((Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0));
+      const j = it.jumlah !== undefined && it.jumlah !== '' ? Number(it.jumlah) : ((Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0));
+      return acc + (Number(j) || 0);
     }, 0);
 
     const computedItems = items.map(it => {
@@ -619,7 +620,7 @@ export const TeknikModule = () => {
       const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
       const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? Number(it.bobotRatio) : autoBobotRatio;
       const progress = Number(it.progress) || 0;
-      const autoBobotProgress = (progress / 100) * (bobotRatio * 100);
+      const autoBobotProgress = (progress / 100) * (bobotRatio > 1 ? bobotRatio : (bobotRatio * 100));
       const bobotProgress = it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress;
 
       return {
@@ -630,7 +631,7 @@ export const TeknikModule = () => {
       };
     });
 
-    const progresPersen = computedItems.reduce((acc, it) => acc + it.bobotProgress, 0);
+    const progresPersen = computedItems.reduce((acc, it) => acc + (Number(it.bobotProgress) || 0), 0);
     const retensiPersen = Number(sheet.retensiPersen) || 5;
     const nilaiOpname = (progresPersen / 100) * totalHargaRab;
     const retensiNilai = (retensiPersen / 100) * nilaiOpname;
@@ -719,7 +720,15 @@ export const TeknikModule = () => {
         if (s.id === activeSheet.id) {
           const updatedItems = (s.items || []).map(it => {
             if (it.id === itemId) {
-              return { ...it, [field]: value };
+              const updated = { ...it, [field]: value };
+              // jika edit progress, hitung ulang bobotProgress
+              if (field === 'progress') {
+                const progNum = Number(value) || 0;
+                const bobotNum = Number(updated.bobotRatio || updated.bobot || 0);
+                const bFactor = bobotNum > 1 ? bobotNum : (bobotNum * 100);
+                updated.bobotProgress = (progNum / 100) * bFactor;
+              }
+              return updated;
             }
             return it;
           });
