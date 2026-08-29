@@ -2821,89 +2821,52 @@ export const TeknikModule = () => {
                 </thead>
 
                 <tbody>
-                  {filteredHasilOpnameSheets.map((sheet, idx) => {
+                  {filteredHasilOpnameSheets.flatMap((sheet, idx) => {
                     const isSelected = sheet.id === activeSheet.id;
                     const c = computeSheetSummary(sheet);
-                    return (
+                    const bgBase = isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a');
+                    const rows = (sheet.opnameHistory && sheet.opnameHistory.length > 0)
+                      ? sheet.opnameHistory
+                      : [{ tanggal: sheet.tanggalOpname || sheet.tanggal || '-' }];
+                    return rows.map((hist, hIdx) => (
                       <tr
-                        key={sheet.id || idx}
+                        key={`${sheet.id}-${hIdx}`}
                         onClick={() => setActiveSheetId(sheet.id)}
                         style={{
-                          backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a'),
+                          backgroundColor: bgBase,
                           color: '#f8fafc',
                           cursor: 'pointer',
-                          borderLeft: isSelected ? '4px solid #10b981' : 'none'
+                          borderLeft: isSelected ? '4px solid #10b981' : 'none',
+                          borderTop: hIdx === 0 ? '2px solid #334155' : 'none'
                         }}
                         title="Klik untuk melihat rincian spreadsheet opname di bawah"
                       >
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#cbd5e1' }}>
-                          {sheet.noInput || `RAB - ${idx + 1}`}
+                        {hIdx === 0 && (
+                          <td rowSpan={rows.length} style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#cbd5e1', verticalAlign: 'middle' }}>
+                            {sheet.noInput || `RAB - ${idx + 1}`}
+                          </td>
+                        )}
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 8px', fontSize: '0.8rem', fontWeight: hIdx === 0 ? 900 : 700, color: hIdx === 0 ? '#34d399' : '#94a3b8', whiteSpace: 'nowrap' }}>
+                          📅 {hist.tanggal}
                         </td>
-                        <td style={{ border: '1px solid #334155', padding: '5px 6px', fontSize: '0.75rem', verticalAlign: 'middle' }}>
-                          {(sheet.opnameHistory && sheet.opnameHistory.length > 0) ? (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', alignItems: 'center' }}>
-                              {sheet.opnameHistory.map((hist, hIdx) => (
-                                <span
-                                  key={hIdx}
-                                  style={{
-                                    display: 'inline-block',
-                                    background: hIdx === 0 ? 'rgba(16, 185, 129, 0.18)' : 'rgba(100, 116, 139, 0.13)',
-                                    color: hIdx === 0 ? '#34d399' : '#94a3b8',
-                                    borderRadius: '4px',
-                                    padding: '1px 5px',
-                                    fontSize: '0.7rem',
-                                    fontWeight: hIdx === 0 ? 900 : 600,
-                                    whiteSpace: 'nowrap'
-                                  }}
-                                >
-                                  📅 {hist.tanggal}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span style={{ color: '#475569', fontSize: '0.75rem' }}>
-                              {sheet.tanggalOpname || sheet.tanggal || '-'}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800 }}>
-                          {sheet.proyek || '-'}
-                        </td>
-                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#38bdf8' }}>
-                          {sheet.namaVendor || '-'}
-                        </td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
-                          {sheet.blok || '-'}
-                        </td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
-                          {sheet.noUnit || '-'}
-                        </td>
-                        <td style={{ border: '1px solid #334155', padding: '7px 8px', fontSize: '0.82rem' }}>
-                          {sheet.fasum || '-'}
-                        </td>
-                        <td style={{ border: '1px solid #334155', padding: '7px 8px' }}>
-                          {sheet.pekerjaan || 'RAB'}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800 }}>
-                          {formatRupiahDesimal(c.totalHargaRab)}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#ffffff' }}>
-                          {c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#c084fc' }}>
-                          {c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#60a5fa' }}>
-                          {c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#fbbf24' }}>
-                          {Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}
-                        </td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
-                          {c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}
-                        </td>
+                        {hIdx === 0 && (
+                          <>
+                            <td rowSpan={rows.length} style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, verticalAlign: 'middle' }}>{sheet.proyek || '-'}</td>
+                            <td rowSpan={rows.length} style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#38bdf8', verticalAlign: 'middle' }}>{sheet.namaVendor || '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', verticalAlign: 'middle' }}>{sheet.blok || '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px', verticalAlign: 'middle' }}>{sheet.noUnit || '-'}</td>
+                            <td rowSpan={rows.length} style={{ border: '1px solid #334155', padding: '7px 8px', fontSize: '0.82rem', verticalAlign: 'middle' }}>{sheet.fasum || '-'}</td>
+                            <td rowSpan={rows.length} style={{ border: '1px solid #334155', padding: '7px 8px', verticalAlign: 'middle' }}>{sheet.pekerjaan || 'RAB'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, verticalAlign: 'middle' }}>{formatRupiahDesimal(c.totalHargaRab)}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#ffffff', verticalAlign: 'middle' }}>{c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#c084fc', verticalAlign: 'middle' }}>{c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#60a5fa', verticalAlign: 'middle' }}>{c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 800, color: '#fbbf24', verticalAlign: 'middle' }}>{Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}</td>
+                            <td rowSpan={rows.length} style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)', verticalAlign: 'middle' }}>{c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}</td>
+                          </>
+                        )}
                       </tr>
-                    );
+                    ));
                   })}
 
                   {/* EMPTY ROWS PLACEHOLDER (PERSIS FOTO EXCEL media_1787938735917.jpg) */}
