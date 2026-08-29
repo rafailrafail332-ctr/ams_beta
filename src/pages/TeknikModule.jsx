@@ -2872,15 +2872,21 @@ export const TeknikModule = () => {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Yakin ingin menghapus riwayat opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
+                              if (window.confirm(`Yakin ingin menghapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
                                 const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
-                                const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : (sheet.tanggal || '');
+                                const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
                                 const updatedSheets = rabSheets.map(s => {
                                   if (s.id === sheet.id) {
+                                    // Jika tidak ada history lagi, reset progress item menjadi 0 dan kosongkan tanggalOpname
+                                    const updatedItems = newHistory.length === 0
+                                      ? (s.items || []).map(it => ({ ...it, progress: 0 }))
+                                      : s.items;
                                     return {
                                       ...s,
                                       tanggalOpname: latestDate,
-                                      opnameHistory: newHistory
+                                      opnameHistory: newHistory,
+                                      items: updatedItems,
+                                      pembayaranSebelumnya: newHistory.length === 0 ? 0 : s.pembayaranSebelumnya
                                     };
                                   }
                                   return s;
@@ -2889,7 +2895,7 @@ export const TeknikModule = () => {
                                 try {
                                   localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                                 } catch(err) {}
-                                showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
+                                showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus total!`, 'info');
                               }
                             }}
                             style={{
