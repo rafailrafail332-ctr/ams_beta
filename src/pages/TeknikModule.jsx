@@ -1033,8 +1033,15 @@ export const TeknikModule = () => {
     if (!opnameTargetSheet) return;
 
     const updatedItems = (opnameTargetSheet.items || []).map(it => {
-      const newProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
-      return { ...it, progress: Math.min(100, Math.max(0, newProg)) };
+      const progInput = opnameFormData.itemProgress[it.id];
+      const newProg = progInput !== undefined && progInput !== '' ? parseNum(progInput) : (parseNum(it.progress) || 0);
+      const bobotNum = parseNum(it.bobotRatio || it.bobot);
+      const bobotProgress = newProg > 0 ? (bobotNum * newProg) : 0;
+      return { 
+        ...it, 
+        progress: Math.min(100, Math.max(0, newProg)),
+        bobotProgress
+      };
     });
 
     const tempSummary = computeSheetSummary({ ...opnameTargetSheet, items: updatedItems });
@@ -1042,30 +1049,36 @@ export const TeknikModule = () => {
 
     const opnameEntry = {
       id: `OPN-${Date.now().toString().slice(-4)}`,
-      tanggal: opnameFormData.tanggal,
-      pengawas: opnameFormData.pengawas,
-      catatan: opnameFormData.catatan,
+      tanggal: opnameFormData.tanggal || new Date().toISOString().split('T')[0],
+      pengawas: opnameFormData.pengawas || 'Pengawas Lapangan',
+      catatan: opnameFormData.catatan || '',
       progresHasil: totalProgResult,
       nilaiOpname: tempSummary.nilaiOpname,
       retensiNilai: tempSummary.retensiNilai,
       nilaiProgress: tempSummary.nilaiProgress,
-      pembayaranSebelumnya: Number(opnameTargetSheet.pembayaranSebelumnya) || 0,
+      pembayaranSebelumnya: parseNum(opnameTargetSheet.pembayaranSebelumnya),
       pembayaranSaatIni: tempSummary.pembayaranSaatIni,
       itemsSnapshot: updatedItems,
       timestamp: new Date().toLocaleString('id-ID')
     };
 
-    setRabSheets(prev => prev.map(s => {
+    const newSheets = rabSheets.map(s => {
       if (s.id === opnameTargetSheet.id) {
         return {
           ...s,
           items: updatedItems,
-          tanggalOpname: opnameFormData.tanggal,
+          tanggalOpname: opnameFormData.tanggal || new Date().toISOString().split('T')[0],
           opnameHistory: [opnameEntry, ...(s.opnameHistory || [])]
         };
       }
       return s;
-    }));
+    });
+
+    setRabSheets(newSheets);
+    setActiveSheetId(opnameTargetSheet.id);
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
+    } catch(err) {}
 
     showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres terupdate: ${formatDecimal(totalProgResult)}%`, 'success');
     setIsOpnameModalOpen(false);
@@ -4351,19 +4364,19 @@ export const TeknikModule = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                                   <input
                                     type="text"
-                                    value={curProg}
+                                    value={opnameFormData.itemProgress[it.id] !== undefined ? opnameFormData.itemProgress[it.id] : (it.progress || '')}
                                     onChange={(e) => {
-                                      const val = Math.min(100, Math.max(0, Number(e.target.value) || 0));
-                                      setOpnameFormData({
-                                        ...opnameFormData,
+                                      const rawVal = e.target.value;
+                                      setOpnameFormData(prev => ({
+                                        ...prev,
                                         itemProgress: {
-                                          ...opnameFormData.itemProgress,
-                                          [it.id]: val
+                                          ...prev.itemProgress,
+                                          [it.id]: rawVal
                                         }
-                                      });
+                                      }));
                                     }}
                                     style={{
-                                      width: '45px',
+                                      width: '48px',
                                       background: '#0f172a',
                                       border: '1.5px solid #10b981',
                                       borderRadius: '4px',
@@ -4381,7 +4394,7 @@ export const TeknikModule = () => {
 
                               {/* 10. Bobot Progress (Otomatis Bobot x Progress) */}
                               <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '6px 8px' }}>
-                                {formatDecimal(it.bobotRatio * curProg)}%
+                                {formatDecimal(it.bobotRatio * (parseNum(opnameFormData.itemProgress[it.id] !== undefined ? opnameFormData.itemProgress[it.id] : it.progress)))}%
                               </td>
                             </tr>
                           );
