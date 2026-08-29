@@ -4354,9 +4354,9 @@ export const TeknikModule = () => {
                                 {formatRupiahDesimal(it.jumlah)}
                               </td>
 
-                              {/* 8. Bobot (Terkunci) */}
+                              {/* 8. Bobot (Terkunci - Desimal Tanpa Persen) */}
                               <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '6px 8px' }}>
-                                {formatDecimal(it.bobotRatio * 100)}%
+                                {formatDecimal(it.bobotRatio, 2)}
                               </td>
 
                               {/* 9. Progress (HANYA INI YANG BISA DIUBAH SECARA BEBAS) */}
@@ -4409,7 +4409,7 @@ export const TeknikModule = () => {
                             {formatRupiahDesimal(liveCalc.totalHargaRab)}
                           </td>
                           <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                            100,00%
+                            {liveCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
                           </td>
                           <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
                             -
