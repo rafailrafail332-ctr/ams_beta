@@ -666,9 +666,26 @@ export const TeknikModule = () => {
     } catch (e) {}
   }, [rabSheets]);
 
+  const emptyTemplateSheet = {
+    id: 'sheet_empty',
+    noInput: 'RAB - 01',
+    tanggal: new Date().toISOString().split('T')[0],
+    proyek: 'Ashoka View',
+    namaVendor: '',
+    pekerjaan: '',
+    blok: '',
+    noUnit: '',
+    fasum: '',
+    retensiPersen: 5,
+    pembayaranSebelumnya: 0,
+    tanggalOpname: '',
+    opnameHistory: [],
+    items: []
+  };
+
   // Selected Active Sheet for TAB 2 (Input Spreadsheet)
-  const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || 'RAB-01'));
-  const activeSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || defaultRabSheets[0];
+  const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || ''));
+  const activeSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || emptyTemplateSheet;
 
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
@@ -840,18 +857,18 @@ export const TeknikModule = () => {
     showNotification(`Lembar spreadsheet baru "${nextNo}" berhasil dibuat!`, 'success');
   };
 
-  // DELETE SHEET
+  // DELETE SHEET (Bisa dihapus sampai kosong total)
   const handleDeleteSheet = (sheetId) => {
-    if (rabSheets.length <= 1) {
-      alert('Minimal harus ada 1 lembar RAB.');
-      return;
-    }
     const target = rabSheets.find(s => s.id === sheetId);
     if (window.confirm(`Hapus seluruh lembar "${target?.noInput || 'RAB'}" (${target?.pekerjaan || 'Tanpa Judul'})?`)) {
       const remaining = rabSheets.filter(s => s.id !== sheetId);
       setRabSheets(remaining);
-      setActiveSheetId(remaining[0].id);
-      showNotification(`Lembar "${target?.noInput}" berhasil dihapus.`, 'warning');
+      if (remaining.length > 0) {
+        setActiveSheetId(remaining[0].id);
+      } else {
+        setActiveSheetId('');
+      }
+      showNotification(`Lembar "${target?.noInput || 'RAB'}" berhasil dihapus.`, 'warning');
     }
   };
 
@@ -2295,7 +2312,7 @@ export const TeknikModule = () => {
                 <Printer size={14} /> Cetak Sheet
               </button>
 
-              {rabSheets.length > 1 && (
+              {rabSheets.length > 0 && (
                 <button
                   type="button"
                   className="btn btn-sm"
@@ -2876,28 +2893,14 @@ export const TeknikModule = () => {
                               e.stopPropagation();
                               if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${sheet.noInput} (${sheet.namaVendor || sheet.proyek})? Data RAB dan seluruh riwayat hasil opname akan dihapus permanen.`)) {
                                 const updatedSheets = rabSheets.filter(s => s.id !== sheet.id);
-                                const finalSheets = updatedSheets.length > 0 ? updatedSheets : [{
-                                  id: 'sheet_1',
-                                  noInput: 'RAB - 01',
-                                  tanggal: new Date().toISOString().split('T')[0],
-                                  proyek: '',
-                                  namaVendor: '',
-                                  pekerjaan: 'RAB Bangunan',
-                                  blok: '',
-                                  noUnit: '',
-                                  fasum: '',
-                                  retensiPersen: 5,
-                                  pembayaranSebelumnya: 0,
-                                  tanggalOpname: '',
-                                  opnameHistory: [],
-                                  items: []
-                                }];
-                                setRabSheets(finalSheets);
-                                if (activeSheet.id === sheet.id) {
-                                  setActiveSheetId(finalSheets[0].id);
+                                setRabSheets(updatedSheets);
+                                if (updatedSheets.length > 0) {
+                                  setActiveSheetId(updatedSheets[0].id);
+                                } else {
+                                  setActiveSheetId('');
                                 }
                                 try {
-                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(finalSheets));
+                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                                 } catch(err) {}
                                 showNotification(`Data RAB ${sheet.noInput} berhasil dihapus permanen!`, 'error');
                               }
@@ -3233,26 +3236,14 @@ export const TeknikModule = () => {
                 onClick={() => {
                   if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${activeSheet.noInput} (${activeSheet.namaVendor || activeSheet.proyek})? Lembar RAB ini akan dihapus permanen dari sistem.`)) {
                     const updatedSheets = rabSheets.filter(s => s.id !== activeSheet.id);
-                    const finalSheets = updatedSheets.length > 0 ? updatedSheets : [{
-                      id: 'sheet_1',
-                      noInput: 'RAB - 01',
-                      tanggal: new Date().toISOString().split('T')[0],
-                      proyek: '',
-                      namaVendor: '',
-                      pekerjaan: 'RAB Bangunan',
-                      blok: '',
-                      noUnit: '',
-                      fasum: '',
-                      retensiPersen: 5,
-                      pembayaranSebelumnya: 0,
-                      tanggalOpname: '',
-                      opnameHistory: [],
-                      items: []
-                    }];
-                    setRabSheets(finalSheets);
-                    setActiveSheetId(finalSheets[0].id);
+                    setRabSheets(updatedSheets);
+                    if (updatedSheets.length > 0) {
+                      setActiveSheetId(updatedSheets[0].id);
+                    } else {
+                      setActiveSheetId('');
+                    }
                     try {
-                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(finalSheets));
+                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                     } catch(e) {}
                     showNotification(`Seluruh data RAB ${activeSheet.noInput} berhasil dihapus permanen!`, 'error');
                   }
