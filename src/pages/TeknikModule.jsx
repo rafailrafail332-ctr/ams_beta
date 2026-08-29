@@ -2804,8 +2804,8 @@ export const TeknikModule = () => {
                     <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
                       Pembyaran saat ini
                     </th>
-                    <th style={{ width: '60px', textAlign: 'center', background: '#ef4444', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
-                      Hapus
+                    <th style={{ width: '110px', textAlign: 'center', background: '#10b981', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                      Aksi
                     </th>
                   </tr>
                 </thead>
@@ -2897,48 +2897,77 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
                               {hist.pembayaranSaatIni !== undefined ? (hist.pembayaranSaatIni > 0 ? formatRupiahDesimal(hist.pembayaranSaatIni) : '-') : (c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-')}
                             </td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (window.confirm(`Hapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
-                                    const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
-                                    const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
-                                    const updatedSheets = rabSheets.map(s => {
-                                      if (s.id === sheet.id) {
-                                        return {
-                                          ...s,
-                                          tanggalOpname: latestDate,
-                                          opnameHistory: newHistory,
-                                          items: newHistory.length === 0 ? (s.items || []).map(it => ({ ...it, progress: 0 })) : s.items
-                                        };
-                                      }
-                                      return s;
-                                    });
-                                    setRabSheets(updatedSheets);
-                                    try {
-                                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                                    } catch(err) {}
-                                    showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
-                                  }
-                                }}
-                                style={{
-                                  background: '#ef4444',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  padding: '4px 6px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
-                                }}
-                                title="Hapus riwayat opname tanggal ini"
-                              >
-                                <Trash2 size={13} />
-                              </button>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                {/* TOMBOL OPNAME (MODAL UBAH PROGRES) */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenOpnameModal(sheet);
+                                  }}
+                                  style={{
+                                    background: '#10b981',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '4px 7px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 900,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+                                  }}
+                                  title="Input / Update Opname (Ubah Progres)"
+                                >
+                                  <ClipboardCheck size={12} /> Opname
+                                </button>
+
+                                {/* TOMBOL HAPUS TANGGAL OPNAME INI */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm(`Hapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
+                                      const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
+                                      const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
+                                      const updatedSheets = rabSheets.map(s => {
+                                        if (s.id === sheet.id) {
+                                          return {
+                                            ...s,
+                                            tanggalOpname: latestDate,
+                                            opnameHistory: newHistory,
+                                            items: newHistory.length === 0 ? (s.items || []).map(it => ({ ...it, progress: 0 })) : s.items
+                                          };
+                                        }
+                                        return s;
+                                      });
+                                      setRabSheets(updatedSheets);
+                                      try {
+                                        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                                      } catch(err) {}
+                                      showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
+                                    }
+                                  }}
+                                  style={{
+                                    background: '#ef4444',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '4px 6px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                                  }}
+                                  title="Hapus riwayat opname tanggal ini"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
