@@ -739,13 +739,22 @@ export const TeknikModule = () => {
           const updatedItems = (s.items || []).map(it => {
             if (it.id === itemId) {
               const updated = { ...it, [field]: value };
-              // jika edit progress, hitung ulang bobotProgress
+
+              // Otomatis hitung Jumlah saat Vol atau Harga Satuan diubah
+              if (field === 'vol' || field === 'hargaSatuan') {
+                const volNum = Number(field === 'vol' ? value : updated.vol) || 0;
+                const hrgNum = Number(field === 'hargaSatuan' ? value : updated.hargaSatuan) || 0;
+                updated.jumlah = volNum * hrgNum;
+              }
+
+              // Otomatis hitung ulang bobotProgress jika edit progress
               if (field === 'progress') {
                 const progNum = Number(value) || 0;
                 const bobotNum = Number(updated.bobotRatio || updated.bobot || 0);
                 const bFactor = bobotNum > 1 ? bobotNum : (bobotNum * 100);
-                updated.bobotProgress = (progNum / 100) * bFactor;
+                updated.bobotProgress = progNum > 0 ? ((progNum / 100) * bFactor) : 0;
               }
+
               return updated;
             }
             return it;
