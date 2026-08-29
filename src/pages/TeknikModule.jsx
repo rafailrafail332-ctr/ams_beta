@@ -2874,30 +2874,32 @@ export const TeknikModule = () => {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (window.confirm(`Yakin ingin menghapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
-                                const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
-                                const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
-                                const updatedSheets = rabSheets.map(s => {
-                                  if (s.id === sheet.id) {
-                                    // Jika tidak ada history lagi, reset progress item menjadi 0 dan kosongkan tanggalOpname
-                                    const updatedItems = newHistory.length === 0
-                                      ? (s.items || []).map(it => ({ ...it, progress: 0 }))
-                                      : s.items;
-                                    return {
-                                      ...s,
-                                      tanggalOpname: latestDate,
-                                      opnameHistory: newHistory,
-                                      items: updatedItems,
-                                      pembayaranSebelumnya: newHistory.length === 0 ? 0 : s.pembayaranSebelumnya
-                                    };
-                                  }
-                                  return s;
-                                });
-                                setRabSheets(updatedSheets);
+                              if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${sheet.noInput} (${sheet.namaVendor || sheet.proyek})? Data RAB dan seluruh riwayat hasil opname akan dihapus permanen.`)) {
+                                const updatedSheets = rabSheets.filter(s => s.id !== sheet.id);
+                                const finalSheets = updatedSheets.length > 0 ? updatedSheets : [{
+                                  id: 'sheet_1',
+                                  noInput: 'RAB - 01',
+                                  tanggal: new Date().toISOString().split('T')[0],
+                                  proyek: '',
+                                  namaVendor: '',
+                                  pekerjaan: 'RAB Bangunan',
+                                  blok: '',
+                                  noUnit: '',
+                                  fasum: '',
+                                  retensiPersen: 5,
+                                  pembayaranSebelumnya: 0,
+                                  tanggalOpname: '',
+                                  opnameHistory: [],
+                                  items: []
+                                }];
+                                setRabSheets(finalSheets);
+                                if (activeSheet.id === sheet.id) {
+                                  setActiveSheetId(finalSheets[0].id);
+                                }
                                 try {
-                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(finalSheets));
                                 } catch(err) {}
-                                showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus total!`, 'info');
+                                showNotification(`Data RAB ${sheet.noInput} berhasil dihapus permanen!`, 'error');
                               }
                             }}
                             style={{
@@ -2912,7 +2914,7 @@ export const TeknikModule = () => {
                               justifyContent: 'center',
                               boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
                             }}
-                            title="Hapus riwayat opname ini"
+                            title="Hapus permanen data RAB dan Opname ini"
                           >
                             <Trash2 size={13} />
                           </button>
@@ -3231,29 +3233,34 @@ export const TeknikModule = () => {
                 <Edit size={15} /> {isEditingPembayaran ? '🔒 Kunci Pembayaran' : '✏️ Edit Pembayaran Sebelumnya'}
               </button>
 
-              {/* HAPUS Seluruh Opname Sheet Ini / Reset Progress Opname */}
+              {/* HAPUS Seluruh Data RAB & Opname Ini */}
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm(`Yakin ingin mereset/menghapus seluruh riwayat opname untuk lembar ${activeSheet.noInput}? Progress item pekerjaan akan dikembalikan ke 0%.`)) {
-                    const resetItems = (activeSheet.items || []).map(it => ({ ...it, progress: 0 }));
-                    const updatedSheets = rabSheets.map(s => {
-                      if (s.id === activeSheet.id) {
-                        return {
-                          ...s,
-                          items: resetItems,
-                          tanggalOpname: '',
-                          opnameHistory: [],
-                          pembayaranSebelumnya: 0
-                        };
-                      }
-                      return s;
-                    });
-                    setRabSheets(updatedSheets);
+                  if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${activeSheet.noInput} (${activeSheet.namaVendor || activeSheet.proyek})? Lembar RAB ini akan dihapus permanen dari sistem.`)) {
+                    const updatedSheets = rabSheets.filter(s => s.id !== activeSheet.id);
+                    const finalSheets = updatedSheets.length > 0 ? updatedSheets : [{
+                      id: 'sheet_1',
+                      noInput: 'RAB - 01',
+                      tanggal: new Date().toISOString().split('T')[0],
+                      proyek: '',
+                      namaVendor: '',
+                      pekerjaan: 'RAB Bangunan',
+                      blok: '',
+                      noUnit: '',
+                      fasum: '',
+                      retensiPersen: 5,
+                      pembayaranSebelumnya: 0,
+                      tanggalOpname: '',
+                      opnameHistory: [],
+                      items: []
+                    }];
+                    setRabSheets(finalSheets);
+                    setActiveSheetId(finalSheets[0].id);
                     try {
-                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(finalSheets));
                     } catch(e) {}
-                    showNotification(`Seluruh data opname ${activeSheet.noInput} berhasil direset/dihapus!`, 'warning');
+                    showNotification(`Seluruh data RAB ${activeSheet.noInput} berhasil dihapus permanen!`, 'error');
                   }
                 }}
                 style={{
@@ -3271,7 +3278,7 @@ export const TeknikModule = () => {
                   boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
                 }}
               >
-                <Trash2 size={15} /> Hapus / Reset Opname
+                <Trash2 size={15} /> Hapus Lembar RAB
               </button>
 
               {/* SIMPAN ke Rekapitulasi */}
