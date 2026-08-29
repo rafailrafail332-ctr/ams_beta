@@ -2263,48 +2263,6 @@ export const TeknikModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
-                onClick={() => handleOpenOpnameModal(activeSheet)}
-                style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 900,
-                  fontSize: '0.78rem',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
-                }}
-                title="Input Opname Progres Lapangan"
-              >
-                <ClipboardCheck size={14} /> Opname Pekerjaan
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSubTabBorongan('laporan_rab')}
-                style={{
-                  background: '#0284c7',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: '0.78rem',
-                  padding: '5px 10px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                <BarChart3 size={14} /> Lihat di Tabel Laporan &rarr;
-              </button>
-
-              <button
-                type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={handlePrint}
                 style={{ background: '#1e293b', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, fontSize: '0.78rem' }}
@@ -2347,7 +2305,7 @@ export const TeknikModule = () => {
                     value={activeSheet.noInput || ''}
                     onChange={(e) => handleUpdateHeaderField('noInput', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #ea580c', color: '#fb923c', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Contoh: SPK-001 / SPK/2026/08/01"
+                    placeholder=""
                   />
                 </div>
 
@@ -2360,7 +2318,7 @@ export const TeknikModule = () => {
                     value={activeSheet.tanggal || ''}
                     onChange={(e) => handleUpdateHeaderField('tanggal', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="28/08/26"
+                    placeholder=""
                   />
                 </div>
 
@@ -2387,7 +2345,7 @@ export const TeknikModule = () => {
                     value={activeSheet.namaVendor || ''}
                     onChange={(e) => handleUpdateHeaderField('namaVendor', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #38bdf8', color: '#38bdf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Joko / PT. Sarana..."
+                    placeholder=""
                   />
                 </div>
 
@@ -2400,7 +2358,7 @@ export const TeknikModule = () => {
                     value={activeSheet.pekerjaan || ''}
                     onChange={(e) => handleUpdateHeaderField('pekerjaan', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #f59e0b', color: '#fbbf24', fontWeight: 800, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Borongan Pemasangan lantai..."
+                    placeholder=""
                   />
                 </div>
 
@@ -2413,7 +2371,7 @@ export const TeknikModule = () => {
                     value={activeSheet.blok || ''}
                     onChange={(e) => handleUpdateHeaderField('blok', e.target.value.toUpperCase())}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #6366f1', color: '#818cf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="B1, A, C..."
+                    placeholder=""
                   />
                 </div>
 
@@ -2426,7 +2384,7 @@ export const TeknikModule = () => {
                     value={activeSheet.noUnit || ''}
                     onChange={(e) => handleUpdateHeaderField('noUnit', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #6366f1', color: '#818cf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="10, 01..."
+                    placeholder=""
                   />
                 </div>
 
@@ -2439,7 +2397,7 @@ export const TeknikModule = () => {
                     value={activeSheet.fasum || ''}
                     onChange={(e) => handleUpdateHeaderField('fasum', e.target.value)}
                     style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#cbd5e1', fontWeight: 700, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="Area Masjid / Fasum / Kosong jika unit"
+                    placeholder=""
                   />
                 </div>
               </div>
