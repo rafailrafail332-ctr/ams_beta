@@ -947,6 +947,12 @@ export const TeknikModule = () => {
       pengawas: opnameFormData.pengawas,
       catatan: opnameFormData.catatan,
       progresHasil: totalProgResult,
+      nilaiOpname: tempSummary.nilaiOpname,
+      retensiNilai: tempSummary.retensiNilai,
+      nilaiProgress: tempSummary.nilaiProgress,
+      pembayaranSebelumnya: Number(opnameTargetSheet.pembayaranSebelumnya) || 0,
+      pembayaranSaatIni: tempSummary.pembayaranSaatIni,
+      itemsSnapshot: updatedItems,
       timestamp: new Date().toLocaleString('id-ID')
     };
 
@@ -2820,23 +2826,34 @@ export const TeknikModule = () => {
                             <td style={{ border: '1px solid #334155', padding: '8px 8px', color: '#ffffff', fontWeight: 700 }}>
                               {sheet.pekerjaan || 'RAB'}
                             </td>
+                            {/* Harga RAB */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
                               {formatRupiahDesimal(c.totalHargaRab)}
                             </td>
+
+                            {/* Nilai Opname */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
-                              {c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}
+                              {hist.nilaiOpname !== undefined ? (hist.nilaiOpname > 0 ? formatRupiahDesimal(hist.nilaiOpname) : '-') : (c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-')}
                             </td>
+
+                            {/* Retensi 5% */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#c084fc' }}>
-                              {c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}
+                              {hist.retensiNilai !== undefined ? (hist.retensiNilai > 0 ? formatRupiahDesimal(hist.retensiNilai) : '-') : (c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-')}
                             </td>
+
+                            {/* Nilai Progress */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#60a5fa' }}>
-                              {c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}
+                              {hist.nilaiProgress !== undefined ? (hist.nilaiProgress > 0 ? formatRupiahDesimal(hist.nilaiProgress) : '-') : (c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-')}
                             </td>
+
+                            {/* Pembayaran sebelumnya */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#fbbf24' }}>
-                              {Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}
+                              {hist.pembayaranSebelumnya !== undefined ? (Number(hist.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(hist.pembayaranSebelumnya) : '-') : (Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-')}
                             </td>
+
+                            {/* Pembayaran saat ini */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
-                              {c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}
+                              {hist.pembayaranSaatIni !== undefined ? (hist.pembayaranSaatIni > 0 ? formatRupiahDesimal(hist.pembayaranSaatIni) : '-') : (c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-')}
                             </td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
                               <button
