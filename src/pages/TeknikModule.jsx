@@ -562,99 +562,16 @@ export const TeknikModule = () => {
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v14';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v15_clean';
 
-  const defaultRabSheets = [
-    {
-      id: 'RAB-01',
-      noInput: 'RAB - 01',
-      tanggal: '28/08/26',
-      proyek: 'Ashoka View',
-      namaVendor: 'Joko',
-      blok: 'B1',
-      noUnit: '10',
-      fasum: '',
-      pekerjaan: 'Borongan Pemasangan lantai',
-      retensiPersen: 5,
-      items: [
-        {
-          id: 'ITEM-01',
-          itemPekerjaan: 'Perataan tanah',
-          spesifikasi: '-',
-          vol: 50.00,
-          sat: 'm2',
-          hargaSatuan: 15000.00,
-          progress: 0
-        },
-        {
-          id: 'ITEM-02',
-          itemPekerjaan: 'Pemasangan keramik',
-          spesifikasi: 'keramik 40 x 40',
-          vol: 40.00,
-          sat: 'm2',
-          hargaSatuan: 45000.00,
-          progress: 0
-        },
-        {
-          id: 'ITEM-03',
-          itemPekerjaan: 'Pemasangan Plint lantai',
-          spesifikasi: 'uk. 7 cm',
-          vol: 75.00,
-          sat: 'm1',
-          hargaSatuan: 7500.00,
-          progress: 0
-        },
-        {
-          id: 'ITEM-04',
-          itemPekerjaan: 'Pembersihan',
-          spesifikasi: '-',
-          vol: 1.00,
-          sat: 'ls',
-          hargaSatuan: 250000.00,
-          progress: 0
-        }
-      ]
-    },
-    {
-      id: 'RAB-02',
-      noInput: 'RAB - 02',
-      tanggal: '28/08/26',
-      proyek: 'Ashoka Park',
-      namaVendor: 'PT. Sarana',
-      blok: '',
-      noUnit: '',
-      fasum: 'Area Masjid',
-      pekerjaan: 'Pembuatan Turap',
-      retensiPersen: 5,
-      items: [
-        {
-          id: 'ITEM-05',
-          itemPekerjaan: 'Galian Tanah Pondasi Turap',
-          spesifikasi: 'Tanah Keras / Cadas',
-          vol: 50.00,
-          sat: 'm3',
-          hargaSatuan: 90000.00,
-          progress: 100
-        },
-        {
-          id: 'ITEM-06',
-          itemPekerjaan: 'Pasangan Batu Kali Turap Belakang',
-          spesifikasi: 'Batu Belah 15/20, Mortar 1:4',
-          vol: 30.00,
-          sat: 'm3',
-          hargaSatuan: 500000.00,
-          progress: 60
-        }
-      ]
-    }
-  ];
+  const defaultRabSheets = [];
 
   const [rabSheets, setRabSheets] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_RAB_SHEETS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
     return defaultRabSheets;
