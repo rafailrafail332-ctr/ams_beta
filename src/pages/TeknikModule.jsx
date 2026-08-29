@@ -3223,6 +3223,49 @@ export const TeknikModule = () => {
                 <Edit size={15} /> {isEditingPembayaran ? '🔒 Kunci Pembayaran' : '✏️ Edit Pembayaran Sebelumnya'}
               </button>
 
+              {/* HAPUS Seluruh Opname Sheet Ini / Reset Progress Opname */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`Yakin ingin mereset/menghapus seluruh riwayat opname untuk lembar ${activeSheet.noInput}? Progress item pekerjaan akan dikembalikan ke 0%.`)) {
+                    const resetItems = (activeSheet.items || []).map(it => ({ ...it, progress: 0 }));
+                    const updatedSheets = rabSheets.map(s => {
+                      if (s.id === activeSheet.id) {
+                        return {
+                          ...s,
+                          items: resetItems,
+                          tanggalOpname: '',
+                          opnameHistory: [],
+                          pembayaranSebelumnya: 0
+                        };
+                      }
+                      return s;
+                    });
+                    setRabSheets(updatedSheets);
+                    try {
+                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                    } catch(e) {}
+                    showNotification(`Seluruh data opname ${activeSheet.noInput} berhasil direset/dihapus!`, 'warning');
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#991b1b',
+                  color: '#ffffff',
+                  border: '1.5px solid #ef4444',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontWeight: 900,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                }}
+              >
+                <Trash2 size={15} /> Hapus / Reset Opname
+              </button>
+
               {/* SIMPAN ke Rekapitulasi */}
               <button
                 type="button"
