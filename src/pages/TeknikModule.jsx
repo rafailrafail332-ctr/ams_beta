@@ -3190,22 +3190,29 @@ export const TeknikModule = () => {
                 <Edit size={15} /> {isEditingPembayaran ? '🔒 Kunci Pembayaran' : '✏️ Edit Pembayaran Sebelumnya'}
               </button>
 
-              {/* HAPUS Seluruh Data RAB & Opname Ini */}
+              {/* HAPUS / RESET OPNAME LEMBAR INI */}
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${activeSheet.noInput} (${activeSheet.namaVendor || activeSheet.proyek})? Lembar RAB ini akan dihapus permanen dari sistem.`)) {
-                    const updatedSheets = rabSheets.filter(s => s.id !== activeSheet.id);
+                  if (window.confirm(`Yakin ingin menghapus seluruh data opname untuk ${activeSheet.noInput}? Progress item pekerjaan akan dikembalikan ke 0% dan riwayat opname dibersihkan (data RAB tetap aman).`)) {
+                    const resetItems = (activeSheet.items || []).map(it => ({ ...it, progress: 0 }));
+                    const updatedSheets = rabSheets.map(s => {
+                      if (s.id === activeSheet.id) {
+                        return {
+                          ...s,
+                          items: resetItems,
+                          tanggalOpname: '',
+                          opnameHistory: [],
+                          pembayaranSebelumnya: 0
+                        };
+                      }
+                      return s;
+                    });
                     setRabSheets(updatedSheets);
-                    if (updatedSheets.length > 0) {
-                      setActiveSheetId(updatedSheets[0].id);
-                    } else {
-                      setActiveSheetId('');
-                    }
                     try {
                       localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                     } catch(e) {}
-                    showNotification(`Seluruh data RAB ${activeSheet.noInput} berhasil dihapus permanen!`, 'error');
+                    showNotification(`Seluruh data hasil opname ${activeSheet.noInput} berhasil dihapus/direset!`, 'warning');
                   }
                 }}
                 style={{
@@ -3223,7 +3230,7 @@ export const TeknikModule = () => {
                   boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
                 }}
               >
-                <Trash2 size={15} /> Hapus Lembar RAB
+                <Trash2 size={15} /> Hapus Data Opname
               </button>
 
               {/* SIMPAN ke Rekapitulasi */}
