@@ -4216,7 +4216,8 @@ export const TeknikModule = () => {
       {isOpnameModalOpen && opnameTargetSheet && (() => {
         const targetSummary = computeSheetSummary(opnameTargetSheet);
         const liveItems = (opnameTargetSheet.items || []).map(it => {
-          const newProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
+          const rawInput = opnameFormData.itemProgress[it.id];
+          const newProg = rawInput !== undefined && rawInput !== '' ? parseNum(rawInput) : (parseNum(it.progress) || 0);
           return { ...it, progress: newProg };
         });
         const liveCalc = computeSheetSummary({ ...opnameTargetSheet, items: liveItems });
