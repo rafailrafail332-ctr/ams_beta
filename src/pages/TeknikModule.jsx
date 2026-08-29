@@ -602,7 +602,24 @@ export const TeknikModule = () => {
 
   // Selected Active Sheet for TAB 2 (Input Spreadsheet)
   const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || ''));
-  const activeSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || emptyTemplateSheet;
+  const rawActiveSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || emptyTemplateSheet;
+
+  // Active Sheet with items snapshot of the selected opname date if applicable
+  const activeSheet = useMemo(() => {
+    if (!rawActiveSheet) return emptyTemplateSheet;
+    const selectedDate = rawActiveSheet.tanggalOpname;
+    if (selectedDate && rawActiveSheet.opnameHistory && rawActiveSheet.opnameHistory.length > 0) {
+      const matchedHist = rawActiveSheet.opnameHistory.find(h => h.tanggal === selectedDate);
+      if (matchedHist && matchedHist.itemsSnapshot) {
+        return {
+          ...rawActiveSheet,
+          items: matchedHist.itemsSnapshot,
+          pembayaranSebelumnya: matchedHist.pembayaranSebelumnya !== undefined ? matchedHist.pembayaranSebelumnya : rawActiveSheet.pembayaranSebelumnya
+        };
+      }
+    }
+    return rawActiveSheet;
+  }, [rawActiveSheet]);
 
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
