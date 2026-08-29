@@ -2923,35 +2923,29 @@ export const TeknikModule = () => {
                     ));
                   })}
 
-                  {/* EMPTY ROWS PLACEHOLDER (PERSIS FOTO EXCEL media_1787938735917.jpg) */}
-                  {filteredHasilOpnameSheets.length < 6 && Array.from({ length: 6 - filteredHasilOpnameSheets.length }).map((_, rIdx) => (
-                    <tr key={`empty-rekap-top-${rIdx}`} style={{ height: '30px', backgroundColor: (filteredHasilOpnameSheets.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
+                  {/* JIKA BELUM ADA DATA OPNAME SAMA SEKALI */}
+                  {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '')).length === 0 && (
+                    <tr>
+                      <td colSpan={15} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8', background: '#0f172a', border: '1px solid #334155' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+                          <ClipboardCheck size={36} color="#64748b" />
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#cbd5e1' }}>Belum Ada Data Hasil Opname</div>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b', maxWidth: '420px' }}>
+                            Data hasil opname akan muncul di sini setelah Anda melakukan <strong>Opname</strong> di tab <strong>Laporan Rekapitulasi RAB</strong>.
+                          </div>
+                        </div>
+                      </td>
                     </tr>
-                  ))}
-
-
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
           {/* ========================================================================= */}
-          {/* 2. TABEL RINCIAN HASIL OPNAME & PEMBAYARAN (PERSIS FOTO media_1787936577245.png) */}
+          {/* 2. TABEL RINCIAN HASIL OPNAME & PEMBAYARAN (HANYA MUNCUL JIKA ADA OPNAME) */}
           {/* ========================================================================= */}
+          {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '')).length > 0 && (
           <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', overflowX: 'auto' }}>
             
             {/* Header Title & Info */}
@@ -3315,6 +3309,7 @@ export const TeknikModule = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
       )}
 
