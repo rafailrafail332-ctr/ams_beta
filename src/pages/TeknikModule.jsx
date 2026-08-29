@@ -2585,23 +2585,37 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Harga Satuan */}
+                      {/* Harga Satuan (Bentuk Currency / Format Titik Ribuan) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
-                          value={row.hargaSatuan !== undefined ? row.hargaSatuan : ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'hargaSatuan', e.target.value)}
+                          value={
+                            row.hargaSatuan !== undefined && row.hargaSatuan !== '' && row.hargaSatuan !== 0
+                              ? formatRupiah(parseNum(row.hargaSatuan))
+                              : (row.hargaSatuan === 0 ? '0' : (row.hargaSatuan || ''))
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateCell(row.id, 'hargaSatuan', val);
+                          }}
                           placeholder=""
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.88rem', outline: 'none' }}
                         />
                       </td>
 
-                      {/* Jumlah (Input Manual Tanpa Titik Pemisah / Desimal) */}
+                      {/* Jumlah (Bentuk Currency / Format Titik Ribuan) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
-                          value={row.jumlah !== undefined ? row.jumlah : ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'jumlah', e.target.value)}
+                          value={
+                            row.jumlah !== undefined && row.jumlah !== '' && row.jumlah !== 0
+                              ? formatRupiah(parseNum(row.jumlah))
+                              : (row.jumlah === 0 ? '0' : (row.jumlah || ''))
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            handleUpdateCell(row.id, 'jumlah', val);
+                          }}
                           placeholder=""
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
                         />
