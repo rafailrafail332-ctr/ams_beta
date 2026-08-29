@@ -2817,6 +2817,9 @@ export const TeknikModule = () => {
                     <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
                       Pembyaran saat ini
                     </th>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#ef4444', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                      Hapus
+                    </th>
                   </tr>
                 </thead>
 
@@ -2831,7 +2834,12 @@ export const TeknikModule = () => {
                     return rows.map((hist, hIdx) => (
                       <tr
                         key={`${sheet.id}-${hIdx}`}
-                        onClick={() => setActiveSheetId(sheet.id)}
+                        onClick={() => {
+                          setActiveSheetId(sheet.id);
+                          if (hist.tanggal && hist.tanggal !== '-') {
+                            setRabSheets(prev => prev.map(s => s.id === sheet.id ? { ...s, tanggalOpname: hist.tanggal } : s));
+                          }
+                        }}
                         style={{
                           backgroundColor: hIdx === 0 ? bgBase : (isSelected ? 'rgba(16, 185, 129, 0.10)' : (idx % 2 === 0 ? '#162032' : '#0a1220')),
                           color: '#f8fafc',
@@ -2859,6 +2867,48 @@ export const TeknikModule = () => {
                         <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#60a5fa' : '#334155' }}>{c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}</td>
                         <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#fbbf24' : '#334155' }}>{Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}</td>
                         <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 900, color: hIdx === 0 ? '#34d399' : '#334155', background: hIdx === 0 ? 'rgba(16, 185, 129, 0.08)' : 'transparent' }}>{c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}</td>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Yakin ingin menghapus riwayat opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
+                                const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
+                                const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : (sheet.tanggal || '');
+                                const updatedSheets = rabSheets.map(s => {
+                                  if (s.id === sheet.id) {
+                                    return {
+                                      ...s,
+                                      tanggalOpname: latestDate,
+                                      opnameHistory: newHistory
+                                    };
+                                  }
+                                  return s;
+                                });
+                                setRabSheets(updatedSheets);
+                                try {
+                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                                } catch(err) {}
+                                showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
+                              }
+                            }}
+                            style={{
+                              background: '#ef4444',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '4px 6px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                            }}
+                            title="Hapus riwayat opname ini"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
                       </tr>
                     ));
                   })}
