@@ -585,8 +585,8 @@ export const TeknikModule = () => {
 
   const emptyTemplateSheet = {
     id: 'sheet_empty',
-    noInput: 'RAB - 01',
-    tanggal: new Date().toISOString().split('T')[0],
+    noInput: '',
+    tanggal: '',
     proyek: 'Ashoka View',
     namaVendor: '',
     pekerjaan: '',
@@ -683,28 +683,48 @@ export const TeknikModule = () => {
 
   // UPDATE ACTIVE SHEET HEADER INLINE
   const handleUpdateHeaderField = (field, value) => {
-    setRabSheets(prev => prev.map(s => {
-      if (s.id === activeSheet.id) {
-        return { ...s, [field]: value };
+    setRabSheets(prev => {
+      const exists = prev.some(s => s.id === activeSheet.id);
+      if (!exists) {
+        const newSheet = { ...emptyTemplateSheet, id: `RAB-${Date.now().toString().slice(-4)}`, [field]: value };
+        setActiveSheetId(newSheet.id);
+        return [newSheet];
       }
-      return s;
-    }));
+      return prev.map(s => {
+        if (s.id === activeSheet.id) {
+          return { ...s, [field]: value };
+        }
+        return s;
+      });
+    });
   };
 
   // UPDATE ACTIVE SHEET TABLE CELLS INLINE
   const handleUpdateCell = (itemId, field, value) => {
-    setRabSheets(prev => prev.map(s => {
-      if (s.id === activeSheet.id) {
-        const updatedItems = (s.items || []).map(it => {
-          if (it.id === itemId) {
-            return { ...it, [field]: value };
-          }
-          return it;
-        });
-        return { ...s, items: updatedItems };
+    setRabSheets(prev => {
+      const exists = prev.some(s => s.id === activeSheet.id);
+      if (!exists) {
+        const newSheet = { 
+          ...emptyTemplateSheet, 
+          id: `RAB-${Date.now().toString().slice(-4)}`,
+          items: [{ id: itemId, itemPekerjaan: '', spesifikasi: '-', vol: 1, sat: 'm2', hargaSatuan: 0, progress: 0, [field]: value }]
+        };
+        setActiveSheetId(newSheet.id);
+        return [newSheet];
       }
-      return s;
-    }));
+      return prev.map(s => {
+        if (s.id === activeSheet.id) {
+          const updatedItems = (s.items || []).map(it => {
+            if (it.id === itemId) {
+              return { ...it, [field]: value };
+            }
+            return it;
+          });
+          return { ...s, items: updatedItems };
+        }
+        return s;
+      });
+    });
   };
 
   // ADD NEW ROW TO ACTIVE SHEET
@@ -719,12 +739,20 @@ export const TeknikModule = () => {
       progress: 0
     };
 
-    setRabSheets(prev => prev.map(s => {
-      if (s.id === activeSheet.id) {
-        return { ...s, items: [...(s.items || []), newItem] };
+    setRabSheets(prev => {
+      const exists = prev.some(s => s.id === activeSheet.id);
+      if (!exists) {
+        const newSheet = { ...emptyTemplateSheet, id: `RAB-${Date.now().toString().slice(-4)}`, items: [newItem] };
+        setActiveSheetId(newSheet.id);
+        return [newSheet];
       }
-      return s;
-    }));
+      return prev.map(s => {
+        if (s.id === activeSheet.id) {
+          return { ...s, items: [...(s.items || []), newItem] };
+        }
+        return s;
+      });
+    });
     showNotification('Baris item pekerjaan baru berhasil ditambahkan.', 'info');
   };
 
@@ -739,14 +767,12 @@ export const TeknikModule = () => {
     showNotification('Baris item pekerjaan berhasil dihapus.', 'warning');
   };
 
-  // CREATE NEW RAB SHEET
+  // CREATE NEW RAB SHEET (Mulai Kosong Bersih: No. SPK dan Tanggal Kosong)
   const handleCreateNewSheet = () => {
-    const nextIdx = rabSheets.length + 1;
-    const nextNo = `RAB - ${nextIdx < 10 ? '0' + nextIdx : nextIdx}`;
     const newSheet = {
       id: `RAB-${Date.now().toString().slice(-4)}`,
-      noInput: nextNo,
-      tanggal: '28/08/26',
+      noInput: '',
+      tanggal: '',
       proyek: 'Ashoka View',
       namaVendor: '',
       blok: '',
@@ -754,6 +780,9 @@ export const TeknikModule = () => {
       fasum: '',
       pekerjaan: '',
       retensiPersen: 5,
+      pembayaranSebelumnya: 0,
+      tanggalOpname: '',
+      opnameHistory: [],
       items: [
         {
           id: `ITEM-${Date.now().toString().slice(-4)}-1`,
@@ -771,7 +800,7 @@ export const TeknikModule = () => {
     setActiveSheetId(newSheet.id);
     setMainCategory('borongan');
     setSubTabBorongan('input_rab');
-    showNotification(`Lembar spreadsheet baru "${nextNo}" berhasil dibuat!`, 'success');
+    showNotification('Lembar RAB baru yang kosong berhasil dibuat. Silakan isi No. SPK dan data.', 'success');
   };
 
   // DELETE SHEET (Bisa dihapus sampai kosong total)
