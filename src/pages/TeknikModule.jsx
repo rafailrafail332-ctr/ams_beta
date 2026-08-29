@@ -621,12 +621,19 @@ export const TeknikModule = () => {
     return rawActiveSheet;
   }, [rawActiveSheet]);
 
-  // HELPER UNTUK PARSING ANGKA (MENDUKUNG FORMAT TEKS TITIK/KOMA/RUPIAH)
+  // HELPER UNTUK PARSING ANGKA (MENDUKUNG FORMAT TEKS TITIK/KOMA/RUPIAH/DESIMAL)
   const parseNum = (val) => {
     if (val === undefined || val === null || val === '') return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
-    // Jika string memiliki format ribuan titik / koma
-    const cleaned = String(val).replace(/[^0-9.-]/g, '');
+    let s = String(val).trim();
+    // Jika ada koma sebagai desimal (contoh "0,35" atau "12,5")
+    if (s.includes(',') && !s.includes('.')) {
+      s = s.replace(',', '.');
+    } else if (s.includes('.') && s.includes(',')) {
+      // Format Indonesia 1.000.000,50 -> 1000000.50
+      s = s.replace(/\./g, '').replace(',', '.');
+    }
+    const cleaned = s.replace(/[^0-9.-]/g, '');
     const num = parseFloat(cleaned);
     return isNaN(num) ? 0 : num;
   };
