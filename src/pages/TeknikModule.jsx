@@ -2338,16 +2338,16 @@ export const TeknikModule = () => {
             <div style={{ maxWidth: '640px', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem 1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.35rem', alignItems: 'center' }}>
                 
-                {/* 1. No. Input */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. Input</div>
+                {/* 1. No. SPK (Input Manual) */}
+                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. SPK</div>
                 <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                 <div>
                   <input
                     type="text"
                     value={activeSheet.noInput || ''}
                     onChange={(e) => handleUpdateHeaderField('noInput', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#ea580c', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder="RAB - 01"
+                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #ea580c', color: '#fb923c', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
+                    placeholder="Contoh: SPK-001 / SPK/2026/08/01"
                   />
                 </div>
 
@@ -2793,7 +2793,7 @@ export const TeknikModule = () => {
                 <thead>
                   <tr style={{ background: '#f6b26b', color: '#000000' }}>
                     <th style={{ width: '80px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
-                      No. Input
+                      No. SPK
                     </th>
                     <th style={{ width: '120px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
                       Tgl Opname<br/><span style={{ fontSize: '0.72rem', fontWeight: 700 }}>(History)</span>
@@ -3314,8 +3314,8 @@ export const TeknikModule = () => {
           {/* KPI Summary Cards */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Kontrak / No. Input</div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanSheets.length} RAB</div>
+              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Kontrak / No. SPK</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanSheets.length} SPK</div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Kontrak Kerja Terdaftar</div>
             </div>
 
@@ -3434,7 +3434,7 @@ export const TeknikModule = () => {
                 type="text"
                 className="form-control"
                 style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff', flex: 1 }}
-                placeholder="Cari No. Input (RAB-01), nama vendor, pekerjaan, blok/unit, fasum..."
+                placeholder="Cari No. SPK, nama vendor, pekerjaan, blok/unit, fasum..."
                 value={laporanSearch}
                 onChange={(e) => setLaporanSearch(e.target.value)}
               />
@@ -3474,7 +3474,7 @@ export const TeknikModule = () => {
                     <tr style={{ color: '#000000' }}>
                       {/* Left tan columns */}
                       <th style={{ width: '85px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
-                        No. Input
+                        No. SPK
                       </th>
                       <th style={{ width: '90px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
                         Tanggal
