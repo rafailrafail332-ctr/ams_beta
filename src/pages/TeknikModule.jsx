@@ -654,7 +654,8 @@ export const TeknikModule = () => {
       const hargaSatuan = parseNum(it.hargaSatuan);
       const autoJumlah = vol * hargaSatuan;
       const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? parseNum(it.jumlah) : autoJumlah;
-      const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const rawAutoBobot = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const autoBobotRatio = Math.round(rawAutoBobot * 100) / 100;
       const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? parseNum(it.bobotRatio) : autoBobotRatio;
       const progress = it.progress !== undefined && it.progress !== '' ? parseNum(it.progress) : 0;
       
