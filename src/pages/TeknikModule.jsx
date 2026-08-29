@@ -621,29 +621,39 @@ export const TeknikModule = () => {
     return rawActiveSheet;
   }, [rawActiveSheet]);
 
+  // HELPER UNTUK PARSING ANGKA (MENDUKUNG FORMAT TEKS TITIK/KOMA/RUPIAH)
+  const parseNum = (val) => {
+    if (val === undefined || val === null || val === '') return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    // Jika string memiliki format ribuan titik / koma
+    const cleaned = String(val).replace(/[^0-9.-]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
     const items = sheet.items || [];
     const totalHargaRab = items.reduce((acc, it) => {
-      const j = it.jumlah !== undefined && it.jumlah !== '' ? Number(it.jumlah) : ((Number(it.vol) || 0) * (Number(it.hargaSatuan) || 0));
-      return acc + (Number(j) || 0);
+      const vol = parseNum(it.vol);
+      const harga = parseNum(it.hargaSatuan);
+      const autoJml = vol * harga;
+      const j = it.jumlah !== undefined && it.jumlah !== '' ? parseNum(it.jumlah) : autoJml;
+      return acc + j;
     }, 0);
 
     const computedItems = items.map(it => {
-      const vol = Number(it.vol) || 0;
-      const hargaSatuan = Number(it.hargaSatuan) || 0;
+      const vol = parseNum(it.vol);
+      const hargaSatuan = parseNum(it.hargaSatuan);
       const autoJumlah = vol * hargaSatuan;
-      const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? Number(it.jumlah) : autoJumlah;
+      const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? parseNum(it.jumlah) : autoJumlah;
       const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
-      const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? Number(it.bobotRatio) : autoBobotRatio;
-      const progress = it.progress !== undefined && it.progress !== '' ? Number(it.progress) : 0;
+      const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? parseNum(it.bobotRatio) : autoBobotRatio;
+      const progress = it.progress !== undefined && it.progress !== '' ? parseNum(it.progress) : 0;
       
       // Rumus: Bobot (tanpa persen) x Progress (%) = Bobot Progress (%)
-      // Contoh: Bobot 0.35 x Progress 50% = 17.5%
-      const bRatioNum = Number(bobotRatio) || 0;
-      const progNum = Number(progress) || 0;
-      const autoBobotProgress = progNum > 0 ? (bRatioNum * progNum) : 0;
-      const bobotProgress = progNum === 0 ? 0 : (it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress);
+      const autoBobotProgress = progress > 0 ? (bobotRatio * progress) : 0;
+      const bobotProgress = progress === 0 ? 0 : (it.bobotProgress !== undefined && it.bobotProgress !== '' ? parseNum(it.bobotProgress) : autoBobotProgress);
 
       return {
         ...it,
@@ -654,20 +664,23 @@ export const TeknikModule = () => {
       };
     });
 
+    // Total Bobot Keseluruhan
+    const totalBobot = computedItems.reduce((acc, it) => acc + (Number(it.bobotRatio) || 0), 0);
     // Total Progres Kumulatif = Total Seluruh Bobot Progress (%)
     const progresPersen = computedItems.reduce((acc, it) => acc + (Number(it.bobotProgress) || 0), 0);
-    const retensiPersen = Number(sheet.retensiPersen) || 5;
+    const retensiPersen = parseNum(sheet.retensiPersen) || 5;
     // Nilai Opname = Progres (%) x Total Harga RAB
     const nilaiOpname = (progresPersen / 100) * totalHargaRab;
     const retensiNilai = (retensiPersen / 100) * nilaiOpname;
     const nilaiProgress = nilaiOpname - retensiNilai;
-    const pembayaranSebelumnya = Number(sheet.pembayaranSebelumnya) || 0;
+    const pembayaranSebelumnya = parseNum(sheet.pembayaranSebelumnya) || 0;
     const pembayaranSaatIni = nilaiProgress - pembayaranSebelumnya;
 
     return {
       ...sheet,
       items: computedItems,
       totalHargaRab,
+      totalBobot,
       progresPersen,
       retensiPersen,
       nilaiOpname,
