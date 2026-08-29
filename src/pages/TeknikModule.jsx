@@ -2653,12 +2653,16 @@ export const TeknikModule = () => {
                         </div>
                       </td>
 
-                      {/* Bobot Progress (Input Manual) */}
+                      {/* Bobot Progress (Auto-Kalkulasi Bobot x Progress) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
                           <input
                             type="text"
-                            value={row.bobotProgress !== undefined ? row.bobotProgress : ''}
+                            value={
+                              row.bobotProgress !== undefined && row.bobotProgress !== '' && row.bobotProgress !== 0
+                                ? formatDecimal(row.bobotProgress, 2)
+                                : (row.bobotProgress === 0 ? '0' : (row.bobotProgress || ''))
+                            }
                             onChange={(e) => handleUpdateCell(row.id, 'bobotProgress', e.target.value)}
                             placeholder=""
                             style={{ width: '56px', textAlign: 'right', background: 'transparent', border: 'none', color: '#a78bfa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
