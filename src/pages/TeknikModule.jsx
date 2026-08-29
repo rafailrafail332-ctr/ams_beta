@@ -637,8 +637,13 @@ export const TeknikModule = () => {
       const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
       const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? Number(it.bobotRatio) : autoBobotRatio;
       const progress = it.progress !== undefined && it.progress !== '' ? Number(it.progress) : 0;
-      const autoBobotProgress = progress > 0 ? ((progress / 100) * (bobotRatio > 1 ? bobotRatio : (bobotRatio * 100))) : 0;
-      const bobotProgress = progress === 0 ? 0 : (it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress);
+      
+      // Rumus: Bobot (tanpa persen) x Progress (%) = Bobot Progress (%)
+      // Contoh: Bobot 0.35 x Progress 50% = 17.5%
+      const bRatioNum = Number(bobotRatio) || 0;
+      const progNum = Number(progress) || 0;
+      const autoBobotProgress = progNum > 0 ? (bRatioNum * progNum) : 0;
+      const bobotProgress = progNum === 0 ? 0 : (it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress);
 
       return {
         ...it,
@@ -649,8 +654,10 @@ export const TeknikModule = () => {
       };
     });
 
+    // Total Progres Kumulatif = Total Seluruh Bobot Progress (%)
     const progresPersen = computedItems.reduce((acc, it) => acc + (Number(it.bobotProgress) || 0), 0);
     const retensiPersen = Number(sheet.retensiPersen) || 5;
+    // Nilai Opname = Progres (%) x Total Harga RAB
     const nilaiOpname = (progresPersen / 100) * totalHargaRab;
     const retensiNilai = (retensiPersen / 100) * nilaiOpname;
     const nilaiProgress = nilaiOpname - retensiNilai;
@@ -747,12 +754,11 @@ export const TeknikModule = () => {
                 updated.jumlah = volNum * hrgNum;
               }
 
-              // Otomatis hitung ulang bobotProgress jika edit progress
-              if (field === 'progress') {
-                const progNum = Number(value) || 0;
-                const bobotNum = Number(updated.bobotRatio || updated.bobot || 0);
-                const bFactor = bobotNum > 1 ? bobotNum : (bobotNum * 100);
-                updated.bobotProgress = progNum > 0 ? ((progNum / 100) * bFactor) : 0;
+              // Otomatis hitung ulang bobotProgress jika edit progress atau bobot
+              if (field === 'progress' || field === 'bobotRatio' || field === 'bobot') {
+                const progNum = Number(field === 'progress' ? value : updated.progress) || 0;
+                const bobotNum = Number(field === 'bobotRatio' || field === 'bobot' ? value : (updated.bobotRatio || updated.bobot || 0));
+                updated.bobotProgress = progNum > 0 ? (bobotNum * progNum) : 0;
               }
 
               return updated;
