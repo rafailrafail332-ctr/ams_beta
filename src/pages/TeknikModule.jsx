@@ -743,7 +743,18 @@ export const TeknikModule = () => {
       }
       return prev.map(s => {
         if (s.id === targetId) {
-          return { ...s, [field]: value };
+          const updated = { ...s, [field]: value };
+          // Jika field pembayaranSebelumnya diubah dan ada opnameHistory dengan tanggalOpname yang aktif
+          if (field === 'pembayaranSebelumnya' && s.opnameHistory && s.opnameHistory.length > 0) {
+            const curDate = s.tanggalOpname || s.opnameHistory[0].tanggal;
+            updated.opnameHistory = s.opnameHistory.map(h => {
+              if (h.tanggal === curDate || !curDate) {
+                return { ...h, pembayaranSebelumnya: value };
+              }
+              return h;
+            });
+          }
+          return updated;
         }
         return s;
       });
@@ -1029,6 +1040,7 @@ export const TeknikModule = () => {
     });
     setOpnameFormData({
       tanggal: sheet.tanggalOpname || new Date().toISOString().split('T')[0],
+      pembayaranSebelumnya: sheet.pembayaranSebelumnya !== undefined ? sheet.pembayaranSebelumnya : 0,
       pengawas: 'Joko Susanto (Mandor)',
       catatan: '',
       itemProgress: initialProgress
@@ -1052,7 +1064,11 @@ export const TeknikModule = () => {
       };
     });
 
-    const tempSummary = computeSheetSummary({ ...opnameTargetSheet, items: updatedItems });
+    const bayarSebNum = opnameFormData.pembayaranSebelumnya !== undefined && opnameFormData.pembayaranSebelumnya !== ''
+      ? parseNum(opnameFormData.pembayaranSebelumnya)
+      : parseNum(opnameTargetSheet.pembayaranSebelumnya);
+
+    const tempSummary = computeSheetSummary({ ...opnameTargetSheet, items: updatedItems, pembayaranSebelumnya: bayarSebNum });
     const totalProgResult = tempSummary.progresPersen;
 
     const opnameEntry = {
@@ -1064,7 +1080,7 @@ export const TeknikModule = () => {
       nilaiOpname: tempSummary.nilaiOpname,
       retensiNilai: tempSummary.retensiNilai,
       nilaiProgress: tempSummary.nilaiProgress,
-      pembayaranSebelumnya: parseNum(opnameTargetSheet.pembayaranSebelumnya),
+      pembayaranSebelumnya: bayarSebNum,
       pembayaranSaatIni: tempSummary.pembayaranSaatIni,
       itemsSnapshot: updatedItems,
       timestamp: new Date().toLocaleString('id-ID')
@@ -1076,6 +1092,7 @@ export const TeknikModule = () => {
           ...s,
           items: updatedItems,
           tanggalOpname: opnameFormData.tanggal || new Date().toISOString().split('T')[0],
+          pembayaranSebelumnya: bayarSebNum,
           opnameHistory: [opnameEntry, ...(s.opnameHistory || [])]
         };
       }
@@ -4271,11 +4288,11 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* PENGATURAN TANGGAL OPNAME (BISA DIINPUT) & PENGAWAS */}
-                  <div style={{ background: 'rgba(15, 23, 42, 0.75)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', alignItems: 'center', fontSize: '0.82rem' }}>
+                  {/* PENGATURAN TANGGAL OPNAME & PEMBAYARAN SEBELUMNYA */}
+                  <div style={{ background: 'rgba(15, 23, 42, 0.75)', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', alignItems: 'center', fontSize: '0.82rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                       <label style={{ color: '#10b981', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px', margin: 0, fontSize: '0.84rem' }}>
-                        <Calendar size={16} /> Tanggal Opname:
+                        <Calendar size={16} /> Tanggal:
                       </label>
                       <input
                         type="date"
@@ -4294,6 +4311,39 @@ export const TeknikModule = () => {
                         }}
                       />
                     </div>
+
+                    {/* INPUT PEMBAYARAN SEBELUMNYA DI MODAL */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <label style={{ color: '#fbbf24', fontWeight: 900, margin: 0, fontSize: '0.84rem' }}>
+                        💳 Bayar Sblmnya (Rp):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="0"
+                        value={
+                          opnameFormData.pembayaranSebelumnya !== undefined && opnameFormData.pembayaranSebelumnya !== '' && opnameFormData.pembayaranSebelumnya !== 0
+                            ? formatRupiah(parseNum(opnameFormData.pembayaranSebelumnya))
+                            : (opnameFormData.pembayaranSebelumnya === 0 ? '0' : (opnameFormData.pembayaranSebelumnya || ''))
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setOpnameFormData(prev => ({ ...prev, pembayaranSebelumnya: val }));
+                        }}
+                        style={{
+                          width: '110px',
+                          background: '#1e293b',
+                          border: '1.5px solid #f59e0b',
+                          borderRadius: '6px',
+                          color: '#fbbf24',
+                          fontWeight: 900,
+                          fontSize: '0.84rem',
+                          padding: '4px 8px',
+                          textAlign: 'right',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
                     <div>
                       <span style={{ color: '#94a3b8', fontWeight: 800 }}>🔒 Pengawas:</span>
                       <span style={{ color: '#fbbf24', fontWeight: 900, marginLeft: '6px' }}>{opnameFormData.pengawas}</span>
