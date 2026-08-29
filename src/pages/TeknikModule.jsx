@@ -2765,88 +2765,118 @@ export const TeknikModule = () => {
                 <tbody>
                   {filteredHasilOpnameSheets
                     .filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== ''))
-                    .flatMap((sheet, idx) => {
-                    const isSelected = sheet.id === activeSheet.id;
-                    const c = computeSheetSummary(sheet);
-                    const bgBase = isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a');
-                    const rows = (sheet.opnameHistory && sheet.opnameHistory.length > 0)
-                      ? sheet.opnameHistory
-                      : [{ tanggal: sheet.tanggalOpname }];
-                    return rows.map((hist, hIdx) => (
-                      <tr
-                        key={`${sheet.id}-${hIdx}`}
-                        onClick={() => {
-                          setActiveSheetId(sheet.id);
-                          if (hist.tanggal && hist.tanggal !== '-') {
-                            setRabSheets(prev => prev.map(s => s.id === sheet.id ? { ...s, tanggalOpname: hist.tanggal } : s));
-                          }
-                        }}
-                        style={{
-                          backgroundColor: hIdx === 0 ? bgBase : (isSelected ? 'rgba(16, 185, 129, 0.10)' : (idx % 2 === 0 ? '#162032' : '#0a1220')),
-                          color: '#f8fafc',
-                          cursor: 'pointer',
-                          borderLeft: isSelected ? '4px solid #10b981' : 'none',
-                          borderTop: hIdx === 0 ? '2px solid #334155' : '1px dashed #1e3a5f'
-                        }}
-                        title="Klik untuk melihat rincian spreadsheet opname di bawah"
-                      >
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#cbd5e1', fontSize: '0.82rem' }}>
-                          {sheet.noInput || `RAB-${idx + 1}`}
-                        </td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.8rem', fontWeight: hIdx === 0 ? 900 : 700, color: hIdx === 0 ? '#34d399' : '#64748b', whiteSpace: 'nowrap' }}>
-                          📅 {hist.tanggal}
-                        </td>
-                        <td style={{ border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{sheet.proyek || '-'}</td>
-                        <td style={{ border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#38bdf8' : '#334155' }}>{sheet.namaVendor || '-'}</td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px', color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{sheet.blok || '-'}</td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px', color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{sheet.noUnit || '-'}</td>
-                        <td style={{ border: '1px solid #334155', padding: '6px 8px', fontSize: '0.82rem', color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{sheet.fasum || '-'}</td>
-                        <td style={{ border: '1px solid #334155', padding: '6px 8px', color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{sheet.pekerjaan || 'RAB'}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#f8fafc' : '#64748b' }}>{formatRupiahDesimal(c.totalHargaRab)}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#ffffff' : '#334155' }}>{c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#c084fc' : '#334155' }}>{c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#60a5fa' : '#334155' }}>{c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: hIdx === 0 ? '#fbbf24' : '#334155' }}>{Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}</td>
-                        <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 900, color: hIdx === 0 ? '#34d399' : '#334155', background: hIdx === 0 ? 'rgba(16, 185, 129, 0.08)' : 'transparent' }}>{c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}</td>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${sheet.noInput} (${sheet.namaVendor || sheet.proyek})? Data RAB dan seluruh riwayat hasil opname akan dihapus permanen.`)) {
-                                const updatedSheets = rabSheets.filter(s => s.id !== sheet.id);
-                                setRabSheets(updatedSheets);
-                                if (updatedSheets.length > 0) {
-                                  setActiveSheetId(updatedSheets[0].id);
-                                } else {
-                                  setActiveSheetId('');
+                    .map((sheet, idx) => {
+                      const isSelected = sheet.id === activeSheet.id;
+                      const c = computeSheetSummary(sheet);
+                      const bgBase = isSelected ? 'rgba(16, 185, 129, 0.22)' : (idx % 2 === 0 ? '#1e293b' : '#0f172a');
+                      
+                      // Ambil tanggal opname: jika ada search tanggal, cari history yang cocok; jika tidak, ambil history terbaru / tanggalOpname
+                      const dSearch = hasilOpnameDateSearch.toLowerCase().trim();
+                      const matchedHist = dSearch && sheet.opnameHistory
+                        ? sheet.opnameHistory.find(h => (h.tanggal || '').toLowerCase().includes(dSearch))
+                        : null;
+                      const displayTanggal = matchedHist?.tanggal || sheet.tanggalOpname || (sheet.opnameHistory?.[0]?.tanggal) || sheet.tanggal || '-';
+
+                      return (
+                        <tr
+                          key={sheet.id || idx}
+                          onClick={() => {
+                            setActiveSheetId(sheet.id);
+                            if (displayTanggal && displayTanggal !== '-') {
+                              setRabSheets(prev => prev.map(s => s.id === sheet.id ? { ...s, tanggalOpname: displayTanggal } : s));
+                            }
+                          }}
+                          style={{
+                            backgroundColor: bgBase,
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            borderLeft: isSelected ? '4px solid #10b981' : 'none',
+                            borderTop: '1px solid #334155',
+                            opacity: 1
+                          }}
+                          title="Klik untuk melihat rincian spreadsheet opname di bawah"
+                        >
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', fontWeight: 900, color: isSelected ? '#34d399' : '#f8fafc', fontSize: '0.85rem' }}>
+                            {sheet.noInput || `RAB-${idx + 1}`}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontSize: '0.82rem', fontWeight: 900, color: '#34d399', whiteSpace: 'nowrap' }}>
+                            📅 {displayTanggal}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
+                            {sheet.proyek || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#38bdf8' }}>
+                            {sheet.namaVendor || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', color: '#ffffff', fontWeight: 700 }}>
+                            {sheet.blok || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', color: '#ffffff', fontWeight: 700 }}>
+                            {sheet.noUnit || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 8px', fontSize: '0.82rem', color: '#ffffff' }}>
+                            {sheet.fasum || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 8px', color: '#ffffff', fontWeight: 700 }}>
+                            {sheet.pekerjaan || 'RAB'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
+                            {formatRupiahDesimal(c.totalHargaRab)}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
+                            {c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#c084fc' }}>
+                            {c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#60a5fa' }}>
+                            {c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#fbbf24' }}>
+                            {Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
+                            {c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Yakin ingin menghapus seluruh data RAB ${sheet.noInput} (${sheet.namaVendor || sheet.proyek})? Data RAB dan seluruh riwayat hasil opname akan dihapus permanen.`)) {
+                                  const updatedSheets = rabSheets.filter(s => s.id !== sheet.id);
+                                  setRabSheets(updatedSheets);
+                                  if (updatedSheets.length > 0) {
+                                    setActiveSheetId(updatedSheets[0].id);
+                                  } else {
+                                    setActiveSheetId('');
+                                  }
+                                  try {
+                                    localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                                  } catch(err) {}
+                                  showNotification(`Data RAB ${sheet.noInput} berhasil dihapus permanen!`, 'error');
                                 }
-                                try {
-                                  localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                                } catch(err) {}
-                                showNotification(`Data RAB ${sheet.noInput} berhasil dihapus permanen!`, 'error');
-                              }
-                            }}
-                            style={{
-                              background: '#ef4444',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              padding: '4px 6px',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
-                            }}
-                            title="Hapus permanen data RAB dan Opname ini"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </td>
-                      </tr>
-                    ));
-                  })}
+                              }}
+                              style={{
+                                background: '#ef4444',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '4px 6px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                              }}
+                              title="Hapus permanen data RAB dan Opname ini"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
 
                   {/* JIKA BELUM ADA DATA OPNAME SAMA SEKALI */}
                   {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '')).length === 0 && (
