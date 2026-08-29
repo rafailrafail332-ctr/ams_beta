@@ -876,6 +876,7 @@ export const TeknikModule = () => {
     catatan: '',
     itemProgress: {}
   });
+  const [isEditingPembayaran, setIsEditingPembayaran] = useState(false);
 
   const filteredHasilOpnameSheets = useMemo(() => {
     return rabSheets.filter(s => {
@@ -3128,33 +3129,42 @@ export const TeknikModule = () => {
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
                   </tr>
 
-                  {/* 4. Pembayaran sebelumnya — input saja, tombol Simpan ada di bawah */}
+                  {/* 4. Pembayaran sebelumnya — read-only, klik Edit di bawah untuk mengubah */}
                   <tr style={{ backgroundColor: '#1e293b', color: '#f8fafc' }}>
                     <td colSpan={6} style={{ fontWeight: 800, padding: '8px 12px', border: '1px solid #334155', color: '#f8fafc', fontSize: '0.88rem' }}>
                       Pembayaran sebelumnya :
                     </td>
                     <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px', background: 'rgba(245, 158, 11, 0.08)' }}>
-                      <input
-                        type="text"
-                        placeholder="0"
-                        value={activeSheet.pembayaranSebelumnya ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID') : ''}
-                        onChange={(e) => {
-                          const clean = e.target.value.replace(/[^0-9]/g, '');
-                          handleUpdateHeaderField('pembayaranSebelumnya', clean === '' ? 0 : Number(clean));
-                        }}
-                        style={{
-                          width: '130px',
-                          background: '#0f172a',
-                          border: '1.5px solid #f59e0b',
-                          borderRadius: '4px',
-                          color: '#fbbf24',
-                          fontWeight: 900,
-                          fontSize: '0.88rem',
-                          padding: '4px 8px',
-                          textAlign: 'right',
-                          outline: 'none'
-                        }}
-                      />
+                      {isEditingPembayaran ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          placeholder="0"
+                          value={activeSheet.pembayaranSebelumnya ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID') : ''}
+                          onChange={(e) => {
+                            const clean = e.target.value.replace(/[^0-9]/g, '');
+                            handleUpdateHeaderField('pembayaranSebelumnya', clean === '' ? 0 : Number(clean));
+                          }}
+                          style={{
+                            width: '130px',
+                            background: '#0f172a',
+                            border: '1.5px solid #f59e0b',
+                            borderRadius: '4px',
+                            color: '#fbbf24',
+                            fontWeight: 900,
+                            fontSize: '0.88rem',
+                            padding: '4px 8px',
+                            textAlign: 'right',
+                            outline: 'none'
+                          }}
+                        />
+                      ) : (
+                        <span style={{ fontWeight: 900, color: '#fbbf24', fontSize: '0.9rem' }}>
+                          {Number(activeSheet.pembayaranSebelumnya || 0) > 0
+                            ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID')
+                            : '-'}
+                        </span>
+                      )}
                     </td>
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
                   </tr>
@@ -3183,31 +3193,29 @@ export const TeknikModule = () => {
 
             {/* ACTION BUTTONS BAWAH: EDIT & SIMPAN */}
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end', paddingTop: '0.5rem', borderTop: '1px solid #334155' }}>
+              {/* EDIT button: toggle input mode untuk Pembayaran sebelumnya */}
               <button
                 type="button"
-                onClick={() => {
-                  setMainCategory('borongan');
-                  setSubTabBorongan('input_rab');
-                  showNotification(`Membuka lembar kerja ${activeSheet.noInput} untuk di-edit...`, 'info');
-                }}
+                onClick={() => setIsEditingPembayaran(prev => !prev)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: '#1e40af',
+                  background: isEditingPembayaran ? '#78350f' : '#1e40af',
                   color: '#ffffff',
-                  border: '1.5px solid #3b82f6',
+                  border: isEditingPembayaran ? '1.5px solid #f59e0b' : '1.5px solid #3b82f6',
                   borderRadius: '8px',
                   padding: '8px 18px',
                   fontWeight: 900,
                   fontSize: '0.85rem',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+                  boxShadow: isEditingPembayaran ? '0 2px 8px rgba(245, 158, 11, 0.3)' : '0 2px 8px rgba(59, 130, 246, 0.3)'
                 }}
               >
-                <Edit size={15} /> Edit Input RAB
+                <Edit size={15} /> {isEditingPembayaran ? '🔒 Kunci Pembayaran' : '✏️ Edit Pembayaran Sebelumnya'}
               </button>
 
+              {/* SIMPAN ke Rekapitulasi */}
               <button
                 type="button"
                 onClick={() => {
@@ -3219,7 +3227,8 @@ export const TeknikModule = () => {
                   try {
                     localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                   } catch(e) {}
-                  showNotification(`Data Hasil Opname ${activeSheet.noInput} berhasil disimpan ke Rekapitulasi!`, 'success');
+                  setIsEditingPembayaran(false);
+                  showNotification(`Pembayaran sebelumnya Rp ${val.toLocaleString('id-ID')} disimpan ke Rekapitulasi!`, 'success');
                 }}
                 style={{
                   display: 'inline-flex',
