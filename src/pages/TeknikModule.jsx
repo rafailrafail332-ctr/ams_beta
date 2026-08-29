@@ -614,10 +614,13 @@ export const TeknikModule = () => {
     const computedItems = items.map(it => {
       const vol = Number(it.vol) || 0;
       const hargaSatuan = Number(it.hargaSatuan) || 0;
-      const jumlah = vol * hargaSatuan;
-      const bobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const autoJumlah = vol * hargaSatuan;
+      const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? Number(it.jumlah) : autoJumlah;
+      const autoBobotRatio = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
+      const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? Number(it.bobotRatio) : autoBobotRatio;
       const progress = Number(it.progress) || 0;
-      const bobotProgress = (progress / 100) * (bobotRatio * 100);
+      const autoBobotProgress = (progress / 100) * (bobotRatio * 100);
+      const bobotProgress = it.bobotProgress !== undefined && it.bobotProgress !== '' ? Number(it.bobotProgress) : autoBobotProgress;
 
       return {
         ...it,
@@ -2438,71 +2441,87 @@ export const TeknikModule = () => {
                       {/* Vol */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
-                          type="number"
-                          step="0.01"
-                          min="0"
+                          type="text"
                           value={row.vol !== undefined ? row.vol : ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'vol', Number(e.target.value) || 0)}
+                          onChange={(e) => handleUpdateCell(row.id, 'vol', e.target.value)}
+                          placeholder=""
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
                         />
                       </td>
 
-                      {/* Sat (Dropdown Select) */}
+                      {/* Sat (Input Manual Bebas) */}
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 4px' }}>
-                        <select
-                          value={row.sat || 'm2'}
+                        <input
+                          type="text"
+                          value={row.sat || ''}
                           onChange={(e) => handleUpdateCell(row.id, 'sat', e.target.value)}
-                          style={{ background: '#0f172a', border: '1px solid #475569', color: '#f8fafc', borderRadius: '4px', fontWeight: 800, fontSize: '0.82rem', padding: '2px 4px', outline: 'none' }}
-                        >
-                          <option value="m1">m1</option>
-                          <option value="m2">m2</option>
-                          <option value="m3">m3</option>
-                          <option value="pcs">pcs</option>
-                          <option value="unit">unit</option>
-                          <option value="ls">ls</option>
-                        </select>
+                          placeholder=""
+                          style={{ width: '100%', textAlign: 'center', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.82rem', outline: 'none' }}
+                        />
                       </td>
 
                       {/* Harga Satuan */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
-                          type="number"
-                          step="500"
-                          min="0"
+                          type="text"
                           value={row.hargaSatuan !== undefined ? row.hargaSatuan : ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'hargaSatuan', Number(e.target.value) || 0)}
+                          onChange={(e) => handleUpdateCell(row.id, 'hargaSatuan', e.target.value)}
+                          placeholder=""
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.88rem', outline: 'none' }}
                         />
                       </td>
 
-                      {/* Jumlah = Vol * Harga Satuan */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
-                        {formatRupiahDesimal(row.jumlah)}
+                      {/* Jumlah (Input Manual) */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
+                        <input
+                          type="text"
+                          value={row.jumlah !== undefined ? row.jumlah : ''}
+                          onChange={(e) => handleUpdateCell(row.id, 'jumlah', e.target.value)}
+                          placeholder=""
+                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
+                        />
                       </td>
 
-                      {/* Bobot = Jumlah / Total */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
-                        {formatDecimal(row.bobotRatio)}
+                      {/* Bobot (Input Manual) */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
+                        <input
+                          type="text"
+                          value={row.bobotRatio !== undefined ? row.bobotRatio : (row.bobot !== undefined ? row.bobot : '')}
+                          onChange={(e) => {
+                            handleUpdateCell(row.id, 'bobotRatio', e.target.value);
+                            handleUpdateCell(row.id, 'bobot', e.target.value);
+                          }}
+                          placeholder=""
+                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
+                        />
                       </td>
 
-                      {/* Progress % */}
+                      {/* Progress % (Input Manual) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
                           <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={row.progress !== undefined ? row.progress : 0}
-                            onChange={(e) => handleUpdateCell(row.id, 'progress', Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
-                            style={{ width: '42px', textAlign: 'right', background: 'transparent', border: 'none', color: '#60a5fa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
+                            type="text"
+                            value={row.progress !== undefined ? row.progress : ''}
+                            onChange={(e) => handleUpdateCell(row.id, 'progress', e.target.value)}
+                            placeholder=""
+                            style={{ width: '48px', textAlign: 'right', background: 'transparent', border: 'none', color: '#60a5fa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
                           />
                           <span style={{ color: '#60a5fa', fontWeight: 800, fontSize: '0.82rem' }}>%</span>
                         </div>
                       </td>
 
-                      {/* Bobot Progress = Progress% * Bobot */}
-                      <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '6px 8px', fontSize: '0.88rem' }}>
-                        {formatDecimal(row.bobotProgress)}%
+                      {/* Bobot Progress (Input Manual) */}
+                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
+                          <input
+                            type="text"
+                            value={row.bobotProgress !== undefined ? row.bobotProgress : ''}
+                            onChange={(e) => handleUpdateCell(row.id, 'bobotProgress', e.target.value)}
+                            placeholder=""
+                            style={{ width: '56px', textAlign: 'right', background: 'transparent', border: 'none', color: '#a78bfa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
+                          />
+                          <span style={{ color: '#a78bfa', fontWeight: 800, fontSize: '0.82rem' }}>%</span>
+                        </div>
                       </td>
 
                       {/* Aksi Hapus Baris */}
