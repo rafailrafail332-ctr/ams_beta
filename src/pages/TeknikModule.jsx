@@ -3292,42 +3292,36 @@ export const TeknikModule = () => {
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
                   </tr>
 
-                  {/* 4. Pembayaran sebelumnya — read-only, klik Edit di bawah untuk mengubah */}
+                  {/* 4. Pembayaran sebelumnya (Bisa Langsung Diisi / Diubah) */}
                   <tr style={{ backgroundColor: '#1e293b', color: '#f8fafc' }}>
                     <td colSpan={6} style={{ fontWeight: 800, padding: '8px 12px', border: '1px solid #334155', color: '#f8fafc', fontSize: '0.88rem' }}>
                       Pembayaran sebelumnya :
                     </td>
-                    <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 8px', background: 'rgba(245, 158, 11, 0.08)' }}>
-                      {isEditingPembayaran ? (
-                        <input
-                          autoFocus
-                          type="text"
-                          placeholder="0"
-                          value={activeSheet.pembayaranSebelumnya ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID') : ''}
-                          onChange={(e) => {
-                            const clean = e.target.value.replace(/[^0-9]/g, '');
-                            handleUpdateHeaderField('pembayaranSebelumnya', clean === '' ? 0 : Number(clean));
-                          }}
-                          style={{
-                            width: '130px',
-                            background: '#0f172a',
-                            border: '1.5px solid #f59e0b',
-                            borderRadius: '4px',
-                            color: '#fbbf24',
-                            fontWeight: 900,
-                            fontSize: '0.88rem',
-                            padding: '4px 8px',
-                            textAlign: 'right',
-                            outline: 'none'
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontWeight: 900, color: '#fbbf24', fontSize: '0.9rem' }}>
-                          {Number(activeSheet.pembayaranSebelumnya || 0) > 0
-                            ? Number(activeSheet.pembayaranSebelumnya).toLocaleString('id-ID')
-                            : '-'}
-                        </span>
-                      )}
+                    <td style={{ textAlign: 'right', border: '1.5px solid #f59e0b', padding: '4px 8px', background: 'rgba(245, 158, 11, 0.12)' }}>
+                      <input
+                        type="text"
+                        placeholder="0"
+                        value={
+                          activeSheet.pembayaranSebelumnya !== undefined && activeSheet.pembayaranSebelumnya !== '' && activeSheet.pembayaranSebelumnya !== 0
+                            ? formatRupiah(parseNum(activeSheet.pembayaranSebelumnya))
+                            : (activeSheet.pembayaranSebelumnya === 0 ? '0' : (activeSheet.pembayaranSebelumnya || ''))
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateHeaderField('pembayaranSebelumnya', val);
+                        }}
+                        style={{
+                          width: '100%',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#fbbf24',
+                          fontWeight: 900,
+                          fontSize: '0.92rem',
+                          padding: '4px 4px',
+                          textAlign: 'right',
+                          outline: 'none'
+                        }}
+                      />
                     </td>
                     <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
                   </tr>
