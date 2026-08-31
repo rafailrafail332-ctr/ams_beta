@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { supabase, fetchCloudStore, saveCloudStore } from '../supabase';
 import { 
   Building2, 
   Users, 
@@ -237,9 +238,7 @@ export const TeknikModule = () => {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_ABSEN, JSON.stringify(attendanceList));
-    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_ABSEN, attendanceList);
   }, [attendanceList]);
 
   // Absen Filter States
@@ -272,9 +271,7 @@ export const TeknikModule = () => {
     return defaultDatabaseVendor;
   });
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_DB_VENDOR, JSON.stringify(databaseVendorRows));
-    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_VENDOR, databaseVendorRows);
   }, [databaseVendorRows]);
 
   // =========================================================================
@@ -301,6 +298,9 @@ export const TeknikModule = () => {
     } catch (e) {}
     return defaultDatabasePekerja;
   });
+  useEffect(() => {
+    saveCloudStore(STORAGE_KEY_DATABASE_PEKERJA, databasePekerjaRows);
+  }, [databasePekerjaRows]);
 
   // =========================================================================
   // 3. DATA BASE KARYAWAN (NAMA, NO HP, NIK, T/T/L, ALAMAT, DIVISI, JABATAN, STATUS, UPLOAD NIK/KTP)
@@ -358,12 +358,8 @@ export const TeknikModule = () => {
     return defaultDatabaseKaryawan;
   });
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_DB_KARYAWAN, JSON.stringify(databaseKaryawanRows));
-    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_KARYAWAN, databaseKaryawanRows);
   }, [databaseKaryawanRows]);
-
-
 
   // SEARCH STATES FOR 3 DATABASES
   const [searchDbVendor, setSearchDbVendor] = useState('');
@@ -387,11 +383,44 @@ export const TeknikModule = () => {
   const [rekapUpahFilter, setRekapUpahFilter] = useState('ALL');
   const [rekapSearchText, setRekapSearchText] = useState('');
 
+  // MASTER CLOUD INITIAL SYNC & REALTIME SUBSCRIPTION
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_DATABASE_PEKERJA, JSON.stringify(databasePekerjaRows));
-    } catch (e) {}
-  }, [databasePekerjaRows]);
+    // 1. Initial fetch from Supabase Cloud
+    fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
+      if (val && Array.isArray(val)) setAttendanceList(val);
+    });
+    fetchCloudStore(STORAGE_KEY_DB_VENDOR, null).then(val => {
+      if (val && Array.isArray(val)) setDatabaseVendorRows(val);
+    });
+    fetchCloudStore(STORAGE_KEY_DATABASE_PEKERJA, null).then(val => {
+      if (val && Array.isArray(val)) setDatabasePekerjaRows(val);
+    });
+    fetchCloudStore(STORAGE_KEY_DB_KARYAWAN, null).then(val => {
+      if (val && Array.isArray(val)) setDatabaseKaryawanRows(val);
+    });
+    fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
+      if (val && Array.isArray(val)) setRabSheets(val);
+    });
+
+    // 2. Realtime listener: If another user on another laptop saves data, update immediately
+    const channel = supabase
+      .channel('public:ams_app_data')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ams_app_data' }, (payload) => {
+        if (payload.new && payload.new.key) {
+          const { key, value } = payload.new;
+          if (key === STORAGE_KEY_ABSEN && Array.isArray(value)) setAttendanceList(value);
+          if (key === STORAGE_KEY_DB_VENDOR && Array.isArray(value)) setDatabaseVendorRows(value);
+          if (key === STORAGE_KEY_DATABASE_PEKERJA && Array.isArray(value)) setDatabasePekerjaRows(value);
+          if (key === STORAGE_KEY_DB_KARYAWAN && Array.isArray(value)) setDatabaseKaryawanRows(value);
+          if (key === STORAGE_KEY_RAB_SHEETS && Array.isArray(value)) setRabSheets(value);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
   const [isMasterWorkerModalOpen, setIsMasterWorkerModalOpen] = useState(false);
@@ -701,9 +730,7 @@ export const TeknikModule = () => {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(rabSheets));
-    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, rabSheets);
   }, [rabSheets]);
 
   const emptyTemplateSheet = {
