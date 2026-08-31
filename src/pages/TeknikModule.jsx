@@ -4830,7 +4830,7 @@ export const TeknikModule = () => {
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: row.proyek.includes('Park') ? '#34d399' : '#fbbf24' }}>
-                            🏢 {row.proyek}
+                            {row.proyek}
                           </td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#818cf8' }}>
                             Blok {row.blok}
