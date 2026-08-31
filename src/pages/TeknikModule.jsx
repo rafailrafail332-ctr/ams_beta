@@ -714,6 +714,7 @@ export const TeknikModule = () => {
   const [absenFormData, setAbsenFormData] = useState({
     proyek: 'Ashoka Park',
     nama: '',
+    status: 'Tukang',
     jamMasuk: '08:00',
     jamPulang: '17:00',
     lembur: 0,
@@ -727,9 +728,12 @@ export const TeknikModule = () => {
 
   const handleOpenAddAbsen = () => {
     setEditingAbsenItem(null);
+    const firstWorkerName = uniqueWorkerNames[0] || '';
+    const firstWorker = databasePekerjaRows.find(w => w.nama === firstWorkerName);
     setAbsenFormData({
       proyek: projectFilter !== 'ALL' ? projectFilter : 'Ashoka Park',
-      nama: uniqueWorkerNames[0] || '',
+      nama: firstWorkerName,
+      status: firstWorker?.status || 'Tukang',
       jamMasuk: '08:00',
       jamPulang: '17:00',
       lembur: 0,
@@ -745,9 +749,11 @@ export const TeknikModule = () => {
 
   const handleOpenEditAbsen = (item) => {
     setEditingAbsenItem(item);
+    const worker = databasePekerjaRows.find(w => w.nama === item.nama);
     setAbsenFormData({
       proyek: item.proyek || 'Ashoka Park',
       nama: item.nama || '',
+      status: item.status || worker?.status || 'Tukang',
       jamMasuk: item.jamMasuk || '08:00',
       jamPulang: item.jamPulang || '17:00',
       lembur: Number(item.lembur) || 0,
@@ -2300,13 +2306,16 @@ export const TeknikModule = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Status Pekerja</label>
-                    <input
-                      type="text"
+                    <select
                       className="form-control"
-                      value={absenFormData.status}
-                      readOnly
-                      style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#475569' }}
-                    />
+                      value={absenFormData.status || 'Tukang'}
+                      onChange={(e) => setAbsenFormData({ ...absenFormData, status: e.target.value })}
+                      style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#f59e0b' }}
+                    >
+                      <option value="Mandor">Mandor</option>
+                      <option value="Tukang">Tukang</option>
+                      <option value="Kenek">Kenek</option>
+                    </select>
                   </div>
 
                   <div className="form-group">
@@ -5330,7 +5339,15 @@ export const TeknikModule = () => {
                     <select
                       className="form-control"
                       value={absenFormData.nama}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, nama: e.target.value })}
+                      onChange={(e) => {
+                        const selectedNama = e.target.value;
+                        const worker = databasePekerjaRows.find(w => w.nama === selectedNama);
+                        setAbsenFormData({
+                          ...absenFormData,
+                          nama: selectedNama,
+                          status: worker ? worker.status : (absenFormData.status || 'Tukang')
+                        });
+                      }}
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8', flex: 1 }}
                     >
                       <option value="">-- Pilih dari Database Tenaga Kerja --</option>
@@ -5348,6 +5365,21 @@ export const TeknikModule = () => {
                       style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8', flex: 1 }}
                     />
                   </div>
+                </div>
+
+                {/* STATUS TENAGA KERJA */}
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, color: '#fbbf24' }}>🏷️ Status Kerja Tenaga Kerja</label>
+                  <select
+                    className="form-control"
+                    value={absenFormData.status || 'Tukang'}
+                    onChange={(e) => setAbsenFormData({ ...absenFormData, status: e.target.value })}
+                    style={{ fontWeight: 900, background: '#1e293b', color: '#fbbf24', borderColor: '#f59e0b' }}
+                  >
+                    <option value="Mandor">Mandor</option>
+                    <option value="Tukang">Tukang</option>
+                    <option value="Kenek">Kenek</option>
+                  </select>
                 </div>
 
                 {/* JAM MASUK, JAM PULANG & JAM LEMBUR */}
