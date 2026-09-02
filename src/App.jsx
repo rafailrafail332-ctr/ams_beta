@@ -22,7 +22,7 @@ import { Lock, ArrowLeft } from 'lucide-react';
 
 function AppContent() {
   const { currentUser, setCurrentUser, users, canAccessModule } = useApp();
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -47,7 +47,8 @@ function AppContent() {
   };
 
   const handleLogout = () => {
-    setIsProfileModalOpen(true);
+    setIsAuthenticated(false);
+    setIsProfileModalOpen(false);
   };
 
   const toggleSidebar = () => {
