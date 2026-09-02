@@ -48,7 +48,14 @@ export const fetchCloudStore = async (key, defaultValue) => {
   // 3. Fallback to LocalStorage
   try {
     const local = localStorage.getItem(key);
-    if (local) return JSON.parse(local);
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed !== undefined && parsed !== null) {
+        // Auto-seed to MySQL backend if missing on server
+        saveCloudStore(key, parsed);
+        return parsed;
+      }
+    }
   } catch (e) {}
 
   return defaultValue;
