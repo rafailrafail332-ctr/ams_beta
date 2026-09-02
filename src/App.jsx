@@ -176,6 +176,7 @@ function AppContent() {
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onOpenUserControl={handleOpenUserControl}
+        onLogout={handleLogout}
       />
     </div>
   );

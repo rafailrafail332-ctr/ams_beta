@@ -12,7 +12,7 @@ import {
   MapPin
 } from 'lucide-react';
 
-export const UserProfileModal = ({ isOpen, onClose, onOpenUserControl }) => {
+export const UserProfileModal = ({ isOpen, onClose, onOpenUserControl, onLogout }) => {
   const { currentUser, getAvatarUrl } = useApp();
 
   if (!isOpen || !currentUser) return null;
@@ -121,21 +121,32 @@ export const UserProfileModal = ({ isOpen, onClose, onOpenUserControl }) => {
           </div>
         </div>
 
-        <div className="modal-footer">
-          {isSuperAdmin && (
-            <button 
-              className="btn btn-primary" 
-              onClick={() => {
-                onClose();
-                onOpenUserControl();
-              }}
-            >
-              <Key size={16} /> Buka User Control (Upload Foto Manual)
-            </button>
-          )}
-          <button className="btn btn-secondary" onClick={onClose}>
-            Tutup Profil
+        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button 
+            className="btn btn-outline-danger" 
+            onClick={() => {
+              onClose();
+              if (onLogout) onLogout();
+            }}
+          >
+            <Lock size={16} /> Logout / Ganti User
           </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {isSuperAdmin && (
+              <button 
+                className="btn btn-primary" 
+                onClick={() => {
+                  onClose();
+                  onOpenUserControl();
+                }}
+              >
+                <Key size={16} /> Buka User Control
+              </button>
+            )}
+            <button className="btn btn-secondary" onClick={onClose}>
+              Tutup
+            </button>
+          </div>
         </div>
       </div>
     </div>
