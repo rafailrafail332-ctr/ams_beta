@@ -1049,87 +1049,59 @@ export const TeknikModule = () => {
   // UPDATE ACTIVE SHEET TABLE CELLS INLINE
   const handleUpdateCell = (itemId, field, value) => {
     setRabSheets(prev => {
-      const targetId = activeSheetId || (prev[0] ? prev[0].id : null);
-      if (!targetId || !prev.some(s => s.id === targetId)) {
-        const newSheetId = `RAB-${Date.now().toString().slice(-4)}`;
+      let curSheets = [...prev];
+      let currentSheet = curSheets.find(s => s.id === activeSheet.id);
+      
+      if (!currentSheet) {
+        const newSheetId = activeSheet.id && activeSheet.id !== 'sheet_empty' ? activeSheet.id : `RAB-${Date.now().toString().slice(-4)}`;
+        currentSheet = { ...emptyTemplateSheet, ...activeSheet, id: newSheetId, items: [] };
+        curSheets.push(currentSheet);
+        setActiveSheetId(newSheetId);
+      }
+
+      const currentItems = currentSheet.items || [];
+      const itemExists = currentItems.some(it => it.id === itemId);
+      let updatedItems = [];
+
+      if (!itemExists) {
         const volVal = field === 'vol' ? value : 1;
         const hrgVal = field === 'hargaSatuan' ? value : 0;
         const autoJml = (parseNum(volVal)) * (parseNum(hrgVal));
-        const jmlVal = field === 'jumlah' ? value : autoJml;
-        const newItem = { 
-          id: itemId, 
-          itemPekerjaan: field === 'itemPekerjaan' ? value : '', 
-          spesifikasi: field === 'spesifikasi' ? value : '-', 
-          vol: volVal, 
-          sat: field === 'sat' ? value : 'm2', 
-          hargaSatuan: hrgVal, 
-          jumlah: jmlVal,
+        const newItem = {
+          id: itemId,
+          itemPekerjaan: field === 'itemPekerjaan' ? value : '',
+          spesifikasi: field === 'spesifikasi' ? value : '-',
+          vol: volVal,
+          sat: field === 'sat' ? value : 'm2',
+          hargaSatuan: hrgVal,
+          jumlah: field === 'jumlah' ? value : autoJml,
           bobotRatio: field === 'bobotRatio' || field === 'bobot' ? value : '',
           progress: field === 'progress' ? value : 0,
           bobotProgress: field === 'bobotProgress' ? value : 0,
-          [field]: value 
+          [field]: value
         };
-        const newSheet = { 
-          ...emptyTemplateSheet, 
-          id: newSheetId,
-          items: [newItem]
-        };
-        setActiveSheetId(newSheetId);
-        return [newSheet];
-      }
-      const resSheets = prev.map(s => {
-        if (s.id === targetId) {
-          const currentItems = s.items || [];
-          const itemExists = currentItems.some(it => it.id === itemId);
-          let updatedItems = [];
-
-          if (!itemExists) {
-            const newItem = {
-              id: itemId,
-              itemPekerjaan: '',
-              spesifikasi: '-',
-              vol: 1,
-              sat: 'm2',
-              hargaSatuan: 0,
-              jumlah: 0,
-              bobotRatio: '',
-              progress: 0,
-              bobotProgress: 0,
-              [field]: value
-            };
+        updatedItems = [...currentItems, newItem];
+      } else {
+        updatedItems = currentItems.map(it => {
+          if (it.id === itemId) {
+            const updated = { ...it, [field]: value };
             if (field === 'vol' || field === 'hargaSatuan') {
-              newItem.jumlah = (parseNum(newItem.vol)) * (parseNum(newItem.hargaSatuan));
+              const volNum = parseNum(field === 'vol' ? value : updated.vol);
+              const hrgNum = parseNum(field === 'hargaSatuan' ? value : updated.hargaSatuan);
+              updated.jumlah = volNum * hrgNum;
             }
-            updatedItems = [...currentItems, newItem];
-          } else {
-            updatedItems = currentItems.map(it => {
-              if (it.id === itemId) {
-                const updated = { ...it, [field]: value };
-
-                // Otomatis hitung Jumlah saat Vol atau Harga Satuan diubah
-                if (field === 'vol' || field === 'hargaSatuan') {
-                  const volNum = parseNum(field === 'vol' ? value : updated.vol);
-                  const hrgNum = parseNum(field === 'hargaSatuan' ? value : updated.hargaSatuan);
-                  updated.jumlah = volNum * hrgNum;
-                }
-
-                // Otomatis hitung ulang bobotProgress jika edit progress atau bobot
-                if (field === 'progress' || field === 'bobotRatio' || field === 'bobot') {
-                  const progNum = parseNum(field === 'progress' ? value : updated.progress);
-                  const bobotNum = parseNum(field === 'bobotRatio' || field === 'bobot' ? value : (updated.bobotRatio || updated.bobot || 0));
-                  updated.bobotProgress = progNum > 0 ? (bobotNum * progNum) : 0;
-                }
-
-                return updated;
-              }
-              return it;
-            });
+            if (field === 'progress' || field === 'bobotRatio' || field === 'bobot') {
+              const progNum = parseNum(field === 'progress' ? value : updated.progress);
+              const bobotNum = parseNum(field === 'bobotRatio' || field === 'bobot' ? value : (updated.bobotRatio || updated.bobot || 0));
+              updated.bobotProgress = progNum > 0 ? (bobotNum * progNum) : 0;
+            }
+            return updated;
           }
+          return it;
+        });
+      }
 
-          return { ...s, items: updatedItems };
-        }
-        return s;
-      });
+      const resSheets = curSheets.map(s => s.id === currentSheet.id ? { ...s, items: updatedItems } : s);
       try {
         localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(resSheets));
       } catch (e) {}
@@ -1151,30 +1123,40 @@ export const TeknikModule = () => {
     };
 
     setRabSheets(prev => {
-      const exists = prev.some(s => s.id === activeSheet.id);
-      if (!exists) {
-        const newSheet = { ...emptyTemplateSheet, id: `RAB-${Date.now().toString().slice(-4)}`, items: [newItem] };
-        setActiveSheetId(newSheet.id);
-        return [newSheet];
+      let curSheets = [...prev];
+      let currentSheet = curSheets.find(s => s.id === activeSheet.id);
+      if (!currentSheet) {
+        const newSheetId = activeSheet.id && activeSheet.id !== 'sheet_empty' ? activeSheet.id : `RAB-${Date.now().toString().slice(-4)}`;
+        currentSheet = { ...emptyTemplateSheet, ...activeSheet, id: newSheetId, items: [newItem] };
+        curSheets.push(currentSheet);
+        setActiveSheetId(newSheetId);
+      } else {
+        curSheets = curSheets.map(s => s.id === currentSheet.id ? { ...s, items: [...(s.items || []), newItem] } : s);
       }
-      return prev.map(s => {
-        if (s.id === activeSheet.id) {
-          return { ...s, items: [...(s.items || []), newItem] };
-        }
-        return s;
-      });
+      try {
+        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(curSheets));
+      } catch (e) {}
+      saveCloudStore(STORAGE_KEY_RAB_SHEETS, curSheets);
+      return curSheets;
     });
     showNotification('Baris item pekerjaan baru berhasil ditambahkan.', 'info');
   };
 
   // DELETE ROW FROM ACTIVE SHEET
   const handleDeleteRow = (itemId) => {
-    setRabSheets(prev => prev.map(s => {
-      if (s.id === activeSheet.id) {
-        return { ...s, items: (s.items || []).filter(it => it.id !== itemId) };
-      }
-      return s;
-    }));
+    setRabSheets(prev => {
+      const curSheets = prev.map(s => {
+        if (s.id === activeSheet.id) {
+          return { ...s, items: (s.items || []).filter(it => it.id !== itemId) };
+        }
+        return s;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(curSheets));
+      } catch (e) {}
+      saveCloudStore(STORAGE_KEY_RAB_SHEETS, curSheets);
+      return curSheets;
+    });
     showNotification('Baris item pekerjaan berhasil dihapus.', 'warning');
   };
 
@@ -1207,8 +1189,13 @@ export const TeknikModule = () => {
       ]
     };
 
-    setRabSheets([...rabSheets, newSheet]);
+    const newSheets = [...rabSheets, newSheet];
+    setRabSheets(newSheets);
     setActiveSheetId(newSheet.id);
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, newSheets);
     setMainCategory('borongan');
     setSubTabBorongan('input_rab');
     showNotification('Lembar RAB baru yang kosong berhasil dibuat. Silakan isi No. SPK dan data.', 'success');
@@ -1225,6 +1212,10 @@ export const TeknikModule = () => {
       } else {
         setActiveSheetId('');
       }
+      try {
+        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(remaining));
+      } catch (e) {}
+      saveCloudStore(STORAGE_KEY_RAB_SHEETS, remaining);
       showNotification(`Lembar "${target?.noInput || 'RAB'}" berhasil dihapus.`, 'warning');
     }
   };
