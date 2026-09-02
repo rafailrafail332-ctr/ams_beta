@@ -109,6 +109,7 @@ function AppContent() {
         isOpen={true}
         setIsOpen={() => {}}
         onOpenProfile={() => setIsProfileModalOpen(true)}
+        onLogout={handleLogout}
       />
       <Header 
         onToggleSidebar={() => {}} 

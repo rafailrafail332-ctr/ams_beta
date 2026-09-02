@@ -32,11 +32,12 @@ import {
   KeyRound,
   Wrench,
   HardHat,
-  Calculator
+  Calculator,
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenProfile }) => {
+export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenProfile, onLogout }) => {
   const { currentUser, canAccessModule, activeSubTab, setActiveSubTab, showNotification, getAvatarUrl } = useApp();
 
   const isBossRole = () => {
@@ -322,25 +323,23 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
 
         {/* Footer User Profile Card */}
         <div 
-          onClick={onOpenProfile}
-          title="Klik untuk membuka Profil Pengguna & Hak Akses"
           style={{
-            padding: '0.9rem 1.1rem',
+            padding: '0.8rem 1rem',
             borderTop: '1px solid var(--border-color)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
-            background: 'rgba(30, 41, 59, 0.4)',
-            transition: 'all 0.25s ease'
+            background: 'rgba(30, 41, 59, 0.4)'
           }}
-          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(245, 158, 11, 0.12)'}
-          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(30, 41, 59, 0.4)'}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+          <div 
+            onClick={onOpenProfile}
+            title="Klik untuk membuka Profil Pengguna & Hak Akses"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', overflow: 'hidden', cursor: 'pointer', flex: 1 }}
+          >
             <div style={{
-              width: '38px',
-              height: '38px',
+              width: '36px',
+              height: '36px',
               borderRadius: '50%',
               overflow: 'hidden',
               border: '2px solid #F59E0B',
@@ -349,11 +348,31 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
               <img src={avatarUrl} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontWeight: '800', fontSize: '0.88rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', color: '#ffffff' }}>{currentUser?.name || 'User'}</div>
-              <div style={{ fontSize: '0.74rem', color: '#F59E0B', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser?.role || 'Staff'}</div>
+              <div style={{ fontWeight: '800', fontSize: '0.84rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', color: '#ffffff' }}>{currentUser?.name || 'User'}</div>
+              <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentUser?.role || 'Staff'}</div>
             </div>
           </div>
-          <ChevronRight size={16} color="#F59E0B" />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onLogout) onLogout();
+            }}
+            title="Sign Out / Ganti Akun"
+            style={{
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#f87171',
+              padding: '0.45rem',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: '0.4rem'
+            }}
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </aside>
     </>

@@ -17,8 +17,9 @@ export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }
         right: 0,
         left: 0,
         height: 'var(--header-height)',
-        backgroundColor: 'var(--bg-glass)',
-        backdropFilter: 'blur(16px)',
+        backgroundColor: '#0f172a',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
         borderBottom: '1px solid var(--border-color)',
         zIndex: 40,
         display: 'flex',
@@ -220,7 +221,10 @@ export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }
                 <User size={14} /> Profil Saya
               </button>
               <button 
-                onClick={onLogout}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  if (onLogout) onLogout();
+                }}
                 className="btn btn-outline-danger btn-sm" 
                 style={{ width: '100%', justifyContent: 'flex-start', marginTop: '0.25rem' }}
               >
