@@ -3089,7 +3089,7 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Harga Satuan (Bentuk Currency / Format Titik Ribuan) */}
+                      {/* Harga Satuan (Bentuk Currency / Format Titik Ribuan Tanpa Batas Digit) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
@@ -3099,15 +3099,15 @@ export const TeknikModule = () => {
                               : (row.hargaSatuan === 0 ? '0' : (row.hargaSatuan || ''))
                           }
                           onChange={(e) => {
-                            const val = e.target.value;
-                            handleUpdateCell(row.id, 'hargaSatuan', val);
+                            const raw = e.target.value.replace(/[^0-9]/g, '');
+                            handleUpdateCell(row.id, 'hargaSatuan', raw === '' ? '' : Number(raw));
                           }}
-                          placeholder=""
+                          placeholder="0"
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.88rem', outline: 'none' }}
                         />
                       </td>
 
-                      {/* Jumlah (Bentuk Currency / Format Titik Ribuan) */}
+                      {/* Jumlah (Bentuk Currency / Format Titik Ribuan Tanpa Batas Digit) */}
                       <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
                         <input
                           type="text"
@@ -3117,10 +3117,10 @@ export const TeknikModule = () => {
                               : (row.jumlah === 0 ? '0' : (row.jumlah || ''))
                           }
                           onChange={(e) => {
-                            const val = e.target.value;
-                            handleUpdateCell(row.id, 'jumlah', val);
+                            const raw = e.target.value.replace(/[^0-9]/g, '');
+                            handleUpdateCell(row.id, 'jumlah', raw === '' ? '' : Number(raw));
                           }}
-                          placeholder=""
+                          placeholder="0"
                           style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
                         />
                       </td>
