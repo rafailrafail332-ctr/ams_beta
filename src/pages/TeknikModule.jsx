@@ -2864,7 +2864,7 @@ export const TeknikModule = () => {
           </div>
 
           {/* SPREADSHEET CARD */}
-          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #f59e0b', overflowX: 'auto' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #f59e0b', maxWidth: '100%' }}>
             
             {/* Title */}
             <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', marginBottom: '0.75rem' }}>
@@ -3352,7 +3352,7 @@ export const TeknikModule = () => {
           {/* ========================================================================= */}
           {/* 1. TABEL UTAMA ATAS: REKAPITULASI OPNAME (PERSIS FOTO media_1787938735917.jpg) */}
           {/* ========================================================================= */}
-          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem', overflowX: 'auto' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem', maxWidth: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <BarChart3 size={20} color="#f59e0b" /> Rekapitulasi Opname
@@ -3613,7 +3613,7 @@ export const TeknikModule = () => {
           {/* 2. TABEL RINCIAN HASIL OPNAME & PEMBAYARAN                                */}
           {/* ========================================================================= */}
           {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '') || (sheet.items && sheet.items.length > 0) || ((sheet.noInput || '').trim() !== '')).length > 0 && (
-          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', overflowX: 'auto' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', maxWidth: '100%' }}>
             
             {/* Header Title & Info */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
