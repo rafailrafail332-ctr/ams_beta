@@ -1037,29 +1037,35 @@ export const TeknikModule = () => {
   const handleUpdateHeaderField = (field, value) => {
     setRabSheets(prev => {
       const targetId = activeSheetId || (prev[0] ? prev[0].id : null);
+      let updatedSheets = [];
       if (!targetId || !prev.some(s => s.id === targetId)) {
         const newSheetId = `RAB-${Date.now().toString().slice(-4)}`;
         const newSheet = { ...emptyTemplateSheet, id: newSheetId, [field]: value };
         setActiveSheetId(newSheetId);
-        return [newSheet];
-      }
-      return prev.map(s => {
-        if (s.id === targetId) {
-          const updated = { ...s, [field]: value };
-          // Jika field pembayaranSebelumnya diubah dan ada opnameHistory dengan tanggalOpname yang aktif
-          if (field === 'pembayaranSebelumnya' && s.opnameHistory && s.opnameHistory.length > 0) {
-            const curDate = s.tanggalOpname || s.opnameHistory[0].tanggal;
-            updated.opnameHistory = s.opnameHistory.map(h => {
-              if (h.tanggal === curDate || !curDate) {
-                return { ...h, pembayaranSebelumnya: value };
-              }
-              return h;
-            });
+        updatedSheets = [newSheet];
+      } else {
+        updatedSheets = prev.map(s => {
+          if (s.id === targetId) {
+            const updated = { ...s, [field]: value };
+            if (field === 'pembayaranSebelumnya' && s.opnameHistory && s.opnameHistory.length > 0) {
+              const curDate = s.tanggalOpname || s.opnameHistory[0].tanggal;
+              updated.opnameHistory = s.opnameHistory.map(h => {
+                if (h.tanggal === curDate || !curDate) {
+                  return { ...h, pembayaranSebelumnya: value };
+                }
+                return h;
+              });
+            }
+            return updated;
           }
-          return updated;
-        }
-        return s;
-      });
+          return s;
+        });
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+      } catch (e) {}
+      saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
+      return updatedSheets;
     });
   };
 
@@ -1147,6 +1153,11 @@ export const TeknikModule = () => {
         }
         return s;
       });
+      try {
+        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(resSheets));
+      } catch (e) {}
+      saveCloudStore(STORAGE_KEY_RAB_SHEETS, resSheets);
+      return resSheets;
     });
   };
 
