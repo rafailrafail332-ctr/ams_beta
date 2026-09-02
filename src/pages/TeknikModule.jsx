@@ -504,9 +504,8 @@ export const TeknikModule = () => {
   const [rekapUpahFilter, setRekapUpahFilter] = useState('ALL');
   const [rekapSearchText, setRekapSearchText] = useState('');
 
-  // MASTER CLOUD INITIAL SYNC & REALTIME SUBSCRIPTION
+  // MASTER CLOUD INITIAL SYNC (100% MySQL Database on Sengked Hosting)
   useEffect(() => {
-    // 1. Initial fetch from Supabase Cloud
     fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
       if (val && Array.isArray(val)) setAttendanceList(val);
     });
@@ -531,28 +530,6 @@ export const TeknikModule = () => {
     fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
       if (val && Array.isArray(val)) setRabSheets(val);
     });
-
-    // 2. Realtime listener: If another user on another laptop saves data, update immediately
-    const channel = supabase
-      .channel('public:ams_app_data')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ams_app_data' }, (payload) => {
-        if (payload.new && payload.new.key) {
-          const { key, value } = payload.new;
-          if (key === STORAGE_KEY_ABSEN && Array.isArray(value)) setAttendanceList(value);
-          if (key === STORAGE_KEY_DB_VENDOR && Array.isArray(value)) setDatabaseVendorRows(value);
-          if (key === STORAGE_KEY_DATABASE_PEKERJA && Array.isArray(value)) setDatabasePekerjaRows(value);
-          if (key === STORAGE_KEY_DB_KARYAWAN && Array.isArray(value)) setDatabaseKaryawanRows(value);
-          if (key === STORAGE_KEY_DB_UNIT && Array.isArray(value)) setDatabaseUnitRows(value);
-          if (key === STORAGE_KEY_DB_KONSUMEN && Array.isArray(value)) setDatabaseKonsumenRows(value);
-          if (key === STORAGE_KEY_DB_CALON_KONSUMEN && Array.isArray(value)) setDatabaseCalonKonsumenRows(value);
-          if (key === STORAGE_KEY_RAB_SHEETS && Array.isArray(value)) setRabSheets(value);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
