@@ -2290,18 +2290,18 @@ export const TeknikModule = () => {
                     onChange={(e) => {
                       const selectedNama = e.target.value;
                       const worker = databasePekerjaRows.find(w => w.nama === selectedNama);
-                      setAbsenFormData({
-                        ...absenFormData,
+                      setAbsenFormData(prev => ({
+                        ...prev,
                         nama: selectedNama,
-                        status: worker ? worker.status : absenFormData.status
-                      });
+                        status: worker ? worker.status : prev.status
+                      }));
                     }}
                     required
                     style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#38bdf8' }}
                   >
                     <option value="">-- Pilih Nama Pekerja Terdaftar --</option>
-                    {sortedAndFilteredDatabaseRows.map(w => (
-                      <option key={w.id} value={w.nama}>
+                    {[...databasePekerjaRows].sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).map(w => (
+                      <option key={w.id || w.nama} value={w.nama}>
                         {w.nama} ({w.status} - Rp {formatRupiahDesimal(w.upah)}/hari)
                       </option>
                     ))}
@@ -2314,7 +2314,7 @@ export const TeknikModule = () => {
                     <select
                       className="form-control"
                       value={absenFormData.status || 'Tukang'}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, status: e.target.value })}
+                      onChange={(e) => setAbsenFormData(prev => ({ ...prev, status: e.target.value }))}
                       style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#f59e0b' }}
                     >
                       <option value="Mandor">Mandor</option>
@@ -2329,7 +2329,7 @@ export const TeknikModule = () => {
                       type="time"
                       className="form-control"
                       value={absenFormData.jamMasuk}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamMasuk: e.target.value })}
+                      onChange={(e) => setAbsenFormData(prev => ({ ...prev, jamMasuk: e.target.value }))}
                       required
                       style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
                     />
@@ -2341,7 +2341,7 @@ export const TeknikModule = () => {
                       type="time"
                       className="form-control"
                       value={absenFormData.jamPulang}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, jamPulang: e.target.value })}
+                      onChange={(e) => setAbsenFormData(prev => ({ ...prev, jamPulang: e.target.value }))}
                       required
                       style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
                     />
@@ -2354,8 +2354,11 @@ export const TeknikModule = () => {
                       min="0"
                       max="12"
                       className="form-control"
-                      value={absenFormData.lemburJam}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, lemburJam: Number(e.target.value) || 0 })}
+                      value={absenFormData.lembur !== undefined ? absenFormData.lembur : (absenFormData.lemburJam || 0)}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        setAbsenFormData(prev => ({ ...prev, lembur: val, lemburJam: val }));
+                      }}
                       style={{ fontWeight: 900, background: '#0f172a', color: '#fbbf24', borderColor: '#f59e0b' }}
                     />
                   </div>
