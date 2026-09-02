@@ -2923,16 +2923,29 @@ export const TeknikModule = () => {
                   />
                 </div>
 
-                {/* 3. Proyek (Input Manual Tanpa Panah Dropdown) */}
+                {/* 3. Proyek (Pilihan Dropdown: Ashoka Park / Ashoka View + Ketik Bebas) */}
                 <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
                 <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                 <div>
                   <input
                     type="text"
+                    list="proyek-options"
                     value={activeSheet.proyek || ''}
                     onChange={(e) => handleUpdateHeaderField('proyek', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #10b981', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    style={{ 
+                      width: '100%', 
+                      background: 'rgba(16, 185, 129, 0.12)', 
+                      border: '1px solid rgba(16, 185, 129, 0.4)', 
+                      borderRadius: '4px',
+                      color: '#34d399', 
+                      fontWeight: 900, 
+                      fontSize: '0.9rem', 
+                      outline: 'none', 
+                      padding: '3px 8px',
+                      cursor: 'pointer'
+                    }}
+                    placeholder="Pilih atau ketik proyek (Ashoka Park / Ashoka View)..."
+                    title="Pilih Ashoka Park atau Ashoka View"
                   />
                 </div>
 
@@ -3296,6 +3309,12 @@ export const TeknikModule = () => {
                 {angkaTerbilang(activeSheetCalc.totalHargaRab)}
               </span>
             </div>
+
+            {/* DATALIST PILIHAN PROYEK STANDAR */}
+            <datalist id="proyek-options">
+              <option value="Ashoka Park">Ashoka Park</option>
+              <option value="Ashoka View">Ashoka View</option>
+            </datalist>
 
             {/* DATALIST PILIHAN SATUAN STANDAR PROYEK */}
             <datalist id="satuan-options">
