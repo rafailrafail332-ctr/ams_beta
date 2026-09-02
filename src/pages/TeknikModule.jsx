@@ -1100,7 +1100,7 @@ export const TeknikModule = () => {
         setActiveSheetId(newSheetId);
         return [newSheet];
       }
-      return prev.map(s => {
+      const resSheets = prev.map(s => {
         if (s.id === targetId) {
           const currentItems = s.items || [];
           const itemExists = currentItems.some(it => it.id === itemId);
