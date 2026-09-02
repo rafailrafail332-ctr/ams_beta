@@ -832,14 +832,56 @@ export const TeknikModule = () => {
   // =========================================================================
   const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v15_clean';
 
-  const defaultRabSheets = [];
+  const defaultRabSheets = [
+    {
+      id: 'RAB-01',
+      noInput: 'SPK-001',
+      tanggal: new Date().toISOString().split('T')[0],
+      proyek: 'Ashoka View',
+      namaVendor: 'CV. Berkah Konstruksi',
+      blok: 'A',
+      noUnit: '01',
+      fasum: '',
+      pekerjaan: 'Pekerjaan Pondasi & Dinding',
+      retensiPersen: 5,
+      pembayaranSebelumnya: 0,
+      tanggalOpname: '',
+      opnameHistory: [],
+      items: [
+        {
+          id: 'ITEM-001',
+          itemPekerjaan: 'Galian Tanah Pondasi',
+          spesifikasi: 'Tanah keras kedalaman 80cm',
+          vol: 12.50,
+          sat: 'm3',
+          hargaSatuan: 85000,
+          jumlah: 1062500,
+          bobotRatio: 0.15,
+          progress: 0,
+          bobotProgress: 0
+        },
+        {
+          id: 'ITEM-002',
+          itemPekerjaan: 'Pasangan Batu Kali',
+          spesifikasi: 'Adukan 1:4',
+          vol: 8.00,
+          sat: 'm3',
+          hargaSatuan: 450000,
+          jumlah: 3600000,
+          bobotRatio: 0.50,
+          progress: 0,
+          bobotProgress: 0
+        }
+      ]
+    }
+  ];
 
   const [rabSheets, setRabSheets] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_RAB_SHEETS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
     return defaultRabSheets;
@@ -850,7 +892,7 @@ export const TeknikModule = () => {
   }, [rabSheets]);
 
   const emptyTemplateSheet = {
-    id: 'sheet_empty',
+    id: 'RAB-01',
     noInput: '',
     tanggal: '',
     proyek: 'Ashoka View',
@@ -867,7 +909,7 @@ export const TeknikModule = () => {
   };
 
   // Selected Active Sheet for TAB 2 (Input Spreadsheet)
-  const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || ''));
+  const [activeSheetId, setActiveSheetId] = useState(() => (rabSheets[0]?.id || 'RAB-01'));
   const rawActiveSheet = rabSheets.find(s => s.id === activeSheetId) || rabSheets[0] || emptyTemplateSheet;
 
   // Active Sheet with items snapshot of the selected opname date if applicable
