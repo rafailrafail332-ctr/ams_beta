@@ -3095,14 +3095,28 @@ export const TeknikModule = () => {
                         />
                       </td>
 
-                      {/* Sat (Input Manual Bebas) */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 4px' }}>
+                      {/* Sat (Pilihan Dropdown Satuan Standar + Bisa Ketik Bebas) */}
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 4px', minWidth: '75px' }}>
                         <input
                           type="text"
+                          list="satuan-options"
                           value={row.sat || ''}
                           onChange={(e) => handleUpdateCell(row.id, 'sat', e.target.value)}
-                          placeholder=""
-                          style={{ width: '100%', textAlign: 'center', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.82rem', outline: 'none' }}
+                          placeholder="m2 / ls..."
+                          style={{ 
+                            width: '100%', 
+                            textAlign: 'center', 
+                            background: 'rgba(15, 23, 42, 0.6)', 
+                            border: '1px solid rgba(245, 158, 11, 0.4)', 
+                            borderRadius: '4px',
+                            color: '#38bdf8', 
+                            fontWeight: 900, 
+                            fontSize: '0.82rem', 
+                            padding: '2px 4px',
+                            outline: 'none',
+                            cursor: 'pointer'
+                          }}
+                          title="Klik untuk memilih satuan atau ketik satuan kustom"
                         />
                       </td>
 
@@ -3277,6 +3291,25 @@ export const TeknikModule = () => {
                 {angkaTerbilang(activeSheetCalc.totalHargaRab)}
               </span>
             </div>
+
+            {/* DATALIST PILIHAN SATUAN STANDAR PROYEK */}
+            <datalist id="satuan-options">
+              <option value="m2">m2 (Meter Persegi)</option>
+              <option value="m3">m3 (Meter Kubik)</option>
+              <option value="m1">m1 (Meter Lari / Panjang)</option>
+              <option value="ls">ls (Lumsum)</option>
+              <option value="titik">titik (Titik Lampu/Listrik)</option>
+              <option value="unit">unit (Unit Rumah/Bangunan)</option>
+              <option value="bh">bh (Buah / Pcs)</option>
+              <option value="kg">kg (Kilogram)</option>
+              <option value="zak">zak (Zak Semen)</option>
+              <option value="btg">btg (Batang)</option>
+              <option value="lbr">lbr (Lembar Triplek/Baja)</option>
+              <option value="roll">roll (Roll Kabel/Pipa)</option>
+              <option value="set">set (Set Kunci/Engsel)</option>
+              <option value="hari">hari (Hari Kerja)</option>
+              <option value="rit">rit (Rit Truk/Pasir)</option>
+            </datalist>
           </div>
         </div>
       )}
