@@ -11,6 +11,7 @@ export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }
 
   return (
     <header
+      className="app-header"
       style={{
         position: 'fixed',
         top: 0,
@@ -18,15 +19,11 @@ export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }
         left: 0,
         height: 'var(--header-height)',
         backgroundColor: '#0f172a',
-        backdropFilter: 'none',
-        WebkitBackdropFilter: 'none',
         borderBottom: '1px solid var(--border-color)',
         zIndex: 40,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1.75rem',
-        paddingLeft: 'calc(var(--sidebar-width) + 1.75rem)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
     >

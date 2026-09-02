@@ -106,13 +106,14 @@ function AppContent() {
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        isOpen={true}
-        setIsOpen={() => {}}
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onLogout={handleLogout}
       />
       <Header 
-        onToggleSidebar={() => {}} 
+        onToggleSidebar={toggleSidebar} 
+        isSidebarOpen={isSidebarOpen}
         activeTitle={getActiveTitle()} 
         onLogout={handleLogout}
         onOpenProfile={() => setIsProfileModalOpen(true)}

@@ -58,6 +58,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     }
     setCurrentTab(moduleKey);
     setActiveSubTab(subTabKey);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setIsOpen(false);
+    }
   };
 
   // CLEAN SPACIOUS SUB-MODULES NAVIGATION TAILORED FOR SPECIFIC ROLES
@@ -182,7 +185,14 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
 
   return (
     <>
+      {/* Mobile Backdrop Overlay */}
+      <div 
+        className={`sidebar-backdrop ${isOpen ? 'active' : ''}`}
+        onClick={() => setIsOpen(false)}
+      />
+
       <aside 
+        className={`sidebar-nav ${isOpen ? 'open' : 'closed'}`}
         style={{
           position: 'fixed',
           top: 0,
@@ -190,15 +200,11 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           bottom: 0,
           width: 'var(--sidebar-width)',
           backgroundColor: '#0f172a',
-          backdropFilter: 'none',
-          WebkitBackdropFilter: 'none',
           borderRight: '1px solid var(--border-color)',
-          zIndex: 50,
+          zIndex: 999,
           display: 'flex',
           flexDirection: 'column',
-          transform: 'translateX(0)',
-          visibility: 'visible',
-          opacity: 1
+          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease'
         }}
       >
         {/* Logo Section */}
@@ -206,32 +212,51 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
           height: 'var(--header-height)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.85rem',
+          justifyContent: 'space-between',
           padding: '0 1.25rem',
           borderBottom: '1px solid var(--border-color)'
         }}>
-          <img 
-            src="/company-logo.png" 
-            alt="Ashoka Logo" 
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              objectFit: 'contain',
-              background: '#ffffff',
-              padding: '3px',
-              boxShadow: 'var(--shadow-glow)',
-              border: '1px solid rgba(245, 158, 11, 0.5)'
-            }}
-          />
-          <div>
-            <div style={{ fontWeight: '900', fontSize: '1.18rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
-              ASHOKA
-            </div>
-            <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 800 }}>
-              {isBoss ? 'Pusat Pengawasan Direksi' : `Modul ${currentUser?.role || 'Staf'}`}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <img 
+              src="/company-logo.png" 
+              alt="Ashoka Logo" 
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                objectFit: 'contain',
+                background: '#ffffff',
+                padding: '3px',
+                boxShadow: 'var(--shadow-glow)',
+                border: '1px solid rgba(245, 158, 11, 0.5)'
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: '900', fontSize: '1.18rem', letterSpacing: '-0.02em', color: '#ffffff' }}>
+                ASHOKA
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 800 }}>
+                {isBoss ? 'Pusat Pengawasan Direksi' : `Modul ${currentUser?.role || 'Staf'}`}
+              </div>
             </div>
           </div>
+
+          {/* Close button visible only on mobile */}
+          <button
+            type="button"
+            className="sidebar-close-mobile-btn"
+            onClick={() => setIsOpen(false)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              padding: '4px',
+              fontSize: '1.25rem'
+            }}
+          >
+            ✕
+          </button>
         </div>
 
         {/* Navigation Items */}
