@@ -3494,12 +3494,24 @@ export const TeknikModule = () => {
 
                             {/* Pembayaran sebelumnya */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#fbbf24' }}>
-                              {hist.pembayaranSebelumnya !== undefined ? (Number(hist.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(hist.pembayaranSebelumnya) : '-') : (Number(sheet.pembayaranSebelumnya) > 0 ? formatRupiahDesimal(sheet.pembayaranSebelumnya) : '-')}
+                              {(() => {
+                                const val = hist.pembayaranSebelumnya !== undefined && hist.pembayaranSebelumnya !== '' 
+                                  ? parseNum(hist.pembayaranSebelumnya) 
+                                  : parseNum(sheet.pembayaranSebelumnya);
+                                return val > 0 ? formatRupiahDesimal(val) : '-';
+                              })()}
                             </td>
 
                             {/* Pembayaran saat ini */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
-                              {hist.pembayaranSaatIni !== undefined ? (hist.pembayaranSaatIni > 0 ? formatRupiahDesimal(hist.pembayaranSaatIni) : '-') : (c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-')}
+                              {(() => {
+                                const nProg = hist.nilaiProgress !== undefined ? parseNum(hist.nilaiProgress) : parseNum(c.nilaiProgress);
+                                const bayarSeb = hist.pembayaranSebelumnya !== undefined && hist.pembayaranSebelumnya !== ''
+                                  ? parseNum(hist.pembayaranSebelumnya)
+                                  : parseNum(sheet.pembayaranSebelumnya);
+                                const saatIni = nProg - bayarSeb;
+                                return saatIni > 0 ? formatRupiahDesimal(saatIni) : (hist.pembayaranSaatIni > 0 ? formatRupiahDesimal(hist.pembayaranSaatIni) : (c.pembayaranSaatIni > 0 ? formatRupiahDesimal(c.pembayaranSaatIni) : '-'));
+                              })()}
                             </td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
