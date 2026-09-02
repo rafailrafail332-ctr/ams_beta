@@ -118,14 +118,7 @@ function AppContent() {
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
-      <main
-        className="main-content"
-        style={{
-          marginLeft: 'var(--sidebar-width)',
-          minHeight: 'calc(100vh - var(--header-height))',
-          padding: '2rem'
-        }}
-      >
+      <main className="main-content">
         {!isAllowed ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '2rem auto' }}>
             <div style={{
