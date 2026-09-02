@@ -15,18 +15,28 @@ const MYSQL_API_URL = typeof window !== 'undefined' && window.location.origin.in
  * Saves JSON key to MySQL Database, Supabase, and localStorage simultaneously.
  */
 export const fetchCloudStore = async (key, defaultValue) => {
+  // Read local first to check if we have richer existing data
+  let localValue = null;
+  try {
+    const local = localStorage.getItem(key);
+    if (local) localValue = JSON.parse(local);
+  } catch (e) {}
+
   // 1. Try MySQL Database on Hosting first
   try {
     const res = await fetch(`${MYSQL_API_URL}?action=get&key=${encodeURIComponent(key)}`);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.value !== undefined && json.value !== null) {
-        localStorage.setItem(key, JSON.stringify(json.value));
-        return json.value;
+        // If remote has data or local is empty, use remote
+        if (!Array.isArray(json.value) || json.value.length > 0 || !localValue || (Array.isArray(localValue) && localValue.length === 0)) {
+          localStorage.setItem(key, JSON.stringify(json.value));
+          return json.value;
+        }
       }
     }
   } catch (err) {
-    // Fallback to Supabase
+    // Fallback
   }
 
   // 2. Fallback to Supabase Cloud
@@ -38,25 +48,20 @@ export const fetchCloudStore = async (key, defaultValue) => {
       .single();
 
     if (data && data.value !== undefined && data.value !== null) {
-      localStorage.setItem(key, JSON.stringify(data.value));
-      return data.value;
+      if (!Array.isArray(data.value) || data.value.length > 0 || !localValue || (Array.isArray(localValue) && localValue.length === 0)) {
+        localStorage.setItem(key, JSON.stringify(data.value));
+        return data.value;
+      }
     }
   } catch (err) {
     console.warn(`[Fetch error for ${key}]:`, err);
   }
 
-  // 3. Fallback to LocalStorage
-  try {
-    const local = localStorage.getItem(key);
-    if (local) {
-      const parsed = JSON.parse(local);
-      if (parsed !== undefined && parsed !== null) {
-        // Auto-seed to MySQL backend if missing on server
-        saveCloudStore(key, parsed);
-        return parsed;
-      }
-    }
-  } catch (e) {}
+  // 3. Fallback to LocalStorage (if local has items, save to MySQL now)
+  if (localValue !== null && localValue !== undefined) {
+    saveCloudStore(key, localValue);
+    return localValue;
+  }
 
   return defaultValue;
 };

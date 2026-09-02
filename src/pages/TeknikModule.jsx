@@ -2842,6 +2842,23 @@ export const TeknikModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  let targetSheets = [...rabSheets];
+                  if (!targetSheets.some(s => s.id === activeSheet.id)) {
+                    targetSheets.push(activeSheet);
+                  }
+                  setRabSheets(targetSheets);
+                  saveCloudStore(STORAGE_KEY_RAB_SHEETS, targetSheets);
+                  showNotification(`Lembar ${activeSheet.noInput || 'RAB'} berhasil disimpan ke Database MySQL & Cloud!`, 'success');
+                }}
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: '0.78rem', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)' }}
+              >
+                <Save size={14} /> 💾 Simpan ke Database
+              </button>
+
+              <button
+                type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={handlePrint}
                 style={{ background: '#1e293b', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, fontSize: '0.78rem' }}
