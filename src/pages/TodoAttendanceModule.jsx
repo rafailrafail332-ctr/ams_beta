@@ -84,6 +84,14 @@ export const COMPANY_PROJECTS = [
   { id: 'PROJ-HO', name: 'Kantor Pusat / Head Office', short: 'Kantor Pusat', icon: '🏢', color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)' }
 ];
 
+export const formatLocalDate = (d) => {
+  if (!d) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const TodoAttendanceModule = () => {
   const { 
     currentUser, 
@@ -192,13 +200,6 @@ export const TodoAttendanceModule = () => {
   const safeUsers = Array.isArray(users) ? users : [];
   const safeTodos = Array.isArray(todos) ? todos : [];
   const safeInstructions = Array.isArray(instructions) ? instructions : [];
-  // Active Date Selector (Format: YYYY-MM-DD using local timezone)
-  const formatLocalDate = (d) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
 
   const todayDateStr = formatLocalDate(new Date());
   const nowForMonth = new Date();
