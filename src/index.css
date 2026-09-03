@@ -330,14 +330,20 @@ body {
 
 /* CUSTOM HIGH-END TABLES */
 .table-container {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: rgba(15, 23, 42, 0.6);
+  position: relative;
+  display: block;
 }
 
 .custom-table {
   width: 100%;
+  min-width: 960px;
   border-collapse: collapse;
   text-align: left;
 }

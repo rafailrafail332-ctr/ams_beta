@@ -1651,26 +1651,26 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           )}
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
-          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
-            <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  <th style={{ width: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ width: '125px', minWidth: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     📅 Tanggal
                   </th>
-                  <th style={{ width: '135px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ width: '135px', minWidth: '135px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     🕒 Waktu
                   </th>
-                  <th style={{ padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     📝 Laporan Harian & Proyek
                   </th>
-                  <th style={{ width: '220px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ width: '190px', minWidth: '190px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     🏢 Kordinasi
                   </th>
-                  <th style={{ width: '180px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ width: '170px', minWidth: '170px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     👤 PIC
                   </th>
-                  <th style={{ width: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+                  <th style={{ width: '145px', minWidth: '145px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     ⚡ Status & Aksi
                   </th>
                 </tr>
@@ -1987,18 +1987,18 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           </div>
 
           {/* Table Instruksi Pekerjaan */}
-          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
-            <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
-                  <th style={{ width: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📌 No. & Tanggal</th>
-                  <th style={{ width: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>⏰ Batas Waktu (Deadline)</th>
-                  <th style={{ padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📋 Uraian Instruksi Pekerjaan</th>
-                  <th style={{ width: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👤 Ditugaskan Kepada</th>
-                  <th style={{ width: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👑 Pemberi Instruksi</th>
-                  <th style={{ width: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>⚡ Status & Laporan</th>
-                  <th style={{ width: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>📲 Lapor WA Pak Yazid</th>
-                  {isBoss && <th style={{ width: '80px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Aksi</th>}
+                  <th style={{ width: '110px', minWidth: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>📌 No. & Tanggal</th>
+                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>⏰ Batas Waktu (Deadline)</th>
+                  <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>📋 Uraian Instruksi Pekerjaan</th>
+                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>👤 Ditugaskan Kepada</th>
+                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>👑 Pemberi Instruksi</th>
+                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>⚡ Status & Laporan</th>
+                  <th style={{ width: '140px', minWidth: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>📲 Lapor WA Pak Yazid</th>
+                  {isBoss && <th style={{ width: '80px', minWidth: '80px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
