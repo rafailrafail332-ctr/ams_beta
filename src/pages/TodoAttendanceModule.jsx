@@ -1372,87 +1372,88 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
       {activeTab === 'laporan' && (
         <div className="glass-card" style={{ padding: '1.75rem' }}>
           {/* CENTERED TITLE PERSIS SEPERTI GAMBAR SPREADSHEET */}
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.35rem 1rem', borderRadius: '999px', color: '#F59E0B', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem' }}>
+              <FileText size={14} /> To Do List & Laporan Harian
+            </div>
             <h2 style={{ 
-              fontSize: '1.4rem', 
+              fontSize: '1.6rem', 
               fontWeight: 900, 
-              color: 'var(--text-main)', 
-              textDecoration: 'underline',
-              textUnderlineOffset: '6px',
-              letterSpacing: '0.5px',
+              color: '#ffffff', 
+              letterSpacing: '-0.02em',
               margin: '0 0 4px 0'
             }}>
               Laporan Pekerjaan Harian
             </h2>
-            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-              To Do List
+            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+              Monitoring Real-Time Aktivitas & Rekapitulasi Tugas Karyawan Seluruh Divisi
             </div>
           </div>
 
           {/* REKAPITULASI SUMMARY CARDS (BISA DILIHAT OLEH SEMUA KARYAWAN) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FDE047', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 900 }}>
                 📋
               </div>
               <div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Total Rekap Laporan</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>{visibleReports.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pekerjaan</span></div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Rekap Laporan</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff' }}>{visibleReports.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pekerjaan</span></div>
               </div>
             </div>
 
-            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#10B981', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
                 ✓
               </div>
               <div>
-                <div style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700, textTransform: 'uppercase' }}>Pekerjaan Selesai</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10B981' }}>{visibleReports.filter(r => r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Selesai</span></div>
+                <div style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pekerjaan Selesai</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10B981' }}>{visibleReports.filter(r => r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Selesai</span></div>
               </div>
             </div>
 
-            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#F59E0B', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
                 ⏳
               </div>
               <div>
-                <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, textTransform: 'uppercase' }}>Dalam Proses / Pending</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#F59E0B' }}>{visibleReports.filter(r => !r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pending</span></div>
+                <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Dalam Proses / Pending</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#F59E0B' }}>{visibleReports.filter(r => !r.completed).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Pending</span></div>
               </div>
             </div>
 
-            <div style={{ padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#38BDF8', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.2)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38BDF8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
                 👥
               </div>
               <div>
-                <div style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700, textTransform: 'uppercase' }}>PIC Terlibat</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38BDF8' }}>{new Set(visibleReports.map(r => r.pic || r.assignee)).size} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Karyawan</span></div>
+                <div style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>PIC Terlibat</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38BDF8' }}>{new Set(visibleReports.map(r => r.pic || r.assignee)).size} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Karyawan</span></div>
               </div>
             </div>
           </div>
 
           {/* TOP CONTROLS & DATE SELECTOR */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem', background: 'rgba(15, 23, 42, 0.65)', padding: '0.85rem 1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
             {/* Box Header Rentang Tanggal */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap', background: 'rgba(234, 179, 8, 0.08)', padding: '0.4rem 0.65rem', borderRadius: '8px', border: '1px solid rgba(234, 179, 8, 0.25)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <div style={{
-                background: '#FDE047',
-                color: '#1E293B',
+                background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                color: '#000000',
                 fontWeight: 900,
-                fontSize: '0.85rem',
-                padding: '0.3rem 0.6rem',
-                borderRadius: '6px',
-                border: '1.5px solid #EAB308',
+                fontSize: '0.8rem',
+                padding: '0.4rem 0.75rem',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.35rem'
+                gap: '0.4rem',
+                boxShadow: '0 2px 10px rgba(245, 158, 11, 0.35)'
               }}>
                 <Calendar size={15} /> Rentang Tanggal:
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>Dari:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Dari:</span>
                 <input
                   type="date"
                   className="form-control"
@@ -1461,14 +1462,14 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     setStartDateFilter(e.target.value);
                     setShowAllDates(false);
                   }}
-                  style={{ width: '135px', height: '34px', fontWeight: 700, fontSize: '0.8rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
+                  style={{ width: '140px', height: '36px', fontWeight: 700, fontSize: '0.82rem', background: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(245, 158, 11, 0.4)' }}
                 />
               </div>
 
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#EAB308' }}>s/d</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#F59E0B' }}>s/d</span>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>Sampai:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Sampai:</span>
                 <input
                   type="date"
                   className="form-control"
@@ -1477,12 +1478,12 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     setEndDateFilter(e.target.value);
                     setShowAllDates(false);
                   }}
-                  style={{ width: '135px', height: '34px', fontWeight: 700, fontSize: '0.8rem', background: 'var(--bg-card)', borderColor: '#EAB308' }}
+                  style={{ width: '140px', height: '36px', fontWeight: 700, fontSize: '0.82rem', background: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(245, 158, 11, 0.4)' }}
                 />
               </div>
 
               {/* Quick Presets */}
-              <div style={{ display: 'flex', gap: '3px' }}>
+              <div style={{ display: 'flex', gap: '4px', marginLeft: '0.5rem' }}>
                 <button 
                   className={`btn btn-sm ${!showAllDates && startDateFilter === todayDateStr && endDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={handleSetDateToday}
@@ -1650,27 +1651,27 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           )}
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
-          <div className="table-container" style={{ border: '1.5px solid #EAB308', borderRadius: '8px', overflow: 'hidden' }}>
+          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
             <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#FDE047', color: '#0F172A', borderBottom: '2px solid #CA8A04' }}>
-                  <th style={{ width: '125px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Tanggal
+                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
+                  <th style={{ width: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    📅 Tanggal
                   </th>
-                  <th style={{ width: '135px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Waktu
+                  <th style={{ width: '135px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    🕒 Waktu
                   </th>
-                  <th style={{ padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Laporan harian & Proyek
+                  <th style={{ padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    📝 Laporan Harian & Proyek
                   </th>
-                  <th style={{ width: '220px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    Kordinasi
+                  <th style={{ width: '220px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    🏢 Kordinasi
                   </th>
-                  <th style={{ width: '180px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                    PIC
+                  <th style={{ width: '180px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+                    👤 PIC
                   </th>
-                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 900, fontSize: '0.9rem', color: '#0F172A', textAlign: 'center' }}>
-                    Status & Aksi
+                  <th style={{ width: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+                    ⚡ Status & Aksi
                   </th>
                 </tr>
               </thead>
