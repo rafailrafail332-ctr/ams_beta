@@ -1857,37 +1857,41 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
       {/* ================================================================= */}
       {activeTab === 'instruksi' && (
         <div className="glass-card" style={{ padding: '1.75rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+          {/* MODERN BANNER HEADER */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))', padding: '1.25rem 1.5rem', borderRadius: '16px', border: '1px solid rgba(56, 189, 248, 0.25)', boxShadow: '0 8px 25px rgba(0,0,0,0.35)' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Briefcase size={22} color="#38BDF8" /> Instruksi & Penugasan Resmi Pimpinan
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.2)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38BDF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Briefcase size={20} />
+                </div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 900, margin: 0, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                  Instruksi & Penugasan Resmi Pimpinan
                 </h3>
                 {isBoss ? (
-                  <span className="badge badge-warning" style={{ fontSize: '0.72rem' }}>
+                  <span className="badge badge-warning" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem' }}>
                     <ShieldCheck size={12} /> Mode Pimpinan (BOD / GM / Head)
                   </span>
                 ) : (
-                  <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>
-                    <UserCheck size={12} /> Menampilkan Tugas Untuk: {currentUser?.name}
+                  <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem' }}>
+                    <UserCheck size={12} /> Tugas Untuk: {currentUser?.name}
                   </span>
                 )}
-                <span className="badge badge-success" style={{ fontSize: '0.72rem', background: 'rgba(37, 211, 102, 0.15)', color: '#25D366', border: '1px solid #25D366' }}>
+                <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem', background: 'rgba(37, 211, 102, 0.15)', color: '#25D366', border: '1px solid #25D366' }}>
                   📲 WA Pak Yazid Terhubung (+{yazidWaNumber})
                 </span>
               </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.25rem 0 0' }}>
+              <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: '0.4rem 0 0', lineHeight: 1.5 }}>
                 {isBoss
                   ? 'Direktur Utama, General Manager, dan Head Marketing menerbitkan instruksi resmi dengan batas waktu deadline kepada staf.'
                   : 'Daftar instruksi kerja dan mandat tugas dari Pimpinan. Mohon laporkan bukti hasil penyelesaian sebelum batas waktu.'}
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <button 
                 className="btn btn-secondary btn-sm"
                 onClick={() => { setTempWaNumber(yazidWaNumber); setIsWaConfigOpen(true); }}
-                style={{ fontSize: '0.75rem', height: '38px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                style={{ fontSize: '0.78rem', height: '38px', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(37, 211, 102, 0.35)' }}
                 title="Ubah nomor WhatsApp tujuan Pak Yazid"
               >
                 <PhoneCall size={14} color="#25D366" /> No. WA Pak Yazid (+{yazidWaNumber})
@@ -1897,7 +1901,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 <button 
                   className="btn btn-primary"
                   onClick={handleOpenAddInstructionModal}
-                  style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800, height: '38px' }}
+                  style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800, height: '38px', boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)' }}
                 >
                   <Plus size={16} /> + Terbitkan Instruksi Baru
                 </button>
@@ -1905,8 +1909,51 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
             </div>
           </div>
 
+          {/* KPI STAT CARDS FOR INSTRUCTIONS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.2)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38BDF8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
+                📌
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Tugas Resmi</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff' }}>{safeInstructions.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Instruksi</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
+                ✓
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Instruksi Selesai</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10B981' }}>{safeInstructions.filter(i => i.status === 'Selesai').length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Tuntas</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
+                ⏳
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#F59E0B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Sedang Berjalan</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#F59E0B' }}>{safeInstructions.filter(i => i.status !== 'Selesai').length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Proses</span></div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(239, 68, 68, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.2rem' }}>
+                ⚠️
+              </div>
+              <div>
+                <div style={{ fontSize: '0.72rem', color: '#EF4444', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Melewati Deadline</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#EF4444' }}>{safeInstructions.filter(i => isInstructionOverdue(i)).length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Overdue</span></div>
+              </div>
+            </div>
+          </div>
+
           {/* Sub-Filter Tab Selector untuk Instruksi */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', background: 'rgba(15, 23, 42, 0.65)', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
             <button
               className={`btn btn-sm ${insFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setInsFilter('for_me')}
@@ -1933,25 +1980,25 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
             <button
               className={`btn btn-sm ${insFilter === 'overdue' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setInsFilter('overdue')}
-              style={{ fontSize: '0.78rem', fontWeight: insFilter === 'overdue' ? 800 : 500 }}
+              style={{ fontSize: '0.78rem', fontWeight: insFilter === 'overdue' ? 800 : 500, background: insFilter === 'overdue' ? undefined : 'rgba(239, 68, 68, 0.1)', color: insFilter === 'overdue' ? undefined : '#EF4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
             >
               ⚠️ Melewati Batas Waktu ({safeInstructions.filter(i => isInstructionOverdue(i)).length})
             </button>
           </div>
 
           {/* Table Instruksi Pekerjaan */}
-          <div className="table-container" style={{ border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
             <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: 'rgba(15, 23, 42, 0.85)', borderBottom: '2px solid var(--border-color)' }}>
-                  <th style={{ width: '110px', padding: '0.85rem 1rem', fontWeight: 800 }}>No. & Tanggal</th>
-                  <th style={{ width: '150px', padding: '0.85rem 1rem', fontWeight: 800, color: '#EF4444' }}>Batas Waktu (Deadline)</th>
-                  <th style={{ padding: '0.85rem 1rem', fontWeight: 800 }}>Uraian Instruksi Pekerjaan</th>
-                  <th style={{ width: '160px', padding: '0.85rem 1rem', fontWeight: 800 }}>Ditugaskan Kepada</th>
-                  <th style={{ width: '160px', padding: '0.85rem 1rem', fontWeight: 800 }}>Pemberi Instruksi</th>
-                  <th style={{ width: '140px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Status & Laporan</th>
-                  <th style={{ width: '130px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center', color: '#25D366' }}>Lapor WA Pak Yazid</th>
-                  {isBoss && <th style={{ width: '80px', padding: '0.85rem 1rem', fontWeight: 800, textAlign: 'center' }}>Aksi</th>}
+                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
+                  <th style={{ width: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📌 No. & Tanggal</th>
+                  <th style={{ width: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>⏰ Batas Waktu (Deadline)</th>
+                  <th style={{ padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📋 Uraian Instruksi Pekerjaan</th>
+                  <th style={{ width: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👤 Ditugaskan Kepada</th>
+                  <th style={{ width: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>👑 Pemberi Instruksi</th>
+                  <th style={{ width: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>⚡ Status & Laporan</th>
+                  <th style={{ width: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>📲 Lapor WA Pak Yazid</th>
+                  {isBoss && <th style={{ width: '80px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
