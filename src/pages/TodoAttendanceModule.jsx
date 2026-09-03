@@ -200,6 +200,7 @@ export const TodoAttendanceModule = () => {
   const safeUsers = Array.isArray(users) ? users : [];
   const safeTodos = Array.isArray(todos) ? todos : [];
   const safeInstructions = Array.isArray(instructions) ? instructions : [];
+  const safeAttendances = Array.isArray(attendances) ? attendances : [];
 
   const todayDateStr = formatLocalDate(new Date());
   const nowForMonth = new Date();
