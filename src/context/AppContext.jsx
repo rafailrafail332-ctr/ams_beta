@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 
 const AppContext = createContext();
 
@@ -422,7 +423,33 @@ export const AppProvider = ({ children }) => {
     try {
       localStorage.setItem('ams_todos_master_v5', JSON.stringify(todos));
     } catch (e) {}
+    saveCloudStore('ams_todos_master_v5', todos);
   }, [todos]);
+
+  // Initial fetch and polling sync from MySQL for Todos
+  useEffect(() => {
+    fetchCloudStore('ams_todos_master_v5', null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setTodos(val);
+      }
+    });
+
+    // Auto real-time background sync every 10 seconds
+    const interval = setInterval(() => {
+      fetchCloudStore('ams_todos_master_v5', null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) {
+          setTodos(val);
+        }
+      });
+      fetchCloudStore('ams_work_instructions_v2', null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) {
+          setInstructions(val);
+        }
+      });
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 4B. WORK INSTRUCTIONS STORE (INSTRUKSI PEKERJAAN PIMPINAN KEPADA STAF)
   const defaultInitialInstructions = [
@@ -507,6 +534,7 @@ export const AppProvider = ({ children }) => {
     try {
       localStorage.setItem('ams_work_instructions_v2', JSON.stringify(instructions));
     } catch (e) {}
+    saveCloudStore('ams_work_instructions_v2', instructions);
   }, [instructions]);
 
   // 6. MEDIA INFORMASI & PENGUMUMAN PERUSAHAAN (BISA DIBACA & DIISI OLEH SEMUA KARYAWAN)

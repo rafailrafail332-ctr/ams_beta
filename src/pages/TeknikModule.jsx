@@ -504,32 +504,38 @@ export const TeknikModule = () => {
   const [rekapUpahFilter, setRekapUpahFilter] = useState('ALL');
   const [rekapSearchText, setRekapSearchText] = useState('');
 
-  // MASTER CLOUD INITIAL SYNC (100% MySQL Database on Sengked Hosting)
+  // MASTER CLOUD INITIAL SYNC & REAL-TIME POLLING (100% MySQL Database on Sengked Hosting)
   useEffect(() => {
-    fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
-      if (val && Array.isArray(val)) setAttendanceList(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_VENDOR, null).then(val => {
-      if (val && Array.isArray(val)) setDatabaseVendorRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DATABASE_PEKERJA, null).then(val => {
-      if (val && Array.isArray(val)) setDatabasePekerjaRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_KARYAWAN, null).then(val => {
-      if (val && Array.isArray(val)) setDatabaseKaryawanRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_UNIT, null).then(val => {
-      if (val && Array.isArray(val)) setDatabaseUnitRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
-      if (val && Array.isArray(val)) setDatabaseKonsumenRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
-      if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
-      if (val && Array.isArray(val)) setRabSheets(val);
-    });
+    const doFetchAll = () => {
+      fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setAttendanceList(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_VENDOR, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabaseVendorRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DATABASE_PEKERJA, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabasePekerjaRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_KARYAWAN, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabaseKaryawanRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_UNIT, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabaseUnitRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabaseKonsumenRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setDatabaseCalonKonsumenRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setRabSheets(val);
+      });
+    };
+
+    doFetchAll();
+    const interval = setInterval(doFetchAll, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
