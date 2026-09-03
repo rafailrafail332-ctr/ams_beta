@@ -192,34 +192,41 @@ export const TodoAttendanceModule = () => {
   const safeUsers = Array.isArray(users) ? users : [];
   const safeTodos = Array.isArray(todos) ? todos : [];
   const safeInstructions = Array.isArray(instructions) ? instructions : [];
-  const safeAttendances = Array.isArray(attendances) ? attendances : [];
+  // Active Date Selector (Format: YYYY-MM-DD using local timezone)
+  const formatLocalDate = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-  // Active Date Selector (Format: YYYY-MM-DD)
-  const todayDateStr = new Date().toISOString().split('T')[0];
+  const todayDateStr = formatLocalDate(new Date());
   const [startDateFilter, setStartDateFilter] = useState(todayDateStr);
   const [endDateFilter, setEndDateFilter] = useState(todayDateStr);
   const [showAllDates, setShowAllDates] = useState(false);
 
   // Quick Preset Handlers for Date Range
   const handleSetDateToday = () => {
-    setStartDateFilter(todayDateStr);
-    setEndDateFilter(todayDateStr);
+    const today = formatLocalDate(new Date());
+    setStartDateFilter(today);
+    setEndDateFilter(today);
     setShowAllDates(false);
   };
 
   const handleSetDate7Days = () => {
     const d = new Date();
     d.setDate(d.getDate() - 7);
-    const pastStr = d.toISOString().split('T')[0];
+    const pastStr = formatLocalDate(d);
+    const today = formatLocalDate(new Date());
     setStartDateFilter(pastStr);
-    setEndDateFilter(todayDateStr);
+    setEndDateFilter(today);
     setShowAllDates(false);
   };
 
   const handleSetDateThisMonth = () => {
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    const firstDay = formatLocalDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    const lastDay = formatLocalDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
     setStartDateFilter(firstDay);
     setEndDateFilter(lastDay);
     setShowAllDates(false);
@@ -1480,28 +1487,28 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 <button 
                   className={`btn btn-sm ${!showAllDates && startDateFilter === todayDateStr && endDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={handleSetDateToday}
-                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem', fontWeight: !showAllDates && startDateFilter === todayDateStr && endDateFilter === todayDateStr ? 800 : 500 }}
                 >
                   Hari Ini
                 </button>
                 <button 
-                  className={`btn btn-sm ${!showAllDates && startDateFilter !== todayDateStr && startDateFilter !== endDateFilter ? 'btn-primary' : 'btn-secondary'}`}
+                  className={`btn btn-sm ${!showAllDates && startDateFilter === formatLocalDate(new Date(Date.now() - 7 * 86400000)) && endDateFilter === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={handleSetDate7Days}
                   style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
                 >
                   7 Hari
                 </button>
                 <button 
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-sm ${!showAllDates && startDateFilter === formatLocalDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)) && endDateFilter === formatLocalDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)) ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={handleSetDateThisMonth}
-                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem', fontWeight: !showAllDates && startDateFilter === formatLocalDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)) && endDateFilter === formatLocalDate(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)) ? 800 : 500 }}
                 >
                   Bulan Ini
                 </button>
                 <button 
                   className={`btn btn-sm ${showAllDates ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setShowAllDates(!showAllDates)}
-                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem' }}
+                  style={{ height: '34px', fontSize: '0.75rem', padding: '0 0.45rem', fontWeight: showAllDates ? 800 : 500 }}
                 >
                   {showAllDates ? '✓ Semua' : 'Semua'}
                 </button>
