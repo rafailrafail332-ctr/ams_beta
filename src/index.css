@@ -688,3 +688,125 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(245, 158, 11, 0.8);
 }
+
+/* ========================================================================= */
+/* ENTERPRISE PRINT & CETAK SHEET STYLES (CLEAN WHITE A4 / LETTER)           */
+/* ========================================================================= */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  /* Sembunyikan semua elemen navigasi aplikasi saat mencetak */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .app-header,
+  .sidebar-nav,
+  .sidebar-backdrop,
+  .page-header,
+  .tab-list,
+  button,
+  .btn,
+  datalist {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Sheet Card Styling for Print */
+  .printable-sheet-area {
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #000000 !important;
+  }
+
+  .printable-sheet-area * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Form Header Key-Value Grid */
+  .printable-sheet-area div[style*="gridTemplateColumns"] {
+    background: #ffffff !important;
+    border: none !important;
+  }
+
+  /* Input fields diubah menjadi teks bersih tanpa kotak */
+  .printable-sheet-area input {
+    color: #000000 !important;
+    border: none !important;
+    border-bottom: 1px solid #000000 !important;
+    background: transparent !important;
+    font-size: 10pt !important;
+    padding: 1px 0 !important;
+  }
+
+  /* Tabel Spreadsheet */
+  .table-container {
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .custom-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .custom-table th {
+    background-color: #f3f4f6 !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    font-weight: 800 !important;
+    font-size: 9pt !important;
+    padding: 6px 4px !important;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+
+  .custom-table td {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+    font-size: 9pt !important;
+    padding: 5px 4px !important;
+  }
+
+  .custom-table tr {
+    page-break-inside: avoid !important;
+  }
+
+  /* Sembunyikan kolom aksi hapus saat cetak */
+  .custom-table th:last-child,
+  .custom-table td:last-child {
+    display: none !important;
+  }
+
+  /* Kotak Terbilang */
+  div[style*="Terbilang"] {
+    background: #ffffff !important;
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+    margin-top: 10px !important;
+  }
+}
