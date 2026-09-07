@@ -33,6 +33,8 @@ import {
   Wrench,
   HardHat,
   Calculator,
+  TrendingUp,
+  PieChart,
   LogOut
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
