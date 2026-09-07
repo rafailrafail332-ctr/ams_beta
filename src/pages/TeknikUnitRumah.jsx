@@ -86,7 +86,7 @@ export const TeknikUnitRumah = () => {
     setQcUnit(unit);
     setIsQCModalOpen(true);
   };
-
+  
   // Handle Upload Photo File for Update Modal (Base64)
   const handleFileUploadUpdate = (e) => {
     const file = e.target.files[0];

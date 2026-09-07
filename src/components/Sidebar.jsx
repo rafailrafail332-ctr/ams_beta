@@ -101,13 +101,14 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen') || roleLower.includes('tarkum')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'fin-tax', title: '1. Akuntansi & Pajak (PPh Final & PPN)', moduleKey: 'finance', subTabKey: 'tax', icon: Landmark, color: '#10B981' },
-        { id: 'fin-expenses', title: '2. Pengeluaran Kantor & Kuitansi (OpEx)', moduleKey: 'finance', subTabKey: 'expenses', icon: Receipt, color: '#F87171' },
-        { id: 'fin-dp', title: '3. Monitoring DP & Pembayaran Cash In', moduleKey: 'finance', subTabKey: 'dp', icon: DollarSign, color: '#10B981' },
-        { id: 'fin-kpr', title: '4. SLA Pencairan KPR Bank Mitra', moduleKey: 'finance', subTabKey: 'kpr', icon: CreditCard, color: '#38BDF8' },
-        { id: 'fin-price', title: '5. Penetapan Pricelist & HPP Rumah', moduleKey: 'finance', subTabKey: 'pricelist', icon: Tag, color: '#60A5FA' },
-        { id: 'fin-overrun', title: '6. Cost Overrun Inspector (Faktur)', moduleKey: 'finance', subTabKey: 'cost-overrun', icon: AlertTriangle, color: '#F59E0B' },
-        { id: 'cr-ipl', title: '7. Customer Relation: Tagihan IPL Estate', moduleKey: 'customer-relation', subTabKey: 'ipl', icon: HeartHandshake, color: '#FB7185' }
+        { id: 'fin-pendapatan', title: '1. Pendapatan (Revenue)', moduleKey: 'finance', subTabKey: 'pendapatan', icon: TrendingUp, color: '#10B981' },
+        { id: 'fin-pengeluaran', title: '2. Pengeluaran (OpEx/CapEx)', moduleKey: 'finance', subTabKey: 'pengeluaran', icon: Receipt, color: '#EF4444' },
+        { id: 'fin-piutang', title: '3. Piutang (Konsumen & Bank)', moduleKey: 'finance', subTabKey: 'piutang', icon: DollarSign, color: '#F59E0B' },
+        { id: 'fin-utang', title: '4. Utang (Vendor & Kontraktor)', moduleKey: 'finance', subTabKey: 'utang', icon: CreditCard, color: '#EC4899' },
+        { id: 'fin-invoice', title: '5. Invoice & Pembayaran', moduleKey: 'finance', subTabKey: 'invoice', icon: FileText, color: '#38BDF8' },
+        { id: 'fin-kasbank', title: '6. Kas & Bank (Rekonsiliasi)', moduleKey: 'finance', subTabKey: 'kas_bank', icon: Landmark, color: '#6366F1' },
+        { id: 'fin-budget', title: '7. Budget / Anggaran Proyek', moduleKey: 'finance', subTabKey: 'budget', icon: Calculator, color: '#8B5CF6' },
+        { id: 'fin-laporan', title: '8. Laporan Keuangan (Laba Rugi & Neraca)', moduleKey: 'finance', subTabKey: 'laporan_keuangan', icon: PieChart, color: '#14B8A6' }
       ];
     }
 
