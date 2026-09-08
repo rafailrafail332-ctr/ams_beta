@@ -966,7 +966,7 @@ export const TeknikModule = () => {
       const autoJumlah = vol * hargaSatuan;
       const jumlah = it.jumlah !== undefined && it.jumlah !== '' ? parseNum(it.jumlah) : autoJumlah;
       const rawAutoBobot = totalHargaRab > 0 ? (jumlah / totalHargaRab) : 0;
-      const autoBobotRatio = Math.round(rawAutoBobot * 100) / 100;
+      const autoBobotRatio = rawAutoBobot;
       const bobotRatio = it.bobotRatio !== undefined && it.bobotRatio !== '' ? parseNum(it.bobotRatio) : autoBobotRatio;
       const progress = it.progress !== undefined && it.progress !== '' ? parseNum(it.progress) : 0;
       
@@ -3560,19 +3560,19 @@ export const TeknikModule = () => {
                               {formatRupiahDesimal(c.totalHargaRab)}
                             </td>
 
-                            {/* Nilai Opname */}
+                             {/* Nilai Opname */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
-                              {hist.nilaiOpname !== undefined ? (hist.nilaiOpname > 0 ? formatRupiahDesimal(hist.nilaiOpname) : '-') : (c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-')}
+                              {(hist.nilaiOpname && parseNum(hist.nilaiOpname) > 0) ? formatRupiahDesimal(hist.nilaiOpname) : (c.nilaiOpname > 0 ? formatRupiahDesimal(c.nilaiOpname) : '-')}
                             </td>
 
                             {/* Retensi 5% */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#c084fc' }}>
-                              {hist.retensiNilai !== undefined ? (hist.retensiNilai > 0 ? formatRupiahDesimal(hist.retensiNilai) : '-') : (c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-')}
+                              {(hist.retensiNilai && parseNum(hist.retensiNilai) > 0) ? formatRupiahDesimal(hist.retensiNilai) : (c.retensiNilai > 0 ? formatRupiahDesimal(c.retensiNilai) : '-')}
                             </td>
 
                             {/* Nilai Progress */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#60a5fa' }}>
-                              {hist.nilaiProgress !== undefined ? (hist.nilaiProgress > 0 ? formatRupiahDesimal(hist.nilaiProgress) : '-') : (c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-')}
+                              {(hist.nilaiProgress && parseNum(hist.nilaiProgress) > 0) ? formatRupiahDesimal(hist.nilaiProgress) : (c.nilaiProgress > 0 ? formatRupiahDesimal(c.nilaiProgress) : '-')}
                             </td>
 
                             {/* Pembayaran sebelumnya */}
@@ -3588,7 +3588,7 @@ export const TeknikModule = () => {
                             {/* Pembayaran saat ini */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.08)' }}>
                               {(() => {
-                                const nProg = hist.nilaiProgress !== undefined ? parseNum(hist.nilaiProgress) : parseNum(c.nilaiProgress);
+                                const nProg = (hist.nilaiProgress && parseNum(hist.nilaiProgress) > 0) ? parseNum(hist.nilaiProgress) : parseNum(c.nilaiProgress);
                                 const bayarSeb = hist.pembayaranSebelumnya !== undefined && hist.pembayaranSebelumnya !== ''
                                   ? parseNum(hist.pembayaranSebelumnya)
                                   : parseNum(sheet.pembayaranSebelumnya);
