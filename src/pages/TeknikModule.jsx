@@ -508,28 +508,28 @@ export const TeknikModule = () => {
   useEffect(() => {
     const doFetchAll = () => {
       fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setAttendanceList(val);
+        if (val && Array.isArray(val)) setAttendanceList(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_VENDOR, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabaseVendorRows(val);
+        if (val && Array.isArray(val)) setDatabaseVendorRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DATABASE_PEKERJA, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabasePekerjaRows(val);
+        if (val && Array.isArray(val)) setDatabasePekerjaRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_KARYAWAN, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabaseKaryawanRows(val);
+        if (val && Array.isArray(val)) setDatabaseKaryawanRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_UNIT, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabaseUnitRows(val);
+        if (val && Array.isArray(val)) setDatabaseUnitRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabaseKonsumenRows(val);
+        if (val && Array.isArray(val)) setDatabaseKonsumenRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setDatabaseCalonKonsumenRows(val);
+        if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
       });
       fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setRabSheets(val);
+        if (val && Array.isArray(val)) setRabSheets(val);
       });
     };
 
@@ -893,7 +893,13 @@ export const TeknikModule = () => {
     return defaultRabSheets;
   });
 
+  const isInitialMountRab = useRef(true);
+
   useEffect(() => {
+    if (isInitialMountRab.current) {
+      isInitialMountRab.current = false;
+      return;
+    }
     saveCloudStore(STORAGE_KEY_RAB_SHEETS, rabSheets);
   }, [rabSheets]);
 

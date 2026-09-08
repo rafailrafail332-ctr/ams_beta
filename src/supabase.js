@@ -15,32 +15,31 @@ export const supabase = {
  * - Saves directly to MySQL Database on Hosting
  */
 export const fetchCloudStore = async (key, defaultValue) => {
-  // Read local first
+  // Read local first as fallback
   let localValue = null;
   try {
     const local = localStorage.getItem(key);
     if (local) localValue = JSON.parse(local);
   } catch (e) {}
 
-  // 1. Fetch from MySQL Database on Sengked Hosting
+  // 1. Fetch from MySQL Database on Sengked Hosting (Single Source of Truth)
   try {
     const res = await fetch(`${MYSQL_API_URL}?action=get&key=${encodeURIComponent(key)}`);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.value !== undefined && json.value !== null) {
-        if (!Array.isArray(json.value) || json.value.length > 0 || !localValue || (Array.isArray(localValue) && localValue.length === 0)) {
+        try {
           localStorage.setItem(key, JSON.stringify(json.value));
-          return json.value;
-        }
+        } catch (e) {}
+        return json.value;
       }
     }
   } catch (err) {
     console.warn(`[MySQL Fetch Error for ${key}]:`, err);
   }
 
-  // 2. Fallback to LocalStorage
+  // 2. Fallback to LocalStorage if offline / fetch failed
   if (localValue !== null && localValue !== undefined) {
-    saveCloudStore(key, localValue);
     return localValue;
   }
 
