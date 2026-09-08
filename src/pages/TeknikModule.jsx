@@ -1276,7 +1276,150 @@ export const TeknikModule = () => {
   };
 
   // =========================================================================
-  // OPNAME PEKERJAAN (CEK FISIK & REALISASI PROGRES LAPANGAN)
+  // SUB-MODUL: INPUT PEKERJAAN BORONGAN (RINGKAS & TERINTEGRASI)
+  // =========================================================================
+  const [pekerjaanFormData, setPekerjaanFormData] = useState({
+    id: null,
+    noSpk: '',
+    tanggal: new Date().toISOString().split('T')[0],
+    proyek: 'Ashoka View',
+    namaVendor: '',
+    pekerjaan: '',
+    blok: '',
+    noUnit: '',
+    fasum: '-',
+    nilaiPekerjaan: ''
+  });
+  const [pekerjaanTableSearch, setPekerjaanTableSearch] = useState('');
+  const [pekerjaanProjectFilter, setPekerjaanProjectFilter] = useState('ALL');
+
+  // SIMPAN DATA PEKERJAAN (ADD & EDIT DENGAN RELASI ITEM LENGKAP KE MYSQL)
+  const handleSavePekerjaan = (e) => {
+    e.preventDefault();
+    const cleanNoSpk = (pekerjaanFormData.noSpk || '').trim();
+    const cleanPekerjaan = (pekerjaanFormData.pekerjaan || '').trim();
+    const cleanVendor = (pekerjaanFormData.namaVendor || '').trim();
+    const nilaiNum = parseNum(pekerjaanFormData.nilaiPekerjaan);
+
+    if (!cleanNoSpk) {
+      alert('Silakan masukkan No. SPK!');
+      return;
+    }
+    if (!cleanPekerjaan) {
+      alert('Silakan masukkan nama Pekerjaan!');
+      return;
+    }
+    if (nilaiNum <= 0) {
+      alert('Silakan masukkan Nilai Pekerjaan yang valid!');
+      return;
+    }
+
+    const isEdit = Boolean(pekerjaanFormData.id);
+    const targetId = isEdit ? pekerjaanFormData.id : `RAB-${Date.now().toString().slice(-6)}`;
+    const existingSheet = rabSheets.find(s => s.id === targetId);
+
+    const updatedItem = {
+      id: existingSheet?.items?.[0]?.id || `ITEM-${Date.now().toString().slice(-4)}`,
+      itemPekerjaan: cleanPekerjaan,
+      spesifikasi: '-',
+      vol: 1.00,
+      sat: 'ls',
+      hargaSatuan: nilaiNum,
+      jumlah: nilaiNum,
+      bobotRatio: 1.0,
+      progress: existingSheet?.items?.[0]?.progress || 0,
+      bobotProgress: existingSheet?.items?.[0]?.progress || 0
+    };
+
+    const newSheet = {
+      ...existingSheet,
+      id: targetId,
+      noInput: cleanNoSpk,
+      tanggal: pekerjaanFormData.tanggal || new Date().toISOString().split('T')[0],
+      proyek: pekerjaanFormData.proyek || 'Ashoka View',
+      namaVendor: cleanVendor || '-',
+      pekerjaan: cleanPekerjaan,
+      blok: (pekerjaanFormData.blok || '').trim().toUpperCase(),
+      noUnit: (pekerjaanFormData.noUnit || '').trim(),
+      fasum: (pekerjaanFormData.fasum || '-').trim(),
+      retensiPersen: existingSheet?.retensiPersen || 5,
+      pembayaranSebelumnya: existingSheet?.pembayaranSebelumnya || 0,
+      tanggalOpname: existingSheet?.tanggalOpname || '',
+      opnameHistory: existingSheet?.opnameHistory || [],
+      items: [updatedItem]
+    };
+
+    let nextSheets = [];
+    if (isEdit) {
+      nextSheets = rabSheets.map(s => s.id === targetId ? newSheet : s);
+    } else {
+      nextSheets = [newSheet, ...rabSheets];
+    }
+
+    setRabSheets(nextSheets);
+    setActiveSheetId(targetId);
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
+    } catch (err) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
+
+    // Reset Form
+    setPekerjaanFormData({
+      id: null,
+      noSpk: '',
+      tanggal: new Date().toISOString().split('T')[0],
+      proyek: 'Ashoka View',
+      namaVendor: '',
+      pekerjaan: '',
+      blok: '',
+      noUnit: '',
+      fasum: '-',
+      nilaiPekerjaan: ''
+    });
+
+    showNotification(
+      isEdit 
+        ? `Data pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" berhasil diperbarui!` 
+        : `Pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" (Rp ${formatRupiah(nilaiNum)}) berhasil disimpan ke Database!`,
+      'success'
+    );
+  };
+
+  // EDIT PEKERJAAN (LOAD DATA KE FORMULIR)
+  const handleEditPekerjaan = (sheet) => {
+    const summary = computeSheetSummary(sheet);
+    setPekerjaanFormData({
+      id: sheet.id,
+      noSpk: sheet.noInput || '',
+      tanggal: sheet.tanggal || new Date().toISOString().split('T')[0],
+      proyek: sheet.proyek || 'Ashoka View',
+      namaVendor: sheet.namaVendor || '',
+      pekerjaan: sheet.pekerjaan || (sheet.items?.[0]?.itemPekerjaan) || '',
+      blok: sheet.blok || '',
+      noUnit: sheet.noUnit || '',
+      fasum: sheet.fasum || '-',
+      nilaiPekerjaan: formatRupiah(summary.totalHargaRab || 0)
+    });
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+    showNotification(`Memuat data "${sheet.noInput || 'Pekerjaan'}" ke formulir...`, 'info');
+  };
+
+  // RESET FORMULIR PEKERJAAN
+  const handleResetPekerjaanForm = () => {
+    setPekerjaanFormData({
+      id: null,
+      noSpk: '',
+      tanggal: new Date().toISOString().split('T')[0],
+      proyek: 'Ashoka View',
+      namaVendor: '',
+      pekerjaan: '',
+      blok: '',
+      noUnit: '',
+      fasum: '-',
+      nilaiPekerjaan: ''
+    });
+  };
+
   // =========================================================================
   const [hasilOpnameSearch, setHasilOpnameSearch] = useState('');
   const [hasilOpnameDateSearch, setHasilOpnameDateSearch] = useState('');
@@ -1837,7 +1980,7 @@ export const TeknikModule = () => {
               <ClipboardCheck size={16} /> Hasil Opname
             </button>
 
-            {/* 3. PALING KANAN: Input lembar RAB */}
+            {/* 3. PALING KANAN: Input Pekerjaan */}
             <button
               type="button"
               onClick={() => setSubTabBorongan('input_rab')}
@@ -1857,7 +2000,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <Calculator size={16} /> Input lembar RAB
+              <Briefcase size={16} /> Input Pekerjaan
             </button>
           </div>
         </div>
@@ -2805,564 +2948,603 @@ export const TeknikModule = () => {
   )}
 
       {/* ========================================================================= */}
-      {/* PEKERJAAN BORONGAN (FOTO 3: Input RAB, Laporan, Hasil Opname)             */}
+      {/* PEKERJAAN BORONGAN: SUB-MODUL INPUT PEKERJAAN & REKAPITULASI             */}
       {/* ========================================================================= */}
       {mainCategory === 'borongan' && subTabBorongan === 'input_rab' && (
         <div className="module-animated-view">
           
-          {/* SHEET TAB SWITCHER TOOLBAR (RAB - 01, RAB - 02, etc.) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #334155' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f59e0b', marginRight: '4px' }}>
-                📑 Pilih Lembar RAB:
-              </span>
-              
-              {rabSheets.map((sheet, sIdx) => {
-                const isActive = sheet.id === activeSheet.id;
-                return (
-                  <button
-                    key={sheet.id}
-                    type="button"
-                    onClick={() => setActiveSheetId(sheet.id)}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      border: isActive ? '2px solid #f59e0b' : '1px solid #475569',
-                      background: isActive ? '#f59e0b' : '#1e293b',
-                      color: isActive ? '#000000' : '#ffffff',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: isActive ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <span>{sheet.noInput || `RAB - ${sIdx + 1}`}</span>
-                    <span style={{ fontSize: '0.72rem', opacity: 0.85 }}>({sheet.namaVendor || 'Vendor'})</span>
-                  </button>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={handleCreateNewSheet}
-                style={{
-                  padding: '5px 10px',
-                  borderRadius: '8px',
-                  fontSize: '0.78rem',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  border: '1px dashed #f59e0b',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  color: '#fbbf24',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-                title="Buat Lembar RAB Baru"
-              >
-                <Plus size={14} /> + Sheet Baru
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  let targetSheets = [...rabSheets];
-                  if (!targetSheets.some(s => s.id === activeSheet.id)) {
-                    targetSheets.push(activeSheet);
-                  }
-                  setRabSheets(targetSheets);
-                  saveCloudStore(STORAGE_KEY_RAB_SHEETS, targetSheets);
-                  showNotification(`Lembar ${activeSheet.noInput || 'RAB'} berhasil disimpan ke Database MySQL & Cloud!`, 'success');
-                }}
-                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', border: 'none', fontWeight: 900, fontSize: '0.78rem', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)' }}
-              >
-                <Save size={14} /> 💾 Simpan ke Database
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handlePrint}
-                style={{ background: '#1e293b', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, fontSize: '0.78rem' }}
-              >
-                <Printer size={14} /> Cetak Sheet
-              </button>
-
-              {rabSheets.length > 0 && (
-                <button
-                  type="button"
-                  className="btn btn-sm"
-                  onClick={() => handleDeleteSheet(activeSheet.id)}
-                  style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', fontWeight: 800, fontSize: '0.78rem' }}
-                  title="Hapus Lembar RAB ini"
-                >
-                  <Trash2 size={14} /> Hapus Sheet
-                </button>
+          {/* 1. KARTU FORM INPUT PEKERJAAN */}
+          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #f59e0b', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <Briefcase size={22} color="#f59e0b" /> {pekerjaanFormData.id ? 'Edit Data Pekerjaan' : 'Form Input Pekerjaan Borongan'}
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#94a3b8', fontWeight: 600 }}>
+                  Isi data pekerjaan borongan di bawah ini, klik simpan, dan data otomatis tersimpan ke database & muncul di tabel rekapitulasi.
+                </p>
+              </div>
+              {pekerjaanFormData.id && (
+                <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
+                  ✏️ Mode Edit: {pekerjaanFormData.noSpk}
+                </span>
               )}
             </div>
-          </div>
 
-          {/* SPREADSHEET CARD */}
-          <div className="glass-card printable-sheet-area printable-rab-sheet" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #f59e0b', maxWidth: '100%' }}>
-            
-            {/* Title */}
-            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', marginBottom: '0.75rem' }}>
-              Input RAB
-            </div>
-
-            {/* SPREADSHEET HEADER FORM (GRID KEY-VALUE WITH UNDERLINES MATCHING EXCEL) */}
-            <div style={{ maxWidth: '640px', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem 1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.35rem', alignItems: 'center' }}>
-                
-                {/* 1. No. SPK (Input Manual) */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. SPK</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+            <form onSubmit={handleSavePekerjaan}>
+              {/* ROW 1: No. SPK, Tanggal, Proyek */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                {/* 1. No. SPK */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    📄 No. SPK <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.noInput || ''}
-                    onChange={(e) => handleUpdateHeaderField('noInput', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #ea580c', color: '#fb923c', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    required
+                    placeholder="Contoh: SPK-001, BOR-2026-01..."
+                    value={pekerjaanFormData.noSpk}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, noSpk: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1.5px solid #ea580c',
+                      borderRadius: '6px',
+                      color: '#fb923c',
+                      fontWeight: 900,
+                      fontSize: '0.9rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
 
                 {/* 2. Tanggal */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Tanggal</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    📅 Tanggal
+                  </label>
                   <input
-                    type="text"
-                    value={activeSheet.tanggal || ''}
-                    onChange={(e) => handleUpdateHeaderField('tanggal', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#ffffff', fontWeight: 800, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
-                  />
-                </div>
-
-                {/* 3. Proyek (Pilihan Dropdown: Ashoka Park / Ashoka View + Ketik Bebas) */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Proyek</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
-                  <input
-                    type="text"
-                    list="proyek-options"
-                    value={activeSheet.proyek || ''}
-                    onChange={(e) => handleUpdateHeaderField('proyek', e.target.value)}
-                    style={{ 
-                      width: '100%', 
-                      background: 'rgba(16, 185, 129, 0.12)', 
-                      border: '1px solid rgba(16, 185, 129, 0.4)', 
-                      borderRadius: '4px',
-                      color: '#34d399', 
-                      fontWeight: 900, 
-                      fontSize: '0.9rem', 
-                      outline: 'none', 
-                      padding: '3px 8px',
-                      cursor: 'pointer'
+                    type="date"
+                    value={pekerjaanFormData.tanggal}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, tanggal: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
                     }}
-                    placeholder="Pilih atau ketik proyek (Ashoka Park / Ashoka View)..."
-                    title="Pilih Ashoka Park atau Ashoka View"
                   />
                 </div>
 
-                {/* 4. Nama Vendor */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Nama Vendor</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                {/* 3. Proyek */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    🏢 Proyek Perumahan
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.namaVendor || ''}
-                    onChange={(e) => handleUpdateHeaderField('namaVendor', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #38bdf8', color: '#38bdf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    list="proyek-input-options"
+                    value={pekerjaanFormData.proyek}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, proyek: e.target.value })}
+                    placeholder="Pilih atau ketik proyek..."
+                    style={{
+                      width: '100%',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                      borderRadius: '6px',
+                      color: '#34d399',
+                      fontWeight: 900,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
+                  <datalist id="proyek-input-options">
+                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park">Ashoka Park</option>
+                  </datalist>
+                </div>
+              </div>
+
+              {/* ROW 2: Nama Vendor & Nama Pekerjaan */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                {/* 4. Nama Vendor */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    👤 Nama Vendor / Mandor
+                  </label>
+                  <input
+                    type="text"
+                    list="vendor-input-options"
+                    placeholder="Contoh: CV. Berkah Konstruksi, Pak Supri..."
+                    value={pekerjaanFormData.namaVendor}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, namaVendor: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #38bdf8',
+                      borderRadius: '6px',
+                      color: '#38bdf8',
+                      fontWeight: 900,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
+                  />
+                  <datalist id="vendor-input-options">
+                    {databaseVendorRows.map(v => (
+                      <option key={v.id || v.nama} value={v.nama}>{v.nama} ({v.status || 'Vendor'})</option>
+                    ))}
+                  </datalist>
                 </div>
 
                 {/* 5. Pekerjaan */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Pekerjaan</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    🔨 Nama Pekerjaan <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.pekerjaan || ''}
-                    onChange={(e) => handleUpdateHeaderField('pekerjaan', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #f59e0b', color: '#fbbf24', fontWeight: 800, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    required
+                    placeholder="Contoh: Pekerjaan Pondasi & Dinding, Pemasangan Atap Baja Ringan..."
+                    value={pekerjaanFormData.pekerjaan}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, pekerjaan: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
+              </div>
 
+              {/* ROW 3: Blok, No Unit, Fasum */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                 {/* 6. Blok */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Blok</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    🏷️ Blok
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.blok || ''}
-                    onChange={(e) => handleUpdateHeaderField('blok', e.target.value.toUpperCase())}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #6366f1', color: '#818cf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    placeholder="Misal: A, B, C..."
+                    value={pekerjaanFormData.blok}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, blok: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
 
-                {/* 7. No. unit */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>No. unit</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                {/* 7. No Unit */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    🔢 No. Unit
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.noUnit || ''}
-                    onChange={(e) => handleUpdateHeaderField('noUnit', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #6366f1', color: '#818cf8', fontWeight: 900, fontSize: '0.9rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    placeholder="Misal: 01, 02, 12..."
+                    value={pekerjaanFormData.noUnit}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, noUnit: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
 
                 {/* 8. Fasum */}
-                <div style={{ fontWeight: 900, fontSize: '0.88rem', color: '#f8fafc' }}>Fasum</div>
-                <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                <div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                    🏛️ Fasum (Fasilitas Umum)
+                  </label>
                   <input
                     type="text"
-                    value={activeSheet.fasum || ''}
-                    onChange={(e) => handleUpdateHeaderField('fasum', e.target.value)}
-                    style={{ width: '100%', background: 'transparent', border: 'none', borderBottom: '1.5px solid #475569', color: '#cbd5e1', fontWeight: 700, fontSize: '0.88rem', outline: 'none', padding: '2px 4px' }}
-                    placeholder=""
+                    placeholder="Misal: Jalan Utama, Taman, Saluran..."
+                    value={pekerjaanFormData.fasum}
+                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, fasum: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
                   />
+                </div>
+              </div>
+
+              {/* ROW 4: Nilai Pekerjaan & Tombol Aksi */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-end', marginTop: '0.5rem' }}>
+                {/* 9. Nilai Pekerjaan */}
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: 900, color: '#10b981', fontSize: '0.9rem' }}>
+                    💰 Nilai Pekerjaan (Rp) <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: '#10b981', fontSize: '0.92rem' }}>
+                      Rp
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="0"
+                      value={pekerjaanFormData.nilaiPekerjaan ? formatNumberInput(pekerjaanFormData.nilaiPekerjaan) : ''}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        setPekerjaanFormData({ ...pekerjaanFormData, nilaiPekerjaan: raw ? Number(raw) : '' });
+                      }}
+                      style={{
+                        width: '100%',
+                        background: '#0f172a',
+                        border: '2px solid #10b981',
+                        borderRadius: '6px',
+                        color: '#34d399',
+                        fontWeight: 900,
+                        fontSize: '1.05rem',
+                        padding: '10px 12px 10px 42px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  {pekerjaanFormData.nilaiPekerjaan > 0 && (
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>
+                      Terbilang: {angkaTerbilang(Number(pekerjaanFormData.nilaiPekerjaan))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tombol Simpan & Batal */}
+                <div style={{ display: 'flex', gap: '0.75rem', paddingBottom: '2px' }}>
+                  <button
+                    type="submit"
+                    style={{
+                      flex: 1,
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      color: '#000000',
+                      border: 'none',
+                      fontWeight: 900,
+                      fontSize: '0.95rem',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <Save size={18} /> {pekerjaanFormData.id ? 'Perbarui Data' : 'Simpan Data Pekerjaan'}
+                  </button>
+
+                  {pekerjaanFormData.id && (
+                    <button
+                      type="button"
+                      onClick={handleResetPekerjaanForm}
+                      style={{
+                        background: '#334155',
+                        color: '#f8fafc',
+                        border: '1px solid #475569',
+                        fontWeight: 800,
+                        fontSize: '0.88rem',
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}
+                    >
+                      <RotateCcw size={16} /> Batal Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* 2. TABEL REKAPITULASI PEKERJAAN BORONGAN */}
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+            
+            {/* Header & Filter Bar Tabel */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem' }}>Tabel</span>
+                  Daftar Pekerjaan Borongan & Rekapitulasi
+                </h4>
+                <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Menampilkan data pekerjaan borongan yang telah diinput beserta progress opname saat ini.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {/* Filter Proyek */}
+                <select
+                  value={pekerjaanProjectFilter}
+                  onChange={(e) => setPekerjaanProjectFilter(e.target.value)}
+                  style={{
+                    background: '#0f172a',
+                    border: '1.5px solid #475569',
+                    borderRadius: '6px',
+                    color: '#f8fafc',
+                    padding: '6px 12px',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    outline: 'none'
+                  }}
+                >
+                  <option value="ALL">Semua Proyek</option>
+                  <option value="Ashoka View">Ashoka View</option>
+                  <option value="Ashoka Park">Ashoka Park</option>
+                </select>
+
+                {/* Search Bar */}
+                <div style={{ position: 'relative', minWidth: '220px' }}>
+                  <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder="Cari SPK / Vendor / Pekerjaan..."
+                    value={pekerjaanTableSearch}
+                    onChange={(e) => setPekerjaanTableSearch(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1.5px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      padding: '6px 10px 6px 30px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      outline: 'none'
+                    }}
+                  />
+                  {pekerjaanTableSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setPekerjaanTableSearch('')}
+                      style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* SPREADSHEET TABLE GRID */}
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
-              <table 
-                className="custom-table" 
-                style={{ 
-                  borderCollapse: 'collapse', 
-                  width: '100%', 
-                  minWidth: '1050px',
-                  textAlign: 'left'
-                }}
-              >
-                <thead>
-                  {/* HEADER ROW (PEACH #f6b26b WITH DEEP BLACK TEXT) */}
-                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                    <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>
-                      No.
-                    </th>
-                    <th style={{ minWidth: '220px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Item Pekerjaan
-                    </th>
-                    <th style={{ minWidth: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Spesifikasi
-                    </th>
-                    <th style={{ width: '80px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Vol
-                    </th>
-                    <th style={{ width: '70px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 6px' }}>
-                      Sat
-                    </th>
-                    <th style={{ width: '135px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Harga Satuan
-                    </th>
-                    <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Jumlah
-                    </th>
-                    <th style={{ width: '80px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Bobot
-                    </th>
-                    <th style={{ width: '85px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Progress
-                    </th>
-                    <th style={{ width: '105px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>
-                      Bobot Progress
-                    </th>
-                    <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>
-                      
-                    </th>
-                  </tr>
-                </thead>
+            {/* Table Container */}
+            {filteredPekerjaanList.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', background: '#0f172a', borderRadius: '8px', border: '1px dashed #334155' }}>
+                <Briefcase size={40} color="#64748b" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
+                <h5 style={{ margin: 0, fontWeight: 800, color: '#cbd5e1' }}>Belum ada data pekerjaan yang tersimpan</h5>
+                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                  Silakan isi form di atas dan klik tombol "Simpan Data Pekerjaan".
+                </p>
+              </div>
+            ) : (
+              <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: '#f6b26b', color: '#000000' }}>
+                      <th style={{ width: '40px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>No.</th>
+                      <th style={{ width: '110px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>No. SPK</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Tanggal</th>
+                      <th style={{ width: '110px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Proyek</th>
+                      <th style={{ width: '130px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nama Vendor</th>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>Blok</th>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>No.</th>
+                      <th style={{ width: '100px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Fasum</th>
+                      <th style={{ border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Pekerjaan</th>
+                      <th style={{ width: '125px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nilai Pekerjaan (Rp)</th>
+                      <th style={{ width: '75px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Progress</th>
+                      <th style={{ width: '110px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Retensi 5%</th>
+                      <th style={{ width: '125px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nilai Progress (Rp)</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPekerjaanList.map((item, idx) => {
+                      const nilaiPekerjaan = item.calc.totalHargaRab || 0;
+                      const progress = item.calc.progresPersen || 0;
+                      const retensi = nilaiPekerjaan * 0.05;
+                      const nilaiProgress = (nilaiPekerjaan * progress) / 100;
 
-                <tbody>
-                  {activeSheetCalc.items.map((row, idx) => (
-                    <tr 
-                      key={row.id || idx}
-                      style={{ 
-                        backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
-                        color: '#f8fafc'
-                      }}
-                    >
-                      {/* No. */}
-                      <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
-                        {idx + 1}
-                      </td>
-
-                      {/* Item Pekerjaan */}
-                      <td style={{ border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={row.itemPekerjaan || ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'itemPekerjaan', e.target.value)}
-                          placeholder="Nama item pekerjaan..."
-                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#ffffff', fontWeight: 800, fontSize: '0.86rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Spesifikasi */}
-                      <td style={{ border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={row.spesifikasi || ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'spesifikasi', e.target.value)}
-                          placeholder="-"
-                          style={{ width: '100%', background: 'transparent', border: 'none', color: '#cbd5e1', fontSize: '0.83rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Vol */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={row.vol !== undefined ? row.vol : ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'vol', e.target.value)}
-                          placeholder=""
-                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#38bdf8', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Sat (Pilihan Dropdown Satuan Standar + Bisa Ketik Bebas) */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 4px', minWidth: '75px' }}>
-                        <input
-                          type="text"
-                          list="satuan-options"
-                          value={row.sat || ''}
-                          onChange={(e) => handleUpdateCell(row.id, 'sat', e.target.value)}
-                          placeholder="m2 / ls..."
-                          style={{ 
-                            width: '100%', 
-                            textAlign: 'center', 
-                            background: 'rgba(15, 23, 42, 0.6)', 
-                            border: '1px solid rgba(245, 158, 11, 0.4)', 
-                            borderRadius: '4px',
-                            color: '#38bdf8', 
-                            fontWeight: 900, 
-                            fontSize: '0.82rem', 
-                            padding: '2px 4px',
-                            outline: 'none',
-                            cursor: 'pointer'
+                      return (
+                        <tr
+                          key={item.id}
+                          style={{
+                            background: idx % 2 === 0 ? '#1e293b' : '#0f172a',
+                            borderBottom: '1px solid #334155'
                           }}
-                          title="Klik untuk memilih satuan atau ketik satuan kustom"
-                        />
-                      </td>
-
-                      {/* Harga Satuan (Bentuk Currency / Format Titik Ribuan Tanpa Batas Digit) */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={
-                            row.hargaSatuan !== undefined && row.hargaSatuan !== '' && row.hargaSatuan !== 0
-                              ? formatRupiah(parseNum(row.hargaSatuan))
-                              : (row.hargaSatuan === 0 ? '0' : (row.hargaSatuan || ''))
-                          }
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            handleUpdateCell(row.id, 'hargaSatuan', raw === '' ? '' : Number(raw));
-                          }}
-                          placeholder="0"
-                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#f8fafc', fontWeight: 800, fontSize: '0.88rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Jumlah (Bentuk Currency / Format Titik Ribuan Tanpa Batas Digit) */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={
-                            row.jumlah !== undefined && row.jumlah !== '' && row.jumlah !== 0
-                              ? formatRupiah(parseNum(row.jumlah))
-                              : (row.jumlah === 0 ? '0' : (row.jumlah || ''))
-                          }
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            handleUpdateCell(row.id, 'jumlah', raw === '' ? '' : Number(raw));
-                          }}
-                          placeholder="0"
-                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#34d399', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Bobot (Tepat 2 Digit di Belakang Koma Tanpa Simbol %) */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <input
-                          type="text"
-                          value={
-                            row.bobotRatio !== undefined && row.bobotRatio !== ''
-                              ? (typeof row.bobotRatio === 'number' ? formatDecimal(row.bobotRatio, 2) : row.bobotRatio)
-                              : (row.bobot !== undefined && row.bobot !== '' ? (typeof row.bobot === 'number' ? formatDecimal(row.bobot, 2) : row.bobot) : '')
-                          }
-                          onChange={(e) => {
-                            handleUpdateCell(row.id, 'bobotRatio', e.target.value);
-                            handleUpdateCell(row.id, 'bobot', e.target.value);
-                          }}
-                          placeholder=""
-                          style={{ width: '100%', textAlign: 'right', background: 'transparent', border: 'none', color: '#fbbf24', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                        />
-                      </td>
-
-                      {/* Progress % (Input Manual) */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
-                          <input
-                            type="text"
-                            value={row.progress !== undefined ? row.progress : ''}
-                            onChange={(e) => handleUpdateCell(row.id, 'progress', e.target.value)}
-                            placeholder=""
-                            style={{ width: '48px', textAlign: 'right', background: 'transparent', border: 'none', color: '#60a5fa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                          />
-                          <span style={{ color: '#60a5fa', fontWeight: 800, fontSize: '0.82rem' }}>%</span>
-                        </div>
-                      </td>
-
-                      {/* Bobot Progress (Auto-Kalkulasi Bobot x Progress) */}
-                      <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '4px 6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
-                          <input
-                            type="text"
-                            value={
-                              row.bobotProgress !== undefined && row.bobotProgress !== '' && row.bobotProgress !== 0
-                                ? formatDecimal(row.bobotProgress, 2)
-                                : (row.bobotProgress === 0 ? '0' : (row.bobotProgress || ''))
-                            }
-                            onChange={(e) => handleUpdateCell(row.id, 'bobotProgress', e.target.value)}
-                            placeholder=""
-                            style={{ width: '56px', textAlign: 'right', background: 'transparent', border: 'none', color: '#a78bfa', fontWeight: 900, fontSize: '0.88rem', outline: 'none' }}
-                          />
-                          <span style={{ color: '#a78bfa', fontWeight: 800, fontSize: '0.82rem' }}>%</span>
-                        </div>
-                      </td>
-
-                      {/* Aksi Hapus Baris */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '4px 2px' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteRow(row.id)}
-                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
-                          title="Hapus Baris"
                         >
-                          <Trash2 size={13} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '8px 4px', color: '#94a3b8' }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#fb923c', padding: '8px' }}>
+                            {item.noSpk || item.sheetNumber || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '8px' }}>
+                            {item.tanggal ? item.tanggal.split('-').reverse().join('/') : '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#34d399', padding: '8px' }}>
+                            {item.proyek || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#38bdf8', padding: '8px' }}>
+                            {item.vendor || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, color: '#f8fafc', padding: '8px 4px' }}>
+                            {item.blok || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, color: '#f8fafc', padding: '8px 4px' }}>
+                            {item.nomor || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', color: '#cbd5e1', padding: '8px' }}>
+                            {item.fasum || '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#ffffff', padding: '8px' }}>
+                            {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', fontWeight: 900, color: '#10b981', padding: '8px' }}>
+                            {formatRupiahDesimal(nilaiPekerjaan)}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 900, padding: '8px' }}>
+                            <span
+                              style={{
+                                background: progress >= 100 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                color: progress >= 100 ? '#34d399' : '#60a5fa',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                border: progress >= 100 ? '1px solid #10b981' : '1px solid #3b82f6'
+                              }}
+                            >
+                              {formatDecimal(progress, 1)}%
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', color: '#fbbf24', fontWeight: 800, padding: '8px' }}>
+                            {formatRupiahDesimal(retensi)}
+                          </td>
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', fontWeight: 900, color: '#60a5fa', padding: '8px' }}>
+                            {formatRupiahDesimal(nilaiProgress)}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleEditPekerjaan(item)}
+                                title="Edit Data Pekerjaan"
+                                style={{
+                                  background: '#2563eb',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '4px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '2px'
+                                }}
+                              >
+                                <Edit3 size={12} /> Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveSheetId(item.id);
+                                  setSubTabBorongan('hasil_opname');
+                                }}
+                                title="Lihat/Input Opname"
+                                style={{
+                                  background: '#059669',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '4px 7px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '2px'
+                                }}
+                              >
+                                <ClipboardCheck size={12} /> Opname
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSheet(item.id)}
+                                title="Hapus Pekerjaan"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.2)',
+                                  color: '#f87171',
+                                  border: '1px solid #ef4444',
+                                  padding: '4px 6px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
 
-                  {/* EMPTY ROWS PLACEHOLDER IF LESS THAN 6 ITEMS */}
-                  {activeSheetCalc.items.length < 6 && Array.from({ length: 6 - activeSheetCalc.items.length }).map((_, rIdx) => (
-                    <tr key={`empty-${rIdx}`} style={{ height: '32px', backgroundColor: (activeSheetCalc.items.length + rIdx) % 2 === 0 ? '#1e293b' : '#0f172a' }}>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                      <td style={{ border: '1px solid #334155' }}></td>
-                    </tr>
-                  ))}
+                    {/* ROW TOTAL SUMMARY */}
+                    {filteredPekerjaanList.length > 0 && (() => {
+                      const totalNilai = filteredPekerjaanList.reduce((acc, it) => acc + (it.calc.totalHargaRab || 0), 0);
+                      const totalRetensi = totalNilai * 0.05;
+                      const totalProgressNilai = filteredPekerjaanList.reduce((acc, it) => {
+                        const val = it.calc.totalHargaRab || 0;
+                        const prg = it.calc.progresPersen || 0;
+                        return acc + ((val * prg) / 100);
+                      }, 0);
 
-                  {/* SUMMARY ROW TOTAL */}
-                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      Total
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatRupiahDesimal(activeSheetCalc.totalHargaRab)}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {activeSheetCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
-                      -
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                      {formatDecimal(activeSheetCalc.progresPersen)}%
-                    </td>
-                    <td style={{ border: '1.5px solid #78350f' }}></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* BUTTON TAMBAH BARIS */}
-            <div style={{ marginBottom: '0.85rem' }}>
-              <button
-                type="button"
-                onClick={handleAddRow}
-                style={{
-                  background: '#f59e0b',
-                  color: '#000000',
-                  border: 'none',
-                  fontWeight: 900,
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  fontSize: '0.82rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
-                }}
-              >
-                <Plus size={16} /> + Tambah Baris Pekerjaan
-              </button>
-            </div>
-
-            {/* TERBILANG BOX */}
-            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '0.9rem' }}>Terbilang :</span>
-              <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                {angkaTerbilang(activeSheetCalc.totalHargaRab)}
-              </span>
-            </div>
-
-            {/* DATALIST PILIHAN PROYEK STANDAR */}
-            <datalist id="proyek-options">
-              <option value="Ashoka Park">Ashoka Park</option>
-              <option value="Ashoka View">Ashoka View</option>
-            </datalist>
-
-            {/* DATALIST PILIHAN SATUAN STANDAR PROYEK */}
-            <datalist id="satuan-options">
-              <option value="m2">m2 (Meter Persegi)</option>
-              <option value="m3">m3 (Meter Kubik)</option>
-              <option value="m1">m1 (Meter Lari / Panjang)</option>
-              <option value="ls">ls (Lumsum)</option>
-              <option value="titik">titik (Titik Lampu/Listrik)</option>
-              <option value="unit">unit (Unit Rumah/Bangunan)</option>
-              <option value="bh">bh (Buah / Pcs)</option>
-              <option value="kg">kg (Kilogram)</option>
-              <option value="zak">zak (Zak Semen)</option>
-              <option value="btg">btg (Batang)</option>
-              <option value="lbr">lbr (Lembar Triplek/Baja)</option>
-              <option value="roll">roll (Roll Kabel/Pipa)</option>
-              <option value="set">set (Set Kunci/Engsel)</option>
-              <option value="hari">hari (Hari Kerja)</option>
-              <option value="rit">rit (Rit Truk/Pasir)</option>
-            </datalist>
+                      return (
+                        <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
+                          <td colSpan={9} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                            TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)
+                          </td>
+                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                            {formatRupiahDesimal(totalNilai)}
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                            -
+                          </td>
+                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                            {formatRupiahDesimal(totalRetensi)}
+                          </td>
+                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                            {formatRupiahDesimal(totalProgressNilai)}
+                          </td>
+                          <td style={{ border: '1.5px solid #78350f' }}></td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
-
-      {/* ========================================================================= */}
       {/* VIEW 3: SUB-MODUL HASIL OPNAME (PERSIS FOTO 3 & EXCEL)                   */}
       {/* ========================================================================= */}
       {mainCategory === 'borongan' && subTabBorongan === 'hasil_opname' && (
