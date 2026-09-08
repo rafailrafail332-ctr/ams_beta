@@ -529,7 +529,14 @@ export const TeknikModule = () => {
         if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
       });
       fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
-        if (val && Array.isArray(val)) setRabSheets(val);
+        if (val && Array.isArray(val)) {
+          setRabSheets(val);
+          if (val.length > 0) {
+            setActiveSheetId(prev => (val.some(s => s.id === prev) ? prev : val[0].id));
+          } else {
+            setActiveSheetId('');
+          }
+        }
       });
     };
 
@@ -887,7 +894,7 @@ export const TeknikModule = () => {
       const saved = localStorage.getItem(STORAGE_KEY_RAB_SHEETS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
     return defaultRabSheets;
@@ -1241,9 +1248,11 @@ export const TeknikModule = () => {
 
   // DELETE SHEET (Bisa dihapus sampai kosong total)
   const handleDeleteSheet = (sheetId) => {
-    const target = rabSheets.find(s => s.id === sheetId);
-    if (window.confirm(`Hapus seluruh lembar "${target?.noInput || 'RAB'}" (${target?.pekerjaan || 'Tanpa Judul'})?`)) {
-      const remaining = rabSheets.filter(s => s.id !== sheetId);
+    if (!sheetId) return;
+    const target = rabSheets.find(s => String(s.id).trim() === String(sheetId).trim());
+    const sheetTitle = target?.noInput || 'RAB';
+    if (window.confirm(`Hapus seluruh lembar "${sheetTitle}" (${target?.pekerjaan || 'Tanpa Judul'}) dari Database?`)) {
+      const remaining = rabSheets.filter(s => String(s.id).trim() !== String(sheetId).trim());
       setRabSheets(remaining);
       if (remaining.length > 0) {
         setActiveSheetId(remaining[0].id);
@@ -1254,7 +1263,7 @@ export const TeknikModule = () => {
         localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(remaining));
       } catch (e) {}
       saveCloudStore(STORAGE_KEY_RAB_SHEETS, remaining);
-      showNotification(`Lembar "${target?.noInput || 'RAB'}" berhasil dihapus.`, 'warning');
+      showNotification(`Lembar "${sheetTitle}" berhasil dihapus dari Database!`, 'warning');
     }
   };
 
@@ -3603,76 +3612,106 @@ export const TeknikModule = () => {
                               })()}
                             </td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                {/* TOMBOL OPNAME (MODAL UBAH PROGRES) */}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenOpnameModal(sheet);
-                                  }}
-                                  style={{
-                                    background: '#10b981',
-                                    color: '#ffffff',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    padding: '4px 7px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.72rem',
-                                    fontWeight: 900,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '3px',
-                                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
-                                  }}
-                                  title="Input / Update Opname (Ubah Progres)"
-                                >
-                                  <ClipboardCheck size={12} /> Opname
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                  {/* TOMBOL OPNAME (MODAL UBAH PROGRES) */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenOpnameModal(sheet);
+                                    }}
+                                    style={{
+                                      background: '#10b981',
+                                      color: '#ffffff',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      padding: '4px 7px',
+                                      cursor: 'pointer',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 900,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+                                    }}
+                                    title="Input / Update Opname (Ubah Progres)"
+                                  >
+                                    <ClipboardCheck size={12} /> Opname
+                                  </button>
 
-                                {/* TOMBOL HAPUS TANGGAL OPNAME INI */}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (window.confirm(`Hapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
-                                      const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
-                                      const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
-                                      const updatedSheets = rabSheets.map(s => {
-                                        if (s.id === sheet.id) {
-                                          return {
-                                            ...s,
-                                            tanggalOpname: latestDate,
-                                            opnameHistory: newHistory,
-                                            items: newHistory.length === 0 ? (s.items || []).map(it => ({ ...it, progress: 0 })) : s.items
-                                          };
+                                  {/* TOMBOL HAPUS SHEET SELURUHNYA */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteSheet(sheet.id);
+                                    }}
+                                    style={{
+                                      background: '#dc2626',
+                                      color: '#ffffff',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      padding: '4px 7px',
+                                      cursor: 'pointer',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 900,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)'
+                                    }}
+                                    title={`Hapus lembar ${sheet.noInput || 'RAB'} dari database`}
+                                  >
+                                    <Trash2 size={12} /> Hapus Sheet
+                                  </button>
+
+                                  {/* TOMBOL HAPUS TANGGAL OPNAME SPESIFIK (JIKA ADA RIWAYAT LEBIH DARI 1) */}
+                                  {hist.tanggal && hist.tanggal !== '-' && (sheet.opnameHistory || []).length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (window.confirm(`Hapus data opname tanggal "${hist.tanggal}" untuk ${sheet.noInput}?`)) {
+                                          const newHistory = (sheet.opnameHistory || []).filter((_, idxH) => idxH !== hIdx);
+                                          const latestDate = newHistory.length > 0 ? newHistory[0].tanggal : '';
+                                          const updatedSheets = rabSheets.map(s => {
+                                            if (s.id === sheet.id) {
+                                              return {
+                                                ...s,
+                                                tanggalOpname: latestDate,
+                                                opnameHistory: newHistory,
+                                                items: newHistory.length === 0 ? (s.items || []).map(it => ({ ...it, progress: 0 })) : s.items
+                                              };
+                                            }
+                                            return s;
+                                          });
+                                          setRabSheets(updatedSheets);
+                                          try {
+                                            localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
+                                          } catch(err) {}
+                                          saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
+                                          showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
                                         }
-                                        return s;
-                                      });
-                                      setRabSheets(updatedSheets);
-                                      try {
-                                        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                                      } catch(err) {}
-                                      showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
-                                    }
-                                  }}
-                                  style={{
-                                    background: '#ef4444',
-                                    color: '#ffffff',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    padding: '4px 6px',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
-                                  }}
-                                  title="Hapus riwayat opname tanggal ini"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
+                                      }}
+                                      style={{
+                                        background: '#475569',
+                                        color: '#cbd5e1',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        padding: '4px 5px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 700
+                                      }}
+                                      title={`Hapus hanya riwayat opname tanggal ${hist.tanggal}`}
+                                    >
+                                      ✕ Tgl
+                                    </button>
+                                  )}
+                                </div>
                             </td>
                           </tr>
                         );
@@ -4003,6 +4042,7 @@ export const TeknikModule = () => {
                     try {
                       localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
                     } catch(e) {}
+                    saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
                     showNotification(`Seluruh data hasil opname ${activeSheet.noInput} berhasil dihapus/direset!`, 'warning');
                   }
                 }}
@@ -4021,7 +4061,30 @@ export const TeknikModule = () => {
                   boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
                 }}
               >
-                <Trash2 size={15} /> Hapus Data Opname
+                <Trash2 size={15} /> Reset Data Opname
+              </button>
+
+              {/* HAPUS SHEET SELURUHNYA */}
+              <button
+                type="button"
+                onClick={() => handleDeleteSheet(activeSheet.id)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: '1.5px solid #ef4444',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontWeight: 900,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(220, 38, 38, 0.4)'
+                }}
+                title="Hapus seluruh lembar sheet ini dari Database"
+              >
+                <Trash2 size={15} /> Hapus Lembar Sheet Ini
               </button>
 
               {/* SIMPAN ke Rekapitulasi */}
