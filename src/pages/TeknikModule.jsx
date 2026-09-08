@@ -1421,6 +1421,126 @@ export const TeknikModule = () => {
   };
 
   // =========================================================================
+  // HISTORI PEMBAYARAN VENDOR PEKERJAAN BORONGAN
+  // =========================================================================
+  const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
+  const [paymentHistoryTargetSheet, setPaymentHistoryTargetSheet] = useState(null);
+  const [newPaymentFormData, setNewPaymentFormData] = useState({
+    tanggal: new Date().toISOString().split('T')[0],
+    keterangan: '',
+    nominal: '',
+    metode: 'Transfer BCA'
+  });
+
+  const getSheetPaymentHistory = useCallback((sheet) => {
+    if (!sheet) return [];
+    if (Array.isArray(sheet.paymentHistory) && sheet.paymentHistory.length > 0) {
+      return sheet.paymentHistory;
+    }
+    const bayarAwal = Number(sheet.pembayaranSebelumnya) || 0;
+    if (bayarAwal > 0) {
+      return [{
+        id: `PAY-INIT-${sheet.id}`,
+        tanggal: sheet.tanggal || new Date().toISOString().split('T')[0],
+        keterangan: 'Pembayaran Awal / Sebelumnya',
+        nominal: bayarAwal,
+        metode: 'Transfer Bank',
+        timestamp: '-'
+      }];
+    }
+    return [];
+  }, []);
+
+  const getSheetTotalBayar = useCallback((sheet) => {
+    const hist = getSheetPaymentHistory(sheet);
+    return hist.reduce((sum, p) => sum + (Number(p.nominal) || 0), 0);
+  }, [getSheetPaymentHistory]);
+
+  const handleOpenPaymentHistory = (sheet) => {
+    setPaymentHistoryTargetSheet(sheet);
+    setNewPaymentFormData({
+      tanggal: new Date().toISOString().split('T')[0],
+      keterangan: '',
+      nominal: '',
+      metode: 'Transfer BCA'
+    });
+    setIsPaymentHistoryModalOpen(true);
+  };
+
+  const handleAddPayment = (e) => {
+    e.preventDefault();
+    if (!paymentHistoryTargetSheet) return;
+    const nominalNum = Number(newPaymentFormData.nominal) || 0;
+    if (nominalNum <= 0) {
+      alert('Nominal pembayaran harus lebih dari 0!');
+      return;
+    }
+
+    const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
+    const newEntry = {
+      id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      tanggal: newPaymentFormData.tanggal || new Date().toISOString().split('T')[0],
+      keterangan: (newPaymentFormData.keterangan || '').trim() || `Pembayaran Ke-${currentHistory.length + 1}`,
+      nominal: nominalNum,
+      metode: newPaymentFormData.metode || 'Transfer BCA',
+      timestamp: new Date().toLocaleString('id-ID')
+    };
+
+    const updatedHistory = [...currentHistory, newEntry];
+    const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
+
+    const updatedSheet = {
+      ...paymentHistoryTargetSheet,
+      paymentHistory: updatedHistory,
+      pembayaranSebelumnya: newTotalBayar
+    };
+
+    const nextSheets = rabSheets.map(s => s.id === paymentHistoryTargetSheet.id ? updatedSheet : s);
+    setRabSheets(nextSheets);
+    setPaymentHistoryTargetSheet(updatedSheet);
+
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
+    } catch (err) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
+
+    setNewPaymentFormData({
+      tanggal: new Date().toISOString().split('T')[0],
+      keterangan: '',
+      nominal: '',
+      metode: 'Transfer BCA'
+    });
+
+    showNotification(`Pembayaran Rp ${formatRupiah(nominalNum)} berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`, 'success');
+  };
+
+  const handleDeletePayment = (paymentId) => {
+    if (!paymentHistoryTargetSheet) return;
+    if (!window.confirm('Yakin ingin menghapus catatan histori pembayaran ini?')) return;
+
+    const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
+    const updatedHistory = currentHistory.filter(p => p.id !== paymentId);
+    const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
+
+    const updatedSheet = {
+      ...paymentHistoryTargetSheet,
+      paymentHistory: updatedHistory,
+      pembayaranSebelumnya: newTotalBayar
+    };
+
+    const nextSheets = rabSheets.map(s => s.id === paymentHistoryTargetSheet.id ? updatedSheet : s);
+    setRabSheets(nextSheets);
+    setPaymentHistoryTargetSheet(updatedSheet);
+
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
+    } catch (err) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
+
+    showNotification('Catatan histori pembayaran berhasil dihapus.', 'info');
+  };
+
+  // =========================================================================
   const [hasilOpnameSearch, setHasilOpnameSearch] = useState('');
   const [hasilOpnameDateSearch, setHasilOpnameDateSearch] = useState('');
   const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
@@ -3356,31 +3476,27 @@ export const TeknikModule = () => {
               </div>
             ) : (
               <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px', fontSize: '0.82rem' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                      <th style={{ width: '40px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>No.</th>
-                      <th style={{ width: '110px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>No. SPK</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Tanggal</th>
-                      <th style={{ width: '110px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Proyek</th>
-                      <th style={{ width: '130px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nama Vendor</th>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>Blok</th>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px 4px' }}>No.</th>
-                      <th style={{ width: '100px', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Fasum</th>
-                      <th style={{ border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Pekerjaan</th>
-                      <th style={{ width: '125px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nilai Pekerjaan (Rp)</th>
-                      <th style={{ width: '75px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Progress</th>
-                      <th style={{ width: '110px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Retensi 5%</th>
-                      <th style={{ width: '125px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Nilai Progress (Rp)</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '8px' }}>Aksi</th>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 4px' }}>No.</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
+                      <th style={{ width: '160px', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
+                      <th style={{ width: '160px', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
+                      <th style={{ border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Pekerjaan</th>
+                      <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Jumlah (Rp)</th>
+                      <th style={{ width: '175px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Pembayaran Sblmnya</th>
+                      <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
+                      <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredPekerjaanList.map((item, idx) => {
-                      const nilaiPekerjaan = item.calc.totalHargaRab || 0;
-                      const progress = item.calc.progresPersen || 0;
-                      const retensi = nilaiPekerjaan * 0.05;
-                      const nilaiProgress = (nilaiPekerjaan * progress) / 100;
+                      const jumlah = item.calc.totalHargaRab || 0;
+                      const paymentHistory = getSheetPaymentHistory(item);
+                      const totalBayar = getSheetTotalBayar(item);
+                      const sisaPembayaran = Math.max(0, jumlah - totalBayar);
+                      const isLunas = sisaPembayaran === 0 && jumlah > 0;
 
                       return (
                         <tr
@@ -3390,57 +3506,110 @@ export const TeknikModule = () => {
                             borderBottom: '1px solid #334155'
                           }}
                         >
+                          {/* 1. No */}
                           <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '8px 4px', color: '#94a3b8' }}>
                             {idx + 1}
                           </td>
-                          <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#fb923c', padding: '8px' }}>
-                            {item.noSpk || item.sheetNumber || '-'}
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '8px' }}>
+
+                          {/* 2. Tanggal */}
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '8px 6px' }}>
                             {item.tanggal ? item.tanggal.split('-').reverse().join('/') : '-'}
                           </td>
-                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#34d399', padding: '8px' }}>
-                            {item.proyek || '-'}
+
+                          {/* 3. Nama Vendor */}
+                          <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#38bdf8', padding: '8px' }}>
+                            {item.namaVendor || item.vendor || '-'}
                           </td>
-                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#38bdf8', padding: '8px' }}>
-                            {item.vendor || '-'}
+
+                          {/* 4. Proyek */}
+                          <td style={{ border: '1px solid #334155', padding: '8px' }}>
+                            <div style={{ fontWeight: 900, color: '#34d399' }}>{item.proyek || '-'}</div>
+                            {(item.blok || item.nomor || item.fasum) && (
+                              <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                                {item.blok ? `Blok ${item.blok}` : ''} {item.nomor ? `No. ${item.nomor}` : ''} {item.fasum && item.fasum !== '-' ? `• ${item.fasum}` : ''}
+                              </div>
+                            )}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, color: '#f8fafc', padding: '8px 4px' }}>
-                            {item.blok || '-'}
+
+                          {/* 5. Pekerjaan */}
+                          <td style={{ border: '1px solid #334155', padding: '8px' }}>
+                            <div style={{ fontWeight: 800, color: '#ffffff' }}>
+                              {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: '#fb923c', fontWeight: 800, marginTop: '2px' }}>
+                              SPK: {item.noSpk || item.sheetNumber || '-'}
+                            </div>
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, color: '#f8fafc', padding: '8px 4px' }}>
-                            {item.nomor || '-'}
-                          </td>
-                          <td style={{ border: '1px solid #334155', color: '#cbd5e1', padding: '8px' }}>
-                            {item.fasum || '-'}
-                          </td>
-                          <td style={{ border: '1px solid #334155', fontWeight: 800, color: '#ffffff', padding: '8px' }}>
-                            {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
-                          </td>
+
+                          {/* 6. Jumlah */}
                           <td style={{ textAlign: 'right', border: '1px solid #334155', fontWeight: 900, color: '#10b981', padding: '8px' }}>
-                            {formatRupiahDesimal(nilaiPekerjaan)}
+                            Rp {formatRupiahDesimal(jumlah)}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 900, padding: '8px' }}>
-                            <span
+
+                          {/* 7. Pembayaran Sebelumnya */}
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px' }}>
+                            <div style={{ fontWeight: 900, color: '#fbbf24', fontSize: '0.86rem' }}>
+                              Rp {formatRupiahDesimal(totalBayar)}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenPaymentHistory(item)}
                               style={{
-                                background: progress >= 100 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                color: progress >= 100 ? '#34d399' : '#60a5fa',
-                                padding: '3px 8px',
+                                background: 'rgba(245, 158, 11, 0.15)',
+                                color: '#f59e0b',
+                                border: '1px solid #f59e0b',
                                 borderRadius: '4px',
-                                border: progress >= 100 ? '1px solid #10b981' : '1px solid #3b82f6'
+                                padding: '2px 6px',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                marginTop: '3px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
                               }}
+                              title="Klik untuk melihat / menambah histori pembayaran"
                             >
-                              {formatDecimal(progress, 1)}%
-                            </span>
+                              <CreditCard size={10} /> {paymentHistory.length > 0 ? `${paymentHistory.length}x Bayar` : '+ Catat Bayar'}
+                            </button>
                           </td>
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', color: '#fbbf24', fontWeight: 800, padding: '8px' }}>
-                            {formatRupiahDesimal(retensi)}
+
+                          {/* 8. Sisa Pembayaran */}
+                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px' }}>
+                            {isLunas ? (
+                              <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '3px 8px', borderRadius: '4px', fontWeight: 900, fontSize: '0.76rem' }}>
+                                ✓ LUNAS
+                              </span>
+                            ) : (
+                              <div style={{ fontWeight: 900, color: '#f87171', fontSize: '0.88rem' }}>
+                                Rp {formatRupiahDesimal(sisaPembayaran)}
+                              </div>
+                            )}
                           </td>
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', fontWeight: 900, color: '#60a5fa', padding: '8px' }}>
-                            {formatRupiahDesimal(nilaiProgress)}
-                          </td>
+
+                          {/* 9. Aksi */}
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPaymentHistory(item)}
+                                title="Lihat Histori Pembayaran & Catat Pembayaran Baru"
+                                style={{
+                                  background: '#d97706',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '4px 6px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '2px'
+                                }}
+                              >
+                                <CreditCard size={11} /> Bayar
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => handleEditPekerjaan(item)}
@@ -3449,9 +3618,9 @@ export const TeknikModule = () => {
                                   background: '#2563eb',
                                   color: '#ffffff',
                                   border: 'none',
-                                  padding: '4px 8px',
+                                  padding: '4px 6px',
                                   borderRadius: '5px',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.72rem',
                                   fontWeight: 800,
                                   cursor: 'pointer',
                                   display: 'inline-flex',
@@ -3459,30 +3628,7 @@ export const TeknikModule = () => {
                                   gap: '2px'
                                 }}
                               >
-                                <Edit3 size={12} /> Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setActiveSheetId(item.id);
-                                  setSubTabBorongan('hasil_opname');
-                                }}
-                                title="Lihat/Input Opname"
-                                style={{
-                                  background: '#059669',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  padding: '4px 7px',
-                                  borderRadius: '5px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '2px'
-                                }}
-                              >
-                                <ClipboardCheck size={12} /> Opname
+                                <Edit3 size={11} /> Edit
                               </button>
                               <button
                                 type="button"
@@ -3492,9 +3638,9 @@ export const TeknikModule = () => {
                                   background: 'rgba(239, 68, 68, 0.2)',
                                   color: '#f87171',
                                   border: '1px solid #ef4444',
-                                  padding: '4px 6px',
+                                  padding: '4px 5px',
                                   borderRadius: '5px',
-                                  fontSize: '0.75rem',
+                                  fontSize: '0.72rem',
                                   fontWeight: 800,
                                   cursor: 'pointer'
                                 }}
@@ -3507,34 +3653,29 @@ export const TeknikModule = () => {
                       );
                     })}
 
-                    {/* ROW TOTAL SUMMARY */}
+                    {/* ROW TOTAL SUMMARY (DI BAWAH ADA SISA PEMBAYARAN) */}
                     {filteredPekerjaanList.length > 0 && (() => {
-                      const totalNilai = filteredPekerjaanList.reduce((acc, it) => acc + (it.calc.totalHargaRab || 0), 0);
-                      const totalRetensi = totalNilai * 0.05;
-                      const totalProgressNilai = filteredPekerjaanList.reduce((acc, it) => {
-                        const val = it.calc.totalHargaRab || 0;
-                        const prg = it.calc.progresPersen || 0;
-                        return acc + ((val * prg) / 100);
-                      }, 0);
+                      const totalJumlah = filteredPekerjaanList.reduce((acc, it) => acc + (it.calc.totalHargaRab || 0), 0);
+                      const totalBayarSeb = filteredPekerjaanList.reduce((acc, it) => acc + getSheetTotalBayar(it), 0);
+                      const totalSisa = Math.max(0, totalJumlah - totalBayarSeb);
 
                       return (
                         <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                          <td colSpan={9} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
+                          <td colSpan={5} style={{ textAlign: 'left', padding: '10px 14px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
                             TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                            {formatRupiahDesimal(totalNilai)}
+                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.94rem', color: '#000000' }}>
+                            Rp {formatRupiahDesimal(totalJumlah)}
                           </td>
-                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
-                            -
+                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.94rem', color: '#78350f' }}>
+                            Rp {formatRupiahDesimal(totalBayarSeb)}
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                            {formatRupiahDesimal(totalRetensi)}
+                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.96rem', color: totalSisa === 0 ? '#065f46' : '#991b1b', background: totalSisa === 0 ? '#bbf7d0' : '#fecaca' }}>
+                            Rp {formatRupiahDesimal(totalSisa)}
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                            {formatRupiahDesimal(totalProgressNilai)}
+                          <td style={{ border: '1.5px solid #78350f', textAlign: 'center', fontSize: '0.78rem', color: '#78350f' }}>
+                            {totalSisa === 0 ? 'LUNAS' : 'BELUM LUNAS'}
                           </td>
-                          <td style={{ border: '1.5px solid #78350f' }}></td>
                         </tr>
                       );
                     })()}
@@ -6502,6 +6643,320 @@ export const TeknikModule = () => {
           </div>
         </div>
       )}
+
+
+      {/* ========================================================================= */}
+      {/* MODAL HISTORI PEMBAYARAN VENDOR PEKERJAAN BORONGAN                       */}
+      {/* ========================================================================= */}
+      {isPaymentHistoryModalOpen && paymentHistoryTargetSheet && (() => {
+        const sheetSummary = computeSheetSummary(paymentHistoryTargetSheet);
+        const jumlahPekerjaan = sheetSummary.totalHargaRab || 0;
+        const historyList = getSheetPaymentHistory(paymentHistoryTargetSheet);
+        const totalBayar = getSheetTotalBayar(paymentHistoryTargetSheet);
+        const sisaBayar = Math.max(0, jumlahPekerjaan - totalBayar);
+        const isLunas = sisaBayar === 0 && jumlahPekerjaan > 0;
+
+        return (
+          <div className="modal-backdrop">
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
+              
+              {/* Modal Header */}
+              <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ffffff', fontWeight: 900, margin: 0, fontSize: '1.2rem' }}>
+                    <CreditCard size={24} color="#f59e0b" /> Histori Pembayaran Vendor
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                    Vendor: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.namaVendor || paymentHistoryTargetSheet.vendor}</strong> | Proyek: <strong style={{ color: '#34d399' }}>{paymentHistoryTargetSheet.proyek}</strong> ({paymentHistoryTargetSheet.blok ? `Blok ${paymentHistoryTargetSheet.blok} No ${paymentHistoryTargetSheet.noUnit}` : (paymentHistoryTargetSheet.fasum || '-')})
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentHistoryModalOpen(false)}
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.25rem' }}
+                >
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', padding: '1.25rem' }}>
+                
+                {/* 3 KARTU RINGKASAN STATUS KEUANGAN */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
+                  
+                  {/* Kartu 1: Total Kontrak / Jumlah */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #334155' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800 }}>💰 TOTAL NILAI PEKERJAAN (JUMLAH)</div>
+                    <div style={{ fontSize: '1.15rem', color: '#10b981', fontWeight: 900, marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(jumlahPekerjaan)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
+                      SPK: {paymentHistoryTargetSheet.noInput || '-'} &bull; {paymentHistoryTargetSheet.pekerjaan || '-'}
+                    </div>
+                  </div>
+
+                  {/* Kartu 2: Total Pembayaran Sebelumnya */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800 }}>💳 TOTAL PEMBAYARAN SEBELUMNYA</div>
+                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(totalBayar)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {historyList.length} transaksi pembayaran tercatat
+                    </div>
+                  </div>
+
+                  {/* Kartu 3: Sisa Pembayaran */}
+                  <div style={{ background: isLunas ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: '0.85rem 1rem', borderRadius: '8px', border: isLunas ? '1.5px solid #10b981' : '1.5px solid #ef4444' }}>
+                    <div style={{ fontSize: '0.74rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 800 }}>⚡ SISA PEMBAYARAN</div>
+                    <div style={{ fontSize: '1.15rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 900, marginTop: '2px' }}>
+                      {isLunas ? '✓ LUNAS (Rp 0)' : `Rp ${formatRupiahDesimal(sisaBayar)}`}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
+                      {isLunas ? 'Semua kewajiban telah terbayar penuh' : 'Sisa yang belum dibayarkan'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* TABEL HISTORI PEMBAYARAN SEBELUMNYA */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Clock size={16} color="#38bdf8" /> Riwayat Pembayaran Sebelumnya
+                    </h4>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                      {historyList.length} Catatan
+                    </span>
+                  </div>
+
+                  {historyList.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '1.75rem 1rem', background: '#1e293b', borderRadius: '8px', border: '1px dashed #475569' }}>
+                      <CreditCard size={32} color="#64748b" style={{ opacity: 0.5, marginBottom: '0.4rem' }} />
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
+                        Belum ada riwayat pembayaran yang dicatat untuk pekerjaan ini.
+                      </p>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+                        Gunakan formulir di bawah ini untuk mencatat pembayaran pertama.
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
+                            <th style={{ padding: '8px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155' }}>No.</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'center', width: '95px', borderBottom: '1px solid #334155' }}>Tanggal</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Uraian / Keterangan</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', width: '140px', borderBottom: '1px solid #334155' }}>Metode</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px', borderBottom: '1px solid #334155' }}>Nominal (Rp)</th>
+                            <th style={{ padding: '8px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155' }}>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {historyList.map((hist, hIdx) => (
+                            <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
+                              <td style={{ padding: '7px 8px', textAlign: 'center', color: '#94a3b8' }}>{hIdx + 1}</td>
+                              <td style={{ padding: '7px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 700 }}>
+                                {hist.tanggal ? hist.tanggal.split('-').reverse().join('/') : '-'}
+                              </td>
+                              <td style={{ padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>
+                                {hist.keterangan || `Pembayaran Ke-${hIdx + 1}`}
+                              </td>
+                              <td style={{ padding: '7px 10px', color: '#38bdf8', fontWeight: 700 }}>
+                                {hist.metode || 'Transfer Bank'}
+                              </td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', color: '#34d399', fontWeight: 900 }}>
+                                Rp {formatRupiahDesimal(hist.nominal || 0)}
+                              </td>
+                              <td style={{ padding: '7px 6px', textAlign: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePayment(hist.id)}
+                                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                  title="Hapus baris pembayaran ini"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr style={{ background: '#1e293b', borderTop: '2px solid #f59e0b', fontWeight: 900 }}>
+                            <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'left', color: '#f59e0b' }}>
+                              TOTAL TERBAYAR SEBELUMNYA
+                            </td>
+                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#fbbf24', fontSize: '0.9rem' }}>
+                              Rp {formatRupiahDesimal(totalBayar)}
+                            </td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* FORM CATAT PEMBAYARAN BARU */}
+                <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1.5px solid #38bdf8' }}>
+                  <h4 style={{ margin: '0 0 0.85rem', fontSize: '0.92rem', fontWeight: 900, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Plus size={16} /> + Catat Pembayaran Baru
+                  </h4>
+
+                  <form onSubmit={handleAddPayment}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                      
+                      {/* Tanggal Bayar */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                          📅 Tanggal Bayar
+                        </label>
+                        <input
+                          type="date"
+                          value={newPaymentFormData.tanggal}
+                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, tanggal: e.target.value })}
+                          style={{
+                            width: '100%',
+                            background: '#0f172a',
+                            border: '1px solid #475569',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            padding: '6px 10px',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* Uraian / Keterangan */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                          📝 Keterangan / Termin
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Misal: Termin 1, DP 20%, Opname 50%..."
+                          value={newPaymentFormData.keterangan}
+                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, keterangan: e.target.value })}
+                          style={{
+                            width: '100%',
+                            background: '#0f172a',
+                            border: '1px solid #475569',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            padding: '6px 10px',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* Nominal Pembayaran */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#34d399', fontWeight: 900, marginBottom: '4px' }}>
+                          💰 Nominal Bayar (Rp) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="0"
+                          value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\D/g, '');
+                            setNewPaymentFormData({ ...newPaymentFormData, nominal: raw ? Number(raw) : '' });
+                          }}
+                          style={{
+                            width: '100%',
+                            background: '#0f172a',
+                            border: '1.5px solid #10b981',
+                            borderRadius: '6px',
+                            color: '#34d399',
+                            fontWeight: 900,
+                            padding: '6px 10px',
+                            fontSize: '0.88rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* Metode Pembayaran */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                          🏦 Metode Pembayaran
+                        </label>
+                        <select
+                          value={newPaymentFormData.metode}
+                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, metode: e.target.value })}
+                          style={{
+                            width: '100%',
+                            background: '#0f172a',
+                            border: '1px solid #475569',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            padding: '6px 10px',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="Transfer BCA">Transfer BCA</option>
+                          <option value="Transfer Mandiri">Transfer Mandiri</option>
+                          <option value="Transfer BRI">Transfer BRI</option>
+                          <option value="Transfer BNI">Transfer BNI</option>
+                          <option value="Kas Tunai">Kas Tunai Proyek</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        type="submit"
+                        style={{
+                          background: 'linear-gradient(135deg, #059669, #047857)',
+                          color: '#ffffff',
+                          border: 'none',
+                          fontWeight: 900,
+                          padding: '8px 18px',
+                          borderRadius: '6px',
+                          fontSize: '0.84rem',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.4)'
+                        }}
+                      >
+                        <Save size={15} /> Simpan Pembayaran Ini
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f172a' }}>
+                <div style={{ fontSize: '0.84rem' }}>
+                  <span style={{ color: '#94a3b8' }}>Status: </span>
+                  <strong style={{ color: isLunas ? '#34d399' : '#f87171' }}>
+                    {isLunas ? '✓ LUNAS' : `SISA PEMBAYARAN: Rp ${formatRupiahDesimal(sisaBayar)}`}
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsPaymentHistoryModalOpen(false)}
+                  style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, padding: '6px 16px', borderRadius: '6px', cursor: 'pointer' }}
+                >
+                  Tutup
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ========================================================================= */}
       {/* MODAL MASTER 3: UNIT (Proyek, Blok, Nomor, Type, LB, LT)                   */}
