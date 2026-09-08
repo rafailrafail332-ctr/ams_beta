@@ -1293,6 +1293,42 @@ export const TeknikModule = () => {
   const [pekerjaanTableSearch, setPekerjaanTableSearch] = useState('');
   const [pekerjaanProjectFilter, setPekerjaanProjectFilter] = useState('ALL');
 
+  // Filter & data mapping untuk Tabel Rekapitulasi Pekerjaan Borongan
+  const filteredPekerjaanList = useMemo(() => {
+    return rabSheets.map(s => {
+      const calc = computeSheetSummary(s);
+      return { 
+        ...s, 
+        calc,
+        noSpk: s.noInput || s.sheetNumber || s.noSpk || '-',
+        vendor: s.namaVendor || s.vendor || '-',
+        nomor: s.noUnit || s.nomor || '-'
+      };
+    }).filter(item => {
+      // 1. Filter project
+      if (pekerjaanProjectFilter !== 'ALL' && item.proyek !== pekerjaanProjectFilter) {
+        return false;
+      }
+      // 2. Search filter
+      if (!pekerjaanTableSearch) return true;
+      const q = pekerjaanTableSearch.toLowerCase().trim();
+      return (
+        (item.noSpk || '').toLowerCase().includes(q) ||
+        (item.noInput || '').toLowerCase().includes(q) ||
+        (item.sheetNumber || '').toLowerCase().includes(q) ||
+        (item.namaVendor || '').toLowerCase().includes(q) ||
+        (item.vendor || '').toLowerCase().includes(q) ||
+        (item.proyek || '').toLowerCase().includes(q) ||
+        (item.pekerjaan || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.noUnit || '').toLowerCase().includes(q) ||
+        (item.nomor || '').toLowerCase().includes(q) ||
+        (item.fasum || '').toLowerCase().includes(q)
+      );
+    });
+  }, [rabSheets, pekerjaanTableSearch, pekerjaanProjectFilter]);
+
+
   // SIMPAN DATA PEKERJAAN (ADD & EDIT DENGAN RELASI ITEM LENGKAP KE MYSQL)
   const handleSavePekerjaan = (e) => {
     e.preventDefault();

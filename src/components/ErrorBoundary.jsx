@@ -29,10 +29,15 @@ export class ErrorBoundary extends React.Component {
           <h2 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
             Modul Ini Mengalami Pemulihan Otomatis
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '1rem', lineHeight: '1.5' }}>
             Terjadi kesalahan sementara pada tampilan modul ({this.props.moduleName || 'Komponen System'}). 
             Layar tidak akan menjadi kosong (blank screen), Anda dapat memuat ulang modul ini atau memilih modul lain di Sidebar.
           </p>
+          {this.state.error && (
+            <div style={{ margin: '0 auto 1.5rem', padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#f87171', fontSize: '0.8rem', textAlign: 'left', fontFamily: 'monospace', maxHeight: '120px', overflowY: 'auto' }}>
+              <strong>Error Detail:</strong> {this.state.error?.toString() || 'Unknown error'}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button className="btn btn-primary" onClick={this.handleReset} style={{ gap: '0.5rem' }}>
               <RefreshCw size={16} /> Muat Ulang Modul Ini
