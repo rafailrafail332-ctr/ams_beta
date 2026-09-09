@@ -3542,8 +3542,8 @@ export const TeknikModule = () => {
                       cursor: 'pointer'
                     }}
                   >
-                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#34d399' }}>🏔️ Ashoka View</option>
-                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#38bdf8' }}>🌳 Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#34d399' }}>Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#38bdf8' }}>Ashoka Park</option>
                   </select>
                   <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
                     <button
@@ -3566,7 +3566,7 @@ export const TeknikModule = () => {
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      🏔️ Ashoka View {(pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? '✓' : ''}
+                      Ashoka View {(pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? '✓' : ''}
                     </button>
                     <button
                       type="button"
@@ -3588,7 +3588,7 @@ export const TeknikModule = () => {
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      🌳 Ashoka Park {pekerjaanFormData.proyek === 'Ashoka Park' ? '✓' : ''}
+                      Ashoka Park {pekerjaanFormData.proyek === 'Ashoka Park' ? '✓' : ''}
                     </button>
                   </div>
                 </div>
