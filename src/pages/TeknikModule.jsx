@@ -214,6 +214,182 @@ const formatTanggalLengkap = (val) => {
   return formatTanggalIndo(val);
 };
 
+const IndoDatePicker = ({ value, onChange, label, required, accentColor = '#38bdf8' }) => {
+  const safeDate = formatToInputDate(value) || getTodayDateString();
+  const parts = safeDate.split('-');
+  const curY = parts[0] || '2026';
+  const curM = parts[1] ? parts[1].padStart(2, '0') : '09';
+  const curD = parts[2] ? parts[2].padStart(2, '0') : '09';
+
+  const hiddenRef = useRef(null);
+
+  const handleDayChange = (newD) => {
+    onChange(`${curY}-${curM}-${newD.padStart(2, '0')}`);
+  };
+
+  const handleMonthChange = (newM) => {
+    onChange(`${curY}-${newM.padStart(2, '0')}-${curD}`);
+  };
+
+  const handleYearChange = (newY) => {
+    onChange(`${newY}-${curM}-${curD}`);
+  };
+
+  const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+        <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <span>📅</span> <span>{label || 'Tanggal'} {required && <span style={{ color: '#f87171' }}>*</span>}</span>
+        </label>
+        <div style={{
+          whiteSpace: 'nowrap',
+          fontSize: '0.74rem',
+          padding: '2px 8px',
+          borderRadius: '6px',
+          background: 'rgba(56, 189, 248, 0.12)',
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          color: accentColor,
+          fontWeight: 800,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}>
+          {formatTanggalLengkap(safeDate)}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 80px 36px', gap: '5px', alignItems: 'center' }}>
+        {/* Dropdown Tanggal 01 - 31 */}
+        <select
+          value={curD}
+          onChange={(e) => handleDayChange(e.target.value)}
+          title="Pilih Tanggal Hari (1-31)"
+          style={{
+            width: '100%',
+            background: '#0f172a',
+            border: '1px solid #475569',
+            borderRadius: '6px',
+            color: '#ffffff',
+            fontWeight: 800,
+            padding: '7px 4px',
+            fontSize: '0.84rem',
+            textAlign: 'center',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map(d => (
+            <option key={d} value={d}>Tgl {d}</option>
+          ))}
+        </select>
+
+        {/* Dropdown Bulan Indonesia */}
+        <select
+          value={curM}
+          onChange={(e) => handleMonthChange(e.target.value)}
+          title="Pilih Nama Bulan"
+          style={{
+            width: '100%',
+            background: '#0f172a',
+            border: '1px solid #475569',
+            borderRadius: '6px',
+            color: '#38bdf8',
+            fontWeight: 900,
+            padding: '7px 6px',
+            fontSize: '0.84rem',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          {namaBulanIndo.slice(1).map((bName, idx) => {
+            const mVal = String(idx + 1).padStart(2, '0');
+            return (
+              <option key={mVal} value={mVal}>
+                {bName}
+              </option>
+            );
+          })}
+        </select>
+
+        {/* Dropdown Tahun */}
+        <select
+          value={curY}
+          onChange={(e) => handleYearChange(e.target.value)}
+          title="Pilih Tahun"
+          style={{
+            width: '100%',
+            background: '#0f172a',
+            border: '1px solid #475569',
+            borderRadius: '6px',
+            color: '#ffffff',
+            fontWeight: 800,
+            padding: '7px 4px',
+            fontSize: '0.84rem',
+            textAlign: 'center',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          {years.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+
+        {/* Tombol Kalender Visual */}
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button
+            type="button"
+            onClick={() => {
+              if (hiddenRef.current) {
+                if (typeof hiddenRef.current.showPicker === 'function') {
+                  hiddenRef.current.showPicker();
+                } else {
+                  hiddenRef.current.focus();
+                }
+              }
+            }}
+            title="Klik untuk memilih dari kalender visual"
+            style={{
+              width: '36px',
+              height: '35px',
+              background: 'rgba(56, 189, 248, 0.15)',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              borderRadius: '6px',
+              color: '#38bdf8',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0
+            }}
+          >
+            <Calendar size={16} />
+          </button>
+          <input
+            ref={hiddenRef}
+            type="date"
+            value={safeDate}
+            onChange={(e) => {
+              if (e.target.value) onChange(e.target.value);
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
@@ -1652,9 +1828,14 @@ export const TeknikModule = () => {
     const sheetSummary = computeSheetSummary(paymentHistoryTargetSheet);
     const jumlahPekerjaan = sheetSummary.totalHargaRab || 0;
     const currentTotalBayar = getSheetTotalBayar(paymentHistoryTargetSheet);
-    const sisaPembayaran = Math.max(0, jumlahPekerjaan - currentTotalBayar);
+    const isEditMode = Boolean(newPaymentFormData.id);
+    const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
+    const existingEntry = isEditMode ? currentHistory.find(p => p.id === newPaymentFormData.id) : null;
+    const oldNominal = existingEntry ? (Number(existingEntry.nominal) || 0) : 0;
+    const effectiveTotalBayar = isEditMode ? (currentTotalBayar - oldNominal) : currentTotalBayar;
+    const sisaPembayaran = Math.max(0, jumlahPekerjaan - effectiveTotalBayar);
 
-    if (sisaPembayaran <= 0 && jumlahPekerjaan > 0) {
+    if (sisaPembayaran <= 0 && jumlahPekerjaan > 0 && !isEditMode) {
       alert('Pekerjaan ini sudah LUNAS! Tidak dapat menambah pembayaran lagi.');
       return;
     }
@@ -1665,17 +1846,34 @@ export const TeknikModule = () => {
     }
 
     const tglInput = (newPaymentFormData.tanggal || '').trim() || getTodayDateString();
-    const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
-    const newEntry = {
-      id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      tanggal: tglInput,
-      keterangan: (newPaymentFormData.keterangan || '').trim() || `Pembayaran Ke-${currentHistory.length + 1}`,
-      nominal: nominalNum,
-      metode: newPaymentFormData.metode || 'Transfer BCA',
-      timestamp: new Date().toLocaleString('id-ID')
-    };
+    let updatedHistory = [];
 
-    const updatedHistory = [...currentHistory, newEntry];
+    if (isEditMode) {
+      updatedHistory = currentHistory.map(p => {
+        if (p.id === newPaymentFormData.id) {
+          return {
+            ...p,
+            tanggal: tglInput,
+            keterangan: (newPaymentFormData.keterangan || '').trim() || p.keterangan,
+            nominal: nominalNum,
+            metode: newPaymentFormData.metode || p.metode,
+            updatedAt: new Date().toLocaleString('id-ID')
+          };
+        }
+        return p;
+      });
+    } else {
+      const newEntry = {
+        id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        tanggal: tglInput,
+        keterangan: (newPaymentFormData.keterangan || '').trim() || `Pembayaran Ke-${currentHistory.length + 1}`,
+        nominal: nominalNum,
+        metode: newPaymentFormData.metode || 'Transfer BCA',
+        timestamp: new Date().toLocaleString('id-ID')
+      };
+      updatedHistory = [...currentHistory, newEntry];
+    }
+
     const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
 
     const updatedSheet = {
@@ -1694,13 +1892,19 @@ export const TeknikModule = () => {
     saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
 
     setNewPaymentFormData({
+      id: null,
       tanggal: getTodayDateString(),
       keterangan: '',
       nominal: '',
       metode: 'Transfer BCA'
     });
 
-    showNotification(`Pembayaran Rp ${formatRupiah(nominalNum)} berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`, 'success');
+    showNotification(
+      isEditMode
+        ? `Pembayaran berhasil diperbarui menjadi Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)})!`
+        : `Pembayaran Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)}) berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`,
+      'success'
+    );
   };
 
   const handleDeletePayment = (paymentId) => {
@@ -3308,32 +3512,12 @@ export const TeknikModule = () => {
 
                 {/* 2. Tanggal */}
                 <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem', margin: 0 }}>
-                      📅 Tanggal
-                    </label>
-                    {pekerjaanFormData.tanggal && (
-                      <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 800 }}>
-                        {formatTanggalLengkap(pekerjaanFormData.tanggal)}
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    type="date"
+                  <IndoDatePicker
+                    label="Tanggal Pekerjaan"
                     required
-                    value={formatToInputDate(pekerjaanFormData.tanggal)}
-                    onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, tanggal: e.target.value })}
-                    style={{
-                      width: '100%',
-                      background: '#0f172a',
-                      border: '1px solid #475569',
-                      borderRadius: '6px',
-                      color: '#ffffff',
-                      fontWeight: 800,
-                      fontSize: '0.88rem',
-                      padding: '8px 12px',
-                      outline: 'none'
-                    }}
+                    value={pekerjaanFormData.tanggal}
+                    onChange={(val) => setPekerjaanFormData({ ...pekerjaanFormData, tanggal: val })}
+                    accentColor="#38bdf8"
                   />
                 </div>
 
@@ -6995,14 +7179,30 @@ export const TeknikModule = () => {
                               <td style={{ padding: '8px 10px', color: '#38bdf8', fontWeight: 700, verticalAlign: 'middle' }}>
                                 {hist.metode || 'Transfer Bank'}
                               </td>
-                              <td style={{ padding: '8px 6px', textAlign: 'center', verticalAlign: 'middle' }}>
+                              <td style={{ padding: '8px 6px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setNewPaymentFormData({
+                                      id: hist.id,
+                                      tanggal: hist.tanggal,
+                                      keterangan: hist.keterangan || '',
+                                      nominal: hist.nominal || '',
+                                      metode: hist.metode || 'Transfer BCA'
+                                    });
+                                  }}
+                                  style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px', marginRight: '6px' }}
+                                  title="Edit tanggal atau nominal pembayaran ini"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDeletePayment(hist.id)}
                                   style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
                                   title="Hapus baris pembayaran ini"
                                 >
-                                  <Trash2 size={13} />
+                                  <Trash2 size={14} />
                                 </button>
                               </td>
                             </tr>
@@ -7039,75 +7239,69 @@ export const TeknikModule = () => {
                     </p>
                   </div>
                 ) : (
-                  <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1.5px solid #38bdf8' }}>
+                  <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: newPaymentFormData.id ? '2px solid #38bdf8' : '1.5px solid #38bdf8' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem' }}>
                       <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 900, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Plus size={16} /> + Catat Pembayaran Baru
+                        {newPaymentFormData.id ? (
+                          <>
+                            <Edit3 size={16} /> Edit Data Pembayaran
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={16} /> + Catat Pembayaran Baru
+                          </>
+                        )}
                       </h4>
-                      <button
-                        type="button"
-                        onClick={() => setNewPaymentFormData(prev => ({ ...prev, nominal: sisaBayar }))}
-                        style={{
-                          background: 'rgba(56, 189, 248, 0.15)',
-                          color: '#38bdf8',
-                          border: '1px solid #38bdf8',
-                          borderRadius: '6px',
-                          padding: '3px 9px',
-                          fontSize: '0.74rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                        title="Klik untuk mengisi nominal otomatis sesuai sisa tagihan"
-                      >
-                        ⚡ Bayar Pas Sisa: Rp {formatRupiahDesimal(sisaBayar)}
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {newPaymentFormData.id && (
+                          <button
+                            type="button"
+                            onClick={() => setNewPaymentFormData({ id: null, tanggal: getTodayDateString(), keterangan: '', nominal: '', metode: 'Transfer BCA' })}
+                            style={{
+                              background: '#475569',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '3px 9px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ✕ Batal Edit
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setNewPaymentFormData(prev => ({ ...prev, nominal: sisaBayar }))}
+                          style={{
+                            background: 'rgba(56, 189, 248, 0.15)',
+                            color: '#38bdf8',
+                            border: '1px solid #38bdf8',
+                            borderRadius: '6px',
+                            padding: '3px 9px',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                          title="Klik untuk mengisi nominal otomatis sesuai sisa tagihan"
+                        >
+                          ⚡ Bayar Pas Sisa: Rp {formatRupiahDesimal(sisaBayar)}
+                        </button>
+                      </div>
                     </div>
 
                     <form onSubmit={handleAddPayment}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem', marginBottom: '0.85rem' }}>
                         
                         {/* Tanggal Bayar */}
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
-                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                              <span>📅</span> <span>Tanggal Bayar <span style={{ color: '#f87171' }}>*</span></span>
-                            </label>
-                            {newPaymentFormData.tanggal && (
-                              <span style={{
-                                whiteSpace: 'nowrap',
-                                fontSize: '0.74rem',
-                                padding: '2px 8px',
-                                borderRadius: '6px',
-                                background: 'rgba(56, 189, 248, 0.12)',
-                                border: '1px solid rgba(56, 189, 248, 0.35)',
-                                color: '#38bdf8',
-                                fontWeight: 800,
-                                display: 'inline-flex',
-                                alignItems: 'center'
-                              }}>
-                                {formatTanggalLengkap(newPaymentFormData.tanggal)}
-                              </span>
-                            )}
-                          </div>
-                          <input
-                            type="date"
-                            required
-                            value={formatToInputDate(newPaymentFormData.tanggal)}
-                            onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, tanggal: e.target.value })}
-                            style={{
-                              width: '100%',
-                              background: '#0f172a',
-                              border: '1px solid #475569',
-                              borderRadius: '6px',
-                              color: '#ffffff',
-                              fontWeight: 800,
-                              padding: '7px 10px',
-                              fontSize: '0.84rem',
-                              outline: 'none',
-                              boxSizing: 'border-box'
-                            }}
-                          />
-                        </div>
+                        <IndoDatePicker
+                          label="Tanggal Bayar"
+                          required
+                          value={newPaymentFormData.tanggal}
+                          onChange={(val) => setNewPaymentFormData(prev => ({ ...prev, tanggal: val }))}
+                          accentColor="#38bdf8"
+                        />
 
                         {/* Uraian / Keterangan */}
                         <div>
@@ -7255,7 +7449,7 @@ export const TeknikModule = () => {
                             opacity: (Number(newPaymentFormData.nominal) || 0) > sisaBayar || (Number(newPaymentFormData.nominal) || 0) <= 0 ? 0.6 : 1
                           }}
                         >
-                          <Save size={15} /> Simpan Pembayaran Ini
+                          <Save size={15} /> {newPaymentFormData.id ? 'Perbarui Pembayaran' : 'Simpan Pembayaran Ini'}
                         </button>
                       </div>
                     </form>
