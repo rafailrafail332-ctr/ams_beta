@@ -1707,41 +1707,127 @@ export const TeknikModule = () => {
   });
   const [pekerjaanTableSearch, setPekerjaanTableSearch] = useState('');
   const [pekerjaanProjectFilter, setPekerjaanProjectFilter] = useState('ALL');
+  const [pekerjaanVendorFilter, setPekerjaanVendorFilter] = useState('ALL');
+  const [pekerjaanStatusBayarFilter, setPekerjaanStatusBayarFilter] = useState('ALL');
+  const [pekerjaanNamaSearch, setPekerjaanNamaSearch] = useState('');
+  const [pekerjaanNoSearch, setPekerjaanNoSearch] = useState('');
 
-  // Filter & data mapping untuk Tabel Rekapitulasi Pekerjaan Borongan
+  // Extract unique vendor names for filter
+  const uniquePekerjaanVendors = useMemo(() => {
+    const fromSheets = rabSheets.map(s => (s.namaVendor || s.vendor || '').trim()).filter(Boolean);
+    const fromDb = databaseVendorRows.map(v => (v.nama || '').trim()).filter(Boolean);
+    return Array.from(new Set([...fromSheets, ...fromDb])).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+  }, [rabSheets, databaseVendorRows]);
+
+  // Filter & data mapping untuk Tabel Rekapitulasi Pekerjaan Borongan (Lengkap & Terintegrasi)
   const filteredPekerjaanList = useMemo(() => {
     return rabSheets.map(s => {
       const calc = computeSheetSummary(s);
+      const hist = (Array.isArray(s.paymentHistory) && s.paymentHistory.length > 0)
+        ? s.paymentHistory
+        : (Number(s.pembayaranSebelumnya) > 0 ? [{ nominal: Number(s.pembayaranSebelumnya) }] : []);
+      const totalBayar = hist.reduce((sum, p) => sum + (Number(p.nominal) || 0), 0);
+      const jumlah = calc.totalHargaRab || 0;
+      const sisaPembayaran = Math.max(0, jumlah - totalBayar);
+      const isLunas = sisaPembayaran === 0 && jumlah > 0;
+      const hasPaid = totalBayar > 0;
+
       return { 
         ...s, 
         calc,
+        totalBayar,
+        sisaPembayaran,
+        isLunas,
+        hasPaid,
         noSpk: s.noInput || s.sheetNumber || s.noSpk || '-',
         vendor: s.namaVendor || s.vendor || '-',
         nomor: s.noUnit || s.nomor || '-'
       };
     }).filter(item => {
-      // 1. Filter project
+      // 1. Filter Proyek
       if (pekerjaanProjectFilter !== 'ALL' && item.proyek !== pekerjaanProjectFilter) {
         return false;
       }
-      // 2. Search filter
-      if (!pekerjaanTableSearch) return true;
-      const q = pekerjaanTableSearch.toLowerCase().trim();
-      return (
-        (item.noSpk || '').toLowerCase().includes(q) ||
-        (item.noInput || '').toLowerCase().includes(q) ||
-        (item.sheetNumber || '').toLowerCase().includes(q) ||
-        (item.namaVendor || '').toLowerCase().includes(q) ||
-        (item.vendor || '').toLowerCase().includes(q) ||
-        (item.proyek || '').toLowerCase().includes(q) ||
-        (item.pekerjaan || '').toLowerCase().includes(q) ||
-        (item.blok || '').toLowerCase().includes(q) ||
-        (item.noUnit || '').toLowerCase().includes(q) ||
-        (item.nomor || '').toLowerCase().includes(q) ||
-        (item.fasum || '').toLowerCase().includes(q)
-      );
+
+      // 2. Filter Vendor
+      if (pekerjaanVendorFilter !== 'ALL') {
+        const itemV = (item.namaVendor || item.vendor || '').toLowerCase().trim();
+        if (itemV !== pekerjaanVendorFilter.toLowerCase().trim()) {
+          return false;
+        }
+      }
+
+      // 3. Filter Status Pembayaran (yang dibayar dan belum)
+      if (pekerjaanStatusBayarFilter === 'LUNAS' && !item.isLunas) {
+        return false;
+      }
+      if (pekerjaanStatusBayarFilter === 'BELUM_LUNAS' && item.isLunas) {
+        return false;
+      }
+      if (pekerjaanStatusBayarFilter === 'SUDAH_BAYAR' && !item.hasPaid) {
+        return false;
+      }
+      if (pekerjaanStatusBayarFilter === 'BELUM_DIBAYAR' && item.hasPaid) {
+        return false;
+      }
+
+      // 4. Filter Cari Nama (Pekerjaan & Vendor)
+      if (pekerjaanNamaSearch) {
+        const qName = pekerjaanNamaSearch.toLowerCase().trim();
+        const matchName = (
+          (item.pekerjaan || '').toLowerCase().includes(qName) ||
+          (item.items?.[0]?.itemPekerjaan || '').toLowerCase().includes(qName) ||
+          (item.namaVendor || '').toLowerCase().includes(qName) ||
+          (item.vendor || '').toLowerCase().includes(qName)
+        );
+        if (!matchName) return false;
+      }
+
+      // 5. Filter No (No. SPK, Blok, No. Unit, Fasum)
+      if (pekerjaanNoSearch) {
+        const qNo = pekerjaanNoSearch.toLowerCase().trim();
+        const matchNo = (
+          (item.noSpk || '').toLowerCase().includes(qNo) ||
+          (item.noInput || '').toLowerCase().includes(qNo) ||
+          (item.sheetNumber || '').toLowerCase().includes(qNo) ||
+          (item.blok || '').toLowerCase().includes(qNo) ||
+          (item.noUnit || '').toLowerCase().includes(qNo) ||
+          (item.nomor || '').toLowerCase().includes(qNo) ||
+          (item.fasum || '').toLowerCase().includes(qNo)
+        );
+        if (!matchNo) return false;
+      }
+
+      // 6. Search filter umum (fallback)
+      if (pekerjaanTableSearch) {
+        const q = pekerjaanTableSearch.toLowerCase().trim();
+        const matchGeneral = (
+          (item.noSpk || '').toLowerCase().includes(q) ||
+          (item.noInput || '').toLowerCase().includes(q) ||
+          (item.sheetNumber || '').toLowerCase().includes(q) ||
+          (item.namaVendor || '').toLowerCase().includes(q) ||
+          (item.vendor || '').toLowerCase().includes(q) ||
+          (item.proyek || '').toLowerCase().includes(q) ||
+          (item.pekerjaan || '').toLowerCase().includes(q) ||
+          (item.blok || '').toLowerCase().includes(q) ||
+          (item.noUnit || '').toLowerCase().includes(q) ||
+          (item.nomor || '').toLowerCase().includes(q) ||
+          (item.fasum || '').toLowerCase().includes(q)
+        );
+        if (!matchGeneral) return false;
+      }
+
+      return true;
     }).sort(compareSpkAsc);
-  }, [rabSheets, pekerjaanTableSearch, pekerjaanProjectFilter]);
+  }, [
+    rabSheets,
+    pekerjaanProjectFilter,
+    pekerjaanVendorFilter,
+    pekerjaanStatusBayarFilter,
+    pekerjaanNamaSearch,
+    pekerjaanNoSearch,
+    pekerjaanTableSearch
+  ]);
 
 
   // SIMPAN DATA PEKERJAAN (ADD & EDIT DENGAN RELASI ITEM LENGKAP KE MYSQL)
@@ -3948,66 +4034,210 @@ export const TeknikModule = () => {
           <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             
             {/* Header & Filter Bar Tabel */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #f59e0b' }}>
+              
+              {/* Row 1: Judul Tabel & Ringkasan Filter */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.65rem' }}>
                 <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem' }}>Tabel</span>
+                  <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
                   Daftar Pekerjaan Borongan & Rekapitulasi
                 </h4>
                 
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {/* Filter Proyek */}
-                <select
-                  value={pekerjaanProjectFilter}
-                  onChange={(e) => setPekerjaanProjectFilter(e.target.value)}
-                  style={{
-                    background: '#0f172a',
-                    border: '1.5px solid #475569',
-                    borderRadius: '6px',
-                    color: '#f8fafc',
-                    padding: '6px 12px',
-                    fontSize: '0.82rem',
-                    fontWeight: 800,
-                    outline: 'none'
-                  }}
-                >
-                  <option value="ALL">Semua Proyek</option>
-                  <option value="Ashoka View">Ashoka View</option>
-                  <option value="Ashoka Park">Ashoka Park</option>
-                </select>
-
-                {/* Search Bar */}
-                <div style={{ position: 'relative', minWidth: '220px' }}>
-                  <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
-                  <input
-                    type="text"
-                    placeholder="Cari SPK / Vendor / Pekerjaan..."
-                    value={pekerjaanTableSearch}
-                    onChange={(e) => setPekerjaanTableSearch(e.target.value)}
-                    style={{
-                      width: '100%',
-                      background: '#0f172a',
-                      border: '1.5px solid #475569',
-                      borderRadius: '6px',
-                      color: '#ffffff',
-                      padding: '6px 10px 6px 30px',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      outline: 'none'
-                    }}
-                  />
-                  {pekerjaanTableSearch && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 800 }}>
+                    Menampilkan <strong style={{ color: '#34d399' }}>{filteredPekerjaanList.length}</strong> dari {rabSheets.length} Pekerjaan
+                  </span>
+                  {(pekerjaanProjectFilter !== 'ALL' || pekerjaanVendorFilter !== 'ALL' || pekerjaanStatusBayarFilter !== 'ALL' || pekerjaanNamaSearch || pekerjaanNoSearch || pekerjaanTableSearch) && (
                     <button
                       type="button"
-                      onClick={() => setPekerjaanTableSearch('')}
-                      style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                      onClick={() => {
+                        setPekerjaanProjectFilter('ALL');
+                        setPekerjaanVendorFilter('ALL');
+                        setPekerjaanStatusBayarFilter('ALL');
+                        setPekerjaanNamaSearch('');
+                        setPekerjaanNoSearch('');
+                        setPekerjaanTableSearch('');
+                      }}
+                      style={{
+                        background: '#dc2626',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '4px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        boxShadow: '0 2px 6px rgba(220, 38, 38, 0.4)'
+                      }}
                     >
-                      ✕
+                      <RotateCcw size={12} /> Reset Filter
                     </button>
                   )}
                 </div>
+              </div>
+
+              {/* Row 2: Filter Grid Controls (Proyek, Vendor, Status Bayar, Cari Nama, Cari No) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', alignItems: 'flex-end' }}>
+                
+                {/* 1. Filter Proyek */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                    🏢 Proyek:
+                  </label>
+                  <select
+                    value={pekerjaanProjectFilter}
+                    onChange={(e) => setPekerjaanProjectFilter(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#1e293b',
+                      border: pekerjaanProjectFilter !== 'ALL' ? '1.5px solid #f59e0b' : '1.5px solid #475569',
+                      borderRadius: '6px',
+                      color: pekerjaanProjectFilter !== 'ALL' ? '#fbbf24' : '#f8fafc',
+                      padding: '7px 10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="ALL">Semua Proyek ({rabSheets.length})</option>
+                    <option value="Ashoka View">Ashoka View ({rabSheets.filter(s => (s.proyek || '').includes('View')).length})</option>
+                    <option value="Ashoka Park">Ashoka Park ({rabSheets.filter(s => (s.proyek || '').includes('Park')).length})</option>
+                  </select>
+                </div>
+
+                {/* 2. Filter Vendor */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                    👤 Filter Vendor:
+                  </label>
+                  <select
+                    value={pekerjaanVendorFilter}
+                    onChange={(e) => setPekerjaanVendorFilter(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#1e293b',
+                      border: pekerjaanVendorFilter !== 'ALL' ? '1.5px solid #38bdf8' : '1.5px solid #475569',
+                      borderRadius: '6px',
+                      color: pekerjaanVendorFilter !== 'ALL' ? '#38bdf8' : '#f8fafc',
+                      padding: '7px 10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="ALL">Semua Vendor ({uniquePekerjaanVendors.length})</option>
+                    {uniquePekerjaanVendors.map(v => (
+                      <option key={v} value={v}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 3. Filter Status Bayar (Yang Dibayar & Belum) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                    💰 Status Pembayaran:
+                  </label>
+                  <select
+                    value={pekerjaanStatusBayarFilter}
+                    onChange={(e) => setPekerjaanStatusBayarFilter(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#1e293b',
+                      border: pekerjaanStatusBayarFilter !== 'ALL' ? '1.5px solid #10b981' : '1.5px solid #475569',
+                      borderRadius: '6px',
+                      color: pekerjaanStatusBayarFilter === 'LUNAS' ? '#34d399' : (pekerjaanStatusBayarFilter === 'BELUM_LUNAS' ? '#f87171' : '#f8fafc'),
+                      padding: '7px 10px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="ALL">Semua Status Bayar</option>
+                    <option value="LUNAS">✓ Lunas (Rp 0 sisa)</option>
+                    <option value="BELUM_LUNAS">⏳ Belum Lunas (Ada Sisa Tagihan)</option>
+                    <option value="SUDAH_BAYAR">💳 Sudah Ada Pembayaran / Dicicil</option>
+                    <option value="BELUM_DIBAYAR">❌ Belum Pernah Dibayar (Rp 0)</option>
+                  </select>
+                </div>
+
+                {/* 4. Filter Cari Nama (Pekerjaan & Vendor) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                    🔨 Cari Nama Pekerjaan / Vendor:
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="text"
+                      placeholder="Ketik nama pekerjaan/vendor..."
+                      value={pekerjaanNamaSearch}
+                      onChange={(e) => setPekerjaanNamaSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#1e293b',
+                        border: pekerjaanNamaSearch ? '1.5px solid #f59e0b' : '1.5px solid #475569',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        padding: '7px 28px 7px 30px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        outline: 'none'
+                      }}
+                    />
+                    {pekerjaanNamaSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setPekerjaanNamaSearch('')}
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 5. Filter No (No. SPK / Blok / Unit) */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                    🏷️ Cari No. SPK / Blok / Unit:
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Tag size={14} color="#38bdf8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                      type="text"
+                      placeholder="Ketik No. SPK / Blok / Unit..."
+                      value={pekerjaanNoSearch}
+                      onChange={(e) => setPekerjaanNoSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#1e293b',
+                        border: pekerjaanNoSearch ? '1.5px solid #38bdf8' : '1.5px solid #475569',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        padding: '7px 28px 7px 30px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        outline: 'none'
+                      }}
+                    />
+                    {pekerjaanNoSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setPekerjaanNoSearch('')}
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
               </div>
             </div>
 
