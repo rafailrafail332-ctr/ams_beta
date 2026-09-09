@@ -808,8 +808,9 @@ export const TeknikModule = () => {
     // Fetch RAB sheets from MySQL cloud once on mount
     fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
       if (val && Array.isArray(val) && val.length > 0) {
-        setRabSheets(val);
-        setActiveSheetId(prev => (val.some(s => s.id === prev) ? prev : val[0].id));
+        const sorted = [...val].sort(compareSpkAsc);
+        setRabSheets(sorted);
+        setActiveSheetId(prev => (sorted.some(s => s.id === prev) ? prev : sorted[0].id));
       }
     });
 
@@ -1251,6 +1252,81 @@ export const TeknikModule = () => {
     return isNaN(num) ? 0 : num;
   };
 
+  // HELPER UNTUK MENGURUTKAN NO. SPK DARI YANG TERKECIL KE TERBESAR (ASCENDING)
+  const compareSpkAsc = (a, b) => {
+    const valA = String(a?.noInput || a?.noSpk || a?.sheetNumber || '').trim();
+    const valB = String(b?.noInput || b?.noSpk || b?.sheetNumber || '').trim();
+
+    const matchA = valA.match(/\d+/g);
+    const matchB = valB.match(/\d+/g);
+
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[matchA.length - 1], 10);
+      const numB = parseInt(matchB[matchB.length - 1], 10);
+      if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+        return numA - numB;
+      }
+    } else if (matchA && !matchB) {
+      return -1;
+    } else if (!matchA && matchB) {
+      return 1;
+    }
+
+    return valA.localeCompare(valB, 'id', { numeric: true, sensitivity: 'base' });
+  };
+
+  // STANDARDIZED SHEET SANITIZER TO PREVENT DATA POLLUTION / NESTED CALC
+  const cleanSheetForStorage = (sheet) => {
+    if (!sheet) return sheet;
+    const { calc, noSpk, vendor, nomor, ...clean } = sheet;
+    const totalHargaRab = Number(clean.totalHargaRab || clean.nilaiPekerjaan || clean.jumlah || 0);
+    const cleanItems = Array.isArray(clean.items) ? clean.items.map(it => {
+      const vol = Number(it.vol) || 1;
+      const hargaSatuan = Number(it.hargaSatuan) || (totalHargaRab > 0 ? totalHargaRab : 0);
+      const jumlah = Number(it.jumlah) || (vol * hargaSatuan);
+      const bobotRatio = Number(it.bobotRatio) || (totalHargaRab > 0 ? (jumlah / totalHargaRab) : 1);
+      const progress = Math.min(100, Math.max(0, Number(it.progress) || 0));
+      const bobotProgress = progress > 0 ? (bobotRatio * progress) : 0;
+      return {
+        id: it.id || `ITEM-${Math.random().toString(36).substr(2, 6)}`,
+        itemPekerjaan: it.itemPekerjaan || clean.pekerjaan || '',
+        spesifikasi: it.spesifikasi || '-',
+        vol,
+        sat: it.sat || 'ls',
+        hargaSatuan,
+        jumlah,
+        bobotRatio,
+        progress,
+        bobotProgress
+      };
+    }) : [];
+
+    const effectiveTotalHarga = cleanItems.length > 0
+      ? cleanItems.reduce((acc, it) => acc + (Number(it.jumlah) || 0), 0)
+      : totalHargaRab;
+
+    return {
+      ...clean,
+      id: clean.id || `RAB-${Date.now().toString().slice(-6)}`,
+      noInput: clean.noInput || '',
+      tanggal: clean.tanggal || getTodayDateString(),
+      proyek: clean.proyek || 'Ashoka View',
+      namaVendor: clean.namaVendor || '',
+      pekerjaan: clean.pekerjaan || (cleanItems[0]?.itemPekerjaan) || '',
+      blok: clean.blok || '',
+      noUnit: clean.noUnit || '',
+      fasum: clean.fasum || '',
+      nilaiPekerjaan: effectiveTotalHarga,
+      totalHargaRab: effectiveTotalHarga,
+      retensiPersen: clean.retensiPersen !== undefined ? Number(clean.retensiPersen) : 5,
+      pembayaranSebelumnya: Number(clean.pembayaranSebelumnya || 0),
+      paymentHistory: Array.isArray(clean.paymentHistory) ? clean.paymentHistory : [],
+      tanggalOpname: clean.tanggalOpname || '',
+      opnameHistory: Array.isArray(clean.opnameHistory) ? clean.opnameHistory : [],
+      items: cleanItems
+    };
+  };
+
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
     if (!sheet) return { items: [], totalHargaRab: 0, totalBobot: 0, progresPersen: 0, retensiPersen: 5, nilaiOpname: 0, retensiNilai: 0, nilaiProgress: 0, nilaiProgres: 0, pembayaranSebelumnya: 0, pembayaranSaatIni: 0 };
@@ -1309,13 +1385,19 @@ export const TeknikModule = () => {
     // Total Bobot Keseluruhan
     const totalBobot = computedItems.reduce((acc, it) => acc + (Number(it.bobotRatio) || 0), 0);
     // Total Progres Kumulatif = Total Seluruh Bobot Progress (%)
-    const progresPersen = computedItems.reduce((acc, it) => acc + (Number(it.bobotProgress) || 0), 0);
+    const rawProgres = computedItems.reduce((acc, it) => acc + (Number(it.bobotProgress) || 0), 0);
+    const progresPersen = Math.min(100, Math.max(0, rawProgres));
     const retensiPersen = parseNum(sheet.retensiPersen) || 5;
     // Nilai Opname = Progres (%) x Total Harga RAB
     const nilaiOpname = (progresPersen / 100) * totalHargaRab;
     const retensiNilai = (retensiPersen / 100) * nilaiOpname;
     const nilaiProgress = nilaiOpname - retensiNilai;
-    const pembayaranSebelumnya = parseNum(sheet.pembayaranSebelumnya) || 0;
+    
+    // Pembayaran sebelumnya: prioritaskan dari riwayat pembayaran aktual jika ada
+    const actualBayar = (Array.isArray(sheet.paymentHistory) && sheet.paymentHistory.length > 0)
+      ? sheet.paymentHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0)
+      : (parseNum(sheet.pembayaranSebelumnya) || 0);
+    const pembayaranSebelumnya = actualBayar;
     const pembayaranSaatIni = nilaiProgress - pembayaranSebelumnya;
 
     return {
@@ -1358,7 +1440,7 @@ export const TeknikModule = () => {
 
     const matchProj = laporanProjectFilter === 'ALL' || sheet.proyek === laporanProjectFilter;
     return matchSearch && matchProj;
-  });
+  }).sort(compareSpkAsc);
 
   // GRAND TOTALS FOR TAB 3 LAPORAN
   const grandTotalHargaRab = filteredLaporanSheets.reduce((acc, s) => acc + s.totalHargaRab, 0);
@@ -1577,12 +1659,35 @@ export const TeknikModule = () => {
     }
   };
 
-  // OPEN SPECIFIC SHEET FROM LAPORAN TABLE
+  // EDIT PEKERJAAN (LOAD DATA KE FORMULIR)
+  const handleEditPekerjaan = (sheet) => {
+    const summary = computeSheetSummary(sheet);
+    setPekerjaanFormData({
+      id: sheet.id,
+      noSpk: sheet.noInput || '',
+      tanggal: sheet.tanggal || getTodayDateString(),
+      proyek: sheet.proyek || 'Ashoka View',
+      namaVendor: sheet.namaVendor || '',
+      pekerjaan: sheet.pekerjaan || (sheet.items?.[0]?.itemPekerjaan) || '',
+      blok: sheet.blok || '',
+      noUnit: sheet.noUnit || '',
+      fasum: sheet.fasum || '',
+      nilaiPekerjaan: summary.totalHargaRab || 0
+    });
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+    showNotification(`Memuat data "${sheet.noInput || 'Pekerjaan'}" ke formulir...`, 'info');
+  };
+
+  // OPEN SPECIFIC SHEET FROM LAPORAN TABLE (LANGSUNG LOAD KE FORMULIR)
   const handleOpenSheetFromLaporan = (sheetId) => {
+    const target = rabSheets.find(s => s.id === sheetId);
+    if (target) {
+      handleEditPekerjaan(target);
+    }
     setActiveSheetId(sheetId);
     setMainCategory('borongan');
     setSubTabBorongan('input_rab');
-    showNotification('Membuka lembar kerja input RAB...', 'info');
+    showNotification(`Memuat data "${target?.noInput || 'Pekerjaan'}" di Input Pekerjaan...`, 'info');
   };
 
   // =========================================================================
@@ -1635,7 +1740,7 @@ export const TeknikModule = () => {
         (item.nomor || '').toLowerCase().includes(q) ||
         (item.fasum || '').toLowerCase().includes(q)
       );
-    });
+    }).sort(compareSpkAsc);
   }, [rabSheets, pekerjaanTableSearch, pekerjaanProjectFilter]);
 
 
@@ -1677,7 +1782,7 @@ export const TeknikModule = () => {
       bobotProgress: existingSheet?.items?.[0]?.progress || 0
     };
 
-    const newSheet = {
+    const newSheet = cleanSheetForStorage({
       ...existingSheet,
       id: targetId,
       noInput: cleanNoSpk,
@@ -1690,20 +1795,21 @@ export const TeknikModule = () => {
       fasum: (pekerjaanFormData.fasum || '').trim(),
       nilaiPekerjaan: nilaiNum,
       totalHargaRab: nilaiNum,
-      retensiPersen: existingSheet?.retensiPersen || 5,
+      retensiPersen: existingSheet?.retensiPersen !== undefined ? existingSheet.retensiPersen : 5,
       pembayaranSebelumnya: existingSheet?.pembayaranSebelumnya || 0,
       paymentHistory: existingSheet?.paymentHistory || [],
       tanggalOpname: existingSheet?.tanggalOpname || '',
       opnameHistory: existingSheet?.opnameHistory || [],
       items: [updatedItem]
-    };
+    });
 
     let nextSheets = [];
     if (isEdit) {
-      nextSheets = rabSheets.map(s => s.id === targetId ? newSheet : s);
+      nextSheets = rabSheets.map(s => s.id === targetId ? newSheet : cleanSheetForStorage(s));
     } else {
-      nextSheets = [newSheet, ...rabSheets];
+      nextSheets = [newSheet, ...rabSheets.map(cleanSheetForStorage)];
     }
+    nextSheets.sort(compareSpkAsc);
 
     setRabSheets(nextSheets);
     setActiveSheetId(targetId);
@@ -1734,24 +1840,7 @@ export const TeknikModule = () => {
     );
   };
 
-  // EDIT PEKERJAAN (LOAD DATA KE FORMULIR)
-  const handleEditPekerjaan = (sheet) => {
-    const summary = computeSheetSummary(sheet);
-    setPekerjaanFormData({
-      id: sheet.id,
-      noSpk: sheet.noInput || '',
-      tanggal: sheet.tanggal || getTodayDateString(),
-      proyek: sheet.proyek || 'Ashoka View',
-      namaVendor: sheet.namaVendor || '',
-      pekerjaan: sheet.pekerjaan || (sheet.items?.[0]?.itemPekerjaan) || '',
-      blok: sheet.blok || '',
-      noUnit: sheet.noUnit || '',
-      fasum: sheet.fasum || '-',
-      nilaiPekerjaan: formatRupiah(summary.totalHargaRab || 0)
-    });
-    window.scrollTo({ top: 200, behavior: 'smooth' });
-    showNotification(`Memuat data "${sheet.noInput || 'Pekerjaan'}" ke formulir...`, 'info');
-  };
+
 
   // RESET FORMULIR PEKERJAAN
   const handleResetPekerjaanForm = () => {
@@ -1876,13 +1965,14 @@ export const TeknikModule = () => {
 
     const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
 
-    const updatedSheet = {
-      ...paymentHistoryTargetSheet,
+    const cleanTarget = cleanSheetForStorage(paymentHistoryTargetSheet);
+    const updatedSheet = cleanSheetForStorage({
+      ...cleanTarget,
       paymentHistory: updatedHistory,
       pembayaranSebelumnya: newTotalBayar
-    };
+    });
 
-    const nextSheets = rabSheets.map(s => s.id === paymentHistoryTargetSheet.id ? updatedSheet : s);
+    const nextSheets = rabSheets.map(s => s.id === cleanTarget.id ? updatedSheet : cleanSheetForStorage(s));
     setRabSheets(nextSheets);
     setPaymentHistoryTargetSheet(updatedSheet);
 
@@ -1915,13 +2005,14 @@ export const TeknikModule = () => {
     const updatedHistory = currentHistory.filter(p => p.id !== paymentId);
     const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
 
-    const updatedSheet = {
-      ...paymentHistoryTargetSheet,
+    const cleanTarget = cleanSheetForStorage(paymentHistoryTargetSheet);
+    const updatedSheet = cleanSheetForStorage({
+      ...cleanTarget,
       paymentHistory: updatedHistory,
       pembayaranSebelumnya: newTotalBayar
-    };
+    });
 
-    const nextSheets = rabSheets.map(s => s.id === paymentHistoryTargetSheet.id ? updatedSheet : s);
+    const nextSheets = rabSheets.map(s => s.id === cleanTarget.id ? updatedSheet : cleanSheetForStorage(s));
     setRabSheets(nextSheets);
     setPaymentHistoryTargetSheet(updatedSheet);
 
@@ -1936,6 +2027,7 @@ export const TeknikModule = () => {
   // =========================================================================
   const [hasilOpnameSearch, setHasilOpnameSearch] = useState('');
   const [hasilOpnameDateSearch, setHasilOpnameDateSearch] = useState('');
+  const [hasilOpnameProjectFilter, setHasilOpnameProjectFilter] = useState('ALL');
   const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
   const [opnameTargetSheet, setOpnameTargetSheet] = useState(null);
   const [opnameFormData, setOpnameFormData] = useState({
@@ -1948,6 +2040,9 @@ export const TeknikModule = () => {
 
   const filteredHasilOpnameSheets = useMemo(() => {
     return rabSheets.filter(s => {
+      if (hasilOpnameProjectFilter !== 'ALL' && s.proyek !== hasilOpnameProjectFilter) {
+        return false;
+      }
       const q = hasilOpnameSearch.toLowerCase().trim();
       const d = hasilOpnameDateSearch.toLowerCase().trim();
       const dClean = d.replace(/[-/]/g, '');
@@ -1978,8 +2073,8 @@ export const TeknikModule = () => {
         hasHistoryDate;
 
       return textMatch && dateMatch;
-    });
-  }, [rabSheets, hasilOpnameSearch, hasilOpnameDateSearch]);
+    }).sort(compareSpkAsc);
+  }, [rabSheets, hasilOpnameSearch, hasilOpnameDateSearch, hasilOpnameProjectFilter]);
 
   // AUTO-SYNC ACTIVE SHEET WITH FILTER
   useEffect(() => {
@@ -2029,13 +2124,15 @@ export const TeknikModule = () => {
       initialTotalProgress[it.id] = prev;
     });
 
-    // Default pembayaran sebelumnya dari riwayat opname terakhir jika ada
-    let defaultBayarSeb = 0;
-    if (sheet.opnameHistory && sheet.opnameHistory.length > 0) {
+    // Default pembayaran sebelumnya: prioritaskan dari riwayat pembayaran aktual
+    const actualBayar = (Array.isArray(sheet.paymentHistory) && sheet.paymentHistory.length > 0)
+      ? sheet.paymentHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0)
+      : (parseNum(sheet.pembayaranSebelumnya) || 0);
+
+    let defaultBayarSeb = actualBayar;
+    if (defaultBayarSeb === 0 && sheet.opnameHistory && sheet.opnameHistory.length > 0) {
       const lastOpn = sheet.opnameHistory[0];
-      defaultBayarSeb = parseNum(lastOpn.nilaiProgress) || parseNum(lastOpn.nilaiOpname) || parseNum(sheet.pembayaranSebelumnya) || 0;
-    } else {
-      defaultBayarSeb = parseNum(sheet.pembayaranSebelumnya) || 0;
+      defaultBayarSeb = parseNum(lastOpn.nilaiProgress) || parseNum(lastOpn.nilaiOpname) || 0;
     }
 
     setOpnameFormData({
@@ -2100,15 +2197,15 @@ export const TeknikModule = () => {
 
     const newSheets = rabSheets.map(s => {
       if (s.id === opnameTargetSheet.id) {
-        return {
+        return cleanSheetForStorage({
           ...s,
           items: updatedItems,
           tanggalOpname: opnameFormData.tanggal || getTodayDateString(),
           pembayaranSebelumnya: bayarSebNum,
           opnameHistory: [opnameEntry, ...(s.opnameHistory || [])]
-        };
+        });
       }
-      return s;
+      return cleanSheetForStorage(s);
     });
 
     setRabSheets(newSheets);
@@ -2116,6 +2213,7 @@ export const TeknikModule = () => {
     try {
       localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
     } catch(err) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, newSheets);
 
     showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres bertambah menjadi: ${formatDecimal(totalProgResult)}%`, 'success');
     setIsOpnameModalOpen(false);
@@ -2495,7 +2593,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <BarChart3 size={16} /> Laporan Rekapitulasi RAB ({rabSheets.length} Proyek)
+              <BarChart3 size={16} /> Laporan Rekapitulasi RAB (2 Proyek)
             </button>
 
             {/* 2. DI TENGAH: Hasil Opname */}
@@ -3995,8 +4093,27 @@ export const TeknikModule = () => {
                             <div style={{ fontWeight: 800, color: '#ffffff' }}>
                               {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: '#fb923c', fontWeight: 800, marginTop: '2px' }}>
-                              SPK: {item.noSpk || item.sheetNumber || '-'}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
+                              <span style={{ fontSize: '0.72rem', color: '#fb923c', fontWeight: 800 }}>
+                                SPK: {item.noSpk || item.sheetNumber || '-'}
+                              </span>
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 900,
+                                fontSize: '0.72rem',
+                                background: item.calc.progresPersen >= 100 ? 'rgba(16, 185, 129, 0.2)' : (item.calc.progresPersen > 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(148, 163, 184, 0.15)'),
+                                color: item.calc.progresPersen >= 100 ? '#34d399' : (item.calc.progresPersen > 0 ? '#60a5fa' : '#94a3b8'),
+                                border: `1px solid ${item.calc.progresPersen >= 100 ? '#10b981' : (item.calc.progresPersen > 0 ? '#3b82f6' : '#475569')}`
+                              }}>
+                                Progres: {formatDecimal(item.calc.progresPersen || 0)}%
+                              </span>
+                              {item.tanggalOpname && (
+                                <span style={{ fontSize: '0.68rem', color: '#38bdf8' }}>
+                                  ({formatTanggalIndo(item.tanggalOpname)})
+                                </span>
+                              )}
                             </div>
                           </td>
 
@@ -4079,6 +4196,27 @@ export const TeknikModule = () => {
                           {/* 9. Aksi */}
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', verticalAlign: 'top' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenOpnameModal(item)}
+                                title="Input / Update Opname (Ubah & Tambah Progres Pekerjaan)"
+                                style={{
+                                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '4px 7px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 900,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+                                }}
+                              >
+                                <ClipboardCheck size={11} /> Opname
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => handleOpenPaymentHistory(item)}
@@ -4229,6 +4367,64 @@ export const TeknikModule = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1.5px solid #10b981' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: 1 }}>
               
+              {/* FILTER PROYEK TOMBOL */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#f8fafc', marginRight: '2px' }}>
+                  🏢 Proyek:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setHasilOpnameProjectFilter('ALL')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: hasilOpnameProjectFilter === 'ALL' ? '2px solid #10b981' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'ALL' ? '#10b981' : '#1e293b',
+                    color: '#ffffff',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  Semua ({rabSheets.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHasilOpnameProjectFilter('Ashoka View')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: hasilOpnameProjectFilter === 'Ashoka View' ? '2px solid #f59e0b' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'Ashoka View' ? '#f59e0b' : '#1e293b',
+                    color: hasilOpnameProjectFilter === 'Ashoka View' ? '#000000' : '#cbd5e1',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  Ashoka View ({rabSheets.filter(s => (s.proyek || '').includes('View')).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHasilOpnameProjectFilter('Ashoka Park')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    border: hasilOpnameProjectFilter === 'Ashoka Park' ? '2px solid #38bdf8' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'Ashoka Park' ? '#38bdf8' : '#1e293b',
+                    color: hasilOpnameProjectFilter === 'Ashoka Park' ? '#000000' : '#cbd5e1',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  Ashoka Park ({rabSheets.filter(s => (s.proyek || '').includes('Park')).length})
+                </button>
+              </div>
+
               {/* 1. INPUT SEARCH BY NAMA VENDOR / NO RAB */}
               <div style={{ position: 'relative', minWidth: '200px', flex: '1 1 200px', maxWidth: '280px' }}>
                 <input
@@ -4348,6 +4544,9 @@ export const TeknikModule = () => {
                     <th style={{ width: '130px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
                       Harga RAB
                     </th>
+                    <th style={{ width: '85px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                      Progress
+                    </th>
                     <th style={{ width: '110px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
                       Nilai Opname
                     </th>
@@ -4430,6 +4629,29 @@ export const TeknikModule = () => {
                             {/* Harga RAB */}
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
                               {formatRupiahDesimal(c.totalHargaRab)}
+                            </td>
+
+                            {/* Progress (%) */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
+                              {(() => {
+                                const progVal = (hist.progresHasil !== undefined && hist.progresHasil !== '')
+                                  ? parseNum(hist.progresHasil)
+                                  : c.progresPersen;
+                                return (
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 900,
+                                    fontSize: '0.82rem',
+                                    background: progVal >= 100 ? 'rgba(16, 185, 129, 0.2)' : (progVal > 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(148, 163, 184, 0.15)'),
+                                    color: progVal >= 100 ? '#34d399' : (progVal > 0 ? '#60a5fa' : '#94a3b8'),
+                                    border: `1px solid ${progVal >= 100 ? '#10b981' : (progVal > 0 ? '#3b82f6' : '#475569')}`
+                                  }}>
+                                    {formatDecimal(progVal)}%
+                                  </span>
+                                );
+                              })()}
                             </td>
 
                              {/* Nilai Opname */}
