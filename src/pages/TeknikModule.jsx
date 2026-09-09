@@ -1399,6 +1399,7 @@ export const TeknikModule = () => {
       totalHargaRab: nilaiNum,
       retensiPersen: existingSheet?.retensiPersen || 5,
       pembayaranSebelumnya: existingSheet?.pembayaranSebelumnya || 0,
+      paymentHistory: existingSheet?.paymentHistory || [],
       tanggalOpname: existingSheet?.tanggalOpname || '',
       opnameHistory: existingSheet?.opnameHistory || [],
       items: [updatedItem]
@@ -3612,22 +3613,23 @@ export const TeknikModule = () => {
                               type="button"
                               onClick={() => handleOpenPaymentHistory(item)}
                               style={{
-                                background: 'rgba(245, 158, 11, 0.15)',
-                                color: '#f59e0b',
-                                border: '1px solid #f59e0b',
+                                background: '#0284c7',
+                                color: '#ffffff',
+                                border: 'none',
                                 borderRadius: '4px',
-                                padding: '2px 6px',
-                                fontSize: '0.68rem',
+                                padding: '3px 7px',
+                                fontSize: '0.7rem',
                                 fontWeight: 800,
                                 cursor: 'pointer',
-                                marginTop: '3px',
+                                marginTop: '4px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px'
+                                gap: '3px',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                               }}
-                              title="Klik untuk melihat / menambah histori pembayaran"
+                              title="Lihat riwayat pembayaran pekerjaan ini (kapan bayar & berapa bayar)"
                             >
-                              <CreditCard size={10} /> {paymentHistory.length > 0 ? `${paymentHistory.length}x Bayar` : '+ Catat Bayar'}
+                              <Clock size={10} /> History ({paymentHistory.length})
                             </button>
                           </td>
 
@@ -3650,22 +3652,42 @@ export const TeknikModule = () => {
                               <button
                                 type="button"
                                 onClick={() => handleOpenPaymentHistory(item)}
-                                title="Lihat Histori Pembayaran & Catat Pembayaran Baru"
+                                title="Lihat Histori Pembayaran Pekerjaan Ini (Kapan bayar & Berapa bayar)"
                                 style={{
-                                  background: '#d97706',
+                                  background: '#0284c7',
                                   color: '#ffffff',
                                   border: 'none',
-                                  padding: '4px 6px',
+                                  padding: '4px 7px',
                                   borderRadius: '5px',
                                   fontSize: '0.72rem',
                                   fontWeight: 800,
                                   cursor: 'pointer',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '2px'
+                                  gap: '3px'
                                 }}
                               >
-                                <CreditCard size={11} /> Bayar
+                                <Clock size={11} /> History
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPaymentHistory(item)}
+                                title="Catat Pembayaran Baru untuk Pekerjaan Ini"
+                                style={{
+                                  background: '#059669',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '4px 7px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                              >
+                                <CreditCard size={11} /> + Bayar
                               </button>
                               <button
                                 type="button"
@@ -3675,14 +3697,14 @@ export const TeknikModule = () => {
                                   background: '#2563eb',
                                   color: '#ffffff',
                                   border: 'none',
-                                  padding: '4px 6px',
+                                  padding: '4px 7px',
                                   borderRadius: '5px',
                                   fontSize: '0.72rem',
                                   fontWeight: 800,
                                   cursor: 'pointer',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '2px'
+                                  gap: '3px'
                                 }}
                               >
                                 <Edit3 size={11} /> Edit
@@ -6716,19 +6738,19 @@ export const TeknikModule = () => {
             <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
               
               {/* Modal Header */}
-              <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
                 <div>
                   <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ffffff', fontWeight: 900, margin: 0, fontSize: '1.2rem' }}>
-                    <CreditCard size={24} color="#f59e0b" /> Histori Pembayaran Vendor
+                    <Clock size={24} color="#38bdf8" /> Riwayat Pembayaran: <span style={{ color: '#fbbf24' }}>{paymentHistoryTargetSheet.pekerjaan || paymentHistoryTargetSheet.items?.[0]?.itemPekerjaan || 'Pekerjaan Borongan'}</span>
                   </h3>
-                  <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                    Vendor: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.namaVendor || paymentHistoryTargetSheet.vendor}</strong> | Proyek: <strong style={{ color: '#34d399' }}>{paymentHistoryTargetSheet.proyek}</strong> ({paymentHistoryTargetSheet.blok ? `Blok ${paymentHistoryTargetSheet.blok} No ${paymentHistoryTargetSheet.noUnit}` : (paymentHistoryTargetSheet.fasum || '-')})
+                  <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                    No. SPK: <strong style={{ color: '#fb923c' }}>{paymentHistoryTargetSheet.noInput || paymentHistoryTargetSheet.noSpk || '-'}</strong> &bull; Vendor: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.namaVendor || paymentHistoryTargetSheet.vendor || '-'}</strong> &bull; Proyek: <strong style={{ color: '#34d399' }}>{paymentHistoryTargetSheet.proyek}</strong> {paymentHistoryTargetSheet.blok ? `(Blok ${paymentHistoryTargetSheet.blok} No ${paymentHistoryTargetSheet.noUnit})` : (paymentHistoryTargetSheet.fasum && paymentHistoryTargetSheet.fasum !== '-' ? `(${paymentHistoryTargetSheet.fasum})` : '')}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsPaymentHistoryModalOpen(false)}
-                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.25rem' }}
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.25rem', padding: '4px' }}
                 >
                   <X size={22} />
                 </button>
@@ -6777,7 +6799,7 @@ export const TeknikModule = () => {
                 <div style={{ marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Clock size={16} color="#38bdf8" /> Riwayat Pembayaran Sebelumnya
+                      <Clock size={16} color="#38bdf8" /> Riwayat Pembayaran Pekerjaan Ini
                     </h4>
                     <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
                       {historyList.length} Catatan
@@ -6788,41 +6810,38 @@ export const TeknikModule = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                       <thead>
                         <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
-                          <th style={{ padding: '8px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155' }}>No.</th>
-                          <th style={{ padding: '8px 10px', textAlign: 'center', width: '95px', borderBottom: '1px solid #334155' }}>Tanggal</th>
-                          <th style={{ padding: '8px 10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Uraian / Keterangan</th>
-                          <th style={{ padding: '8px 10px', textAlign: 'left', width: '140px', borderBottom: '1px solid #334155' }}>Metode</th>
-                          <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px', borderBottom: '1px solid #334155' }}>Nominal (Rp)</th>
-                          <th style={{ padding: '8px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155' }}>Aksi</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155' }}>No.</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '105px', borderBottom: '1px solid #334155' }}>📅 Tanggal Bayar</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'right', width: '150px', borderBottom: '1px solid #334155' }}>💰 Bayar Berapa (Nominal)</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>📝 Keterangan / Termin</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', width: '130px', borderBottom: '1px solid #334155' }}>🏦 Metode</th>
+                          <th style={{ padding: '9px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
                         {historyList.length === 0 && (
-                          <tr style={{ background: '#0f172a', height: '38px' }}>
-                            <td style={{ textAlign: 'center', color: '#64748b' }}>-</td>
-                            <td style={{ textAlign: 'center', color: '#64748b' }}>-</td>
-                            <td style={{ color: '#64748b' }}>-</td>
-                            <td style={{ color: '#64748b' }}>-</td>
-                            <td style={{ textAlign: 'right', color: '#64748b' }}>-</td>
-                            <td style={{ textAlign: 'center', color: '#64748b' }}>-</td>
+                          <tr style={{ background: '#0f172a', height: '44px' }}>
+                            <td colSpan={6} style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem', padding: '12px' }}>
+                              Belum ada catatan riwayat pembayaran untuk pekerjaan ini.
+                            </td>
                           </tr>
                         )}
                         {historyList.map((hist, hIdx) => (
                             <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
-                              <td style={{ padding: '7px 8px', textAlign: 'center', color: '#94a3b8' }}>{hIdx + 1}</td>
-                              <td style={{ padding: '7px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 700 }}>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800 }}>{hIdx + 1}</td>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800 }}>
                                 {hist.tanggal ? hist.tanggal.split('-').reverse().join('/') : '-'}
                               </td>
-                              <td style={{ padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>
-                                {hist.keterangan || `Pembayaran Ke-${hIdx + 1}`}
-                              </td>
-                              <td style={{ padding: '7px 10px', color: '#38bdf8', fontWeight: 700 }}>
-                                {hist.metode || 'Transfer Bank'}
-                              </td>
-                              <td style={{ padding: '7px 10px', textAlign: 'right', color: '#34d399', fontWeight: 900 }}>
+                              <td style={{ padding: '8px 10px', textAlign: 'right', color: '#34d399', fontWeight: 900, fontSize: '0.92rem' }}>
                                 Rp {formatRupiahDesimal(hist.nominal || 0)}
                               </td>
-                              <td style={{ padding: '7px 6px', textAlign: 'center' }}>
+                              <td style={{ padding: '8px 10px', color: '#ffffff', fontWeight: 800 }}>
+                                {hist.keterangan || `Pembayaran Ke-${hIdx + 1}`}
+                              </td>
+                              <td style={{ padding: '8px 10px', color: '#38bdf8', fontWeight: 700 }}>
+                                {hist.metode || 'Transfer Bank'}
+                              </td>
+                              <td style={{ padding: '8px 6px', textAlign: 'center' }}>
                                 <button
                                   type="button"
                                   onClick={() => handleDeletePayment(hist.id)}
@@ -6837,13 +6856,15 @@ export const TeknikModule = () => {
                         </tbody>
                         <tfoot>
                           <tr style={{ background: '#1e293b', borderTop: '2px solid #f59e0b', fontWeight: 900 }}>
-                            <td colSpan={4} style={{ padding: '8px 10px', textAlign: 'left', color: '#f59e0b' }}>
-                              TOTAL TERBAYAR SEBELUMNYA
+                            <td colSpan={2} style={{ padding: '9px 10px', textAlign: 'left', color: '#f59e0b' }}>
+                              TOTAL SUDAH DIBAYAR
                             </td>
-                            <td style={{ padding: '8px 10px', textAlign: 'right', color: '#fbbf24', fontSize: '0.9rem' }}>
+                            <td style={{ padding: '9px 10px', textAlign: 'right', color: '#fbbf24', fontSize: '0.94rem' }}>
                               Rp {formatRupiahDesimal(totalBayar)}
                             </td>
-                            <td></td>
+                            <td colSpan={3} style={{ padding: '9px 10px', color: '#94a3b8', fontSize: '0.78rem' }}>
+                              {historyList.length}x transaksi pembayaran dicatat untuk pekerjaan ini
+                            </td>
                           </tr>
                         </tfoot>
                       </table>
