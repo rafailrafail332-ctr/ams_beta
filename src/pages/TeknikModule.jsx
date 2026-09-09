@@ -2018,16 +2018,34 @@ export const TeknikModule = () => {
 
   const handleOpenOpnameModal = (sheet) => {
     setOpnameTargetSheet(sheet);
-    const initialProgress = {};
+    const initialPrevProgress = {};
+    const initialAddedProgress = {};
+    const initialTotalProgress = {};
+
     (sheet.items || []).forEach(it => {
-      initialProgress[it.id] = Number(it.progress) || 0;
+      const prev = Number(it.progress) || 0;
+      initialPrevProgress[it.id] = prev;
+      initialAddedProgress[it.id] = '';
+      initialTotalProgress[it.id] = prev;
     });
+
+    // Default pembayaran sebelumnya dari riwayat opname terakhir jika ada
+    let defaultBayarSeb = 0;
+    if (sheet.opnameHistory && sheet.opnameHistory.length > 0) {
+      const lastOpn = sheet.opnameHistory[0];
+      defaultBayarSeb = parseNum(lastOpn.nilaiProgress) || parseNum(lastOpn.nilaiOpname) || parseNum(sheet.pembayaranSebelumnya) || 0;
+    } else {
+      defaultBayarSeb = parseNum(sheet.pembayaranSebelumnya) || 0;
+    }
+
     setOpnameFormData({
       tanggal: sheet.tanggalOpname || getTodayDateString(),
-      pembayaranSebelumnya: sheet.pembayaranSebelumnya !== undefined ? sheet.pembayaranSebelumnya : 0,
+      pembayaranSebelumnya: defaultBayarSeb,
       pengawas: 'Joko Susanto (Mandor)',
       catatan: '',
-      itemProgress: initialProgress
+      prevProgress: initialPrevProgress,
+      addedProgress: initialAddedProgress,
+      itemProgress: initialTotalProgress
     });
     setIsOpnameModalOpen(true);
   };
@@ -2037,13 +2055,23 @@ export const TeknikModule = () => {
     if (!opnameTargetSheet) return;
 
     const updatedItems = (opnameTargetSheet.items || []).map(it => {
-      const progInput = opnameFormData.itemProgress[it.id];
-      const newProg = progInput !== undefined && progInput !== '' ? parseNum(progInput) : (parseNum(it.progress) || 0);
+      const prevProg = Number(opnameFormData.prevProgress?.[it.id] ?? it.progress) || 0;
+      const totProgInput = opnameFormData.itemProgress?.[it.id];
+      const addedProgInput = opnameFormData.addedProgress?.[it.id];
+
+      // Akumulasikan: jika user mengisi Tambah Progres, tambahkan ke progres sebelumnya
+      let finalTotalProg = prevProg;
+      if (addedProgInput !== undefined && addedProgInput !== '') {
+        finalTotalProg = Math.min(100, Math.max(0, prevProg + parseNum(addedProgInput)));
+      } else if (totProgInput !== undefined && totProgInput !== '') {
+        finalTotalProg = Math.min(100, Math.max(0, parseNum(totProgInput)));
+      }
+
       const bobotNum = parseNum(it.bobotRatio || it.bobot);
-      const bobotProgress = newProg > 0 ? (bobotNum * newProg) : 0;
+      const bobotProgress = finalTotalProg > 0 ? (bobotNum * finalTotalProg) : 0;
       return { 
         ...it, 
-        progress: Math.min(100, Math.max(0, newProg)),
+        progress: Math.min(100, Math.max(0, finalTotalProg)),
         bobotProgress
       };
     });
@@ -2089,7 +2117,7 @@ export const TeknikModule = () => {
       localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
     } catch(err) {}
 
-    showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres terupdate: ${formatDecimal(totalProgResult)}%`, 'success');
+    showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres bertambah menjadi: ${formatDecimal(totalProgResult)}%`, 'success');
     setIsOpnameModalOpen(false);
   };
 
@@ -6549,15 +6577,23 @@ export const TeknikModule = () => {
       {isOpnameModalOpen && opnameTargetSheet && (() => {
         const targetSummary = computeSheetSummary(opnameTargetSheet);
         const liveItems = (opnameTargetSheet.items || []).map(it => {
-          const rawInput = opnameFormData.itemProgress[it.id];
-          const newProg = rawInput !== undefined && rawInput !== '' ? parseNum(rawInput) : (parseNum(it.progress) || 0);
-          return { ...it, progress: newProg };
+          const prevProg = Number(opnameFormData.prevProgress?.[it.id] ?? it.progress) || 0;
+          const addedProg = opnameFormData.addedProgress?.[it.id];
+          const totProgInput = opnameFormData.itemProgress?.[it.id];
+
+          let newTotal = prevProg;
+          if (addedProg !== undefined && addedProg !== '') {
+            newTotal = Math.min(100, Math.max(0, prevProg + parseNum(addedProg)));
+          } else if (totProgInput !== undefined && totProgInput !== '') {
+            newTotal = Math.min(100, Math.max(0, parseNum(totProgInput)));
+          }
+          return { ...it, progress: newTotal };
         });
         const liveCalc = computeSheetSummary({ ...opnameTargetSheet, items: liveItems });
 
         return (
           <div className="modal-backdrop">
-            <div className="modal-content" style={{ maxWidth: '780px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
               <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
                 <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                   <ClipboardCheck size={24} color="#10b981" /> 
@@ -6598,9 +6634,14 @@ export const TeknikModule = () => {
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>📈 Hasil Opname Fisik</div>
-                      <div style={{ fontSize: '1.05rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>📈 Progres Akumulatif (Bertambah)</div>
+                      <div style={{ fontSize: '1rem', color: '#34d399', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                         <span>{formatDecimal(liveCalc.progresPersen)}%</span>
+                        {liveCalc.progresPersen > targetSummary.progresPersen && (
+                          <span style={{ fontSize: '0.72rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.2)', padding: '1px 5px', borderRadius: '4px', border: '1px solid #10b981' }}>
+                            (+{formatDecimal(liveCalc.progresPersen - targetSummary.progresPersen)}%)
+                          </span>
+                        )}
                         <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>(Rp {formatRupiahDesimal(liveCalc.nilaiProgres)})</span>
                       </div>
                     </div>
@@ -6675,45 +6716,55 @@ export const TeknikModule = () => {
                   {/* DAFTAR ITEM PEKERJAAN & INPUT PROGRES REALISASI (HANYA INI YANG BISA DIUBAH) */}
                   {/* FULL SPREADSHEET TABLE GRID (PERSIS TABEL INPUT EDIT RAB) */}
                   <div style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
-                    <table style={{ width: '100%', minWidth: '950px', borderCollapse: 'collapse', fontSize: '0.82rem', background: '#0f172a' }}>
+                    <table style={{ width: '100%', minWidth: '1020px', borderCollapse: 'collapse', fontSize: '0.82rem', background: '#0f172a' }}>
                       <thead>
                         {/* HEADER ROW (PEACH #f6b26b WITH DEEP BLACK TEXT PERSIS FOTO) */}
                         <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                          <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                          <th style={{ width: '40px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
                             No.
                           </th>
-                          <th style={{ minWidth: '200px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ minWidth: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
                             Item Pekerjaan
                           </th>
-                          <th style={{ minWidth: '150px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ minWidth: '130px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
                             Spesifikasi
                           </th>
-                          <th style={{ width: '70px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ width: '60px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Vol
                           </th>
-                          <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                          <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
                             Sat
                           </th>
-                          <th style={{ width: '115px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ width: '110px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Harga Satuan
                           </th>
-                          <th style={{ width: '120px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ width: '115px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Jumlah
                           </th>
-                          <th style={{ width: '75px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ width: '60px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Bobot
                           </th>
-                          <th style={{ width: '100px', textAlign: 'center', background: '#34d399', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
-                            ✏️ Progress
+                          <th style={{ width: '85px', textAlign: 'center', background: '#e2e8f0', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#0f172a', padding: '8px 4px' }}>
+                            Progres Lalu
                           </th>
-                          <th style={{ width: '115px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ width: '105px', textAlign: 'center', background: '#34d399', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
+                            ➕ Tambah (%)
+                          </th>
+                          <th style={{ width: '100px', textAlign: 'center', background: '#38bdf8', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
+                            Total Progres
+                          </th>
+                          <th style={{ width: '105px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Bobot Progress
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {(liveCalc.items || []).map((it, iIdx) => {
-                          const curProg = Number(opnameFormData.itemProgress[it.id] ?? it.progress) || 0;
+                          const prevProg = Number(opnameFormData.prevProgress?.[it.id] ?? it.progress) || 0;
+                          const addedProgStr = opnameFormData.addedProgress?.[it.id] !== undefined ? opnameFormData.addedProgress[it.id] : '';
+                          const totProg = opnameFormData.itemProgress?.[it.id] !== undefined ? Number(opnameFormData.itemProgress[it.id]) : prevProg;
+                          const bobotProgress = (parseNum(it.bobotRatio) * totProg);
+
                           return (
                             <tr key={it.id || iIdx} style={{ backgroundColor: iIdx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
                               {/* 1. No */}
@@ -6732,7 +6783,7 @@ export const TeknikModule = () => {
                               </td>
 
                               {/* 4. Vol (Terkunci) */}
-                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 900, color: '#38bdf8' }}>
+                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 6px', fontWeight: 900, color: '#38bdf8' }}>
                                 {formatDecimal(it.vol)}
                               </td>
 
@@ -6742,38 +6793,53 @@ export const TeknikModule = () => {
                               </td>
 
                               {/* 6. Harga Satuan (Terkunci) */}
-                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 8px', fontWeight: 800, color: '#f8fafc' }}>
+                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '6px 6px', fontWeight: 800, color: '#f8fafc' }}>
                                 {formatRupiahDesimal(it.hargaSatuan)}
                               </td>
 
                               {/* 7. Jumlah (Terkunci) */}
-                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 8px' }}>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399', border: '1px solid #334155', padding: '6px 6px' }}>
                                 {formatRupiahDesimal(it.jumlah)}
                               </td>
 
                               {/* 8. Bobot (Terkunci - Desimal Tanpa Persen) */}
-                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '6px 8px' }}>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#fbbf24', border: '1px solid #334155', padding: '6px 6px' }}>
                                 {formatDecimal(it.bobotRatio, 2)}
                               </td>
 
-                              {/* 9. Progress (HANYA INI YANG BISA DIUBAH SECARA BEBAS) */}
-                              <td style={{ textAlign: 'center', border: '1.5px solid #10b981', background: 'rgba(16, 185, 129, 0.12)', padding: '4px 6px' }}>
+                              {/* 9. PROGRES LALU (SEBELUMNYA) */}
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', background: 'rgba(148, 163, 184, 0.08)', padding: '6px 4px' }}>
+                                <span style={{ fontWeight: 800, color: '#94a3b8', fontSize: '0.85rem' }}>
+                                  {formatDecimal(prevProg)}%
+                                </span>
+                              </td>
+
+                              {/* 10. TAMBAH PROGRES SAAT INI */}
+                              <td style={{ textAlign: 'center', border: '1.5px solid #10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '4px 6px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                  <span style={{ fontWeight: 900, color: '#34d399', fontSize: '0.88rem' }}>+</span>
                                   <input
                                     type="text"
-                                    value={opnameFormData.itemProgress[it.id] !== undefined ? opnameFormData.itemProgress[it.id] : (it.progress || '')}
+                                    placeholder="0"
+                                    value={addedProgStr}
                                     onChange={(e) => {
-                                      const rawVal = e.target.value;
+                                      const rawVal = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                                      const addNum = rawVal === '' ? 0 : Number(rawVal);
+                                      const calculatedTotal = Math.min(100, Math.max(0, prevProg + addNum));
                                       setOpnameFormData(prev => ({
                                         ...prev,
+                                        addedProgress: {
+                                          ...prev.addedProgress,
+                                          [it.id]: rawVal
+                                        },
                                         itemProgress: {
                                           ...prev.itemProgress,
-                                          [it.id]: rawVal
+                                          [it.id]: calculatedTotal
                                         }
                                       }));
                                     }}
                                     style={{
-                                      width: '48px',
+                                      width: '46px',
                                       background: '#0f172a',
                                       border: '1.5px solid #10b981',
                                       borderRadius: '4px',
@@ -6789,9 +6855,49 @@ export const TeknikModule = () => {
                                 </div>
                               </td>
 
-                              {/* 10. Bobot Progress (Otomatis Bobot x Progress) */}
-                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '6px 8px' }}>
-                                {formatDecimal(it.bobotRatio * (parseNum(opnameFormData.itemProgress[it.id] !== undefined ? opnameFormData.itemProgress[it.id] : it.progress)))}%
+                              {/* 11. TOTAL PROGRES BARU (AKUMULATIF) */}
+                              <td style={{ textAlign: 'center', border: '1.5px solid #0284c7', background: 'rgba(56, 189, 248, 0.12)', padding: '4px 6px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                  <input
+                                    type="text"
+                                    value={totProg}
+                                    onChange={(e) => {
+                                      const rawVal = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                                      const totNum = rawVal === '' ? prevProg : Number(rawVal);
+                                      const newTotal = Math.min(100, Math.max(0, totNum));
+                                      const calcAdd = Math.max(0, newTotal - prevProg);
+                                      setOpnameFormData(prev => ({
+                                        ...prev,
+                                        addedProgress: {
+                                          ...prev.addedProgress,
+                                          [it.id]: calcAdd > 0 ? String(calcAdd) : ''
+                                        },
+                                        itemProgress: {
+                                          ...prev.itemProgress,
+                                          [it.id]: newTotal
+                                        }
+                                      }));
+                                    }}
+                                    style={{
+                                      width: '46px',
+                                      background: '#0f172a',
+                                      border: '1.5px solid #38bdf8',
+                                      borderRadius: '4px',
+                                      color: '#38bdf8',
+                                      fontWeight: 900,
+                                      fontSize: '0.88rem',
+                                      padding: '2px 4px',
+                                      textAlign: 'right',
+                                      outline: 'none'
+                                    }}
+                                  />
+                                  <span style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.82rem' }}>%</span>
+                                </div>
+                              </td>
+
+                              {/* 12. Bobot Progress (Otomatis Bobot x Total Progres) */}
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#a78bfa', border: '1px solid #334155', padding: '6px 6px' }}>
+                                {formatDecimal(bobotProgress)}%
                               </td>
                             </tr>
                           );
@@ -6802,16 +6908,22 @@ export const TeknikModule = () => {
                           <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                             Total
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                             {formatRupiahDesimal(liveCalc.totalHargaRab)}
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                             {liveCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
                           </td>
-                          <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
-                            -
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.82rem', color: '#000000' }}>
+                            {formatDecimal(targetSummary.progresPersen)}%
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.82rem', color: '#065f46' }}>
+                            {liveCalc.progresPersen > targetSummary.progresPersen ? `+${formatDecimal(liveCalc.progresPersen - targetSummary.progresPersen)}%` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#0369a1' }}>
+                            {formatDecimal(liveCalc.progresPersen)}%
+                          </td>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                             {formatDecimal(liveCalc.progresPersen)}%
                           </td>
                         </tr>
