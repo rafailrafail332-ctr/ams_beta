@@ -3717,21 +3717,20 @@ export const TeknikModule = () => {
                       const totalSisa = Math.max(0, totalJumlah - totalBayarSeb);
 
                       return (
-                        <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                          <td colSpan={5} style={{ textAlign: 'left', padding: '10px 14px', border: '1.5px solid #78350f', fontSize: '0.9rem', color: '#000000' }}>
-                            TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)
+                        <tr style={{ background: '#fef3c7', color: '#000000', fontWeight: 900 }}>
+                          <td colSpan={7} style={{ textAlign: 'left', padding: '12px 16px', border: '1.5px solid #d97706', fontSize: '0.92rem', color: '#78350f', letterSpacing: '0.3px' }}>
+                            <strong>TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)</strong>
                           </td>
-                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.94rem', color: '#000000' }}>
-                            Rp {formatRupiahDesimal(totalJumlah)}
-                          </td>
-                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.94rem', color: '#78350f' }}>
-                            Rp {formatRupiahDesimal(totalBayarSeb)}
-                          </td>
-                          <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.96rem', color: totalSisa === 0 ? '#065f46' : '#991b1b', background: totalSisa === 0 ? '#bbf7d0' : '#fecaca' }}>
-                            Rp {formatRupiahDesimal(totalSisa)}
-                          </td>
-                          <td style={{ border: '1.5px solid #78350f', textAlign: 'center', fontSize: '0.78rem', color: '#78350f' }}>
-                            {totalSisa === 0 ? 'LUNAS' : 'BELUM LUNAS'}
+                          <td colSpan={2} style={{ textAlign: 'center', padding: '10px 12px', border: '1.5px solid #d97706' }}>
+                            {totalSisa === 0 ? (
+                              <span style={{ display: 'inline-block', background: '#059669', color: '#ffffff', padding: '6px 18px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                                ✓ LUNAS
+                              </span>
+                            ) : (
+                              <span style={{ display: 'inline-block', background: '#dc2626', color: '#ffffff', padding: '6px 18px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                                BELUM LUNAS
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );
