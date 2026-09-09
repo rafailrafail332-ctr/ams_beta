@@ -97,6 +97,123 @@ const formatNumberInput = (val) => {
   return isNaN(num) || num === 0 ? '' : num.toLocaleString('id-ID');
 };
 
+const namaBulanIndo = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatToInputDate = (val) => {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (!str || str === '-') return '';
+
+  // Case 1: YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD
+  const ymdMatch = str.match(/^(\d{4})[-/. ](\d{1,2})[-/. ](\d{1,2})/);
+  if (ymdMatch) {
+    const y = ymdMatch[1];
+    const m = ymdMatch[2].padStart(2, '0');
+    const d = ymdMatch[3].padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // Case 2: DD/MM/YYYY or DD-MM-YYYY or D-M-YYYY
+  const dmyMatch = str.match(/^(\d{1,2})[-/. ](\d{1,2})[-/. ](\d{4})/);
+  if (dmyMatch) {
+    const d = dmyMatch[1].padStart(2, '0');
+    const m = dmyMatch[2].padStart(2, '0');
+    const y = dmyMatch[3];
+    return `${y}-${m}-${d}`;
+  }
+
+  try {
+    const parts = str.split(/[-/T ]/);
+    if (parts.length >= 3) {
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+      if (parts[2].length === 4) {
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    }
+    const dt = new Date(str);
+    if (!isNaN(dt.getTime())) {
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const d = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+  } catch (e) {}
+
+  return str;
+};
+
+const formatTanggalIndo = (val) => {
+  if (!val) return '-';
+  const str = String(val).trim();
+  if (!str || str === '-') return '-';
+
+  if (/[a-zA-Z]/.test(str)) return str;
+
+  // Case 1: YYYY-MM-DD or YYYY/MM/DD
+  const ymdMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (ymdMatch) {
+    const y = ymdMatch[1];
+    const m = ymdMatch[2].padStart(2, '0');
+    const d = ymdMatch[3].padStart(2, '0');
+    return `${d}/${m}/${y}`;
+  }
+
+  // Case 2: DD/MM/YYYY or DD-MM-YYYY
+  const dmyMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (dmyMatch) {
+    const d = dmyMatch[1].padStart(2, '0');
+    const m = dmyMatch[2].padStart(2, '0');
+    const y = dmyMatch[3];
+    return `${d}/${m}/${y}`;
+  }
+
+  try {
+    const dt = new Date(str);
+    if (!isNaN(dt.getTime())) {
+      const d = String(dt.getDate()).padStart(2, '0');
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const y = dt.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+  } catch (e) {}
+
+  return str;
+};
+
+const formatTanggalLengkap = (val) => {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (!str || str === '-') return '';
+
+  const ymdMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (ymdMatch) {
+    const y = ymdMatch[1];
+    const m = parseInt(ymdMatch[2], 10);
+    const d = parseInt(ymdMatch[3], 10);
+    return `${d} ${namaBulanIndo[m] || m} ${y}`;
+  }
+
+  const dmyMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (dmyMatch) {
+    const d = parseInt(dmyMatch[1], 10);
+    const m = parseInt(dmyMatch[2], 10);
+    const y = dmyMatch[3];
+    return `${d} ${namaBulanIndo[m] || m} ${y}`;
+  }
+
+  return formatTanggalIndo(val);
+};
+
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
@@ -736,7 +853,7 @@ export const TeknikModule = () => {
       no: '01',
       umum: '-',
       catatan: '',
-      tanggal: dateFilter || new Date().toISOString().split('T')[0]
+      tanggal: dateFilter || getTodayDateString()
     });
     setIsAbsenModalOpen(true);
   };
@@ -853,7 +970,7 @@ export const TeknikModule = () => {
     {
       id: 'RAB-01',
       noInput: 'SPK-001',
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: getTodayDateString(),
       proyek: 'Ashoka View',
       namaVendor: 'CV. Berkah Konstruksi',
       blok: 'A',
@@ -1298,7 +1415,7 @@ export const TeknikModule = () => {
   const [pekerjaanFormData, setPekerjaanFormData] = useState({
     id: null,
     noSpk: '',
-    tanggal: new Date().toISOString().split('T')[0],
+    tanggal: getTodayDateString(),
     proyek: 'Ashoka View',
     namaVendor: '',
     pekerjaan: '',
@@ -1388,7 +1505,7 @@ export const TeknikModule = () => {
       ...existingSheet,
       id: targetId,
       noInput: cleanNoSpk,
-      tanggal: pekerjaanFormData.tanggal || new Date().toISOString().split('T')[0],
+      tanggal: (pekerjaanFormData.tanggal || '').trim() || getTodayDateString(),
       proyek: pekerjaanFormData.proyek || 'Ashoka View',
       namaVendor: cleanVendor || '-',
       pekerjaan: cleanPekerjaan,
@@ -1423,7 +1540,7 @@ export const TeknikModule = () => {
     setPekerjaanFormData({
       id: null,
       noSpk: '',
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: getTodayDateString(),
       proyek: 'Ashoka View',
       namaVendor: '',
       pekerjaan: '',
@@ -1447,7 +1564,7 @@ export const TeknikModule = () => {
     setPekerjaanFormData({
       id: sheet.id,
       noSpk: sheet.noInput || '',
-      tanggal: sheet.tanggal || new Date().toISOString().split('T')[0],
+      tanggal: sheet.tanggal || getTodayDateString(),
       proyek: sheet.proyek || 'Ashoka View',
       namaVendor: sheet.namaVendor || '',
       pekerjaan: sheet.pekerjaan || (sheet.items?.[0]?.itemPekerjaan) || '',
@@ -1465,7 +1582,7 @@ export const TeknikModule = () => {
     setPekerjaanFormData({
       id: null,
       noSpk: '',
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: getTodayDateString(),
       proyek: 'Ashoka View',
       namaVendor: '',
       pekerjaan: '',
@@ -1482,7 +1599,7 @@ export const TeknikModule = () => {
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [paymentHistoryTargetSheet, setPaymentHistoryTargetSheet] = useState(null);
   const [newPaymentFormData, setNewPaymentFormData] = useState({
-    tanggal: new Date().toISOString().split('T')[0],
+    tanggal: getTodayDateString(),
     keterangan: '',
     nominal: '',
     metode: 'Transfer BCA'
@@ -1497,7 +1614,7 @@ export const TeknikModule = () => {
     if (bayarAwal > 0) {
       return [{
         id: `PAY-INIT-${sheet.id}`,
-        tanggal: sheet.tanggal || new Date().toISOString().split('T')[0],
+        tanggal: sheet.tanggal || getTodayDateString(),
         keterangan: 'Pembayaran Awal / Sebelumnya',
         nominal: bayarAwal,
         metode: 'Transfer Bank',
@@ -1515,7 +1632,7 @@ export const TeknikModule = () => {
   const handleOpenPaymentHistory = (sheet) => {
     setPaymentHistoryTargetSheet(sheet);
     setNewPaymentFormData({
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: getTodayDateString(),
       keterangan: '',
       nominal: '',
       metode: 'Transfer BCA'
@@ -1547,10 +1664,11 @@ export const TeknikModule = () => {
       return;
     }
 
+    const tglInput = (newPaymentFormData.tanggal || '').trim() || getTodayDateString();
     const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
     const newEntry = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      tanggal: newPaymentFormData.tanggal || new Date().toISOString().split('T')[0],
+      tanggal: tglInput,
       keterangan: (newPaymentFormData.keterangan || '').trim() || `Pembayaran Ke-${currentHistory.length + 1}`,
       nominal: nominalNum,
       metode: newPaymentFormData.metode || 'Transfer BCA',
@@ -1576,7 +1694,7 @@ export const TeknikModule = () => {
     saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
 
     setNewPaymentFormData({
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: getTodayDateString(),
       keterangan: '',
       nominal: '',
       metode: 'Transfer BCA'
@@ -1617,7 +1735,7 @@ export const TeknikModule = () => {
   const [isOpnameModalOpen, setIsOpnameModalOpen] = useState(false);
   const [opnameTargetSheet, setOpnameTargetSheet] = useState(null);
   const [opnameFormData, setOpnameFormData] = useState({
-    tanggal: new Date().toISOString().split('T')[0],
+    tanggal: getTodayDateString(),
     pengawas: 'Joko Susanto (Mandor)',
     catatan: '',
     itemProgress: {}
@@ -1701,7 +1819,7 @@ export const TeknikModule = () => {
       initialProgress[it.id] = Number(it.progress) || 0;
     });
     setOpnameFormData({
-      tanggal: sheet.tanggalOpname || new Date().toISOString().split('T')[0],
+      tanggal: sheet.tanggalOpname || getTodayDateString(),
       pembayaranSebelumnya: sheet.pembayaranSebelumnya !== undefined ? sheet.pembayaranSebelumnya : 0,
       pengawas: 'Joko Susanto (Mandor)',
       catatan: '',
@@ -1735,7 +1853,7 @@ export const TeknikModule = () => {
 
     const opnameEntry = {
       id: `OPN-${Date.now().toString().slice(-4)}`,
-      tanggal: opnameFormData.tanggal || new Date().toISOString().split('T')[0],
+      tanggal: opnameFormData.tanggal || getTodayDateString(),
       pengawas: opnameFormData.pengawas || 'Pengawas Lapangan',
       catatan: opnameFormData.catatan || '',
       progresHasil: totalProgResult,
@@ -1753,7 +1871,7 @@ export const TeknikModule = () => {
         return {
           ...s,
           items: updatedItems,
-          tanggalOpname: opnameFormData.tanggal || new Date().toISOString().split('T')[0],
+          tanggalOpname: opnameFormData.tanggal || getTodayDateString(),
           pembayaranSebelumnya: bayarSebNum,
           opnameHistory: [opnameEntry, ...(s.opnameHistory || [])]
         };
@@ -3190,12 +3308,20 @@ export const TeknikModule = () => {
 
                 {/* 2. Tanggal */}
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                    📅 Tanggal
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem', margin: 0 }}>
+                      📅 Tanggal
+                    </label>
+                    {pekerjaanFormData.tanggal && (
+                      <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 800 }}>
+                        {formatTanggalLengkap(pekerjaanFormData.tanggal)}
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="date"
-                    value={pekerjaanFormData.tanggal}
+                    required
+                    value={formatToInputDate(pekerjaanFormData.tanggal)}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, tanggal: e.target.value })}
                     style={{
                       width: '100%',
@@ -3586,7 +3712,12 @@ export const TeknikModule = () => {
 
                           {/* 2. Tanggal */}
                           <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '8px 6px' }}>
-                            {item.tanggal ? item.tanggal.split('-').reverse().join('/') : '-'}
+                            <div style={{ color: '#ffffff', fontWeight: 800 }}>{formatTanggalIndo(item.tanggal)}</div>
+                            {formatTanggalLengkap(item.tanggal) && (
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '1px' }}>
+                                {formatTanggalLengkap(item.tanggal)}
+                              </div>
+                            )}
                           </td>
 
                           {/* 3. Nama Vendor */}
@@ -6200,7 +6331,7 @@ export const TeknikModule = () => {
                       </label>
                       <input
                         type="date"
-                        value={opnameFormData.tanggal || ''}
+                        value={formatToInputDate(opnameFormData.tanggal)}
                         onChange={(e) => setOpnameFormData(prev => ({ ...prev, tanggal: e.target.value }))}
                         style={{
                           background: '#1e293b',
@@ -6844,8 +6975,13 @@ export const TeknikModule = () => {
                         {historyList.map((hist, hIdx) => (
                             <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
                               <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
-                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle' }}>
-                                {hist.tanggal ? hist.tanggal.split('-').reverse().join('/') : '-'}
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatTanggalIndo(hist.tanggal)}</div>
+                                {formatTanggalLengkap(hist.tanggal) && (
+                                  <div style={{ fontSize: '0.7rem', color: '#38bdf8', marginTop: '1px' }}>
+                                    {formatTanggalLengkap(hist.tanggal)}
+                                  </div>
+                                )}
                               </td>
                               <td style={{ padding: '8px 12px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px', color: '#34d399', fontWeight: 900, fontSize: '0.92rem' }}>
@@ -6928,16 +7064,35 @@ export const TeknikModule = () => {
                     </div>
 
                     <form onSubmit={handleAddPayment}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem', marginBottom: '0.85rem' }}>
                         
                         {/* Tanggal Bayar */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                            📅 Tanggal Bayar
-                          </label>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>📅</span> <span>Tanggal Bayar <span style={{ color: '#f87171' }}>*</span></span>
+                            </label>
+                            {newPaymentFormData.tanggal && (
+                              <span style={{
+                                whiteSpace: 'nowrap',
+                                fontSize: '0.74rem',
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                background: 'rgba(56, 189, 248, 0.12)',
+                                border: '1px solid rgba(56, 189, 248, 0.35)',
+                                color: '#38bdf8',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center'
+                              }}>
+                                {formatTanggalLengkap(newPaymentFormData.tanggal)}
+                              </span>
+                            )}
+                          </div>
                           <input
                             type="date"
-                            value={newPaymentFormData.tanggal}
+                            required
+                            value={formatToInputDate(newPaymentFormData.tanggal)}
                             onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, tanggal: e.target.value })}
                             style={{
                               width: '100%',
@@ -6946,18 +7101,24 @@ export const TeknikModule = () => {
                               borderRadius: '6px',
                               color: '#ffffff',
                               fontWeight: 800,
-                              padding: '6px 10px',
-                              fontSize: '0.82rem',
-                              outline: 'none'
+                              padding: '7px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
                             }}
                           />
                         </div>
 
                         {/* Uraian / Keterangan */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                            📝 Keterangan / Termin
-                          </label>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>📝</span> <span>Keterangan / Termin</span>
+                            </label>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              Opsional
+                            </span>
+                          </div>
                           <input
                             type="text"
                             placeholder="Misal: Termin 1, DP 20%, Pelunasan..."
@@ -6969,22 +7130,35 @@ export const TeknikModule = () => {
                               border: '1px solid #475569',
                               borderRadius: '6px',
                               color: '#ffffff',
-                              padding: '6px 10px',
-                              fontSize: '0.82rem',
-                              outline: 'none'
+                              padding: '7px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
                             }}
                           />
                         </div>
 
                         {/* Nominal Pembayaran */}
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <label style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 900 }}>
-                              💰 Nominal Bayar (Rp) *
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#34d399', fontWeight: 900, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>💰</span> <span>Nominal Bayar (Rp) <span style={{ color: '#f87171' }}>*</span></span>
                             </label>
-                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                              Maks: <strong style={{ color: '#fbbf24' }}>Rp {formatRupiahDesimal(sisaBayar)}</strong>
-                            </span>
+                            <div style={{
+                              whiteSpace: 'nowrap',
+                              fontSize: '0.74rem',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(245, 158, 11, 0.12)',
+                              border: '1px solid rgba(245, 158, 11, 0.35)',
+                              color: '#cbd5e1',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              <span>Maks:</span>
+                              <strong style={{ color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiahDesimal(sisaBayar)}</strong>
+                            </div>
                           </div>
                           <input
                             type="text"
@@ -7002,23 +7176,33 @@ export const TeknikModule = () => {
                               borderRadius: '6px',
                               color: (Number(newPaymentFormData.nominal) || 0) > sisaBayar ? '#f87171' : '#34d399',
                               fontWeight: 900,
-                              padding: '6px 10px',
+                              padding: '7px 10px',
                               fontSize: '0.88rem',
-                              outline: 'none'
+                              outline: 'none',
+                              boxSizing: 'border-box'
                             }}
                           />
-                          {(Number(newPaymentFormData.nominal) || 0) > sisaBayar && (
-                            <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 800, marginTop: '4px' }}>
+                          {(Number(newPaymentFormData.nominal) || 0) > sisaBayar ? (
+                            <div style={{ fontSize: '0.74rem', color: '#f87171', fontWeight: 800, marginTop: '4px' }}>
                               ⚠️ Kelebihan bayar Rp {formatRupiahDesimal((Number(newPaymentFormData.nominal) || 0) - sisaBayar)}! Maksimal Rp {formatRupiahDesimal(sisaBayar)}.
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
+                              Sisa tagihan: <span style={{ color: '#fbbf24', fontWeight: 700 }}>Rp {formatRupiahDesimal(sisaBayar)}</span>
                             </div>
                           )}
                         </div>
 
                         {/* Metode Pembayaran */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                            🏦 Metode Pembayaran
-                          </label>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>🏦</span> <span>Metode Pembayaran</span>
+                            </label>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              Transfer / Kas
+                            </span>
+                          </div>
                           <select
                             value={newPaymentFormData.metode}
                             onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, metode: e.target.value })}
@@ -7029,9 +7213,10 @@ export const TeknikModule = () => {
                               borderRadius: '6px',
                               color: '#ffffff',
                               fontWeight: 800,
-                              padding: '6px 10px',
-                              fontSize: '0.82rem',
-                              outline: 'none'
+                              padding: '7px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
                             }}
                           >
                             <option value="Transfer BCA">Transfer BCA</option>
