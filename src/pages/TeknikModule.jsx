@@ -3890,27 +3890,27 @@ export const TeknikModule = () => {
                           }}
                         >
                           {/* 1. No */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '8px 4px', color: '#94a3b8' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#94a3b8', verticalAlign: 'top' }}>
                             {idx + 1}
                           </td>
 
                           {/* 2. Tanggal */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '8px 6px' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '10px 6px', verticalAlign: 'top' }}>
                             <div style={{ color: '#ffffff', fontWeight: 800 }}>{formatTanggalIndo(item.tanggal)}</div>
                             {formatTanggalLengkap(item.tanggal) && (
-                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '1px' }}>
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>
                                 {formatTanggalLengkap(item.tanggal)}
                               </div>
                             )}
                           </td>
 
                           {/* 3. Nama Vendor */}
-                          <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#38bdf8', padding: '8px' }}>
+                          <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#38bdf8', padding: '10px 8px', verticalAlign: 'top' }}>
                             {item.namaVendor || item.vendor || '-'}
                           </td>
 
                           {/* 4. Proyek */}
-                          <td style={{ border: '1px solid #334155', padding: '8px' }}>
+                          <td style={{ border: '1px solid #334155', padding: '10px 8px', verticalAlign: 'top' }}>
                             <div style={{ fontWeight: 900, color: '#34d399' }}>{item.proyek || '-'}</div>
                             {(item.blok || item.nomor || item.fasum) && (
                               <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -3920,7 +3920,7 @@ export const TeknikModule = () => {
                           </td>
 
                           {/* 5. Pekerjaan */}
-                          <td style={{ border: '1px solid #334155', padding: '8px' }}>
+                          <td style={{ border: '1px solid #334155', padding: '10px 8px', verticalAlign: 'top' }}>
                             <div style={{ fontWeight: 800, color: '#ffffff' }}>
                               {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
                             </div>
@@ -3930,54 +3930,83 @@ export const TeknikModule = () => {
                           </td>
 
                           {/* 6. Jumlah */}
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', fontWeight: 900, color: '#10b981', padding: '8px' }}>
-                            Rp {formatRupiahDesimal(jumlah)}
+                          <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#6ee7b7', fontWeight: 800 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#10b981', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatRupiahDesimal(jumlah)}
+                              </span>
+                            </div>
                           </td>
 
                           {/* 7. Pembayaran Sebelumnya */}
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px' }}>
-                            <div style={{ fontWeight: 900, color: '#fbbf24', fontSize: '0.86rem' }}>
-                              Rp {formatRupiahDesimal(totalBayar)}
+                          <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#fde68a', fontWeight: 800 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatRupiahDesimal(totalBayar)}
+                              </span>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenPaymentHistory(item)}
-                              style={{
-                                background: '#0284c7',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '4px',
-                                padding: '3px 7px',
-                                fontSize: '0.7rem',
-                                fontWeight: 800,
-                                cursor: 'pointer',
-                                marginTop: '4px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                              }}
-                              title="Lihat riwayat pembayaran pekerjaan ini (kapan bayar & berapa bayar)"
-                            >
-                              <Clock size={10} /> History ({paymentHistory.length})
-                            </button>
+                            <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPaymentHistory(item)}
+                                style={{
+                                  background: '#0284c7',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  padding: '3px 8px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                                }}
+                                title="Lihat riwayat pembayaran pekerjaan ini (kapan bayar & berapa bayar)"
+                              >
+                                <Clock size={11} /> History ({paymentHistory.length})
+                              </button>
+                            </div>
                           </td>
 
                           {/* 8. Sisa Pembayaran */}
-                          <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '8px' }}>
+                          <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
                             {isLunas ? (
-                              <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '3px 8px', borderRadius: '4px', fontWeight: 900, fontSize: '0.76rem' }}>
-                                ✓ LUNAS
-                              </span>
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                                  <span style={{ fontSize: '0.78rem', color: '#6ee7b7', fontWeight: 800 }}>Rp</span>
+                                  <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#34d399', fontVariantNumeric: 'tabular-nums' }}>
+                                    0,00
+                                  </span>
+                                </div>
+                                <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                                  <span style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '2px 7px', borderRadius: '4px', fontWeight: 900, fontSize: '0.72rem' }}>
+                                    ✓ LUNAS
+                                  </span>
+                                </div>
+                              </div>
                             ) : (
-                              <div style={{ fontWeight: 900, color: '#f87171', fontSize: '0.88rem' }}>
-                                Rp {formatRupiahDesimal(sisaPembayaran)}
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                                  <span style={{ fontSize: '0.78rem', color: '#fca5a5', fontWeight: 800 }}>Rp</span>
+                                  <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                                    {formatRupiahDesimal(sisaPembayaran)}
+                                  </span>
+                                </div>
+                                <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                                  <span style={{ display: 'inline-block', fontSize: '0.68rem', color: '#f87171', fontWeight: 700, background: 'rgba(239,68,68,0.15)', padding: '1px 6px', borderRadius: '3px', border: '1px solid rgba(239,68,68,0.3)' }}>
+                                    Belum Lunas
+                                  </span>
+                                </div>
                               </div>
                             )}
                           </td>
 
                           {/* 9. Aksi */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', verticalAlign: 'top' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
                               <button
                                 type="button"
@@ -4070,16 +4099,40 @@ export const TeknikModule = () => {
 
                       return (
                         <tr style={{ background: '#fef3c7', color: '#000000', fontWeight: 900 }}>
-                          <td colSpan={7} style={{ textAlign: 'left', padding: '12px 16px', border: '1.5px solid #d97706', fontSize: '0.92rem', color: '#78350f', letterSpacing: '0.3px' }}>
+                          <td colSpan={5} style={{ textAlign: 'left', padding: '10px 14px', border: '1.5px solid #d97706', fontSize: '0.88rem', color: '#78350f', letterSpacing: '0.3px', verticalAlign: 'middle' }}>
                             <strong>TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)</strong>
                           </td>
-                          <td colSpan={2} style={{ textAlign: 'center', padding: '10px 12px', border: '1.5px solid #d97706' }}>
+                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#065f46', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#065f46', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatRupiahDesimal(totalJumlah)}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#92400e', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#92400e', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatRupiahDesimal(totalBayarSeb)}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#991b1b', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#991b1b', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatRupiahDesimal(totalSisa)}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '8px 6px', border: '1.5px solid #d97706', verticalAlign: 'middle' }}>
                             {totalSisa === 0 ? (
-                              <span style={{ display: 'inline-block', background: '#059669', color: '#ffffff', padding: '6px 18px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                              <span style={{ display: 'inline-block', background: '#059669', color: '#ffffff', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.5px' }}>
                                 ✓ LUNAS
                               </span>
                             ) : (
-                              <span style={{ display: 'inline-block', background: '#dc2626', color: '#ffffff', padding: '6px 18px', borderRadius: '6px', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                              <span style={{ display: 'inline-block', background: '#dc2626', color: '#ffffff', padding: '4px 8px', borderRadius: '4px', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.5px' }}>
                                 BELUM LUNAS
                               </span>
                             )}
