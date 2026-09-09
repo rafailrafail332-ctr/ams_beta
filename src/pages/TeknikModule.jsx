@@ -6774,8 +6774,8 @@ export const TeknikModule = () => {
 
                   {/* Kartu 2: Total Pembayaran Sebelumnya */}
                   <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800 }}>💳 TOTAL PEMBAYARAN SEBELUMNYA</div>
-                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
+                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
                       Rp {formatRupiahDesimal(totalBayar)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -6786,7 +6786,7 @@ export const TeknikModule = () => {
                   {/* Kartu 3: Sisa Pembayaran */}
                   <div style={{ background: isLunas ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: '0.85rem 1rem', borderRadius: '8px', border: isLunas ? '1.5px solid #10b981' : '1.5px solid #ef4444' }}>
                     <div style={{ fontSize: '0.74rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 800 }}>⚡ SISA PEMBAYARAN</div>
-                    <div style={{ fontSize: '1.15rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 900, marginTop: '2px' }}>
+                    <div style={{ fontSize: '1.15rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
                       {isLunas ? '✓ LUNAS (Rp 0)' : `Rp ${formatRupiahDesimal(sisaBayar)}`}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
@@ -6810,12 +6810,12 @@ export const TeknikModule = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                       <thead>
                         <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
-                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155' }}>No.</th>
-                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '105px', borderBottom: '1px solid #334155' }}>📅 Tanggal Bayar</th>
-                          <th style={{ padding: '9px 10px', textAlign: 'right', width: '150px', borderBottom: '1px solid #334155' }}>💰 Bayar Berapa (Nominal)</th>
-                          <th style={{ padding: '9px 10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>📝 Keterangan / Termin</th>
-                          <th style={{ padding: '9px 10px', textAlign: 'left', width: '130px', borderBottom: '1px solid #334155' }}>🏦 Metode</th>
-                          <th style={{ padding: '9px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155' }}>Aksi</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>No.</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '110px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📅 Tanggal Bayar</th>
+                          <th style={{ padding: '9px 12px', textAlign: 'right', width: '165px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>💰 Bayar Berapa (Nominal)</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📝 Keterangan / Termin</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', width: '130px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>🏦 Metode</th>
+                          <th style={{ padding: '9px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -6828,20 +6828,23 @@ export const TeknikModule = () => {
                         )}
                         {historyList.map((hist, hIdx) => (
                             <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
-                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800 }}>{hIdx + 1}</td>
-                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800 }}>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle' }}>
                                 {hist.tanggal ? hist.tanggal.split('-').reverse().join('/') : '-'}
                               </td>
-                              <td style={{ padding: '8px 10px', textAlign: 'right', color: '#34d399', fontWeight: 900, fontSize: '0.92rem' }}>
-                                Rp {formatRupiahDesimal(hist.nominal || 0)}
+                              <td style={{ padding: '8px 12px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px', color: '#34d399', fontWeight: 900, fontSize: '0.92rem' }}>
+                                  <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontWeight: 800 }}>Rp</span>
+                                  <span>{formatRupiahDesimal(hist.nominal || 0)}</span>
+                                </div>
                               </td>
-                              <td style={{ padding: '8px 10px', color: '#ffffff', fontWeight: 800 }}>
+                              <td style={{ padding: '8px 10px', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle' }}>
                                 {hist.keterangan || `Pembayaran Ke-${hIdx + 1}`}
                               </td>
-                              <td style={{ padding: '8px 10px', color: '#38bdf8', fontWeight: 700 }}>
+                              <td style={{ padding: '8px 10px', color: '#38bdf8', fontWeight: 700, verticalAlign: 'middle' }}>
                                 {hist.metode || 'Transfer Bank'}
                               </td>
-                              <td style={{ padding: '8px 6px', textAlign: 'center' }}>
+                              <td style={{ padding: '8px 6px', textAlign: 'center', verticalAlign: 'middle' }}>
                                 <button
                                   type="button"
                                   onClick={() => handleDeletePayment(hist.id)}
@@ -6856,13 +6859,16 @@ export const TeknikModule = () => {
                         </tbody>
                         <tfoot>
                           <tr style={{ background: '#1e293b', borderTop: '2px solid #f59e0b', fontWeight: 900 }}>
-                            <td colSpan={2} style={{ padding: '9px 10px', textAlign: 'left', color: '#f59e0b' }}>
+                            <td colSpan={2} style={{ padding: '10px 10px', textAlign: 'left', color: '#f59e0b', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                               TOTAL SUDAH DIBAYAR
                             </td>
-                            <td style={{ padding: '9px 10px', textAlign: 'right', color: '#fbbf24', fontSize: '0.94rem' }}>
-                              Rp {formatRupiahDesimal(totalBayar)}
+                            <td style={{ padding: '10px 12px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px', color: '#fbbf24', fontWeight: 900, fontSize: '0.95rem' }}>
+                                <span style={{ fontSize: '0.82rem', color: '#fde047', fontWeight: 800 }}>Rp</span>
+                                <span>{formatRupiahDesimal(totalBayar)}</span>
+                              </div>
                             </td>
-                            <td colSpan={3} style={{ padding: '9px 10px', color: '#94a3b8', fontSize: '0.78rem' }}>
+                            <td colSpan={3} style={{ padding: '10px 10px', color: '#94a3b8', fontSize: '0.78rem', verticalAlign: 'middle' }}>
                               {historyList.length}x transaksi pembayaran dicatat untuk pekerjaan ini
                             </td>
                           </tr>
