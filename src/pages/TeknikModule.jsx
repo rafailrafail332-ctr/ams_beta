@@ -1532,6 +1532,21 @@ export const TeknikModule = () => {
       return;
     }
 
+    const sheetSummary = computeSheetSummary(paymentHistoryTargetSheet);
+    const jumlahPekerjaan = sheetSummary.totalHargaRab || 0;
+    const currentTotalBayar = getSheetTotalBayar(paymentHistoryTargetSheet);
+    const sisaPembayaran = Math.max(0, jumlahPekerjaan - currentTotalBayar);
+
+    if (sisaPembayaran <= 0 && jumlahPekerjaan > 0) {
+      alert('Pekerjaan ini sudah LUNAS! Tidak dapat menambah pembayaran lagi.');
+      return;
+    }
+
+    if (nominalNum > sisaPembayaran) {
+      alert(`Pembayaran ditolak karena terjadi KELEBIHAN BAYAR!\n\nNominal yang diinput: Rp ${formatRupiahDesimal(nominalNum)}\nSisa tagihan saat ini: Rp ${formatRupiahDesimal(sisaPembayaran)}\nKelebihan: Rp ${formatRupiahDesimal(nominalNum - sisaPembayaran)}\n\nSilakan masukkan nominal maksimal Rp ${formatRupiahDesimal(sisaPembayaran)}.`);
+      return;
+    }
+
     const currentHistory = getSheetPaymentHistory(paymentHistoryTargetSheet);
     const newEntry = {
       id: `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -6878,140 +6893,189 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* FORM CATAT PEMBAYARAN BARU */}
-                <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1.5px solid #38bdf8' }}>
-                  <h4 style={{ margin: '0 0 0.85rem', fontSize: '0.92rem', fontWeight: 900, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Plus size={16} /> + Catat Pembayaran Baru
-                  </h4>
-
-                  <form onSubmit={handleAddPayment}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
-                      
-                      {/* Tanggal Bayar */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                          📅 Tanggal Bayar
-                        </label>
-                        <input
-                          type="date"
-                          value={newPaymentFormData.tanggal}
-                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, tanggal: e.target.value })}
-                          style={{
-                            width: '100%',
-                            background: '#0f172a',
-                            border: '1px solid #475569',
-                            borderRadius: '6px',
-                            color: '#ffffff',
-                            fontWeight: 800,
-                            padding: '6px 10px',
-                            fontSize: '0.82rem',
-                            outline: 'none'
-                          }}
-                        />
-                      </div>
-
-                      {/* Uraian / Keterangan */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                          📝 Keterangan / Termin
-                        </label>
-                        <input
-                          type="text"
-                          
-                          value={newPaymentFormData.keterangan}
-                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, keterangan: e.target.value })}
-                          style={{
-                            width: '100%',
-                            background: '#0f172a',
-                            border: '1px solid #475569',
-                            borderRadius: '6px',
-                            color: '#ffffff',
-                            padding: '6px 10px',
-                            fontSize: '0.82rem',
-                            outline: 'none'
-                          }}
-                        />
-                      </div>
-
-                      {/* Nominal Pembayaran */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#34d399', fontWeight: 900, marginBottom: '4px' }}>
-                          💰 Nominal Bayar (Rp) *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          
-                          value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/\D/g, '');
-                            setNewPaymentFormData({ ...newPaymentFormData, nominal: raw ? Number(raw) : '' });
-                          }}
-                          style={{
-                            width: '100%',
-                            background: '#0f172a',
-                            border: '1.5px solid #10b981',
-                            borderRadius: '6px',
-                            color: '#34d399',
-                            fontWeight: 900,
-                            padding: '6px 10px',
-                            fontSize: '0.88rem',
-                            outline: 'none'
-                          }}
-                        />
-                      </div>
-
-                      {/* Metode Pembayaran */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
-                          🏦 Metode Pembayaran
-                        </label>
-                        <select
-                          value={newPaymentFormData.metode}
-                          onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, metode: e.target.value })}
-                          style={{
-                            width: '100%',
-                            background: '#0f172a',
-                            border: '1px solid #475569',
-                            borderRadius: '6px',
-                            color: '#ffffff',
-                            fontWeight: 800,
-                            padding: '6px 10px',
-                            fontSize: '0.82rem',
-                            outline: 'none'
-                          }}
-                        >
-                          <option value="Transfer BCA">Transfer BCA</option>
-                          <option value="Transfer Mandiri">Transfer Mandiri</option>
-                          <option value="Transfer BRI">Transfer BRI</option>
-                          <option value="Transfer BNI">Transfer BNI</option>
-                          <option value="Kas Tunai">Kas Tunai Proyek</option>
-                        </select>
-                      </div>
+                {isLunas ? (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.12)', padding: '1.25rem', borderRadius: '10px', border: '1.5px solid #10b981', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={24} color="#10b981" /> Pekerjaan Ini Sudah Lunas!
                     </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <p style={{ margin: '6px 0 0', fontSize: '0.84rem', color: '#cbd5e1' }}>
+                      Seluruh kewajiban pembayaran telah terpenuhi (Total terbayar: Rp {formatRupiahDesimal(totalBayar)}). Tidak dapat menambah pembayaran baru.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: '1.5px solid #38bdf8' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 900, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Plus size={16} /> + Catat Pembayaran Baru
+                      </h4>
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={() => setNewPaymentFormData(prev => ({ ...prev, nominal: sisaBayar }))}
                         style={{
-                          background: 'linear-gradient(135deg, #059669, #047857)',
-                          color: '#ffffff',
-                          border: 'none',
-                          fontWeight: 900,
-                          padding: '8px 18px',
+                          background: 'rgba(56, 189, 248, 0.15)',
+                          color: '#38bdf8',
+                          border: '1px solid #38bdf8',
                           borderRadius: '6px',
-                          fontSize: '0.84rem',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.4)'
+                          padding: '3px 9px',
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
                         }}
+                        title="Klik untuk mengisi nominal otomatis sesuai sisa tagihan"
                       >
-                        <Save size={15} /> Simpan Pembayaran Ini
+                        ⚡ Bayar Pas Sisa: Rp {formatRupiahDesimal(sisaBayar)}
                       </button>
                     </div>
-                  </form>
-                </div>
+
+                    <form onSubmit={handleAddPayment}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                        
+                        {/* Tanggal Bayar */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                            📅 Tanggal Bayar
+                          </label>
+                          <input
+                            type="date"
+                            value={newPaymentFormData.tanggal}
+                            onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, tanggal: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              padding: '6px 10px',
+                              fontSize: '0.82rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        {/* Uraian / Keterangan */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                            📝 Keterangan / Termin
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Misal: Termin 1, DP 20%, Pelunasan..."
+                            value={newPaymentFormData.keterangan}
+                            onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, keterangan: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              padding: '6px 10px',
+                              fontSize: '0.82rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        {/* Nominal Pembayaran */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <label style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 900 }}>
+                              💰 Nominal Bayar (Rp) *
+                            </label>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                              Maks: <strong style={{ color: '#fbbf24' }}>Rp {formatRupiahDesimal(sisaBayar)}</strong>
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            placeholder="0"
+                            value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/\D/g, '');
+                              setNewPaymentFormData({ ...newPaymentFormData, nominal: raw ? Number(raw) : '' });
+                            }}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: (Number(newPaymentFormData.nominal) || 0) > sisaBayar ? '2px solid #ef4444' : '1.5px solid #10b981',
+                              borderRadius: '6px',
+                              color: (Number(newPaymentFormData.nominal) || 0) > sisaBayar ? '#f87171' : '#34d399',
+                              fontWeight: 900,
+                              padding: '6px 10px',
+                              fontSize: '0.88rem',
+                              outline: 'none'
+                            }}
+                          />
+                          {(Number(newPaymentFormData.nominal) || 0) > sisaBayar && (
+                            <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 800, marginTop: '4px' }}>
+                              ⚠️ Kelebihan bayar Rp {formatRupiahDesimal((Number(newPaymentFormData.nominal) || 0) - sisaBayar)}! Maksimal Rp {formatRupiahDesimal(sisaBayar)}.
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Metode Pembayaran */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, marginBottom: '4px' }}>
+                            🏦 Metode Pembayaran
+                          </label>
+                          <select
+                            value={newPaymentFormData.metode}
+                            onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, metode: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              padding: '6px 10px',
+                              fontSize: '0.82rem',
+                              outline: 'none'
+                            }}
+                          >
+                            <option value="Transfer BCA">Transfer BCA</option>
+                            <option value="Transfer Mandiri">Transfer Mandiri</option>
+                            <option value="Transfer BRI">Transfer BRI</option>
+                            <option value="Transfer BNI">Transfer BNI</option>
+                            <option value="Kas Tunai">Kas Tunai Proyek</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+                        {(Number(newPaymentFormData.nominal) || 0) > sisaBayar && (
+                          <span style={{ fontSize: '0.78rem', color: '#f87171', fontWeight: 800 }}>
+                            ⛔ Tidak bisa bayar: Kelebihan bayar Rp {formatRupiahDesimal((Number(newPaymentFormData.nominal) || 0) - sisaBayar)}
+                          </span>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={(Number(newPaymentFormData.nominal) || 0) > sisaBayar || (Number(newPaymentFormData.nominal) || 0) <= 0}
+                          style={{
+                            background: (Number(newPaymentFormData.nominal) || 0) > sisaBayar || (Number(newPaymentFormData.nominal) || 0) <= 0
+                              ? '#475569'
+                              : 'linear-gradient(135deg, #059669, #047857)',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: 900,
+                            padding: '8px 18px',
+                            borderRadius: '6px',
+                            fontSize: '0.84rem',
+                            cursor: (Number(newPaymentFormData.nominal) || 0) > sisaBayar || (Number(newPaymentFormData.nominal) || 0) <= 0 ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.4)',
+                            opacity: (Number(newPaymentFormData.nominal) || 0) > sisaBayar || (Number(newPaymentFormData.nominal) || 0) <= 0 ? 0.6 : 1
+                          }}
+                        >
+                          <Save size={15} /> Simpan Pembayaran Ini
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
 
               </div>
 
