@@ -815,6 +815,21 @@ export const TeknikModule = () => {
     });
 
     const doFetchMaster = () => {
+      fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) {
+          const validSheets = val.filter(s => {
+            const spk = String(s.noInput || s.noSpk || '').trim();
+            const pek = String(s.pekerjaan || s.items?.[0]?.itemPekerjaan || '').trim();
+            const nil = Number(s.nilaiPekerjaan || s.totalHargaRab || 0);
+            return spk !== '' || pek !== '' || nil > 0;
+          });
+          const sorted = [...validSheets].sort(compareSpkAsc);
+          setRabSheets(sorted);
+          try {
+            localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sorted));
+          } catch (e) {}
+        }
+      });
       fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
         if (val && Array.isArray(val)) setAttendanceList(val);
       });
@@ -1145,41 +1160,77 @@ export const TeknikModule = () => {
 
   const defaultRabSheets = [
     {
-      id: 'RAB-01',
-      noInput: 'SPK-001',
-      tanggal: getTodayDateString(),
+      id: 'RAB-839954',
+      noInput: '001',
+      tanggal: '2026-09-09',
       proyek: 'Ashoka View',
-      namaVendor: 'CV. Berkah Konstruksi',
-      blok: 'A',
-      noUnit: '01',
+      namaVendor: 'PT Bangun Jaya Perkasa',
+      blok: 'B-2',
+      noUnit: '2',
       fasum: '',
-      pekerjaan: 'Pekerjaan Pondasi & Dinding',
+      pekerjaan: 'cor',
       retensiPersen: 5,
       pembayaranSebelumnya: 0,
+      paymentHistory: [],
       tanggalOpname: '',
       opnameHistory: [],
       items: [
         {
-          id: 'ITEM-001',
-          itemPekerjaan: 'Galian Tanah Pondasi',
-          spesifikasi: 'Tanah keras kedalaman 80cm',
-          vol: 12.50,
-          sat: 'm3',
-          hargaSatuan: 85000,
-          jumlah: 1062500,
-          bobotRatio: 0.15,
+          id: 'ITEM-9954',
+          itemPekerjaan: 'cor',
+          spesifikasi: '-',
+          vol: 1,
+          sat: 'ls',
+          hargaSatuan: 10000000,
+          jumlah: 10000000,
+          bobotRatio: 1,
           progress: 0,
           bobotProgress: 0
+        }
+      ]
+    },
+    {
+      id: 'RAB-105113',
+      noInput: '002',
+      tanggal: '2026-09-09',
+      proyek: 'Ashoka Park',
+      namaVendor: 'UD Cahaya Besi Baja',
+      blok: 'D-1',
+      noUnit: '4',
+      fasum: '',
+      pekerjaan: 'aspal',
+      retensiPersen: 5,
+      pembayaranSebelumnya: 500000,
+      paymentHistory: [
+        {
+          id: 'PAY-1788936136159-4x3b',
+          tanggal: '2026-09-09',
+          keterangan: 'TF',
+          nominal: 200000,
+          metode: 'Transfer BRI',
+          timestamp: '9/9/2026, 13.42.16'
         },
         {
-          id: 'ITEM-002',
-          itemPekerjaan: 'Pasangan Batu Kali',
-          spesifikasi: 'Adukan 1:4',
-          vol: 8.00,
-          sat: 'm3',
-          hargaSatuan: 450000,
-          jumlah: 3600000,
-          bobotRatio: 0.50,
+          id: 'PAY-1788936204559-sy2f',
+          tanggal: '2026-09-10',
+          keterangan: 'TF BRI',
+          nominal: 300000,
+          metode: 'Transfer BRI',
+          timestamp: '9/9/2026, 13.43.24'
+        }
+      ],
+      tanggalOpname: '',
+      opnameHistory: [],
+      items: [
+        {
+          id: 'ITEM-5113',
+          itemPekerjaan: 'aspal',
+          spesifikasi: '-',
+          vol: 1,
+          sat: 'ls',
+          hargaSatuan: 800000,
+          jumlah: 800000,
+          bobotRatio: 1,
           progress: 0,
           bobotProgress: 0
         }
@@ -1597,45 +1648,13 @@ export const TeknikModule = () => {
     showNotification('Baris item pekerjaan berhasil dihapus.', 'warning');
   };
 
-  // CREATE NEW RAB SHEET (Mulai Kosong Bersih: No. SPK dan Tanggal Kosong)
+  // INPUT PEKERJAAN / RAB BARU (RESET FORMULIR & ARAHKAN KE INPUT PEKERJAAN)
   const handleCreateNewSheet = () => {
-    const newSheet = {
-      id: `RAB-${Date.now().toString().slice(-4)}`,
-      noInput: '',
-      tanggal: '',
-      proyek: 'Ashoka View',
-      namaVendor: '',
-      blok: '',
-      noUnit: '',
-      fasum: '',
-      pekerjaan: '',
-      retensiPersen: 5,
-      pembayaranSebelumnya: 0,
-      tanggalOpname: '',
-      opnameHistory: [],
-      items: [
-        {
-          id: `ITEM-${Date.now().toString().slice(-4)}-1`,
-          itemPekerjaan: '',
-          spesifikasi: '-',
-          vol: 1.00,
-          sat: 'm2',
-          hargaSatuan: 0,
-          progress: 0
-        }
-      ]
-    };
-
-    const newSheets = [...rabSheets, newSheet];
-    setRabSheets(newSheets);
-    setActiveSheetId(newSheet.id);
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
-    } catch (e) {}
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, newSheets);
+    handleResetPekerjaanForm();
     setMainCategory('borongan');
     setSubTabBorongan('input_rab');
-    showNotification('Lembar RAB baru yang kosong berhasil dibuat. Silakan isi No. SPK dan data.', 'success');
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+    showNotification('Silakan isi Formulir Input Pekerjaan Borongan.', 'info');
   };
 
   // DELETE SHEET (Bisa dihapus sampai kosong total)
@@ -2183,7 +2202,7 @@ export const TeknikModule = () => {
       totNilaiOpname += c.nilaiOpname || 0;
       totRetensi += c.retensiNilai || 0;
       totNilaiProgress += c.nilaiProgress || 0;
-      totBayarSeb += Number(s.pembayaranSebelumnya) || 0;
+      totBayarSeb += c.pembayaranSebelumnya || 0;
       totBayarSaatIni += c.pembayaranSaatIni || 0;
     });
 
@@ -5802,7 +5821,7 @@ export const TeknikModule = () => {
                     {/* TOTAL DI PALING BAWAH LAPORAN */}
                     <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
                       <td colSpan={8} style={{ textAlign: 'left', padding: '10px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
-                        Total Keseluruhan ({filteredLaporanSheets.length} Proyek)
+                        Total Keseluruhan ({filteredLaporanSheets.length} Pekerjaan / SPK)
                       </td>
                       <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
                         {formatRupiahDesimal(grandTotalHargaRab)}
