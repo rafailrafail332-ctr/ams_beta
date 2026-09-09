@@ -512,7 +512,15 @@ export const TeknikModule = () => {
 
   // MASTER CLOUD INITIAL SYNC & REAL-TIME POLLING (100% MySQL Database on Sengked Hosting)
   useEffect(() => {
-    const doFetchAll = () => {
+    // Fetch RAB sheets from MySQL cloud once on mount
+    fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setRabSheets(val);
+        setActiveSheetId(prev => (val.some(s => s.id === prev) ? prev : val[0].id));
+      }
+    });
+
+    const doFetchMaster = () => {
       fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
         if (val && Array.isArray(val)) setAttendanceList(val);
       });
@@ -534,20 +542,10 @@ export const TeknikModule = () => {
       fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
         if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
       });
-      fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
-        if (val && Array.isArray(val)) {
-          setRabSheets(val);
-          if (val.length > 0) {
-            setActiveSheetId(prev => (val.some(s => s.id === prev) ? prev : val[0].id));
-          } else {
-            setActiveSheetId('');
-          }
-        }
-      });
     };
 
-    doFetchAll();
-    const interval = setInterval(doFetchAll, 10000);
+    doFetchMaster();
+    const interval = setInterval(doFetchMaster, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -849,7 +847,7 @@ export const TeknikModule = () => {
   // =========================================================================
   // 2. DATA STORE UNTUK LEMBAR INPUT RAB & LAPORAN REKAPITULASI
   // =========================================================================
-  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_synced_v15_clean';
+  const STORAGE_KEY_RAB_SHEETS = 'ams_teknik_rab_sheets_v16_clean';
 
   const defaultRabSheets = [
     {
@@ -906,15 +904,7 @@ export const TeknikModule = () => {
     return defaultRabSheets;
   });
 
-  const isInitialMountRab = useRef(true);
-
-  useEffect(() => {
-    if (isInitialMountRab.current) {
-      isInitialMountRab.current = false;
-      return;
-    }
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, rabSheets);
-  }, [rabSheets]);
+  // Note: saveCloudStore is explicitly called on each user action (save, edit, delete, payment) to prevent race conditions
 
   const emptyTemplateSheet = {
     id: 'RAB-01',
@@ -970,7 +960,28 @@ export const TeknikModule = () => {
 
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
-    const items = sheet.items || [];
+    if (!sheet) return { items: [], totalHargaRab: 0, totalBobot: 0, progresPersen: 0, retensiPersen: 5, nilaiOpname: 0, retensiNilai: 0, nilaiProgress: 0, nilaiProgres: 0, pembayaranSebelumnya: 0, pembayaranSaatIni: 0 };
+    
+    let items = Array.isArray(sheet.items) ? sheet.items : [];
+    // If sheet has no items but has recorded nilaiPekerjaan / totalHargaRab
+    if (items.length === 0) {
+      const fallbackVal = parseNum(sheet.nilaiPekerjaan || sheet.totalHargaRab || sheet.jumlah || 0);
+      if (fallbackVal > 0) {
+        items = [{
+          id: `ITEM-${sheet.id || 'DEF'}-01`,
+          itemPekerjaan: sheet.pekerjaan || 'Pekerjaan Borongan',
+          spesifikasi: '-',
+          vol: 1,
+          sat: 'ls',
+          hargaSatuan: fallbackVal,
+          jumlah: fallbackVal,
+          bobotRatio: 1.0,
+          progress: 0,
+          bobotProgress: 0
+        }];
+      }
+    }
+
     const totalHargaRab = items.reduce((acc, it) => {
       const vol = parseNum(it.vol);
       const harga = parseNum(it.hargaSatuan);
@@ -1383,7 +1394,9 @@ export const TeknikModule = () => {
       pekerjaan: cleanPekerjaan,
       blok: (pekerjaanFormData.blok || '').trim().toUpperCase(),
       noUnit: (pekerjaanFormData.noUnit || '').trim(),
-      fasum: (pekerjaanFormData.fasum || '-').trim(),
+      fasum: (pekerjaanFormData.fasum || '').trim(),
+      nilaiPekerjaan: nilaiNum,
+      totalHargaRab: nilaiNum,
       retensiPersen: existingSheet?.retensiPersen || 5,
       pembayaranSebelumnya: existingSheet?.pembayaranSebelumnya || 0,
       tanggalOpname: existingSheet?.tanggalOpname || '',

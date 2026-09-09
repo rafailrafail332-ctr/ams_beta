@@ -24,7 +24,7 @@ export const fetchCloudStore = async (key, defaultValue) => {
 
   // 1. Fetch from MySQL Database on Sengked Hosting (Single Source of Truth)
   try {
-    const res = await fetch(`${MYSQL_API_URL}?action=get&key=${encodeURIComponent(key)}`);
+    const res = await fetch(`${MYSQL_API_URL}?action=get&key=${encodeURIComponent(key)}&_t=${Date.now()}`);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.value !== undefined && json.value !== null) {
