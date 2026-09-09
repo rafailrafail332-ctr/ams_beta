@@ -4141,41 +4141,44 @@ export const TeknikModule = () => {
                       const totalSisa = Math.max(0, totalJumlah - totalBayarSeb);
 
                       return (
-                        <tr style={{ background: '#fef3c7', color: '#000000', fontWeight: 900 }}>
-                          <td colSpan={5} style={{ textAlign: 'left', padding: '10px 14px', border: '1.5px solid #d97706', fontSize: '0.88rem', color: '#78350f', letterSpacing: '0.3px', verticalAlign: 'middle' }}>
-                            <strong>TOTAL KESELURUHAN ({filteredPekerjaanList.length} Pekerjaan)</strong>
+                        <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', fontWeight: 900 }}>
+                          <td colSpan={5} style={{ textAlign: 'left', padding: '12px 14px', border: '1px solid #334155', borderTop: '2.5px solid #f59e0b', borderBottom: '2.5px solid #f59e0b', fontSize: '0.9rem', color: '#f8fafc', letterSpacing: '0.3px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '1.05rem' }}>📊</span>
+                              <span>TOTAL KESELURUHAN <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 700 }}>({filteredPekerjaanList.length} Pekerjaan)</span></span>
+                            </div>
                           </td>
-                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                          <td style={{ border: '1px solid #334155', borderTop: '2.5px solid #f59e0b', borderBottom: '2.5px solid #f59e0b', padding: '12px 10px', verticalAlign: 'middle', background: 'rgba(16, 185, 129, 0.08)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#065f46', fontWeight: 900 }}>Rp</span>
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#065f46', fontVariantNumeric: 'tabular-nums' }}>
+                              <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.92rem', fontWeight: 900, color: '#10b981', fontVariantNumeric: 'tabular-nums' }}>
                                 {formatRupiahDesimal(totalJumlah)}
                               </span>
                             </div>
                           </td>
-                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                          <td style={{ border: '1px solid #334155', borderTop: '2.5px solid #f59e0b', borderBottom: '2.5px solid #f59e0b', padding: '12px 10px', verticalAlign: 'middle', background: 'rgba(245, 158, 11, 0.08)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#92400e', fontWeight: 900 }}>Rp</span>
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#92400e', fontVariantNumeric: 'tabular-nums' }}>
+                              <span style={{ fontSize: '0.8rem', color: '#fde68a', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.92rem', fontWeight: 900, color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>
                                 {formatRupiahDesimal(totalBayarSeb)}
                               </span>
                             </div>
                           </td>
-                          <td style={{ border: '1.5px solid #d97706', padding: '10px 10px', verticalAlign: 'middle' }}>
+                          <td style={{ border: '1px solid #334155', borderTop: '2.5px solid #f59e0b', borderBottom: '2.5px solid #f59e0b', padding: '12px 10px', verticalAlign: 'middle', background: totalSisa === 0 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#991b1b', fontWeight: 900 }}>Rp</span>
-                              <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#991b1b', fontVariantNumeric: 'tabular-nums' }}>
+                              <span style={{ fontSize: '0.8rem', color: totalSisa === 0 ? '#6ee7b7' : '#fca5a5', fontWeight: 900 }}>Rp</span>
+                              <span style={{ fontFamily: 'monospace', fontSize: '0.92rem', fontWeight: 900, color: totalSisa === 0 ? '#10b981' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
                                 {formatRupiahDesimal(totalSisa)}
                               </span>
                             </div>
                           </td>
-                          <td style={{ textAlign: 'center', padding: '8px 6px', border: '1.5px solid #d97706', verticalAlign: 'middle' }}>
+                          <td style={{ textAlign: 'center', padding: '10px 8px', border: '1px solid #334155', borderTop: '2.5px solid #f59e0b', borderBottom: '2.5px solid #f59e0b', verticalAlign: 'middle' }}>
                             {totalSisa === 0 ? (
-                              <span style={{ display: 'inline-block', background: '#059669', color: '#ffffff', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.5px' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', padding: '5px 12px', borderRadius: '6px', fontWeight: 900, fontSize: '0.78rem', letterSpacing: '0.5px', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)' }}>
                                 ✓ LUNAS
                               </span>
                             ) : (
-                              <span style={{ display: 'inline-block', background: '#dc2626', color: '#ffffff', padding: '4px 8px', borderRadius: '4px', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.5px' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', color: '#ffffff', padding: '5px 12px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', letterSpacing: '0.5px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)' }}>
                                 BELUM LUNAS
                               </span>
                             )}
