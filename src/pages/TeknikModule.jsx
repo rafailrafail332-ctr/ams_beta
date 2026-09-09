@@ -91,6 +91,12 @@ const formatDecimal = (val) => {
   return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
 };
 
+const formatNumberInput = (val) => {
+  if (val === undefined || val === null || val === '') return '';
+  const num = Number(String(val).replace(/\D/g, ''));
+  return isNaN(num) || num === 0 ? '' : num.toLocaleString('id-ID');
+};
+
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
