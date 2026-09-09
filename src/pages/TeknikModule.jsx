@@ -3524,30 +3524,73 @@ export const TeknikModule = () => {
                 {/* 3. Proyek */}
                 <div className="form-group">
                   <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                    🏢 Proyek Perumahan
+                    🏢 Proyek Perumahan <span style={{ color: '#ef4444' }}>*</span>
                   </label>
-                  <input
-                    type="text"
-                    list="proyek-input-options"
-                    value={pekerjaanFormData.proyek}
+                  <select
+                    value={pekerjaanFormData.proyek || 'Ashoka View'}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, proyek: e.target.value })}
-                    
                     style={{
                       width: '100%',
-                      background: 'rgba(16, 185, 129, 0.1)',
-                      border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                      background: '#0f172a',
+                      border: '1.5px solid #10b981',
                       borderRadius: '6px',
                       color: '#34d399',
                       fontWeight: 900,
-                      fontSize: '0.88rem',
+                      fontSize: '0.9rem',
                       padding: '8px 12px',
-                      outline: 'none'
+                      outline: 'none',
+                      cursor: 'pointer'
                     }}
-                  />
-                  <datalist id="proyek-input-options">
-                    <option value="Ashoka View">Ashoka View</option>
-                    <option value="Ashoka Park">Ashoka Park</option>
-                  </datalist>
+                  >
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#34d399' }}>🏔️ Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#38bdf8' }}>🌳 Ashoka Park</option>
+                  </select>
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setPekerjaanFormData({ ...pekerjaanFormData, proyek: 'Ashoka View' })}
+                      style={{
+                        flex: 1,
+                        padding: '5px 8px',
+                        borderRadius: '5px',
+                        border: (pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? '1.5px solid #10b981' : '1px solid #334155',
+                        background: (pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? 'rgba(16, 185, 129, 0.25)' : '#1e293b',
+                        color: (pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? '#34d399' : '#94a3b8',
+                        fontWeight: 800,
+                        fontSize: '0.78rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      🏔️ Ashoka View {(pekerjaanFormData.proyek === 'Ashoka View' || !pekerjaanFormData.proyek) ? '✓' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPekerjaanFormData({ ...pekerjaanFormData, proyek: 'Ashoka Park' })}
+                      style={{
+                        flex: 1,
+                        padding: '5px 8px',
+                        borderRadius: '5px',
+                        border: pekerjaanFormData.proyek === 'Ashoka Park' ? '1.5px solid #38bdf8' : '1px solid #334155',
+                        background: pekerjaanFormData.proyek === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.25)' : '#1e293b',
+                        color: pekerjaanFormData.proyek === 'Ashoka Park' ? '#38bdf8' : '#94a3b8',
+                        fontWeight: 800,
+                        fontSize: '0.78rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      🌳 Ashoka Park {pekerjaanFormData.proyek === 'Ashoka Park' ? '✓' : ''}
+                    </button>
+                  </div>
                 </div>
               </div>
 
