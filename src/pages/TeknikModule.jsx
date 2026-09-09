@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { supabase, fetchCloudStore, saveCloudStore } from '../supabase';
-import { 
+import {
+  RefreshCw,
   Building2, 
   Users, 
   Clock, 
@@ -808,9 +809,19 @@ export const TeknikModule = () => {
     // Fetch RAB sheets from MySQL cloud once on mount
     fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
       if (val && Array.isArray(val) && val.length > 0) {
-        const sorted = [...val].sort(compareSpkAsc);
+        const validSheets = val.filter(s => {
+          if (!s) return false;
+          const spk = String(s.noInput || s.noSpk || '').trim();
+          const pek = String(s.pekerjaan || s.items?.[0]?.itemPekerjaan || '').trim();
+          const nil = Number(s.nilaiPekerjaan || s.totalHargaRab || 0);
+          return spk !== '' || pek !== '' || nil > 0;
+        });
+        const sorted = validSheets.map(cleanSheetForStorage).sort(compareSpkAsc);
         setRabSheets(sorted);
         setActiveSheetId(prev => (sorted.some(s => s.id === prev) ? prev : sorted[0].id));
+        try {
+          localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sorted));
+        } catch (e) {}
       }
     });
 
@@ -818,16 +829,24 @@ export const TeknikModule = () => {
       fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
         if (val && Array.isArray(val) && val.length > 0) {
           const validSheets = val.filter(s => {
+            if (!s) return false;
             const spk = String(s.noInput || s.noSpk || '').trim();
             const pek = String(s.pekerjaan || s.items?.[0]?.itemPekerjaan || '').trim();
             const nil = Number(s.nilaiPekerjaan || s.totalHargaRab || 0);
             return spk !== '' || pek !== '' || nil > 0;
           });
-          const sorted = [...validSheets].sort(compareSpkAsc);
-          setRabSheets(sorted);
-          try {
-            localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sorted));
-          } catch (e) {}
+          const sorted = validSheets.map(cleanSheetForStorage).sort(compareSpkAsc);
+          setRabSheets(prev => {
+            const currentStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(sorted);
+            if (currentStr !== newStr) {
+              try {
+                localStorage.setItem(STORAGE_KEY_RAB_SHEETS, newStr);
+              } catch (e) {}
+              return sorted;
+            }
+            return prev;
+          });
         }
       });
       fetchCloudStore(STORAGE_KEY_ABSEN, null).then(val => {
@@ -854,7 +873,8 @@ export const TeknikModule = () => {
     };
 
     doFetchMaster();
-    const interval = setInterval(doFetchMaster, 15000);
+    // 5-second interval for real-time consistency across all laptops
+    const interval = setInterval(doFetchMaster, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -1526,10 +1546,7 @@ export const TeknikModule = () => {
           return s;
         });
       }
-      try {
-        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-      } catch (e) {}
-      saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
+      updateAndSaveRabSheets(updatedSheets);
       return updatedSheets;
     });
   };
@@ -1590,10 +1607,7 @@ export const TeknikModule = () => {
       }
 
       const resSheets = curSheets.map(s => s.id === currentSheet.id ? { ...s, items: updatedItems } : s);
-      try {
-        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(resSheets));
-      } catch (e) {}
-      saveCloudStore(STORAGE_KEY_RAB_SHEETS, resSheets);
+      updateAndSaveRabSheets(resSheets);
       return resSheets;
     });
   };
@@ -1621,13 +1635,8 @@ export const TeknikModule = () => {
       } else {
         curSheets = curSheets.map(s => s.id === currentSheet.id ? { ...s, items: [...(s.items || []), newItem] } : s);
       }
-      try {
-        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(curSheets));
-      } catch (e) {}
-      saveCloudStore(STORAGE_KEY_RAB_SHEETS, curSheets);
-      return curSheets;
+      return updateAndSaveRabSheets(curSheets, "Baris item pekerjaan baru berhasil ditambahkan.", "info");
     });
-    showNotification('Baris item pekerjaan baru berhasil ditambahkan.', 'info');
   };
 
   // DELETE ROW FROM ACTIVE SHEET
@@ -1639,13 +1648,8 @@ export const TeknikModule = () => {
         }
         return s;
       });
-      try {
-        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(curSheets));
-      } catch (e) {}
-      saveCloudStore(STORAGE_KEY_RAB_SHEETS, curSheets);
-      return curSheets;
+      return updateAndSaveRabSheets(curSheets, "Baris item pekerjaan berhasil dihapus.", "warning");
     });
-    showNotification('Baris item pekerjaan berhasil dihapus.', 'warning');
   };
 
   // INPUT PEKERJAAN / RAB BARU (RESET FORMULIR & ARAHKAN KE INPUT PEKERJAAN)
@@ -1664,17 +1668,12 @@ export const TeknikModule = () => {
     const sheetTitle = target?.noInput || 'RAB';
     if (window.confirm(`Hapus seluruh lembar "${sheetTitle}" (${target?.pekerjaan || 'Tanpa Judul'}) dari Database?`)) {
       const remaining = rabSheets.filter(s => String(s.id).trim() !== String(sheetId).trim());
-      setRabSheets(remaining);
       if (remaining.length > 0) {
         setActiveSheetId(remaining[0].id);
       } else {
         setActiveSheetId('');
       }
-      try {
-        localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(remaining));
-      } catch (e) {}
-      saveCloudStore(STORAGE_KEY_RAB_SHEETS, remaining);
-      showNotification(`Lembar "${sheetTitle}" berhasil dihapus dari Database!`, 'warning');
+      updateAndSaveRabSheets(remaining, `Lembar "${sheetTitle}" berhasil dihapus dari Database!`, 'warning');
     }
   };
 
@@ -1916,12 +1915,14 @@ export const TeknikModule = () => {
     }
     nextSheets.sort(compareSpkAsc);
 
-    setRabSheets(nextSheets);
     setActiveSheetId(targetId);
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
-    } catch (err) {}
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
+    updateAndSaveRabSheets(
+      nextSheets,
+      isEdit 
+        ? `Data pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" berhasil diperbarui!` 
+        : `Pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" (Rp ${formatRupiah(nilaiNum)}) berhasil disimpan ke Database!`,
+      'success'
+    );
 
     // Reset Form
     setPekerjaanFormData({
@@ -1936,13 +1937,6 @@ export const TeknikModule = () => {
       fasum: '',
       nilaiPekerjaan: ''
     });
-
-    showNotification(
-      isEdit 
-        ? `Data pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" berhasil diperbarui!` 
-        : `Pekerjaan "${cleanNoSpk} - ${cleanPekerjaan}" (Rp ${formatRupiah(nilaiNum)}) berhasil disimpan ke Database!`,
-      'success'
-    );
   };
 
 
@@ -2078,13 +2072,14 @@ export const TeknikModule = () => {
     });
 
     const nextSheets = rabSheets.map(s => s.id === cleanTarget.id ? updatedSheet : cleanSheetForStorage(s));
-    setRabSheets(nextSheets);
     setPaymentHistoryTargetSheet(updatedSheet);
-
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
-    } catch (err) {}
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
+    updateAndSaveRabSheets(
+      nextSheets,
+      isEditMode
+        ? `Pembayaran berhasil diperbarui menjadi Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)})!`
+        : `Pembayaran Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)}) berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`,
+      'success'
+    );
 
     setNewPaymentFormData({
       id: null,
@@ -2093,13 +2088,6 @@ export const TeknikModule = () => {
       nominal: '',
       metode: 'Transfer BCA'
     });
-
-    showNotification(
-      isEditMode
-        ? `Pembayaran berhasil diperbarui menjadi Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)})!`
-        : `Pembayaran Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)}) berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`,
-      'success'
-    );
   };
 
   const handleDeletePayment = (paymentId) => {
@@ -2118,15 +2106,8 @@ export const TeknikModule = () => {
     });
 
     const nextSheets = rabSheets.map(s => s.id === cleanTarget.id ? updatedSheet : cleanSheetForStorage(s));
-    setRabSheets(nextSheets);
     setPaymentHistoryTargetSheet(updatedSheet);
-
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(nextSheets));
-    } catch (err) {}
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, nextSheets);
-
-    showNotification('Catatan histori pembayaran berhasil dihapus.', 'info');
+    updateAndSaveRabSheets(nextSheets, 'Catatan histori pembayaran berhasil dihapus.', 'info');
   };
 
   // =========================================================================
@@ -2313,14 +2294,12 @@ export const TeknikModule = () => {
       return cleanSheetForStorage(s);
     });
 
-    setRabSheets(newSheets);
     setActiveSheetId(opnameTargetSheet.id);
-    try {
-      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(newSheets));
-    } catch(err) {}
-    saveCloudStore(STORAGE_KEY_RAB_SHEETS, newSheets);
-
-    showNotification(`Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres bertambah menjadi: ${formatDecimal(totalProgResult)}%`, 'success');
+    updateAndSaveRabSheets(
+      newSheets,
+      `Hasil Opname Pekerjaan "${opnameTargetSheet.noInput}" berhasil disimpan! Progres bertambah menjadi: ${formatDecimal(totalProgResult)}%`,
+      'success'
+    );
     setIsOpnameModalOpen(false);
   };
 
@@ -2331,7 +2310,7 @@ export const TeknikModule = () => {
   return (
     <div className="module-animated-view">
       {/* PAGE HEADER */}
-      <div className="page-header" style={{ marginBottom: '1.25rem' }}>
+      <div className="page-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
@@ -2339,6 +2318,32 @@ export const TeknikModule = () => {
           <p className="page-subtitle">
             Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja, spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            type="button"
+            onClick={handleManualCloudSync}
+            disabled={isSyncingCloud}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '7px',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              background: isSyncingCloud ? '#065f46' : 'linear-gradient(135deg, #059669, #047857)',
+              color: '#ffffff',
+              border: '1.5px solid #10b981',
+              fontWeight: 900,
+              fontSize: '0.86rem',
+              cursor: isSyncingCloud ? 'not-allowed' : 'pointer',
+              boxShadow: '0 3px 10px rgba(16, 185, 129, 0.4)',
+              transition: 'all 0.2s ease'
+            }}
+            title="Klik untuk menyinkronkan data langsung dari server MySQL secara real-time"
+          >
+            <RefreshCw size={16} style={{ animation: isSyncingCloud ? 'spin 1s linear infinite' : 'none' }} />
+            {isSyncingCloud ? 'Menyinkronkan Cloud...' : '🔄 Sinkronkan Data Cloud (MySQL)'}
+          </button>
         </div>
       </div>
 
@@ -5013,12 +5018,7 @@ export const TeknikModule = () => {
                                             }
                                             return s;
                                           });
-                                          setRabSheets(updatedSheets);
-                                          try {
-                                            localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                                          } catch(err) {}
-                                          saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
-                                          showNotification(`Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
+                                          updateAndSaveRabSheets(updatedSheets, `Data opname ${sheet.noInput} (${hist.tanggal}) berhasil dihapus!`, 'info');
                                         }
                                       }}
                                       style={{
@@ -5366,12 +5366,7 @@ export const TeknikModule = () => {
                       }
                       return s;
                     });
-                    setRabSheets(updatedSheets);
-                    try {
-                      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                    } catch(e) {}
-                    saveCloudStore(STORAGE_KEY_RAB_SHEETS, updatedSheets);
-                    showNotification(`Seluruh data hasil opname ${activeSheet.noInput} berhasil dihapus/direset!`, 'warning');
+                    updateAndSaveRabSheets(updatedSheets, `Seluruh data hasil opname ${activeSheet.noInput} berhasil dihapus/direset!`, 'warning');
                   }
                 }}
                 style={{
@@ -5423,12 +5418,8 @@ export const TeknikModule = () => {
                   const updatedSheets = rabSheets.map(s =>
                     s.id === activeSheet.id ? { ...s, pembayaranSebelumnya: val } : s
                   );
-                  setRabSheets(updatedSheets);
-                  try {
-                    localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(updatedSheets));
-                  } catch(e) {}
                   setIsEditingPembayaran(false);
-                  showNotification(`Pembayaran sebelumnya Rp ${val.toLocaleString('id-ID')} disimpan ke Rekapitulasi!`, 'success');
+                  updateAndSaveRabSheets(updatedSheets, `Pembayaran sebelumnya Rp ${val.toLocaleString('id-ID')} disimpan ke Rekapitulasi!`, 'success');
                 }}
                 style={{
                   display: 'inline-flex',
