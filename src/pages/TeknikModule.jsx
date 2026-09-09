@@ -1293,7 +1293,7 @@ export const TeknikModule = () => {
     pekerjaan: '',
     blok: '',
     noUnit: '',
-    fasum: '-',
+    fasum: '',
     nilaiPekerjaan: ''
   });
   const [pekerjaanTableSearch, setPekerjaanTableSearch] = useState('');
@@ -1415,7 +1415,7 @@ export const TeknikModule = () => {
       pekerjaan: '',
       blok: '',
       noUnit: '',
-      fasum: '-',
+      fasum: '',
       nilaiPekerjaan: ''
     });
 
@@ -1457,7 +1457,7 @@ export const TeknikModule = () => {
       pekerjaan: '',
       blok: '',
       noUnit: '',
-      fasum: '-',
+      fasum: '',
       nilaiPekerjaan: ''
     });
   };
@@ -3122,9 +3122,7 @@ export const TeknikModule = () => {
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                   <Briefcase size={22} color="#f59e0b" /> {pekerjaanFormData.id ? 'Edit Data Pekerjaan' : 'Form Input Pekerjaan Borongan'}
                 </h3>
-                <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#94a3b8', fontWeight: 600 }}>
-                  Isi data pekerjaan borongan di bawah ini, klik simpan, dan data otomatis tersimpan ke database & muncul di tabel rekapitulasi.
-                </p>
+                
               </div>
               {pekerjaanFormData.id && (
                 <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
@@ -3144,7 +3142,7 @@ export const TeknikModule = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: SPK-001, BOR-2026-01..."
+                    
                     value={pekerjaanFormData.noSpk}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, noSpk: e.target.value })}
                     style={{
@@ -3194,7 +3192,7 @@ export const TeknikModule = () => {
                     list="proyek-input-options"
                     value={pekerjaanFormData.proyek}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, proyek: e.target.value })}
-                    placeholder="Pilih atau ketik proyek..."
+                    
                     style={{
                       width: '100%',
                       background: 'rgba(16, 185, 129, 0.1)',
@@ -3224,7 +3222,7 @@ export const TeknikModule = () => {
                   <input
                     type="text"
                     list="vendor-input-options"
-                    placeholder="Contoh: CV. Berkah Konstruksi, Pak Supri..."
+                    
                     value={pekerjaanFormData.namaVendor}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, namaVendor: e.target.value })}
                     style={{
@@ -3254,7 +3252,7 @@ export const TeknikModule = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Pekerjaan Pondasi & Dinding, Pemasangan Atap Baja Ringan..."
+                    
                     value={pekerjaanFormData.pekerjaan}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, pekerjaan: e.target.value })}
                     style={{
@@ -3281,7 +3279,7 @@ export const TeknikModule = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Misal: A, B, C..."
+                    
                     value={pekerjaanFormData.blok}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, blok: e.target.value })}
                     style={{
@@ -3305,7 +3303,7 @@ export const TeknikModule = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Misal: 01, 02, 12..."
+                    
                     value={pekerjaanFormData.noUnit}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, noUnit: e.target.value })}
                     style={{
@@ -3329,7 +3327,7 @@ export const TeknikModule = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="Misal: Jalan Utama, Taman, Saluran..."
+                    
                     value={pekerjaanFormData.fasum}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, fasum: e.target.value })}
                     style={{
@@ -3361,7 +3359,7 @@ export const TeknikModule = () => {
                     <input
                       type="text"
                       required
-                      placeholder="0"
+                      
                       value={pekerjaanFormData.nilaiPekerjaan ? formatNumberInput(pekerjaanFormData.nilaiPekerjaan) : ''}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '');
@@ -3448,9 +3446,7 @@ export const TeknikModule = () => {
                   <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem' }}>Tabel</span>
                   Daftar Pekerjaan Borongan & Rekapitulasi
                 </h4>
-                <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
-                  Menampilkan data pekerjaan borongan yang telah diinput beserta progress opname saat ini.
-                </p>
+                
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -4314,7 +4310,7 @@ export const TeknikModule = () => {
                     <td style={{ textAlign: 'right', border: '1.5px solid #f59e0b', padding: '4px 8px', background: 'rgba(245, 158, 11, 0.12)' }}>
                       <input
                         type="text"
-                        placeholder="0"
+                        
                         maxLength={18}
                         value={
                           activeSheet.pembayaranSebelumnya !== undefined && activeSheet.pembayaranSebelumnya !== ''
@@ -6178,7 +6174,7 @@ export const TeknikModule = () => {
                       </label>
                       <input
                         type="text"
-                        placeholder="0"
+                        
                         maxLength={18}
                         value={
                           opnameFormData.pembayaranSebelumnya !== undefined && opnameFormData.pembayaranSebelumnya !== ''
@@ -6881,7 +6877,7 @@ export const TeknikModule = () => {
                         </label>
                         <input
                           type="text"
-                          placeholder="Misal: Termin 1, DP 20%, Opname 50%..."
+                          
                           value={newPaymentFormData.keterangan}
                           onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, keterangan: e.target.value })}
                           style={{
@@ -6905,7 +6901,7 @@ export const TeknikModule = () => {
                         <input
                           type="text"
                           required
-                          placeholder="0"
+                          
                           value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/\D/g, '');
