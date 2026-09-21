@@ -1874,7 +1874,7 @@ export const TeknikModule = () => {
   });
   const [pekerjaanTableSearch, setPekerjaanTableSearch] = useState('');
   const [pekerjaanProjectFilter, setPekerjaanProjectFilter] = useState('ALL');
-  const [pekerjaanVendorFilter, setPekerjaanVendorFilter] = useState('ALL');
+  const [pekerjaanVendorFilter, setPekerjaanVendorFilter] = useState('');
   const [pekerjaanStatusBayarFilter, setPekerjaanStatusBayarFilter] = useState('ALL');
   const [pekerjaanNamaSearch, setPekerjaanNamaSearch] = useState('');
   const [pekerjaanNoSearch, setPekerjaanNoSearch] = useState('');
@@ -1917,9 +1917,10 @@ export const TeknikModule = () => {
       }
 
       // 2. Filter Vendor
-      if (pekerjaanVendorFilter !== 'ALL') {
-        const itemV = (item.namaVendor || item.vendor || '').toLowerCase().trim();
-        if (itemV !== pekerjaanVendorFilter.toLowerCase().trim()) {
+      if (pekerjaanVendorFilter && pekerjaanVendorFilter !== 'ALL' && pekerjaanVendorFilter.trim() !== '') {
+        const qV = pekerjaanVendorFilter.toLowerCase().trim();
+        const itemV = (item.namaVendor || item.vendor || '').toLowerCase();
+        if (!itemV.includes(qV)) {
           return false;
         }
       }
@@ -2500,7 +2501,7 @@ export const TeknikModule = () => {
 
   const [tfTableSearch, setTfTableSearch] = useState('');
   const [tfProjectFilter, setTfProjectFilter] = useState('ALL');
-  const [tfVendorFilter, setTfVendorFilter] = useState('ALL');
+  const [tfVendorFilter, setTfVendorFilter] = useState('');
   const [tfStatusBayarFilter, setTfStatusBayarFilter] = useState('ALL');
   const [tfNamaSearch, setTfNamaSearch] = useState('');
   const [tfNoSearch, setTfNoSearch] = useState('');
@@ -2795,9 +2796,10 @@ export const TeknikModule = () => {
       // 1. Proyek
       if (tfProjectFilter !== 'ALL' && item.proyek !== tfProjectFilter) return false;
       // 2. Vendor
-      if (tfVendorFilter !== 'ALL') {
-        const itemV = (item.namaVendor || '').toLowerCase().trim();
-        if (itemV !== tfVendorFilter.toLowerCase().trim()) return false;
+      if (tfVendorFilter && tfVendorFilter !== 'ALL' && tfVendorFilter.trim() !== '') {
+        const qV = tfVendorFilter.toLowerCase().trim();
+        const itemV = (item.namaVendor || '').toLowerCase();
+        if (!itemV.includes(qV)) return false;
       }
       // 3. Status Bayar
       if (tfStatusBayarFilter === 'LUNAS' && !item.isLunas) return false;
@@ -4754,12 +4756,12 @@ export const TeknikModule = () => {
                   <span style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 800 }}>
                     Menampilkan <strong style={{ color: '#34d399' }}>{filteredPekerjaanList.length}</strong> dari {rabSheets.length} Pekerjaan
                   </span>
-                  {(pekerjaanProjectFilter !== 'ALL' || pekerjaanVendorFilter !== 'ALL' || pekerjaanStatusBayarFilter !== 'ALL' || pekerjaanNamaSearch || pekerjaanNoSearch || pekerjaanTableSearch) && (
+                  {(pekerjaanProjectFilter !== 'ALL' || (pekerjaanVendorFilter && pekerjaanVendorFilter !== 'ALL') || pekerjaanStatusBayarFilter !== 'ALL' || pekerjaanNamaSearch || pekerjaanNoSearch || pekerjaanTableSearch) && (
                     <button
                       type="button"
                       onClick={() => {
                         setPekerjaanProjectFilter('ALL');
-                        setPekerjaanVendorFilter('ALL');
+                        setPekerjaanVendorFilter('');
                         setPekerjaanStatusBayarFilter('ALL');
                         setPekerjaanNamaSearch('');
                         setPekerjaanNoSearch('');
@@ -4821,27 +4823,40 @@ export const TeknikModule = () => {
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
                     👤 Filter Vendor:
                   </label>
-                  <select
-                    value={pekerjaanVendorFilter}
-                    onChange={(e) => setPekerjaanVendorFilter(e.target.value)}
-                    style={{
-                      width: '100%',
-                      background: '#1e293b',
-                      border: pekerjaanVendorFilter !== 'ALL' ? '1.5px solid #38bdf8' : '1.5px solid #475569',
-                      borderRadius: '6px',
-                      color: pekerjaanVendorFilter !== 'ALL' ? '#38bdf8' : '#f8fafc',
-                      padding: '7px 10px',
-                      fontSize: '0.82rem',
-                      fontWeight: 800,
-                      outline: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="ALL">Semua Vendor ({uniquePekerjaanVendors.length})</option>
-                    {uniquePekerjaanVendors.map(v => (
-                      <option key={v} value={v}>{v}</option>
-                    ))}
-                  </select>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      list="filter-vendor-borongan-options"
+                      placeholder="Ketik nama vendor..."
+                      value={pekerjaanVendorFilter === 'ALL' ? '' : pekerjaanVendorFilter}
+                      onChange={(e) => setPekerjaanVendorFilter(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#1e293b',
+                        border: (pekerjaanVendorFilter && pekerjaanVendorFilter !== 'ALL') ? '1.5px solid #38bdf8' : '1.5px solid #475569',
+                        borderRadius: '6px',
+                        color: (pekerjaanVendorFilter && pekerjaanVendorFilter !== 'ALL') ? '#38bdf8' : '#f8fafc',
+                        padding: '7px 28px 7px 10px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        outline: 'none'
+                      }}
+                    />
+                    {pekerjaanVendorFilter && pekerjaanVendorFilter !== 'ALL' && (
+                      <button
+                        type="button"
+                        onClick={() => setPekerjaanVendorFilter('')}
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                    <datalist id="filter-vendor-borongan-options">
+                      {uniquePekerjaanVendors.map(v => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </datalist>
+                  </div>
                 </div>
 
                 {/* 3. Filter Status Bayar (Yang Dibayar & Belum) */}
@@ -6934,12 +6949,12 @@ export const TeknikModule = () => {
                       <span style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 800 }}>
                         Menampilkan <strong style={{ color: '#c084fc' }}>{filteredTukarFakturList.length}</strong> dari {tukarFakturList.length} Dokumen
                       </span>
-                      {(tfProjectFilter !== 'ALL' || tfVendorFilter !== 'ALL' || tfStatusBayarFilter !== 'ALL' || tfNamaSearch || tfNoSearch || tfTableSearch) && (
+                      {(tfProjectFilter !== 'ALL' || (tfVendorFilter && tfVendorFilter !== 'ALL') || tfStatusBayarFilter !== 'ALL' || tfNamaSearch || tfNoSearch || tfTableSearch) && (
                         <button
                           type="button"
                           onClick={() => {
                             setTfProjectFilter('ALL');
-                            setTfVendorFilter('ALL');
+                            setTfVendorFilter('');
                             setTfStatusBayarFilter('ALL');
                             setTfNamaSearch('');
                             setTfNoSearch('');
@@ -7001,27 +7016,40 @@ export const TeknikModule = () => {
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
                         👤 Filter Vendor / Supplier:
                       </label>
-                      <select
-                        value={tfVendorFilter}
-                        onChange={(e) => setTfVendorFilter(e.target.value)}
-                        style={{
-                          width: '100%',
-                          background: '#1e293b',
-                          border: tfVendorFilter !== 'ALL' ? '1.5px solid #38bdf8' : '1.5px solid #475569',
-                          borderRadius: '6px',
-                          color: tfVendorFilter !== 'ALL' ? '#38bdf8' : '#f8fafc',
-                          padding: '7px 10px',
-                          fontSize: '0.82rem',
-                          fontWeight: 800,
-                          outline: 'none',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="ALL">Semua Vendor ({uniqueTfVendors.length})</option>
-                        {uniqueTfVendors.map(v => (
-                          <option key={v} value={v}>{v}</option>
-                        ))}
-                      </select>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          list="filter-vendor-tf-options"
+                          placeholder="Ketik nama vendor..."
+                          value={tfVendorFilter === 'ALL' ? '' : tfVendorFilter}
+                          onChange={(e) => setTfVendorFilter(e.target.value)}
+                          style={{
+                            width: '100%',
+                            background: '#1e293b',
+                            border: (tfVendorFilter && tfVendorFilter !== 'ALL') ? '1.5px solid #38bdf8' : '1.5px solid #475569',
+                            borderRadius: '6px',
+                            color: (tfVendorFilter && tfVendorFilter !== 'ALL') ? '#38bdf8' : '#f8fafc',
+                            padding: '7px 28px 7px 10px',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            outline: 'none'
+                          }}
+                        />
+                        {tfVendorFilter && tfVendorFilter !== 'ALL' && (
+                          <button
+                            type="button"
+                            onClick={() => setTfVendorFilter('')}
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                        <datalist id="filter-vendor-tf-options">
+                          {uniqueTfVendors.map(v => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </datalist>
+                      </div>
                     </div>
 
                     {/* 3. Filter Status Bayar */}
