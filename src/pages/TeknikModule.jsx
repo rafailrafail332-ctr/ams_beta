@@ -2008,11 +2008,21 @@ export const TeknikModule = () => {
   // =========================================================================
   const [isPaymentHistoryModalOpen, setIsPaymentHistoryModalOpen] = useState(false);
   const [paymentHistoryTargetSheet, setPaymentHistoryTargetSheet] = useState(null);
+  const normalizeMetodeBayar = (m) => {
+    if (!m) return 'Cash';
+    const lower = String(m).toLowerCase();
+    if (lower.includes('cek') || lower.includes('bg')) return 'Cek/BG';
+    if (lower.includes('tf') || lower.includes('transfer')) return 'TF';
+    if (lower.includes('cash') || lower.includes('tunai') || lower.includes('kas')) return 'Cash';
+    return m;
+  };
+
   const [newPaymentFormData, setNewPaymentFormData] = useState({
+    id: null,
     tanggal: getTodayDateString(),
     keterangan: '',
     nominal: '',
-    metode: 'Transfer BCA'
+    metode: 'Cash'
   });
 
   const getSheetPaymentHistory = useCallback((sheet) => {
@@ -2027,7 +2037,7 @@ export const TeknikModule = () => {
         tanggal: sheet.tanggal || getTodayDateString(),
         keterangan: 'Pembayaran Awal / Sebelumnya',
         nominal: bayarAwal,
-        metode: 'Transfer Bank',
+        metode: 'Cash',
         timestamp: '-'
       }];
     }
@@ -2042,10 +2052,11 @@ export const TeknikModule = () => {
   const handleOpenPaymentHistory = (sheet) => {
     setPaymentHistoryTargetSheet(sheet);
     setNewPaymentFormData({
+      id: null,
       tanggal: getTodayDateString(),
       keterangan: '',
       nominal: '',
-      metode: 'Transfer BCA'
+      metode: 'Cash'
     });
     setIsPaymentHistoryModalOpen(true);
   };
@@ -2102,7 +2113,7 @@ export const TeknikModule = () => {
         tanggal: tglInput,
         keterangan: (newPaymentFormData.keterangan || '').trim() || `Pembayaran Ke-${currentHistory.length + 1}`,
         nominal: nominalNum,
-        metode: newPaymentFormData.metode || 'Transfer BCA',
+        metode: normalizeMetodeBayar(newPaymentFormData.metode),
         timestamp: new Date().toLocaleString('id-ID')
       };
       updatedHistory = [...currentHistory, newEntry];
@@ -2132,7 +2143,7 @@ export const TeknikModule = () => {
       tanggal: getTodayDateString(),
       keterangan: '',
       nominal: '',
-      metode: 'Transfer BCA'
+      metode: 'Cash'
     });
   };
 
@@ -7908,7 +7919,7 @@ export const TeknikModule = () => {
                                 {hist.keterangan || `Pembayaran Ke-${hIdx + 1}`}
                               </td>
                               <td style={{ padding: '8px 10px', color: '#38bdf8', fontWeight: 700, verticalAlign: 'middle' }}>
-                                {hist.metode || 'Transfer Bank'}
+                                {normalizeMetodeBayar(hist.metode)}
                               </td>
                               <td style={{ padding: '8px 6px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                                 <button
@@ -7919,7 +7930,7 @@ export const TeknikModule = () => {
                                       tanggal: hist.tanggal,
                                       keterangan: hist.keterangan || '',
                                       nominal: hist.nominal || '',
-                                      metode: hist.metode || 'Transfer BCA'
+                                      metode: normalizeMetodeBayar(hist.metode)
                                     });
                                   }}
                                   style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px', marginRight: '6px' }}
@@ -7987,7 +7998,7 @@ export const TeknikModule = () => {
                         {newPaymentFormData.id && (
                           <button
                             type="button"
-                            onClick={() => setNewPaymentFormData({ id: null, tanggal: getTodayDateString(), keterangan: '', nominal: '', metode: 'Transfer BCA' })}
+                            onClick={() => setNewPaymentFormData({ id: null, tanggal: getTodayDateString(), keterangan: '', nominal: '', metode: 'Cash' })}
                             style={{
                               background: '#475569',
                               color: '#ffffff',
@@ -8163,11 +8174,11 @@ export const TeknikModule = () => {
                               <span>🏦</span> <span>Metode Pembayaran</span>
                             </label>
                             <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                              Transfer / Kas
+                              Cash / TF / Cek
                             </span>
                           </div>
                           <select
-                            value={newPaymentFormData.metode}
+                            value={normalizeMetodeBayar(newPaymentFormData.metode)}
                             onChange={(e) => setNewPaymentFormData({ ...newPaymentFormData, metode: e.target.value })}
                             style={{
                               width: '100%',
@@ -8182,11 +8193,9 @@ export const TeknikModule = () => {
                               boxSizing: 'border-box'
                             }}
                           >
-                            <option value="Transfer BCA">Transfer BCA</option>
-                            <option value="Transfer Mandiri">Transfer Mandiri</option>
-                            <option value="Transfer BRI">Transfer BRI</option>
-                            <option value="Transfer BNI">Transfer BNI</option>
-                            <option value="Kas Tunai">Kas Tunai Proyek</option>
+                            <option value="Cash">Cash</option>
+                            <option value="TF">TF</option>
+                            <option value="Cek/BG">Cek/BG</option>
                           </select>
                         </div>
                       </div>
