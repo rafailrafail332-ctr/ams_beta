@@ -2496,7 +2496,9 @@ export const TeknikModule = () => {
     blok: '',
     noUnit: '',
     fasum: '',
-    nilaiPekerjaan: ''
+    nilaiPekerjaan: '',
+    pembayaranAwal: '',
+    metodePembayaranAwal: 'Cash'
   });
 
   const [tfTableSearch, setTfTableSearch] = useState('');
@@ -2565,7 +2567,7 @@ export const TeknikModule = () => {
       return;
     }
 
-    const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan) || 0;
+    const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan || tfPaymentTargetItem.nilai || tfPaymentTargetItem.totalHargaRab || tfPaymentTargetItem.jumlah || 0);
     const currentTotalBayar = getTfTotalBayar(tfPaymentTargetItem);
     const isEditMode = Boolean(newTfPaymentFormData.id);
     const currentHistory = getTfPaymentHistory(tfPaymentTargetItem);
@@ -2620,7 +2622,8 @@ export const TeknikModule = () => {
       pembayaranSebelumnya: newTotalBayar
     };
 
-    const nextList = tukarFakturList.map(s => s.id === tfPaymentTargetItem.id ? updatedItem : s);
+    const exists = tukarFakturList.some(s => s.id === tfPaymentTargetItem.id);
+    const nextList = exists ? tukarFakturList.map(s => s.id === tfPaymentTargetItem.id ? updatedItem : s) : [updatedItem, ...tukarFakturList];
     setTfPaymentTargetItem(updatedItem);
     updateAndSaveTukarFaktur(
       nextList,
@@ -2682,6 +2685,24 @@ export const TeknikModule = () => {
     const targetId = isEdit ? tukarFakturFormData.id : `TF-${Date.now().toString().slice(-6)}`;
     const existing = tukarFakturList.find(s => s.id === targetId);
 
+    const bayarAwalNum = parseNum(tukarFakturFormData.pembayaranAwal);
+    let initialHistory = existing?.paymentHistory || [];
+    let initialTotalBayar = existing?.pembayaranSebelumnya || 0;
+
+    if (!isEdit && bayarAwalNum > 0) {
+      initialTotalBayar = bayarAwalNum;
+      initialHistory = [
+        {
+          id: `PAY-TF-${Date.now()}-INIT`,
+          tanggal: (tukarFakturFormData.tanggal || '').trim() || getTodayDateString(),
+          keterangan: 'Pembayaran DP / Awal',
+          nominal: bayarAwalNum,
+          metode: normalizeMetodeBayar(tukarFakturFormData.metodePembayaranAwal || 'Cash'),
+          timestamp: new Date().toLocaleString('id-ID')
+        }
+      ];
+    }
+
     const newItem = {
       ...existing,
       id: targetId,
@@ -2694,8 +2715,8 @@ export const TeknikModule = () => {
       noUnit: (tukarFakturFormData.noUnit || '').trim(),
       fasum: (tukarFakturFormData.fasum || '').trim(),
       nilaiPekerjaan: nilaiNum,
-      pembayaranSebelumnya: existing?.pembayaranSebelumnya || 0,
-      paymentHistory: existing?.paymentHistory || []
+      pembayaranSebelumnya: initialTotalBayar,
+      paymentHistory: initialHistory
     };
 
     let nextList = [];
@@ -2724,7 +2745,9 @@ export const TeknikModule = () => {
       blok: '',
       noUnit: '',
       fasum: '',
-      nilaiPekerjaan: ''
+      nilaiPekerjaan: '',
+      pembayaranAwal: '',
+      metodePembayaranAwal: 'Cash'
     });
   };
 
@@ -2739,7 +2762,9 @@ export const TeknikModule = () => {
       blok: item.blok || '',
       noUnit: item.noUnit || '',
       fasum: item.fasum || '',
-      nilaiPekerjaan: item.nilaiPekerjaan || 0
+      nilaiPekerjaan: item.nilaiPekerjaan || 0,
+      pembayaranAwal: '',
+      metodePembayaranAwal: 'Cash'
     });
     setSubTabTukarFaktur('input_tf');
     window.scrollTo({ top: 200, behavior: 'smooth' });
@@ -2764,7 +2789,9 @@ export const TeknikModule = () => {
       blok: '',
       noUnit: '',
       fasum: '',
-      nilaiPekerjaan: ''
+      nilaiPekerjaan: '',
+      pembayaranAwal: '',
+      metodePembayaranAwal: 'Cash'
     });
   };
 
@@ -6846,6 +6873,82 @@ export const TeknikModule = () => {
                       )}
                     </div>
 
+                    {/* 10. Pembayaran Langsung / DP (Opsional) */}
+                    {!tukarFakturFormData.id && (
+                      <div className="form-group">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem', margin: 0 }}>
+                            💳 Pembayaran Langsung / DP (Rp)
+                          </label>
+                          {tukarFakturFormData.nilaiPekerjaan > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setTukarFakturFormData(prev => ({ ...prev, pembayaranAwal: prev.nilaiPekerjaan }))}
+                              style={{
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#34d399',
+                                border: '1px solid #10b981',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                padding: '2px 7px',
+                                fontWeight: 800,
+                                cursor: 'pointer'
+                              }}
+                              title="Set nominal bayar sama dengan nilai faktur (Lunas)"
+                            >
+                              ⚡ Bayar Lunas
+                            </button>
+                          )}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px', gap: '6px' }}>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: '#fbbf24', fontSize: '0.92rem' }}>
+                              Rp
+                            </span>
+                            <input
+                              type="text"
+                              placeholder="0 (opsional, jika sudah bayar)"
+                              value={tukarFakturFormData.pembayaranAwal ? formatNumberInput(tukarFakturFormData.pembayaranAwal) : ''}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(/\D/g, '');
+                                setTukarFakturFormData({ ...tukarFakturFormData, pembayaranAwal: raw ? Number(raw) : '' });
+                              }}
+                              style={{
+                                width: '100%',
+                                background: '#0f172a',
+                                border: '1.5px solid #f59e0b',
+                                borderRadius: '6px',
+                                color: '#fbbf24',
+                                fontWeight: 900,
+                                fontSize: '0.95rem',
+                                padding: '10px 12px 10px 42px',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+                          <select
+                            value={tukarFakturFormData.metodePembayaranAwal || 'Cash'}
+                            onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, metodePembayaranAwal: e.target.value })}
+                            style={{
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              padding: '8px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="Cash">Cash</option>
+                            <option value="TF">TF</option>
+                            <option value="Cek/BG">Cek/BG</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Tombol Simpan & Batal */}
                     <div style={{ display: 'flex', gap: '0.75rem', paddingBottom: '2px' }}>
                       <button
@@ -7167,7 +7270,7 @@ export const TeknikModule = () => {
                         <th style={{ width: '165px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sudah Dibayar</th>
                         <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
                         <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>Status</th>
-                        <th style={{ width: '120px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
+                        <th style={{ width: '160px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -7268,7 +7371,7 @@ export const TeknikModule = () => {
                                   type="button"
                                   onClick={() => handleOpenTfPayment(item)}
                                   style={{
-                                    background: '#7c3aed',
+                                    background: '#0284c7',
                                     color: '#ffffff',
                                     border: 'none',
                                     borderRadius: '4px',
@@ -7278,11 +7381,12 @@ export const TeknikModule = () => {
                                     cursor: 'pointer',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '3px'
+                                    gap: '4px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                                   }}
-                                  title="Catat atau kelola histori pembayaran faktur ini"
+                                  title="Lihat riwayat pembayaran faktur ini"
                                 >
-                                  💳 Histori Bayar {item.paymentHistory?.length > 0 ? `(${item.paymentHistory.length})` : ''}
+                                  <Clock size={11} /> History ({item.paymentHistory?.length || 0})
                                 </button>
                               </div>
                             </td>
@@ -7301,6 +7405,35 @@ export const TeknikModule = () => {
                                   {formatRupiahDesimal(sisaPembayaran)}
                                 </span>
                               </div>
+                              {!isLunas && sisaPembayaran > 0 && (
+                                <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleOpenTfPayment(item);
+                                      setTimeout(() => {
+                                        setNewTfPaymentFormData(prev => ({ ...prev, nominal: sisaPembayaran }));
+                                      }, 50);
+                                    }}
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.15)',
+                                      color: '#f87171',
+                                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                                      padding: '2px 7px',
+                                      borderRadius: '4px',
+                                      fontSize: '0.68rem',
+                                      fontWeight: 800,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                    title="Bayar sisa tagihan faktur ini"
+                                  >
+                                    ⚡ Bayar Sisa
+                                  </button>
+                                </div>
+                              )}
                             </td>
 
                             {/* 10. Status */}
@@ -7317,8 +7450,49 @@ export const TeknikModule = () => {
                             </td>
 
                             {/* 11. Aksi */}
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '10px 6px', verticalAlign: 'middle' }}>
-                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center' }}>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', verticalAlign: 'top' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenTfPayment(item)}
+                                  title="Catat Pembayaran Baru untuk Faktur Ini"
+                                  style={{
+                                    background: '#059669',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    padding: '4px 7px',
+                                    borderRadius: '5px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.3)'
+                                  }}
+                                >
+                                  <CreditCard size={11} /> + Bayar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenTfPayment(item)}
+                                  title="Lihat Histori Pembayaran Faktur Ini"
+                                  style={{
+                                    background: '#0284c7',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    padding: '4px 7px',
+                                    borderRadius: '5px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  <Clock size={11} /> History
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => handleEditTukarFaktur(item)}
@@ -7327,12 +7501,12 @@ export const TeknikModule = () => {
                                     color: '#38bdf8',
                                     border: '1px solid #0284c7',
                                     borderRadius: '5px',
-                                    padding: '5px 7px',
+                                    padding: '4px 6px',
                                     cursor: 'pointer'
                                   }}
                                   title="Edit data faktur"
                                 >
-                                  <Edit3 size={14} />
+                                  <Edit3 size={12} />
                                 </button>
                                 <button
                                   type="button"
@@ -7342,12 +7516,12 @@ export const TeknikModule = () => {
                                     color: '#f87171',
                                     border: '1px solid #dc2626',
                                     borderRadius: '5px',
-                                    padding: '5px 7px',
+                                    padding: '4px 6px',
                                     cursor: 'pointer'
                                   }}
                                   title="Hapus dokumen faktur ini"
                                 >
-                                  <Trash2 size={14} />
+                                  <Trash2 size={12} />
                                 </button>
                               </div>
                             </td>
@@ -7610,6 +7784,7 @@ export const TeknikModule = () => {
                         <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Terbayar</th>
                         <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Sisa Tagihan</th>
                         <th style={{ padding: '8px 6px', textAlign: 'center', width: '85px' }}>Status</th>
+                        <th style={{ padding: '8px 6px', textAlign: 'center', width: '90px' }}>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -7644,6 +7819,29 @@ export const TeknikModule = () => {
                                 BELUM
                               </span>
                             )}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenTfPayment(item)}
+                              style={{
+                                background: '#059669',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                              }}
+                              title="Catat atau kelola pembayaran faktur ini"
+                            >
+                              <CreditCard size={11} /> + Bayar
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -10028,7 +10226,7 @@ export const TeknikModule = () => {
       {/* MODAL HISTORI PEMBAYARAN TUKAR FAKTUR (NO OPNAME, METODE: CASH, TF, CEK/BG) */}
       {/* ========================================================================= */}
       {isTfPaymentModalOpen && tfPaymentTargetItem && (() => {
-        const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan) || 0;
+        const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan || tfPaymentTargetItem.nilai || tfPaymentTargetItem.totalHargaRab || tfPaymentTargetItem.jumlah || 0);
         const historyList = getTfPaymentHistory(tfPaymentTargetItem);
         const totalBayar = getTfTotalBayar(tfPaymentTargetItem);
         const sisaBayar = Math.max(0, nilaiFaktur - totalBayar);
@@ -10042,7 +10240,7 @@ export const TeknikModule = () => {
               <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
                 <div>
                   <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ffffff', fontWeight: 900, margin: 0, fontSize: '1.2rem' }}>
-                    <Clock size={24} color="#c084fc" /> Riwayat Pembayaran Faktur: <span style={{ color: '#c084fc' }}>{tfPaymentTargetItem.pekerjaan || 'Tukar Faktur'}</span>
+                    <CreditCard size={24} color="#10b981" /> Catat Pembayaran & Riwayat Faktur: <span style={{ color: '#c084fc' }}>{tfPaymentTargetItem.pekerjaan || 'Tukar Faktur'}</span>
                   </h3>
                   <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#cbd5e1' }}>
                     No. TT: <strong style={{ color: '#c084fc' }}>{tfPaymentTargetItem.noTt || '-'}</strong> &bull; Vendor: <strong style={{ color: '#38bdf8' }}>{tfPaymentTargetItem.namaVendor || '-'}</strong> &bull; Proyek: <strong style={{ color: '#34d399' }}>{tfPaymentTargetItem.proyek}</strong> {tfPaymentTargetItem.blok ? `(Blok ${tfPaymentTargetItem.blok} No ${tfPaymentTargetItem.noUnit})` : (tfPaymentTargetItem.fasum && tfPaymentTargetItem.fasum !== '-' ? `(${tfPaymentTargetItem.fasum})` : '')}
@@ -10410,7 +10608,7 @@ export const TeknikModule = () => {
                           style={{
                             background: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0
                               ? '#475569'
-                              : 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                              : 'linear-gradient(135deg, #059669, #10b981)',
                             color: '#ffffff',
                             border: 'none',
                             fontWeight: 900,
@@ -10421,10 +10619,10 @@ export const TeknikModule = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            boxShadow: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0 ? 'none' : '0 2px 8px rgba(124, 58, 237, 0.4)'
+                            boxShadow: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0 ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.4)'
                           }}
                         >
-                          <Save size={16} /> {newTfPaymentFormData.id ? 'Perbarui Pembayaran Faktur' : 'Simpan Pembayaran Faktur'}
+                          <CreditCard size={16} /> {newTfPaymentFormData.id ? 'Perbarui Pembayaran Faktur' : 'Simpan Pembayaran Faktur'}
                         </button>
                       </div>
                     </form>
