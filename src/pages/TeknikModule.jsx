@@ -7780,6 +7780,7 @@ export const TeknikModule = () => {
         const historyList = getSheetPaymentHistory(paymentHistoryTargetSheet);
         const totalBayar = getSheetTotalBayar(paymentHistoryTargetSheet);
         const sisaBayar = Math.max(0, jumlahPekerjaan - totalBayar);
+        const sisaOpname = Math.max(0, (sheetSummary.nilaiOpname || 0) - totalBayar);
         const isLunas = sisaBayar === 0 && jumlahPekerjaan > 0;
 
         return (
@@ -7821,21 +7822,21 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* Kartu 2: Nilai Opname Progres Fisik */}
-                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #0284c7' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800 }}>🏗️ NILAI OPNAME ({formatDecimal(sheetSummary.progresPersen || 0)}%)</div>
-                    <div style={{ fontSize: '1.15rem', color: '#38bdf8', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
-                      Rp {formatRupiahDesimal(sheetSummary.nilaiOpname || 0)}
+                  {/* Kartu 2: Sisa Opname (Kuning) */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 800 }}>🏗️ SISA OPNAME ({formatDecimal(sheetSummary.progresPersen || 0)}%)</div>
+                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
+                      Rp {formatRupiahDesimal(sisaOpname)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
-                      Net Progres: <strong style={{ color: '#34d399' }}>Rp {formatRupiahDesimal(sheetSummary.nilaiProgress || 0)}</strong>
+                      Total Opname: <strong style={{ color: '#94a3b8' }}>Rp {formatRupiahDesimal(sheetSummary.nilaiOpname || 0)}</strong>
                     </div>
                   </div>
 
                   {/* Kartu 3: Total Pembayaran Sebelumnya */}
-                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
-                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #0284c7' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
+                    <div style={{ fontSize: '1.15rem', color: '#38bdf8', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
                       Rp {formatRupiahDesimal(totalBayar)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -8002,14 +8003,14 @@ export const TeknikModule = () => {
                           </button>
                         )}
                         {/* Tombol Cepat Isi Sisa & Opname */}
-                        {Math.max(0, (sheetSummary.nilaiOpname || 0) - totalBayar) > 0 && Math.max(0, (sheetSummary.nilaiOpname || 0) - totalBayar) !== sisaBayar && (
+                        {sisaOpname > 0 && sisaOpname !== sisaBayar && (
                           <button
                             type="button"
-                            onClick={() => setNewPaymentFormData(prev => ({ ...prev, nominal: Math.max(0, (sheetSummary.nilaiOpname || 0) - totalBayar) }))}
+                            onClick={() => setNewPaymentFormData(prev => ({ ...prev, nominal: sisaOpname }))}
                             style={{
-                              background: 'rgba(16, 185, 129, 0.15)',
-                              color: '#34d399',
-                              border: '1px solid #10b981',
+                              background: 'rgba(245, 158, 11, 0.15)',
+                              color: '#fbbf24',
+                              border: '1px solid #f59e0b',
                               borderRadius: '6px',
                               padding: '3px 9px',
                               fontSize: '0.74rem',
@@ -8018,7 +8019,7 @@ export const TeknikModule = () => {
                             }}
                             title="Klik untuk mengisi nominal sesuai sisa opname progres fisik yang belum dibayar"
                           >
-                            🏗️ Bayar Sesuai Opname: Rp {formatRupiahDesimal(Math.max(0, (sheetSummary.nilaiOpname || 0) - totalBayar))}
+                            🏗️ Bayar Sesuai Sisa Opname: Rp {formatRupiahDesimal(sisaOpname)}
                           </button>
                         )}
                         <button
@@ -8084,62 +8085,71 @@ export const TeknikModule = () => {
 
                         {/* Nominal Pembayaran */}
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
-                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#34d399', fontWeight: 900, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                              <span>💰</span> <span>Nominal Bayar (Rp) <span style={{ color: '#f87171' }}>*</span></span>
-                            </label>
-                            <div style={{
-                              whiteSpace: 'nowrap',
-                              fontSize: '0.74rem',
-                              padding: '2px 8px',
-                              borderRadius: '6px',
-                              background: 'rgba(245, 158, 11, 0.12)',
-                              border: '1px solid rgba(245, 158, 11, 0.35)',
-                              color: '#cbd5e1',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}>
-                              <span>Maks Kontrak:</span>
-                              <strong style={{ color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiahDesimal(sisaBayar)}</strong>
-                              <span style={{ color: '#64748b' }}>|</span>
-                              <span>Opname:</span>
-                              <strong style={{ color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiahDesimal(sheetSummary.nilaiOpname || 0)}</strong>
-                            </div>
-                          </div>
-                          <input
-                            type="text"
-                            required
-                            placeholder="0"
-                            value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
-                            onChange={(e) => {
-                              const raw = e.target.value.replace(/\D/g, '');
-                              setNewPaymentFormData({ ...newPaymentFormData, nominal: raw ? Number(raw) : '' });
-                            }}
-                            style={{
-                              width: '100%',
-                              background: '#0f172a',
-                              border: (Number(newPaymentFormData.nominal) || 0) > sisaBayar ? '2px solid #ef4444' : '1.5px solid #10b981',
-                              borderRadius: '6px',
-                              color: (Number(newPaymentFormData.nominal) || 0) > sisaBayar ? '#f87171' : '#34d399',
-                              fontWeight: 900,
-                              padding: '7px 10px',
-                              fontSize: '0.88rem',
-                              outline: 'none',
-                              boxSizing: 'border-box'
-                            }}
-                          />
-                          {(Number(newPaymentFormData.nominal) || 0) > sisaBayar ? (
-                            <div style={{ fontSize: '0.74rem', color: '#f87171', fontWeight: 800, marginTop: '4px' }}>
-                              ⚠️ Kelebihan bayar Rp {formatRupiahDesimal((Number(newPaymentFormData.nominal) || 0) - sisaBayar)}! Maksimal Rp {formatRupiahDesimal(sisaBayar)}.
-                            </div>
-                          ) : (
-                            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                              <span>Sisa Kontrak: <strong style={{ color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiahDesimal(sisaBayar)}</strong></span>
-                              <span>&bull;</span>
-                              <span>Nilai Opname Fisik: <strong style={{ color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiahDesimal(sheetSummary.nilaiOpname || 0)}</strong> ({formatDecimal(sheetSummary.progresPersen || 0)}%)</span>
-                            </div>
-                          )}
+                          {(() => {
+                            const nominalVal = Number(newPaymentFormData.nominal) || 0;
+                            const liveSisaOpname = Math.max(0, sisaOpname - nominalVal);
+                            const liveSisaBayar = Math.max(0, sisaBayar - nominalVal);
+                            return (
+                              <>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                                  <label style={{ margin: 0, fontSize: '0.82rem', color: '#34d399', fontWeight: 900, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                    <span>💰</span> <span>Nominal Bayar (Rp) <span style={{ color: '#f87171' }}>*</span></span>
+                                  </label>
+                                  <div style={{
+                                    whiteSpace: 'nowrap',
+                                    fontSize: '0.74rem',
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(245, 158, 11, 0.12)',
+                                    border: '1px solid rgba(245, 158, 11, 0.35)',
+                                    color: '#cbd5e1',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <span>Sisa Opname:</span>
+                                    <strong style={{ color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiahDesimal(liveSisaOpname)}</strong>
+                                    <span style={{ color: '#64748b' }}>|</span>
+                                    <span>Sisa Pembayaran:</span>
+                                    <strong style={{ color: liveSisaBayar === 0 ? '#34d399' : '#f87171', fontWeight: 800 }}>Rp {formatRupiahDesimal(liveSisaBayar)}</strong>
+                                  </div>
+                                </div>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="0"
+                                  value={newPaymentFormData.nominal ? formatNumberInput(newPaymentFormData.nominal) : ''}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.replace(/\D/g, '');
+                                    setNewPaymentFormData({ ...newPaymentFormData, nominal: raw ? Number(raw) : '' });
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    background: '#0f172a',
+                                    border: nominalVal > sisaBayar ? '2px solid #ef4444' : '1.5px solid #10b981',
+                                    borderRadius: '6px',
+                                    color: nominalVal > sisaBayar ? '#f87171' : '#34d399',
+                                    fontWeight: 900,
+                                    padding: '7px 10px',
+                                    fontSize: '0.88rem',
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                  }}
+                                />
+                                {nominalVal > sisaBayar ? (
+                                  <div style={{ fontSize: '0.74rem', color: '#f87171', fontWeight: 800, marginTop: '4px' }}>
+                                    ⚠️ Kelebihan bayar Rp {formatRupiahDesimal(nominalVal - sisaBayar)}! Maksimal Rp {formatRupiahDesimal(sisaBayar)}.
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <span>Sisa Opname: <strong style={{ color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiahDesimal(liveSisaOpname)}</strong></span>
+                                    <span>&bull;</span>
+                                    <span>Sisa Pembayaran: <strong style={{ color: liveSisaBayar === 0 ? '#34d399' : '#f87171', fontWeight: 800 }}>Rp {formatRupiahDesimal(liveSisaBayar)}</strong></span>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
 
                         {/* Metode Pembayaran */}
@@ -8220,10 +8230,6 @@ export const TeknikModule = () => {
                   <strong style={{ color: isLunas ? '#34d399' : '#f87171' }}>
                     {isLunas ? '✓ LUNAS' : `SISA PEMBAYARAN: Rp ${formatRupiahDesimal(sisaBayar)}`}
                   </strong>
-                  <span style={{ color: '#64748b' }}>&bull;</span>
-                  <span style={{ color: '#cbd5e1' }}>
-                    Nilai Opname: <strong style={{ color: '#38bdf8' }}>Rp {formatRupiahDesimal(sheetSummary.nilaiOpname || 0)}</strong> ({formatDecimal(sheetSummary.progresPersen || 0)}%)
-                  </span>
                 </div>
                 <button
                   type="button"
