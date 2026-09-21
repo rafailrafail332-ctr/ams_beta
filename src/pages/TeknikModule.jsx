@@ -52,7 +52,11 @@ import {
   HeartHandshake,
   FolderOpen,
   Eye,
-  FileCheck
+  FileCheck,
+  Package,
+  Boxes,
+  ArrowDownLeft,
+  ArrowUpRight
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -394,11 +398,12 @@ const IndoDatePicker = ({ value, onChange, label, required, accentColor = '#38bd
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
-  // MAIN CATEGORIES (Level 1): 'harian' | 'borongan' | 'tukar_faktur' | 'database'
+  // MAIN CATEGORIES (Level 1): 'harian' | 'borongan' | 'tukar_faktur' | 'persediaan' | 'database'
   // SUB-TABS (Level 2):
   // - Pekerjaan Harian   : 'database' | 'input_absen' | 'detail_absen'
   // - Pekerjaan Borongan : 'input_rab' | 'laporan_rab' | 'hasil_opname'
   // - Tukar Faktur       : 'input_tf' | 'laporan_tf'
+  // - Persediaan         : 'terpadu' | 'daftar' | 'masuk' | 'keluar' | 'database'
   // - Data Base Terpadu  : 'vendor' | 'tenaga_kerja' | 'karyawan' | 'unit' | 'konsumen' | 'calon_konsumen'
   const [mainCategory, setMainCategory] = useState(() => {
     if (activeSubTab === 'rab' || activeSubTab === 'input' || activeSubTab === 'laporan' || activeSubTab === 'opname' || activeSubTab === 'borongan') {
@@ -406,6 +411,9 @@ export const TeknikModule = () => {
     }
     if (activeSubTab === 'tukar_faktur' || activeSubTab === 'faktur') {
       return 'tukar_faktur';
+    }
+    if (activeSubTab === 'persediaan' || activeSubTab === 'stok' || activeSubTab === 'inventory') {
+      return 'persediaan';
     }
     if (activeSubTab === 'database' || activeSubTab === 'vendor' || activeSubTab === 'karyawan' || activeSubTab === 'unit' || activeSubTab === 'konsumen') {
       return 'database';
@@ -420,6 +428,7 @@ export const TeknikModule = () => {
     return 'input_rab';
   });
   const [subTabTukarFaktur, setSubTabTukarFaktur] = useState('input_tf');
+  const [subTabPersediaan, setSubTabPersediaan] = useState('terpadu');
   const [subTabDatabase, setSubTabDatabase] = useState('vendor');
 
   useEffect(() => {
@@ -434,6 +443,8 @@ export const TeknikModule = () => {
       setSubTabBorongan('hasil_opname');
     } else if (activeSubTab === 'tukar_faktur' || activeSubTab === 'faktur') {
       setMainCategory('tukar_faktur');
+    } else if (activeSubTab === 'persediaan' || activeSubTab === 'stok' || activeSubTab === 'inventory') {
+      setMainCategory('persediaan');
     } else if (activeSubTab === 'absen' || activeSubTab === 'harian') {
       setMainCategory('harian');
     } else if (activeSubTab === 'database') {
@@ -833,6 +844,214 @@ export const TeknikModule = () => {
     if (notifMsg) showNotification(notifMsg, notifType);
   };
 
+  // =========================================================================
+  // SUB-MODUL: PERSEDIAAN (INVENTORY, BARANG MASUK, BARANG KELUAR, DAFTAR STOK)
+  // =========================================================================
+  const STORAGE_KEY_PERSEDIAAN_BARANG = 'ams_teknik_persediaan_barang_v1';
+  const STORAGE_KEY_PERSEDIAAN_MASUK = 'ams_teknik_persediaan_masuk_v1';
+  const STORAGE_KEY_PERSEDIAAN_KELUAR = 'ams_teknik_persediaan_keluar_v1';
+
+  const defaultPersediaanMasterBarang = [
+    { id: 'BRG-01', kode: 'BRG-001', nama: 'Semen Gresik 40 Kg', satuan: 'Sak' },
+    { id: 'BRG-02', kode: 'BRG-002', nama: 'Besi Beton 10 mm Polos', satuan: 'Btg' },
+    { id: 'BRG-03', kode: 'BRG-003', nama: 'Besi Beton 8 mm Polos', satuan: 'Btg' },
+    { id: 'BRG-04', kode: 'BRG-004', nama: 'Bata Ringan / Hebel 10 cm', satuan: 'M3' },
+    { id: 'BRG-05', kode: 'BRG-005', nama: 'Pasir Pasang Hitam Cor', satuan: 'M3' },
+    { id: 'BRG-06', kode: 'BRG-006', nama: 'Batu Split 1-2 Cor', satuan: 'M3' },
+    { id: 'BRG-07', kode: 'BRG-007', nama: 'Keramik Lantai 40x40 Putih Polos', satuan: 'Dus' }
+  ];
+
+  const defaultPersediaanBarangMasuk = [
+    {
+      id: 'MSK-001',
+      tanggal: '2026-09-15',
+      proyek: 'Ashoka View',
+      kode: 'BRG-001',
+      namaBarang: 'Semen Gresik 40 Kg',
+      qty: 100,
+      satuan: 'Sak',
+      hargaSatuan: 65000,
+      vendor: 'CV Mitra Semen Abadi',
+      keterangan: 'Pengadaan tahap 1 pondasi'
+    },
+    {
+      id: 'MSK-002',
+      tanggal: '2026-09-16',
+      proyek: 'Ashoka View',
+      kode: 'BRG-002',
+      namaBarang: 'Besi Beton 10 mm Polos',
+      qty: 80,
+      satuan: 'Btg',
+      hargaSatuan: 75000,
+      vendor: 'UD Cahaya Besi Baja',
+      keterangan: 'Struktur kolom blok A'
+    },
+    {
+      id: 'MSK-003',
+      tanggal: '2026-09-17',
+      proyek: 'Ashoka Park',
+      kode: 'BRG-004',
+      namaBarang: 'Bata Ringan / Hebel 10 cm',
+      qty: 15,
+      satuan: 'M3',
+      hargaSatuan: 620000,
+      vendor: 'PT Bangun Jaya Perkasa',
+      keterangan: 'Dinding unit 01-03'
+    }
+  ];
+
+  const defaultPersediaanBarangKeluar = [
+    {
+      id: 'KLR-001',
+      tanggal: '2026-09-18',
+      proyek: 'Ashoka View',
+      kode: 'BRG-001',
+      namaBarang: 'Semen Gresik 40 Kg',
+      qty: 35,
+      satuan: 'Sak',
+      avgHarga: 65000,
+      blok: 'A',
+      noUnit: '01',
+      fasum: ''
+    },
+    {
+      id: 'KLR-002',
+      tanggal: '2026-09-19',
+      proyek: 'Ashoka View',
+      kode: 'BRG-002',
+      namaBarang: 'Besi Beton 10 mm Polos',
+      qty: 25,
+      satuan: 'Btg',
+      avgHarga: 75000,
+      blok: 'A',
+      noUnit: '02',
+      fasum: ''
+    },
+    {
+      id: 'KLR-003',
+      tanggal: '2026-09-20',
+      proyek: 'Ashoka Park',
+      kode: 'BRG-004',
+      namaBarang: 'Bata Ringan / Hebel 10 cm',
+      qty: 5,
+      satuan: 'M3',
+      avgHarga: 620000,
+      blok: 'B',
+      noUnit: '01',
+      fasum: ''
+    }
+  ];
+
+  const [persediaanMasterBarang, setPersediaanMasterBarang] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_BARANG);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultPersediaanMasterBarang;
+  });
+
+  const updateAndSaveMasterBarang = (nextList, notifMsg = '', notifType = 'success') => {
+    setPersediaanMasterBarang(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PERSEDIAAN_BARANG, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PERSEDIAAN_BARANG, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
+  const [persediaanBarangMasuk, setPersediaanBarangMasuk] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_MASUK);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return defaultPersediaanBarangMasuk;
+  });
+
+  const updateAndSaveBarangMasuk = (nextList, notifMsg = '', notifType = 'success') => {
+    setPersediaanBarangMasuk(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PERSEDIAAN_MASUK, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PERSEDIAAN_MASUK, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
+  const [persediaanBarangKeluar, setPersediaanBarangKeluar] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_KELUAR);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return defaultPersediaanBarangKeluar;
+  });
+
+  const updateAndSaveBarangKeluar = (nextList, notifMsg = '', notifType = 'success') => {
+    setPersediaanBarangKeluar(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PERSEDIAAN_KELUAR, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PERSEDIAAN_KELUAR, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
+  // FILTER & SEARCH STATES UNTUK PERSEDIAAN
+  const [filterPersediaanProyek, setFilterPersediaanProyek] = useState('ALL');
+  const [searchPersediaan, setSearchPersediaan] = useState('');
+
+  const [filterMasukProyek, setFilterMasukProyek] = useState('ALL');
+  const [searchMasuk, setSearchMasuk] = useState('');
+
+  const [filterKeluarProyek, setFilterKeluarProyek] = useState('ALL');
+  const [searchKeluar, setSearchKeluar] = useState('');
+
+  const [searchMasterBarang, setSearchMasterBarang] = useState('');
+
+  // MODAL STATES UNTUK PERSEDIAAN
+  const [isMasterBarangModalOpen, setIsMasterBarangModalOpen] = useState(false);
+  const [editingBarangId, setEditingBarangId] = useState(null);
+  const [barangFormData, setBarangFormData] = useState({
+    kode: '',
+    nama: '',
+    satuan: 'Sak'
+  });
+
+  const [isBarangMasukModalOpen, setIsBarangMasukModalOpen] = useState(false);
+  const [editingMasukId, setEditingMasukId] = useState(null);
+  const [barangMasukFormData, setBarangMasukFormData] = useState({
+    tanggal: getTodayDateString(),
+    proyek: 'Ashoka View',
+    kode: '',
+    namaBarang: '',
+    qty: '',
+    satuan: 'Sak',
+    hargaSatuan: '',
+    vendor: '',
+    keterangan: ''
+  });
+
+  const [isBarangKeluarModalOpen, setIsBarangKeluarModalOpen] = useState(false);
+  const [editingKeluarId, setEditingKeluarId] = useState(null);
+  const [barangKeluarFormData, setBarangKeluarFormData] = useState({
+    tanggal: getTodayDateString(),
+    proyek: 'Ashoka View',
+    kode: '',
+    namaBarang: '',
+    qty: '',
+    satuan: 'Sak',
+    avgHarga: 0,
+    blok: '',
+    noUnit: '',
+    fasum: ''
+  });
+
   // SEARCH STATES FOR 6 DATABASES
   const [searchDbVendor, setSearchDbVendor] = useState('');
   const [searchDbKaryawan, setSearchDbKaryawan] = useState('');
@@ -978,6 +1197,15 @@ export const TeknikModule = () => {
       });
       fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
         if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_PERSEDIAAN_BARANG, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) setPersediaanMasterBarang(val);
+      });
+      fetchCloudStore(STORAGE_KEY_PERSEDIAAN_MASUK, null).then(val => {
+        if (val && Array.isArray(val)) setPersediaanBarangMasuk(val);
+      });
+      fetchCloudStore(STORAGE_KEY_PERSEDIAAN_KELUAR, null).then(val => {
+        if (val && Array.isArray(val)) setPersediaanBarangKeluar(val);
       });
     };
 
@@ -2973,6 +3201,336 @@ export const TeknikModule = () => {
     return { totFaktur, totBayar, totSisa };
   }, [filteredLaporanTfList]);
 
+  // =========================================================================
+  // LOGIKA, PERHITUNGAN & HANDLER SUB-MODUL PERSEDIAAN
+  // =========================================================================
+  const persediaanSummaryList = useMemo(() => {
+    return persediaanMasterBarang.map(item => {
+      const matchingMasuk = persediaanBarangMasuk.filter(m => 
+        (m.kode?.trim().toUpperCase() === item.kode?.trim().toUpperCase() ||
+         m.namaBarang?.trim().toLowerCase() === item.nama?.trim().toLowerCase()) &&
+        (filterPersediaanProyek === 'ALL' || m.proyek === filterPersediaanProyek)
+      );
+
+      const matchingKeluar = persediaanBarangKeluar.filter(k =>
+        (k.kode?.trim().toUpperCase() === item.kode?.trim().toUpperCase() ||
+         k.namaBarang?.trim().toLowerCase() === item.nama?.trim().toLowerCase()) &&
+        (filterPersediaanProyek === 'ALL' || k.proyek === filterPersediaanProyek)
+      );
+
+      const totalQtyMasuk = matchingMasuk.reduce((sum, m) => sum + (Number(m.qty) || 0), 0);
+      const totalNilaiMasuk = matchingMasuk.reduce((sum, m) => sum + ((Number(m.qty) || 0) * (Number(m.hargaSatuan) || 0)), 0);
+      const avgHarga = totalQtyMasuk > 0 ? Math.round(totalNilaiMasuk / totalQtyMasuk) : 0;
+
+      const totalQtyKeluar = matchingKeluar.reduce((sum, k) => sum + (Number(k.qty) || 0), 0);
+      const sisaQty = Math.max(0, totalQtyMasuk - totalQtyKeluar);
+      const totalNilaiSisa = sisaQty * avgHarga;
+      const totalNilaiKeluar = matchingKeluar.reduce((sum, k) => sum + ((Number(k.qty) || 0) * (Number(k.avgHarga) || avgHarga)), 0);
+
+      return {
+        ...item,
+        totalQtyMasuk,
+        totalNilaiMasuk,
+        totalQtyKeluar,
+        sisaQty,
+        avgHarga,
+        totalNilaiSisa,
+        totalNilaiKeluar
+      };
+    });
+  }, [persediaanMasterBarang, persediaanBarangMasuk, persediaanBarangKeluar, filterPersediaanProyek]);
+
+  const filteredDaftarPersediaan = useMemo(() => {
+    return persediaanSummaryList.filter(item => {
+      if (!searchPersediaan) return true;
+      const q = searchPersediaan.toLowerCase().trim();
+      return (
+        (item.kode || '').toLowerCase().includes(q) ||
+        (item.nama || '').toLowerCase().includes(q) ||
+        (item.satuan || '').toLowerCase().includes(q)
+      );
+    });
+  }, [persediaanSummaryList, searchPersediaan]);
+
+  const filteredBarangMasuk = useMemo(() => {
+    return persediaanBarangMasuk.filter(item => {
+      if (filterMasukProyek !== 'ALL' && item.proyek !== filterMasukProyek) return false;
+      if (!searchMasuk) return true;
+      const q = searchMasuk.toLowerCase().trim();
+      return (
+        (item.kode || '').toLowerCase().includes(q) ||
+        (item.namaBarang || '').toLowerCase().includes(q) ||
+        (item.vendor || '').toLowerCase().includes(q) ||
+        (item.keterangan || '').toLowerCase().includes(q) ||
+        (item.tanggal || '').includes(q)
+      );
+    }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+  }, [persediaanBarangMasuk, filterMasukProyek, searchMasuk]);
+
+  const filteredBarangKeluar = useMemo(() => {
+    return persediaanBarangKeluar.filter(item => {
+      if (filterKeluarProyek !== 'ALL' && item.proyek !== filterKeluarProyek) return false;
+      if (!searchKeluar) return true;
+      const q = searchKeluar.toLowerCase().trim();
+      return (
+        (item.kode || '').toLowerCase().includes(q) ||
+        (item.namaBarang || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.noUnit || '').toLowerCase().includes(q) ||
+        (item.fasum || '').toLowerCase().includes(q) ||
+        (item.tanggal || '').includes(q)
+      );
+    }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+  }, [persediaanBarangKeluar, filterKeluarProyek, searchKeluar]);
+
+  const filteredMasterBarang = useMemo(() => {
+    return persediaanMasterBarang.filter(item => {
+      if (!searchMasterBarang) return true;
+      const q = searchMasterBarang.toLowerCase().trim();
+      return (
+        (item.kode || '').toLowerCase().includes(q) ||
+        (item.nama || '').toLowerCase().includes(q) ||
+        (item.satuan || '').toLowerCase().includes(q)
+      );
+    });
+  }, [persediaanMasterBarang, searchMasterBarang]);
+
+  // HANDLER: MASTER BARANG
+  const handleOpenAddMasterBarang = () => {
+    setEditingBarangId(null);
+    const nextNum = (persediaanMasterBarang.length + 1).toString().padStart(3, '0');
+    setBarangFormData({
+      kode: `BRG-${nextNum}`,
+      nama: '',
+      satuan: 'Sak'
+    });
+    setIsMasterBarangModalOpen(true);
+  };
+
+  const handleOpenEditMasterBarang = (item) => {
+    setEditingBarangId(item.id);
+    setBarangFormData({
+      kode: item.kode || '',
+      nama: item.nama || '',
+      satuan: item.satuan || 'Sak'
+    });
+    setIsMasterBarangModalOpen(true);
+  };
+
+  const handleSaveMasterBarang = (e) => {
+    e.preventDefault();
+    const cleanKode = (barangFormData.kode || '').trim().toUpperCase();
+    const cleanNama = (barangFormData.nama || '').trim();
+    if (!cleanKode || !cleanNama) {
+      alert('Kode dan Nama Barang wajib diisi!');
+      return;
+    }
+    const isDup = persediaanMasterBarang.some(b => b.id !== editingBarangId && b.kode.trim().toUpperCase() === cleanKode);
+    if (isDup) {
+      alert(`Kode barang "${cleanKode}" sudah terdaftar! Gunakan kode lain.`);
+      return;
+    }
+    if (editingBarangId) {
+      const nextList = persediaanMasterBarang.map(b => b.id === editingBarangId ? { ...b, kode: cleanKode, nama: cleanNama, satuan: barangFormData.satuan } : b);
+      updateAndSaveMasterBarang(nextList, `Data Barang "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newB = {
+        id: `BRG-${Date.now().toString().slice(-4)}`,
+        kode: cleanKode,
+        nama: cleanNama,
+        satuan: barangFormData.satuan || 'Sak'
+      };
+      updateAndSaveMasterBarang([...persediaanMasterBarang, newB], `Barang "${cleanNama}" berhasil didaftarkan ke Database!`, 'success');
+    }
+    setIsMasterBarangModalOpen(false);
+  };
+
+  const handleDeleteMasterBarang = (id) => {
+    const item = persediaanMasterBarang.find(b => b.id === id);
+    if (window.confirm(`Hapus barang "${item?.nama || id}" dari database persediaan?`)) {
+      const nextList = persediaanMasterBarang.filter(b => b.id !== id);
+      updateAndSaveMasterBarang(nextList, `Barang "${item?.nama}" berhasil dihapus.`, 'info');
+    }
+  };
+
+  // HANDLER: BARANG MASUK
+  const handleOpenAddBarangMasuk = () => {
+    setEditingMasukId(null);
+    setBarangMasukFormData({
+      tanggal: getTodayDateString(),
+      proyek: 'Ashoka View',
+      kode: persediaanMasterBarang[0]?.kode || '',
+      namaBarang: persediaanMasterBarang[0]?.nama || '',
+      qty: '',
+      satuan: persediaanMasterBarang[0]?.satuan || 'Sak',
+      hargaSatuan: '',
+      vendor: '',
+      keterangan: ''
+    });
+    setIsBarangMasukModalOpen(true);
+  };
+
+  const handleOpenEditBarangMasuk = (item) => {
+    setEditingMasukId(item.id);
+    setBarangMasukFormData({
+      tanggal: item.tanggal || getTodayDateString(),
+      proyek: item.proyek || 'Ashoka View',
+      kode: item.kode || '',
+      namaBarang: item.namaBarang || '',
+      qty: item.qty || '',
+      satuan: item.satuan || 'Sak',
+      hargaSatuan: item.hargaSatuan || '',
+      vendor: item.vendor || '',
+      keterangan: item.keterangan || ''
+    });
+    setIsBarangMasukModalOpen(true);
+  };
+
+  const handleSaveBarangMasuk = (e) => {
+    e.preventDefault();
+    const cleanKode = (barangMasukFormData.kode || '').trim().toUpperCase();
+    const cleanNama = (barangMasukFormData.namaBarang || '').trim();
+    const qtyNum = Number(barangMasukFormData.qty) || 0;
+    const hargaNum = Number(barangMasukFormData.hargaSatuan) || 0;
+
+    if (!cleanNama || qtyNum <= 0) {
+      alert('Silakan pilih/isi nama barang dan jumlah qty masuk yang valid!');
+      return;
+    }
+
+    // Auto-register to master barang if not exists
+    const existsInMaster = persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === cleanKode || b.nama.trim().toLowerCase() === cleanNama.toLowerCase());
+    if (!existsInMaster) {
+      const nextNum = (persediaanMasterBarang.length + 1).toString().padStart(3, '0');
+      const generatedKode = cleanKode || `BRG-${nextNum}`;
+      const newMaster = {
+        id: `BRG-${Date.now().toString().slice(-4)}`,
+        kode: generatedKode,
+        nama: cleanNama,
+        satuan: barangMasukFormData.satuan || 'Sak'
+      };
+      updateAndSaveMasterBarang([...persediaanMasterBarang, newMaster]);
+    }
+
+    const payload = {
+      ...barangMasukFormData,
+      kode: cleanKode || (persediaanMasterBarang.find(b => b.nama.toLowerCase() === cleanNama.toLowerCase())?.kode || 'BRG-001'),
+      namaBarang: cleanNama,
+      qty: qtyNum,
+      hargaSatuan: hargaNum
+    };
+
+    if (editingMasukId) {
+      const nextList = persediaanBarangMasuk.map(m => m.id === editingMasukId ? { ...payload, id: editingMasukId } : m);
+      updateAndSaveBarangMasuk(nextList, `Penerimaan barang "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        ...payload,
+        id: `MSK-${Date.now().toString().slice(-4)}`
+      };
+      updateAndSaveBarangMasuk([newItem, ...persediaanBarangMasuk], `Penerimaan barang "${cleanNama}" (${qtyNum} ${payload.satuan}) berhasil dicatat!`, 'success');
+    }
+    setIsBarangMasukModalOpen(false);
+  };
+
+  const handleDeleteBarangMasuk = (id) => {
+    const item = persediaanBarangMasuk.find(m => m.id === id);
+    if (window.confirm(`Hapus catatan barang masuk "${item?.namaBarang || id}"?`)) {
+      const nextList = persediaanBarangMasuk.filter(m => m.id !== id);
+      updateAndSaveBarangMasuk(nextList, `Penerimaan barang "${item?.namaBarang}" dihapus.`, 'info');
+    }
+  };
+
+  // HANDLER: BARANG KELUAR
+  const handleOpenAddBarangKeluar = () => {
+    setEditingKeluarId(null);
+    const firstItem = persediaanSummaryList[0] || persediaanMasterBarang[0];
+    setBarangKeluarFormData({
+      tanggal: getTodayDateString(),
+      proyek: 'Ashoka View',
+      kode: firstItem?.kode || '',
+      namaBarang: firstItem?.nama || '',
+      qty: '',
+      satuan: firstItem?.satuan || 'Sak',
+      avgHarga: firstItem?.avgHarga || 0,
+      blok: 'A',
+      noUnit: '01',
+      fasum: ''
+    });
+    setIsBarangKeluarModalOpen(true);
+  };
+
+  const handleOpenEditBarangKeluar = (item) => {
+    setEditingKeluarId(item.id);
+    setBarangKeluarFormData({
+      tanggal: item.tanggal || getTodayDateString(),
+      proyek: item.proyek || 'Ashoka View',
+      kode: item.kode || '',
+      namaBarang: item.namaBarang || '',
+      qty: item.qty || '',
+      satuan: item.satuan || 'Sak',
+      avgHarga: item.avgHarga || 0,
+      blok: item.blok || '',
+      noUnit: item.noUnit || '',
+      fasum: item.fasum || ''
+    });
+    setIsBarangKeluarModalOpen(true);
+  };
+
+  const handleSaveBarangKeluar = (e) => {
+    e.preventDefault();
+    const cleanKode = (barangKeluarFormData.kode || '').trim().toUpperCase();
+    const cleanNama = (barangKeluarFormData.namaBarang || '').trim();
+    const qtyNum = Number(barangKeluarFormData.qty) || 0;
+
+    if (!cleanNama || qtyNum <= 0) {
+      alert('Silakan pilih/isi nama barang dan jumlah qty keluar yang valid!');
+      return;
+    }
+
+    const summary = persediaanSummaryList.find(s => 
+      s.kode?.trim().toUpperCase() === cleanKode || 
+      s.nama?.trim().toLowerCase() === cleanNama.toLowerCase()
+    );
+    const existingKeluarQty = editingKeluarId ? (Number(persediaanBarangKeluar.find(k => k.id === editingKeluarId)?.qty) || 0) : 0;
+    const effectiveAvailableStock = (summary ? summary.sisaQty : 0) + existingKeluarQty;
+
+    if (qtyNum > effectiveAvailableStock && effectiveAvailableStock > 0) {
+      if (!window.confirm(`⚠️ Perhatian: Qty keluar (${qtyNum}) melebihi sisa stok saat ini (${effectiveAvailableStock}). Tetap lanjutkan simpan?`)) {
+        return;
+      }
+    }
+
+    const autoAvg = Number(barangKeluarFormData.avgHarga) > 0 ? Number(barangKeluarFormData.avgHarga) : (summary?.avgHarga || 0);
+    const payload = {
+      ...barangKeluarFormData,
+      kode: cleanKode || (summary?.kode || 'BRG-001'),
+      namaBarang: cleanNama,
+      qty: qtyNum,
+      avgHarga: autoAvg
+    };
+
+    if (editingKeluarId) {
+      const nextList = persediaanBarangKeluar.map(k => k.id === editingKeluarId ? { ...payload, id: editingKeluarId } : k);
+      updateAndSaveBarangKeluar(nextList, `Catatan barang keluar "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        ...payload,
+        id: `KLR-${Date.now().toString().slice(-4)}`
+      };
+      updateAndSaveBarangKeluar([newItem, ...persediaanBarangKeluar], `Pengeluaran barang "${cleanNama}" (${qtyNum} ${payload.satuan}) berhasil dicatat!`, 'success');
+    }
+    setIsBarangKeluarModalOpen(false);
+  };
+
+  const handleDeleteBarangKeluar = (id) => {
+    const item = persediaanBarangKeluar.find(k => k.id === id);
+    if (window.confirm(`Hapus catatan barang keluar "${item?.namaBarang || id}"?`)) {
+      const nextList = persediaanBarangKeluar.filter(k => k.id !== id);
+      updateAndSaveBarangKeluar(nextList, `Pengeluaran barang "${item?.namaBarang}" dihapus.`, 'info');
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -3106,7 +3664,34 @@ export const TeknikModule = () => {
           <FileText size={22} color={mainCategory === 'tukar_faktur' ? '#ffffff' : '#c084fc'} /> Tukar Faktur
         </button>
 
-        {/* Tombol 4: Data Base Terpadu Proyek */}
+        {/* Tombol 4: Persediaan (Di Pinggir Tukar Faktur Sesuai Permintaan) */}
+        <button
+          type="button"
+          onClick={() => {
+            setMainCategory('persediaan');
+            if (setActiveSubTab) setActiveSubTab('persediaan');
+          }}
+          style={{
+            padding: '1rem 1.25rem',
+            borderRadius: '10px',
+            border: mainCategory === 'persediaan' ? '3px solid #f59e0b' : '1.5px solid #b45309',
+            background: mainCategory === 'persediaan' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#1e293b',
+            color: mainCategory === 'persediaan' ? '#ffffff' : '#fbbf24',
+            fontWeight: 900,
+            fontSize: '1.1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            cursor: 'pointer',
+            boxShadow: mainCategory === 'persediaan' ? '0 4px 16px rgba(245, 158, 11, 0.45)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Boxes size={22} color={mainCategory === 'persediaan' ? '#ffffff' : '#fbbf24'} /> Persediaan
+        </button>
+
+        {/* Tombol 5: Data Base Terpadu Proyek */}
         <button
           type="button"
           onClick={() => {
@@ -3185,6 +3770,131 @@ export const TeknikModule = () => {
               }}
             >
               <BarChart3 size={16} /> Laporan Ringkasan per Proyek
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* LEVEL 2: SUB-MENU PERSEDIAAN                                              */}
+      {/* ========================================================================= */}
+      {mainCategory === 'persediaan' && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #f59e0b', flexWrap: 'wrap' }}>
+            
+            {/* 1. Tampilan Terpadu (Format Excel) */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('terpadu')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'terpadu' ? '2px solid #f59e0b' : '1px solid #475569',
+                background: subTabPersediaan === 'terpadu' ? '#d97706' : '#1e293b',
+                color: subTabPersediaan === 'terpadu' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'terpadu' ? '0 2px 8px rgba(217, 119, 6, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileSpreadsheet size={16} /> 📋 Tampilan Terpadu (Format Excel)
+            </button>
+
+            {/* 2. Daftar Persediaan */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('daftar')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'daftar' ? '2px solid #10b981' : '1px solid #475569',
+                background: subTabPersediaan === 'daftar' ? '#059669' : '#1e293b',
+                color: subTabPersediaan === 'daftar' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'daftar' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <BarChart3 size={16} /> 📊 Daftar Persediaan
+            </button>
+
+            {/* 3. Barang Masuk */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('masuk')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'masuk' ? '2px solid #38bdf8' : '1px solid #475569',
+                background: subTabPersediaan === 'masuk' ? '#0284c7' : '#1e293b',
+                color: subTabPersediaan === 'masuk' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'masuk' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ArrowDownLeft size={16} /> 📥 Barang Masuk ({persediaanBarangMasuk.length})
+            </button>
+
+            {/* 4. Barang Keluar */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('keluar')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'keluar' ? '2px solid #ec4899' : '1px solid #475569',
+                background: subTabPersediaan === 'keluar' ? '#db2777' : '#1e293b',
+                color: subTabPersediaan === 'keluar' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'keluar' ? '0 2px 8px rgba(219, 39, 119, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ArrowUpRight size={16} /> 📤 Barang Keluar ({persediaanBarangKeluar.length})
+            </button>
+
+            {/* 5. Data Base Barang */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('database')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'database' ? '2px solid #a855f7' : '1px solid #475569',
+                background: subTabPersediaan === 'database' ? '#7c3aed' : '#1e293b',
+                color: subTabPersediaan === 'database' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'database' ? '0 2px 8px rgba(124, 58, 237, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Package size={16} /> 📦 Data Base Barang ({persediaanMasterBarang.length})
             </button>
           </div>
         </div>
@@ -8184,6 +8894,1108 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* VIEW: PERSEDIAAN / INVENTORY & STOK MATERIAL (FORMAT EXCEL & REKAPITULASI) */}
+      {/* 1. Tampilan Terpadu (Format Excel: Database, Masuk, Keluar, Persediaan)   */}
+      {/* 2. Daftar Persediaan (Rekap Stok & Nilai Persediaan WAC)                   */}
+      {/* 3. Barang Masuk (Penerimaan & Pembelian Material)                         */}
+      {/* 4. Barang Keluar (Pemakaian Material Unit / Fasum)                         */}
+      {/* 5. Data Base Barang (Master Material & Satuan)                             */}
+      {/* ========================================================================= */}
+      {mainCategory === 'persediaan' && (
+        <div className="module-animated-view">
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 1: TAMPILAN TERPADU (PERSIS LEMBAR KERJA EXCEL PENGGUNA)          */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'terpadu' && (
+            <div>
+              {/* Header Tampilan Terpadu */}
+              <div className="glass-card" style={{ padding: '1rem 1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <Boxes size={24} color="#f59e0b" /> Sub-Modul Persediaan (Format Excel Terpadu)
+                    </h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Tampilan komprehensif: Data Base Master Barang, Barang Masuk, Barang Keluar, dan Rekapitulasi Daftar Persediaan Otomatis.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    {/* Filter Proyek */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                      <Filter size={14} color="#fbbf24" />
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1' }}>Proyek:</span>
+                      <select
+                        value={filterPersediaanProyek}
+                        onChange={(e) => setFilterPersediaanProyek(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: '#fbbf24', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                      >
+                        <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Proyek (Gabungan)</option>
+                        <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                        <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                      </select>
+                    </div>
+
+                    {/* Tombol Cetak */}
+                    <button
+                      type="button"
+                      onClick={handlePrint}
+                      style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                    >
+                      <Printer size={15} /> Cetak
+                    </button>
+                  </div>
+                </div>
+
+                {/* KPI Summary Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginTop: '1rem' }}>
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #a855f7' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#c084fc', textTransform: 'uppercase' }}>Total Jenis Material</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
+                      {persediaanMasterBarang.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Item Barang</span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #10b981' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', textTransform: 'uppercase' }}>Total Sisa Stok Fisik</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10b981', marginTop: '3px' }}>
+                      {persediaanSummaryList.reduce((acc, it) => acc + (it.sisaQty || 0), 0)} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Qty</span>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase' }}>Nilai Aset Persediaan</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fbbf24', marginTop: '3px' }}>
+                      Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiSisa || 0), 0))}
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #ec4899' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f472b6', textTransform: 'uppercase' }}>Total Pemakaian (Keluar)</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f472b6', marginTop: '3px' }}>
+                      Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiKeluar || 0), 0))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 GRID ATAS: DATA BASE | BARANG MASUK | BARANG KELUAR */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                
+                {/* 1. KOTAK KIRI ATAS: DATA BASE (KODE, NAMA BARANG, SATUAN) */}
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #a855f7', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Package size={18} color="#a855f7" /> Data Base ({persediaanMasterBarang.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddMasterBarang}
+                      style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                    >
+                      <Plus size={13} /> + Tambah
+                    </button>
+                  </div>
+
+                  {/* Search Master */}
+                  <div style={{ marginBottom: '0.65rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Cari kode / nama barang..."
+                      value={searchMasterBarang}
+                      onChange={(e) => setSearchMasterBarang(e.target.value)}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.78rem', padding: '4px 8px', outline: 'none' }}
+                    />
+                  </div>
+
+                  {/* Tabel Data Base Sesuai Gambar */}
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #6b21a8', borderRadius: '6px' }}>
+                    <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.78rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+                        <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
+                          <th style={{ width: '75px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Kode</th>
+                          <th style={{ border: '1px solid #6d28d9', padding: '6px 8px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '55px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Satuan</th>
+                          <th style={{ width: '45px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredMasterBarang.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada master barang</td>
+                          </tr>
+                        ) : (
+                          filteredMasterBarang.map((b, idx) => (
+                            <tr key={b.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#c084fc', border: '1px solid #334155', padding: '5px 4px' }}>{b.kode}</td>
+                              <td style={{ fontWeight: 800, color: '#f8fafc', border: '1px solid #334155', padding: '5px 8px' }}>{b.nama}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '5px 4px' }}>{b.satuan}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
+                                <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditMasterBarang(b)}
+                                    title="Edit Barang"
+                                    style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Edit size={12} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteMasterBarang(b.id)}
+                                    title="Hapus Barang"
+                                    style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 2. KOTAK TENGAH ATAS: BARANG MASUK (TGL, PROYEK, KODE, NAMA BARANG, QTY, SAT, HARGA SATUAN, VENDOR, KETERANGAN) */}
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #0284c7', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ArrowDownLeft size={18} color="#38bdf8" /> Barang Masuk ({persediaanBarangMasuk.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddBarangMasuk}
+                      style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                    >
+                      <Plus size={13} /> + Masuk
+                    </button>
+                  </div>
+
+                  {/* Search & Filter Masuk */}
+                  <div style={{ display: 'flex', gap: '5px', marginBottom: '0.65rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Cari barang / vendor masuk..."
+                      value={searchMasuk}
+                      onChange={(e) => setSearchMasuk(e.target.value)}
+                      style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.78rem', padding: '4px 8px', outline: 'none' }}
+                    />
+                    <select
+                      value={filterMasukProyek}
+                      onChange={(e) => setFilterMasukProyek(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8', fontSize: '0.76rem', fontWeight: 800, padding: '4px' }}
+                    >
+                      <option value="ALL">Semua</option>
+                      <option value="Ashoka View">View</option>
+                      <option value="Ashoka Park">Park</option>
+                    </select>
+                  </div>
+
+                  {/* Tabel Barang Masuk Sesuai Gambar */}
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #0369a1', borderRadius: '6px' }}>
+                    <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '650px', fontSize: '0.78rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+                        <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                          <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
+                          <th style={{ width: '80px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
+                          <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '120px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '45px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '45px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '85px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Harga Satuan</th>
+                          <th style={{ minWidth: '100px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Vendor</th>
+                          <th style={{ minWidth: '90px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Keterangan</th>
+                          <th style={{ width: '40px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredBarangMasuk.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada data barang masuk</td>
+                          </tr>
+                        ) : (
+                          filteredBarangMasuk.map((m, idx) => (
+                            <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{m.proyek}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{m.kode}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#10b981', fontWeight: 900 }}>{m.qty}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8' }}>{m.satuan}</td>
+                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#f59e0b', fontWeight: 800 }}>{m.vendor || '-'}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
+                                <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditBarangMasuk(m)}
+                                    title="Edit"
+                                    style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Edit size={11} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteBarangMasuk(m.id)}
+                                    title="Hapus"
+                                    style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 3. KOTAK KANAN ATAS: BARANG KELUAR (TGL, PROYEK, KODE, NAMA BARANG, QTY, SAT, AVG, BLOK, NO., LAIN-LAIN) */}
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #db2777', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ArrowUpRight size={18} color="#f472b6" /> Barang Keluar ({persediaanBarangKeluar.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddBarangKeluar}
+                      style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                    >
+                      <Plus size={13} /> + Keluar
+                    </button>
+                  </div>
+
+                  {/* Search & Filter Keluar */}
+                  <div style={{ display: 'flex', gap: '5px', marginBottom: '0.65rem' }}>
+                    <input
+                      type="text"
+                      placeholder="Cari pemakaian / blok..."
+                      value={searchKeluar}
+                      onChange={(e) => setSearchKeluar(e.target.value)}
+                      style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.78rem', padding: '4px 8px', outline: 'none' }}
+                    />
+                    <select
+                      value={filterKeluarProyek}
+                      onChange={(e) => setFilterKeluarProyek(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#f472b6', fontSize: '0.76rem', fontWeight: 800, padding: '4px' }}
+                    >
+                      <option value="ALL">Semua</option>
+                      <option value="Ashoka View">View</option>
+                      <option value="Ashoka Park">Park</option>
+                    </select>
+                  </div>
+
+                  {/* Tabel Barang Keluar Sesuai Gambar */}
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #be185d', borderRadius: '6px' }}>
+                    <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '680px', fontSize: '0.78rem' }}>
+                      <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+                        <tr style={{ background: '#db2777', color: '#ffffff' }}>
+                          <th style={{ width: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
+                          <th style={{ width: '80px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
+                          <th style={{ width: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '120px', border: '1px solid #be185d', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '85px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
+                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
+                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
+                          <th style={{ minWidth: '85px', border: '1px solid #be185d', padding: '6px 6px', fontWeight: 900 }}>Lain-lain</th>
+                          <th style={{ width: '40px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredBarangKeluar.length === 0 ? (
+                          <tr>
+                            <td colSpan={11} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada data barang keluar</td>
+                          </tr>
+                        ) : (
+                          filteredBarangKeluar.map((k, idx) => (
+                            <tr key={k.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#cbd5e1' }}>{k.tanggal}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#f472b6', fontWeight: 800 }}>{k.proyek}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{k.kode}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#f43f5e', fontWeight: 900 }}>{k.qty}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8' }}>{k.satuan}</td>
+                              <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{k.fasum || '-'}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
+                                <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditBarangKeluar(k)}
+                                    title="Edit"
+                                    style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Edit size={11} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteBarangKeluar(k.id)}
+                                    title="Hapus"
+                                    style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                  >
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 4. KOTAK BAWAH: DAFTAR PERSEDIAAN (PERSIS TABEL BAWAH DI GAMBAR EXCEL) */}
+              <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <BarChart3 size={20} color="#10b981" /> Daftar Persediaan (Sisa Stok Real-Time)
+                    </h4>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Kalkulasi otomatis: Sisa Qty = (Qty Masuk - Qty Keluar) | Avg Harga = (Total Biaya Masuk / Qty Masuk) | Jumlah = Sisa Qty × Avg Harga
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <Search size={14} color="#94a3b8" />
+                      <input
+                        type="text"
+                        placeholder="Cari kode / nama material..."
+                        value={searchPersediaan}
+                        onChange={(e) => setSearchPersediaan(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '200px', outline: 'none' }}
+                      />
+                      {searchPersediaan && (
+                        <button onClick={() => setSearchPersediaan('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                          <X size={13} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabel Daftar Persediaan */}
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
+                    <thead>
+                      <tr style={{ background: '#10b981', color: '#000000' }}>
+                        <th style={{ width: '45px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                        <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Kode</th>
+                        <th style={{ minWidth: '220px', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Barang</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Masuk</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Keluar</th>
+                        <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Qty (Sisa)</th>
+                        <th style={{ width: '65px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Sat</th>
+                        <th style={{ width: '130px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Avg Harga</th>
+                        <th style={{ width: '160px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Jumlah (Rp)</th>
+                        <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Status Stok</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDaftarPersediaan.length === 0 ? (
+                        <tr>
+                          <td colSpan={10} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                            Data persediaan tidak ditemukan
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredDaftarPersediaan.map((item, idx) => {
+                          const isLow = item.sisaQty > 0 && item.sisaQty <= 10;
+                          const isEmpty = item.sisaQty <= 0;
+                          return (
+                            <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
+                              <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 10px' }}>{item.nama}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyMasuk}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyKeluar}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
+                                {item.sisaQty}
+                              </td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px' }}>{item.satuan}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
+                                Rp {formatRupiah(item.avgHarga)}
+                              </td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.92rem', border: '1px solid #334155', padding: '7px 10px' }}>
+                                Rp {formatRupiah(item.totalNilaiSisa)}
+                              </td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px' }}>
+                                {isEmpty ? (
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444' }}>
+                                    Habis
+                                  </span>
+                                ) : isLow ? (
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b' }}>
+                                    Menipis
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981' }}>
+                                    Tersedia
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                    <tfoot>
+                      <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #10b981' }}>
+                        <td colSpan={5} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
+                          TOTAL KESELURUHAN NILAI PERSEDIAAN :
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '9px 6px', color: '#34d399', fontSize: '0.95rem', border: '1px solid #334155' }}>
+                          {filteredDaftarPersediaan.reduce((sum, it) => sum + (it.sisaQty || 0), 0)}
+                        </td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td style={{ textAlign: 'right', padding: '9px 12px', color: '#10b981', fontSize: '1.05rem', border: '1px solid #334155' }}>
+                          Rp {formatRupiah(filteredDaftarPersediaan.reduce((sum, it) => sum + (it.totalNilaiSisa || 0), 0))}
+                        </td>
+                        <td style={{ border: '1px solid #334155' }}></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 2: DAFTAR PERSEDIAAN (TAMPILAN RINCI / FULL VIEW)                 */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'daftar' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <BarChart3 size={22} color="#10b981" /> Laporan Rekapitulasi Stok & Persediaan Proyek
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                    Sisa stok fisik, valuasi harga rata-rata (Weighted Average Cost), dan total nilai aset material
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <Filter size={14} color="#10b981" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1' }}>Proyek:</span>
+                    <select
+                      value={filterPersediaanProyek}
+                      onChange={(e) => setFilterPersediaanProyek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#10b981', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Proyek (Gabungan)</option>
+                      <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                      <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari kode / nama material..."
+                      value={searchPersediaan}
+                      onChange={(e) => setSearchPersediaan(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                    />
+                    {searchPersediaan && (
+                      <button onClick={() => setSearchPersediaan('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                  >
+                    <Printer size={15} /> Cetak
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Total Item Terdaftar</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
+                    {persediaanMasterBarang.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Barang</span>
+                  </div>
+                </div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #0284c7' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase' }}>Total Pembelian Masuk</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8', marginTop: '3px' }}>
+                    Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiMasuk || 0), 0))}
+                  </div>
+                </div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #db2777' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#f472b6', textTransform: 'uppercase' }}>Total Pemakaian Keluar</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#f472b6', marginTop: '3px' }}>
+                    Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiKeluar || 0), 0))}
+                  </div>
+                </div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #10b981' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#34d399', textTransform: 'uppercase' }}>Nilai Aset Stok Saat Ini</div>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10b981', marginTop: '3px' }}>
+                    Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiSisa || 0), 0))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                  <thead>
+                    <tr style={{ background: '#10b981', color: '#000000' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '220px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Keluar</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
+                      <th style={{ width: '65px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '130px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Avg Harga Satuan</th>
+                      <th style={{ width: '160px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Jumlah Nilai (Rp)</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Status</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>Pintasan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDaftarPersediaan.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Tidak ada data persediaan sesuai filter
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredDaftarPersediaan.map((item, idx) => {
+                        const isLow = item.sisaQty > 0 && item.sisaQty <= 10;
+                        const isEmpty = item.sisaQty <= 0;
+                        return (
+                          <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
+                            <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 10px' }}>{item.nama}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyMasuk}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyKeluar}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
+                              {item.sisaQty}
+                            </td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px' }}>{item.satuan}</td>
+                            <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
+                              Rp {formatRupiah(item.avgHarga)}
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.92rem', border: '1px solid #334155', padding: '7px 10px' }}>
+                              Rp {formatRupiah(item.totalNilaiSisa)}
+                            </td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px' }}>
+                              {isEmpty ? (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444' }}>
+                                  Habis
+                                </span>
+                              ) : isLow ? (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b' }}>
+                                  Menipis
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.72rem', fontWeight: 900, padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981' }}>
+                                  Tersedia
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingMasukId(null);
+                                    setBarangMasukFormData({
+                                      tanggal: getTodayDateString(),
+                                      proyek: 'Ashoka View',
+                                      kode: item.kode,
+                                      namaBarang: item.nama,
+                                      qty: '',
+                                      satuan: item.satuan,
+                                      hargaSatuan: item.avgHarga || '',
+                                      vendor: '',
+                                      keterangan: ''
+                                    });
+                                    setIsBarangMasukModalOpen(true);
+                                  }}
+                                  title="+ Tambah Stok Masuk"
+                                  style={{ background: 'rgba(2, 132, 199, 0.25)', color: '#38bdf8', border: '1px solid #0284c7', borderRadius: '4px', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                  + Masuk
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingKeluarId(null);
+                                    setBarangKeluarFormData({
+                                      tanggal: getTodayDateString(),
+                                      proyek: 'Ashoka View',
+                                      kode: item.kode,
+                                      namaBarang: item.nama,
+                                      qty: '',
+                                      satuan: item.satuan,
+                                      avgHarga: item.avgHarga || 0,
+                                      blok: 'A',
+                                      noUnit: '01',
+                                      fasum: ''
+                                    });
+                                    setIsBarangKeluarModalOpen(true);
+                                  }}
+                                  title="+ Catat Stok Keluar"
+                                  style={{ background: 'rgba(219, 39, 119, 0.25)', color: '#f472b6', border: '1px solid #db2777', borderRadius: '4px', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                  + Keluar
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #10b981' }}>
+                      <td colSpan={5} style={{ textAlign: 'right', padding: '10px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
+                        TOTAL KESELURUHAN NILAI PERSEDIAAN :
+                      </td>
+                      <td style={{ textAlign: 'center', padding: '10px 6px', color: '#34d399', fontSize: '1rem', border: '1px solid #334155' }}>
+                        {filteredDaftarPersediaan.reduce((sum, it) => sum + (it.sisaQty || 0), 0)}
+                      </td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ textAlign: 'right', padding: '10px 12px', color: '#10b981', fontSize: '1.1rem', border: '1px solid #334155' }}>
+                        Rp {formatRupiah(filteredDaftarPersediaan.reduce((sum, it) => sum + (it.totalNilaiSisa || 0), 0))}
+                      </td>
+                      <td colSpan={2} style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 3: BARANG MASUK (TAMPILAN RINCI / FULL VIEW)                     */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'masuk' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #0284c7', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ArrowDownLeft size={22} color="#38bdf8" /> Riwayat Penerimaan Material (Barang Masuk)
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                    Log penerimaan barang dari vendor / suplier material untuk proyek Ashoka View & Ashoka Park
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <Filter size={14} color="#38bdf8" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1' }}>Proyek:</span>
+                    <select
+                      value={filterMasukProyek}
+                      onChange={(e) => setFilterMasukProyek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Proyek</option>
+                      <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                      <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari barang / vendor / nota..."
+                      value={searchMasuk}
+                      onChange={(e) => setSearchMasuk(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                    />
+                    {searchMasuk && (
+                      <button onClick={() => setSearchMasuk('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddBarangMasuk}
+                    style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)' }}
+                  >
+                    <Plus size={16} /> + Catat Barang Masuk
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabel Barang Masuk */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #0369a1' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                  <thead>
+                    <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
+                      <th style={{ width: '110px', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #0369a1', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '70px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Qty</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Harga Satuan</th>
+                      <th style={{ width: '135px', textAlign: 'right', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900, background: '#0369a1' }}>Total Biaya</th>
+                      <th style={{ minWidth: '150px', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Vendor / Suplier</th>
+                      <th style={{ minWidth: '130px', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Keterangan</th>
+                      <th style={{ width: '75px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 4px', fontWeight: 900 }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBarangMasuk.length === 0 ? (
+                      <tr>
+                        <td colSpan={12} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada catatan barang masuk
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBarangMasuk.map((m, idx) => {
+                        const totalBiaya = (Number(m.qty) || 0) * (Number(m.hargaSatuan) || 0);
+                        return (
+                          <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>{m.proyek}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#10b981', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8' }}>{m.satuan}</td>
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#10b981', fontWeight: 900 }}>Rp {formatRupiah(totalBiaya)}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>{m.vendor || '-'}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditBarangMasuk(m)}
+                                  title="Edit Penerimaan"
+                                  style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteBarangMasuk(m.id)}
+                                  title="Hapus Penerimaan"
+                                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #0284c7' }}>
+                      <td colSpan={5} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff' }}>TOTAL BARANG MASUK :</td>
+                      <td style={{ textAlign: 'center', padding: '9px 6px', color: '#10b981', fontSize: '0.95rem', border: '1px solid #334155' }}>
+                        {filteredBarangMasuk.reduce((sum, it) => sum + (Number(it.qty) || 0), 0)}
+                      </td>
+                      <td colSpan={2} style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ textAlign: 'right', padding: '9px 8px', color: '#38bdf8', fontSize: '1.05rem', border: '1px solid #334155' }}>
+                        Rp {formatRupiah(filteredBarangMasuk.reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.hargaSatuan) || 0)), 0))}
+                      </td>
+                      <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 4: BARANG KELUAR (TAMPILAN RINCI / FULL VIEW)                    */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'keluar' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #db2777', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ArrowUpRight size={22} color="#f472b6" /> Riwayat Pengeluaran Material (Barang Keluar)
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                    Log pemakaian material untuk pembangunan unit (Blok & Nomor), fasilitas umum, atau keperluan lainnya
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <Filter size={14} color="#f472b6" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1' }}>Proyek:</span>
+                    <select
+                      value={filterKeluarProyek}
+                      onChange={(e) => setFilterKeluarProyek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#f472b6', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Proyek</option>
+                      <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                      <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari pemakaian / blok / fasum..."
+                      value={searchKeluar}
+                      onChange={(e) => setSearchKeluar(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                    />
+                    {searchKeluar && (
+                      <button onClick={() => setSearchKeluar('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddBarangKeluar}
+                    style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(219, 39, 119, 0.4)' }}
+                  >
+                    <Plus size={16} /> + Catat Barang Keluar
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabel Barang Keluar */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #be185d' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                  <thead>
+                    <tr style={{ background: '#db2777', color: '#ffffff' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
+                      <th style={{ width: '110px', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #be185d', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '70px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Qty Keluar</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Avg Harga</th>
+                      <th style={{ width: '135px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900, background: '#be185d' }}>Nilai Pemakaian</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Blok</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>No. Unit</th>
+                      <th style={{ minWidth: '120px', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Lain-lain / Fasum</th>
+                      <th style={{ width: '75px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 4px', fontWeight: 900 }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBarangKeluar.length === 0 ? (
+                      <tr>
+                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada catatan barang keluar
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBarangKeluar.map((k, idx) => {
+                        const nilaiPemakaian = (Number(k.qty) || 0) * (Number(k.avgHarga) || 0);
+                        return (
+                          <tr key={k.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{k.tanggal}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 800 }}>{k.proyek}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{k.kode}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#f43f5e', fontWeight: 900, fontSize: '0.92rem' }}>{k.qty}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8' }}>{k.satuan}</td>
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
+                            <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 900 }}>Rp {formatRupiah(nilaiPemakaian)}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#94a3b8' }}>{k.fasum || '-'}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditBarangKeluar(k)}
+                                  title="Edit Pengeluaran"
+                                  style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteBarangKeluar(k.id)}
+                                  title="Hapus Pengeluaran"
+                                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #db2777' }}>
+                      <td colSpan={5} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff' }}>TOTAL BARANG KELUAR :</td>
+                      <td style={{ textAlign: 'center', padding: '9px 6px', color: '#f43f5e', fontSize: '0.95rem', border: '1px solid #334155' }}>
+                        {filteredBarangKeluar.reduce((sum, it) => sum + (Number(it.qty) || 0), 0)}
+                      </td>
+                      <td colSpan={2} style={{ border: '1px solid #334155' }}></td>
+                      <td style={{ textAlign: 'right', padding: '9px 8px', color: '#f472b6', fontSize: '1.05rem', border: '1px solid #334155' }}>
+                        Rp {formatRupiah(filteredBarangKeluar.reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.avgHarga) || 0)), 0))}
+                      </td>
+                      <td colSpan={4} style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 5: DATA BASE MASTER BARANG (TAMPILAN RINCI / FULL VIEW)          */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'database' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #a855f7', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Package size={22} color="#a855f7" /> Data Base Barang Persediaan ({persediaanMasterBarang.length} Item)
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                    Master daftar kode, nama material bahan bangunan, satuan standar, dan ringkasan perputaran stok
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari kode / nama material..."
+                      value={searchMasterBarang}
+                      onChange={(e) => setSearchMasterBarang(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                    />
+                    {searchMasterBarang && (
+                      <button onClick={() => setSearchMasterBarang('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddMasterBarang}
+                    style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(168, 85, 247, 0.4)' }}
+                  >
+                    <Plus size={16} /> + Tambah Master Barang
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabel Data Base Master Barang */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #7c3aed' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
+                  <thead>
+                    <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900 }}>Kode Barang</th>
+                      <th style={{ minWidth: '220px', border: '1px solid #6d28d9', padding: '9px 12px', fontWeight: 900 }}>Nama Material / Barang</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Satuan Standar</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Total Masuk</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Total Keluar</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Sisa Fisik</th>
+                      <th style={{ width: '140px', textAlign: 'right', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900 }}>Avg Harga Saat Ini</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900 }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredMasterBarang.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada master barang terdaftar
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredMasterBarang.map((b, idx) => {
+                        const summary = persediaanSummaryList.find(s => s.id === b.id || s.kode === b.kode);
+                        return (
+                          <tr key={b.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 6px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 10px' }}>{b.kode}</td>
+                            <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 12px' }}>{b.nama}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 8px' }}>{b.satuan}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyMasuk || 0}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyKeluar || 0}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 900, color: (summary?.sisaQty || 0) <= 0 ? '#f87171' : '#34d399', border: '1px solid #334155', padding: '7px 8px' }}>
+                              {summary?.sisaQty || 0}
+                            </td>
+                            <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
+                              Rp {formatRupiah(summary?.avgHarga || 0)}
+                            </td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px' }}>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditMasterBarang(b)}
+                                  title="Edit Master Barang"
+                                  style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Edit size={15} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteMasterBarang(b.id)}
+                                  title="Hapus Master Barang"
+                                  style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* VIEW 3: DATA BASE TERPADU PROYEK (6 TABEL MASTER PERSIS GAMBAR)           */}
       {/* 1. Data Base Vendor                                                       */}
       {/* 2. Data Base Tenaga Kerja                                                 */}
@@ -11497,6 +13309,496 @@ export const TeknikModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', fontWeight: 900 }}>
                   💾 Simpan Calon Konsumen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PERSEDIAAN 1: MASTER BARANG (Kode, Nama Barang, Satuan)             */}
+      {/* ========================================================================= */}
+      {isMasterBarangModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #a855f7', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Package size={20} color="#a855f7" />
+                {editingBarangId ? 'Edit Master Barang / Material' : 'Tambah Master Barang (Data Base)'}
+              </h3>
+              <button onClick={() => setIsMasterBarangModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMasterBarang}>
+              <div className="modal-body">
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '110px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Kode Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: BRG-001"
+                      value={barangFormData.kode}
+                      onChange={(e) => setBarangFormData({ ...barangFormData, kode: e.target.value.toUpperCase() })}
+                      style={{ background: '#0f172a', border: '1.5px solid #a855f7', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Nama Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: Semen Gresik 40 Kg"
+                      value={barangFormData.nama}
+                      onChange={(e) => setBarangFormData({ ...barangFormData, nama: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Satuan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <select
+                        value={barangFormData.satuan}
+                        onChange={(e) => setBarangFormData({ ...barangFormData, satuan: e.target.value })}
+                        style={{ flex: 1, background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      >
+                        <option value="Sak">Sak</option>
+                        <option value="Btg">Btg (Batang)</option>
+                        <option value="M3">M3 (Kubik)</option>
+                        <option value="Dus">Dus</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Roll">Roll</option>
+                        <option value="Lembar">Lembar</option>
+                        <option value="Meter">Meter</option>
+                        <option value="Rit">Rit / Truk</option>
+                        <option value="Unit">Unit</option>
+                        <option value="Set">Set</option>
+                      </select>
+                      <input
+                        type="text"
+                        placeholder="Atau ketik satuan..."
+                        value={barangFormData.satuan}
+                        onChange={(e) => setBarangFormData({ ...barangFormData, satuan: e.target.value })}
+                        style={{ width: '130px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 8px', fontSize: '0.82rem' }}
+                      />
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMasterBarangModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
+                  💾 Simpan Master Barang
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PERSEDIAAN 2: BARANG MASUK                                          */}
+      {/* ========================================================================= */}
+      {isBarangMasukModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <ArrowDownLeft size={20} color="#38bdf8" />
+                {editingMasukId ? 'Edit Catatan Barang Masuk' : 'Penerimaan Material (Barang Masuk)'}
+              </h3>
+              <button onClick={() => setIsBarangMasukModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBarangMasuk}>
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Tanggal */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Tanggal Masuk</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <IndoDatePicker
+                      value={barangMasukFormData.tanggal}
+                      onChange={(d) => setBarangMasukFormData({ ...barangMasukFormData, tanggal: d })}
+                      accentColor="#38bdf8"
+                    />
+
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={barangMasukFormData.proyek}
+                      onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, proyek: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '7px 10px', fontSize: '0.86rem' }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                    </select>
+
+                    {/* Pilih Cepat Master */}
+                    <div style={{ fontWeight: 900, fontSize: '0.82rem', color: '#94a3b8' }}>Pilih Dari Master</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      onChange={(e) => {
+                        const selectedCode = e.target.value;
+                        const found = persediaanMasterBarang.find(b => b.kode === selectedCode);
+                        if (found) {
+                          setBarangMasukFormData(prev => ({
+                            ...prev,
+                            kode: found.kode,
+                            namaBarang: found.nama,
+                            satuan: found.satuan || 'Sak'
+                          }));
+                        }
+                      }}
+                      value=""
+                      style={{ background: '#0f172a', border: '1px solid #475569', borderRadius: '6px', color: '#c084fc', fontWeight: 800, padding: '5px 8px', fontSize: '0.82rem' }}
+                    >
+                      <option value="">-- Pilih dari Master Barang (Auto-fill) --</option>
+                      {persediaanMasterBarang.map(b => (
+                        <option key={b.id || b.kode} value={b.kode}>
+                          [{b.kode}] {b.nama} ({b.satuan})
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Kode Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="BRG-001"
+                      value={barangMasukFormData.kode}
+                      onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, kode: e.target.value.toUpperCase() })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Nama Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama material/barang..."
+                      value={barangMasukFormData.namaBarang}
+                      onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, namaBarang: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Qty & Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Jumlah (Qty) & Sat</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '6px' }}>
+                      <input
+                        type="number"
+                        step="any"
+                        min="0.01"
+                        required
+                        placeholder="Contoh: 100"
+                        value={barangMasukFormData.qty}
+                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, qty: e.target.value })}
+                        style={{ background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#10b981', fontWeight: 900, padding: '6px 10px', fontSize: '0.92rem' }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Satuan (Sak/Btg/M3)"
+                        value={barangMasukFormData.satuan}
+                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
+                        style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 8px', fontSize: '0.82rem' }}
+                      />
+                    </div>
+
+                    {/* Harga Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Harga Satuan (Rp)</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Contoh: 65000"
+                        value={barangMasukFormData.hargaSatuan}
+                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, hargaSatuan: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      {Number(barangMasukFormData.qty) > 0 && Number(barangMasukFormData.hargaSatuan) > 0 && (
+                        <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 800, marginTop: '4px' }}>
+                          💵 Subtotal Nilai: Rp {formatRupiah(Number(barangMasukFormData.qty) * Number(barangMasukFormData.hargaSatuan))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vendor */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Vendor / Suplier</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="text"
+                        list="vendor-options-persediaan"
+                        placeholder="Pilih atau ketik vendor..."
+                        value={barangMasukFormData.vendor}
+                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, vendor: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      <datalist id="vendor-options-persediaan">
+                        {databaseVendorRows.map(v => (
+                          <option key={v.id || v.nama} value={v.nama} />
+                        ))}
+                      </datalist>
+
+                      {/* Quick Add Vendor to Database Terpadu */}
+                      {barangMasukFormData.vendor && !databaseVendorRows.some(v => v.nama?.trim().toLowerCase() === barangMasukFormData.vendor.trim().toLowerCase()) && (
+                        <div style={{ marginTop: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cleanV = barangMasukFormData.vendor.trim();
+                              const newV = {
+                                id: `VND-${Date.now().toString().slice(-4)}`,
+                                nama: cleanV,
+                                noHp: '-',
+                                noKtp: '-',
+                                status: 'Suplier'
+                              };
+                              setDatabaseVendorRows(prev => [...prev, newV]);
+                              showNotification(`Vendor "${cleanV}" berhasil didaftarkan ke Data Base Terpadu!`, 'success');
+                            }}
+                            style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', borderRadius: '4px', padding: '3px 8px', fontSize: '0.72rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <Plus size={11} /> Daftarkan "{barangMasukFormData.vendor}" ke Data Base Vendor
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Keterangan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Keterangan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="No. Nota / Surat Jalan / Pengemudi / Truk..."
+                      value={barangMasukFormData.keterangan}
+                      onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, keterangan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsBarangMasukModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
+                  💾 Simpan Barang Masuk
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PERSEDIAAN 3: BARANG KELUAR                                         */}
+      {/* ========================================================================= */}
+      {isBarangKeluarModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #db2777', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <ArrowUpRight size={20} color="#f472b6" />
+                {editingKeluarId ? 'Edit Catatan Barang Keluar' : 'Pengeluaran Material (Barang Keluar)'}
+              </h3>
+              <button onClick={() => setIsBarangKeluarModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBarangKeluar}>
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Tanggal */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Tanggal Keluar</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <IndoDatePicker
+                      value={barangKeluarFormData.tanggal}
+                      onChange={(d) => setBarangKeluarFormData({ ...barangKeluarFormData, tanggal: d })}
+                      accentColor="#f472b6"
+                    />
+
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={barangKeluarFormData.proyek}
+                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, proyek: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#f472b6', fontWeight: 900, padding: '7px 10px', fontSize: '0.86rem' }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                    </select>
+
+                    {/* Pilih Cepat Dari Stok Tersedia */}
+                    <div style={{ fontWeight: 900, fontSize: '0.82rem', color: '#94a3b8' }}>Pilih Material</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      onChange={(e) => {
+                        const selectedCode = e.target.value;
+                        const found = persediaanSummaryList.find(s => s.kode === selectedCode) || persediaanMasterBarang.find(b => b.kode === selectedCode);
+                        if (found) {
+                          setBarangKeluarFormData(prev => ({
+                            ...prev,
+                            kode: found.kode,
+                            namaBarang: found.nama,
+                            satuan: found.satuan || 'Sak',
+                            avgHarga: found.avgHarga || 0
+                          }));
+                        }
+                      }}
+                      value=""
+                      style={{ background: '#0f172a', border: '1px solid #475569', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '5px 8px', fontSize: '0.82rem' }}
+                    >
+                      <option value="">-- Pilih dari Stok Tersedia (Auto-fill Avg) --</option>
+                      {persediaanSummaryList.map(s => (
+                        <option key={s.id || s.kode} value={s.kode}>
+                          [{s.kode}] {s.nama} - Sisa Stok: {s.sisaQty} {s.satuan} (Avg: Rp {formatRupiah(s.avgHarga)})
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Kode Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="BRG-001"
+                      value={barangKeluarFormData.kode}
+                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, kode: e.target.value.toUpperCase() })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Nama Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Barang</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama material yang keluar..."
+                      value={barangKeluarFormData.namaBarang}
+                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, namaBarang: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Qty Keluar & Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Qty Keluar & Sat</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '6px' }}>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0.01"
+                          required
+                          placeholder="Contoh: 15"
+                          value={barangKeluarFormData.qty}
+                          onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, qty: e.target.value })}
+                          style={{ background: '#0f172a', border: '1.5px solid #f43f5e', borderRadius: '6px', color: '#f43f5e', fontWeight: 900, padding: '6px 10px', fontSize: '0.92rem' }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Satuan"
+                          value={barangKeluarFormData.satuan}
+                          onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
+                          style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 8px', fontSize: '0.82rem' }}
+                        />
+                      </div>
+                      {(() => {
+                        const curSummary = persediaanSummaryList.find(s => s.kode === barangKeluarFormData.kode || s.nama?.toLowerCase() === barangKeluarFormData.namaBarang?.toLowerCase());
+                        if (curSummary) {
+                          return (
+                            <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, marginTop: '3px' }}>
+                              ℹ️ Sisa stok tersedia: <span style={{ color: curSummary.sisaQty <= 0 ? '#f87171' : '#34d399' }}>{curSummary.sisaQty} {curSummary.satuan}</span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+
+                    {/* Avg Harga Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Avg Harga (Rp)</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Harga rata-rata (otomatis)"
+                        value={barangKeluarFormData.avgHarga}
+                        onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, avgHarga: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      {Number(barangKeluarFormData.qty) > 0 && Number(barangKeluarFormData.avgHarga) > 0 && (
+                        <div style={{ fontSize: '0.78rem', color: '#f472b6', fontWeight: 800, marginTop: '4px' }}>
+                          🔥 Nilai Pemakaian Material: Rp {formatRupiah(Number(barangKeluarFormData.qty) * Number(barangKeluarFormData.avgHarga))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Peruntukan: Blok & No. Unit */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Blok & No. Unit</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                      <input
+                        type="text"
+                        placeholder="Blok (A / B / C...)"
+                        value={barangKeluarFormData.blok}
+                        onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, blok: e.target.value.toUpperCase() })}
+                        style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="No. (01 / 02...)"
+                        value={barangKeluarFormData.noUnit}
+                        onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, noUnit: e.target.value })}
+                        style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                    </div>
+
+                    {/* Lain-lain / Fasum */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Lain-lain / Fasum</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Saluran Jalan, Pos Satpam, Kantor Proyek, dll..."
+                      value={barangKeluarFormData.fasum}
+                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, fasum: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsBarangKeluarModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
+                  💾 Simpan Barang Keluar
                 </button>
               </div>
             </form>
