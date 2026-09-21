@@ -2645,7 +2645,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'harian' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #f6b26b', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #0284c7', flexWrap: 'wrap' }}>
             
             {/* 1. Data Base tenaga kerja */}
             <button
@@ -2657,17 +2657,17 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'database' ? '2px solid #ea580c' : '1px solid #475569',
-                background: subTabHarian === 'database' ? '#f6b26b' : '#1e293b',
-                color: subTabHarian === 'database' ? '#000000' : '#ffffff',
+                border: subTabHarian === 'database' ? '2px solid #38bdf8' : '1px solid #475569',
+                background: subTabHarian === 'database' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'database' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'database' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
-              <Database size={16} /> Data Base tenaga kerja ({databasePekerjaRows.length})
+              <Database size={16} /> Data Base Tenaga Kerja ({databasePekerjaRows.length})
             </button>
 
             {/* 2. Input Absen harian */}
@@ -2680,17 +2680,17 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'input_absen' ? '2px solid #ea580c' : '1px solid #475569',
-                background: subTabHarian === 'input_absen' ? '#f6b26b' : '#1e293b',
-                color: subTabHarian === 'input_absen' ? '#000000' : '#ffffff',
+                border: subTabHarian === 'input_absen' ? '2px solid #38bdf8' : '1px solid #475569',
+                background: subTabHarian === 'input_absen' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'input_absen' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'input_absen' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
-              <Plus size={16} /> Input Absen harian
+              <Plus size={16} /> Input Absen Harian
             </button>
 
             {/* 3. Detail Absen tenaga kerja */}
@@ -2703,17 +2703,17 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'detail_absen' ? '2px solid #ea580c' : '1px solid #475569',
-                background: subTabHarian === 'detail_absen' ? '#f6b26b' : '#1e293b',
-                color: subTabHarian === 'detail_absen' ? '#000000' : '#ffffff',
+                border: subTabHarian === 'detail_absen' ? '2px solid #38bdf8' : '1px solid #475569',
+                background: subTabHarian === 'detail_absen' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
+                color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'detail_absen' ? '0 2px 8px rgba(246, 178, 107, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'detail_absen' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
-              <Users size={16} /> Detail Absen tenaga kerja ({filteredAttendanceList.length})
+              <Users size={16} /> Detail Absen Tenaga Kerja ({filteredAttendanceList.length})
             </button>
           </div>
         </div>
@@ -3614,14 +3614,14 @@ export const TeknikModule = () => {
           </div>
 
           {/* ABSEN TABLE (WITH LEMBUR COLUMN IN JAM KERJA) */}
-          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #0284c7', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>Log Harian</span>
+                <span style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '3px 10px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900, border: '1px solid #38bdf8' }}>Log Harian</span>
                 Detail Absen Tenaga Kerja & Jam Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 800 }}>
-                PT Ashoka Enterprise Development &bull; Divisi Teknik
+              <div style={{ fontSize: '0.82rem', color: '#38bdf8', fontWeight: 800 }}>
+                AMS Properti &bull; Divisi Teknik & Konstruksi
               </div>
             </div>
 
@@ -3634,25 +3634,25 @@ export const TeknikModule = () => {
                 </p>
               </div>
             ) : (
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #0369a1' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1080px', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                      <th rowSpan={2} style={{ width: '45px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>No.</th>
-                      <th rowSpan={2} style={{ width: '135px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>Proyek</th>
-                      <th rowSpan={2} style={{ width: '160px', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 8px' }}>Nama</th>
-                      <th colSpan={3} style={{ textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '7px 8px' }}>Jam Kerja</th>
-                      <th colSpan={3} style={{ textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '7px 8px' }}>Lokasi</th>
-                      <th rowSpan={2} style={{ verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', minWidth: '240px', padding: '8px 8px' }}>Catatan Pekerjaan</th>
-                      <th rowSpan={2} style={{ width: '110px', textAlign: 'center', verticalAlign: 'middle', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '8px 4px' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff' }}>
+                      <th rowSpan={2} style={{ width: '45px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>No.</th>
+                      <th rowSpan={2} style={{ width: '135px', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>Proyek</th>
+                      <th rowSpan={2} style={{ width: '160px', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>Nama</th>
+                      <th colSpan={3} style={{ textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '8px 8px' }}>Jam Kerja</th>
+                      <th colSpan={3} style={{ textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '8px 8px' }}>Lokasi</th>
+                      <th rowSpan={2} style={{ verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', minWidth: '240px', padding: '9px 8px' }}>Catatan Pekerjaan</th>
+                      <th rowSpan={2} style={{ width: '110px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>Aksi</th>
                     </tr>
-                    <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Masuk</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Jam Pulang</th>
-                      <th style={{ width: '85px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Lembur</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Blok</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>No.</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '6px 4px' }}>Umum</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff' }}>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Jam Masuk</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Jam Pulang</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Lembur</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Blok</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>No.</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Umum</th>
                     </tr>
                   </thead>
                   <tbody>
