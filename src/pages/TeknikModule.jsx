@@ -394,14 +394,18 @@ const IndoDatePicker = ({ value, onChange, label, required, accentColor = '#38bd
 export const TeknikModule = () => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
 
-  // MAIN CATEGORIES (Level 1): 'harian' | 'borongan' | 'database'
+  // MAIN CATEGORIES (Level 1): 'harian' | 'borongan' | 'tukar_faktur' | 'database'
   // SUB-TABS (Level 2):
   // - Pekerjaan Harian   : 'database' | 'input_absen' | 'detail_absen'
   // - Pekerjaan Borongan : 'input_rab' | 'laporan_rab' | 'hasil_opname'
+  // - Tukar Faktur       : 'input_tf' | 'laporan_tf'
   // - Data Base Terpadu  : 'vendor' | 'tenaga_kerja' | 'karyawan' | 'unit' | 'konsumen' | 'calon_konsumen'
   const [mainCategory, setMainCategory] = useState(() => {
     if (activeSubTab === 'rab' || activeSubTab === 'input' || activeSubTab === 'laporan' || activeSubTab === 'opname' || activeSubTab === 'borongan') {
       return 'borongan';
+    }
+    if (activeSubTab === 'tukar_faktur' || activeSubTab === 'faktur') {
+      return 'tukar_faktur';
     }
     if (activeSubTab === 'database' || activeSubTab === 'vendor' || activeSubTab === 'karyawan' || activeSubTab === 'unit' || activeSubTab === 'konsumen') {
       return 'database';
@@ -415,6 +419,7 @@ export const TeknikModule = () => {
     if (activeSubTab === 'opname') return 'hasil_opname';
     return 'input_rab';
   });
+  const [subTabTukarFaktur, setSubTabTukarFaktur] = useState('input_tf');
   const [subTabDatabase, setSubTabDatabase] = useState('vendor');
 
   useEffect(() => {
@@ -427,6 +432,8 @@ export const TeknikModule = () => {
     } else if (activeSubTab === 'opname') {
       setMainCategory('borongan');
       setSubTabBorongan('hasil_opname');
+    } else if (activeSubTab === 'tukar_faktur' || activeSubTab === 'faktur') {
+      setMainCategory('tukar_faktur');
     } else if (activeSubTab === 'absen' || activeSubTab === 'harian') {
       setMainCategory('harian');
     } else if (activeSubTab === 'database') {
@@ -762,6 +769,70 @@ export const TeknikModule = () => {
     saveCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, databaseCalonKonsumenRows);
   }, [databaseCalonKonsumenRows]);
 
+  // =========================================================================
+  // SUB-MODUL: TUKAR FAKTUR STORE (NO. TT, TANPA OPNAME, PEMBAYARAN KONTRAK)
+  // =========================================================================
+  const STORAGE_KEY_TUKAR_FAKTUR = 'ams_teknik_tukar_faktur_v1';
+  const defaultTukarFakturList = [
+    {
+      id: 'TF-001',
+      noTt: 'TT-001',
+      tanggal: '2026-09-15',
+      proyek: 'Ashoka View',
+      namaVendor: 'PT Bangun Jaya Perkasa',
+      blok: 'A',
+      noUnit: '01',
+      fasum: '',
+      pekerjaan: 'Pengadaan Pasir Pasang & Batu Belah',
+      nilaiPekerjaan: 7500000,
+      pembayaranSebelumnya: 2500000,
+      paymentHistory: [
+        {
+          id: 'PAY-TF-01',
+          tanggal: '2026-09-18',
+          keterangan: 'Pembayaran DP',
+          nominal: 2500000,
+          metode: 'TF',
+          timestamp: '18/09/2026, 10.15.00'
+        }
+      ]
+    },
+    {
+      id: 'TF-002',
+      noTt: 'TT-002',
+      tanggal: '2026-09-16',
+      proyek: 'Ashoka Park',
+      namaVendor: 'CV Mitra Semen Abadi',
+      blok: '',
+      noUnit: '',
+      fasum: 'Pagar Keliling',
+      pekerjaan: 'Semen Tiga Roda 150 Sak',
+      nilaiPekerjaan: 9750000,
+      pembayaranSebelumnya: 0,
+      paymentHistory: []
+    }
+  ];
+
+  const [tukarFakturList, setTukarFakturList] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_TUKAR_FAKTUR);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultTukarFakturList;
+  });
+
+  const updateAndSaveTukarFaktur = (nextList, notifMsg = '', notifType = 'success') => {
+    setTukarFakturList(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_TUKAR_FAKTUR, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_TUKAR_FAKTUR, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
   // SEARCH STATES FOR 6 DATABASES
   const [searchDbVendor, setSearchDbVendor] = useState('');
   const [searchDbKaryawan, setSearchDbKaryawan] = useState('');
@@ -825,6 +896,16 @@ export const TeknikModule = () => {
       }
     });
 
+    // Fetch Tukar Faktur from MySQL cloud once on mount
+    fetchCloudStore(STORAGE_KEY_TUKAR_FAKTUR, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setTukarFakturList(val);
+        try {
+          localStorage.setItem(STORAGE_KEY_TUKAR_FAKTUR, JSON.stringify(val));
+        } catch (e) {}
+      }
+    });
+
     const doFetchMaster = () => {
       fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
         if (val && Array.isArray(val) && val.length > 0) {
@@ -844,6 +925,21 @@ export const TeknikModule = () => {
                 localStorage.setItem(STORAGE_KEY_RAB_SHEETS, newStr);
               } catch (e) {}
               return sorted;
+            }
+            return prev;
+          });
+        }
+      });
+      fetchCloudStore(STORAGE_KEY_TUKAR_FAKTUR, null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) {
+          setTukarFakturList(prev => {
+            const currentStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(val);
+            if (currentStr !== newStr) {
+              try {
+                localStorage.setItem(STORAGE_KEY_TUKAR_FAKTUR, newStr);
+              } catch (e) {}
+              return val;
             }
             return prev;
           });
@@ -1433,10 +1529,17 @@ export const TeknikModule = () => {
         try {
           localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sorted));
         } catch (e) {}
-        showNotification(`Sinkronisasi berhasil! ${sorted.length} pekerjaan borongan terhubung langsung dengan server MySQL.`, 'success');
-      } else {
-        showNotification('Data di server MySQL sudah sinkron.', 'info');
       }
+
+      const valTf = await fetchCloudStore(STORAGE_KEY_TUKAR_FAKTUR, null);
+      if (valTf && Array.isArray(valTf) && valTf.length > 0) {
+        setTukarFakturList(valTf);
+        try {
+          localStorage.setItem(STORAGE_KEY_TUKAR_FAKTUR, JSON.stringify(valTf));
+        } catch (e) {}
+      }
+
+      showNotification('Sinkronisasi data Cloud (MySQL) berhasil diperbarui!', 'success');
     } catch (e) {
       showNotification('Gagal menghubungi server MySQL. Periksa koneksi internet.', 'error');
     } finally {
@@ -2360,6 +2463,446 @@ export const TeknikModule = () => {
     setIsOpnameModalOpen(false);
   };
 
+  // =========================================================================
+  // SUB-MODUL: LOGIKA, FORM, FILTER & PEMBAYARAN TUKAR FAKTUR (NO. TT)
+  // =========================================================================
+  const compareTtAsc = (a, b) => {
+    const valA = String(a?.noTt || '').trim();
+    const valB = String(b?.noTt || '').trim();
+    const matchA = valA.match(/\d+/g);
+    const matchB = valB.match(/\d+/g);
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[matchA.length - 1], 10);
+      const numB = parseInt(matchB[matchB.length - 1], 10);
+      if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+        return numA - numB;
+      }
+    } else if (matchA && !matchB) {
+      return -1;
+    } else if (!matchA && matchB) {
+      return 1;
+    }
+    return valA.localeCompare(valB, 'id', { numeric: true, sensitivity: 'base' });
+  };
+
+  const [tukarFakturFormData, setTukarFakturFormData] = useState({
+    id: null,
+    noTt: '',
+    tanggal: getTodayDateString(),
+    proyek: 'Ashoka View',
+    namaVendor: '',
+    pekerjaan: '',
+    blok: '',
+    noUnit: '',
+    fasum: '',
+    nilaiPekerjaan: ''
+  });
+
+  const [tfTableSearch, setTfTableSearch] = useState('');
+  const [tfProjectFilter, setTfProjectFilter] = useState('ALL');
+  const [tfVendorFilter, setTfVendorFilter] = useState('ALL');
+  const [tfStatusBayarFilter, setTfStatusBayarFilter] = useState('ALL');
+  const [tfNamaSearch, setTfNamaSearch] = useState('');
+  const [tfNoSearch, setTfNoSearch] = useState('');
+
+  const [laporanTfSearch, setLaporanTfSearch] = useState('');
+  const [laporanTfProjectFilter, setLaporanTfProjectFilter] = useState('ALL');
+
+  // MODAL HISTORI PEMBAYARAN TUKAR FAKTUR
+  const [isTfPaymentModalOpen, setIsTfPaymentModalOpen] = useState(false);
+  const [tfPaymentTargetItem, setTfPaymentTargetItem] = useState(null);
+  const [newTfPaymentFormData, setNewTfPaymentFormData] = useState({
+    id: null,
+    tanggal: getTodayDateString(),
+    keterangan: '',
+    nominal: '',
+    metode: 'Cash'
+  });
+
+  const getTfPaymentHistory = useCallback((item) => {
+    if (!item) return [];
+    if (Array.isArray(item.paymentHistory) && item.paymentHistory.length > 0) {
+      return item.paymentHistory;
+    }
+    const bayarAwal = Number(item.pembayaranSebelumnya) || 0;
+    if (bayarAwal > 0) {
+      return [{
+        id: `PAY-INIT-${item.id}`,
+        tanggal: item.tanggal || getTodayDateString(),
+        keterangan: 'Pembayaran Awal / Sebelumnya',
+        nominal: bayarAwal,
+        metode: 'Cash',
+        timestamp: '-'
+      }];
+    }
+    return [];
+  }, []);
+
+  const getTfTotalBayar = useCallback((item) => {
+    const hist = getTfPaymentHistory(item);
+    return hist.reduce((sum, p) => sum + (Number(p.nominal) || 0), 0);
+  }, [getTfPaymentHistory]);
+
+  const handleOpenTfPayment = (item) => {
+    setTfPaymentTargetItem(item);
+    setNewTfPaymentFormData({
+      id: null,
+      tanggal: getTodayDateString(),
+      keterangan: '',
+      nominal: '',
+      metode: 'Cash'
+    });
+    setIsTfPaymentModalOpen(true);
+  };
+
+  const handleAddTfPayment = (e) => {
+    e.preventDefault();
+    if (!tfPaymentTargetItem) return;
+    const nominalNum = Number(newTfPaymentFormData.nominal) || 0;
+    if (nominalNum <= 0) {
+      alert('Nominal pembayaran harus lebih dari 0!');
+      return;
+    }
+
+    const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan) || 0;
+    const currentTotalBayar = getTfTotalBayar(tfPaymentTargetItem);
+    const isEditMode = Boolean(newTfPaymentFormData.id);
+    const currentHistory = getTfPaymentHistory(tfPaymentTargetItem);
+    const existingEntry = isEditMode ? currentHistory.find(p => p.id === newTfPaymentFormData.id) : null;
+    const oldNominal = existingEntry ? (Number(existingEntry.nominal) || 0) : 0;
+    const effectiveTotalBayar = isEditMode ? (currentTotalBayar - oldNominal) : currentTotalBayar;
+    const sisaPembayaran = Math.max(0, nilaiFaktur - effectiveTotalBayar);
+
+    if (sisaPembayaran <= 0 && nilaiFaktur > 0 && !isEditMode) {
+      alert('Dokumen Tukar Faktur ini sudah LUNAS! Tidak dapat menambah pembayaran lagi.');
+      return;
+    }
+
+    if (nominalNum > sisaPembayaran) {
+      alert(`Pembayaran ditolak karena terjadi KELEBIHAN BAYAR!\n\nNominal yang diinput: Rp ${formatRupiahDesimal(nominalNum)}\nSisa tagihan faktur: Rp ${formatRupiahDesimal(sisaPembayaran)}\nKelebihan: Rp ${formatRupiahDesimal(nominalNum - sisaPembayaran)}\n\nSilakan masukkan nominal maksimal Rp ${formatRupiahDesimal(sisaPembayaran)}.`);
+      return;
+    }
+
+    const tglInput = (newTfPaymentFormData.tanggal || '').trim() || getTodayDateString();
+    let updatedHistory = [];
+
+    if (isEditMode) {
+      updatedHistory = currentHistory.map(p => {
+        if (p.id === newTfPaymentFormData.id) {
+          return {
+            ...p,
+            tanggal: tglInput,
+            keterangan: (newTfPaymentFormData.keterangan || '').trim() || p.keterangan,
+            nominal: nominalNum,
+            metode: newTfPaymentFormData.metode || p.metode,
+            updatedAt: new Date().toLocaleString('id-ID')
+          };
+        }
+        return p;
+      });
+    } else {
+      const newEntry = {
+        id: `PAY-TF-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        tanggal: tglInput,
+        keterangan: (newTfPaymentFormData.keterangan || '').trim() || `Pembayaran Faktur Ke-${currentHistory.length + 1}`,
+        nominal: nominalNum,
+        metode: normalizeMetodeBayar(newTfPaymentFormData.metode),
+        timestamp: new Date().toLocaleString('id-ID')
+      };
+      updatedHistory = [...currentHistory, newEntry];
+    }
+
+    const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
+    const updatedItem = {
+      ...tfPaymentTargetItem,
+      paymentHistory: updatedHistory,
+      pembayaranSebelumnya: newTotalBayar
+    };
+
+    const nextList = tukarFakturList.map(s => s.id === tfPaymentTargetItem.id ? updatedItem : s);
+    setTfPaymentTargetItem(updatedItem);
+    updateAndSaveTukarFaktur(
+      nextList,
+      isEditMode
+        ? `Pembayaran Faktur berhasil diperbarui menjadi Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)})!`
+        : `Pembayaran Faktur Rp ${formatRupiah(nominalNum)} (Tgl: ${formatTanggalIndo(tglInput)}) berhasil dicatat! Total terbayar: Rp ${formatRupiah(newTotalBayar)}`,
+      'success'
+    );
+
+    setNewTfPaymentFormData({
+      id: null,
+      tanggal: getTodayDateString(),
+      keterangan: '',
+      nominal: '',
+      metode: 'Cash'
+    });
+  };
+
+  const handleDeleteTfPayment = (paymentId) => {
+    if (!tfPaymentTargetItem) return;
+    if (!window.confirm('Yakin ingin menghapus catatan pembayaran faktur ini?')) return;
+
+    const currentHistory = getTfPaymentHistory(tfPaymentTargetItem);
+    const updatedHistory = currentHistory.filter(p => p.id !== paymentId);
+    const newTotalBayar = updatedHistory.reduce((s, p) => s + (Number(p.nominal) || 0), 0);
+
+    const updatedItem = {
+      ...tfPaymentTargetItem,
+      paymentHistory: updatedHistory,
+      pembayaranSebelumnya: newTotalBayar
+    };
+
+    const nextList = tukarFakturList.map(s => s.id === tfPaymentTargetItem.id ? updatedItem : s);
+    setTfPaymentTargetItem(updatedItem);
+    updateAndSaveTukarFaktur(nextList, 'Catatan histori pembayaran faktur berhasil dihapus.', 'info');
+  };
+
+  const handleSaveTukarFaktur = (e) => {
+    e.preventDefault();
+    const cleanNoTt = (tukarFakturFormData.noTt || '').trim();
+    const cleanPekerjaan = (tukarFakturFormData.pekerjaan || '').trim();
+    const cleanVendor = (tukarFakturFormData.namaVendor || '').trim();
+    const nilaiNum = parseNum(tukarFakturFormData.nilaiPekerjaan);
+
+    if (!cleanNoTt) {
+      alert('Silakan masukkan No. TT!');
+      return;
+    }
+    if (!cleanPekerjaan) {
+      alert('Silakan masukkan Uraian Faktur / Pekerjaan!');
+      return;
+    }
+    if (nilaiNum <= 0) {
+      alert('Silakan masukkan Nilai Faktur yang valid!');
+      return;
+    }
+
+    const isEdit = Boolean(tukarFakturFormData.id);
+    const targetId = isEdit ? tukarFakturFormData.id : `TF-${Date.now().toString().slice(-6)}`;
+    const existing = tukarFakturList.find(s => s.id === targetId);
+
+    const newItem = {
+      ...existing,
+      id: targetId,
+      noTt: cleanNoTt,
+      tanggal: (tukarFakturFormData.tanggal || '').trim() || getTodayDateString(),
+      proyek: tukarFakturFormData.proyek || 'Ashoka View',
+      namaVendor: cleanVendor || '-',
+      pekerjaan: cleanPekerjaan,
+      blok: (tukarFakturFormData.blok || '').trim().toUpperCase(),
+      noUnit: (tukarFakturFormData.noUnit || '').trim(),
+      fasum: (tukarFakturFormData.fasum || '').trim(),
+      nilaiPekerjaan: nilaiNum,
+      pembayaranSebelumnya: existing?.pembayaranSebelumnya || 0,
+      paymentHistory: existing?.paymentHistory || []
+    };
+
+    let nextList = [];
+    if (isEdit) {
+      nextList = tukarFakturList.map(s => s.id === targetId ? newItem : s);
+    } else {
+      nextList = [newItem, ...tukarFakturList];
+    }
+    nextList.sort(compareTtAsc);
+
+    updateAndSaveTukarFaktur(
+      nextList,
+      isEdit 
+        ? `Data Tukar Faktur "${cleanNoTt} - ${cleanPekerjaan}" berhasil diperbarui!` 
+        : `Tukar Faktur "${cleanNoTt} - ${cleanPekerjaan}" (Rp ${formatRupiah(nilaiNum)}) berhasil disimpan!`,
+      'success'
+    );
+
+    setTukarFakturFormData({
+      id: null,
+      noTt: '',
+      tanggal: getTodayDateString(),
+      proyek: 'Ashoka View',
+      namaVendor: '',
+      pekerjaan: '',
+      blok: '',
+      noUnit: '',
+      fasum: '',
+      nilaiPekerjaan: ''
+    });
+  };
+
+  const handleEditTukarFaktur = (item) => {
+    setTukarFakturFormData({
+      id: item.id,
+      noTt: item.noTt || '',
+      tanggal: item.tanggal || getTodayDateString(),
+      proyek: item.proyek || 'Ashoka View',
+      namaVendor: item.namaVendor || '',
+      pekerjaan: item.pekerjaan || '',
+      blok: item.blok || '',
+      noUnit: item.noUnit || '',
+      fasum: item.fasum || '',
+      nilaiPekerjaan: item.nilaiPekerjaan || 0
+    });
+    setSubTabTukarFaktur('input_tf');
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+    showNotification(`Memuat data Tukar Faktur "${item.noTt}" ke formulir...`, 'info');
+  };
+
+  const handleDeleteTukarFaktur = (id) => {
+    const item = tukarFakturList.find(s => s.id === id);
+    if (!window.confirm(`Yakin ingin menghapus dokumen Tukar Faktur "${item?.noTt || id}"?`)) return;
+    const nextList = tukarFakturList.filter(s => s.id !== id);
+    updateAndSaveTukarFaktur(nextList, `Tukar Faktur "${item?.noTt || id}" berhasil dihapus.`, 'info');
+  };
+
+  const handleResetTukarFakturForm = () => {
+    setTukarFakturFormData({
+      id: null,
+      noTt: '',
+      tanggal: getTodayDateString(),
+      proyek: 'Ashoka View',
+      namaVendor: '',
+      pekerjaan: '',
+      blok: '',
+      noUnit: '',
+      fasum: '',
+      nilaiPekerjaan: ''
+    });
+  };
+
+  const uniqueTfVendors = useMemo(() => {
+    const fromList = tukarFakturList.map(s => (s.namaVendor || '').trim()).filter(Boolean);
+    const fromDb = databaseVendorRows.map(v => (v.nama || '').trim()).filter(Boolean);
+    return Array.from(new Set([...fromList, ...fromDb])).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+  }, [tukarFakturList, databaseVendorRows]);
+
+  const filteredTukarFakturList = useMemo(() => {
+    return tukarFakturList.map(s => {
+      const hist = (Array.isArray(s.paymentHistory) && s.paymentHistory.length > 0)
+        ? s.paymentHistory
+        : (Number(s.pembayaranSebelumnya) > 0 ? [{ nominal: Number(s.pembayaranSebelumnya) }] : []);
+      const totalBayar = hist.reduce((sum, p) => sum + (Number(p.nominal) || 0), 0);
+      const nilaiFaktur = Number(s.nilaiPekerjaan) || 0;
+      const sisaPembayaran = Math.max(0, nilaiFaktur - totalBayar);
+      const isLunas = sisaPembayaran === 0 && nilaiFaktur > 0;
+      const hasPaid = totalBayar > 0;
+
+      return {
+        ...s,
+        totalBayar,
+        sisaPembayaran,
+        isLunas,
+        hasPaid
+      };
+    }).filter(item => {
+      // 1. Proyek
+      if (tfProjectFilter !== 'ALL' && item.proyek !== tfProjectFilter) return false;
+      // 2. Vendor
+      if (tfVendorFilter !== 'ALL') {
+        const itemV = (item.namaVendor || '').toLowerCase().trim();
+        if (itemV !== tfVendorFilter.toLowerCase().trim()) return false;
+      }
+      // 3. Status Bayar
+      if (tfStatusBayarFilter === 'LUNAS' && !item.isLunas) return false;
+      if (tfStatusBayarFilter === 'BELUM_LUNAS' && item.isLunas) return false;
+      if (tfStatusBayarFilter === 'SUDAH_BAYAR' && !item.hasPaid) return false;
+      if (tfStatusBayarFilter === 'BELUM_DIBAYAR' && item.hasPaid) return false;
+
+      // 4. Cari Nama
+      if (tfNamaSearch) {
+        const qName = tfNamaSearch.toLowerCase().trim();
+        const matchName = (item.pekerjaan || '').toLowerCase().includes(qName) || (item.namaVendor || '').toLowerCase().includes(qName);
+        if (!matchName) return false;
+      }
+
+      // 5. Cari No (No. TT, Blok, Unit, Lain-lain)
+      if (tfNoSearch) {
+        const qNo = tfNoSearch.toLowerCase().trim();
+        const matchNo = (
+          (item.noTt || '').toLowerCase().includes(qNo) ||
+          (item.blok || '').toLowerCase().includes(qNo) ||
+          (item.noUnit || '').toLowerCase().includes(qNo) ||
+          (item.fasum || '').toLowerCase().includes(qNo)
+        );
+        if (!matchNo) return false;
+      }
+
+      // 6. Table search umum
+      if (tfTableSearch) {
+        const q = tfTableSearch.toLowerCase().trim();
+        const match = (
+          (item.noTt || '').toLowerCase().includes(q) ||
+          (item.namaVendor || '').toLowerCase().includes(q) ||
+          (item.proyek || '').toLowerCase().includes(q) ||
+          (item.pekerjaan || '').toLowerCase().includes(q) ||
+          (item.blok || '').toLowerCase().includes(q) ||
+          (item.noUnit || '').toLowerCase().includes(q) ||
+          (item.fasum || '').toLowerCase().includes(q)
+        );
+        if (!match) return false;
+      }
+
+      return true;
+    }).sort(compareTtAsc);
+  }, [
+    tukarFakturList,
+    tfProjectFilter,
+    tfVendorFilter,
+    tfStatusBayarFilter,
+    tfNamaSearch,
+    tfNoSearch,
+    tfTableSearch
+  ]);
+
+  const filteredLaporanTfList = useMemo(() => {
+    return tukarFakturList.map(s => {
+      const hist = (Array.isArray(s.paymentHistory) && s.paymentHistory.length > 0)
+        ? s.paymentHistory
+        : (Number(s.pembayaranSebelumnya) > 0 ? [{ nominal: Number(s.pembayaranSebelumnya) }] : []);
+      const totalBayar = hist.reduce((sum, p) => sum + (Number(p.nominal) || 0), 0);
+      const nilaiFaktur = Number(s.nilaiPekerjaan) || 0;
+      const sisaPembayaran = Math.max(0, nilaiFaktur - totalBayar);
+      const isLunas = sisaPembayaran === 0 && nilaiFaktur > 0;
+      return { ...s, totalBayar, sisaPembayaran, isLunas };
+    }).filter(item => {
+      if (laporanTfProjectFilter !== 'ALL' && item.proyek !== laporanTfProjectFilter) return false;
+      if (laporanTfSearch) {
+        const q = laporanTfSearch.toLowerCase().trim();
+        return (
+          (item.noTt || '').toLowerCase().includes(q) ||
+          (item.namaVendor || '').toLowerCase().includes(q) ||
+          (item.proyek || '').toLowerCase().includes(q) ||
+          (item.pekerjaan || '').toLowerCase().includes(q) ||
+          (item.blok || '').toLowerCase().includes(q) ||
+          (item.noUnit || '').toLowerCase().includes(q) ||
+          (item.fasum || '').toLowerCase().includes(q)
+        );
+      }
+      return true;
+    }).sort(compareTtAsc);
+  }, [tukarFakturList, laporanTfProjectFilter, laporanTfSearch]);
+
+  const grandSummaryTf = useMemo(() => {
+    let totFaktur = 0;
+    let totBayar = 0;
+    let totSisa = 0;
+    filteredTukarFakturList.forEach(item => {
+      totFaktur += Number(item.nilaiPekerjaan) || 0;
+      totBayar += Number(item.totalBayar) || 0;
+      totSisa += Number(item.sisaPembayaran) || 0;
+    });
+    return { totFaktur, totBayar, totSisa };
+  }, [filteredTukarFakturList]);
+
+  const grandSummaryLaporanTf = useMemo(() => {
+    let totFaktur = 0;
+    let totBayar = 0;
+    let totSisa = 0;
+    filteredLaporanTfList.forEach(item => {
+      totFaktur += Number(item.nilaiPekerjaan) || 0;
+      totBayar += Number(item.totalBayar) || 0;
+      totSisa += Number(item.sisaPembayaran) || 0;
+    });
+    return { totFaktur, totBayar, totSisa };
+  }, [filteredLaporanTfList]);
+
   const handlePrint = () => {
     window.print();
   };
@@ -2410,7 +2953,7 @@ export const TeknikModule = () => {
       {/* 2. PEKERJAAN BORONGAN (Warna Biru Langit #00a2ed)                         */}
       {/* 3. DATA BASE TERPADU PROYEK (Warna Emerald #10b981)                       */}
       {/* ========================================================================= */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
         
         {/* Tombol 1: Pekerjaan Harian */}
         <button
@@ -2466,7 +3009,34 @@ export const TeknikModule = () => {
           <Building2 size={22} color={mainCategory === 'borongan' ? '#ffffff' : '#38bdf8'} /> Pekerjaan Borongan
         </button>
 
-        {/* Tombol 3: Data Base Terpadu Proyek */}
+        {/* Tombol 3: Tukar Faktur (Di Samping Borongan) */}
+        <button
+          type="button"
+          onClick={() => {
+            setMainCategory('tukar_faktur');
+            if (setActiveSubTab) setActiveSubTab('tukar_faktur');
+          }}
+          style={{
+            padding: '1rem 1.25rem',
+            borderRadius: '10px',
+            border: mainCategory === 'tukar_faktur' ? '3px solid #7c3aed' : '1.5px solid #5b21b6',
+            background: mainCategory === 'tukar_faktur' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : '#1e293b',
+            color: mainCategory === 'tukar_faktur' ? '#ffffff' : '#c084fc',
+            fontWeight: 900,
+            fontSize: '1.1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            cursor: 'pointer',
+            boxShadow: mainCategory === 'tukar_faktur' ? '0 4px 16px rgba(124, 58, 237, 0.45)' : 'none',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <FileText size={22} color={mainCategory === 'tukar_faktur' ? '#ffffff' : '#c084fc'} /> Tukar Faktur
+        </button>
+
+        {/* Tombol 4: Data Base Terpadu Proyek */}
         <button
           type="button"
           onClick={() => {
@@ -2493,6 +3063,62 @@ export const TeknikModule = () => {
           <Database size={22} color={mainCategory === 'database' ? '#ffffff' : '#34d399'} /> Data Base Terpadu
         </button>
       </div>
+
+      {/* ========================================================================= */}
+      {/* LEVEL 2: SUB-MENU TUKAR FAKTUR                                            */}
+      {/* ========================================================================= */}
+      {mainCategory === 'tukar_faktur' && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #7c3aed', flexWrap: 'wrap' }}>
+            
+            {/* 1. Input & Rekapitulasi Faktur */}
+            <button
+              type="button"
+              onClick={() => setSubTabTukarFaktur('input_tf')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabTukarFaktur === 'input_tf' ? '2px solid #8b5cf6' : '1px solid #475569',
+                background: subTabTukarFaktur === 'input_tf' ? '#7c3aed' : '#1e293b',
+                color: subTabTukarFaktur === 'input_tf' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabTukarFaktur === 'input_tf' ? '0 2px 8px rgba(124, 58, 237, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileText size={16} /> Input & Rekapitulasi Tukar Faktur
+            </button>
+
+            {/* 2. Laporan Ringkasan */}
+            <button
+              type="button"
+              onClick={() => setSubTabTukarFaktur('laporan_tf')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabTukarFaktur === 'laporan_tf' ? '2px solid #00a2ed' : '1px solid #475569',
+                background: subTabTukarFaktur === 'laporan_tf' ? '#00a2ed' : '#1e293b',
+                color: subTabTukarFaktur === 'laporan_tf' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabTukarFaktur === 'laporan_tf' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <BarChart3 size={16} /> Laporan Ringkasan per Proyek
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* LEVEL 2: SUB-MENU DATA BASE TERPADU (6 PILIHAN DATA BASE UTAMA)           */}
@@ -3344,7 +3970,7 @@ export const TeknikModule = () => {
                       style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#475569' }}
                     >
                       <option value="kavling">Unit Kavling (Blok / No)</option>
-                      <option value="umum">Fasum / Area Umum</option>
+                      <option value="umum">Lain - Lain / Area Umum</option>
                     </select>
                   </div>
 
@@ -3375,7 +4001,7 @@ export const TeknikModule = () => {
                     </>
                   ) : (
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Nama Fasum / Area</label>
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem' }}>Nama Lain - Lain / Area</label>
                       <input
                         type="text"
                         className="form-control"
@@ -3995,10 +4621,10 @@ export const TeknikModule = () => {
                   />
                 </div>
 
-                {/* 8. Fasum */}
+                {/* 8. Lain - Lain */}
                 <div className="form-group">
                   <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                    🏛️ Fasum (Fasilitas Umum)
+                    📌 Lain - Lain
                   </label>
                   <input
                     type="text"
@@ -4847,7 +5473,7 @@ export const TeknikModule = () => {
                       No.
                     </th>
                     <th style={{ minWidth: '100px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
-                      Fasum
+                      Lain - Lain
                     </th>
                     <th style={{ minWidth: '170px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
                       Pekerjaan
@@ -5631,7 +6257,7 @@ export const TeknikModule = () => {
                 type="text"
                 className="form-control"
                 style={{ paddingLeft: '0.5rem', background: '#0f172a', border: '1px solid #475569', borderRadius: '8px', height: '36px', fontSize: '0.85rem', color: '#ffffff', flex: 1 }}
-                placeholder="Cari No. SPK, nama vendor, pekerjaan, blok/unit, fasum..."
+                placeholder="Cari No. SPK, nama vendor, pekerjaan, blok/unit, lain-lain..."
                 value={laporanSearch}
                 onChange={(e) => setLaporanSearch(e.target.value)}
               />
@@ -5689,7 +6315,7 @@ export const TeknikModule = () => {
                         No.
                       </th>
                       <th style={{ width: '110px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
-                        Fasum
+                        Lain - Lain
                       </th>
                       <th style={{ minWidth: '220px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
                         Pekerjaan
@@ -5890,6 +6516,1117 @@ export const TeknikModule = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW: TUKAR FAKTUR (NO. TT, TANPA OPNAME)                                 */}
+      {/* ========================================================================= */}
+      {mainCategory === 'tukar_faktur' && (
+        <div className="module-animated-view">
+          
+          {/* SUB-TAB 1: INPUT & REKAPITULASI TUKAR FAKTUR */}
+          {subTabTukarFaktur === 'input_tf' && (
+            <>
+              {/* 1. KARTU FORM INPUT TUKAR FAKTUR */}
+              <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #7c3aed', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.25)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <FileText size={22} color="#c084fc" /> {tukarFakturFormData.id ? 'Edit Dokumen Tukar Faktur' : 'Form Input Tukar Faktur'}
+                    </h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Mencatat dokumen faktur tagihan supplier/kontraktor dengan No. TT & kontrol status pembayaran
+                    </p>
+                  </div>
+                  {tukarFakturFormData.id && (
+                    <span style={{ background: 'rgba(124, 58, 237, 0.25)', color: '#c084fc', border: '1px solid #7c3aed', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
+                      ✏️ Mode Edit: {tukarFakturFormData.noTt}
+                    </span>
+                  )}
+                </div>
+
+                <form onSubmit={handleSaveTukarFaktur}>
+                  {/* ROW 1: No. TT, Tanggal, Proyek */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                    {/* 1. No. TT */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        📄 No. TT (Tanda Terima) <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Contoh: TT-001"
+                        value={tukarFakturFormData.noTt}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, noTt: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #7c3aed',
+                          borderRadius: '6px',
+                          color: '#c084fc',
+                          fontWeight: 900,
+                          fontSize: '0.9rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    {/* 2. Tanggal */}
+                    <div className="form-group">
+                      <IndoDatePicker
+                        label="Tanggal Faktur / TT"
+                        required
+                        value={tukarFakturFormData.tanggal}
+                        onChange={(val) => setTukarFakturFormData({ ...tukarFakturFormData, tanggal: val })}
+                        accentColor="#c084fc"
+                      />
+                    </div>
+
+                    {/* 3. Proyek */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        🏢 Proyek Perumahan <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <select
+                        value={tukarFakturFormData.proyek || 'Ashoka View'}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, proyek: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #10b981',
+                          borderRadius: '6px',
+                          color: '#34d399',
+                          fontWeight: 900,
+                          fontSize: '0.9rem',
+                          padding: '8px 12px',
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="Ashoka View" style={{ background: '#0f172a', color: '#34d399' }}>Ashoka View</option>
+                        <option value="Ashoka Park" style={{ background: '#0f172a', color: '#38bdf8' }}>Ashoka Park</option>
+                      </select>
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setTukarFakturFormData({ ...tukarFakturFormData, proyek: 'Ashoka View' })}
+                          style={{
+                            flex: 1,
+                            padding: '5px 8px',
+                            borderRadius: '5px',
+                            border: (tukarFakturFormData.proyek === 'Ashoka View' || !tukarFakturFormData.proyek) ? '1.5px solid #10b981' : '1px solid #334155',
+                            background: (tukarFakturFormData.proyek === 'Ashoka View' || !tukarFakturFormData.proyek) ? 'rgba(16, 185, 129, 0.25)' : '#1e293b',
+                            color: (tukarFakturFormData.proyek === 'Ashoka View' || !tukarFakturFormData.proyek) ? '#34d399' : '#94a3b8',
+                            fontWeight: 800,
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          Ashoka View {(tukarFakturFormData.proyek === 'Ashoka View' || !tukarFakturFormData.proyek) ? '✓' : ''}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTukarFakturFormData({ ...tukarFakturFormData, proyek: 'Ashoka Park' })}
+                          style={{
+                            flex: 1,
+                            padding: '5px 8px',
+                            borderRadius: '5px',
+                            border: tukarFakturFormData.proyek === 'Ashoka Park' ? '1.5px solid #38bdf8' : '1px solid #334155',
+                            background: tukarFakturFormData.proyek === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.25)' : '#1e293b',
+                            color: tukarFakturFormData.proyek === 'Ashoka Park' ? '#38bdf8' : '#94a3b8',
+                            fontWeight: 800,
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          Ashoka Park {tukarFakturFormData.proyek === 'Ashoka Park' ? '✓' : ''}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ROW 2: Nama Vendor & Nama Pekerjaan / Uraian Faktur */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                    {/* 4. Nama Vendor */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        👤 Nama Vendor / Supplier
+                      </label>
+                      <input
+                        type="text"
+                        list="tf-vendor-options"
+                        placeholder="Pilih atau ketik nama vendor..."
+                        value={tukarFakturFormData.namaVendor}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, namaVendor: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1px solid #c084fc',
+                          borderRadius: '6px',
+                          color: '#c084fc',
+                          fontWeight: 900,
+                          fontSize: '0.88rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                      <datalist id="tf-vendor-options">
+                        {uniqueTfVendors.map(v => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                      </datalist>
+                    </div>
+
+                    {/* 5. Uraian Faktur / Pekerjaan */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        🔨 Uraian Faktur / Pekerjaan <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Misal: Pengadaan Semen 200 Sak / Pemasangan Paving..."
+                        value={tukarFakturFormData.pekerjaan}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, pekerjaan: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1px solid #475569',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.88rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ROW 3: Blok, No Unit, Lain - Lain */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                    {/* 6. Blok */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        🏷️ Blok
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Misal: A, B, C"
+                        value={tukarFakturFormData.blok}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, blok: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1px solid #475569',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.88rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    {/* 7. No Unit */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        🔢 No. Unit
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Misal: 01, 02"
+                        value={tukarFakturFormData.noUnit}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, noUnit: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1px solid #475569',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.88rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    {/* 8. Lain - Lain */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
+                        📌 Lain - Lain
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Misal: Gerbang Masuk, Pagar Keliling, Saluran..."
+                        value={tukarFakturFormData.fasum}
+                        onChange={(e) => setTukarFakturFormData({ ...tukarFakturFormData, fasum: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1px solid #475569',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          fontSize: '0.88rem',
+                          padding: '8px 12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ROW 4: Nilai Faktur & Tombol Aksi */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-end', marginTop: '0.5rem' }}>
+                    {/* 9. Nilai Faktur */}
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 900, color: '#10b981', fontSize: '0.9rem' }}>
+                        💰 Nilai Faktur (Rp) <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: '#10b981', fontSize: '0.92rem' }}>
+                          Rp
+                        </span>
+                        <input
+                          type="text"
+                          required
+                          placeholder="0"
+                          value={tukarFakturFormData.nilaiPekerjaan ? formatNumberInput(tukarFakturFormData.nilaiPekerjaan) : ''}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\D/g, '');
+                            setTukarFakturFormData({ ...tukarFakturFormData, nilaiPekerjaan: raw ? Number(raw) : '' });
+                          }}
+                          style={{
+                            width: '100%',
+                            background: '#0f172a',
+                            border: '2px solid #10b981',
+                            borderRadius: '6px',
+                            color: '#34d399',
+                            fontWeight: 900,
+                            fontSize: '1.05rem',
+                            padding: '10px 12px 10px 42px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      {tukarFakturFormData.nilaiPekerjaan > 0 && (
+                        <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>
+                          Terbilang: {angkaTerbilang(Number(tukarFakturFormData.nilaiPekerjaan))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tombol Simpan & Batal */}
+                    <div style={{ display: 'flex', gap: '0.75rem', paddingBottom: '2px' }}>
+                      <button
+                        type="submit"
+                        style={{
+                          flex: 1,
+                          background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                          color: '#ffffff',
+                          border: 'none',
+                          fontWeight: 900,
+                          fontSize: '0.95rem',
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          boxShadow: '0 4px 12px rgba(124, 58, 237, 0.4)',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <Save size={18} /> {tukarFakturFormData.id ? 'Perbarui Dokumen TT' : 'Simpan Tukar Faktur'}
+                      </button>
+
+                      {tukarFakturFormData.id && (
+                        <button
+                          type="button"
+                          onClick={handleResetTukarFakturForm}
+                          style={{
+                            background: '#334155',
+                            color: '#f8fafc',
+                            border: '1px solid #475569',
+                            fontWeight: 800,
+                            fontSize: '0.88rem',
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem'
+                          }}
+                        >
+                          <RotateCcw size={16} /> Batal Edit
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              {/* 2. TABEL REKAPITULASI TUKAR FAKTUR */}
+              <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+                
+                {/* 4 KARTU KPI RINGKASAN TUKAR FAKTUR */}
+                <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #7c3aed', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>📋 Jumlah Dokumen TT</div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredTukarFakturList.length} TT</div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                      {filteredTukarFakturList.filter(i => i.isLunas).length} Lunas &bull; {filteredTukarFakturList.filter(i => !i.isLunas).length} Belum Lunas
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>💰 Total Nilai Faktur</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(grandSummaryTf.totFaktur)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Nilai Seluruh Faktur</div>
+                  </div>
+
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>💳 Total Terbayar</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(grandSummaryTf.totBayar)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Realisasi Pembayaran yang Keluar</div>
+                  </div>
+
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #ef4444', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>⚡ Sisa Tagihan Faktur</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f87171', marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(grandSummaryTf.totSisa)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Sisa Kewajiban Hutang Faktur</div>
+                  </div>
+                </div>
+
+                {/* Header & Filter Bar Tabel */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #7c3aed' }}>
+                  
+                  {/* Row 1: Judul Tabel & Ringkasan Filter */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.65rem' }}>
+                    <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ background: '#7c3aed', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
+                      Daftar Rekapitulasi Tukar Faktur
+                    </h4>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 800 }}>
+                        Menampilkan <strong style={{ color: '#c084fc' }}>{filteredTukarFakturList.length}</strong> dari {tukarFakturList.length} Dokumen
+                      </span>
+                      {(tfProjectFilter !== 'ALL' || tfVendorFilter !== 'ALL' || tfStatusBayarFilter !== 'ALL' || tfNamaSearch || tfNoSearch || tfTableSearch) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTfProjectFilter('ALL');
+                            setTfVendorFilter('ALL');
+                            setTfStatusBayarFilter('ALL');
+                            setTfNamaSearch('');
+                            setTfNoSearch('');
+                            setTfTableSearch('');
+                          }}
+                          style={{
+                            background: '#dc2626',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 10px',
+                            fontSize: '0.75rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(220, 38, 38, 0.4)'
+                          }}
+                        >
+                          <RotateCcw size={12} /> Reset Filter
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 2: Filter Grid Controls */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', alignItems: 'flex-end' }}>
+                    
+                    {/* 1. Filter Proyek */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                        🏢 Proyek:
+                      </label>
+                      <select
+                        value={tfProjectFilter}
+                        onChange={(e) => setTfProjectFilter(e.target.value)}
+                        style={{
+                          width: '100%',
+                          background: '#1e293b',
+                          border: tfProjectFilter !== 'ALL' ? '1.5px solid #7c3aed' : '1.5px solid #475569',
+                          borderRadius: '6px',
+                          color: tfProjectFilter !== 'ALL' ? '#c084fc' : '#f8fafc',
+                          padding: '7px 10px',
+                          fontSize: '0.82rem',
+                          fontWeight: 800,
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="ALL">Semua Proyek ({tukarFakturList.length})</option>
+                        <option value="Ashoka View">Ashoka View ({tukarFakturList.filter(s => (s.proyek || '').includes('View')).length})</option>
+                        <option value="Ashoka Park">Ashoka Park ({tukarFakturList.filter(s => (s.proyek || '').includes('Park')).length})</option>
+                      </select>
+                    </div>
+
+                    {/* 2. Filter Vendor */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                        👤 Filter Vendor / Supplier:
+                      </label>
+                      <select
+                        value={tfVendorFilter}
+                        onChange={(e) => setTfVendorFilter(e.target.value)}
+                        style={{
+                          width: '100%',
+                          background: '#1e293b',
+                          border: tfVendorFilter !== 'ALL' ? '1.5px solid #38bdf8' : '1.5px solid #475569',
+                          borderRadius: '6px',
+                          color: tfVendorFilter !== 'ALL' ? '#38bdf8' : '#f8fafc',
+                          padding: '7px 10px',
+                          fontSize: '0.82rem',
+                          fontWeight: 800,
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="ALL">Semua Vendor ({uniqueTfVendors.length})</option>
+                        {uniqueTfVendors.map(v => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* 3. Filter Status Bayar */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                        💳 Status Bayar:
+                      </label>
+                      <select
+                        value={tfStatusBayarFilter}
+                        onChange={(e) => setTfStatusBayarFilter(e.target.value)}
+                        style={{
+                          width: '100%',
+                          background: '#1e293b',
+                          border: tfStatusBayarFilter !== 'ALL' ? '1.5px solid #10b981' : '1.5px solid #475569',
+                          borderRadius: '6px',
+                          color: tfStatusBayarFilter !== 'ALL' ? '#34d399' : '#f8fafc',
+                          padding: '7px 10px',
+                          fontSize: '0.82rem',
+                          fontWeight: 800,
+                          outline: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="ALL">Semua Status Bayar</option>
+                        <option value="LUNAS">✓ LUNAS</option>
+                        <option value="BELUM_LUNAS">⏳ BELUM LUNAS (Ada Sisa)</option>
+                        <option value="SUDAH_BAYAR">💰 Sudah Ada Pembayaran</option>
+                        <option value="BELUM_DIBAYAR">⛔ Belum Ada Pembayaran (0)</option>
+                      </select>
+                    </div>
+
+                    {/* 4. Cari Nama (Pekerjaan & Vendor) */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                        🔍 Cari Nama / Uraian:
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          placeholder="Cari uraian atau vendor..."
+                          value={tfNamaSearch}
+                          onChange={(e) => setTfNamaSearch(e.target.value)}
+                          style={{
+                            width: '100%',
+                            background: '#1e293b',
+                            border: tfNamaSearch ? '1.5px solid #c084fc' : '1.5px solid #475569',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            padding: '7px 28px 7px 10px',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                        {tfNamaSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setTfNamaSearch('')}
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 5. Cari No (No. TT, Blok, Unit, Lain-lain) */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
+                        🔢 Cari No. TT / Lokasi:
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          placeholder="TT-001, Blok, Unit, Lain-lain..."
+                          value={tfNoSearch}
+                          onChange={(e) => setTfNoSearch(e.target.value)}
+                          style={{
+                            width: '100%',
+                            background: '#1e293b',
+                            border: tfNoSearch ? '1.5px solid #c084fc' : '1.5px solid #475569',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            padding: '7px 28px 7px 10px',
+                            fontSize: '0.82rem',
+                            outline: 'none'
+                          }}
+                        />
+                        {tfNoSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setTfNoSearch('')}
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Table Container */}
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #5b21b6' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px', fontSize: '0.82rem' }}>
+                    <thead>
+                      <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
+                        <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 4px' }}>No.</th>
+                        <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>No. TT</th>
+                        <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
+                        <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
+                        <th style={{ border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Uraian Faktur</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nilai Faktur (Rp)</th>
+                        <th style={{ width: '165px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sudah Dibayar</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>Status</th>
+                        <th style={{ width: '120px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTukarFakturList.length === 0 && (
+                        <tr style={{ height: '50px', background: '#0f172a' }}>
+                          <td colSpan={11} style={{ textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', padding: '18px' }}>
+                            Tidak ada data Tukar Faktur yang sesuai dengan filter.
+                          </td>
+                        </tr>
+                      )}
+                      {filteredTukarFakturList.map((item, idx) => {
+                        const nilaiFaktur = Number(item.nilaiPekerjaan) || 0;
+                        const totalBayar = item.totalBayar || 0;
+                        const sisaPembayaran = item.sisaPembayaran || 0;
+                        const isLunas = item.isLunas;
+
+                        return (
+                          <tr
+                            key={item.id}
+                            style={{
+                              background: idx % 2 === 0 ? '#1e293b' : '#0f172a',
+                              borderBottom: '1px solid #334155'
+                            }}
+                          >
+                            {/* 1. No */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#94a3b8', verticalAlign: 'top' }}>
+                              {idx + 1}
+                            </td>
+
+                            {/* 2. Tanggal */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '10px 6px', verticalAlign: 'top' }}>
+                              <div style={{ color: '#ffffff', fontWeight: 800 }}>{formatTanggalIndo(item.tanggal)}</div>
+                              {formatTanggalLengkap(item.tanggal) && (
+                                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>
+                                  {formatTanggalLengkap(item.tanggal)}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* 3. No. TT (Purple Badge) */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '10px 6px', verticalAlign: 'top' }}>
+                              <span style={{
+                                background: '#7c3aed',
+                                color: '#ffffff',
+                                padding: '3px 8px',
+                                borderRadius: '5px',
+                                fontWeight: 900,
+                                fontSize: '0.8rem',
+                                letterSpacing: '0.5px',
+                                display: 'inline-block'
+                              }}>
+                                {item.noTt || '-'}
+                              </span>
+                            </td>
+
+                            {/* 4. Nama Vendor */}
+                            <td style={{ border: '1px solid #334155', fontWeight: 900, color: '#c084fc', padding: '10px 8px', verticalAlign: 'top' }}>
+                              {item.namaVendor || '-'}
+                            </td>
+
+                            {/* 5. Proyek */}
+                            <td style={{ border: '1px solid #334155', padding: '10px 8px', verticalAlign: 'top' }}>
+                              <div style={{ fontWeight: 900, color: '#34d399' }}>{item.proyek || '-'}</div>
+                              {(item.blok || item.noUnit || item.fasum) && (
+                                <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                                  {item.blok ? `Blok ${item.blok}` : ''} {item.noUnit ? `No. ${item.noUnit}` : ''} {item.fasum && item.fasum !== '-' ? `• ${item.fasum}` : ''}
+                                </div>
+                              )}
+                            </td>
+
+                            {/* 6. Uraian Faktur */}
+                            <td style={{ border: '1px solid #334155', padding: '10px 8px', verticalAlign: 'top' }}>
+                              <div style={{ fontWeight: 800, color: '#ffffff' }}>
+                                {item.pekerjaan || '-'}
+                              </div>
+                            </td>
+
+                            {/* 7. Nilai Faktur */}
+                            <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', color: '#6ee7b7', fontWeight: 800 }}>Rp</span>
+                                <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#10b981', fontVariantNumeric: 'tabular-nums' }}>
+                                  {formatRupiahDesimal(nilaiFaktur)}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* 8. Sudah Dibayar */}
+                            <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', color: '#fde68a', fontWeight: 800 }}>Rp</span>
+                                <span style={{ fontFamily: 'monospace', fontSize: '0.88rem', fontWeight: 900, color: '#fbbf24', fontVariantNumeric: 'tabular-nums' }}>
+                                  {formatRupiahDesimal(totalBayar)}
+                                </span>
+                              </div>
+                              <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenTfPayment(item)}
+                                  style={{
+                                    background: '#7c3aed',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '3px 8px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                  title="Catat atau kelola histori pembayaran faktur ini"
+                                >
+                                  💳 Histori Bayar {item.paymentHistory?.length > 0 ? `(${item.paymentHistory.length})` : ''}
+                                </button>
+                              </div>
+                            </td>
+
+                            {/* 9. Sisa Pembayaran */}
+                            <td style={{ border: '1px solid #334155', padding: '10px 10px', verticalAlign: 'top' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', width: '100%', gap: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', color: isLunas ? '#6ee7b7' : '#fca5a5', fontWeight: 800 }}>Rp</span>
+                                <span style={{
+                                  fontFamily: 'monospace',
+                                  fontSize: '0.88rem',
+                                  fontWeight: 900,
+                                  color: isLunas ? '#34d399' : '#f87171',
+                                  fontVariantNumeric: 'tabular-nums'
+                                }}>
+                                  {formatRupiahDesimal(sisaPembayaran)}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* 10. Status */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '10px 4px', verticalAlign: 'middle' }}>
+                              {isLunas ? (
+                                <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '3px 7px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 900 }}>
+                                  ✓ LUNAS
+                                </span>
+                              ) : (
+                                <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '3px 7px', borderRadius: '5px', fontSize: '0.72rem', fontWeight: 900 }}>
+                                  BELUM
+                                </span>
+                              )}
+                            </td>
+
+                            {/* 11. Aksi */}
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '10px 6px', verticalAlign: 'middle' }}>
+                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditTukarFaktur(item)}
+                                  style={{
+                                    background: 'rgba(56, 189, 248, 0.15)',
+                                    color: '#38bdf8',
+                                    border: '1px solid #0284c7',
+                                    borderRadius: '5px',
+                                    padding: '5px 7px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Edit data faktur"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteTukarFaktur(item.id)}
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    color: '#f87171',
+                                    border: '1px solid #dc2626',
+                                    borderRadius: '5px',
+                                    padding: '5px 7px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Hapus dokumen faktur ini"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr style={{ background: '#0f172a', borderTop: '2px solid #7c3aed', fontWeight: 900 }}>
+                        <td colSpan={6} style={{ padding: '12px 10px', textAlign: 'left', color: '#c084fc', verticalAlign: 'middle' }}>
+                          TOTAL REKAPITULASI TUKAR FAKTUR ({filteredTukarFakturList.length} DOKUMEN)
+                        </td>
+                        <td style={{ padding: '12px 10px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: 900, fontSize: '0.92rem' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#6ee7b7' }}>Rp</span>
+                            <span>{formatRupiahDesimal(grandSummaryTf.totFaktur)}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 10px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', color: '#fbbf24', fontWeight: 900, fontSize: '0.92rem' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#fde047' }}>Rp</span>
+                            <span>{formatRupiahDesimal(grandSummaryTf.totBayar)}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 10px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', color: '#f87171', fontWeight: 900, fontSize: '0.92rem' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#fca5a5' }}>Rp</span>
+                            <span>{formatRupiahDesimal(grandSummaryTf.totSisa)}</span>
+                          </div>
+                        </td>
+                        <td colSpan={2} style={{ padding: '12px 6px', textAlign: 'center', color: '#94a3b8', fontSize: '0.78rem' }}>
+                          {filteredTukarFakturList.filter(i => i.isLunas).length} Lunas
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+              </div>
+            </>
+          )}
+
+          {/* SUB-TAB 2: LAPORAN RINGKASAN PER PROYEK */}
+          {subTabTukarFaktur === 'laporan_tf' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)' }}>
+              
+              {/* 4 KPI CARDS */}
+              <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #7c3aed', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Faktur Terdaftar</div>
+                  <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanTfList.length} TT</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Dokumen Tagihan Tukar Faktur</div>
+                </div>
+
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Nilai Faktur</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
+                    Rp {formatRupiahDesimal(grandSummaryLaporanTf.totFaktur)}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Kewajiban Faktur</div>
+                </div>
+
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Total Sudah Terbayar</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
+                    Rp {formatRupiahDesimal(grandSummaryLaporanTf.totBayar)}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Dana Keluar Pelunasan Faktur</div>
+                </div>
+
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #ef4444', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>Sisa Tagihan Faktur</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f87171', marginTop: '2px' }}>
+                    Rp {formatRupiahDesimal(grandSummaryLaporanTf.totSisa)}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Sisa Kewajiban Hutang Faktur</div>
+                </div>
+              </div>
+
+              {/* TOOLBAR FILTER & CETAK */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
+                    🏢 Filter Proyek:
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={() => setLaporanTfProjectFilter('ALL')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: laporanTfProjectFilter === 'ALL' ? '2px solid #7c3aed' : '1px solid #475569',
+                      background: laporanTfProjectFilter === 'ALL' ? '#7c3aed' : '#0f172a',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Semua Proyek ({tukarFakturList.length})
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setLaporanTfProjectFilter('Ashoka View')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: laporanTfProjectFilter === 'Ashoka View' ? '2px solid #10b981' : '1px solid rgba(16, 185, 129, 0.4)',
+                      background: laporanTfProjectFilter === 'Ashoka View' ? '#10b981' : 'rgba(16, 185, 129, 0.15)',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🏔️ Ashoka View ({tukarFakturList.filter(a => (a.proyek || '').includes('View')).length})
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setLaporanTfProjectFilter('Ashoka Park')}
+                    style={{
+                      padding: '5px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: laporanTfProjectFilter === 'Ashoka Park' ? '2px solid #38bdf8' : '1px solid rgba(56, 189, 248, 0.4)',
+                      background: laporanTfProjectFilter === 'Ashoka Park' ? '#0284c7' : 'rgba(56, 189, 248, 0.15)',
+                      color: '#ffffff',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🌳 Ashoka Park ({tukarFakturList.filter(a => (a.proyek || '').includes('Park')).length})
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="Cari No. TT, vendor, uraian..."
+                    value={laporanTfSearch}
+                    onChange={(e) => setLaporanTfSearch(e.target.value)}
+                    style={{
+                      background: '#1e293b',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      padding: '6px 12px',
+                      fontSize: '0.82rem',
+                      outline: 'none',
+                      minWidth: '220px'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    style={{
+                      background: '#475569',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      fontWeight: 800,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Printer size={15} /> Cetak Laporan
+                  </button>
+                </div>
+              </div>
+
+              {/* TABEL RINGKASAN KOMPARASI PER PROYEK */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ color: '#c084fc', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.65rem' }}>
+                  📊 Ringkasan Komparasi Proyek
+                </h4>
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                    <thead>
+                      <tr style={{ background: '#0f172a', color: '#cbd5e1', borderBottom: '1.5px solid #334155' }}>
+                        <th style={{ padding: '9px 12px', textAlign: 'left' }}>Proyek Perumahan</th>
+                        <th style={{ padding: '9px 12px', textAlign: 'center', width: '110px' }}>Jumlah TT</th>
+                        <th style={{ padding: '9px 12px', textAlign: 'right', width: '180px' }}>Total Nilai Faktur</th>
+                        <th style={{ padding: '9px 12px', textAlign: 'right', width: '180px' }}>Total Terbayar</th>
+                        <th style={{ padding: '9px 12px', textAlign: 'right', width: '180px' }}>Sisa Tagihan</th>
+                        <th style={{ padding: '9px 12px', textAlign: 'center', width: '120px' }}>% Terbayar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {['Ashoka View', 'Ashoka Park'].map((prjName, pIdx) => {
+                        const items = tukarFakturList.filter(s => (s.proyek || '').includes(prjName.replace('Ashoka ', '')));
+                        const totFak = items.reduce((s, it) => s + (Number(it.nilaiPekerjaan) || 0), 0);
+                        const totBay = items.reduce((s, it) => {
+                          const h = it.paymentHistory?.length > 0 ? it.paymentHistory : (Number(it.pembayaranSebelumnya) > 0 ? [{ nominal: Number(it.pembayaranSebelumnya) }] : []);
+                          return s + h.reduce((acc, p) => acc + (Number(p.nominal) || 0), 0);
+                        }, 0);
+                        const totSis = Math.max(0, totFak - totBay);
+                        const pct = totFak > 0 ? ((totBay / totFak) * 100) : 0;
+
+                        return (
+                          <tr key={prjName} style={{ background: pIdx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                            <td style={{ padding: '10px 12px', fontWeight: 900, color: prjName === 'Ashoka View' ? '#34d399' : '#38bdf8' }}>
+                              {prjName === 'Ashoka View' ? '🏔️ Ashoka View' : '🌳 Ashoka Park'}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>
+                              {items.length} Dokumen
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#10b981' }}>
+                              Rp {formatRupiahDesimal(totFak)}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#fbbf24' }}>
+                              Rp {formatRupiahDesimal(totBay)}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#f87171' }}>
+                              Rp {formatRupiahDesimal(totSis)}
+                            </td>
+                            <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                              <span style={{
+                                padding: '3px 8px',
+                                borderRadius: '5px',
+                                fontWeight: 900,
+                                fontSize: '0.78rem',
+                                background: pct >= 100 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(56, 189, 248, 0.2)',
+                                color: pct >= 100 ? '#34d399' : '#38bdf8',
+                                border: `1px solid ${pct >= 100 ? '#10b981' : '#38bdf8'}`
+                              }}>
+                                {formatDecimal(pct)}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* TABEL RINCIAN DOKUMEN TT */}
+              <div>
+                <h4 style={{ color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.65rem' }}>
+                  📄 Rincian Dokumen Tukar Faktur ({filteredLaporanTfList.length} Faktur)
+                </h4>
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                    <thead>
+                      <tr style={{ background: '#0f172a', color: '#cbd5e1', borderBottom: '1.5px solid #334155' }}>
+                        <th style={{ padding: '8px 6px', textAlign: 'center', width: '40px' }}>No.</th>
+                        <th style={{ padding: '8px 8px', textAlign: 'center', width: '90px' }}>Tanggal</th>
+                        <th style={{ padding: '8px 8px', textAlign: 'center', width: '90px' }}>No. TT</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'left', width: '160px' }}>Nama Vendor</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'left', width: '140px' }}>Proyek</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Uraian Faktur</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Nilai Faktur</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Terbayar</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Sisa Tagihan</th>
+                        <th style={{ padding: '8px 6px', textAlign: 'center', width: '85px' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLaporanTfList.map((item, lIdx) => (
+                        <tr key={item.id || lIdx} style={{ background: lIdx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#94a3b8' }}>{lIdx + 1}</td>
+                          <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1' }}>{formatTanggalIndo(item.tanggal)}</td>
+                          <td style={{ padding: '8px 8px', textAlign: 'center' }}>
+                            <span style={{ background: '#7c3aed', color: '#ffffff', padding: '2px 7px', borderRadius: '4px', fontWeight: 900, fontSize: '0.76rem' }}>
+                              {item.noTt}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 10px', color: '#c084fc', fontWeight: 800 }}>{item.namaVendor || '-'}</td>
+                          <td style={{ padding: '8px 10px', color: '#34d399', fontWeight: 800 }}>{item.proyek}</td>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', fontWeight: 700 }}>{item.pekerjaan}</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', color: '#10b981', fontWeight: 900, fontFamily: 'monospace' }}>
+                            Rp {formatRupiahDesimal(item.nilaiPekerjaan || 0)}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', color: '#fbbf24', fontWeight: 900, fontFamily: 'monospace' }}>
+                            Rp {formatRupiahDesimal(item.totalBayar || 0)}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', color: item.isLunas ? '#34d399' : '#f87171', fontWeight: 900, fontFamily: 'monospace' }}>
+                            Rp {formatRupiahDesimal(item.sisaPembayaran || 0)}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center' }}>
+                            {item.isLunas ? (
+                              <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900 }}>
+                                LUNAS
+                              </span>
+                            ) : (
+                              <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 900 }}>
+                                BELUM
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          )}
+
         </div>
       )}
 
@@ -7012,7 +8749,7 @@ export const TeknikModule = () => {
                         checked={absenFormData.lokasiTipe === 'umum'}
                         onChange={() => setAbsenFormData({ ...absenFormData, lokasiTipe: 'umum', blok: '-', no: '-' })}
                       />
-                      🏗️ Area Umum / Fasum
+                      🏗️ Area Umum / Lain - Lain
                     </label>
                   </div>
 
@@ -7045,11 +8782,11 @@ export const TeknikModule = () => {
                     </div>
                   ) : (
                     <div>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Nama Area Umum / Fasum</label>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8' }}>Nama Area Umum / Lain - Lain</label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Contoh: Gerbang Utama / Saluran Drainase / Taman Fasum..."
+                        placeholder="Contoh: Gerbang Utama / Saluran Drainase / Taman..."
                         value={absenFormData.umum === '-' ? '' : absenFormData.umum}
                         onChange={(e) => setAbsenFormData({ ...absenFormData, umum: e.target.value })}
                         required={absenFormData.lokasiTipe === 'umum'}
@@ -8248,6 +9985,437 @@ export const TeknikModule = () => {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsPaymentHistoryModalOpen(false)}
+                  style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, padding: '6px 16px', borderRadius: '6px', cursor: 'pointer' }}
+                >
+                  Tutup
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ========================================================================= */}
+      {/* MODAL HISTORI PEMBAYARAN TUKAR FAKTUR (NO OPNAME, METODE: CASH, TF, CEK/BG) */}
+      {/* ========================================================================= */}
+      {isTfPaymentModalOpen && tfPaymentTargetItem && (() => {
+        const nilaiFaktur = Number(tfPaymentTargetItem.nilaiPekerjaan) || 0;
+        const historyList = getTfPaymentHistory(tfPaymentTargetItem);
+        const totalBayar = getTfTotalBayar(tfPaymentTargetItem);
+        const sisaBayar = Math.max(0, nilaiFaktur - totalBayar);
+        const isLunas = sisaBayar === 0 && nilaiFaktur > 0;
+
+        return (
+          <div className="modal-backdrop">
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #7c3aed', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4)' }}>
+              
+              {/* Modal Header */}
+              <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
+                <div>
+                  <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ffffff', fontWeight: 900, margin: 0, fontSize: '1.2rem' }}>
+                    <Clock size={24} color="#c084fc" /> Riwayat Pembayaran Faktur: <span style={{ color: '#c084fc' }}>{tfPaymentTargetItem.pekerjaan || 'Tukar Faktur'}</span>
+                  </h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                    No. TT: <strong style={{ color: '#c084fc' }}>{tfPaymentTargetItem.noTt || '-'}</strong> &bull; Vendor: <strong style={{ color: '#38bdf8' }}>{tfPaymentTargetItem.namaVendor || '-'}</strong> &bull; Proyek: <strong style={{ color: '#34d399' }}>{tfPaymentTargetItem.proyek}</strong> {tfPaymentTargetItem.blok ? `(Blok ${tfPaymentTargetItem.blok} No ${tfPaymentTargetItem.noUnit})` : (tfPaymentTargetItem.fasum && tfPaymentTargetItem.fasum !== '-' ? `(${tfPaymentTargetItem.fasum})` : '')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTfPaymentModalOpen(false)}
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.25rem', padding: '4px' }}
+                >
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', padding: '1.25rem' }}>
+                
+                {/* 3 KARTU RINGKASAN STATUS KEUANGAN FAKTUR (MURNI TANPA OPNAME) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
+                  
+                  {/* Kartu 1: Nilai Faktur (Jumlah TT) */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #334155' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800 }}>💰 NILAI FAKTUR (JUMLAH TT)</div>
+                    <div style={{ fontSize: '1.15rem', color: '#10b981', fontWeight: 900, marginTop: '2px' }}>
+                      Rp {formatRupiahDesimal(nilaiFaktur)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
+                      No. TT: {tfPaymentTargetItem.noTt || '-'}
+                    </div>
+                  </div>
+
+                  {/* Kartu 2: Total Sudah Dibayar */}
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #7c3aed' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
+                    <div style={{ fontSize: '1.15rem', color: '#38bdf8', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
+                      Rp {formatRupiahDesimal(totalBayar)}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {historyList.length} transaksi pembayaran
+                    </div>
+                  </div>
+
+                  {/* Kartu 3: Sisa Pembayaran Faktur */}
+                  <div style={{ background: isLunas ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: '0.85rem 1rem', borderRadius: '8px', border: isLunas ? '1.5px solid #10b981' : '1.5px solid #ef4444', minWidth: '0' }}>
+                    <div style={{ fontSize: '0.74rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 800, whiteSpace: 'normal', lineHeight: '1.3' }}>⚡ SISA PEMBAYARAN FAKTUR</div>
+                    <div style={{ fontSize: '1.1rem', color: isLunas ? '#34d399' : '#f87171', fontWeight: 900, marginTop: '2px', wordBreak: 'break-word' }}>
+                      {isLunas ? '✓ LUNAS (Rp 0)' : `Rp ${formatRupiahDesimal(sisaBayar)}`}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
+                      {isLunas ? 'Semua kewajiban faktur terbayar' : 'Sisa tagihan faktur belum dibayar'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* TABEL HISTORI PEMBAYARAN FAKTUR */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Clock size={16} color="#c084fc" /> Riwayat Pembayaran Dokumen Ini
+                    </h4>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                      {historyList.length} Catatan
+                    </span>
+                  </div>
+
+                  <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                      <thead>
+                        <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>No.</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'center', width: '110px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📅 Tanggal Bayar</th>
+                          <th style={{ padding: '9px 12px', textAlign: 'right', width: '165px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>💰 Bayar Berapa (Nominal)</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📝 Keterangan / Termin</th>
+                          <th style={{ padding: '9px 10px', textAlign: 'left', width: '130px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>🏦 Metode</th>
+                          <th style={{ padding: '9px 6px', textAlign: 'center', width: '45px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historyList.length === 0 && (
+                          <tr style={{ background: '#0f172a', height: '44px' }}>
+                            <td colSpan={6} style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem', padding: '12px' }}>
+                              Belum ada catatan riwayat pembayaran untuk dokumen faktur ini.
+                            </td>
+                          </tr>
+                        )}
+                        {historyList.map((hist, hIdx) => (
+                          <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                              <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatTanggalIndo(hist.tanggal)}</div>
+                              {formatTanggalLengkap(hist.tanggal) && (
+                                <div style={{ fontSize: '0.7rem', color: '#c084fc', marginTop: '1px' }}>
+                                  {formatTanggalLengkap(hist.tanggal)}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '8px 12px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px', color: '#34d399', fontWeight: 900, fontSize: '0.92rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#6ee7b7', fontWeight: 800 }}>Rp</span>
+                                <span>{formatRupiahDesimal(hist.nominal || 0)}</span>
+                              </div>
+                            </td>
+                            <td style={{ padding: '8px 10px', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle' }}>
+                              {hist.keterangan || `Pembayaran Faktur Ke-${hIdx + 1}`}
+                            </td>
+                            <td style={{ padding: '8px 10px', color: '#c084fc', fontWeight: 700, verticalAlign: 'middle' }}>
+                              {normalizeMetodeBayar(hist.metode)}
+                            </td>
+                            <td style={{ padding: '8px 6px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setNewTfPaymentFormData({
+                                    id: hist.id,
+                                    tanggal: hist.tanggal,
+                                    keterangan: hist.keterangan || '',
+                                    nominal: hist.nominal || '',
+                                    metode: normalizeMetodeBayar(hist.metode)
+                                  });
+                                }}
+                                style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px', marginRight: '6px' }}
+                                title="Edit tanggal atau nominal pembayaran ini"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTfPayment(hist.id)}
+                                style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                                title="Hapus baris pembayaran ini"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: '#1e293b', borderTop: '2px solid #7c3aed', fontWeight: 900 }}>
+                          <td colSpan={2} style={{ padding: '10px 10px', textAlign: 'left', color: '#c084fc', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            TOTAL SUDAH DIBAYAR
+                          </td>
+                          <td style={{ padding: '10px 12px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '8px', color: '#fbbf24', fontWeight: 900, fontSize: '0.95rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: '#fde047', fontWeight: 800 }}>Rp</span>
+                              <span>{formatRupiahDesimal(totalBayar)}</span>
+                            </div>
+                          </td>
+                          <td colSpan={3} style={{ padding: '10px 10px', color: '#94a3b8', fontSize: '0.78rem', verticalAlign: 'middle' }}>
+                            {historyList.length}x transaksi pembayaran dicatat untuk faktur ini
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+
+                {/* FORM CATAT PEMBAYARAN BARU */}
+                {isLunas ? (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.12)', padding: '1.25rem', borderRadius: '10px', border: '1.5px solid #10b981', textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={24} color="#10b981" /> Dokumen Tukar Faktur Ini Sudah Lunas!
+                    </div>
+                    <p style={{ margin: '6px 0 0', fontSize: '0.84rem', color: '#cbd5e1' }}>
+                      Seluruh kewajiban pembayaran telah terpenuhi (Total terbayar: Rp {formatRupiahDesimal(totalBayar)}). Tidak dapat menambah pembayaran baru.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ background: '#1e293b', padding: '1.1rem', borderRadius: '10px', border: newTfPaymentFormData.id ? '2px solid #c084fc' : '1.5px solid #7c3aed' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.85rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 900, color: '#c084fc', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {newTfPaymentFormData.id ? (
+                          <>
+                            <Edit3 size={16} /> Edit Data Pembayaran Faktur
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={16} /> + Catat Pembayaran Faktur Baru
+                          </>
+                        )}
+                      </h4>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {newTfPaymentFormData.id && (
+                          <button
+                            type="button"
+                            onClick={() => setNewTfPaymentFormData({ id: null, tanggal: getTodayDateString(), keterangan: '', nominal: '', metode: 'Cash' })}
+                            style={{
+                              background: '#475569',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '3px 9px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            ✕ Batal Edit
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setNewTfPaymentFormData(prev => ({ ...prev, nominal: sisaBayar }))}
+                          style={{
+                            background: 'rgba(124, 58, 237, 0.2)',
+                            color: '#c084fc',
+                            border: '1px solid #7c3aed',
+                            borderRadius: '6px',
+                            padding: '3px 9px',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                          title="Klik untuk mengisi nominal otomatis sesuai sisa tagihan faktur"
+                        >
+                          ⚡ Bayar Pas Sisa Faktur: Rp {formatRupiahDesimal(sisaBayar)}
+                        </button>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleAddTfPayment}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem', marginBottom: '0.85rem' }}>
+                        
+                        {/* Tanggal Bayar */}
+                        <IndoDatePicker
+                          label="Tanggal Bayar"
+                          required
+                          value={newTfPaymentFormData.tanggal}
+                          onChange={(val) => setNewTfPaymentFormData(prev => ({ ...prev, tanggal: val }))}
+                          accentColor="#c084fc"
+                        />
+
+                        {/* Uraian / Keterangan */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>📝</span> <span>Keterangan / Termin</span>
+                            </label>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              Opsional
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Misal: Termin 1, DP, Pelunasan Faktur..."
+                            value={newTfPaymentFormData.keterangan}
+                            onChange={(e) => setNewTfPaymentFormData({ ...newTfPaymentFormData, keterangan: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              padding: '7px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+
+                        {/* Nominal Pembayaran (Murni Sisa Faktur, Tanpa Opname) */}
+                        <div>
+                          {(() => {
+                            const nominalVal = Number(newTfPaymentFormData.nominal) || 0;
+                            const liveSisaBayar = Math.max(0, sisaBayar - nominalVal);
+                            return (
+                              <>
+                                <div style={{ marginBottom: '6px' }}>
+                                  <label style={{ margin: 0, fontSize: '0.82rem', color: '#34d399', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                    <span>💰</span> <span>Nominal Bayar (Rp) <span style={{ color: '#f87171' }}>*</span></span>
+                                  </label>
+                                </div>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="0"
+                                  value={newTfPaymentFormData.nominal ? formatNumberInput(newTfPaymentFormData.nominal) : ''}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.replace(/\D/g, '');
+                                    setNewTfPaymentFormData({ ...newTfPaymentFormData, nominal: raw ? Number(raw) : '' });
+                                  }}
+                                  style={{
+                                    width: '100%',
+                                    background: '#0f172a',
+                                    border: nominalVal > sisaBayar ? '2px solid #ef4444' : '1.5px solid #10b981',
+                                    borderRadius: '6px',
+                                    color: nominalVal > sisaBayar ? '#f87171' : '#34d399',
+                                    fontWeight: 900,
+                                    padding: '7px 10px',
+                                    fontSize: '0.88rem',
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                  }}
+                                />
+                                {nominalVal > sisaBayar ? (
+                                  <div style={{ fontSize: '0.74rem', color: '#f87171', fontWeight: 800, marginTop: '6px' }}>
+                                    ⚠️ Kelebihan bayar Rp {formatRupiahDesimal(nominalVal - sisaBayar)}! Maksimal Rp {formatRupiahDesimal(sisaBayar)}.
+                                  </div>
+                                ) : (
+                                  <div style={{
+                                    marginTop: '6px',
+                                    padding: '6px 10px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(15, 23, 42, 0.9)',
+                                    border: '1px solid #334155',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontSize: '0.76rem',
+                                    lineHeight: '1.4'
+                                  }}>
+                                    <span style={{ color: '#94a3b8' }}>Sisa Pembayaran Faktur:</span>
+                                    <strong style={{ color: liveSisaBayar === 0 ? '#34d399' : '#f87171', fontWeight: 800 }}>
+                                      Rp {formatRupiahDesimal(liveSisaBayar)}
+                                    </strong>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Metode Pembayaran (Hanya 3: Cash, TF, Cek/BG) */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
+                            <label style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 800, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span>🏦</span> <span>Metode Pembayaran</span>
+                            </label>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              Cash / TF / Cek
+                            </span>
+                          </div>
+                          <select
+                            value={normalizeMetodeBayar(newTfPaymentFormData.metode)}
+                            onChange={(e) => setNewTfPaymentFormData({ ...newTfPaymentFormData, metode: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1px solid #475569',
+                              borderRadius: '6px',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              padding: '7px 10px',
+                              fontSize: '0.84rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          >
+                            <option value="Cash">Cash</option>
+                            <option value="TF">TF</option>
+                            <option value="Cek/BG">Cek/BG</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+                        {(Number(newTfPaymentFormData.nominal) || 0) > sisaBayar && (
+                          <span style={{ fontSize: '0.78rem', color: '#f87171', fontWeight: 800 }}>
+                            ⛔ Tidak bisa bayar: Kelebihan bayar Rp {formatRupiahDesimal((Number(newTfPaymentFormData.nominal) || 0) - sisaBayar)}
+                          </span>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={(Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0}
+                          style={{
+                            background: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0
+                              ? '#475569'
+                              : 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontWeight: 900,
+                            padding: '8px 18px',
+                            borderRadius: '6px',
+                            fontSize: '0.86rem',
+                            cursor: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0 ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: (Number(newTfPaymentFormData.nominal) || 0) > sisaBayar || (Number(newTfPaymentFormData.nominal) || 0) <= 0 ? 'none' : '0 2px 8px rgba(124, 58, 237, 0.4)'
+                          }}
+                        >
+                          <Save size={16} /> {newTfPaymentFormData.id ? 'Perbarui Pembayaran Faktur' : 'Simpan Pembayaran Faktur'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+                <div style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>
+                  Status Dokumen: <strong style={{ color: isLunas ? '#34d399' : '#f87171' }}>
+                    {isLunas ? '✓ LUNAS' : `SISA TAGIHAN: Rp ${formatRupiahDesimal(sisaBayar)}`}
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsTfPaymentModalOpen(false)}
                   style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', fontWeight: 800, padding: '6px 16px', borderRadius: '6px', cursor: 'pointer' }}
                 >
                   Tutup
