@@ -990,6 +990,7 @@ export const TeknikModule = () => {
   // Master Data Modal State (Opens when clicking "Database Tenaga Kerja" or "Edit" on row)
   const [isMasterWorkerModalOpen, setIsMasterWorkerModalOpen] = useState(false);
   const [editingWorkerId, setEditingWorkerId] = useState(null);
+  const [workerModalOrigin, setWorkerModalOrigin] = useState(null); // 'absen' | null
   const [masterWorkerInput, setMasterWorkerInput] = useState({
     nama: '',
     status: 'Tukang',
@@ -1015,6 +1016,7 @@ export const TeknikModule = () => {
   // OPEN MASTER WORKER MODAL IN ADD MODE
   const handleOpenMasterWorkerModal = () => {
     setEditingWorkerId(null);
+    setWorkerModalOrigin(null);
     setMasterWorkerInput({
       nama: '',
       status: 'Tukang',
@@ -1023,9 +1025,25 @@ export const TeknikModule = () => {
     setIsMasterWorkerModalOpen(true);
   };
 
+  // OPEN MASTER WORKER MODAL FROM FORM ATTENDANCE (QUICK ADD)
+  const handleOpenAddWorkerModal = (initialName = '', origin = 'absen') => {
+    setEditingWorkerId(null);
+    const cleanName = (initialName || '').trim();
+    const st = absenFormData?.status || 'Tukang';
+    const upahDef = st.toLowerCase().includes('mandor') ? 160000 : (st.toLowerCase().includes('kenek') ? 130000 : 150000);
+    setMasterWorkerInput({
+      nama: cleanName,
+      status: st,
+      upah: upahDef
+    });
+    setWorkerModalOrigin(origin);
+    setIsMasterWorkerModalOpen(true);
+  };
+
   // OPEN MASTER WORKER MODAL IN EDIT MODE FROM TABLE ROW (FITUR EDIT AKTIF)
   const handleOpenEditMasterWorker = (worker) => {
     setEditingWorkerId(worker.id);
+    setWorkerModalOrigin(null);
     setMasterWorkerInput({
       nama: worker.nama || '',
       status: worker.status || 'Tukang',
@@ -1088,9 +1106,19 @@ export const TeknikModule = () => {
       };
       setDatabasePekerjaRows([...databasePekerjaRows, newWorker]);
       showNotification(`Tenaga kerja "${cleanName}" (${newWorker.status} - Rp ${formatRupiah(newWorker.upah)}) berhasil didaftarkan ke Database!`, 'success');
+
+      // Jika dibuka dari form absen, otomatis set nama dan status di formulir absen!
+      if (workerModalOrigin === 'absen') {
+        setAbsenFormData(prev => ({
+          ...prev,
+          nama: cleanName,
+          status: newWorker.status
+        }));
+      }
     }
 
     setIsMasterWorkerModalOpen(false);
+    setWorkerModalOrigin(null);
   };
 
   // DELETE ROW FROM DATABASE TENAGA KERJA
@@ -3921,29 +3949,135 @@ export const TeknikModule = () => {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>👷 Pilih Tenaga Kerja (Dari Database)</label>
-                  <select
-                    className="form-control"
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.85rem', margin: 0 }}>
+                      👷 Nama Tenaga Kerja (Ketik / Pilih)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAddWorkerModal(absenFormData.nama, 'absen')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#38bdf8',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                    >
+                      <Plus size={12} /> + Add Tenaga Kerja
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    list="absen-worker-options"
+                    placeholder="Pilih atau ketik nama tenaga kerja..."
                     value={absenFormData.nama}
                     onChange={(e) => {
-                      const selectedNama = e.target.value;
-                      const worker = databasePekerjaRows.find(w => w.nama === selectedNama);
+                      const typedNama = e.target.value;
+                      const matched = databasePekerjaRows.find(
+                        w => (w.nama || '').trim().toLowerCase() === typedNama.trim().toLowerCase()
+                      );
                       setAbsenFormData(prev => ({
                         ...prev,
-                        nama: selectedNama,
-                        status: worker ? worker.status : prev.status
+                        nama: typedNama,
+                        status: matched ? matched.status : prev.status
                       }));
                     }}
                     required
-                    style={{ fontWeight: 900, background: '#0f172a', color: '#ffffff', borderColor: '#38bdf8' }}
-                  >
-                    <option value="">-- Pilih Nama Pekerja Terdaftar --</option>
-                    {[...databasePekerjaRows].sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).map(w => (
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1.5px solid #38bdf8',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 900,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
+                  />
+                  <datalist id="absen-worker-options">
+                    {[...databasePekerjaRows].sort((a, b) => (a.nama || '').localeCompare(b.nama || '')).map(w => (
                       <option key={w.id || w.nama} value={w.nama}>
-                        {w.nama} ({w.status} - Rp {formatRupiahDesimal(w.upah)}/hari)
+                        {w.nama} ({w.status} - Rp {formatRupiah(w.upah)}/hari)
                       </option>
                     ))}
-                  </select>
+                  </datalist>
+
+                  {/* INDIKATOR STATUS & TOMBOL ADD TENAGA KERJA */}
+                  {(() => {
+                    const typedNama = (absenFormData.nama || '').trim();
+                    if (!typedNama) {
+                      return null;
+                    }
+
+                    const matchedWorker = databasePekerjaRows.find(
+                      w => (w.nama || '').trim().toLowerCase() === typedNama.toLowerCase()
+                    );
+
+                    if (matchedWorker) {
+                      return (
+                        <div style={{
+                          marginTop: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.78rem',
+                          color: '#10b981',
+                          fontWeight: 800
+                        }}>
+                          <CheckCircle2 size={14} color="#10b981" />
+                          <span>Terdaftar di Data Base Terpadu ({matchedWorker.status} - Upah: Rp {formatRupiah(matchedWorker.upah)}/hari)</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{
+                        marginTop: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        padding: '6px 10px',
+                        background: 'rgba(245, 158, 11, 0.12)',
+                        border: '1px dashed #f59e0b',
+                        borderRadius: '6px'
+                      }}>
+                        <div style={{ fontSize: '0.78rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                          <AlertCircle size={14} color="#f59e0b" />
+                          <span>Tenaga kerja belum ada di Data Base Terpadu</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddWorkerModal(typedNama, 'absen')}
+                          style={{
+                            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontSize: '0.78rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.4)',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <Plus size={13} /> Add "{typedNama.length > 20 ? typedNama.slice(0, 20) + '...' : typedNama}" ke Database
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
@@ -8865,20 +8999,37 @@ export const TeknikModule = () => {
       {/* Pop up form: Nama :, Status :, Upah : (Validasi: Nama Tidak Boleh Sama)   */}
       {/* ========================================================================= */}
       {isMasterWorkerModalOpen && (
-        <div className="modal-backdrop">
+        <div className="modal-backdrop" style={{ zIndex: 1100 }}>
           <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Database size={22} color="#38bdf8" /> 
-                {editingWorkerId ? 'Edit Database Tenaga Kerja' : 'Database Tenaga Kerja (Tambah Baru)'}
+                <HardHat size={22} color="#38bdf8" /> 
+                {editingWorkerId ? 'Edit Database Tenaga Kerja' : (workerModalOrigin ? 'Tambah Tenaga Kerja Baru (Data Base Terpadu)' : 'Database Tenaga Kerja (Tambah Baru)')}
               </h3>
-              <button onClick={() => setIsMasterWorkerModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => { setIsMasterWorkerModalOpen(false); setWorkerModalOrigin(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
             <form onSubmit={handleRegisterMasterWorker}>
               <div className="modal-body">
+                {workerModalOrigin && (
+                  <div style={{
+                    marginBottom: '1rem',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid #0284c7',
+                    fontSize: '0.8rem',
+                    color: '#bae6fd',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Sparkles size={16} color="#38bdf8" />
+                    <span>Tenaga kerja ini otomatis tersimpan di <strong>Data Base Terpadu</strong> dan langsung terpilih pada formulir absensi.</span>
+                  </div>
+                )}
                 <div style={{ background: 'rgba(234, 88, 12, 0.15)', border: '1px solid #ea580c', padding: '0.6rem 0.85rem', borderRadius: '6px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>
                   <AlertCircle size={16} /> Aturan: Nama tidak boleh sama / duplikat
                 </div>
@@ -8917,7 +9068,11 @@ export const TeknikModule = () => {
                     <div>
                       <select
                         value={masterWorkerInput.status}
-                        onChange={(e) => setMasterWorkerInput({ ...masterWorkerInput, status: e.target.value })}
+                        onChange={(e) => {
+                          const nextStatus = e.target.value;
+                          const nextUpah = nextStatus.toLowerCase().includes('mandor') ? 160000 : (nextStatus.toLowerCase().includes('kenek') ? 130000 : 150000);
+                          setMasterWorkerInput({ ...masterWorkerInput, status: nextStatus, upah: nextUpah });
+                        }}
                         style={{
                           width: '100%',
                           background: '#0f172a',
@@ -8967,7 +9122,7 @@ export const TeknikModule = () => {
               </div>
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsMasterWorkerModalOpen(false)}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setIsMasterWorkerModalOpen(false); setWorkerModalOrigin(null); }}>
                   Batal
                 </button>
                 <button 
@@ -9030,37 +9185,135 @@ export const TeknikModule = () => {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.85rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8' }}>👷 Pilih / Isi Nama Tenaga Kerja</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <select
-                      className="form-control"
-                      value={absenFormData.nama}
-                      onChange={(e) => {
-                        const selectedNama = e.target.value;
-                        const worker = databasePekerjaRows.find(w => w.nama === selectedNama);
-                        setAbsenFormData({
-                          ...absenFormData,
-                          nama: selectedNama,
-                          status: worker ? worker.status : (absenFormData.status || 'Tukang')
-                        });
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.85rem', margin: 0 }}>
+                      👷 Nama Tenaga Kerja (Ketik / Pilih)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAddWorkerModal(absenFormData.nama, 'absen')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#38bdf8',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
                       }}
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8', flex: 1 }}
                     >
-                      <option value="">-- Pilih dari Database Tenaga Kerja --</option>
-                      {uniqueWorkerNames.map(name => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Atau ketik nama baru..."
-                      value={absenFormData.nama}
-                      onChange={(e) => setAbsenFormData({ ...absenFormData, nama: e.target.value })}
-                      required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#38bdf8', flex: 1 }}
-                    />
+                      <Plus size={12} /> + Add Tenaga Kerja
+                    </button>
                   </div>
+                  <input
+                    type="text"
+                    list="modal-absen-worker-options"
+                    placeholder="Pilih atau ketik nama tenaga kerja..."
+                    value={absenFormData.nama}
+                    onChange={(e) => {
+                      const typedNama = e.target.value;
+                      const matched = databasePekerjaRows.find(
+                        w => (w.nama || '').trim().toLowerCase() === typedNama.trim().toLowerCase()
+                      );
+                      setAbsenFormData(prev => ({
+                        ...prev,
+                        nama: typedNama,
+                        status: matched ? matched.status : prev.status
+                      }));
+                    }}
+                    required
+                    style={{
+                      width: '100%',
+                      background: '#1e293b',
+                      border: '1.5px solid #38bdf8',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 900,
+                      fontSize: '0.88rem',
+                      padding: '8px 12px',
+                      outline: 'none'
+                    }}
+                  />
+                  <datalist id="modal-absen-worker-options">
+                    {[...databasePekerjaRows].sort((a, b) => (a.nama || '').localeCompare(b.nama || '')).map(w => (
+                      <option key={w.id || w.nama} value={w.nama}>
+                        {w.nama} ({w.status} - Rp {formatRupiah(w.upah)}/hari)
+                      </option>
+                    ))}
+                  </datalist>
+
+                  {/* INDIKATOR STATUS & TOMBOL ADD TENAGA KERJA */}
+                  {(() => {
+                    const typedNama = (absenFormData.nama || '').trim();
+                    if (!typedNama) {
+                      return null;
+                    }
+
+                    const matchedWorker = databasePekerjaRows.find(
+                      w => (w.nama || '').trim().toLowerCase() === typedNama.toLowerCase()
+                    );
+
+                    if (matchedWorker) {
+                      return (
+                        <div style={{
+                          marginTop: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.78rem',
+                          color: '#10b981',
+                          fontWeight: 800
+                        }}>
+                          <CheckCircle2 size={14} color="#10b981" />
+                          <span>Terdaftar di Data Base Terpadu ({matchedWorker.status} - Upah: Rp {formatRupiah(matchedWorker.upah)}/hari)</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{
+                        marginTop: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        padding: '6px 10px',
+                        background: 'rgba(245, 158, 11, 0.12)',
+                        border: '1px dashed #f59e0b',
+                        borderRadius: '6px'
+                      }}>
+                        <div style={{ fontSize: '0.78rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                          <AlertCircle size={14} color="#f59e0b" />
+                          <span>Tenaga kerja belum ada di Data Base Terpadu</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddWorkerModal(typedNama, 'absen')}
+                          style={{
+                            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontSize: '0.78rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.4)',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <Plus size={13} /> Add "{typedNama.length > 20 ? typedNama.slice(0, 20) + '...' : typedNama}" ke Database
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* STATUS TENAGA KERJA */}
