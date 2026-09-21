@@ -2669,7 +2669,7 @@ export const TeknikModule = () => {
       return;
     }
     if (!cleanPekerjaan) {
-      alert('Silakan masukkan Uraian Faktur / Pekerjaan!');
+      alert('Silakan masukkan Keterangan!');
       return;
     }
     if (nilaiNum <= 0) {
@@ -6690,10 +6690,10 @@ export const TeknikModule = () => {
                       </datalist>
                     </div>
 
-                    {/* 5. Uraian Faktur / Pekerjaan */}
+                    {/* 5. Keterangan */}
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                        🔨 Uraian Faktur / Pekerjaan <span style={{ color: '#ef4444' }}>*</span>
+                        📝 Keterangan <span style={{ color: '#ef4444' }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -7053,15 +7053,15 @@ export const TeknikModule = () => {
                       </select>
                     </div>
 
-                    {/* 4. Cari Nama (Pekerjaan & Vendor) */}
+                    {/* 4. Cari Nama (Keterangan & Vendor) */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>
-                        🔍 Cari Nama / Uraian:
+                        🔍 Cari Nama / Keterangan:
                       </label>
                       <div style={{ position: 'relative' }}>
                         <input
                           type="text"
-                          placeholder="Cari uraian atau vendor..."
+                          placeholder="Cari keterangan atau vendor..."
                           value={tfNamaSearch}
                           onChange={(e) => setTfNamaSearch(e.target.value)}
                           style={{
@@ -7134,7 +7134,7 @@ export const TeknikModule = () => {
                         <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>No. TT</th>
                         <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
                         <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
-                        <th style={{ border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Uraian Faktur</th>
+                        <th style={{ border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Keterangan</th>
                         <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nilai Faktur (Rp)</th>
                         <th style={{ width: '165px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sudah Dibayar</th>
                         <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
@@ -7461,7 +7461,7 @@ export const TeknikModule = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <input
                     type="text"
-                    placeholder="Cari No. TT, vendor, uraian..."
+                    placeholder="Cari No. TT, vendor, keterangan..."
                     value={laporanTfSearch}
                     onChange={(e) => setLaporanTfSearch(e.target.value)}
                     style={{
@@ -7577,7 +7577,7 @@ export const TeknikModule = () => {
                         <th style={{ padding: '8px 8px', textAlign: 'center', width: '90px' }}>No. TT</th>
                         <th style={{ padding: '8px 10px', textAlign: 'left', width: '160px' }}>Nama Vendor</th>
                         <th style={{ padding: '8px 10px', textAlign: 'left', width: '140px' }}>Proyek</th>
-                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Uraian Faktur</th>
+                        <th style={{ padding: '8px 10px', textAlign: 'left' }}>Keterangan</th>
                         <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Nilai Faktur</th>
                         <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Terbayar</th>
                         <th style={{ padding: '8px 10px', textAlign: 'right', width: '140px' }}>Sisa Tagihan</th>
