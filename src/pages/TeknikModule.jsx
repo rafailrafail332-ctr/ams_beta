@@ -1398,6 +1398,52 @@ export const TeknikModule = () => {
     };
   };
 
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+
+  // UNIFIED SAFE MUTATION HELPER (SANITIZED, SORTED ASCENDING, CLOUD & LOCAL SYNCED)
+  const updateAndSaveRabSheets = (newSheets, message, notifType = 'success') => {
+    const valid = Array.isArray(newSheets) ? newSheets.filter(Boolean) : [];
+    const sanitized = valid.map(cleanSheetForStorage).sort(compareSpkAsc);
+    setRabSheets(sanitized);
+    try {
+      localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sanitized));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_RAB_SHEETS, sanitized);
+    if (message) {
+      showNotification(message, notifType);
+    }
+    return sanitized;
+  };
+
+  // MANUAL FORCE SYNC DIRECTLY FROM MYSQL CLOUD (REAL-TIME GUARANTEE ACROSS LAPTOPS)
+  const handleManualCloudSync = async () => {
+    setIsSyncingCloud(true);
+    try {
+      const val = await fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null);
+      if (val && Array.isArray(val) && val.length > 0) {
+        const validSheets = val.filter(s => {
+          if (!s) return false;
+          const spk = String(s.noInput || s.noSpk || '').trim();
+          const pek = String(s.pekerjaan || s.items?.[0]?.itemPekerjaan || '').trim();
+          const nil = Number(s.nilaiPekerjaan || s.totalHargaRab || 0);
+          return spk !== '' || pek !== '' || nil > 0;
+        });
+        const sorted = validSheets.map(cleanSheetForStorage).sort(compareSpkAsc);
+        setRabSheets(sorted);
+        try {
+          localStorage.setItem(STORAGE_KEY_RAB_SHEETS, JSON.stringify(sorted));
+        } catch (e) {}
+        showNotification(`Sinkronisasi berhasil! ${sorted.length} pekerjaan borongan terhubung langsung dengan server MySQL.`, 'success');
+      } else {
+        showNotification('Data di server MySQL sudah sinkron.', 'info');
+      }
+    } catch (e) {
+      showNotification('Gagal menghubungi server MySQL. Periksa koneksi internet.', 'error');
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
+
   // REAL-TIME COMPUTATION HELPER FOR ANY SHEET
   const computeSheetSummary = (sheet) => {
     if (!sheet) return { items: [], totalHargaRab: 0, totalBobot: 0, progresPersen: 0, retensiPersen: 5, nilaiOpname: 0, retensiNilai: 0, nilaiProgress: 0, nilaiProgres: 0, pembayaranSebelumnya: 0, pembayaranSaatIni: 0 };

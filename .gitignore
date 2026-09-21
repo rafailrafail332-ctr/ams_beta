@@ -4,6 +4,8 @@ dist/
 dist-ssr/
 .vite/
 *.local
+*.zip
+downloaded_app_api.php
 
 #-------------------------
 # Operating Specific Junk Files

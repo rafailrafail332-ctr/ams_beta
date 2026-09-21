@@ -307,7 +307,6 @@ export const ProcurementModule = () => {
     });
     setIsTenderModalOpen(true);
   };
-
   const handleOpenEditTender = (t) => {
     setEditingTender(t);
     setTenderForm({
