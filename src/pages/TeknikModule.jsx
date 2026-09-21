@@ -845,6 +845,19 @@ export const TeknikModule = () => {
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   const [editingVendorId, setEditingVendorId] = useState(null);
   const [vendorFormData, setVendorFormData] = useState({ nama: '', noHp: '', noKtp: '', status: 'Kontraktor' });
+  const [vendorModalOrigin, setVendorModalOrigin] = useState(null); // 'tukar_faktur' | 'borongan' | null
+
+  const handleOpenAddVendorModal = (initialName = '', origin = 'tukar_faktur') => {
+    setEditingVendorId(null);
+    setVendorFormData({
+      nama: (initialName || '').trim(),
+      noHp: '',
+      noKtp: '',
+      status: origin === 'tukar_faktur' ? 'Suplier' : 'Kontraktor'
+    });
+    setVendorModalOrigin(origin);
+    setIsVendorModalOpen(true);
+  };
 
   // Modal 2: Karyawan
   const [isKaryawanModalOpen, setIsKaryawanModalOpen] = useState(false);
@@ -4546,13 +4559,33 @@ export const TeknikModule = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                 {/* 4. Nama Vendor */}
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                    👤 Nama Vendor / Mandor
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem', margin: 0 }}>
+                      👤 Nama Vendor / Mandor
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAddVendorModal(pekerjaanFormData.namaVendor, 'borongan')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#38bdf8',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                    >
+                      <Plus size={12} /> + Add Vendor
+                    </button>
+                  </div>
                   <input
                     type="text"
                     list="vendor-input-options"
-                    
+                    placeholder="Pilih atau ketik nama vendor..."
                     value={pekerjaanFormData.namaVendor}
                     onChange={(e) => setPekerjaanFormData({ ...pekerjaanFormData, namaVendor: e.target.value })}
                     style={{
@@ -4572,6 +4605,76 @@ export const TeknikModule = () => {
                       <option key={v.id || v.nama} value={v.nama}>{v.nama} ({v.status || 'Vendor'})</option>
                     ))}
                   </datalist>
+
+                  {/* INDIKATOR STATUS & TOMBOL ADD VENDOR */}
+                  {(() => {
+                    const typedVendor = (pekerjaanFormData.namaVendor || '').trim();
+                    if (!typedVendor) {
+                      return null;
+                    }
+
+                    const matchVendor = databaseVendorRows.find(
+                      v => (v.nama || '').trim().toLowerCase() === typedVendor.toLowerCase()
+                    );
+
+                    if (matchVendor) {
+                      return (
+                        <div style={{
+                          marginTop: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.78rem',
+                          color: '#10b981',
+                          fontWeight: 800
+                        }}>
+                          <CheckCircle2 size={14} color="#10b981" />
+                          <span>Terdaftar di Data Base Terpadu ({matchVendor.status || 'Vendor'})</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{
+                        marginTop: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        padding: '6px 10px',
+                        background: 'rgba(245, 158, 11, 0.12)',
+                        border: '1px dashed #f59e0b',
+                        borderRadius: '6px'
+                      }}>
+                        <div style={{ fontSize: '0.78rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                          <AlertCircle size={14} color="#f59e0b" />
+                          <span>Vendor belum ada di Data Base Terpadu</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddVendorModal(typedVendor, 'borongan')}
+                          style={{
+                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontSize: '0.78rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(16, 185, 129, 0.4)',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <Plus size={13} /> Add "{typedVendor.length > 20 ? typedVendor.slice(0, 20) + '...' : typedVendor}" ke Database
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* 5. Pekerjaan */}
@@ -6704,9 +6807,29 @@ export const TeknikModule = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                     {/* 4. Nama Vendor */}
                     <div className="form-group">
-                      <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem' }}>
-                        👤 Nama Vendor / Supplier
-                      </label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label className="form-label" style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.85rem', margin: 0 }}>
+                          👤 Nama Vendor / Supplier
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddVendorModal(tukarFakturFormData.namaVendor, 'tukar_faktur')}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#c084fc',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={12} /> + Add Vendor
+                        </button>
+                      </div>
                       <input
                         type="text"
                         list="tf-vendor-options"
@@ -6730,6 +6853,76 @@ export const TeknikModule = () => {
                           <option key={v} value={v}>{v}</option>
                         ))}
                       </datalist>
+
+                      {/* INDIKATOR STATUS & TOMBOL ADD VENDOR */}
+                      {(() => {
+                        const typedVendor = (tukarFakturFormData.namaVendor || '').trim();
+                        if (!typedVendor) {
+                          return null;
+                        }
+
+                        const matchVendor = databaseVendorRows.find(
+                          v => (v.nama || '').trim().toLowerCase() === typedVendor.toLowerCase()
+                        );
+
+                        if (matchVendor) {
+                          return (
+                            <div style={{
+                              marginTop: '6px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontSize: '0.78rem',
+                              color: '#10b981',
+                              fontWeight: 800
+                            }}>
+                              <CheckCircle2 size={14} color="#10b981" />
+                              <span>Terdaftar di Data Base Terpadu ({matchVendor.status || 'Vendor'})</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '8px',
+                            padding: '6px 10px',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px dashed #f59e0b',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={14} color="#f59e0b" />
+                              <span>Vendor belum ada di Data Base Terpadu</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAddVendorModal(typedVendor, 'tukar_faktur')}
+                              style={{
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 12px',
+                                borderRadius: '5px',
+                                fontSize: '0.78rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(16, 185, 129, 0.4)',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <Plus size={13} /> Add "{typedVendor.length > 20 ? typedVendor.slice(0, 20) + '...' : typedVendor}" ke Database
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* 5. Keterangan */}
@@ -9474,33 +9667,59 @@ export const TeknikModule = () => {
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Briefcase size={20} color="#10b981" />
-                {editingVendorId ? 'Edit Data Base Vendor' : 'Data Base Vendor (Tambah Baru)'}
+                {editingVendorId ? 'Edit Data Base Vendor' : (vendorModalOrigin ? 'Tambah Vendor Baru (Data Base Terpadu)' : 'Data Base Vendor (Tambah Baru)')}
               </h3>
-              <button onClick={() => setIsVendorModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => { setIsVendorModalOpen(false); setVendorModalOrigin(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
             <form onSubmit={(e) => {
               e.preventDefault();
-              if (!vendorFormData.nama.trim()) {
+              const vNamaClean = (vendorFormData.nama || '').trim();
+              if (!vNamaClean) {
                 alert('Nama vendor wajib diisi!');
                 return;
               }
               if (editingVendorId) {
-                setDatabaseVendorRows(prev => prev.map(v => v.id === editingVendorId ? { ...v, ...vendorFormData } : v));
-                showNotification(`Data Vendor "${vendorFormData.nama}" berhasil diperbarui!`, 'success');
+                setDatabaseVendorRows(prev => prev.map(v => v.id === editingVendorId ? { ...v, ...vendorFormData, nama: vNamaClean } : v));
+                showNotification(`Data Vendor "${vNamaClean}" berhasil diperbarui!`, 'success');
               } else {
                 const newV = {
                   id: `VND-${Date.now().toString().slice(-4)}`,
-                  ...vendorFormData
+                  ...vendorFormData,
+                  nama: vNamaClean
                 };
                 setDatabaseVendorRows(prev => [...prev, newV]);
-                showNotification(`Vendor "${vendorFormData.nama}" berhasil didaftarkan!`, 'success');
+                showNotification(`Vendor "${vNamaClean}" berhasil didaftarkan ke Data Base Terpadu!`, 'success');
+
+                if (vendorModalOrigin === 'tukar_faktur') {
+                  setTukarFakturFormData(prev => ({ ...prev, namaVendor: vNamaClean }));
+                } else if (vendorModalOrigin === 'borongan') {
+                  setPekerjaanFormData(prev => ({ ...prev, namaVendor: vNamaClean }));
+                }
               }
               setIsVendorModalOpen(false);
+              setVendorModalOrigin(null);
             }}>
               <div className="modal-body">
+                {vendorModalOrigin && (
+                  <div style={{
+                    marginBottom: '1rem',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid #0284c7',
+                    fontSize: '0.8rem',
+                    color: '#bae6fd',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Sparkles size={16} color="#38bdf8" />
+                    <span>Vendor ini otomatis tersimpan di <strong>Data Base Terpadu</strong> dan langsung terpilih pada formulir <strong>{vendorModalOrigin === 'tukar_faktur' ? 'Tukar Faktur' : 'Pekerjaan Borongan'}</strong>.</span>
+                  </div>
+                )}
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '90px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
@@ -9554,7 +9773,7 @@ export const TeknikModule = () => {
               </div>
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsVendorModalOpen(false)}>Batal</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setIsVendorModalOpen(false); setVendorModalOrigin(null); }}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 900 }}>
                   💾 Simpan Data Base Vendor
                 </button>
