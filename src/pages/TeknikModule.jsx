@@ -851,103 +851,16 @@ export const TeknikModule = () => {
   const STORAGE_KEY_PERSEDIAAN_MASUK = 'ams_teknik_persediaan_masuk_v1';
   const STORAGE_KEY_PERSEDIAAN_KELUAR = 'ams_teknik_persediaan_keluar_v1';
 
-  const defaultPersediaanMasterBarang = [
-    { id: 'BRG-01', kode: 'BRG-001', nama: 'Semen Gresik 40 Kg', satuan: 'Sak' },
-    { id: 'BRG-02', kode: 'BRG-002', nama: 'Besi Beton 10 mm Polos', satuan: 'Btg' },
-    { id: 'BRG-03', kode: 'BRG-003', nama: 'Besi Beton 8 mm Polos', satuan: 'Btg' },
-    { id: 'BRG-04', kode: 'BRG-004', nama: 'Bata Ringan / Hebel 10 cm', satuan: 'M3' },
-    { id: 'BRG-05', kode: 'BRG-005', nama: 'Pasir Pasang Hitam Cor', satuan: 'M3' },
-    { id: 'BRG-06', kode: 'BRG-006', nama: 'Batu Split 1-2 Cor', satuan: 'M3' },
-    { id: 'BRG-07', kode: 'BRG-007', nama: 'Keramik Lantai 40x40 Putih Polos', satuan: 'Dus' }
-  ];
-
-  const defaultPersediaanBarangMasuk = [
-    {
-      id: 'MSK-001',
-      tanggal: '2026-09-15',
-      proyek: 'Ashoka View',
-      kode: 'BRG-001',
-      namaBarang: 'Semen Gresik 40 Kg',
-      qty: 100,
-      satuan: 'Sak',
-      hargaSatuan: 65000,
-      vendor: 'CV Mitra Semen Abadi',
-      keterangan: 'Pengadaan tahap 1 pondasi'
-    },
-    {
-      id: 'MSK-002',
-      tanggal: '2026-09-16',
-      proyek: 'Ashoka View',
-      kode: 'BRG-002',
-      namaBarang: 'Besi Beton 10 mm Polos',
-      qty: 80,
-      satuan: 'Btg',
-      hargaSatuan: 75000,
-      vendor: 'UD Cahaya Besi Baja',
-      keterangan: 'Struktur kolom blok A'
-    },
-    {
-      id: 'MSK-003',
-      tanggal: '2026-09-17',
-      proyek: 'Ashoka Park',
-      kode: 'BRG-004',
-      namaBarang: 'Bata Ringan / Hebel 10 cm',
-      qty: 15,
-      satuan: 'M3',
-      hargaSatuan: 620000,
-      vendor: 'PT Bangun Jaya Perkasa',
-      keterangan: 'Dinding unit 01-03'
-    }
-  ];
-
-  const defaultPersediaanBarangKeluar = [
-    {
-      id: 'KLR-001',
-      tanggal: '2026-09-18',
-      proyek: 'Ashoka View',
-      kode: 'BRG-001',
-      namaBarang: 'Semen Gresik 40 Kg',
-      qty: 35,
-      satuan: 'Sak',
-      avgHarga: 65000,
-      blok: 'A',
-      noUnit: '01',
-      fasum: ''
-    },
-    {
-      id: 'KLR-002',
-      tanggal: '2026-09-19',
-      proyek: 'Ashoka View',
-      kode: 'BRG-002',
-      namaBarang: 'Besi Beton 10 mm Polos',
-      qty: 25,
-      satuan: 'Btg',
-      avgHarga: 75000,
-      blok: 'A',
-      noUnit: '02',
-      fasum: ''
-    },
-    {
-      id: 'KLR-003',
-      tanggal: '2026-09-20',
-      proyek: 'Ashoka Park',
-      kode: 'BRG-004',
-      namaBarang: 'Bata Ringan / Hebel 10 cm',
-      qty: 5,
-      satuan: 'M3',
-      avgHarga: 620000,
-      blok: 'B',
-      noUnit: '01',
-      fasum: ''
-    }
-  ];
+  const defaultPersediaanMasterBarang = [];
+  const defaultPersediaanBarangMasuk = [];
+  const defaultPersediaanBarangKeluar = [];
 
   const [persediaanMasterBarang, setPersediaanMasterBarang] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_BARANG);
-      if (saved) {
+      if (saved !== null && saved !== undefined) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
     return defaultPersediaanMasterBarang;
@@ -965,7 +878,7 @@ export const TeknikModule = () => {
   const [persediaanBarangMasuk, setPersediaanBarangMasuk] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_MASUK);
-      if (saved) {
+      if (saved !== null && saved !== undefined) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       }
@@ -985,7 +898,7 @@ export const TeknikModule = () => {
   const [persediaanBarangKeluar, setPersediaanBarangKeluar] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_KELUAR);
-      if (saved) {
+      if (saved !== null && saved !== undefined) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       }
@@ -1200,13 +1113,13 @@ export const TeknikModule = () => {
         if (val && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
       });
       fetchCloudStore(STORAGE_KEY_PERSEDIAAN_BARANG, null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) setPersediaanMasterBarang(val);
+        if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanMasterBarang(val);
       });
       fetchCloudStore(STORAGE_KEY_PERSEDIAAN_MASUK, null).then(val => {
-        if (val && Array.isArray(val)) setPersediaanBarangMasuk(val);
+        if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanBarangMasuk(val);
       });
       fetchCloudStore(STORAGE_KEY_PERSEDIAAN_KELUAR, null).then(val => {
-        if (val && Array.isArray(val)) setPersediaanBarangKeluar(val);
+        if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanBarangKeluar(val);
       });
     };
 
@@ -3378,11 +3291,39 @@ export const TeknikModule = () => {
     setMasterBarangModalOrigin(null);
   };
 
-  const handleDeleteMasterBarang = (id) => {
-    const item = persediaanMasterBarang.find(b => b.id === id);
-    if (window.confirm(`Hapus barang "${item?.nama || id}" dari database persediaan?`)) {
-      const nextList = persediaanMasterBarang.filter(b => b.id !== id);
-      updateAndSaveMasterBarang(nextList, `Barang "${item?.nama}" berhasil dihapus.`, 'info');
+  const handleDeleteMasterBarang = (id, kode = '') => {
+    const item = persediaanMasterBarang.find(b => 
+      (id && b.id === id) || 
+      (kode && b.kode === kode) || 
+      (id && b.kode === id)
+    );
+    const itemName = item?.nama || item?.kode || id || kode;
+    const targetKode = (item?.kode || kode || id || '').trim().toUpperCase();
+
+    // Check if this item is referenced in transactions
+    const usedInMasuk = persediaanBarangMasuk.filter(m => 
+      (m.kode && m.kode.trim().toUpperCase() === targetKode) ||
+      (m.namaBarang && item?.nama && m.namaBarang.trim().toLowerCase() === item.nama.trim().toLowerCase())
+    );
+    const usedInKeluar = persediaanBarangKeluar.filter(k => 
+      (k.kode && k.kode.trim().toUpperCase() === targetKode) ||
+      (k.namaBarang && item?.nama && k.namaBarang.trim().toLowerCase() === item.nama.trim().toLowerCase())
+    );
+
+    let confirmMsg = `Hapus barang "${itemName}" dari database master persediaan?`;
+    if (usedInMasuk.length > 0 || usedInKeluar.length > 0) {
+      confirmMsg = `Barang "${itemName}" tercatat di ${usedInMasuk.length} riwayat barang masuk dan ${usedInKeluar.length} riwayat barang keluar.\n\nYakin tetap ingin menghapus barang ini dari database master?`;
+    }
+
+    if (window.confirm(confirmMsg)) {
+      const nextList = persediaanMasterBarang.filter(b => {
+        if (id && b.id && b.id === id) return false;
+        if (kode && b.kode && b.kode === kode) return false;
+        if (targetKode && b.kode && b.kode.trim().toUpperCase() === targetKode) return false;
+        if (!id && !b.id && b.kode === kode) return false;
+        return true;
+      });
+      updateAndSaveMasterBarang(nextList, `Barang "${itemName}" berhasil dihapus dari database.`, 'info');
     }
   };
 
@@ -9142,7 +9083,7 @@ export const TeknikModule = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => handleDeleteMasterBarang(b.id)}
+                                    onClick={() => handleDeleteMasterBarang(b.id, b.kode)}
                                     title="Hapus Barang"
                                     style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
                                   >
@@ -10073,7 +10014,7 @@ export const TeknikModule = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteMasterBarang(b.id)}
+                                  onClick={() => handleDeleteMasterBarang(b.id, b.kode)}
                                   title="Hapus Master Barang"
                                   style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
                                 >
@@ -13538,11 +13479,29 @@ export const TeknikModule = () => {
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setIsMasterBarangModalOpen(false); setMasterBarangModalOrigin(null); }}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
-                  💾 Simpan Master Barang
-                </button>
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  {editingBarangId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleDeleteMasterBarang(editingBarangId, barangFormData.kode);
+                        setIsMasterBarangModalOpen(false);
+                        setMasterBarangModalOrigin(null);
+                      }}
+                      className="btn btn-danger"
+                      style={{ background: '#dc2626', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '6px', fontSize: '0.84rem', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={14} /> Hapus Barang
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => { setIsMasterBarangModalOpen(false); setMasterBarangModalOrigin(null); }}>Batal</button>
+                  <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
+                    💾 Simpan Master Barang
+                  </button>
+                </div>
               </div>
             </form>
           </div>
