@@ -37,6 +37,7 @@ import {
   Tag,
   PieChart,
   Briefcase,
+  ChevronLeft,
   ChevronRight,
   Send,
   Trash2,
@@ -51,7 +52,12 @@ const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
 const STORAGE_KEY_DB_HOT_PROSPEK = 'ams_teknik_db_hot_prospek_v1';
 const STORAGE_KEY_DB_UNIT = 'ams_teknik_db_unit_v1';
 
-// 1. Initial Data Base Konsumen (Pembeli Resmi)
+const formatRupiah = (val) => {
+  const num = Number(val) || 0;
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
+};
+
+// 1. Initial Data Base Konsumen (Pembeli Resmi & Closing)
 const initialDbKonsumen = [
   {
     id: 'KNS-001',
@@ -63,6 +69,13 @@ const initialDbKonsumen = [
     pekerjaan: 'Wiraswasta (Owner Logistik)',
     alamat: 'Jl. Pemuda No. 142, Semarang Tengah',
     marketing: 'Amanda',
+    proyek: 'Ashoka View',
+    blok: 'A',
+    nomor: '01',
+    type: 'Type 36/60',
+    hargaJual: 450000000,
+    diskon: 15000000,
+    bookingDp: 10000000,
     ktpFile: 'uploaded',
     ktpFileName: 'ktp_budi_santoso.pdf',
     ktpPasanganFile: 'uploaded',
@@ -84,6 +97,13 @@ const initialDbKonsumen = [
     pekerjaan: 'Manajer Keuangan BUMN',
     alamat: 'Jl. Gajahmada No. 88, Semarang',
     marketing: 'Fresda',
+    proyek: 'Ashoka Park',
+    blok: 'B',
+    nomor: '03',
+    type: 'Type 60/100',
+    hargaJual: 650000000,
+    diskon: 0,
+    bookingDp: 25000000,
     ktpFile: null,
     ktpFileName: '',
     ktpPasanganFile: null,
@@ -105,6 +125,13 @@ const initialDbKonsumen = [
     pekerjaan: 'Dokter Spesialis Bedah',
     alamat: 'Jl. Pandanaran No. 25, Semarang',
     marketing: 'Yulieka Rahmawati',
+    proyek: 'Ashoka View',
+    blok: 'B',
+    nomor: '05',
+    type: 'Type 45/84',
+    hargaJual: 550000000,
+    diskon: 20000000,
+    bookingDp: 15000000,
     ktpFile: 'uploaded',
     ktpFileName: 'ktp_dr_ahmad_fauzi.jpg',
     ktpPasanganFile: 'uploaded',
@@ -126,6 +153,13 @@ const initialDbKonsumen = [
     pekerjaan: 'PNS Pemprov Jateng',
     alamat: 'Jl. Majapahit No. 50, Semarang Timur',
     marketing: 'Amanda',
+    proyek: 'Ashoka Park',
+    blok: 'A',
+    nomor: '01',
+    type: 'Type 54/90',
+    hargaJual: 520000000,
+    diskon: 10000000,
+    bookingDp: 10000000,
     ktpFile: null,
     ktpFileName: '',
     ktpPasanganFile: null,
@@ -145,6 +179,7 @@ const initialDbHotProspek = [
     id: 'HOT-001',
     nama: 'Bpk. Irwan Prasetyo',
     noHp: '0812-4455-6677',
+    proyek: 'Ashoka View',
     domisili: 'Gajahmungkur, Semarang',
     marketing: 'Amanda',
     minat: 'Cluster Emerald Unit A-02 (Tipe 45/84)',
@@ -154,6 +189,7 @@ const initialDbHotProspek = [
     id: 'HOT-002',
     nama: 'Ibu Anita Wijaya',
     noHp: '0813-7788-9911',
+    proyek: 'Ashoka Park',
     domisili: 'Tembalang, Semarang',
     marketing: 'Fresda',
     minat: 'Cluster Sapphire Tipe 54/90',
@@ -232,6 +268,18 @@ export const MarketingModule = () => {
   // Modal Preview Dokumen Berkas (KTP, NPWP, KK, Bukti Transfer)
   const [previewModalDoc, setPreviewModalDoc] = useState(null);
 
+  // Modal Gallery Slider Dokumen Closing (Bisa Digeser Fotonya)
+  const [isViewClosingDocsModalOpen, setIsViewClosingDocsModalOpen] = useState(false);
+  const [selectedClosingDocsRow, setSelectedClosingDocsRow] = useState(null);
+  const [activeClosingDocIndex, setActiveClosingDocIndex] = useState(0);
+  const touchStartX = useRef(null);
+
+  const handleOpenViewClosingDocs = (row) => {
+    setSelectedClosingDocsRow(row);
+    setActiveClosingDocIndex(0);
+    setIsViewClosingDocsModalOpen(true);
+  };
+
   // Hidden File Input Ref for Device SPR Upload (.pdf, .jpg, .png)
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
@@ -255,6 +303,84 @@ export const MarketingModule = () => {
     else if (activeSubTab === 'hot_prospek' || activeSubTab === 'hot') setSubTabKonsumen('hot');
     else if (activeSubTab === 'konsumen') setSubTabKonsumen('konsumen');
   }, [activeSubTab]);
+
+  // Kumpulan Berkas Dokumen untuk Slider Galeri Closing
+  const activeDocsList = useMemo(() => {
+    if (!selectedClosingDocsRow) return [];
+    const list = [];
+    if (selectedClosingDocsRow.ktpPasanganFile || selectedClosingDocsRow.ktpPasanganFileName) {
+      list.push({
+        id: 'ktpPasangan',
+        title: 'KTP Suami / Istri',
+        badge: '👫 KTP Pasangan',
+        color: '#ec4899',
+        fileUrl: selectedClosingDocsRow.ktpPasanganFile,
+        fileName: selectedClosingDocsRow.ktpPasanganFileName || 'KTP_Pasangan.jpg'
+      });
+    }
+    if (selectedClosingDocsRow.npwpFile || selectedClosingDocsRow.npwpFileName) {
+      list.push({
+        id: 'npwp',
+        title: 'Nomor Pokok Wajib Pajak (NPWP)',
+        badge: '💳 NPWP',
+        color: '#a855f7',
+        fileUrl: selectedClosingDocsRow.npwpFile,
+        fileName: selectedClosingDocsRow.npwpFileName || 'NPWP.pdf'
+      });
+    }
+    if (selectedClosingDocsRow.kkFile || selectedClosingDocsRow.kkFileName) {
+      list.push({
+        id: 'kk',
+        title: 'Kartu Keluarga (KK)',
+        badge: '👨‍👩‍👧‍👦 Kartu Keluarga',
+        color: '#22c55e',
+        fileUrl: selectedClosingDocsRow.kkFile,
+        fileName: selectedClosingDocsRow.kkFileName || 'Kartu_Keluarga.pdf'
+      });
+    }
+    if (selectedClosingDocsRow.buktiTransferFile || selectedClosingDocsRow.buktiTransferFileName) {
+      list.push({
+        id: 'buktiTransfer',
+        title: 'Bukti Transfer Pembayaran / Booking DP',
+        badge: '💰 Bukti Transfer',
+        color: '#f59e0b',
+        fileUrl: selectedClosingDocsRow.buktiTransferFile,
+        fileName: selectedClosingDocsRow.buktiTransferFileName || 'Bukti_Transfer.jpg'
+      });
+    }
+    if (selectedClosingDocsRow.ktpFile || selectedClosingDocsRow.ktpFileName) {
+      list.push({
+        id: 'ktp',
+        title: 'KTP Pemohon (Konsumen)',
+        badge: '🪪 KTP Pemohon',
+        color: '#38bdf8',
+        fileUrl: selectedClosingDocsRow.ktpFile,
+        fileName: selectedClosingDocsRow.ktpFileName || 'KTP_Pemohon.jpg'
+      });
+    }
+    return list;
+  }, [selectedClosingDocsRow]);
+
+  const handlePrevClosingDoc = () => {
+    if (activeDocsList.length <= 1) return;
+    setActiveClosingDocIndex(prev => (prev > 0 ? prev - 1 : activeDocsList.length - 1));
+  };
+
+  const handleNextClosingDoc = () => {
+    if (activeDocsList.length <= 1) return;
+    setActiveClosingDocIndex(prev => (prev < activeDocsList.length - 1 ? prev + 1 : 0));
+  };
+
+  useEffect(() => {
+    if (!isViewClosingDocsModalOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight') handleNextClosingDoc();
+      if (e.key === 'ArrowLeft') handlePrevClosingDoc();
+      if (e.key === 'Escape') setIsViewClosingDocsModalOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isViewClosingDocsModalOpen, activeDocsList.length]);
 
   // -------------------------------------------------------------
   // DATA STORES: KONSUMEN, HOT PROSPEK, CALON KONSUMEN, UNIT
@@ -438,6 +564,7 @@ export const MarketingModule = () => {
   const [targetMoveCalonItem, setTargetMoveCalonItem] = useState(null);
   const [moveToHotData, setMoveToHotData] = useState({
     minat: '',
+    proyek: 'Ashoka View',
     catatan: '',
     marketing: 'Amanda'
   });
@@ -446,6 +573,7 @@ export const MarketingModule = () => {
     setTargetMoveCalonItem(row);
     setMoveToHotData({
       minat: '',
+      proyek: row.proyek || 'Ashoka View',
       catatan: row.catatan || 'Konsumen sangat berminat, minta janji survey lokasi',
       marketing: row.marketing || 'Amanda'
     });
@@ -464,7 +592,7 @@ export const MarketingModule = () => {
       id: `HOT-${Date.now().toString().slice(-4)}`,
       nama: targetMoveCalonItem.nama,
       noHp: targetMoveCalonItem.noHp,
-      proyek: targetMoveCalonItem.proyek || 'Ashoka View',
+      proyek: moveToHotData.proyek || targetMoveCalonItem.proyek || 'Ashoka View',
       domisili: targetMoveCalonItem.domisili,
       marketing: moveToHotData.marketing || targetMoveCalonItem.marketing || 'Amanda',
       referensi: targetMoveCalonItem.referensi || 'Iklan',
@@ -496,6 +624,7 @@ export const MarketingModule = () => {
   const [hotProspekFormData, setHotProspekFormData] = useState({
     nama: '',
     noHp: '',
+    proyek: 'Ashoka View',
     domisili: '',
     marketing: 'Amanda',
     minat: '',
@@ -507,6 +636,7 @@ export const MarketingModule = () => {
     setHotProspekFormData({
       nama: '',
       noHp: '',
+      proyek: 'Ashoka View',
       domisili: '',
       marketing: 'Amanda',
       minat: '',
@@ -520,6 +650,7 @@ export const MarketingModule = () => {
     setHotProspekFormData({
       nama: row.nama || '',
       noHp: row.noHp || '',
+      proyek: row.proyek || 'Ashoka View',
       domisili: row.domisili || '',
       marketing: row.marketing || 'Amanda',
       minat: row.minat || '',
@@ -568,6 +699,14 @@ export const MarketingModule = () => {
     pekerjaan: '',
     alamat: '',
     marketing: 'Amanda',
+    proyek: 'Ashoka View',
+    selectedUnitId: '',
+    blok: '',
+    nomor: '',
+    type: '',
+    hargaJual: 450000000,
+    diskon: 0,
+    bookingDp: 10000000,
     ktpFile: null,
     ktpFileName: '',
     ktpPasanganFile: null,
@@ -582,6 +721,12 @@ export const MarketingModule = () => {
 
   const handleOpenMoveToKonsumen = (row) => {
     setTargetMoveHotItem(row);
+    // Cari matching unit dari databaseUnitRows berdasarkan minat atau proyek
+    const matchedUnit = databaseUnitRows.find(u => 
+      (row.minat && (row.minat.toLowerCase().includes(u.blok.toLowerCase()) || row.minat.toLowerCase().includes(u.type.toLowerCase()))) ||
+      (row.proyek && u.proyek === row.proyek)
+    );
+
     setMoveToKonsumenData({
       nama: row.nama || '',
       nik: '',
@@ -591,6 +736,14 @@ export const MarketingModule = () => {
       pekerjaan: '',
       alamat: row.domisili || '',
       marketing: row.marketing || 'Amanda',
+      proyek: row.proyek || (matchedUnit ? matchedUnit.proyek : 'Ashoka View'),
+      selectedUnitId: matchedUnit ? matchedUnit.id : '',
+      blok: matchedUnit ? matchedUnit.blok : 'A',
+      nomor: matchedUnit ? matchedUnit.nomor : '01',
+      type: matchedUnit ? matchedUnit.type : 'Type 36/60',
+      hargaJual: matchedUnit && matchedUnit.harga ? matchedUnit.harga : 450000000,
+      diskon: 0,
+      bookingDp: 10000000,
       ktpFile: null,
       ktpFileName: '',
       ktpPasanganFile: null,
@@ -605,6 +758,26 @@ export const MarketingModule = () => {
     setIsMoveToKonsumenModalOpen(true);
   };
 
+  const handleSelectClosingUnit = (unitId) => {
+    const selectedUnit = databaseUnitRows.find(u => u.id === unitId);
+    if (selectedUnit) {
+      setMoveToKonsumenData(prev => ({
+        ...prev,
+        selectedUnitId: selectedUnit.id,
+        proyek: selectedUnit.proyek || prev.proyek,
+        blok: selectedUnit.blok || prev.blok,
+        nomor: selectedUnit.nomor || prev.nomor,
+        type: selectedUnit.type || prev.type,
+        hargaJual: selectedUnit.harga || (selectedUnit.lb ? selectedUnit.lb * 10000000 : prev.hargaJual || 450000000)
+      }));
+    } else {
+      setMoveToKonsumenData(prev => ({
+        ...prev,
+        selectedUnitId: ''
+      }));
+    }
+  };
+
   const handleConfirmMoveToKonsumen = (e) => {
     e.preventDefault();
     if (!targetMoveHotItem) return;
@@ -615,6 +788,7 @@ export const MarketingModule = () => {
 
     const newKonsumenItem = {
       id: `KNS-${Date.now().toString().slice(-4)}`,
+      proyek: moveToKonsumenData.proyek || targetMoveHotItem.proyek || 'Ashoka View',
       ...moveToKonsumenData
     };
 
@@ -646,6 +820,13 @@ export const MarketingModule = () => {
     pekerjaan: '',
     alamat: '',
     marketing: 'Amanda',
+    proyek: 'Ashoka View',
+    blok: '',
+    nomor: '',
+    type: '',
+    hargaJual: 450000000,
+    diskon: 0,
+    bookingDp: 10000000,
     ktpFile: null,
     ktpFileName: '',
     ktpPasanganFile: null,
@@ -669,6 +850,13 @@ export const MarketingModule = () => {
       pekerjaan: '',
       alamat: '',
       marketing: 'Amanda',
+      proyek: 'Ashoka View',
+      blok: '',
+      nomor: '',
+      type: '',
+      hargaJual: 450000000,
+      diskon: 0,
+      bookingDp: 10000000,
       ktpFile: null,
       ktpFileName: '',
       ktpPasanganFile: null,
@@ -694,6 +882,13 @@ export const MarketingModule = () => {
       pekerjaan: row.pekerjaan || '',
       alamat: row.alamat || '',
       marketing: row.marketing || 'Amanda',
+      proyek: row.proyek || 'Ashoka View',
+      blok: row.blok || '',
+      nomor: row.nomor || '',
+      type: row.type || '',
+      hargaJual: row.hargaJual || 450000000,
+      diskon: row.diskon || 0,
+      bookingDp: row.bookingDp || 10000000,
       ktpFile: row.ktpFile || null,
       ktpFileName: row.ktpFileName || '',
       ktpPasanganFile: row.ktpPasanganFile || null,
@@ -1310,11 +1505,6 @@ export const MarketingModule = () => {
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
             <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
               <Plus size={16} /> + Tambah Calon Konsumen
-            </button>
-          )}
-          {currentSubView === 'db_konsumen' && subTabKonsumen === 'konsumen' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#000000', fontWeight: 900 }} onClick={handleOpenAddKonsumen}>
-              <Plus size={16} /> + Tambah Closing Baru
             </button>
           )}
           {currentSubView === 'db_unit' && (
@@ -2078,11 +2268,12 @@ export const MarketingModule = () => {
 
               {/* Table Hot Prospek */}
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #f97316' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
                     <tr style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff' }}>
                       <th style={{ width: '50px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
                       <th style={{ width: '150px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '135px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
                       <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
                       <th style={{ width: '130px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
                       <th style={{ width: '120px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
@@ -2093,7 +2284,7 @@ export const MarketingModule = () => {
                   </thead>
                   <tbody>
                     {databaseHotProspekRows
-                      .filter(r => !searchDbHotProspek || [r.nama, r.noHp, r.domisili, r.marketing, r.minat, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbHotProspek.toLowerCase().trim())))
+                      .filter(r => !searchDbHotProspek || [r.nama, r.proyek, r.noHp, r.domisili, r.marketing, r.minat, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbHotProspek.toLowerCase().trim())))
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
@@ -2104,6 +2295,11 @@ export const MarketingModule = () => {
                               </div>
                               <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <Home size={13} color="#38bdf8" /> {row.proyek || 'Ashoka View'}
+                            </span>
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
                             <button
@@ -2178,7 +2374,7 @@ export const MarketingModule = () => {
                       ))}
                     {databaseHotProspekRows.length === 0 && (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
                           Belum ada data Hot Prospek. Pindahkan calon konsumen melalui aksi tombol "🔥 Prospek".
                         </td>
                       </tr>
@@ -2218,13 +2414,9 @@ export const MarketingModule = () => {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleOpenAddKonsumen}
-                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000000', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
-                  >
-                    <Plus size={16} /> Tambah Closing Baru
-                  </button>
+                  <span style={{ fontSize: '0.78rem', color: '#f59e0b', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.35)', padding: '6px 12px', borderRadius: '6px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <CheckCircle2 size={14} color="#f59e0b" /> Data bersumber resmi dari Hot Prospek (Aksi: Closing)
+                  </span>
                 </div>
               </div>
 
@@ -2233,35 +2425,54 @@ export const MarketingModule = () => {
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
                     <tr style={{ background: '#f59e0b', color: '#000000' }}>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP</th>
-                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
-                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Email</th>
-                      <th style={{ width: '130px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Pekerjaan</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                      <th style={{ width: '110px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ minWidth: '240px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Berkas Dokumen Closing</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                      <th style={{ width: '40px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Unit & Kavling</th>
+                      <th style={{ minWidth: '130px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Harga Jual</th>
+                      <th style={{ minWidth: '120px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Booking / DP</th>
+                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ minWidth: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                      <th style={{ width: '100px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ width: '130px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Dokumen</th>
+                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {databaseKonsumenRows
-                      .filter(r => !searchDbKonsumen || [r.nama, r.nik, r.npwp, r.noHp, r.email, r.pekerjaan, r.alamat, r.marketing].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
+                      .filter(r => !searchDbKonsumen || [r.nama, r.proyek, r.blok, r.nomor, r.type, r.nik, r.npwp, r.noHp, r.email, r.pekerjaan, r.alamat, r.marketing].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'K'}
                               </div>
-                              <span>{row.nama}</span>
+                              <div>
+                                <div>{row.nama}</div>
+                                {row.pekerjaan && <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>{row.pekerjaan}</div>}
+                              </div>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.npwp || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <div style={{ color: '#38bdf8', fontWeight: 900 }}>
+                              {row.blok ? `Blok ${row.blok} No. ${row.nomor || '-'}` : (row.proyek || 'Ashoka View')}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                              {row.type || 'Unit Standar'} {row.proyek ? `• ${row.proyek}` : ''}
+                            </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatRupiah(row.hargaJual || 0)}</div>
+                            {row.diskon > 0 && (
+                              <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 700 }}>
+                                Diskon: {formatRupiah(row.diskon)}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#34d399' }}>
+                            {formatRupiah(row.bookingDp || 0)}
+                          </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
                             <button
                               type="button"
@@ -2272,100 +2483,31 @@ export const MarketingModule = () => {
                               <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
                             </button>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', color: '#38bdf8', fontSize: '0.8rem' }}>
-                            {row.email ? (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <Mail size={12} color="#38bdf8" /> {row.email}
-                              </span>
-                            ) : '-'}
-                          </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.pekerjaan || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#cbd5e1' }}>{row.alamat || '-'}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fbbf24' }}>{row.marketing || 'Amanda'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '6px 8px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                              {/* 1. KTP Pasangan */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
-                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>👫 KTP Pasangan:</span>
-                                {row.ktpPasanganFile || row.ktpPasanganFileName ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewModalDoc({ title: `KTP Suami/Istri - ${row.nama}`, fileUrl: row.ktpPasanganFile, fileName: row.ktpPasanganFileName })}
-                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                                    title="Lihat KTP Pasangan"
-                                  >
-                                    <Eye size={11} /> Ada
-                                  </button>
-                                ) : (
-                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
-                                )}
-                              </div>
-
-                              {/* 2. NPWP */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
-                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>💳 NPWP:</span>
-                                {row.npwpFile || row.npwpFileName ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewModalDoc({ title: `NPWP - ${row.nama}`, fileUrl: row.npwpFile, fileName: row.npwpFileName })}
-                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                                    title="Lihat NPWP"
-                                  >
-                                    <Eye size={11} /> Ada
-                                  </button>
-                                ) : (
-                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
-                                )}
-                              </div>
-
-                              {/* 3. Kartu Keluarga (KK) */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
-                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>👨‍👩‍👧‍👦 KK:</span>
-                                {row.kkFile || row.kkFileName ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewModalDoc({ title: `Kartu Keluarga (KK) - ${row.nama}`, fileUrl: row.kkFile, fileName: row.kkFileName })}
-                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                                    title="Lihat Kartu Keluarga"
-                                  >
-                                    <Eye size={11} /> Ada
-                                  </button>
-                                ) : (
-                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
-                                )}
-                              </div>
-
-                              {/* 4. Bukti Transfer */}
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #f59e0b' }}>
-                                <span style={{ color: '#fcd34d', fontWeight: 800 }}>💰 Bukti Transfer:</span>
-                                {row.buktiTransferFile || row.buktiTransferFileName ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewModalDoc({ title: `Bukti Transfer - ${row.nama}`, fileUrl: row.buktiTransferFile, fileName: row.buktiTransferFileName })}
-                                    style={{ background: 'rgba(245, 158, 11, 0.25)', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                                    title="Lihat Bukti Transfer"
-                                  >
-                                    <Eye size={11} /> Ada
-                                  </button>
-                                ) : (
-                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
-                                )}
-                              </div>
-
-                              {/* KTP Pemohon (opsional) */}
-                              {row.ktpFile || row.ktpFileName ? (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8', padding: '1px 4px' }}>
-                                  <span>🪪 KTP Pemohon:</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewModalDoc({ title: `KTP Pemohon - ${row.nama}`, fileUrl: row.ktpFile, fileName: row.ktpFileName })}
-                                    style={{ background: 'none', border: 'none', color: '#38bdf8', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 800, textDecoration: 'underline' }}
-                                  >
-                                    Lihat
-                                  </button>
-                                </div>
-                              ) : null}
-                            </div>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenViewClosingDocs(row)}
+                              title="Lihat seluruh berkas dokumen closing (Bisa digeser fotonya)"
+                              style={{
+                                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                border: '1px solid #38bdf8',
+                                color: '#ffffff',
+                                fontWeight: 800,
+                                fontSize: '0.76rem',
+                                padding: '5px 11px',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.4)',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <Eye size={13} /> Lihat Dokumen
+                            </button>
                           </td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
@@ -2391,8 +2533,8 @@ export const MarketingModule = () => {
                       ))}
                     {databaseKonsumenRows.length === 0 && (
                       <tr>
-                        <td colSpan={11} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-                          Belum ada data closing terdaftar. Klik "+ Tambah Closing Baru" atau lakukan closing dari Hot Prospek.
+                        <td colSpan={10} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada data closing terdaftar. Lakukan closing dari Hot Prospek melalui tombol "Closing".
                         </td>
                       </tr>
                     )}
@@ -3375,6 +3517,28 @@ export const MarketingModule = () => {
                       style={{ background: '#0f172a', border: '1.5px solid #f97316', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={hotProspekFormData.proyek || 'Ashoka View'}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, proyek: e.target.value })}
+                      style={{
+                        background: '#0f172a',
+                        border: '1.5px solid #38bdf8',
+                        borderRadius: '6px',
+                        color: '#38bdf8',
+                        fontWeight: 900,
+                        padding: '6px 10px',
+                        fontSize: '0.86rem'
+                      }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Grand Emerald">Grand Emerald</option>
+                      <option value="Sapphire Residence">Sapphire Residence</option>
+                    </select>
+
                     {/* No. HP */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
@@ -3587,6 +3751,28 @@ export const MarketingModule = () => {
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '100px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={moveToHotData.proyek || 'Ashoka View'}
+                      onChange={(e) => setMoveToHotData({ ...moveToHotData, proyek: e.target.value })}
+                      style={{
+                        background: '#0f172a',
+                        border: '1.5px solid #38bdf8',
+                        borderRadius: '6px',
+                        color: '#38bdf8',
+                        fontWeight: 900,
+                        padding: '7px 10px',
+                        fontSize: '0.86rem'
+                      }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Grand Emerald">Grand Emerald</option>
+                      <option value="Sapphire Residence">Sapphire Residence</option>
+                    </select>
+
                     {/* Minat */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Minat Unit</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
@@ -3661,7 +3847,149 @@ export const MarketingModule = () => {
                   <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Minat: <strong>{targetMoveHotItem.minat || '-'}</strong> &bull; Proyek: <strong>{targetMoveHotItem.proyek || 'Ashoka View'}</strong> &bull; PIC: <strong>{targetMoveHotItem.marketing || 'Amanda'}</strong></div>
                 </div>
 
+                {/* 1. SELEKSI UNIT & KESEPAKATAN FINANSIAL (HARGA, DISKON & BOOKING/DP) */}
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1.5px solid #10b981', marginBottom: '1.2rem' }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 900, color: '#34d399', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '6px' }}>
+                    <Home size={16} color="#34d399" /> 1. KAVLING & KESEPAKATAN FINANSIAL (HARGA, DISKON & BOOKING/DP)
+                  </div>
+
+                  {/* Dropdown Ambil dari Database Unit */}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1', marginBottom: '4px' }}>
+                      Pilih Unit (Diambil dari Data Base Unit):
+                    </label>
+                    <select
+                      value={moveToKonsumenData.selectedUnitId || ''}
+                      onChange={(e) => handleSelectClosingUnit(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#0f172a',
+                        border: '1.5px solid #38bdf8',
+                        borderRadius: '6px',
+                        color: '#38bdf8',
+                        fontWeight: 900,
+                        padding: '8px 12px',
+                        fontSize: '0.86rem'
+                      }}
+                    >
+                      <option value="">-- Pilih Unit dari Database Unit Properti --</option>
+                      {databaseUnitRows.map(u => (
+                        <option key={u.id} value={u.id}>
+                          [{u.proyek}] Blok {u.blok} No. {u.nomor} &bull; {u.type} (LB: {u.lb}m² / LT: {u.lt}m²)
+                        </option>
+                      ))}
+                    </select>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '3px' }}>
+                      * Memilih unit otomatis mengisi data Blok, Nomor, Tipe, dan estimasi Harga Jual di bawah.
+                    </div>
+                  </div>
+
+                  {/* Grid Blok, Nomor, Type */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '3px' }}>Blok</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: A"
+                        value={moveToKonsumenData.blok}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, blok: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '3px' }}>No. Unit</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: 01"
+                        value={moveToKonsumenData.nomor}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, nomor: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#fcd34d', fontWeight: 800, padding: '6px 10px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '3px' }}>Tipe Rumah</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Type 36/60"
+                        value={moveToKonsumenData.type}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, type: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Grid Harga Jual, Diskon, Booking/DP */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {/* Harga Jual */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '3px' }}>
+                        Harga Jual (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Harga kesepakatan..."
+                        value={moveToKonsumenData.hargaJual}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, hargaJual: Number(e.target.value) })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#ffffff', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, marginTop: '2px' }}>
+                        {formatRupiah(moveToKonsumenData.hargaJual)}
+                      </div>
+                    </div>
+
+                    {/* Diskon */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '3px' }}>
+                        Diskon / Potongan (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Diskon manual..."
+                        value={moveToKonsumenData.diskon}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, diskon: Number(e.target.value) })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #f87171', borderRadius: '6px', color: '#f87171', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      <div style={{ fontSize: '0.74rem', color: '#fca5a5', fontWeight: 800, marginTop: '2px' }}>
+                        {formatRupiah(moveToKonsumenData.diskon)}
+                      </div>
+                    </div>
+
+                    {/* Nilai Booking / DP */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#fcd34d', marginBottom: '3px' }}>
+                        Nilai Booking / DP (Rp)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Nilai booking / DP..."
+                        value={moveToKonsumenData.bookingDp}
+                        onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, bookingDp: Number(e.target.value) })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '6px', color: '#fbbf24', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                      />
+                      <div style={{ fontSize: '0.74rem', color: '#fcd34d', fontWeight: 800, marginTop: '2px' }}>
+                        {formatRupiah(moveToKonsumenData.bookingDp)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ringkasan Finansial Singkat */}
+                  <div style={{ background: '#0f172a', padding: '8px 12px', borderRadius: '6px', border: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.78rem' }}>
+                    <div>
+                      <span style={{ color: '#94a3b8' }}>Harga Netto (Setelah Diskon): </span>
+                      <strong style={{ color: '#ffffff' }}>{formatRupiah(Math.max(0, (moveToKonsumenData.hargaJual || 0) - (moveToKonsumenData.diskon || 0)))}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: '#94a3b8' }}>Sisa Pembayaran: </span>
+                      <strong style={{ color: '#38bdf8' }}>{formatRupiah(Math.max(0, (moveToKonsumenData.hargaJual || 0) - (moveToKonsumenData.diskon || 0) - (moveToKonsumenData.bookingDp || 0)))}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. IDENTITAS KONSUMEN & KONTAK */}
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 900, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '1rem', borderBottom: '1px solid #334155', paddingBottom: '6px' }}>
+                    <Users size={16} color="#38bdf8" /> 2. IDENTITAS KONSUMEN & DOKUMEN BERKAS
+                  </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '110px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
                     {/* Nama */}
@@ -3981,6 +4309,241 @@ export const MarketingModule = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL GALERI DOKUMEN CLOSING (SLIDER / CAROUSEL BISA DIGESER FOTONYA)     */}
+      {/* ========================================================================= */}
+      {isViewClosingDocsModalOpen && selectedClosingDocsRow && (
+        <div className="modal-backdrop" style={{ zIndex: 9998 }}>
+          <div className="modal-content" style={{ maxWidth: '820px', width: '95%', background: '#0f172a', border: '2px solid #38bdf8', color: '#ffffff', borderRadius: '14px', overflow: 'hidden' }}>
+            {/* Modal Header */}
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '12px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900, fontSize: '1.1rem', margin: 0 }}>
+                  <Eye size={20} color="#38bdf8" />
+                  Dokumen Berkas Closing &bull; {selectedClosingDocsRow.nama}
+                </h3>
+                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+                  Unit: <strong>Blok {selectedClosingDocsRow.blok || '-'} No. {selectedClosingDocsRow.nomor || '-'} ({selectedClosingDocsRow.type || '-'})</strong> &bull; Proyek: <strong style={{ color: '#38bdf8' }}>{selectedClosingDocsRow.proyek || 'Ashoka View'}</strong> &bull; Booking/DP: <strong style={{ color: '#34d399' }}>{formatRupiah(selectedClosingDocsRow.bookingDp || 0)}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsViewClosingDocsModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* Modal Body: Slider / Carousel */}
+            <div className="modal-body" style={{ padding: '14px 18px', background: '#090d16' }}>
+              {activeDocsList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 1rem', background: '#1e293b', borderRadius: '10px', border: '1px dashed #475569' }}>
+                  <FileText size={48} color="#94a3b8" style={{ margin: '0 auto 1rem', display: 'block' }} />
+                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Berkas</div>
+                  <div style={{ fontSize: '0.84rem', color: '#94a3b8', marginTop: '6px' }}>
+                    Dokumen berkas (KTP Pasangan, NPWP, KK, Bukti Transfer) belum diunggah saat closing.
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {/* Slider Header Info */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ background: `${activeDocsList[activeClosingDocIndex]?.color || '#38bdf8'}25`, color: activeDocsList[activeClosingDocIndex]?.color || '#38bdf8', border: `1px solid ${activeDocsList[activeClosingDocIndex]?.color || '#38bdf8'}`, padding: '4px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900 }}>
+                        {activeDocsList[activeClosingDocIndex]?.badge || 'Dokumen'}
+                      </span>
+                      <span style={{ fontSize: '0.82rem', color: '#cbd5e1', fontWeight: 700 }}>
+                        {activeDocsList[activeClosingDocIndex]?.fileName}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 800, background: '#1e293b', padding: '4px 12px', borderRadius: '6px', border: '1px solid #334155' }}>
+                      Foto <strong>{activeClosingDocIndex + 1}</strong> dari <strong>{activeDocsList.length}</strong> &bull; <span style={{ color: '#38bdf8' }}>Geser Foto &larr; &rarr;</span>
+                    </div>
+                  </div>
+
+                  {/* Main Slider Display Area */}
+                  <div
+                    onTouchStart={(e) => { touchStartX.current = e.changedTouches[0].clientX; }}
+                    onTouchEnd={(e) => {
+                      if (touchStartX.current === null) return;
+                      const diff = touchStartX.current - e.changedTouches[0].clientX;
+                      if (diff > 40) handleNextClosingDoc();
+                      else if (diff < -40) handlePrevClosingDoc();
+                      touchStartX.current = null;
+                    }}
+                    style={{
+                      position: 'relative',
+                      minHeight: '360px',
+                      maxHeight: '480px',
+                      background: '#111827',
+                      borderRadius: '10px',
+                      border: '1px solid #334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {/* Floating Prev Button */}
+                    <button
+                      type="button"
+                      onClick={handlePrevClosingDoc}
+                      title="Foto Sebelumnya (Panah Kiri)"
+                      style={{
+                        position: 'absolute',
+                        left: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(15, 23, 42, 0.85)',
+                        border: '1.5px solid #38bdf8',
+                        color: '#ffffff',
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.6)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <ChevronLeft size={26} />
+                    </button>
+
+                    {/* Active Document Viewer */}
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+                      {activeDocsList[activeClosingDocIndex]?.fileUrl && activeDocsList[activeClosingDocIndex]?.fileUrl !== 'uploaded' ? (
+                        activeDocsList[activeClosingDocIndex].fileUrl.startsWith('data:image') || activeDocsList[activeClosingDocIndex].fileUrl.match(/\.(jpg|jpeg|png|webp)/i) ? (
+                          <img
+                            src={activeDocsList[activeClosingDocIndex].fileUrl}
+                            alt={activeDocsList[activeClosingDocIndex].title}
+                            style={{
+                              maxWidth: '100%',
+                              maxHeight: '450px',
+                              objectFit: 'contain',
+                              borderRadius: '6px',
+                              boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                            }}
+                          />
+                        ) : (
+                          <iframe
+                            src={activeDocsList[activeClosingDocIndex].fileUrl}
+                            title={activeDocsList[activeClosingDocIndex].title}
+                            style={{ width: '100%', height: '450px', border: 'none', borderRadius: '6px' }}
+                          />
+                        )
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                          <FileText size={56} color={activeDocsList[activeClosingDocIndex]?.color || '#38bdf8'} style={{ margin: '0 auto 1rem', display: 'block' }} />
+                          <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff' }}>
+                            {activeDocsList[activeClosingDocIndex]?.title}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
+                            Nama Berkas: <span style={{ color: '#38bdf8', fontWeight: 800 }}>{activeDocsList[activeClosingDocIndex]?.fileName}</span>
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: '#22c55e', marginTop: '8px', fontWeight: 800 }}>
+                            ✓ Berkas Terverifikasi & Tersimpan Aman di Cloud System
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Floating Next Button */}
+                    <button
+                      type="button"
+                      onClick={handleNextClosingDoc}
+                      title="Foto Selanjutnya (Panah Kanan)"
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(15, 23, 42, 0.85)',
+                        border: '1.5px solid #38bdf8',
+                        color: '#ffffff',
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 10,
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.6)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <ChevronRight size={26} />
+                    </button>
+                  </div>
+
+                  {/* Thumbnail / Pill Selector Strip */}
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+                    {activeDocsList.map((doc, idx) => {
+                      const isActive = idx === activeClosingDocIndex;
+                      return (
+                        <button
+                          key={doc.id}
+                          type="button"
+                          onClick={() => setActiveClosingDocIndex(idx)}
+                          style={{
+                            flex: '1 0 auto',
+                            background: isActive ? '#1e293b' : '#0f172a',
+                            border: isActive ? `2px solid ${doc.color || '#38bdf8'}` : '1px solid #334155',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            cursor: 'pointer',
+                            color: isActive ? '#ffffff' : '#94a3b8',
+                            fontWeight: isActive ? 900 : 700,
+                            fontSize: '0.76rem',
+                            transition: 'all 0.2s',
+                            boxShadow: isActive ? `0 2px 8px ${doc.color || '#38bdf8'}40` : 'none'
+                          }}
+                        >
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: doc.color || '#38bdf8' }} />
+                          <span>{doc.badge}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '10px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                {activeDocsList.length > 0 && activeDocsList[activeClosingDocIndex]?.fileUrl && activeDocsList[activeClosingDocIndex].fileUrl !== 'uploaded' ? (
+                  <a
+                    href={activeDocsList[activeClosingDocIndex].fileUrl}
+                    download={activeDocsList[activeClosingDocIndex].fileName}
+                    className="btn btn-primary"
+                    style={{ background: '#0284c7', border: 'none', fontWeight: 800, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+                  >
+                    <Download size={14} /> Unduh Berkas Ini
+                  </a>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsViewClosingDocsModalOpen(false)}
+                style={{ fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                Tutup Galeri
+              </button>
+            </div>
           </div>
         </div>
       )}
