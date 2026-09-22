@@ -1809,12 +1809,12 @@ export const MarketingModule = () => {
                   <thead>
                     <tr style={{ background: '#ec4899', color: '#ffffff' }}>
                       <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '170px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '120px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
                       <th style={{ minWidth: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ minWidth: '170px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
                       <th style={{ width: '170px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -1831,22 +1831,23 @@ export const MarketingModule = () => {
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
                               </div>
-                              <span>{row.nama}</span>
+                              <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
                               title="Chat via WhatsApp"
-                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, textDecoration: 'underline', whiteSpace: 'nowrap' }}
                             >
-                              <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                              <Phone size={13} color="#22c55e" style={{ flexShrink: 0 }} />
+                              <span style={{ whiteSpace: 'nowrap' }}>{row.noHp || '-'}</span>
                             </button>
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
@@ -1945,7 +1946,7 @@ export const MarketingModule = () => {
                       ))}
                     {databaseCalonKonsumenRows.length === 0 && (
                       <tr>
-                        <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
                           Belum ada data calon konsumen terdaftar. Klik "+ Tambah Calon Konsumen" untuk menambahkan.
                         </td>
                       </tr>
@@ -2001,12 +2002,12 @@ export const MarketingModule = () => {
                   <thead>
                     <tr style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff' }}>
                       <th style={{ width: '50px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '150px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '140px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '140px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Minat Unit / Tipe</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ width: '150px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '130px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '120px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '170px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Minat Unit / Tipe</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
                       <th style={{ width: '180px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -2016,22 +2017,23 @@ export const MarketingModule = () => {
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f97316', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#f97316', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900, flexShrink: 0 }}>
                                 <Flame size={14} />
                               </div>
-                              <span>{row.nama}</span>
+                              <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
                               title="Chat via WhatsApp"
-                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, textDecoration: 'underline', whiteSpace: 'nowrap' }}
                             >
-                              <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                              <Phone size={13} color="#22c55e" style={{ flexShrink: 0 }} />
+                              <span style={{ whiteSpace: 'nowrap' }}>{row.noHp || '-'}</span>
                             </button>
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.domisili || '-'}</td>
