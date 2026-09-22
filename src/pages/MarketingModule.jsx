@@ -64,7 +64,15 @@ const initialDbKonsumen = [
     alamat: 'Jl. Pemuda No. 142, Semarang Tengah',
     marketing: 'Amanda',
     ktpFile: 'uploaded',
-    ktpFileName: 'ktp_budi_santoso.pdf'
+    ktpFileName: 'ktp_budi_santoso.pdf',
+    ktpPasanganFile: 'uploaded',
+    ktpPasanganFileName: 'ktp_istri_budi.jpg',
+    npwpFile: 'uploaded',
+    npwpFileName: 'npwp_budi_santoso.pdf',
+    kkFile: 'uploaded',
+    kkFileName: 'kk_budi_santoso.pdf',
+    buktiTransferFile: 'uploaded',
+    buktiTransferFileName: 'bukti_transfer_dp_10jt.jpg'
   },
   {
     id: 'KNS-002',
@@ -77,7 +85,15 @@ const initialDbKonsumen = [
     alamat: 'Jl. Gajahmada No. 88, Semarang',
     marketing: 'Fresda',
     ktpFile: null,
-    ktpFileName: ''
+    ktpFileName: '',
+    ktpPasanganFile: null,
+    ktpPasanganFileName: '',
+    npwpFile: 'uploaded',
+    npwpFileName: 'npwp_siti_rahmawati.pdf',
+    kkFile: 'uploaded',
+    kkFileName: 'kk_siti_rahmawati.pdf',
+    buktiTransferFile: 'uploaded',
+    buktiTransferFileName: 'bukti_transfer_booking_fee.pdf'
   },
   {
     id: 'KNS-003',
@@ -90,7 +106,15 @@ const initialDbKonsumen = [
     alamat: 'Jl. Pandanaran No. 25, Semarang',
     marketing: 'Yulieka Rahmawati',
     ktpFile: 'uploaded',
-    ktpFileName: 'ktp_dr_ahmad_fauzi.jpg'
+    ktpFileName: 'ktp_dr_ahmad_fauzi.jpg',
+    ktpPasanganFile: 'uploaded',
+    ktpPasanganFileName: 'ktp_istri_dr_ahmad.jpg',
+    npwpFile: 'uploaded',
+    npwpFileName: 'npwp_dr_ahmad.pdf',
+    kkFile: 'uploaded',
+    kkFileName: 'kk_dr_ahmad.pdf',
+    buktiTransferFile: 'uploaded',
+    buktiTransferFileName: 'transfer_cash_bertahap.jpg'
   },
   {
     id: 'KNS-004',
@@ -103,7 +127,15 @@ const initialDbKonsumen = [
     alamat: 'Jl. Majapahit No. 50, Semarang Timur',
     marketing: 'Amanda',
     ktpFile: null,
-    ktpFileName: ''
+    ktpFileName: '',
+    ktpPasanganFile: null,
+    ktpPasanganFileName: '',
+    npwpFile: null,
+    npwpFileName: '',
+    kkFile: null,
+    kkFileName: '',
+    buktiTransferFile: null,
+    buktiTransferFileName: ''
   }
 ];
 
@@ -135,6 +167,7 @@ const initialDbCalonKonsumen = [
     id: 'CLK-001',
     nama: 'Bpk. Hendra Kurniawan',
     noHp: '0812-3344-5566',
+    proyek: 'Ashoka View',
     domisili: 'Semarang Barat',
     marketing: 'Amanda',
     referensi: 'Brosur / Flyer',
@@ -146,6 +179,7 @@ const initialDbCalonKonsumen = [
     id: 'CLK-002',
     nama: 'Ibu Dewi Sartika',
     noHp: '0858-7788-9900',
+    proyek: 'Ashoka Park',
     domisili: 'Ungaran Barat, Kab. Semarang',
     marketing: 'Fresda',
     referensi: 'Get Buyer',
@@ -157,6 +191,7 @@ const initialDbCalonKonsumen = [
     id: 'CLK-003',
     nama: 'Bpk. Agus Setiawan',
     noHp: '0857-1122-3344',
+    proyek: 'Grand Emerald',
     domisili: 'Pedurungan, Semarang',
     marketing: 'Bambang',
     referensi: 'Medsos',
@@ -168,6 +203,7 @@ const initialDbCalonKonsumen = [
     id: 'CLK-004',
     nama: 'Dr. Maya Indah',
     noHp: '0811-9988-7711',
+    proyek: 'Sapphire Residence',
     domisili: 'Banyumanik, Semarang',
     marketing: 'Yulieka Rahmawati',
     referensi: 'WI',
@@ -192,6 +228,9 @@ export const MarketingModule = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSales, setEditingSales] = useState(null);
+
+  // Modal Preview Dokumen Berkas (KTP, NPWP, KK, Bukti Transfer)
+  const [previewModalDoc, setPreviewModalDoc] = useState(null);
 
   // Hidden File Input Ref for Device SPR Upload (.pdf, .jpg, .png)
   const sprFileInputRef = useRef(null);
@@ -325,6 +364,7 @@ export const MarketingModule = () => {
   const [calonKonsumenFormData, setCalonKonsumenFormData] = useState({
     nama: '',
     noHp: '',
+    proyek: 'Ashoka View',
     domisili: '',
     marketing: 'Amanda',
     referensi: 'Iklan',
@@ -338,6 +378,7 @@ export const MarketingModule = () => {
     setCalonKonsumenFormData({
       nama: '',
       noHp: '',
+      proyek: 'Ashoka View',
       domisili: '',
       marketing: 'Amanda',
       referensi: 'Iklan',
@@ -353,6 +394,7 @@ export const MarketingModule = () => {
     setCalonKonsumenFormData({
       nama: row.nama || '',
       noHp: row.noHp || '',
+      proyek: row.proyek || 'Ashoka View',
       domisili: row.domisili || '',
       marketing: row.marketing || 'Amanda',
       referensi: row.referensi || 'Iklan',
@@ -422,6 +464,7 @@ export const MarketingModule = () => {
       id: `HOT-${Date.now().toString().slice(-4)}`,
       nama: targetMoveCalonItem.nama,
       noHp: targetMoveCalonItem.noHp,
+      proyek: targetMoveCalonItem.proyek || 'Ashoka View',
       domisili: targetMoveCalonItem.domisili,
       marketing: moveToHotData.marketing || targetMoveCalonItem.marketing || 'Amanda',
       referensi: targetMoveCalonItem.referensi || 'Iklan',
@@ -526,7 +569,15 @@ export const MarketingModule = () => {
     alamat: '',
     marketing: 'Amanda',
     ktpFile: null,
-    ktpFileName: ''
+    ktpFileName: '',
+    ktpPasanganFile: null,
+    ktpPasanganFileName: '',
+    npwpFile: null,
+    npwpFileName: '',
+    kkFile: null,
+    kkFileName: '',
+    buktiTransferFile: null,
+    buktiTransferFileName: ''
   });
 
   const handleOpenMoveToKonsumen = (row) => {
@@ -541,7 +592,15 @@ export const MarketingModule = () => {
       alamat: row.domisili || '',
       marketing: row.marketing || 'Amanda',
       ktpFile: null,
-      ktpFileName: ''
+      ktpFileName: '',
+      ktpPasanganFile: null,
+      ktpPasanganFileName: '',
+      npwpFile: null,
+      npwpFileName: '',
+      kkFile: null,
+      kkFileName: '',
+      buktiTransferFile: null,
+      buktiTransferFileName: ''
     });
     setIsMoveToKonsumenModalOpen(true);
   };
@@ -565,15 +624,15 @@ export const MarketingModule = () => {
 
     // 2. Hapus dari Hot Prospek
     const nextHotList = databaseHotProspekRows.filter(h => h.id !== targetMoveHotItem.id);
-    updateAndSaveHotProspek(nextHotList, `🎉 Selamat! "${moveToKonsumenData.nama}" resmi closing menjadi KONSUMEN!`, 'success');
+    updateAndSaveHotProspek(nextHotList, `🎉 Selamat! "${moveToKonsumenData.nama}" resmi CLOSING!`, 'success');
 
     setIsMoveToKonsumenModalOpen(false);
     setTargetMoveHotItem(null);
-    setSubTabKonsumen('konsumen'); // Langsung buka tab Konsumen!
+    setSubTabKonsumen('konsumen'); // Langsung buka tab Closing!
   };
 
   // -------------------------------------------------------------
-  // STATE & HANDLERS: DATA BASE KONSUMEN (RESMI)
+  // STATE & HANDLERS: DATA BASE KONSUMEN (CLOSING RESMI)
   // -------------------------------------------------------------
   const [searchDbKonsumen, setSearchDbKonsumen] = useState('');
   const [isKonsumenModalOpen, setIsKonsumenModalOpen] = useState(false);
@@ -588,7 +647,15 @@ export const MarketingModule = () => {
     alamat: '',
     marketing: 'Amanda',
     ktpFile: null,
-    ktpFileName: ''
+    ktpFileName: '',
+    ktpPasanganFile: null,
+    ktpPasanganFileName: '',
+    npwpFile: null,
+    npwpFileName: '',
+    kkFile: null,
+    kkFileName: '',
+    buktiTransferFile: null,
+    buktiTransferFileName: ''
   });
 
   const handleOpenAddKonsumen = () => {
@@ -603,7 +670,15 @@ export const MarketingModule = () => {
       alamat: '',
       marketing: 'Amanda',
       ktpFile: null,
-      ktpFileName: ''
+      ktpFileName: '',
+      ktpPasanganFile: null,
+      ktpPasanganFileName: '',
+      npwpFile: null,
+      npwpFileName: '',
+      kkFile: null,
+      kkFileName: '',
+      buktiTransferFile: null,
+      buktiTransferFileName: ''
     });
     setIsKonsumenModalOpen(true);
   };
@@ -620,7 +695,15 @@ export const MarketingModule = () => {
       alamat: row.alamat || '',
       marketing: row.marketing || 'Amanda',
       ktpFile: row.ktpFile || null,
-      ktpFileName: row.ktpFileName || ''
+      ktpFileName: row.ktpFileName || '',
+      ktpPasanganFile: row.ktpPasanganFile || null,
+      ktpPasanganFileName: row.ktpPasanganFileName || '',
+      npwpFile: row.npwpFile || null,
+      npwpFileName: row.npwpFileName || '',
+      kkFile: row.kkFile || null,
+      kkFileName: row.kkFileName || '',
+      buktiTransferFile: row.buktiTransferFile || null,
+      buktiTransferFileName: row.buktiTransferFileName || ''
     });
     setIsKonsumenModalOpen(true);
   };
@@ -1229,14 +1312,9 @@ export const MarketingModule = () => {
               <Plus size={16} /> + Tambah Calon Konsumen
             </button>
           )}
-          {currentSubView === 'db_konsumen' && subTabKonsumen === 'hot' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddHotProspek}>
-              <Flame size={16} /> + Tambah Hot Prospek
-            </button>
-          )}
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'konsumen' && (
             <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#000000', fontWeight: 900 }} onClick={handleOpenAddKonsumen}>
-              <Plus size={16} /> + Tambah Konsumen Baru
+              <Plus size={16} /> + Tambah Closing Baru
             </button>
           )}
           {currentSubView === 'db_unit' && (
@@ -1742,7 +1820,7 @@ export const MarketingModule = () => {
                   boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none'
                 }}
               >
-                <Users size={14} /> 3. Konsumen ({databaseKonsumenRows.length})
+                <CheckCircle2 size={14} /> 3. Closing ({databaseKonsumenRows.length})
               </button>
             </div>
           </div>
@@ -1808,13 +1886,14 @@ export const MarketingModule = () => {
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
                     <tr style={{ background: '#ec4899', color: '#ffffff' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ width: '135px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
                       <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '120px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ width: '120px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '110px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
                       <th style={{ minWidth: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                      <th style={{ minWidth: '170px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
                       <th style={{ width: '170px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
@@ -1826,7 +1905,7 @@ export const MarketingModule = () => {
                         }
                         if (!searchDbCalonKonsumen) return true;
                         const q = searchDbCalonKonsumen.toLowerCase().trim();
-                        return [r.nama, r.noHp, r.domisili, r.marketing, r.referensi, r.referensiBuyer, r.referensiLain, r.catatan].some(v => (v || '').toLowerCase().includes(q));
+                        return [r.nama, r.proyek, r.noHp, r.domisili, r.marketing, r.referensi, r.referensiBuyer, r.referensiLain, r.catatan].some(v => (v || '').toLowerCase().includes(q));
                       })
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
@@ -1838,6 +1917,11 @@ export const MarketingModule = () => {
                               </div>
                               <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <Home size={13} color="#38bdf8" /> {row.proyek || 'Ashoka View'}
+                            </span>
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
                             <button
@@ -1946,7 +2030,7 @@ export const MarketingModule = () => {
                       ))}
                     {databaseCalonKonsumenRows.length === 0 && (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
                           Belum ada data calon konsumen terdaftar. Klik "+ Tambah Calon Konsumen" untuk menambahkan.
                         </td>
                       </tr>
@@ -1986,13 +2070,9 @@ export const MarketingModule = () => {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleOpenAddHotProspek}
-                    style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)' }}
-                  >
-                    <Plus size={16} /> Tambah Hot Prospek
-                  </button>
+                  <span style={{ fontSize: '0.78rem', color: '#fb923c', background: 'rgba(249, 115, 22, 0.12)', border: '1px solid rgba(249, 115, 22, 0.35)', padding: '6px 12px', borderRadius: '6px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Flame size={14} color="#f97316" /> Data bersumber otomatis dari Calon Konsumen (Aksi: 🔥 Prospek)
+                  </span>
                 </div>
               </div>
 
@@ -2099,7 +2179,7 @@ export const MarketingModule = () => {
                     {databaseHotProspekRows.length === 0 && (
                       <tr>
                         <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-                          Belum ada data Hot Prospek. Pindahkan calon konsumen dengan tombol "🔥 Prospek" atau klik "+ Tambah Hot Prospek".
+                          Belum ada data Hot Prospek. Pindahkan calon konsumen melalui aksi tombol "🔥 Prospek".
                         </td>
                       </tr>
                     )}
@@ -2117,7 +2197,7 @@ export const MarketingModule = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
-                    👑 Pembeli Resmi &bull; Closed Deal
+                    👑 Closing &bull; Closed Deal
                   </span>
                 </div>
 
@@ -2126,7 +2206,7 @@ export const MarketingModule = () => {
                     <Search size={14} color="#94a3b8" />
                     <input
                       type="text"
-                      placeholder="Cari Konsumen / NIK / No HP..."
+                      placeholder="Cari Data Closing / NIK / No HP..."
                       value={searchDbKonsumen}
                       onChange={(e) => setSearchDbKonsumen(e.target.value)}
                       style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '220px', outline: 'none' }}
@@ -2143,27 +2223,27 @@ export const MarketingModule = () => {
                     onClick={handleOpenAddKonsumen}
                     style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000000', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
                   >
-                    <Plus size={16} /> Tambah Konsumen Baru
+                    <Plus size={16} /> Tambah Closing Baru
                   </button>
                 </div>
               </div>
 
-              {/* Table Konsumen */}
+              {/* Table Closing */}
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
                     <tr style={{ background: '#f59e0b', color: '#000000' }}>
                       <th style={{ width: '45px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP</th>
-                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP</th>
+                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
                       <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Email</th>
-                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Pekerjaan</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                      <th style={{ width: '120px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Upload</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                      <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Email</th>
+                      <th style={{ width: '130px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Pekerjaan</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                      <th style={{ width: '110px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '240px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Berkas Dokumen Closing</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2202,21 +2282,97 @@ export const MarketingModule = () => {
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.pekerjaan || '-'}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fbbf24' }}>{row.marketing || 'Amanda'}</td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
-                            {row.ktpFile || row.ktpFileName ? (
-                              <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <FileCheck size={14} color="#10b981" /> Ada KTP
-                              </span>
-                            ) : (
-                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>-</span>
-                            )}
+                          <td style={{ border: '1px solid #334155', padding: '6px 8px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              {/* 1. KTP Pasangan */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
+                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>👫 KTP Pasangan:</span>
+                                {row.ktpPasanganFile || row.ktpPasanganFileName ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewModalDoc({ title: `KTP Suami/Istri - ${row.nama}`, fileUrl: row.ktpPasanganFile, fileName: row.ktpPasanganFileName })}
+                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                    title="Lihat KTP Pasangan"
+                                  >
+                                    <Eye size={11} /> Ada
+                                  </button>
+                                ) : (
+                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
+                                )}
+                              </div>
+
+                              {/* 2. NPWP */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
+                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>💳 NPWP:</span>
+                                {row.npwpFile || row.npwpFileName ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewModalDoc({ title: `NPWP - ${row.nama}`, fileUrl: row.npwpFile, fileName: row.npwpFileName })}
+                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                    title="Lihat NPWP"
+                                  >
+                                    <Eye size={11} /> Ada
+                                  </button>
+                                ) : (
+                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
+                                )}
+                              </div>
+
+                              {/* 3. Kartu Keluarga (KK) */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #334155' }}>
+                                <span style={{ color: '#cbd5e1', fontWeight: 800 }}>👨‍👩‍👧‍👦 KK:</span>
+                                {row.kkFile || row.kkFileName ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewModalDoc({ title: `Kartu Keluarga (KK) - ${row.nama}`, fileUrl: row.kkFile, fileName: row.kkFileName })}
+                                    style={{ background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                    title="Lihat Kartu Keluarga"
+                                  >
+                                    <Eye size={11} /> Ada
+                                  </button>
+                                ) : (
+                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
+                                )}
+                              </div>
+
+                              {/* 4. Bukti Transfer */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#0f172a', padding: '2px 6px', borderRadius: '4px', border: '1px solid #f59e0b' }}>
+                                <span style={{ color: '#fcd34d', fontWeight: 800 }}>💰 Bukti Transfer:</span>
+                                {row.buktiTransferFile || row.buktiTransferFileName ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewModalDoc({ title: `Bukti Transfer - ${row.nama}`, fileUrl: row.buktiTransferFile, fileName: row.buktiTransferFileName })}
+                                    style={{ background: 'rgba(245, 158, 11, 0.25)', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '4px', padding: '1px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                                    title="Lihat Bukti Transfer"
+                                  >
+                                    <Eye size={11} /> Ada
+                                  </button>
+                                ) : (
+                                  <span style={{ color: '#64748b', fontSize: '0.68rem' }}>-</span>
+                                )}
+                              </div>
+
+                              {/* KTP Pemohon (opsional) */}
+                              {row.ktpFile || row.ktpFileName ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8', padding: '1px 4px' }}>
+                                  <span>🪪 KTP Pemohon:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewModalDoc({ title: `KTP Pemohon - ${row.nama}`, fileUrl: row.ktpFile, fileName: row.ktpFileName })}
+                                    style={{ background: 'none', border: 'none', color: '#38bdf8', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 800, textDecoration: 'underline' }}
+                                  >
+                                    Lihat
+                                  </button>
+                                </div>
+                              ) : null}
+                            </div>
                           </td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                               <button
                                 type="button"
                                 onClick={() => handleOpenEditKonsumen(row)}
-                                title="Edit Konsumen"
+                                title="Edit Data Closing"
                                 style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
                               >
                                 <Edit3 size={12} />
@@ -2224,7 +2380,7 @@ export const MarketingModule = () => {
                               <button
                                 type="button"
                                 onClick={() => handleDeleteKonsumen(row.id, row.nama)}
-                                title="Hapus Konsumen"
+                                title="Hapus Data Closing"
                                 style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
                               >
                                 <Trash2 size={12} />
@@ -2236,7 +2392,7 @@ export const MarketingModule = () => {
                     {databaseKonsumenRows.length === 0 && (
                       <tr>
                         <td colSpan={11} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-                          Belum ada data konsumen resmi. Klik "+ Tambah Konsumen Baru" untuk mendaftarkan.
+                          Belum ada data closing terdaftar. Klik "+ Tambah Closing Baru" atau lakukan closing dari Hot Prospek.
                         </td>
                       </tr>
                     )}
@@ -2652,8 +2808,8 @@ export const MarketingModule = () => {
           <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Users size={20} color="#fbbf24" />
-                {editingKonsumenId ? 'Edit Data Base Konsumen' : 'Data Base Konsumen (Tambah Baru)'}
+                <CheckCircle2 size={20} color="#fbbf24" />
+                {editingKonsumenId ? 'Edit Data Closing' : 'Data Closing (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -2754,8 +2910,8 @@ export const MarketingModule = () => {
                       style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* Upload NIK / KTP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP</div>
+                    {/* DOKUMEN CLOSING: 1. KTP Konsumen Pemohon */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>KTP Pemohon</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <div>
                       <input
@@ -2784,23 +2940,194 @@ export const MarketingModule = () => {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
-                          background: 'rgba(245, 158, 11, 0.2)',
-                          border: '1px dashed #f59e0b',
-                          color: '#fbbf24',
+                          background: 'rgba(56, 189, 248, 0.15)',
+                          border: '1px dashed #38bdf8',
+                          color: '#38bdf8',
                           padding: '6px 12px',
                           borderRadius: '6px',
-                          fontSize: '0.82rem',
+                          fontSize: '0.8rem',
                           fontWeight: 800,
                           cursor: 'pointer'
                         }}
                       >
-                        <Upload size={14} /> {konsumenFormData.ktpFileName ? `Berkas: ${konsumenFormData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
+                        <Upload size={14} /> {konsumenFormData.ktpFileName ? `✓ ${konsumenFormData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
                       </label>
-                      {konsumenFormData.ktpFileName && (
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', marginTop: '4px', fontWeight: 700 }}>
-                          ✓ Siap disimpan bersama data konsumen
-                        </div>
-                      )}
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 2. KTP Suami atau Istri */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>KTP Pasangan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="marketing-konsumen-ktp-pasangan-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setKonsumenFormData(prev => ({
+                                ...prev,
+                                ktpPasanganFileName: file.name,
+                                ktpPasanganFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="marketing-konsumen-ktp-pasangan-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(236, 72, 153, 0.15)',
+                          border: '1px dashed #ec4899',
+                          color: '#f472b6',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {konsumenFormData.ktpPasanganFileName ? `✓ ${konsumenFormData.ktpPasanganFileName}` : 'Pilih KTP Suami atau Istri'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 3. NPWP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload NPWP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="marketing-konsumen-npwp-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setKonsumenFormData(prev => ({
+                                ...prev,
+                                npwpFileName: file.name,
+                                npwpFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="marketing-konsumen-npwp-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(168, 85, 247, 0.15)',
+                          border: '1px dashed #a855f7',
+                          color: '#c084fc',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {konsumenFormData.npwpFileName ? `✓ ${konsumenFormData.npwpFileName}` : 'Pilih Dokumen NPWP'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 4. Kartu Keluarga (KK) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KK</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="marketing-konsumen-kk-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setKonsumenFormData(prev => ({
+                                ...prev,
+                                kkFileName: file.name,
+                                kkFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="marketing-konsumen-kk-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(34, 197, 94, 0.15)',
+                          border: '1px dashed #22c55e',
+                          color: '#4ade80',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {konsumenFormData.kkFileName ? `✓ ${konsumenFormData.kkFileName}` : 'Pilih Kartu Keluarga (KK)'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 5. Bukti Transfer */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#fcd34d' }}>Bukti Transfer</div>
+                    <div style={{ fontWeight: 900, color: '#fcd34d' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="marketing-konsumen-transfer-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setKonsumenFormData(prev => ({
+                                ...prev,
+                                buktiTransferFileName: file.name,
+                                buktiTransferFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="marketing-konsumen-transfer-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(245, 158, 11, 0.2)',
+                          border: '1.5px dashed #f59e0b',
+                          color: '#fbbf24',
+                          padding: '7px 14px',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 900,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {konsumenFormData.buktiTransferFileName ? `✓ ${konsumenFormData.buktiTransferFileName}` : 'Pilih Bukti Transfer (Foto/Struk/PDF)'}
+                      </label>
                     </div>
 
                   </div>
@@ -2810,7 +3137,7 @@ export const MarketingModule = () => {
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsKonsumenModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000000' }}>
-                  💾 Simpan Data Base Konsumen
+                  💾 Simpan Closing
                 </button>
               </div>
             </form>
@@ -2850,6 +3177,29 @@ export const MarketingModule = () => {
                       onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, nama: e.target.value })}
                       style={{ background: '#0f172a', border: '1.5px solid #ec4899', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
+
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={calonKonsumenFormData.proyek || 'Ashoka View'}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, proyek: e.target.value })}
+                      style={{
+                        width: '100%',
+                        background: '#0f172a',
+                        border: '1.5px solid #38bdf8',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        padding: '7px 10px',
+                        fontSize: '0.86rem'
+                      }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Grand Emerald">Grand Emerald</option>
+                      <option value="Sapphire Residence">Sapphire Residence</option>
+                    </select>
 
                     {/* No. HP */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
@@ -3296,7 +3646,7 @@ export const MarketingModule = () => {
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <CheckCircle2 size={22} color="#10b981" />
-                Closing Deal & Pindahkan ke KONSUMEN
+                Closing
               </h3>
               <button onClick={() => setIsMoveToKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -3306,9 +3656,9 @@ export const MarketingModule = () => {
             <form onSubmit={handleConfirmMoveToKonsumen}>
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                 <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800 }}>HOT PROSPEK CLOSING:</div>
+                  <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800 }}>DATA PROSPEK CLOSING:</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>{targetMoveHotItem.nama}</div>
-                  <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Minat: <strong>{targetMoveHotItem.minat || '-'}</strong> &bull; Marketing: <strong>{targetMoveHotItem.marketing || 'Amanda'}</strong></div>
+                  <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Minat: <strong>{targetMoveHotItem.minat || '-'}</strong> &bull; Proyek: <strong>{targetMoveHotItem.proyek || 'Ashoka View'}</strong> &bull; PIC: <strong>{targetMoveHotItem.marketing || 'Amanda'}</strong></div>
                 </div>
 
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
@@ -3400,8 +3750,8 @@ export const MarketingModule = () => {
                       style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* Upload NIK / KTP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP</div>
+                    {/* DOKUMEN CLOSING: 1. KTP Konsumen Pemohon */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>KTP Pemohon</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <div>
                       <input
@@ -3430,17 +3780,193 @@ export const MarketingModule = () => {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px',
-                          background: 'rgba(16, 185, 129, 0.2)',
-                          border: '1px dashed #10b981',
-                          color: '#34d399',
+                          background: 'rgba(56, 189, 248, 0.15)',
+                          border: '1px dashed #38bdf8',
+                          color: '#38bdf8',
                           padding: '6px 12px',
                           borderRadius: '6px',
-                          fontSize: '0.82rem',
+                          fontSize: '0.8rem',
                           fontWeight: 800,
                           cursor: 'pointer'
                         }}
                       >
-                        <Upload size={14} /> {moveToKonsumenData.ktpFileName ? `Berkas: ${moveToKonsumenData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
+                        <Upload size={14} /> {moveToKonsumenData.ktpFileName ? `✓ ${moveToKonsumenData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 2. KTP Suami atau Istri */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>KTP Pasangan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="closing-konsumen-ktp-pasangan-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setMoveToKonsumenData(prev => ({
+                                ...prev,
+                                ktpPasanganFileName: file.name,
+                                ktpPasanganFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="closing-konsumen-ktp-pasangan-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(236, 72, 153, 0.15)',
+                          border: '1px dashed #ec4899',
+                          color: '#f472b6',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {moveToKonsumenData.ktpPasanganFileName ? `✓ ${moveToKonsumenData.ktpPasanganFileName}` : 'Pilih KTP Suami atau Istri'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 3. NPWP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload NPWP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="closing-konsumen-npwp-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setMoveToKonsumenData(prev => ({
+                                ...prev,
+                                npwpFileName: file.name,
+                                npwpFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="closing-konsumen-npwp-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(168, 85, 247, 0.15)',
+                          border: '1px dashed #a855f7',
+                          color: '#c084fc',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {moveToKonsumenData.npwpFileName ? `✓ ${moveToKonsumenData.npwpFileName}` : 'Pilih Dokumen NPWP'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 4. Kartu Keluarga (KK) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KK</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="closing-konsumen-kk-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setMoveToKonsumenData(prev => ({
+                                ...prev,
+                                kkFileName: file.name,
+                                kkFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="closing-konsumen-kk-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(34, 197, 94, 0.15)',
+                          border: '1px dashed #22c55e',
+                          color: '#4ade80',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {moveToKonsumenData.kkFileName ? `✓ ${moveToKonsumenData.kkFileName}` : 'Pilih Kartu Keluarga (KK)'}
+                      </label>
+                    </div>
+
+                    {/* DOKUMEN CLOSING: 5. Bukti Transfer */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#fcd34d' }}>Bukti Transfer</div>
+                    <div style={{ fontWeight: 900, color: '#fcd34d' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="closing-konsumen-transfer-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setMoveToKonsumenData(prev => ({
+                                ...prev,
+                                buktiTransferFileName: file.name,
+                                buktiTransferFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="closing-konsumen-transfer-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(245, 158, 11, 0.2)',
+                          border: '1.5px dashed #f59e0b',
+                          color: '#fbbf24',
+                          padding: '7px 14px',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 900,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {moveToKonsumenData.buktiTransferFileName ? `✓ ${moveToKonsumenData.buktiTransferFileName}` : 'Pilih Bukti Transfer (Foto/Struk/PDF)'}
                       </label>
                     </div>
 
@@ -3451,10 +3977,67 @@ export const MarketingModule = () => {
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToKonsumenModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle2 size={16} /> 💾 Simpan sebagai Konsumen Resmi
+                  <CheckCircle2 size={16} /> 💾 Simpan Closing
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PRATINJAU DOKUMEN CLOSING (PREVIEW MODAL)                          */}
+      {/* ========================================================================= */}
+      {previewModalDoc && (
+        <div className="modal-backdrop" style={{ zIndex: 9999 }}>
+          <div className="modal-content" style={{ maxWidth: '750px', background: '#0f172a', border: '2px solid #38bdf8', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8', fontWeight: 900 }}>
+                <Eye size={20} color="#38bdf8" />
+                {previewModalDoc.title || 'Pratinjau Dokumen Closing'}
+              </h3>
+              <button onClick={() => setPreviewModalDoc(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '1.25rem', maxHeight: '72vh', overflowY: 'auto' }}>
+              {previewModalDoc.fileUrl && previewModalDoc.fileUrl !== 'uploaded' ? (
+                previewModalDoc.fileUrl.startsWith('data:image') ? (
+                  <img
+                    src={previewModalDoc.fileUrl}
+                    alt={previewModalDoc.title}
+                    style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #334155' }}
+                  />
+                ) : (
+                  <iframe
+                    src={previewModalDoc.fileUrl}
+                    title={previewModalDoc.title}
+                    style={{ width: '100%', height: '480px', border: 'none', borderRadius: '8px' }}
+                  />
+                )
+              ) : (
+                <div style={{ padding: '2.5rem 1rem', background: '#1e293b', borderRadius: '8px', border: '1px dashed #475569' }}>
+                  <FileText size={48} color="#38bdf8" style={{ margin: '0 auto 1rem', display: 'block' }} />
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>{previewModalDoc.fileName || 'Dokumen Terverifikasi'}</div>
+                  <div style={{ fontSize: '0.84rem', color: '#94a3b8', marginTop: '6px' }}>
+                    Dokumen ini telah tersimpan dalam database closing resmi.
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {previewModalDoc.fileUrl && previewModalDoc.fileUrl !== 'uploaded' ? (
+                <a
+                  href={previewModalDoc.fileUrl}
+                  download={previewModalDoc.fileName || 'dokumen_closing'}
+                  className="btn btn-primary"
+                  style={{ background: '#0284c7', border: 'none', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Download size={15} /> Unduh Berkas
+                </a>
+              ) : <div />}
+              <button type="button" className="btn btn-secondary" onClick={() => setPreviewModalDoc(null)}>Tutup</button>
+            </div>
           </div>
         </div>
       )}
