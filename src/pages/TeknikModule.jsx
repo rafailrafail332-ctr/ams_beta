@@ -3507,15 +3507,14 @@ export const TeknikModule = () => {
   // HANDLER: BARANG KELUAR
   const handleOpenAddBarangKeluar = () => {
     setEditingKeluarId(null);
-    const firstItem = persediaanSummaryList[0] || persediaanMasterBarang[0];
     setBarangKeluarFormData({
       tanggal: getTodayDateString(),
-      proyek: 'Ashoka View',
-      kode: firstItem?.kode || '',
-      namaBarang: firstItem?.nama || '',
+      proyek: (filterKeluarProyek !== 'ALL' && filterKeluarProyek) ? filterKeluarProyek : ((filterPersediaanProyek !== 'ALL' && filterPersediaanProyek) ? filterPersediaanProyek : 'Ashoka View'),
+      kode: '',
+      namaBarang: '',
       qty: '',
-      satuan: firstItem?.satuan || 'Sak',
-      avgHarga: firstItem?.avgHarga || 0,
+      satuan: 'Sak',
+      avgHarga: 0,
       blok: 'A',
       noUnit: '01',
       fasum: ''
@@ -3542,13 +3541,48 @@ export const TeknikModule = () => {
 
   const handleSaveBarangKeluar = (e) => {
     e.preventDefault();
-    const cleanKode = (barangKeluarFormData.kode || '').trim().toUpperCase();
-    const cleanNama = (barangKeluarFormData.namaBarang || '').trim();
+    let cleanKode = (barangKeluarFormData.kode || '').trim().toUpperCase();
+    let cleanNama = (barangKeluarFormData.namaBarang || '').trim();
     const qtyNum = parseFloat(String(barangKeluarFormData.qty).replace(',', '.')) || 0;
 
     if (!cleanNama || qtyNum <= 0) {
       alert('Silakan pilih/isi nama barang dan jumlah qty keluar yang valid!');
       return;
+    }
+
+    // Auto-register item to Master Database if it doesn't exist yet
+    let itemMaster = persediaanMasterBarang.find(b => 
+      (cleanKode && b.kode.trim().toUpperCase() === cleanKode) ||
+      b.nama.trim().toLowerCase() === cleanNama.toLowerCase()
+    );
+
+    let updatedMaster = [...persediaanMasterBarang];
+
+    if (!itemMaster) {
+      if (!cleanKode || persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === cleanKode)) {
+        let maxNum = 0;
+        persediaanMasterBarang.forEach(b => {
+          const m = b.kode?.match(/\d+/);
+          if (m) {
+            const n = parseInt(m[0], 10);
+            if (n > maxNum) maxNum = n;
+          }
+        });
+        cleanKode = `BRG-${String(maxNum + 1).padStart(3, '0')}`;
+      }
+
+      const newMaster = {
+        id: `BRG-${Date.now().toString().slice(-4)}`,
+        kode: cleanKode,
+        nama: cleanNama,
+        satuan: (barangKeluarFormData.satuan || 'Sak').trim()
+      };
+      updatedMaster.push(newMaster);
+      updateAndSaveMasterBarang(updatedMaster);
+      itemMaster = newMaster;
+    } else {
+      cleanKode = itemMaster.kode;
+      if (!cleanNama) cleanNama = itemMaster.nama;
     }
 
     const summary = persediaanSummaryList.find(s => 
@@ -3568,8 +3602,9 @@ export const TeknikModule = () => {
     const autoAvg = rawAvg > 0 ? rawAvg : (summary?.avgHarga || 0);
     const payload = {
       ...barangKeluarFormData,
-      kode: cleanKode || (summary?.kode || 'BRG-001'),
+      kode: cleanKode,
       namaBarang: cleanNama,
+      satuan: (barangKeluarFormData.satuan || itemMaster?.satuan || 'Sak').trim(),
       qty: qtyNum,
       avgHarga: autoAvg
     };
@@ -13495,7 +13530,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isBarangMasukModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '740px', width: '100%', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900, margin: 0 }}>
                 <ArrowDownLeft size={20} color="#38bdf8" />
@@ -13507,11 +13542,11 @@ export const TeknikModule = () => {
             </div>
 
             <form onSubmit={handleSaveBarangMasuk}>
-              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto', padding: '1.25rem' }}>
+              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto', padding: '1.25rem', boxSizing: 'border-box' }}>
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '10px', border: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
                   
                   {/* BARIS 1: Tanggal & Proyek */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     <div>
                       <IndoDatePicker
                         label="Tanggal Penerimaan"
@@ -13529,7 +13564,7 @@ export const TeknikModule = () => {
                       <select
                         value={barangMasukFormData.proyek}
                         onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, proyek: e.target.value })}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       >
                         <option value="Ashoka View">Ashoka View</option>
                         <option value="Ashoka Park">Ashoka Park</option>
@@ -13537,98 +13572,47 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 2: PILIH CEPAT DARI DATABASE */}
-                  <div style={{ background: 'rgba(2, 132, 199, 0.08)', border: '1px dashed #0284c7', borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ margin: 0, fontWeight: 800, fontSize: '0.82rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span>⚡</span> <span>Pilih dari Data Base (Auto-Fill Kode, Nama & Satuan)</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#c084fc',
-                          fontSize: '0.74rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          padding: 0,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Plus size={12} /> + Tambah Barang Baru ke Data Base
-                      </button>
-                    </div>
-                    <select
-                      value={persediaanMasterBarang.some(b => b.kode === barangMasukFormData.kode) ? barangMasukFormData.kode : ''}
-                      onChange={(e) => {
-                        const selectedCode = e.target.value;
-                        const found = persediaanMasterBarang.find(b => b.kode === selectedCode);
-                        if (found) {
-                          setBarangMasukFormData(prev => ({
-                            ...prev,
-                            kode: found.kode,
-                            namaBarang: found.nama,
-                            satuan: found.satuan || 'Sak'
-                          }));
-                        } else if (!selectedCode) {
-                          setBarangMasukFormData(prev => ({
-                            ...prev,
-                            kode: '',
-                            namaBarang: '',
-                            satuan: 'Sak'
-                          }));
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        background: '#0f172a',
-                        border: '1.5px solid #0284c7',
-                        borderRadius: '6px',
-                        color: '#38bdf8',
-                        fontWeight: 800,
-                        padding: '0 10px',
-                        fontSize: '0.86rem',
-                        outline: 'none',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="">-- Klik untuk memilih barang yang sudah ada di Data Base --</option>
-                      {persediaanMasterBarang.map(b => (
-                        <option key={b.id || b.kode} value={b.kode}>
-                          [{b.kode}] {b.nama} ({b.satuan})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* BARIS 3: Kode Barang & Nama Barang */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 2: Kode Barang & Nama Barang */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* KODE BARANG */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', margin: 0 }}>
                           Kode Barang
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Datalist / Manual</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#c084fc',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={12} /> + Add Barang
+                        </button>
                       </div>
                       <input
                         type="text"
                         required
                         list="master-kode-barang-datalist"
-                        placeholder="Ketik kode (contoh: BRG-001)..."
+                        placeholder="Pilih atau ketik kode barang (contoh: BRG-001)..."
                         value={barangMasukFormData.kode}
                         onChange={(e) => {
                           const val = e.target.value.toUpperCase();
-                          const found = persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === val.trim());
+                          const cleanVal = val.trim();
+                          const found = persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === cleanVal || cleanVal.startsWith(b.kode.trim().toUpperCase()));
                           if (found) {
                             setBarangMasukFormData(prev => ({
                               ...prev,
-                              kode: val,
+                              kode: found.kode,
                               namaBarang: found.nama,
                               satuan: found.satuan || prev.satuan
                             }));
@@ -13649,13 +13633,14 @@ export const TeknikModule = () => {
                           fontWeight: 900,
                           padding: '0 12px',
                           fontSize: '0.88rem',
-                          outline: 'none'
+                          outline: 'none',
+                          boxSizing: 'border-box'
                         }}
                       />
                       <datalist id="master-kode-barang-datalist">
                         {persediaanMasterBarang.map(b => (
                           <option key={b.id || b.kode} value={b.kode}>
-                            [{b.kode}] {b.nama} ({b.satuan})
+                            {b.kode} - {b.nama} ({b.satuan})
                           </option>
                         ))}
                       </datalist>
@@ -13673,7 +13658,7 @@ export const TeknikModule = () => {
                           return (
                             <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#10b981', fontWeight: 800 }}>
                               <CheckCircle2 size={13} color="#10b981" />
-                              <span>Terdaftar: <strong>[{matchKode.kode}] {matchKode.nama}</strong></span>
+                              <span>Terdaftar di Data Base: <strong>[{matchKode.kode}] {matchKode.nama}</strong> ({matchKode.satuan})</span>
                             </div>
                           );
                         }
@@ -13687,19 +13672,19 @@ export const TeknikModule = () => {
                             flexWrap: 'wrap',
                             gap: '6px',
                             padding: '6px 10px',
-                            background: 'rgba(168, 85, 247, 0.12)',
-                            border: '1px dashed #a855f7',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px dashed #f59e0b',
                             borderRadius: '6px'
                           }}>
-                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
-                              <AlertCircle size={13} color="#c084fc" />
-                              <span>Kode belum ada</span>
+                            <div style={{ fontSize: '0.76rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#f59e0b" />
+                              <span>Kode "{typedKode}" belum ada di Data Base</span>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleOpenAddMasterBarang(typedKode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
                               style={{
-                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
                                 color: '#ffffff',
                                 border: 'none',
                                 padding: '4px 10px',
@@ -13712,7 +13697,7 @@ export const TeknikModule = () => {
                                 gap: '4px'
                               }}
                             >
-                              <Plus size={12} /> Add ke Database
+                              <Plus size={12} /> Add "{typedKode.length > 18 ? typedKode.slice(0, 18) + '...' : typedKode}" ke Database
                             </button>
                           </div>
                         );
@@ -13721,11 +13706,28 @@ export const TeknikModule = () => {
 
                     {/* NAMA BARANG */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', margin: 0 }}>
                           Nama Material / Barang
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Datalist / Manual</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#38bdf8',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={12} /> + Add Barang
+                        </button>
                       </div>
                       <input
                         type="text"
@@ -13735,11 +13737,12 @@ export const TeknikModule = () => {
                         value={barangMasukFormData.namaBarang}
                         onChange={(e) => {
                           const val = e.target.value;
-                          const found = persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === val.trim().toLowerCase());
+                          const cleanVal = val.trim().toLowerCase();
+                          const found = persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === cleanVal);
                           if (found) {
                             setBarangMasukFormData(prev => ({
                               ...prev,
-                              namaBarang: val,
+                              namaBarang: found.nama,
                               kode: found.kode,
                               satuan: found.satuan || prev.satuan
                             }));
@@ -13750,12 +13753,12 @@ export const TeknikModule = () => {
                             }));
                           }
                         }}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                       <datalist id="master-barang-datalist">
                         {persediaanMasterBarang.map(b => (
                           <option key={b.id || b.kode} value={b.nama}>
-                            [{b.kode}] ({b.satuan})
+                            [{b.kode}] {b.nama} ({b.satuan})
                           </option>
                         ))}
                       </datalist>
@@ -13769,7 +13772,7 @@ export const TeknikModule = () => {
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981', fontSize: '0.76rem', fontWeight: 800, marginTop: '6px' }}>
                               <CheckCircle2 size={13} color="#10b981" />
-                              <span>Terdaftar: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong></span>
+                              <span>Terdaftar di Data Base: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong> ({matchMaster.satuan})</span>
                             </div>
                           );
                         }
@@ -13787,19 +13790,19 @@ export const TeknikModule = () => {
                             flexWrap: 'wrap',
                             gap: '6px',
                             padding: '6px 10px',
-                            background: 'rgba(168, 85, 247, 0.12)',
-                            border: '1px dashed #a855f7',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px dashed #f59e0b',
                             borderRadius: '6px'
                           }}>
-                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
-                              <AlertCircle size={13} color="#c084fc" />
-                              <span>Barang belum ada</span>
+                            <div style={{ fontSize: '0.76rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#f59e0b" />
+                              <span>Barang belum ada di Data Base</span>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, cleanN, 'persediaan_masuk', barangMasukFormData.satuan)}
                               style={{
-                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
                                 color: '#ffffff',
                                 border: 'none',
                                 padding: '4px 10px',
@@ -13812,7 +13815,7 @@ export const TeknikModule = () => {
                                 gap: '4px'
                               }}
                             >
-                              <Plus size={12} /> Add ke Database
+                              <Plus size={12} /> Add "{cleanN.length > 18 ? cleanN.slice(0, 18) + '...' : cleanN}" ke Database
                             </button>
                           </div>
                         );
@@ -13820,11 +13823,11 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 4: Qty & Satuan */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 3: Qty & Satuan */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* JUMLAH QTY */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Jumlah (Qty) Masuk
                         </label>
@@ -13838,13 +13841,13 @@ export const TeknikModule = () => {
                           const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           setBarangMasukFormData({ ...barangMasukFormData, qty: val });
                         }}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#10b981', fontWeight: 900, padding: '0 12px', fontSize: '0.94rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#10b981', fontWeight: 900, padding: '0 12px', fontSize: '0.94rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                     </div>
 
                     {/* SATUAN */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Satuan Ukuran
                         </label>
@@ -13853,7 +13856,7 @@ export const TeknikModule = () => {
                         <select
                           value={barangMasukFormData.satuan}
                           onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
-                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none' }}
+                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
                         >
                           <option value="Sak">Sak</option>
                           <option value="Btg">Btg (Batang)</option>
@@ -13873,17 +13876,17 @@ export const TeknikModule = () => {
                           placeholder="Atau ketik..."
                           value={barangMasukFormData.satuan}
                           onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
-                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none' }}
+                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* BARIS 5: Harga Satuan & Vendor */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 4: Harga Satuan & Vendor */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* HARGA SATUAN */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Harga Satuan (Rp)
                         </label>
@@ -13900,7 +13903,7 @@ export const TeknikModule = () => {
                             const raw = e.target.value.replace(/\D/g, '');
                             setBarangMasukFormData({ ...barangMasukFormData, hargaSatuan: raw });
                           }}
-                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px 0 38px', fontSize: '0.94rem', outline: 'none' }}
+                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px 0 38px', fontSize: '0.94rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                       {(() => {
@@ -13919,7 +13922,7 @@ export const TeknikModule = () => {
 
                     {/* VENDOR / SUPLIER */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Vendor / Suplier
                         </label>
@@ -13948,7 +13951,7 @@ export const TeknikModule = () => {
                         placeholder="Pilih atau ketik nama vendor..."
                         value={barangMasukFormData.vendor}
                         onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, vendor: e.target.value })}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                       <datalist id="vendor-options-persediaan">
                         {databaseVendorRows.map(v => (
@@ -14018,17 +14021,19 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 6: Keterangan */}
+                  {/* BARIS 5: Keterangan */}
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', marginBottom: '6px' }}>
-                      Keterangan / No. Nota / Surat Jalan
-                    </label>
+                    <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
+                      <label style={{ display: 'block', fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', margin: 0 }}>
+                        Keterangan / No. Nota / Surat Jalan
+                      </label>
+                    </div>
                     <input
                       type="text"
                       placeholder="Contoh: Nota #0192, Surat Jalan dari Toko Bangunan, No. Polisi Truk, dsb..."
                       value={barangMasukFormData.keterangan}
                       onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, keterangan: e.target.value })}
-                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                     />
                   </div>
 
@@ -14051,7 +14056,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isBarangKeluarModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '740px', width: '100%', background: '#0f172a', border: '2px solid #db2777', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '2px solid #db2777', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900, margin: 0 }}>
                 <ArrowUpRight size={20} color="#f472b6" />
@@ -14063,11 +14068,11 @@ export const TeknikModule = () => {
             </div>
 
             <form onSubmit={handleSaveBarangKeluar}>
-              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto', padding: '1.25rem' }}>
+              <div className="modal-body" style={{ maxHeight: '78vh', overflowY: 'auto', padding: '1.25rem', boxSizing: 'border-box' }}>
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '10px', border: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
                   
                   {/* BARIS 1: Tanggal & Proyek */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     <div>
                       <IndoDatePicker
                         label="Tanggal Pengeluaran"
@@ -14085,7 +14090,7 @@ export const TeknikModule = () => {
                       <select
                         value={barangKeluarFormData.proyek}
                         onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, proyek: e.target.value })}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#f472b6', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#f472b6', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       >
                         <option value="Ashoka View">Ashoka View</option>
                         <option value="Ashoka Park">Ashoka Park</option>
@@ -14093,92 +14098,47 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 2: PILIH CEPAT DARI STOK TERSEDIA */}
-                  <div style={{ background: 'rgba(219, 39, 119, 0.08)', border: '1px dashed #db2777', borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label style={{ margin: 0, fontWeight: 800, fontSize: '0.82rem', color: '#f472b6', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span>⚡</span> <span>Pilih dari Stok Tersedia (Auto-Fill Kode, Nama, Satuan & Avg Harga)</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#c084fc',
-                          fontSize: '0.74rem',
-                          fontWeight: 800,
-                          cursor: 'pointer',
-                          padding: 0,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <Plus size={12} /> + Tambah Barang Baru ke Data Base
-                      </button>
-                    </div>
-                    <select
-                      onChange={(e) => {
-                        const selectedCode = e.target.value;
-                        const found = persediaanSummaryList.find(s => s.kode === selectedCode) || persediaanMasterBarang.find(b => b.kode === selectedCode);
-                        if (found) {
-                          setBarangKeluarFormData(prev => ({
-                            ...prev,
-                            kode: found.kode,
-                            namaBarang: found.nama,
-                            satuan: found.satuan || 'Sak',
-                            avgHarga: found.avgHarga || 0
-                          }));
-                        }
-                      }}
-                      value=""
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        background: '#0f172a',
-                        border: '1.5px solid #db2777',
-                        borderRadius: '6px',
-                        color: '#ffffff',
-                        fontWeight: 800,
-                        padding: '0 10px',
-                        fontSize: '0.86rem',
-                        outline: 'none',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="">-- Klik untuk memilih barang dari stok tersedia --</option>
-                      {persediaanSummaryList.map(s => (
-                        <option key={s.id || s.kode} value={s.kode}>
-                          [{s.kode}] {s.nama} — Sisa Stok: {s.sisaQty} {s.satuan} (Avg: Rp {formatRupiah(s.avgHarga)})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* BARIS 3: Kode Barang & Nama Barang */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 2: Kode Barang & Nama Barang */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* KODE BARANG */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', margin: 0 }}>
                           Kode Barang
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Datalist / Manual</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#c084fc',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={12} /> + Add Barang
+                        </button>
                       </div>
                       <input
                         type="text"
                         required
                         list="keluar-master-kode-barang-datalist"
-                        placeholder="Ketik atau pilih kode barang..."
+                        placeholder="Pilih atau ketik kode barang..."
                         value={barangKeluarFormData.kode}
                         onChange={(e) => {
                           const val = e.target.value.toUpperCase();
-                          const found = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === val.trim()) || persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === val.trim());
+                          const cleanVal = val.trim();
+                          const found = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === cleanVal || cleanVal.startsWith(s.kode.trim().toUpperCase())) || persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === cleanVal || cleanVal.startsWith(b.kode.trim().toUpperCase()));
                           if (found) {
                             setBarangKeluarFormData(prev => ({
                               ...prev,
-                              kode: val,
+                              kode: found.kode,
                               namaBarang: found.nama,
                               satuan: found.satuan || prev.satuan,
                               avgHarga: found.avgHarga !== undefined ? found.avgHarga : prev.avgHarga
@@ -14200,15 +14160,20 @@ export const TeknikModule = () => {
                           fontWeight: 900,
                           padding: '0 12px',
                           fontSize: '0.88rem',
-                          outline: 'none'
+                          outline: 'none',
+                          boxSizing: 'border-box'
                         }}
                       />
                       <datalist id="keluar-master-kode-barang-datalist">
-                        {persediaanMasterBarang.map(b => (
-                          <option key={b.id || b.kode} value={b.kode}>
-                            [{b.kode}] {b.nama} ({b.satuan})
-                          </option>
-                        ))}
+                        {persediaanMasterBarang.map(b => {
+                          const sum = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === b.kode.trim().toUpperCase());
+                          const sisaStr = sum ? ` — Stok: ${sum.sisaQty} ${b.satuan}` : '';
+                          return (
+                            <option key={b.id || b.kode} value={b.kode}>
+                              {b.kode} - {b.nama} ({b.satuan}){sisaStr}
+                            </option>
+                          );
+                        })}
                       </datalist>
 
                       {/* Status Deteksi Kode di Database */}
@@ -14221,10 +14186,11 @@ export const TeknikModule = () => {
                         );
 
                         if (matchKode) {
+                          const sum = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === matchKode.kode.trim().toUpperCase());
                           return (
                             <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#10b981', fontWeight: 800 }}>
                               <CheckCircle2 size={13} color="#10b981" />
-                              <span>Terdaftar: <strong>[{matchKode.kode}] {matchKode.nama}</strong></span>
+                              <span>Terdaftar di Data Base: <strong>[{matchKode.kode}] {matchKode.nama}</strong> ({matchKode.satuan}){sum ? ` — Sisa: ${sum.sisaQty} ${matchKode.satuan}` : ''}</span>
                             </div>
                           );
                         }
@@ -14238,19 +14204,19 @@ export const TeknikModule = () => {
                             flexWrap: 'wrap',
                             gap: '6px',
                             padding: '6px 10px',
-                            background: 'rgba(168, 85, 247, 0.12)',
-                            border: '1px dashed #a855f7',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px dashed #f59e0b',
                             borderRadius: '6px'
                           }}>
-                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
-                              <AlertCircle size={13} color="#c084fc" />
-                              <span>Kode belum ada</span>
+                            <div style={{ fontSize: '0.76rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#f59e0b" />
+                              <span>Kode "{typedKode}" belum ada di Data Base</span>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleOpenAddMasterBarang(typedKode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
                               style={{
-                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
                                 color: '#ffffff',
                                 border: 'none',
                                 padding: '4px 10px',
@@ -14263,7 +14229,7 @@ export const TeknikModule = () => {
                                 gap: '4px'
                               }}
                             >
-                              <Plus size={12} /> Add ke Database
+                              <Plus size={12} /> Add "{typedKode.length > 18 ? typedKode.slice(0, 18) + '...' : typedKode}" ke Database
                             </button>
                           </div>
                         );
@@ -14272,25 +14238,43 @@ export const TeknikModule = () => {
 
                     {/* NAMA BARANG */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc', margin: 0 }}>
                           Nama Material / Barang
                         </label>
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Datalist / Manual</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#38bdf8',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={12} /> + Add Barang
+                        </button>
                       </div>
                       <input
                         type="text"
                         required
                         list="keluar-master-nama-barang-datalist"
-                        placeholder="Nama material yang keluar..."
+                        placeholder="Pilih atau ketik nama material..."
                         value={barangKeluarFormData.namaBarang}
                         onChange={(e) => {
                           const val = e.target.value;
-                          const found = persediaanSummaryList.find(s => s.nama.trim().toLowerCase() === val.trim().toLowerCase()) || persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === val.trim().toLowerCase());
+                          const cleanVal = val.trim().toLowerCase();
+                          const found = persediaanSummaryList.find(s => s.nama.trim().toLowerCase() === cleanVal) || persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === cleanVal);
                           if (found) {
                             setBarangKeluarFormData(prev => ({
                               ...prev,
-                              namaBarang: val,
+                              namaBarang: found.nama,
                               kode: found.kode,
                               satuan: found.satuan || prev.satuan,
                               avgHarga: found.avgHarga !== undefined ? found.avgHarga : prev.avgHarga
@@ -14302,14 +14286,18 @@ export const TeknikModule = () => {
                             }));
                           }
                         }}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                       <datalist id="keluar-master-nama-barang-datalist">
-                        {persediaanMasterBarang.map(b => (
-                          <option key={b.id || b.kode} value={b.nama}>
-                            [{b.kode}] ({b.satuan})
-                          </option>
-                        ))}
+                        {persediaanMasterBarang.map(b => {
+                          const sum = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === b.kode.trim().toUpperCase());
+                          const sisaStr = sum ? ` — Stok: ${sum.sisaQty} ${b.satuan}` : '';
+                          return (
+                            <option key={b.id || b.kode} value={b.nama}>
+                              [{b.kode}] {b.nama} ({b.satuan}){sisaStr}
+                            </option>
+                          );
+                        })}
                       </datalist>
 
                       {/* Status Deteksi Nama Barang */}
@@ -14318,10 +14306,11 @@ export const TeknikModule = () => {
                         if (!cleanN) return null;
                         const matchMaster = persediaanMasterBarang.find(b => b.nama.toLowerCase() === cleanN.toLowerCase());
                         if (matchMaster) {
+                          const sum = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === matchMaster.kode.trim().toUpperCase());
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981', fontSize: '0.76rem', fontWeight: 800, marginTop: '6px' }}>
                               <CheckCircle2 size={13} color="#10b981" />
-                              <span>Terdaftar: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong></span>
+                              <span>Terdaftar di Data Base: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong> ({matchMaster.satuan}){sum ? ` — Sisa: ${sum.sisaQty} ${matchMaster.satuan}` : ''}</span>
                             </div>
                           );
                         }
@@ -14339,19 +14328,19 @@ export const TeknikModule = () => {
                             flexWrap: 'wrap',
                             gap: '6px',
                             padding: '6px 10px',
-                            background: 'rgba(168, 85, 247, 0.12)',
-                            border: '1px dashed #a855f7',
+                            background: 'rgba(245, 158, 11, 0.12)',
+                            border: '1px dashed #f59e0b',
                             borderRadius: '6px'
                           }}>
-                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
-                              <AlertCircle size={13} color="#c084fc" />
-                              <span>Barang belum ada</span>
+                            <div style={{ fontSize: '0.76rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#f59e0b" />
+                              <span>Barang belum ada di Data Base</span>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, cleanN, 'persediaan_keluar', barangKeluarFormData.satuan)}
                               style={{
-                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
                                 color: '#ffffff',
                                 border: 'none',
                                 padding: '4px 10px',
@@ -14364,7 +14353,7 @@ export const TeknikModule = () => {
                                 gap: '4px'
                               }}
                             >
-                              <Plus size={12} /> Add ke Database
+                              <Plus size={12} /> Add "{cleanN.length > 18 ? cleanN.slice(0, 18) + '...' : cleanN}" ke Database
                             </button>
                           </div>
                         );
@@ -14372,11 +14361,11 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 4: Qty & Satuan */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 3: Qty & Satuan */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* JUMLAH QTY KELUAR */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Jumlah (Qty) Keluar
                         </label>
@@ -14390,7 +14379,7 @@ export const TeknikModule = () => {
                           const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                           setBarangKeluarFormData({ ...barangKeluarFormData, qty: val });
                         }}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #f43f5e', borderRadius: '6px', color: '#f43f5e', fontWeight: 900, padding: '0 12px', fontSize: '0.94rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #f43f5e', borderRadius: '6px', color: '#f43f5e', fontWeight: 900, padding: '0 12px', fontSize: '0.94rem', outline: 'none', boxSizing: 'border-box' }}
                       />
 
                       {/* Sisa Stok Tersedia Badge */}
@@ -14427,7 +14416,7 @@ export const TeknikModule = () => {
 
                     {/* SATUAN */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Satuan Ukuran
                         </label>
@@ -14436,7 +14425,7 @@ export const TeknikModule = () => {
                         <select
                           value={barangKeluarFormData.satuan}
                           onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
-                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none' }}
+                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
                         >
                           <option value="Sak">Sak</option>
                           <option value="Btg">Btg (Batang)</option>
@@ -14456,17 +14445,17 @@ export const TeknikModule = () => {
                           placeholder="Atau ketik..."
                           value={barangKeluarFormData.satuan}
                           onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
-                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none' }}
+                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* BARIS 5: Avg Harga & Total Nilai Pemakaian */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 4: Avg Harga & Total Nilai Pemakaian */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* AVG HARGA */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Avg Harga Satuan (Rp)
                         </label>
@@ -14483,7 +14472,7 @@ export const TeknikModule = () => {
                             const raw = e.target.value.replace(/\D/g, '');
                             setBarangKeluarFormData({ ...barangKeluarFormData, avgHarga: raw });
                           }}
-                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 900, padding: '0 12px 0 38px', fontSize: '0.94rem', outline: 'none' }}
+                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 900, padding: '0 12px 0 38px', fontSize: '0.94rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                       <p style={{ margin: '4px 0 0', fontSize: '0.74rem', color: '#94a3b8' }}>
@@ -14493,7 +14482,7 @@ export const TeknikModule = () => {
 
                     {/* TOTAL NILAI PEMAKAIAN */}
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '22px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', minHeight: '26px' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Total Nilai Pemakaian
                         </label>
@@ -14506,7 +14495,8 @@ export const TeknikModule = () => {
                         padding: '0 12px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between'
+                        justifyContent: 'space-between',
+                        boxSizing: 'border-box'
                       }}>
                         <span style={{ fontSize: '0.84rem', color: '#cbd5e1', fontWeight: 800 }}>Total (Qty × Avg):</span>
                         <span style={{ fontSize: '1rem', color: '#f472b6', fontWeight: 900 }}>
@@ -14520,11 +14510,11 @@ export const TeknikModule = () => {
                     </div>
                   </div>
 
-                  {/* BARIS 6: Peruntukan Blok/Unit & Fasum */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
+                  {/* BARIS 5: Peruntukan Blok/Unit & Fasum */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'flex-start' }}>
                     {/* PERUNTUKAN BLOK & NO UNIT */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Peruntukan Unit (Blok & No.)
                         </label>
@@ -14535,21 +14525,21 @@ export const TeknikModule = () => {
                           placeholder="Blok (A / B / C...)"
                           value={barangKeluarFormData.blok}
                           onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, blok: e.target.value.toUpperCase() })}
-                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                         <input
                           type="text"
                           placeholder="No. (01 / 02...)"
                           value={barangKeluarFormData.noUnit}
                           onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, noUnit: e.target.value })}
-                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                          style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
 
                     {/* LAIN-LAIN / FASUM */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '22px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Lain-lain / Keperluan Fasum
                         </label>
@@ -14559,7 +14549,7 @@ export const TeknikModule = () => {
                         placeholder="Contoh: Saluran Jalan, Pos Satpam, Kantor Proyek, dll..."
                         value={barangKeluarFormData.fasum}
                         onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, fasum: e.target.value })}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                     </div>
                   </div>
