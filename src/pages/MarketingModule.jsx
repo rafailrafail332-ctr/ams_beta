@@ -39,88 +39,139 @@ import {
   Briefcase,
   ChevronRight,
   Send,
-  Trash2
+  Trash2,
+  Flame,
+  Home,
+  ArrowRight,
+  Mail
 } from 'lucide-react';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
+const STORAGE_KEY_DB_HOT_PROSPEK = 'ams_teknik_db_hot_prospek_v1';
+const STORAGE_KEY_DB_UNIT = 'ams_teknik_db_unit_v1';
 
+// 1. Initial Data Base Konsumen (Pembeli Resmi)
 const initialDbKonsumen = [
   {
     id: 'KNS-001',
     nama: 'Budi Santoso',
-    noHp: '0812-9988-7766',
     nik: '3374102908850003',
     npwp: '09.254.341.2-508.000',
+    noHp: '0812-9988-7766',
+    email: 'budi.santoso@gmail.com',
+    pekerjaan: 'Wiraswasta (Owner Logistik)',
     alamat: 'Jl. Pemuda No. 142, Semarang Tengah',
-    referensi: 'Pameran Mall Ciputra',
+    marketing: 'Amanda',
     ktpFile: 'uploaded',
     ktpFileName: 'ktp_budi_santoso.pdf'
   },
   {
     id: 'KNS-002',
     nama: 'Siti Rahmawati',
-    noHp: '0813-1122-3344',
     nik: '3374025501900001',
     npwp: '12.876.432.1-508.000',
+    noHp: '0813-1122-3344',
+    email: 'siti.rahma@perusahaan.co.id',
+    pekerjaan: 'Manajer Keuangan BUMN',
     alamat: 'Jl. Gajahmada No. 88, Semarang',
-    referensi: 'Brosur Marketing',
+    marketing: 'Fresda',
     ktpFile: null,
     ktpFileName: ''
   },
   {
     id: 'KNS-003',
     nama: 'Dr. Ahmad Fauzi',
-    noHp: '0857-4455-6677',
     nik: '3374081203780004',
     npwp: '45.678.901.2-508.000',
+    noHp: '0857-4455-6677',
+    email: 'dr.ahmadfauzi@rsud.go.id',
+    pekerjaan: 'Dokter Spesialis Bedah',
     alamat: 'Jl. Pandanaran No. 25, Semarang',
-    referensi: 'Referral Dokter Teman',
+    marketing: 'Yulieka Rahmawati',
     ktpFile: 'uploaded',
     ktpFileName: 'ktp_dr_ahmad_fauzi.jpg'
   },
   {
     id: 'KNS-004',
     nama: 'Ibu Ratna Pertiwi',
-    noHp: '0813-8877-6655',
     nik: '3374116209870002',
     npwp: '78.901.234.5-508.000',
+    noHp: '0813-8877-6655',
+    email: 'ratna.pertiwi@gmail.com',
+    pekerjaan: 'PNS Pemprov Jateng',
     alamat: 'Jl. Majapahit No. 50, Semarang Timur',
-    referensi: 'Walk-In Customer',
+    marketing: 'Amanda',
     ktpFile: null,
     ktpFileName: ''
   }
 ];
 
+// 2. Initial Data Base Hot Prospek
+const initialDbHotProspek = [
+  {
+    id: 'HOT-001',
+    nama: 'Bpk. Irwan Prasetyo',
+    noHp: '0812-4455-6677',
+    domisili: 'Gajahmungkur, Semarang',
+    marketing: 'Amanda',
+    minat: 'Cluster Emerald Unit A-02 (Tipe 45/84)',
+    catatan: 'Sudah survey site 2x, minat bayar cash bertahap 6 bulan'
+  },
+  {
+    id: 'HOT-002',
+    nama: 'Ibu Anita Wijaya',
+    noHp: '0813-7788-9911',
+    domisili: 'Tembalang, Semarang',
+    marketing: 'Fresda',
+    minat: 'Cluster Sapphire Tipe 54/90',
+    catatan: 'Berkas KPR Bank Mandiri sedang diproses analis'
+  }
+];
+
+// 3. Initial Data Base Calon Konsumen
 const initialDbCalonKonsumen = [
   {
     id: 'CLK-001',
     nama: 'Bpk. Hendra Kurniawan',
     noHp: '0812-3344-5566',
     domisili: 'Semarang Barat',
-    referensi: 'Instagram Ads'
+    marketing: 'Amanda',
+    catatan: 'Tanya brosur Cluster Emerald via WhatsApp'
   },
   {
     id: 'CLK-002',
     nama: 'Ibu Dewi Sartika',
     noHp: '0858-7788-9900',
     domisili: 'Ungaran Barat, Kab. Semarang',
-    referensi: 'Spanduk Gerbang Perumahan'
+    marketing: 'Fresda',
+    catatan: 'Minta simulasi angsuran KPR Bank BSI'
   },
   {
     id: 'CLK-003',
     nama: 'Bpk. Agus Setiawan',
     noHp: '0857-1122-3344',
     domisili: 'Pedurungan, Semarang',
-    referensi: 'Facebook Ads'
+    marketing: 'Bambang',
+    catatan: 'Respon dari iklan Facebook Ads'
   },
   {
     id: 'CLK-004',
     nama: 'Dr. Maya Indah',
     noHp: '0811-9988-7711',
     domisili: 'Banyumanik, Semarang',
-    referensi: 'Referral Konsumen'
+    marketing: 'Yulieka Rahmawati',
+    catatan: 'Rencana survey lokasi weekend ini'
   }
+];
+
+// 4. Initial Data Base Unit Properti
+const defaultDatabaseUnit = [
+  { id: 'UNT-01', proyek: 'Ashoka View', blok: 'A', nomor: '01', type: 'Type 36/60', lb: 36, lt: 60 },
+  { id: 'UNT-02', proyek: 'Ashoka View', blok: 'A', nomor: '02', type: 'Type 36/60', lb: 36, lt: 60 },
+  { id: 'UNT-03', proyek: 'Ashoka View', blok: 'B', nomor: '05', type: 'Type 45/84', lb: 45, lt: 84 },
+  { id: 'UNT-04', proyek: 'Ashoka Park', blok: 'A', nomor: '01', type: 'Type 54/90', lb: 54, lt: 90 },
+  { id: 'UNT-05', proyek: 'Ashoka Park', blok: 'B', nomor: '03', type: 'Type 60/100', lb: 60, lt: 100 }
 ];
 
 export const MarketingModule = () => {
@@ -134,15 +185,28 @@ export const MarketingModule = () => {
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Active Tab Control (leads, spr, konsumen, calon_konsumen)
+  // Sub-view Tab Control (leads, spr, db_konsumen, db_unit)
   const currentSubView = 
     activeSubTab === 'spr' ? 'spr' :
-    activeSubTab === 'konsumen' ? 'konsumen' :
-    activeSubTab === 'calon_konsumen' ? 'calon_konsumen' :
+    (activeSubTab === 'unit' || activeSubTab === 'db_unit') ? 'db_unit' :
+    (activeSubTab === 'konsumen' || activeSubTab === 'calon_konsumen' || activeSubTab === 'calon' || activeSubTab === 'hot_prospek' || activeSubTab === 'hot' || activeSubTab === 'db_konsumen') ? 'db_konsumen' :
     'leads';
 
+  // Sub-Pill Control didalam Data Base Konsumen ('calon' | 'hot' | 'konsumen')
+  const [subTabKonsumen, setSubTabKonsumen] = useState(() => {
+    if (activeSubTab === 'konsumen') return 'konsumen';
+    if (activeSubTab === 'hot_prospek' || activeSubTab === 'hot') return 'hot';
+    return 'calon';
+  });
+
+  useEffect(() => {
+    if (activeSubTab === 'calon_konsumen' || activeSubTab === 'calon') setSubTabKonsumen('calon');
+    else if (activeSubTab === 'hot_prospek' || activeSubTab === 'hot') setSubTabKonsumen('hot');
+    else if (activeSubTab === 'konsumen') setSubTabKonsumen('konsumen');
+  }, [activeSubTab]);
+
   // -------------------------------------------------------------
-  // DATA BASE KONSUMEN & CALON KONSUMEN STORE
+  // DATA STORES: KONSUMEN, HOT PROSPEK, CALON KONSUMEN, UNIT
   // -------------------------------------------------------------
   const [databaseKonsumenRows, setDatabaseKonsumenRows] = useState(() => {
     try {
@@ -153,6 +217,17 @@ export const MarketingModule = () => {
       }
     } catch (e) {}
     return initialDbKonsumen;
+  });
+
+  const [databaseHotProspekRows, setDatabaseHotProspekRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DB_HOT_PROSPEK);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialDbHotProspek;
   });
 
   const [databaseCalonKonsumenRows, setDatabaseCalonKonsumenRows] = useState(() => {
@@ -166,61 +241,71 @@ export const MarketingModule = () => {
     return initialDbCalonKonsumen;
   });
 
-  // Cloud Sync for Konsumen & Calon Konsumen
-  useEffect(() => {
-    fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
-      if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseKonsumenRows(val);
-    });
-    fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
-      if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
-    });
+  const [databaseUnitRows, setDatabaseUnitRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DB_UNIT);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultDatabaseUnit;
+  });
 
-    const interval = setInterval(() => {
+  // Cloud Sync Polling for All 4 Stores
+  useEffect(() => {
+    const doFetch = () => {
       fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
         if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseKonsumenRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_HOT_PROSPEK, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseHotProspekRows(val);
       });
       fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
         if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
       });
-    }, 5000);
+      fetchCloudStore(STORAGE_KEY_DB_UNIT, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseUnitRows(val);
+      });
+    };
 
+    doFetch();
+    const interval = setInterval(doFetch, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  // Save Helpers
   const updateAndSaveKonsumen = (nextList, notifText = '', notifType = 'success') => {
     setDatabaseKonsumenRows(nextList);
-    try {
-      localStorage.setItem(STORAGE_KEY_DB_KONSUMEN, JSON.stringify(nextList));
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY_DB_KONSUMEN, JSON.stringify(nextList)); } catch (e) {}
     saveCloudStore(STORAGE_KEY_DB_KONSUMEN, nextList).catch(() => {});
+    if (notifText) showNotification(notifText, notifType);
+  };
+
+  const updateAndSaveHotProspek = (nextList, notifText = '', notifType = 'success') => {
+    setDatabaseHotProspekRows(nextList);
+    try { localStorage.setItem(STORAGE_KEY_DB_HOT_PROSPEK, JSON.stringify(nextList)); } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_HOT_PROSPEK, nextList).catch(() => {});
     if (notifText) showNotification(notifText, notifType);
   };
 
   const updateAndSaveCalonKonsumen = (nextList, notifText = '', notifType = 'success') => {
     setDatabaseCalonKonsumenRows(nextList);
-    try {
-      localStorage.setItem(STORAGE_KEY_DB_CALON_KONSUMEN, JSON.stringify(nextList));
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_KEY_DB_CALON_KONSUMEN, JSON.stringify(nextList)); } catch (e) {}
     saveCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, nextList).catch(() => {});
     if (notifText) showNotification(notifText, notifType);
   };
 
-  // State: Modal & Form Data Konsumen
-  const [searchDbKonsumen, setSearchDbKonsumen] = useState('');
-  const [isKonsumenModalOpen, setIsKonsumenModalOpen] = useState(false);
-  const [editingKonsumenId, setEditingKonsumenId] = useState(null);
-  const [konsumenFormData, setKonsumenFormData] = useState({
-    nama: '',
-    noHp: '',
-    nik: '',
-    npwp: '',
-    alamat: '',
-    referensi: '',
-    ktpFile: null,
-    ktpFileName: ''
-  });
+  const updateAndSaveUnit = (nextList, notifText = '', notifType = 'success') => {
+    setDatabaseUnitRows(nextList);
+    try { localStorage.setItem(STORAGE_KEY_DB_UNIT, JSON.stringify(nextList)); } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_UNIT, nextList).catch(() => {});
+    if (notifText) showNotification(notifText, notifType);
+  };
 
-  // State: Modal & Form Data Calon Konsumen
+  // -------------------------------------------------------------
+  // STATE & HANDLERS: CALON KONSUMEN
+  // -------------------------------------------------------------
   const [searchDbCalonKonsumen, setSearchDbCalonKonsumen] = useState('');
   const [isCalonKonsumenModalOpen, setIsCalonKonsumenModalOpen] = useState(false);
   const [editingCalonKonsumenId, setEditingCalonKonsumenId] = useState(null);
@@ -228,19 +313,270 @@ export const MarketingModule = () => {
     nama: '',
     noHp: '',
     domisili: '',
-    referensi: ''
+    marketing: 'Amanda',
+    catatan: ''
   });
 
-  // Handlers for Konsumen
+  const handleOpenAddCalonKonsumen = () => {
+    setEditingCalonKonsumenId(null);
+    setCalonKonsumenFormData({
+      nama: '',
+      noHp: '',
+      domisili: '',
+      marketing: 'Amanda',
+      catatan: ''
+    });
+    setIsCalonKonsumenModalOpen(true);
+  };
+
+  const handleOpenEditCalonKonsumen = (row) => {
+    setEditingCalonKonsumenId(row.id);
+    setCalonKonsumenFormData({
+      nama: row.nama || '',
+      noHp: row.noHp || '',
+      domisili: row.domisili || '',
+      marketing: row.marketing || 'Amanda',
+      catatan: row.catatan || row.referensi || ''
+    });
+    setIsCalonKonsumenModalOpen(true);
+  };
+
+  const handleSaveCalonKonsumen = (e) => {
+    e.preventDefault();
+    if (!calonKonsumenFormData.nama.trim()) {
+      showNotification('Nama calon konsumen wajib diisi!', 'warning');
+      return;
+    }
+    if (editingCalonKonsumenId) {
+      const nextList = databaseCalonKonsumenRows.map(c => c.id === editingCalonKonsumenId ? { ...c, ...calonKonsumenFormData } : c);
+      updateAndSaveCalonKonsumen(nextList, `Data Calon Konsumen "${calonKonsumenFormData.nama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newC = {
+        id: `CLK-${Date.now().toString().slice(-4)}`,
+        ...calonKonsumenFormData
+      };
+      updateAndSaveCalonKonsumen([newC, ...databaseCalonKonsumenRows], `Calon Konsumen "${calonKonsumenFormData.nama}" berhasil didaftarkan!`, 'success');
+    }
+    setIsCalonKonsumenModalOpen(false);
+  };
+
+  const handleDeleteCalonKonsumen = (id, name) => {
+    if (window.confirm(`Hapus Calon Konsumen "${name}"?`)) {
+      const nextList = databaseCalonKonsumenRows.filter(c => c.id !== id);
+      updateAndSaveCalonKonsumen(nextList, `Calon Konsumen "${name}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // -------------------------------------------------------------
+  // ACTION: PINDAH CALON KONSUMEN KE HOT PROSPEK
+  // -------------------------------------------------------------
+  const [isMoveToHotModalOpen, setIsMoveToHotModalOpen] = useState(false);
+  const [targetMoveCalonItem, setTargetMoveCalonItem] = useState(null);
+  const [moveToHotData, setMoveToHotData] = useState({
+    minat: '',
+    catatan: '',
+    marketing: 'Amanda'
+  });
+
+  const handleOpenMoveToHot = (row) => {
+    setTargetMoveCalonItem(row);
+    setMoveToHotData({
+      minat: '',
+      catatan: row.catatan || 'Konsumen sangat berminat, minta janji survey lokasi',
+      marketing: row.marketing || 'Amanda'
+    });
+    setIsMoveToHotModalOpen(true);
+  };
+
+  const handleConfirmMoveToHot = (e) => {
+    e.preventDefault();
+    if (!targetMoveCalonItem) return;
+    if (!moveToHotData.minat.trim()) {
+      showNotification('Mohon isi minat unit / tipe rumah yang diminati prospek!', 'warning');
+      return;
+    }
+
+    const newHotItem = {
+      id: `HOT-${Date.now().toString().slice(-4)}`,
+      nama: targetMoveCalonItem.nama,
+      noHp: targetMoveCalonItem.noHp,
+      domisili: targetMoveCalonItem.domisili,
+      marketing: moveToHotData.marketing || targetMoveCalonItem.marketing || 'Amanda',
+      minat: moveToHotData.minat,
+      catatan: moveToHotData.catatan || targetMoveCalonItem.catatan || ''
+    };
+
+    // 1. Masukkan ke Hot Prospek
+    const nextHotList = [newHotItem, ...databaseHotProspekRows];
+    updateAndSaveHotProspek(nextHotList);
+
+    // 2. Hapus dari Calon Konsumen
+    const nextCalonList = databaseCalonKonsumenRows.filter(c => c.id !== targetMoveCalonItem.id);
+    updateAndSaveCalonKonsumen(nextCalonList, `🔥 "${targetMoveCalonItem.nama}" berhasil dipindahkan ke HOT PROSPEK!`, 'success');
+
+    setIsMoveToHotModalOpen(false);
+    setTargetMoveCalonItem(null);
+    setSubTabKonsumen('hot'); // Langsung buka tab Hot Prospek agar staf melihat posisinya!
+  };
+
+  // -------------------------------------------------------------
+  // STATE & HANDLERS: HOT PROSPEK
+  // -------------------------------------------------------------
+  const [searchDbHotProspek, setSearchDbHotProspek] = useState('');
+  const [isHotProspekModalOpen, setIsHotProspekModalOpen] = useState(false);
+  const [editingHotProspekId, setEditingHotProspekId] = useState(null);
+  const [hotProspekFormData, setHotProspekFormData] = useState({
+    nama: '',
+    noHp: '',
+    domisili: '',
+    marketing: 'Amanda',
+    minat: '',
+    catatan: ''
+  });
+
+  const handleOpenAddHotProspek = () => {
+    setEditingHotProspekId(null);
+    setHotProspekFormData({
+      nama: '',
+      noHp: '',
+      domisili: '',
+      marketing: 'Amanda',
+      minat: '',
+      catatan: ''
+    });
+    setIsHotProspekModalOpen(true);
+  };
+
+  const handleOpenEditHotProspek = (row) => {
+    setEditingHotProspekId(row.id);
+    setHotProspekFormData({
+      nama: row.nama || '',
+      noHp: row.noHp || '',
+      domisili: row.domisili || '',
+      marketing: row.marketing || 'Amanda',
+      minat: row.minat || '',
+      catatan: row.catatan || ''
+    });
+    setIsHotProspekModalOpen(true);
+  };
+
+  const handleSaveHotProspek = (e) => {
+    e.preventDefault();
+    if (!hotProspekFormData.nama.trim()) {
+      showNotification('Nama hot prospek wajib diisi!', 'warning');
+      return;
+    }
+    if (editingHotProspekId) {
+      const nextList = databaseHotProspekRows.map(h => h.id === editingHotProspekId ? { ...h, ...hotProspekFormData } : h);
+      updateAndSaveHotProspek(nextList, `Data Hot Prospek "${hotProspekFormData.nama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newH = {
+        id: `HOT-${Date.now().toString().slice(-4)}`,
+        ...hotProspekFormData
+      };
+      updateAndSaveHotProspek([newH, ...databaseHotProspekRows], `Hot Prospek "${hotProspekFormData.nama}" berhasil didaftarkan!`, 'success');
+    }
+    setIsHotProspekModalOpen(false);
+  };
+
+  const handleDeleteHotProspek = (id, name) => {
+    if (window.confirm(`Hapus Hot Prospek "${name}"?`)) {
+      const nextList = databaseHotProspekRows.filter(h => h.id !== id);
+      updateAndSaveHotProspek(nextList, `Hot Prospek "${name}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // -------------------------------------------------------------
+  // ACTION: PINDAH HOT PROSPEK KE KONSUMEN (CLOSING DEAL)
+  // -------------------------------------------------------------
+  const [isMoveToKonsumenModalOpen, setIsMoveToKonsumenModalOpen] = useState(false);
+  const [targetMoveHotItem, setTargetMoveHotItem] = useState(null);
+  const [moveToKonsumenData, setMoveToKonsumenData] = useState({
+    nama: '',
+    nik: '',
+    npwp: '',
+    noHp: '',
+    email: '',
+    pekerjaan: '',
+    alamat: '',
+    marketing: 'Amanda',
+    ktpFile: null,
+    ktpFileName: ''
+  });
+
+  const handleOpenMoveToKonsumen = (row) => {
+    setTargetMoveHotItem(row);
+    setMoveToKonsumenData({
+      nama: row.nama || '',
+      nik: '',
+      npwp: '',
+      noHp: row.noHp || '',
+      email: '',
+      pekerjaan: '',
+      alamat: row.domisili || '',
+      marketing: row.marketing || 'Amanda',
+      ktpFile: null,
+      ktpFileName: ''
+    });
+    setIsMoveToKonsumenModalOpen(true);
+  };
+
+  const handleConfirmMoveToKonsumen = (e) => {
+    e.preventDefault();
+    if (!targetMoveHotItem) return;
+    if (!moveToKonsumenData.nama.trim()) {
+      showNotification('Nama konsumen wajib diisi!', 'warning');
+      return;
+    }
+
+    const newKonsumenItem = {
+      id: `KNS-${Date.now().toString().slice(-4)}`,
+      ...moveToKonsumenData
+    };
+
+    // 1. Masukkan ke Konsumen
+    const nextKonsumenList = [newKonsumenItem, ...databaseKonsumenRows];
+    updateAndSaveKonsumen(nextKonsumenList);
+
+    // 2. Hapus dari Hot Prospek
+    const nextHotList = databaseHotProspekRows.filter(h => h.id !== targetMoveHotItem.id);
+    updateAndSaveHotProspek(nextHotList, `🎉 Selamat! "${moveToKonsumenData.nama}" resmi closing menjadi KONSUMEN!`, 'success');
+
+    setIsMoveToKonsumenModalOpen(false);
+    setTargetMoveHotItem(null);
+    setSubTabKonsumen('konsumen'); // Langsung buka tab Konsumen!
+  };
+
+  // -------------------------------------------------------------
+  // STATE & HANDLERS: DATA BASE KONSUMEN (RESMI)
+  // -------------------------------------------------------------
+  const [searchDbKonsumen, setSearchDbKonsumen] = useState('');
+  const [isKonsumenModalOpen, setIsKonsumenModalOpen] = useState(false);
+  const [editingKonsumenId, setEditingKonsumenId] = useState(null);
+  const [konsumenFormData, setKonsumenFormData] = useState({
+    nama: '',
+    nik: '',
+    npwp: '',
+    noHp: '',
+    email: '',
+    pekerjaan: '',
+    alamat: '',
+    marketing: 'Amanda',
+    ktpFile: null,
+    ktpFileName: ''
+  });
+
   const handleOpenAddKonsumen = () => {
     setEditingKonsumenId(null);
     setKonsumenFormData({
       nama: '',
-      noHp: '',
       nik: '',
       npwp: '',
+      noHp: '',
+      email: '',
+      pekerjaan: '',
       alamat: '',
-      referensi: '',
+      marketing: 'Amanda',
       ktpFile: null,
       ktpFileName: ''
     });
@@ -251,11 +587,13 @@ export const MarketingModule = () => {
     setEditingKonsumenId(row.id);
     setKonsumenFormData({
       nama: row.nama || '',
-      noHp: row.noHp || '',
       nik: row.nik || '',
       npwp: row.npwp || '',
+      noHp: row.noHp || '',
+      email: row.email || '',
+      pekerjaan: row.pekerjaan || '',
       alamat: row.alamat || '',
-      referensi: row.referensi || '',
+      marketing: row.marketing || 'Amanda',
       ktpFile: row.ktpFile || null,
       ktpFileName: row.ktpFileName || ''
     });
@@ -288,52 +626,71 @@ export const MarketingModule = () => {
     }
   };
 
-  // Handlers for Calon Konsumen
-  const handleOpenAddCalonKonsumen = () => {
-    setEditingCalonKonsumenId(null);
-    setCalonKonsumenFormData({
-      nama: '',
-      noHp: '',
-      domisili: '',
-      referensi: ''
+  // -------------------------------------------------------------
+  // STATE & HANDLERS: DATA BASE UNIT PROPERTI
+  // -------------------------------------------------------------
+  const [searchDbUnit, setSearchDbUnit] = useState('');
+  const [filterProyekUnit, setFilterProyekUnit] = useState('ALL');
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+  const [editingUnitId, setEditingUnitId] = useState(null);
+  const [unitFormData, setUnitFormData] = useState({
+    proyek: 'Ashoka View',
+    blok: 'A',
+    nomor: '',
+    type: 'Type 36/60',
+    lb: 36,
+    lt: 60
+  });
+
+  const handleOpenAddUnit = () => {
+    setEditingUnitId(null);
+    setUnitFormData({
+      proyek: 'Ashoka View',
+      blok: 'A',
+      nomor: '',
+      type: 'Type 36/60',
+      lb: 36,
+      lt: 60
     });
-    setIsCalonKonsumenModalOpen(true);
+    setIsUnitModalOpen(true);
   };
 
-  const handleOpenEditCalonKonsumen = (row) => {
-    setEditingCalonKonsumenId(row.id);
-    setCalonKonsumenFormData({
-      nama: row.nama || '',
-      noHp: row.noHp || '',
-      domisili: row.domisili || '',
-      referensi: row.referensi || ''
+  const handleOpenEditUnit = (row) => {
+    setEditingUnitId(row.id);
+    setUnitFormData({
+      proyek: row.proyek || 'Ashoka View',
+      blok: row.blok || 'A',
+      nomor: row.nomor || '',
+      type: row.type || 'Type 36/60',
+      lb: Number(row.lb || 36),
+      lt: Number(row.lt || 60)
     });
-    setIsCalonKonsumenModalOpen(true);
+    setIsUnitModalOpen(true);
   };
 
-  const handleSaveCalonKonsumen = (e) => {
+  const handleSaveUnit = (e) => {
     e.preventDefault();
-    if (!calonKonsumenFormData.nama.trim()) {
-      showNotification('Nama calon konsumen wajib diisi!', 'warning');
+    if (!unitFormData.nomor.trim()) {
+      showNotification('Nomor unit / kavling wajib diisi!', 'warning');
       return;
     }
-    if (editingCalonKonsumenId) {
-      const nextList = databaseCalonKonsumenRows.map(c => c.id === editingCalonKonsumenId ? { ...c, ...calonKonsumenFormData } : c);
-      updateAndSaveCalonKonsumen(nextList, `Data Calon Konsumen "${calonKonsumenFormData.nama}" berhasil diperbarui!`, 'success');
+    if (editingUnitId) {
+      const nextList = databaseUnitRows.map(u => u.id === editingUnitId ? { ...u, ...unitFormData } : u);
+      updateAndSaveUnit(nextList, `Data Unit "${unitFormData.proyek} Blok ${unitFormData.blok} No ${unitFormData.nomor}" berhasil diperbarui!`, 'success');
     } else {
-      const newC = {
-        id: `CLK-${Date.now().toString().slice(-4)}`,
-        ...calonKonsumenFormData
+      const newU = {
+        id: `UNT-${Date.now().toString().slice(-4)}`,
+        ...unitFormData
       };
-      updateAndSaveCalonKonsumen([newC, ...databaseCalonKonsumenRows], `Calon Konsumen "${calonKonsumenFormData.nama}" berhasil didaftarkan!`, 'success');
+      updateAndSaveUnit([newU, ...databaseUnitRows], `Unit baru "${unitFormData.proyek} Blok ${unitFormData.blok} No ${unitFormData.nomor}" berhasil didaftarkan!`, 'success');
     }
-    setIsCalonKonsumenModalOpen(false);
+    setIsUnitModalOpen(false);
   };
 
-  const handleDeleteCalonKonsumen = (id, name) => {
-    if (window.confirm(`Hapus Calon Konsumen "${name}"?`)) {
-      const nextList = databaseCalonKonsumenRows.filter(c => c.id !== id);
-      updateAndSaveCalonKonsumen(nextList, `Calon Konsumen "${name}" berhasil dihapus.`, 'warning');
+  const handleDeleteUnit = (id, label) => {
+    if (window.confirm(`Hapus data unit ${label}?`)) {
+      const nextList = databaseUnitRows.filter(u => u.id !== id);
+      updateAndSaveUnit(nextList, `Unit ${label} berhasil dihapus.`, 'warning');
     }
   };
 
@@ -842,20 +1199,30 @@ export const MarketingModule = () => {
               <Plus size={16} /> Input Transaksi Penjualan
             </button>
           )}
-          {currentSubView === 'konsumen' && (
+          {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
+              <Plus size={16} /> + Tambah Calon Konsumen
+            </button>
+          )}
+          {currentSubView === 'db_konsumen' && subTabKonsumen === 'hot' && (
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddHotProspek}>
+              <Flame size={16} /> + Tambah Hot Prospek
+            </button>
+          )}
+          {currentSubView === 'db_konsumen' && subTabKonsumen === 'konsumen' && (
             <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#000000', fontWeight: 900 }} onClick={handleOpenAddKonsumen}>
               <Plus size={16} /> + Tambah Konsumen Baru
             </button>
           )}
-          {currentSubView === 'calon_konsumen' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
-              <Plus size={16} /> + Tambah Calon Konsumen
+          {currentSubView === 'db_unit' && (
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddUnit}>
+              <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
         </div>
       </div>
 
-      {/* SUB-MODULE TABS NAVIGATION */}
+      {/* SUB-MODULE TABS NAVIGATION (SESUAI HIRARKI DATA BASE) */}
       <div className="tab-list" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <button
           className={`tab-item ${currentSubView === 'leads' ? 'active' : ''}`}
@@ -872,32 +1239,32 @@ export const MarketingModule = () => {
           <FileText size={16} /> 2. Transaksi Penjualan & Upload Dokumen SPR
         </button>
         <button
-          className={`tab-item ${currentSubView === 'konsumen' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('konsumen')}
+          className={`tab-item ${currentSubView === 'db_konsumen' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('db_konsumen')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'konsumen' ? '#f59e0b' : undefined,
-            color: currentSubView === 'konsumen' ? '#fbbf24' : undefined
+            borderColor: currentSubView === 'db_konsumen' ? '#10b981' : undefined,
+            color: currentSubView === 'db_konsumen' ? '#34d399' : undefined
           }}
         >
-          <Users size={16} color="#fbbf24" /> 3. Data Base Konsumen ({databaseKonsumenRows.length})
+          <Users size={16} color="#34d399" /> 3. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
         </button>
         <button
-          className={`tab-item ${currentSubView === 'calon_konsumen' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('calon_konsumen')}
+          className={`tab-item ${currentSubView === 'db_unit' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('db_unit')}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'calon_konsumen' ? '#ec4899' : undefined,
-            color: currentSubView === 'calon_konsumen' ? '#f472b6' : undefined
+            borderColor: currentSubView === 'db_unit' ? '#3b82f6' : undefined,
+            color: currentSubView === 'db_unit' ? '#60a5fa' : undefined
           }}
         >
-          <UserPlus size={16} color="#f472b6" /> 4. Data Base Calon Konsumen ({databaseCalonKonsumenRows.length})
+          <Home size={16} color="#60a5fa" /> 4. Data Base Unit Properti ({databaseUnitRows.length})
         </button>
       </div>
 
@@ -1271,157 +1638,567 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {/* TAB 3: DATA BASE KONSUMEN                                                 */}
       {/* ========================================================================= */}
-      {currentSubView === 'konsumen' && (
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+      {/* ========================================================================= */}
+      {/* TAB 3: DATA BASE KONSUMEN (CALON KONSUMEN, HOT PROSPEK, KONSUMEN RESMI)   */}
+      {/* ========================================================================= */}
+      {currentSubView === 'db_konsumen' && (
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', marginBottom: '1.5rem', borderRadius: '12px' }}>
+          
+          {/* Header & Sub-Pill Navigation */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.85rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Users size={22} color="#fbbf24" /> Data Base Konsumen ({databaseKonsumenRows.length} Pembeli)
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Users size={24} color="#34d399" /> DATA BASE KONSUMEN ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length} Data)
               </h3>
-              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
-                Master data konsumen pembeli unit perumahan, kelengkapan berkas KTP/NIK, NPWP, alamat dan saluran referensi
+              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
+                Hierarki manajemen relasi pembeli: Calon Konsumen &rarr; Hot Prospek &rarr; Konsumen Resmi (Closed Deal)
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
-                <Search size={14} color="#94a3b8" />
-                <input
-                  type="text"
-                  placeholder="Cari Konsumen / NIK / No HP..."
-                  value={searchDbKonsumen}
-                  onChange={(e) => setSearchDbKonsumen(e.target.value)}
-                  style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '190px', outline: 'none' }}
-                />
-                {searchDbKonsumen && (
-                  <button onClick={() => setSearchDbKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                    <X size={13} />
-                  </button>
-                )}
-              </div>
+            {/* 3 SUB-PILL BUTTONS: CALON | HOT PROSPEK | KONSUMEN */}
+            <div style={{ display: 'flex', gap: '0.4rem', background: '#0f172a', padding: '4px', borderRadius: '10px', border: '1px solid #334155', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setSubTabKonsumen('calon')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  fontWeight: 900,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #ec4899, #db2777)' : 'transparent',
+                  color: subTabKonsumen === 'calon' ? '#ffffff' : '#94a3b8',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(236, 72, 153, 0.4)' : 'none'
+                }}
+              >
+                <UserPlus size={14} /> 1. Calon Konsumen ({databaseCalonKonsumenRows.length})
+              </button>
 
               <button
                 type="button"
-                onClick={handleOpenAddKonsumen}
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000000', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
+                onClick={() => setSubTabKonsumen('hot')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  fontWeight: 900,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #f97316, #ea580c)' : 'transparent',
+                  color: subTabKonsumen === 'hot' ? '#ffffff' : '#94a3b8',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(249, 115, 22, 0.4)' : 'none'
+                }}
               >
-                <Plus size={16} /> Tambah Konsumen
+                <Flame size={14} /> 2. Hot Prospek ({databaseHotProspekRows.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSubTabKonsumen('konsumen')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  fontWeight: 900,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'transparent',
+                  color: subTabKonsumen === 'konsumen' ? '#000000' : '#94a3b8',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none'
+                }}
+              >
+                <Users size={14} /> 3. Konsumen ({databaseKonsumenRows.length})
               </button>
             </div>
           </div>
 
-          {/* Table Konsumen */}
-          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
-            <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
-              <thead>
-                <tr style={{ background: '#f59e0b', color: '#000000' }}>
-                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                  <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
-                  <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
-                  <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NIK</th>
-                  <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
-                  <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                  <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Upload KTP</th>
-                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {databaseKonsumenRows
-                  .filter(r => !searchDbKonsumen || [r.nama, r.noHp, r.nik, r.npwp, r.alamat, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
-                  .map((row, idx) => (
-                    <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
-                            {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
-                          </div>
-                          <span>{row.nama}</span>
-                        </div>
-                      </td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
-                          title="Chat via WhatsApp"
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
-                        >
-                          <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
-                        </button>
-                      </td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.npwp || '-'}</td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                          {row.referensi || '-'}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
-                        {row.ktpFile || row.ktpFileName ? (
-                          <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                            <FileCheck size={14} color="#10b981" /> Ada KTP
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Belum ada</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditKonsumen(row)}
-                            title="Edit Konsumen"
-                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                          >
-                            <Edit3 size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteKonsumen(row.id, row.nama)}
-                            title="Hapus Konsumen"
-                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </td>
+          {/* ========================================================================= */}
+          {/* SUB-VIEW 1: CALON KONSUMEN                                               */}
+          {/* ========================================================================= */}
+          {subTabKonsumen === 'calon' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: '1px solid #ec4899', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
+                    Tahap Awal &bull; Data Calon Konsumen
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari Calon Konsumen / HP / Marketing..."
+                      value={searchDbCalonKonsumen}
+                      onChange={(e) => setSearchDbCalonKonsumen(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '220px', outline: 'none' }}
+                    />
+                    {searchDbCalonKonsumen && (
+                      <button onClick={() => setSearchDbCalonKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddCalonKonsumen}
+                    style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.4)' }}
+                  >
+                    <Plus size={16} /> Tambah Calon Konsumen
+                  </button>
+                </div>
+              </div>
+
+              {/* Table Calon Konsumen */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #ec4899' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
+                  <thead>
+                    <tr style={{ background: '#ec4899', color: '#ffffff' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ width: '170px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {databaseCalonKonsumenRows
+                      .filter(r => !searchDbCalonKonsumen || [r.nama, r.noHp, r.domisili, r.marketing, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbCalonKonsumen.toLowerCase().trim())))
+                      .map((row, idx) => (
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
+                              </div>
+                              <span>{row.nama}</span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
+                              title="Chat via WhatsApp"
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                            >
+                              <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                            </button>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <MapPin size={13} color="#f472b6" /> {row.domisili || '-'}
+                            </span>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fcd34d' }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                              {row.marketing || 'Amanda'}
+                            </span>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            {row.catatan || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              {/* AKSI PROSPEK: PINDAH KE HOT PROSPEK */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenMoveToHot(row)}
+                                title="Pindahkan Calon Konsumen ini ke HOT PROSPEK"
+                                style={{
+                                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '5px 9px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 900,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 6px rgba(249, 115, 22, 0.4)'
+                                }}
+                              >
+                                <Flame size={12} /> Prospek
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditCalonKonsumen(row)}
+                                title="Edit Calon Konsumen"
+                                style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Edit3 size={12} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCalonKonsumen(row.id, row.nama)}
+                                title="Hapus Calon Konsumen"
+                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    {databaseCalonKonsumenRows.length === 0 && (
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada data calon konsumen terdaftar. Klik "+ Tambah Calon Konsumen" untuk menambahkan.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* SUB-VIEW 2: HOT PROSPEK                                                  */}
+          {/* ========================================================================= */}
+          {subTabKonsumen === 'hot' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid #f97316', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
+                    🔥 Prospek Hangat &bull; Target Closing
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari Hot Prospek / Minat / HP..."
+                      value={searchDbHotProspek}
+                      onChange={(e) => setSearchDbHotProspek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '220px', outline: 'none' }}
+                    />
+                    {searchDbHotProspek && (
+                      <button onClick={() => setSearchDbHotProspek('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddHotProspek}
+                    style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)' }}
+                  >
+                    <Plus size={16} /> Tambah Hot Prospek
+                  </button>
+                </div>
+              </div>
+
+              {/* Table Hot Prospek */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #f97316' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                  <thead>
+                    <tr style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '150px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '140px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '140px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Minat Unit / Tipe</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ width: '180px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {databaseHotProspekRows
+                      .filter(r => !searchDbHotProspek || [r.nama, r.noHp, r.domisili, r.marketing, r.minat, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbHotProspek.toLowerCase().trim())))
+                      .map((row, idx) => (
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f97316', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                                <Flame size={14} />
+                              </div>
+                              <span>{row.nama}</span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
+                              title="Chat via WhatsApp"
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                            >
+                              <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                            </button>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.domisili || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                              {row.marketing || 'Amanda'}
+                            </span>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#38bdf8' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              🏠 {row.minat || '-'}
+                            </span>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                            {row.catatan || '-'}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              {/* AKSI CLOSING: PINDAH KE KONSUMEN */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenMoveToKonsumen(row)}
+                                title="Closing Deal & Pindahkan ke Daftar KONSUMEN Resmi"
+                                style={{
+                                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '5px 9px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 900,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.4)'
+                                }}
+                              >
+                                <CheckCircle2 size={12} /> Closing
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditHotProspek(row)}
+                                title="Edit Hot Prospek"
+                                style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Edit3 size={12} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteHotProspek(row.id, row.nama)}
+                                title="Hapus Hot Prospek"
+                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    {databaseHotProspekRows.length === 0 && (
+                      <tr>
+                        <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada data Hot Prospek. Pindahkan calon konsumen dengan tombol "🔥 Prospek" atau klik "+ Tambah Hot Prospek".
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* SUB-VIEW 3: KONSUMEN (PEMBELI RESMI)                                      */}
+          {/* ========================================================================= */}
+          {subTabKonsumen === 'konsumen' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
+                    👑 Pembeli Resmi &bull; Closed Deal
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={14} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari Konsumen / NIK / No HP..."
+                      value={searchDbKonsumen}
+                      onChange={(e) => setSearchDbKonsumen(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '220px', outline: 'none' }}
+                    />
+                    {searchDbKonsumen && (
+                      <button onClick={() => setSearchDbKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddKonsumen}
+                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000000', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
+                  >
+                    <Plus size={16} /> Tambah Konsumen Baru
+                  </button>
+                </div>
+              </div>
+
+              {/* Table Konsumen */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px' }}>
+                  <thead>
+                    <tr style={{ background: '#f59e0b', color: '#000000' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP</th>
+                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
+                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Email</th>
+                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Pekerjaan</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                      <th style={{ width: '120px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Upload</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {databaseKonsumenRows
+                      .filter(r => !searchDbKonsumen || [r.nama, r.nik, r.npwp, r.noHp, r.email, r.pekerjaan, r.alamat, r.marketing].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
+                      .map((row, idx) => (
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'K'}
+                              </div>
+                              <span>{row.nama}</span>
+                            </div>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.npwp || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
+                              title="Chat via WhatsApp"
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                            >
+                              <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                            </button>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', color: '#38bdf8', fontSize: '0.8rem' }}>
+                            {row.email ? (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <Mail size={12} color="#38bdf8" /> {row.email}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.pekerjaan || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fbbf24' }}>{row.marketing || 'Amanda'}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                            {row.ktpFile || row.ktpFileName ? (
+                              <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <FileCheck size={14} color="#10b981" /> Ada KTP
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>-</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditKonsumen(row)}
+                                title="Edit Konsumen"
+                                style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Edit3 size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteKonsumen(row.id, row.nama)}
+                                title="Hapus Konsumen"
+                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    {databaseKonsumenRows.length === 0 && (
+                      <tr>
+                        <td colSpan={11} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          Belum ada data konsumen resmi. Klik "+ Tambah Konsumen Baru" untuk mendaftarkan.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 4: DATA BASE CALON KONSUMEN                                           */}
+      {/* TAB 4: DATA BASE UNIT PROPERTI (KAVLING & RUMAH)                          */}
       {/* ========================================================================= */}
-      {currentSubView === 'calon_konsumen' && (
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #ec4899', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+      {currentSubView === 'db_unit' && (
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #3b82f6', marginBottom: '1.5rem', borderRadius: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.85rem' }}>
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <UserPlus size={22} color="#f472b6" /> Data Base Calon Konsumen ({databaseCalonKonsumenRows.length} Prospek)
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Home size={24} color="#60a5fa" /> DATA BASE UNIT PROPERTI ({databaseUnitRows.length} Kavling / Rumah)
               </h3>
-              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
-                Daftar calon pembeli prospektif, domisili asal, nomor kontak WhatsApp dan saluran promosi
+              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
+                Master data unit properti, blok kavling, nomor unit, tipe bangunan, serta luas bangunan (LB) dan luas tanah (LT)
               </p>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <select
+                value={filterProyekUnit}
+                onChange={(e) => setFilterProyekUnit(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', color: '#ffffff', padding: '6px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 800, outline: 'none' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                {Array.from(new Set(databaseUnitRows.map(u => u.proyek))).filter(Boolean).map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
                 <Search size={14} color="#94a3b8" />
                 <input
                   type="text"
-                  placeholder="Cari Prospek / Domisili..."
-                  value={searchDbCalonKonsumen}
-                  onChange={(e) => setSearchDbCalonKonsumen(e.target.value)}
+                  placeholder="Cari Blok / Nomor / Tipe..."
+                  value={searchDbUnit}
+                  onChange={(e) => setSearchDbUnit(e.target.value)}
                   style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '190px', outline: 'none' }}
                 />
-                {searchDbCalonKonsumen && (
-                  <button onClick={() => setSearchDbCalonKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                {searchDbUnit && (
+                  <button onClick={() => setSearchDbUnit('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                     <X size={13} />
                   </button>
                 )}
@@ -1429,76 +2206,74 @@ export const MarketingModule = () => {
 
               <button
                 type="button"
-                onClick={handleOpenAddCalonKonsumen}
-                style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.4)' }}
+                onClick={handleOpenAddUnit}
+                style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(59, 130, 246, 0.4)' }}
               >
-                <Plus size={16} /> Tambah Calon Konsumen
+                <Plus size={16} /> Tambah Unit Properti
               </button>
             </div>
           </div>
 
-          {/* Table Calon Konsumen */}
-          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #db2777' }}>
-            <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '750px' }}>
+          {/* Table Unit Properti */}
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #3b82f6' }}>
+            <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
               <thead>
-                <tr style={{ background: '#ec4899', color: '#ffffff' }}>
-                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                  <th style={{ minWidth: '220px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Calon Konsumen</th>
-                  <th style={{ width: '170px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
-                  <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                  <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                <tr style={{ background: '#3b82f6', color: '#ffffff' }}>
+                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                  <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Proyek</th>
+                  <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Blok</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nomor Unit</th>
+                  <th style={{ minWidth: '160px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Tipe Rumah</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LB (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LT (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {databaseCalonKonsumenRows
-                  .filter(r => !searchDbCalonKonsumen || [r.nama, r.noHp, r.domisili, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbCalonKonsumen.toLowerCase().trim())))
+                {databaseUnitRows
+                  .filter(u => {
+                    const matchProyek = filterProyekUnit === 'ALL' || u.proyek === filterProyekUnit;
+                    const matchSearch = !searchDbUnit || [u.proyek, u.blok, u.nomor, u.type].some(v => (v || '').toLowerCase().includes(searchDbUnit.toLowerCase().trim()));
+                    return matchProyek && matchSearch;
+                  })
                   .map((row, idx) => (
                     <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
                       <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
-                            {row.nama ? row.nama.charAt(0).toUpperCase() : 'P'}
-                          </div>
-                          <span>{row.nama}</span>
-                        </div>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Home size={14} color="#60a5fa" /> {row.proyek}
+                        </span>
                       </td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
-                          title="Chat via WhatsApp"
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
-                        >
-                          <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
-                        </button>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#38bdf8' }}>
+                        Blok {row.blok}
+                      </td>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#fcd34d' }}>
+                        No. {row.nomor}
                       </td>
                       <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <MapPin size={13} color="#f472b6" /> {row.domisili || '-'}
-                        </span>
+                        {row.type}
                       </td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
-                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: '1px solid rgba(236, 72, 153, 0.3)' }}>
-                          {row.referensi || '-'}
-                        </span>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#a7f3d0' }}>
+                        {row.lb} m²
+                      </td>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#a7f3d0' }}>
+                        {row.lt} m²
                       </td>
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                           <button
                             type="button"
-                            onClick={() => handleOpenEditCalonKonsumen(row)}
-                            title="Edit Calon Konsumen"
-                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                            onClick={() => handleOpenEditUnit(row)}
+                            title="Edit Unit"
+                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
                           >
                             <Edit3 size={12} />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteCalonKonsumen(row.id, row.nama)}
-                            title="Hapus Calon Konsumen"
-                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                            onClick={() => handleDeleteUnit(row.id, `${row.proyek} Blok ${row.blok} No ${row.nomor}`)}
+                            title="Hapus Unit"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '5px 7px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
                           >
                             <Trash2 size={12} />
                           </button>
@@ -1506,6 +2281,13 @@ export const MarketingModule = () => {
                       </td>
                     </tr>
                   ))}
+                {databaseUnitRows.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                      Belum ada data unit properti. Klik "+ Tambah Unit Properti" untuk menambahkan.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -1776,11 +2558,11 @@ export const MarketingModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL MASTER: DATA BASE KONSUMEN                                         */}
+      {/* MODAL MASTER 1: DATA BASE KONSUMEN (PEMBELI RESMI)                        */}
       {/* ========================================================================= */}
       {isKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Users size={20} color="#fbbf24" />
@@ -1794,40 +2576,29 @@ export const MarketingModule = () => {
             <form onSubmit={handleSaveKonsumen}>
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
                     {/* Nama */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Konsumen</div>
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
                       required
-                      placeholder="Nama lengkap konsumen..."
+                      placeholder="Nama lengkap pembeli..."
                       value={konsumenFormData.nama}
                       onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nama: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* No. HP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP / WA</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="0812-xxxx-xxxx"
-                      value={konsumenFormData.noHp}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, noHp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
-
-                    {/* NIK */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NIK (KTP)</div>
+                    {/* No. KTP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. KTP</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
                       placeholder="16 digit NIK KTP..."
                       value={konsumenFormData.nik}
                       onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nik: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* NPWP */}
@@ -1835,36 +2606,69 @@ export const MarketingModule = () => {
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
-                      placeholder="Nomor NPWP..."
+                      placeholder="Nomor NPWP pembeli..."
                       value={konsumenFormData.npwp}
                       onChange={(e) => setKonsumenFormData({ ...konsumenFormData, npwp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. HP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="0812-xxxx-xxxx"
+                      value={konsumenFormData.noHp}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, noHp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Email */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Email</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="email"
+                      placeholder="alamat.email@gmail.com"
+                      value={konsumenFormData.email}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, email: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Pekerjaan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Pekerjaan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="PNS / Wiraswasta / Karyawan BUMN / dll..."
+                      value={konsumenFormData.pekerjaan}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, pekerjaan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* Alamat */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Alamat Domisili</div>
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Alamat</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
                       placeholder="Alamat domisili lengkap..."
                       value={konsumenFormData.alamat}
                       onChange={(e) => setKonsumenFormData({ ...konsumenFormData, alamat: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* Referensi */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    {/* Marketing */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Marketing</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
-                      placeholder="Pameran / Brosur / Teman / Instagram..."
-                      value={konsumenFormData.referensi}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, referensi: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      placeholder="Nama sales PIC..."
+                      value={konsumenFormData.marketing}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, marketing: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* Upload NIK / KTP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP / NIK</div>
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <div>
                       <input
@@ -1928,11 +2732,11 @@ export const MarketingModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL MASTER: DATA BASE CALON KONSUMEN                                    */}
+      {/* MODAL MASTER 2: DATA BASE CALON KONSUMEN                                  */}
       {/* ========================================================================= */}
       {isCalonKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #ec4899', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #ec4899', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <UserPlus size={20} color="#f472b6" />
@@ -1946,7 +2750,7 @@ export const MarketingModule = () => {
             <form onSubmit={handleSaveCalonKonsumen}>
               <div className="modal-body">
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '90px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
                     {/* Nama */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
@@ -1954,10 +2758,10 @@ export const MarketingModule = () => {
                     <input
                       type="text"
                       required
-                      placeholder="Nama prospek / calon pembeli..."
+                      placeholder="Nama prospek..."
                       value={calonKonsumenFormData.nama}
                       onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, nama: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #ec4899', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #ec4899', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* No. HP */}
@@ -1968,7 +2772,7 @@ export const MarketingModule = () => {
                       placeholder="0812-xxxx-xxxx"
                       value={calonKonsumenFormData.noHp}
                       onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, noHp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* Domisili */}
@@ -1979,18 +2783,29 @@ export const MarketingModule = () => {
                       placeholder="Kota / Wilayah tempat tinggal..."
                       value={calonKonsumenFormData.domisili}
                       onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, domisili: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* Referensi */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    {/* Marketing */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Marketing</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
-                      placeholder="Brosur / Spanduk / Web / Sales..."
-                      value={calonKonsumenFormData.referensi}
-                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensi: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      placeholder="Nama marketing PIC..."
+                      value={calonKonsumenFormData.marketing}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, marketing: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Catatan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Catatan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <textarea
+                      rows={3}
+                      placeholder="Catatan awal respon prospek, asal brosur / medsos..."
+                      value={calonKonsumenFormData.catatan}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, catatan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '6px 10px', fontSize: '0.86rem', resize: 'vertical' }}
                     />
 
                   </div>
@@ -2001,6 +2816,465 @@ export const MarketingModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', fontWeight: 900 }}>
                   💾 Simpan Calon Konsumen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL MASTER 3: DATA BASE HOT PROSPEK                                     */}
+      {/* ========================================================================= */}
+      {isHotProspekModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #f97316', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Flame size={20} color="#fb923c" />
+                {editingHotProspekId ? 'Edit Data Base Hot Prospek' : 'Data Base Hot Prospek (Tambah Baru)'}
+              </h3>
+              <button onClick={() => setIsHotProspekModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveHotProspek}>
+              <div className="modal-body">
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Nama */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama hot prospek..."
+                      value={hotProspekFormData.nama}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, nama: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #f97316', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. HP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="0812-xxxx-xxxx"
+                      value={hotProspekFormData.noHp}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, noHp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Domisili */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Domisili</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Kota / Wilayah tempat tinggal..."
+                      value={hotProspekFormData.domisili}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, domisili: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Marketing */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Marketing</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Nama marketing PIC..."
+                      value={hotProspekFormData.marketing}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, marketing: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Minat */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Minat</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Tipe rumah / cluster / unit target..."
+                      value={hotProspekFormData.minat}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, minat: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #f97316', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Catatan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Catatan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <textarea
+                      rows={3}
+                      placeholder="Progress survey, kesepakatan harga / skema KPR..."
+                      value={hotProspekFormData.catatan}
+                      onChange={(e) => setHotProspekFormData({ ...hotProspekFormData, catatan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '6px 10px', fontSize: '0.86rem', resize: 'vertical' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsHotProspekModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', fontWeight: 900 }}>
+                  💾 Simpan Hot Prospek
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL MASTER 4: DATA BASE UNIT PROPERTI (KAVLING & RUMAH)                 */}
+      {/* ========================================================================= */}
+      {isUnitModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #3b82f6', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Home size={20} color="#60a5fa" />
+                {editingUnitId ? 'Edit Data Base Unit Properti' : 'Data Base Unit Properti (Tambah Baru)'}
+              </h3>
+              <button onClick={() => setIsUnitModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveUnit}>
+              <div className="modal-body">
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '110px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Proyek */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Proyek</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama proyek (Ashoka View, dll)..."
+                      value={unitFormData.proyek}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, proyek: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #3b82f6', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Blok */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Blok</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Blok A / B / C..."
+                      value={unitFormData.blok}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, blok: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Nomor Unit */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nomor Unit</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nomor kavling (contoh: 01, 05, dll)..."
+                      value={unitFormData.nomor}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, nomor: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fcd34d', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Type Rumah */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Type Rumah</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Type 36/60, Type 45/84, dll..."
+                      value={unitFormData.type}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, type: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Luas Bangunan (LB) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>LB (m²)</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="number"
+                      placeholder="Luas Bangunan..."
+                      value={unitFormData.lb}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, lb: Number(e.target.value) })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#a7f3d0', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Luas Tanah (LT) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>LT (m²)</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="number"
+                      placeholder="Luas Tanah..."
+                      value={unitFormData.lt}
+                      onChange={(e) => setUnitFormData({ ...unitFormData, lt: Number(e.target.value) })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#a7f3d0', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsUnitModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', fontWeight: 900 }}>
+                  💾 Simpan Unit Properti
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL AKSI SPESIAL: PINDAH DARI CALON KONSUMEN KE HOT PROSPEK            */}
+      {/* ========================================================================= */}
+      {isMoveToHotModalOpen && targetMoveCalonItem && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #f97316', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Flame size={22} color="#f97316" />
+                Pindahkan ke HOT PROSPEK
+              </h3>
+              <button onClick={() => setIsMoveToHotModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmMoveToHot}>
+              <div className="modal-body">
+                <div style={{ background: 'rgba(249, 115, 22, 0.1)', border: '1px solid #f97316', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 800 }}>PROSPEK TERPILIH:</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>{targetMoveCalonItem.nama}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>No. HP: {targetMoveCalonItem.noHp || '-'} &bull; Domisili: {targetMoveCalonItem.domisili || '-'}</div>
+                </div>
+
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '100px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Minat */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Minat Unit</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      autoFocus
+                      placeholder="Contoh: Cluster Emerald Unit A-02 / Tipe 45..."
+                      value={moveToHotData.minat}
+                      onChange={(e) => setMoveToHotData({ ...moveToHotData, minat: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #f97316', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '7px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Marketing */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Marketing</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="PIC Marketing..."
+                      value={moveToHotData.marketing}
+                      onChange={(e) => setMoveToHotData({ ...moveToHotData, marketing: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '7px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Catatan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Catatan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <textarea
+                      rows={3}
+                      placeholder="Catatan respon survey, skema KPR atau estimasi waktu closing..."
+                      value={moveToHotData.catatan}
+                      onChange={(e) => setMoveToHotData({ ...moveToHotData, catatan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '7px 10px', fontSize: '0.86rem', resize: 'vertical' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToHotModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Flame size={16} /> 🚀 Pindahkan ke Hot Prospek
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL AKSI SPESIAL: PINDAH DARI HOT PROSPEK KE KONSUMEN (CLOSING DEAL)    */}
+      {/* ========================================================================= */}
+      {isMoveToKonsumenModalOpen && targetMoveHotItem && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <CheckCircle2 size={22} color="#10b981" />
+                Closing Deal & Pindahkan ke KONSUMEN
+              </h3>
+              <button onClick={() => setIsMoveToKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmMoveToKonsumen}>
+              <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '10px 14px', borderRadius: '8px', marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800 }}>HOT PROSPEK CLOSING:</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>{targetMoveHotItem.nama}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Minat: <strong>{targetMoveHotItem.minat || '-'}</strong> &bull; Marketing: <strong>{targetMoveHotItem.marketing || 'Amanda'}</strong></div>
+                </div>
+
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '110px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                    
+                    {/* Nama */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      value={moveToKonsumenData.nama}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, nama: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. KTP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. KTP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="16 digit NIK KTP..."
+                      value={moveToKonsumenData.nik}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, nik: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* NPWP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NPWP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Nomor NPWP..."
+                      value={moveToKonsumenData.npwp}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, npwp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. HP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      value={moveToKonsumenData.noHp}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, noHp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Email */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Email</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="email"
+                      placeholder="email@pembeli.com"
+                      value={moveToKonsumenData.email}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, email: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Pekerjaan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Pekerjaan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Pekerjaan pembeli..."
+                      value={moveToKonsumenData.pekerjaan}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, pekerjaan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Alamat */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Alamat</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Alamat domisili lengkap..."
+                      value={moveToKonsumenData.alamat}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, alamat: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Marketing */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Marketing</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      value={moveToKonsumenData.marketing}
+                      onChange={(e) => setMoveToKonsumenData({ ...moveToKonsumenData, marketing: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Upload NIK / KTP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="closing-konsumen-ktp-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setMoveToKonsumenData(prev => ({
+                                ...prev,
+                                ktpFileName: file.name,
+                                ktpFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="closing-konsumen-ktp-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(16, 185, 129, 0.2)',
+                          border: '1px dashed #10b981',
+                          color: '#34d399',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {moveToKonsumenData.ktpFileName ? `Berkas: ${moveToKonsumenData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
+                      </label>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToKonsumenModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} /> 💾 Simpan sebagai Konsumen Resmi
                 </button>
               </div>
             </form>
