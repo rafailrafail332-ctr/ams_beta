@@ -137,6 +137,9 @@ const initialDbCalonKonsumen = [
     noHp: '0812-3344-5566',
     domisili: 'Semarang Barat',
     marketing: 'Amanda',
+    referensi: 'Brosur / Flyer',
+    referensiBuyer: '',
+    referensiLain: '',
     catatan: 'Tanya brosur Cluster Emerald via WhatsApp'
   },
   {
@@ -145,7 +148,10 @@ const initialDbCalonKonsumen = [
     noHp: '0858-7788-9900',
     domisili: 'Ungaran Barat, Kab. Semarang',
     marketing: 'Fresda',
-    catatan: 'Minta simulasi angsuran KPR Bank BSI'
+    referensi: 'Get Buyer',
+    referensiBuyer: 'Budi Santoso',
+    referensiLain: '',
+    catatan: 'Direferensikan oleh Bpk. Budi Santoso (Emerald A-01)'
   },
   {
     id: 'CLK-003',
@@ -153,6 +159,9 @@ const initialDbCalonKonsumen = [
     noHp: '0857-1122-3344',
     domisili: 'Pedurungan, Semarang',
     marketing: 'Bambang',
+    referensi: 'Medsos',
+    referensiBuyer: '',
+    referensiLain: '',
     catatan: 'Respon dari iklan Facebook Ads'
   },
   {
@@ -161,7 +170,10 @@ const initialDbCalonKonsumen = [
     noHp: '0811-9988-7711',
     domisili: 'Banyumanik, Semarang',
     marketing: 'Yulieka Rahmawati',
-    catatan: 'Rencana survey lokasi weekend ini'
+    referensi: 'WI',
+    referensiBuyer: '',
+    referensiLain: '',
+    catatan: 'Walk-in ke marketing gallery hari Minggu'
   }
 ];
 
@@ -307,6 +319,7 @@ export const MarketingModule = () => {
   // STATE & HANDLERS: CALON KONSUMEN
   // -------------------------------------------------------------
   const [searchDbCalonKonsumen, setSearchDbCalonKonsumen] = useState('');
+  const [filterRefCalonKonsumen, setFilterRefCalonKonsumen] = useState('ALL');
   const [isCalonKonsumenModalOpen, setIsCalonKonsumenModalOpen] = useState(false);
   const [editingCalonKonsumenId, setEditingCalonKonsumenId] = useState(null);
   const [calonKonsumenFormData, setCalonKonsumenFormData] = useState({
@@ -314,6 +327,9 @@ export const MarketingModule = () => {
     noHp: '',
     domisili: '',
     marketing: 'Amanda',
+    referensi: 'Iklan',
+    referensiBuyer: '',
+    referensiLain: '',
     catatan: ''
   });
 
@@ -324,6 +340,9 @@ export const MarketingModule = () => {
       noHp: '',
       domisili: '',
       marketing: 'Amanda',
+      referensi: 'Iklan',
+      referensiBuyer: '',
+      referensiLain: '',
       catatan: ''
     });
     setIsCalonKonsumenModalOpen(true);
@@ -336,7 +355,10 @@ export const MarketingModule = () => {
       noHp: row.noHp || '',
       domisili: row.domisili || '',
       marketing: row.marketing || 'Amanda',
-      catatan: row.catatan || row.referensi || ''
+      referensi: row.referensi || 'Iklan',
+      referensiBuyer: row.referensiBuyer || '',
+      referensiLain: row.referensiLain || '',
+      catatan: row.catatan || ''
     });
     setIsCalonKonsumenModalOpen(true);
   };
@@ -402,6 +424,9 @@ export const MarketingModule = () => {
       noHp: targetMoveCalonItem.noHp,
       domisili: targetMoveCalonItem.domisili,
       marketing: moveToHotData.marketing || targetMoveCalonItem.marketing || 'Amanda',
+      referensi: targetMoveCalonItem.referensi || 'Iklan',
+      referensiBuyer: targetMoveCalonItem.referensiBuyer || '',
+      referensiLain: targetMoveCalonItem.referensiLain || '',
       minat: moveToHotData.minat,
       catatan: moveToHotData.catatan || targetMoveCalonItem.catatan || ''
     };
@@ -1735,11 +1760,12 @@ export const MarketingModule = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  {/* Search Input */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
                     <Search size={14} color="#94a3b8" />
                     <input
                       type="text"
-                      placeholder="Cari Calon Konsumen / HP / Marketing..."
+                      placeholder="Cari Calon Konsumen / HP / Referensi..."
                       value={searchDbCalonKonsumen}
                       onChange={(e) => setSearchDbCalonKonsumen(e.target.value)}
                       style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '220px', outline: 'none' }}
@@ -1750,6 +1776,22 @@ export const MarketingModule = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Filter Referensi Dropdown */}
+                  <select
+                    value={filterRefCalonKonsumen}
+                    onChange={(e) => setFilterRefCalonKonsumen(e.target.value)}
+                    style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#cbd5e1', fontSize: '0.82rem', fontWeight: 800, padding: '6px 10px', outline: 'none' }}
+                  >
+                    <option value="ALL">Semua Referensi</option>
+                    <option value="Iklan">Iklan</option>
+                    <option value="Medsos">Medsos</option>
+                    <option value="Brosur / Flyer">Brosur / Flyer</option>
+                    <option value="WI">WI (Walk In)</option>
+                    <option value="Get Buyer">Get Buyer</option>
+                    <option value="Website">Website</option>
+                    <option value="Lain-lain">Lain-lain</option>
+                  </select>
 
                   <button
                     type="button"
@@ -1763,21 +1805,29 @@ export const MarketingModule = () => {
 
               {/* Table Calon Konsumen */}
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #ec4899' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
                     <tr style={{ background: '#ec4899', color: '#ffffff' }}>
                       <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ minWidth: '170px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '140px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
                       <th style={{ width: '170px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {databaseCalonKonsumenRows
-                      .filter(r => !searchDbCalonKonsumen || [r.nama, r.noHp, r.domisili, r.marketing, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbCalonKonsumen.toLowerCase().trim())))
+                      .filter(r => {
+                        if (filterRefCalonKonsumen !== 'ALL') {
+                          if ((r.referensi || 'Iklan').toLowerCase() !== filterRefCalonKonsumen.toLowerCase()) return false;
+                        }
+                        if (!searchDbCalonKonsumen) return true;
+                        const q = searchDbCalonKonsumen.toLowerCase().trim();
+                        return [r.nama, r.noHp, r.domisili, r.marketing, r.referensi, r.referensiBuyer, r.referensiLain, r.catatan].some(v => (v || '').toLowerCase().includes(q));
+                      })
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
@@ -1808,6 +1858,41 @@ export const MarketingModule = () => {
                             <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
                               {row.marketing || 'Amanda'}
                             </span>
+                          </td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem' }}>
+                            {row.referensi === 'Get Buyer' ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 900, background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid #10b981', width: 'fit-content' }}>
+                                  <Users size={12} /> Get Buyer
+                                </span>
+                                {row.referensiBuyer ? (
+                                  <span style={{ fontSize: '0.74rem', color: '#fcd34d', fontWeight: 800 }}>
+                                    Ref: {row.referensiBuyer}
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>-</span>
+                                )}
+                              </div>
+                            ) : row.referensi === 'Lain-lain' ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(148, 163, 184, 0.15)', color: '#cbd5e1', border: '1px solid #64748b', width: 'fit-content' }}>
+                                  Lain-lain
+                                </span>
+                                {row.referensiLain && (
+                                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                                    {row.referensiLain}
+                                  </span>
+                                )}
+                              </div>
+                            ) : row.referensi === 'WI' ? (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                                WI (Walk In)
+                              </span>
+                            ) : (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                                {row.referensi || 'Iklan'}
+                              </span>
+                            )}
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>
                             {row.catatan || '-'}
@@ -2750,7 +2835,7 @@ export const MarketingModule = () => {
             <form onSubmit={handleSaveCalonKonsumen}>
               <div className="modal-body">
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '100px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
                     {/* Nama */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
@@ -2797,12 +2882,94 @@ export const MarketingModule = () => {
                       style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
+                    {/* Referensi / Saluran Lead */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <select
+                        value={calonKonsumenFormData.referensi || 'Iklan'}
+                        onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensi: e.target.value })}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #38bdf8',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontWeight: 800,
+                          padding: '7px 10px',
+                          fontSize: '0.86rem'
+                        }}
+                      >
+                        <option value="Iklan">Iklan</option>
+                        <option value="Medsos">Medsos</option>
+                        <option value="Brosur / Flyer">Brosur / Flyer</option>
+                        <option value="WI">WI (Walk In)</option>
+                        <option value="Get Buyer">Get Buyer</option>
+                        <option value="Website">Website</option>
+                        <option value="Lain-lain">Lain-lain</option>
+                      </select>
+                    </div>
+
+                    {/* Conditional: Jika Get Buyer dipilih, tampilkan pilihan pembeli yang sudah beli */}
+                    {calonKonsumenFormData.referensi === 'Get Buyer' && (
+                      <>
+                        <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#34d399' }}>Pilih Pembeli</div>
+                        <div style={{ fontWeight: 900, color: '#34d399' }}>:</div>
+                        <div>
+                          <select
+                            value={calonKonsumenFormData.referensiBuyer || ''}
+                            onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensiBuyer: e.target.value })}
+                            style={{
+                              width: '100%',
+                              background: '#0f172a',
+                              border: '1.5px solid #10b981',
+                              borderRadius: '6px',
+                              color: '#34d399',
+                              fontWeight: 800,
+                              padding: '7px 10px',
+                              fontSize: '0.86rem'
+                            }}
+                            required
+                          >
+                            <option value="">-- Pilih Pembeli Yang Sudah Beli (Konsumen) --</option>
+                            {databaseKonsumenRows.length === 0 ? (
+                              <option value="" disabled>Belum ada data konsumen pembeli resmi</option>
+                            ) : (
+                              databaseKonsumenRows.map((k) => (
+                                <option key={k.id} value={k.nama}>
+                                  {k.nama} ({k.id} &bull; {k.pekerjaan || 'Konsumen'})
+                                </option>
+                              ))
+                            )}
+                          </select>
+                          <div style={{ fontSize: '0.73rem', color: '#94a3b8', marginTop: '4px' }}>
+                            * Referensi Get Buyer otomatis diambil dari Data Base Konsumen yang sudah resmi membeli.
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Conditional: Jika Lain-lain dipilih, tampilkan input teks keterangan lain-lain */}
+                    {calonKonsumenFormData.referensi === 'Lain-lain' && (
+                      <>
+                        <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#cbd5e1' }}>Ket. Lain-lain</div>
+                        <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                        <input
+                          type="text"
+                          placeholder="Tuliskan keterangan referensi lainnya..."
+                          value={calonKonsumenFormData.referensiLain || ''}
+                          onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensiLain: e.target.value })}
+                          style={{ background: '#0f172a', border: '1.5px solid #64748b', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                        />
+                      </>
+                    )}
+
                     {/* Catatan */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Catatan</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <textarea
                       rows={3}
-                      placeholder="Catatan awal respon prospek, asal brosur / medsos..."
+                      placeholder="Catatan awal respon prospek, kebutuhan unit, dll..."
                       value={calonKonsumenFormData.catatan}
                       onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, catatan: e.target.value })}
                       style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '6px 10px', fontSize: '0.86rem', resize: 'vertical' }}
@@ -3055,6 +3222,14 @@ export const MarketingModule = () => {
                   <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 800 }}>PROSPEK TERPILIH:</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>{targetMoveCalonItem.nama}</div>
                   <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>No. HP: {targetMoveCalonItem.noHp || '-'} &bull; Domisili: {targetMoveCalonItem.domisili || '-'}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: 800, marginTop: '4px' }}>
+                    Saluran Referensi: <span style={{ color: '#ffffff' }}>{targetMoveCalonItem.referensi || 'Iklan'}</span>
+                    {targetMoveCalonItem.referensi === 'Get Buyer' && targetMoveCalonItem.referensiBuyer ? (
+                      <span style={{ color: '#34d399', marginLeft: '6px' }}>&bull; Pembeli Ref: <strong>{targetMoveCalonItem.referensiBuyer}</strong></span>
+                    ) : targetMoveCalonItem.referensi === 'Lain-lain' && targetMoveCalonItem.referensiLain ? (
+                      <span style={{ color: '#cbd5e1', marginLeft: '6px' }}>({targetMoveCalonItem.referensiLain})</span>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
