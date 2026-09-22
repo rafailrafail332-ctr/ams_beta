@@ -1017,6 +1017,7 @@ export const TeknikModule = () => {
   // MODAL STATES UNTUK PERSEDIAAN
   const [isMasterBarangModalOpen, setIsMasterBarangModalOpen] = useState(false);
   const [editingBarangId, setEditingBarangId] = useState(null);
+  const [masterBarangModalOrigin, setMasterBarangModalOrigin] = useState(null); // 'persediaan_masuk' | 'persediaan_keluar' | null
   const [barangFormData, setBarangFormData] = useState({
     kode: '',
     nama: '',
@@ -3296,14 +3297,26 @@ export const TeknikModule = () => {
   }, [persediaanMasterBarang, searchMasterBarang]);
 
   // HANDLER: MASTER BARANG
-  const handleOpenAddMasterBarang = () => {
+  const handleOpenAddMasterBarang = (initialKode = '', initialNama = '', origin = null, initialSatuan = 'Sak') => {
     setEditingBarangId(null);
-    const nextNum = (persediaanMasterBarang.length + 1).toString().padStart(3, '0');
+    let cleanKode = (typeof initialKode === 'string' ? initialKode : '').trim().toUpperCase();
+    if (!cleanKode) {
+      let maxNum = 0;
+      persediaanMasterBarang.forEach(b => {
+        const m = b.kode?.match(/\d+/);
+        if (m) {
+          const n = parseInt(m[0], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      cleanKode = `BRG-${String(maxNum + 1).padStart(3, '0')}`;
+    }
     setBarangFormData({
-      kode: `BRG-${nextNum}`,
-      nama: '',
-      satuan: 'Sak'
+      kode: cleanKode,
+      nama: (typeof initialNama === 'string' ? initialNama : '').trim(),
+      satuan: (typeof initialSatuan === 'string' && initialSatuan) ? initialSatuan : 'Sak'
     });
+    setMasterBarangModalOrigin(origin || null);
     setIsMasterBarangModalOpen(true);
   };
 
@@ -3314,6 +3327,7 @@ export const TeknikModule = () => {
       nama: item.nama || '',
       satuan: item.satuan || 'Sak'
     });
+    setMasterBarangModalOrigin(null);
     setIsMasterBarangModalOpen(true);
   };
 
@@ -3341,8 +3355,27 @@ export const TeknikModule = () => {
         satuan: barangFormData.satuan || 'Sak'
       };
       updateAndSaveMasterBarang([...persediaanMasterBarang, newB], `Barang "${cleanNama}" berhasil didaftarkan ke Database!`, 'success');
+
+      if (masterBarangModalOrigin === 'persediaan_masuk') {
+        setBarangMasukFormData(prev => ({
+          ...prev,
+          kode: cleanKode,
+          namaBarang: cleanNama,
+          satuan: newB.satuan
+        }));
+        setIsBarangMasukModalOpen(true);
+      } else if (masterBarangModalOrigin === 'persediaan_keluar') {
+        setBarangKeluarFormData(prev => ({
+          ...prev,
+          kode: cleanKode,
+          namaBarang: cleanNama,
+          satuan: newB.satuan
+        }));
+        setIsBarangKeluarModalOpen(true);
+      }
     }
     setIsMasterBarangModalOpen(false);
+    setMasterBarangModalOrigin(null);
   };
 
   const handleDeleteMasterBarang = (id) => {
@@ -3388,7 +3421,7 @@ export const TeknikModule = () => {
 
   const handleSaveBarangMasuk = (e) => {
     e.preventDefault();
-    const cleanNama = (barangMasukFormData.namaBarang || '').trim();
+    let cleanNama = (barangMasukFormData.namaBarang || '').trim();
     let cleanKode = (barangMasukFormData.kode || '').trim().toUpperCase();
     const qtyNum = parseFloat(String(barangMasukFormData.qty).replace(',', '.')) || 0;
     const hargaNum = Number(String(barangMasukFormData.hargaSatuan).replace(/\D/g, '')) || 0;
@@ -3402,8 +3435,9 @@ export const TeknikModule = () => {
       return;
     }
 
-    // Check if item exists in Master Database
+    // Check if item exists in Master Database (by code or name)
     let itemMaster = persediaanMasterBarang.find(b => 
+      (cleanKode && b.kode.trim().toUpperCase() === cleanKode) ||
       b.nama.trim().toLowerCase() === cleanNama.toLowerCase()
     );
 
@@ -3435,6 +3469,7 @@ export const TeknikModule = () => {
     } else {
       // Material already exists in Master Database
       cleanKode = itemMaster.kode;
+      if (!cleanNama) cleanNama = itemMaster.nama;
     }
 
     const payload = {
@@ -11756,7 +11791,7 @@ export const TeknikModule = () => {
       {/* MODAL MASTER 1: VENDOR (Nama | No HP | No KTP | Status Kontraktor/Suplier)*/}
       {/* ========================================================================= */}
       {isVendorModalOpen && (
-        <div className="modal-backdrop">
+        <div className="modal-backdrop" style={{ zIndex: 1050 }}>
           <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
@@ -13351,20 +13386,37 @@ export const TeknikModule = () => {
       {/* MODAL PERSEDIAAN 1: MASTER BARANG (Kode, Nama Barang, Satuan)             */}
       {/* ========================================================================= */}
       {isMasterBarangModalOpen && (
-        <div className="modal-backdrop">
+        <div className="modal-backdrop" style={{ zIndex: 1050 }}>
           <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #a855f7', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Package size={20} color="#a855f7" />
-                {editingBarangId ? 'Edit Master Barang / Material' : 'Tambah Master Barang (Data Base)'}
+                {editingBarangId ? 'Edit Master Barang / Material' : (masterBarangModalOrigin ? 'Tambah Barang Baru (Database Master)' : 'Data Base Barang (Tambah Baru)')}
               </h3>
-              <button onClick={() => setIsMasterBarangModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => { setIsMasterBarangModalOpen(false); setMasterBarangModalOrigin(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
             <form onSubmit={handleSaveMasterBarang}>
               <div className="modal-body">
+                {masterBarangModalOrigin && (
+                  <div style={{
+                    marginBottom: '1rem',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    background: 'rgba(168, 85, 247, 0.15)',
+                    border: '1px solid #a855f7',
+                    fontSize: '0.8rem',
+                    color: '#e9d5ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Sparkles size={16} color="#c084fc" />
+                    <span>Barang ini otomatis tersimpan di <strong>Data Base Master</strong> dan langsung terpilih pada formulir <strong>{masterBarangModalOrigin === 'persediaan_masuk' ? 'Barang Masuk' : 'Barang Keluar'}</strong>.</span>
+                  </div>
+                )}
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '110px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
@@ -13428,7 +13480,7 @@ export const TeknikModule = () => {
               </div>
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsMasterBarangModalOpen(false)}>Batal</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setIsMasterBarangModalOpen(false); setMasterBarangModalOrigin(null); }}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
                   💾 Simpan Master Barang
                 </button>
@@ -13482,34 +13534,181 @@ export const TeknikModule = () => {
                       <option value="Ashoka Park">Ashoka Park</option>
                     </select>
 
-                    {/* Pilih Cepat Dari Master */}
-                    <div style={{ fontWeight: 900, fontSize: '0.82rem', color: '#94a3b8' }}>Pilih Dari Master</div>
+                    {/* 1. KODE BARANG (Ambil dari Database / Ketik Manual + Tombol Add jika belum ada) */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#c084fc',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={11} /> + Add Barang
+                        </button>
+                      </div>
+                    </div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <select
-                      value={persediaanMasterBarang.some(b => b.kode === barangMasukFormData.kode) ? barangMasukFormData.kode : ''}
-                      onChange={(e) => {
-                        const selectedCode = e.target.value;
-                        const found = persediaanMasterBarang.find(b => b.kode === selectedCode);
-                        if (found) {
-                          setBarangMasukFormData(prev => ({
-                            ...prev,
-                            kode: found.kode,
-                            namaBarang: found.nama,
-                            satuan: found.satuan || 'Sak'
-                          }));
-                        }
-                      }}
-                      style={{ background: '#0f172a', border: '1px solid #475569', borderRadius: '6px', color: '#c084fc', fontWeight: 800, padding: '6px 8px', fontSize: '0.82rem', outline: 'none' }}
-                    >
-                      <option value="">-- Pilih dari Master Barang (Auto-fill) --</option>
-                      {persediaanMasterBarang.map(b => (
-                        <option key={b.id || b.kode} value={b.kode}>
-                          [{b.kode}] {b.nama} ({b.satuan})
-                        </option>
-                      ))}
-                    </select>
+                    <div>
+                      {/* Dropdown ambil langsung dari database */}
+                      <select
+                        value={persediaanMasterBarang.some(b => b.kode === barangMasukFormData.kode) ? barangMasukFormData.kode : ''}
+                        onChange={(e) => {
+                          const selectedCode = e.target.value;
+                          const found = persediaanMasterBarang.find(b => b.kode === selectedCode);
+                          if (found) {
+                            setBarangMasukFormData(prev => ({
+                              ...prev,
+                              kode: found.kode,
+                              namaBarang: found.nama,
+                              satuan: found.satuan || 'Sak'
+                            }));
+                          } else if (!selectedCode) {
+                            setBarangMasukFormData(prev => ({
+                              ...prev,
+                              kode: '',
+                              namaBarang: '',
+                              satuan: 'Sak'
+                            }));
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          background: '#0f172a',
+                          border: '1.5px solid #0284c7',
+                          borderRadius: '6px',
+                          color: '#38bdf8',
+                          fontWeight: 800,
+                          padding: '7px 10px',
+                          fontSize: '0.84rem',
+                          outline: 'none',
+                          marginBottom: '6px'
+                        }}
+                      >
+                        <option value="">-- Ambil Kode Barang dari Data Base --</option>
+                        {persediaanMasterBarang.map(b => (
+                          <option key={b.id || b.kode} value={b.kode}>
+                            [{b.kode}] {b.nama} ({b.satuan})
+                          </option>
+                        ))}
+                      </select>
 
-                    {/* Nama Barang */}
+                      {/* Input manual kode barang dengan datalist */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="text"
+                          list="master-kode-barang-datalist"
+                          placeholder="Atau ketik kode barang (contoh: BRG-001)..."
+                          value={barangMasukFormData.kode}
+                          onChange={(e) => {
+                            const val = e.target.value.toUpperCase();
+                            const found = persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === val.trim());
+                            if (found) {
+                              setBarangMasukFormData(prev => ({
+                                ...prev,
+                                kode: val,
+                                namaBarang: found.nama,
+                                satuan: found.satuan || prev.satuan
+                              }));
+                            } else {
+                              setBarangMasukFormData(prev => ({
+                                ...prev,
+                                kode: val
+                              }));
+                            }
+                          }}
+                          style={{
+                            flex: 1,
+                            background: '#0f172a',
+                            border: '1.5px solid #334155',
+                            borderRadius: '6px',
+                            color: '#c084fc',
+                            fontWeight: 900,
+                            padding: '6px 10px',
+                            fontSize: '0.86rem',
+                            outline: 'none'
+                          }}
+                        />
+                        <datalist id="master-kode-barang-datalist">
+                          {persediaanMasterBarang.map(b => (
+                            <option key={b.id || b.kode} value={b.kode}>
+                              [{b.kode}] {b.nama} ({b.satuan})
+                            </option>
+                          ))}
+                        </datalist>
+                      </div>
+
+                      {/* Status Deteksi Kode di Database & Tombol Add jika belum ada */}
+                      {(() => {
+                        const typedKode = (barangMasukFormData.kode || '').trim().toUpperCase();
+                        if (!typedKode) return null;
+
+                        const matchKode = persediaanMasterBarang.find(
+                          b => b.kode.trim().toUpperCase() === typedKode
+                        );
+
+                        if (matchKode) {
+                          return (
+                            <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#10b981', fontWeight: 800 }}>
+                              <CheckCircle2 size={13} color="#10b981" />
+                              <span>Terdaftar di Data Base: <strong>[{matchKode.kode}] {matchKode.nama}</strong> ({matchKode.satuan})</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            padding: '6px 10px',
+                            background: 'rgba(168, 85, 247, 0.12)',
+                            border: '1px dashed #a855f7',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#c084fc" />
+                              <span>Kode "{typedKode}" belum ada di Data Base</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAddMasterBarang(typedKode, barangMasukFormData.namaBarang, 'persediaan_masuk', barangMasukFormData.satuan)}
+                              style={{
+                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(168, 85, 247, 0.4)'
+                              }}
+                            >
+                              <Plus size={12} /> Add "{typedKode}" ke Data Base
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* 2. NAMA BARANG */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Barang</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <div>
@@ -13517,23 +13716,23 @@ export const TeknikModule = () => {
                         type="text"
                         required
                         list="master-barang-datalist"
-                        placeholder="Ketik atau pilih nama material..."
+                        placeholder="Pilih atau ketik nama material..."
                         value={barangMasukFormData.namaBarang}
                         onChange={(e) => {
                           const val = e.target.value;
                           const found = persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === val.trim().toLowerCase());
                           if (found) {
-                            setBarangMasukFormData({
-                              ...barangMasukFormData,
+                            setBarangMasukFormData(prev => ({
+                              ...prev,
                               namaBarang: val,
                               kode: found.kode,
-                              satuan: found.satuan || barangMasukFormData.satuan
-                            });
+                              satuan: found.satuan || prev.satuan
+                            }));
                           } else {
-                            setBarangMasukFormData({
-                              ...barangMasukFormData,
+                            setBarangMasukFormData(prev => ({
+                              ...prev,
                               namaBarang: val
-                            });
+                            }));
                           }
                         }}
                         style={{ width: '100%', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '7px 10px', fontSize: '0.88rem', outline: 'none' }}
@@ -13546,7 +13745,7 @@ export const TeknikModule = () => {
                         ))}
                       </datalist>
 
-                      {/* Status Deteksi Master */}
+                      {/* Status Deteksi Nama Barang & Tombol Add jika belum ada */}
                       {(() => {
                         const cleanN = (barangMasukFormData.namaBarang || '').trim();
                         if (!cleanN) return null;
@@ -13555,31 +13754,55 @@ export const TeknikModule = () => {
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981', fontSize: '0.74rem', fontWeight: 800, marginTop: '4px' }}>
                               <CheckCircle2 size={13} color="#10b981" />
-                              <span>Terdaftar di Database: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong> ({matchMaster.satuan})</span>
+                              <span>Terdaftar di Data Base: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong> ({matchMaster.satuan})</span>
                             </div>
                           );
                         }
+                        const typedKode = (barangMasukFormData.kode || '').trim().toUpperCase();
+                        const matchKode = persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === typedKode);
+                        if (matchKode) {
+                          return null;
+                        }
                         return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#38bdf8', fontSize: '0.74rem', fontWeight: 800, marginTop: '4px' }}>
-                            <Sparkles size={13} color="#38bdf8" />
-                            <span>Material Baru: Kode otomatis dialokasikan saat disimpan ke Database</span>
+                          <div style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            padding: '6px 10px',
+                            background: 'rgba(168, 85, 247, 0.12)',
+                            border: '1px dashed #a855f7',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#c084fc" />
+                              <span>Barang belum ada di Data Base</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAddMasterBarang(barangMasukFormData.kode, cleanN, 'persediaan_masuk', barangMasukFormData.satuan)}
+                              style={{
+                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(168, 85, 247, 0.4)'
+                              }}
+                            >
+                              <Plus size={12} /> Add "{cleanN.length > 18 ? cleanN.slice(0, 18) + '...' : cleanN}" ke Data Base
+                            </button>
                           </div>
                         );
                       })()}
-                    </div>
-
-                    {/* Kode Barang */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input
-                        type="text"
-                        placeholder="Otomatis (BRG-xxx)"
-                        value={barangMasukFormData.kode}
-                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, kode: e.target.value.toUpperCase() })}
-                        style={{ width: '160px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem', outline: 'none' }}
-                      />
-                      <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>*Boleh dikosongkan (otomatis)</span>
                     </div>
 
                     {/* Qty & Satuan */}
@@ -13836,28 +14059,222 @@ export const TeknikModule = () => {
                     </select>
 
                     {/* Kode Barang */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Kode Barang</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#c084fc',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <Plus size={11} /> + Add Barang
+                        </button>
+                      </div>
+                    </div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      required
-                      placeholder="BRG-001"
-                      value={barangKeluarFormData.kode}
-                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, kode: e.target.value.toUpperCase() })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        list="keluar-master-kode-barang-datalist"
+                        placeholder="Ketik atau pilih kode barang..."
+                        value={barangKeluarFormData.kode}
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          const found = persediaanSummaryList.find(s => s.kode.trim().toUpperCase() === val.trim()) || persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === val.trim());
+                          if (found) {
+                            setBarangKeluarFormData(prev => ({
+                              ...prev,
+                              kode: val,
+                              namaBarang: found.nama,
+                              satuan: found.satuan || prev.satuan,
+                              avgHarga: found.avgHarga !== undefined ? found.avgHarga : prev.avgHarga
+                            }));
+                          } else {
+                            setBarangKeluarFormData(prev => ({
+                              ...prev,
+                              kode: val
+                            }));
+                          }
+                        }}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem', outline: 'none' }}
+                      />
+                      <datalist id="keluar-master-kode-barang-datalist">
+                        {persediaanMasterBarang.map(b => (
+                          <option key={b.id || b.kode} value={b.kode}>
+                            [{b.kode}] {b.nama} ({b.satuan})
+                          </option>
+                        ))}
+                      </datalist>
+
+                      {/* Status Deteksi Kode di Database & Tombol Add */}
+                      {(() => {
+                        const typedKode = (barangKeluarFormData.kode || '').trim().toUpperCase();
+                        if (!typedKode) return null;
+
+                        const matchKode = persediaanMasterBarang.find(
+                          b => b.kode.trim().toUpperCase() === typedKode
+                        );
+
+                        if (matchKode) {
+                          return (
+                            <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.76rem', color: '#10b981', fontWeight: 800 }}>
+                              <CheckCircle2 size={13} color="#10b981" />
+                              <span>Terdaftar di Data Base: <strong>[{matchKode.kode}] {matchKode.nama}</strong> ({matchKode.satuan})</span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            padding: '6px 10px',
+                            background: 'rgba(168, 85, 247, 0.12)',
+                            border: '1px dashed #a855f7',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#c084fc" />
+                              <span>Kode "{typedKode}" belum ada di Data Base</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAddMasterBarang(typedKode, barangKeluarFormData.namaBarang, 'persediaan_keluar', barangKeluarFormData.satuan)}
+                              style={{
+                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(168, 85, 247, 0.4)'
+                              }}
+                            >
+                              <Plus size={12} /> Add "{typedKode}" ke Data Base
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
                     {/* Nama Barang */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Barang</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Nama material yang keluar..."
-                      value={barangKeluarFormData.namaBarang}
-                      onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, namaBarang: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        list="keluar-master-nama-barang-datalist"
+                        placeholder="Nama material yang keluar..."
+                        value={barangKeluarFormData.namaBarang}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const found = persediaanSummaryList.find(s => s.nama.trim().toLowerCase() === val.trim().toLowerCase()) || persediaanMasterBarang.find(b => b.nama.trim().toLowerCase() === val.trim().toLowerCase());
+                          if (found) {
+                            setBarangKeluarFormData(prev => ({
+                              ...prev,
+                              namaBarang: val,
+                              kode: found.kode,
+                              satuan: found.satuan || prev.satuan,
+                              avgHarga: found.avgHarga !== undefined ? found.avgHarga : prev.avgHarga
+                            }));
+                          } else {
+                            setBarangKeluarFormData(prev => ({
+                              ...prev,
+                              namaBarang: val
+                            }));
+                          }
+                        }}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem', outline: 'none' }}
+                      />
+                      <datalist id="keluar-master-nama-barang-datalist">
+                        {persediaanMasterBarang.map(b => (
+                          <option key={b.id || b.kode} value={b.nama}>
+                            [{b.kode}] ({b.satuan})
+                          </option>
+                        ))}
+                      </datalist>
+
+                      {/* Status Deteksi Nama Barang & Tombol Add jika belum ada */}
+                      {(() => {
+                        const cleanN = (barangKeluarFormData.namaBarang || '').trim();
+                        if (!cleanN) return null;
+                        const matchMaster = persediaanMasterBarang.find(b => b.nama.toLowerCase() === cleanN.toLowerCase());
+                        if (matchMaster) {
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10b981', fontSize: '0.74rem', fontWeight: 800, marginTop: '4px' }}>
+                              <CheckCircle2 size={13} color="#10b981" />
+                              <span>Terdaftar di Data Base: <strong>[{matchMaster.kode}] {matchMaster.nama}</strong> ({matchMaster.satuan})</span>
+                            </div>
+                          );
+                        }
+                        const typedKode = (barangKeluarFormData.kode || '').trim().toUpperCase();
+                        const matchKode = persediaanMasterBarang.find(b => b.kode.trim().toUpperCase() === typedKode);
+                        if (matchKode) {
+                          return null;
+                        }
+                        return (
+                          <div style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            padding: '6px 10px',
+                            background: 'rgba(168, 85, 247, 0.12)',
+                            border: '1px dashed #a855f7',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ fontSize: '0.76rem', color: '#e9d5ff', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800 }}>
+                              <AlertCircle size={13} color="#c084fc" />
+                              <span>Barang belum ada di Data Base</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAddMasterBarang(barangKeluarFormData.kode, cleanN, 'persediaan_keluar', barangKeluarFormData.satuan)}
+                              style={{
+                                background: 'linear-gradient(135deg, #a855f7, #9333ea)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                fontSize: '0.76rem',
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 6px rgba(168, 85, 247, 0.4)'
+                              }}
+                            >
+                              <Plus size={12} /> Add "{cleanN.length > 18 ? cleanN.slice(0, 18) + '...' : cleanN}" ke Data Base
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
 
                     {/* Qty Keluar & Satuan */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Qty Keluar & Sat</div>
