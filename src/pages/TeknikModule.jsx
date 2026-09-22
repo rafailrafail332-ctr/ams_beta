@@ -9203,7 +9203,7 @@ export const TeknikModule = () => {
                           <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
                           <th style={{ minWidth: '120px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
                           <th style={{ width: '45px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
-                          <th style={{ width: '45px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
                           <th style={{ width: '85px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Harga Satuan</th>
                           <th style={{ minWidth: '100px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Vendor</th>
                           <th style={{ minWidth: '90px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Keterangan</th>
@@ -9223,7 +9223,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{m.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#10b981', fontWeight: 900 }}>{m.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8' }}>{m.satuan}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{m.satuan}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#f59e0b', fontWeight: 800 }}>{m.vendor || '-'}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
@@ -9300,7 +9300,7 @@ export const TeknikModule = () => {
                           <th style={{ width: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
                           <th style={{ minWidth: '120px', border: '1px solid #be185d', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
                           <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
-                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
                           <th style={{ width: '85px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
                           <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
                           <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
@@ -9321,7 +9321,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{k.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#f43f5e', fontWeight: 900 }}>{k.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8' }}>{k.satuan}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{k.satuan}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
@@ -9398,7 +9398,7 @@ export const TeknikModule = () => {
                         <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Masuk</th>
                         <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Keluar</th>
                         <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Qty (Sisa)</th>
-                        <th style={{ width: '65px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Sat</th>
+                        <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem', whiteSpace: 'nowrap' }}>Satuan</th>
                         <th style={{ width: '130px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Avg Harga</th>
                         <th style={{ width: '160px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Jumlah (Rp)</th>
                         <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Status Stok</th>
@@ -9425,7 +9425,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
                                 {item.sisaQty}
                               </td>
-                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px' }}>{item.satuan}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px', whiteSpace: 'nowrap' }}>{item.satuan}</td>
                               <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
                                 Rp {formatRupiah(item.avgHarga)}
                               </td>
@@ -9762,7 +9762,7 @@ export const TeknikModule = () => {
                       <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
                       <th style={{ minWidth: '200px', border: '1px solid #0369a1', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
                       <th style={{ width: '70px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Qty</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Satuan</th>
                       <th style={{ width: '120px', textAlign: 'right', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Harga Satuan</th>
                       <th style={{ width: '135px', textAlign: 'right', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900, background: '#0369a1' }}>Total Biaya</th>
                       <th style={{ minWidth: '150px', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Vendor / Suplier</th>
@@ -9788,7 +9788,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#10b981', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8' }}>{m.satuan}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{m.satuan}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#10b981', fontWeight: 900 }}>Rp {formatRupiah(totalBiaya)}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>{m.vendor || '-'}</td>
@@ -9903,7 +9903,7 @@ export const TeknikModule = () => {
                       <th style={{ width: '90px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
                       <th style={{ minWidth: '200px', border: '1px solid #be185d', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
                       <th style={{ width: '70px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Qty Keluar</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Satuan</th>
                       <th style={{ width: '120px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Avg Harga</th>
                       <th style={{ width: '135px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900, background: '#be185d' }}>Nilai Pemakaian</th>
                       <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Blok</th>
@@ -9930,7 +9930,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{k.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#f43f5e', fontWeight: 900, fontSize: '0.92rem' }}>{k.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8' }}>{k.satuan}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{k.satuan}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 900 }}>Rp {formatRupiah(nilaiPemakaian)}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
@@ -13482,12 +13482,17 @@ export const TeknikModule = () => {
                     {/* Satuan */}
                     <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Satuan</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <select
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        list="master-satuan-datalist"
+                        placeholder="Pilih atau ketik satuan (Sak, Btg, M3)..."
                         value={barangFormData.satuan}
                         onChange={(e) => setBarangFormData({ ...barangFormData, satuan: e.target.value })}
-                        style={{ flex: 1, background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
-                      >
+                        style={{ width: '100%', height: '36px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                      <datalist id="master-satuan-datalist">
                         <option value="Sak">Sak</option>
                         <option value="Btg">Btg (Batang)</option>
                         <option value="M3">M3 (Kubik)</option>
@@ -13500,14 +13505,33 @@ export const TeknikModule = () => {
                         <option value="Rit">Rit / Truk</option>
                         <option value="Unit">Unit</option>
                         <option value="Set">Set</option>
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Atau ketik satuan..."
-                        value={barangFormData.satuan}
-                        onChange={(e) => setBarangFormData({ ...barangFormData, satuan: e.target.value })}
-                        style={{ width: '130px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 8px', fontSize: '0.82rem' }}
-                      />
+                        <option value="Liter">Liter</option>
+                        <option value="Kaleng">Kaleng</option>
+                        <option value="Galon">Galon</option>
+                        <option value="Pail">Pail</option>
+                        <option value="Zak">Zak</option>
+                      </datalist>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                          <button
+                            key={unit}
+                            type="button"
+                            onClick={() => setBarangFormData({ ...barangFormData, satuan: unit })}
+                            style={{
+                              background: barangFormData.satuan === unit ? '#9333ea' : '#0f172a',
+                              color: barangFormData.satuan === unit ? '#ffffff' : '#94a3b8',
+                              border: `1px solid ${barangFormData.satuan === unit ? '#c084fc' : '#334155'}`,
+                              borderRadius: '4px',
+                              padding: '2px 7px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {unit}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                   </div>
@@ -13847,37 +13871,72 @@ export const TeknikModule = () => {
 
                     {/* SATUAN */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Satuan Ukuran
                         </label>
+                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Ketik / Pilih Cepat</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <select
-                          value={barangMasukFormData.satuan}
-                          onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
-                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
-                        >
-                          <option value="Sak">Sak</option>
-                          <option value="Btg">Btg (Batang)</option>
-                          <option value="M3">M3 (Kubik)</option>
-                          <option value="Dus">Dus</option>
-                          <option value="Pcs">Pcs</option>
-                          <option value="Kg">Kg</option>
-                          <option value="Roll">Roll</option>
-                          <option value="Lembar">Lembar</option>
-                          <option value="Meter">Meter</option>
-                          <option value="Rit">Rit / Truk</option>
-                          <option value="Unit">Unit</option>
-                          <option value="Set">Set</option>
-                        </select>
-                        <input
-                          type="text"
-                          placeholder="Atau ketik..."
-                          value={barangMasukFormData.satuan}
-                          onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
-                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
-                        />
+                      <input
+                        type="text"
+                        required
+                        list="masuk-satuan-datalist"
+                        placeholder="Pilih atau ketik satuan (contoh: Sak, Btg, M3)..."
+                        value={barangMasukFormData.satuan}
+                        onChange={(e) => setBarangMasukFormData({ ...barangMasukFormData, satuan: e.target.value })}
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: '#0f172a',
+                          border: '1.5px solid #334155',
+                          borderRadius: '6px',
+                          color: '#38bdf8',
+                          fontWeight: 900,
+                          padding: '0 12px',
+                          fontSize: '0.88rem',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <datalist id="masuk-satuan-datalist">
+                        <option value="Sak">Sak</option>
+                        <option value="Btg">Btg (Batang)</option>
+                        <option value="M3">M3 (Kubik)</option>
+                        <option value="Dus">Dus</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Roll">Roll</option>
+                        <option value="Lembar">Lembar</option>
+                        <option value="Meter">Meter</option>
+                        <option value="Rit">Rit / Truk</option>
+                        <option value="Unit">Unit</option>
+                        <option value="Set">Set</option>
+                        <option value="Liter">Liter</option>
+                        <option value="Kaleng">Kaleng</option>
+                        <option value="Galon">Galon</option>
+                        <option value="Pail">Pail</option>
+                        <option value="Zak">Zak</option>
+                      </datalist>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                          <button
+                            key={unit}
+                            type="button"
+                            onClick={() => setBarangMasukFormData({ ...barangMasukFormData, satuan: unit })}
+                            style={{
+                              background: barangMasukFormData.satuan === unit ? '#0284c7' : '#0f172a',
+                              color: barangMasukFormData.satuan === unit ? '#ffffff' : '#94a3b8',
+                              border: `1px solid ${barangMasukFormData.satuan === unit ? '#38bdf8' : '#334155'}`,
+                              borderRadius: '5px',
+                              padding: '3px 8px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {unit}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -14416,37 +14475,72 @@ export const TeknikModule = () => {
 
                     {/* SATUAN */}
                     <div>
-                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginBottom: '6px', minHeight: '26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <label style={{ margin: 0, fontWeight: 800, fontSize: '0.84rem', color: '#f8fafc' }}>
                           Satuan Ukuran
                         </label>
+                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Ketik / Pilih Cepat</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <select
-                          value={barangKeluarFormData.satuan}
-                          onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
-                          style={{ flex: 1.2, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '0 10px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
-                        >
-                          <option value="Sak">Sak</option>
-                          <option value="Btg">Btg (Batang)</option>
-                          <option value="M3">M3 (Kubik)</option>
-                          <option value="Dus">Dus</option>
-                          <option value="Pcs">Pcs</option>
-                          <option value="Kg">Kg</option>
-                          <option value="Roll">Roll</option>
-                          <option value="Lembar">Lembar</option>
-                          <option value="Meter">Meter</option>
-                          <option value="Rit">Rit / Truk</option>
-                          <option value="Unit">Unit</option>
-                          <option value="Set">Set</option>
-                        </select>
-                        <input
-                          type="text"
-                          placeholder="Atau ketik..."
-                          value={barangKeluarFormData.satuan}
-                          onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
-                          style={{ flex: 1, height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
-                        />
+                      <input
+                        type="text"
+                        required
+                        list="keluar-satuan-datalist"
+                        placeholder="Pilih atau ketik satuan (contoh: Sak, Btg, M3)..."
+                        value={barangKeluarFormData.satuan}
+                        onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: e.target.value })}
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: '#0f172a',
+                          border: '1.5px solid #334155',
+                          borderRadius: '6px',
+                          color: '#f472b6',
+                          fontWeight: 900,
+                          padding: '0 12px',
+                          fontSize: '0.88rem',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <datalist id="keluar-satuan-datalist">
+                        <option value="Sak">Sak</option>
+                        <option value="Btg">Btg (Batang)</option>
+                        <option value="M3">M3 (Kubik)</option>
+                        <option value="Dus">Dus</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Roll">Roll</option>
+                        <option value="Lembar">Lembar</option>
+                        <option value="Meter">Meter</option>
+                        <option value="Rit">Rit / Truk</option>
+                        <option value="Unit">Unit</option>
+                        <option value="Set">Set</option>
+                        <option value="Liter">Liter</option>
+                        <option value="Kaleng">Kaleng</option>
+                        <option value="Galon">Galon</option>
+                        <option value="Pail">Pail</option>
+                        <option value="Zak">Zak</option>
+                      </datalist>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                          <button
+                            key={unit}
+                            type="button"
+                            onClick={() => setBarangKeluarFormData({ ...barangKeluarFormData, satuan: unit })}
+                            style={{
+                              background: barangKeluarFormData.satuan === unit ? '#db2777' : '#0f172a',
+                              color: barangKeluarFormData.satuan === unit ? '#ffffff' : '#94a3b8',
+                              border: `1px solid ${barangKeluarFormData.satuan === unit ? '#f472b6' : '#334155'}`,
+                              borderRadius: '5px',
+                              padding: '3px 8px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {unit}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
