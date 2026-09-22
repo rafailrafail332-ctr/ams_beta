@@ -19,6 +19,7 @@ import {
   BookOpen, 
   Briefcase, 
   Users, 
+  UserPlus,
   Clock, 
   HeartHandshake, 
   MessageSquare, 
@@ -120,7 +121,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'mkt-leads', title: '1. Pipeline CRM Leads & Komisi Sales', moduleKey: 'marketing', subTabKey: 'leads', icon: Users, color: '#FBBF24' },
         { id: 'mkt-spr', title: '2. Transaksi Unit & Upload Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: FileText, color: '#FBBF24' },
-        { id: 'cr-tickets', title: '3. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'mkt-konsumen', title: '3. Data Base Konsumen (Pembeli)', moduleKey: 'marketing', subTabKey: 'konsumen', icon: Users, color: '#F59E0B' },
+        { id: 'mkt-calon-konsumen', title: '4. Data Base Calon Konsumen', moduleKey: 'marketing', subTabKey: 'calon_konsumen', icon: UserPlus, color: '#EC4899' },
+        { id: 'cr-tickets', title: '5. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
         { id: 'cr-handover', title: 'BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
       ];
     }

@@ -850,10 +850,12 @@ export const TeknikModule = () => {
   const STORAGE_KEY_PERSEDIAAN_BARANG = 'ams_teknik_persediaan_barang_v1';
   const STORAGE_KEY_PERSEDIAAN_MASUK = 'ams_teknik_persediaan_masuk_v1';
   const STORAGE_KEY_PERSEDIAAN_KELUAR = 'ams_teknik_persediaan_keluar_v1';
+  const STORAGE_KEY_PERSEDIAAN_MUTASI = 'ams_teknik_persediaan_mutasi_v1';
 
   const defaultPersediaanMasterBarang = [];
   const defaultPersediaanBarangMasuk = [];
   const defaultPersediaanBarangKeluar = [];
+  const defaultPersediaanMutasiBarang = [];
 
   const [persediaanMasterBarang, setPersediaanMasterBarang] = useState(() => {
     try {
@@ -915,17 +917,67 @@ export const TeknikModule = () => {
     if (notifMsg) showNotification(notifMsg, notifType);
   };
 
+  // PEMINDAHAN BARANG (MUTASI ANTAR PROYEK)
+  const [persediaanMutasiBarang, setPersediaanMutasiBarang] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PERSEDIAAN_MUTASI);
+      if (saved !== null && saved !== undefined) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return defaultPersediaanMutasiBarang;
+  });
+
+  const updateAndSaveMutasiBarang = (nextList, notifMsg = '', notifType = 'success') => {
+    setPersediaanMutasiBarang(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PERSEDIAAN_MUTASI, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PERSEDIAAN_MUTASI, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
   // FILTER & SEARCH STATES UNTUK PERSEDIAAN
   const [filterPersediaanProyek, setFilterPersediaanProyek] = useState('ALL');
   const [searchPersediaan, setSearchPersediaan] = useState('');
+  const [sortPersediaanBy, setSortPersediaanBy] = useState('proyek'); // 'proyek' | 'nama' | 'sisa_desc' | 'sisa_asc'
 
+  // SEARCH BARANG MASUK DIPISAH SATU-SATU (Barang, Vendor, Nota)
   const [filterMasukProyek, setFilterMasukProyek] = useState('ALL');
   const [searchMasuk, setSearchMasuk] = useState('');
+  const [searchMasukBarang, setSearchMasukBarang] = useState('');
+  const [searchMasukVendor, setSearchMasukVendor] = useState('');
+  const [searchMasukNota, setSearchMasukNota] = useState('');
 
+  // SEARCH BARANG KELUAR DIPISAH SATU-SATU (Barang, Blok/Unit, Fasum/Ket)
   const [filterKeluarProyek, setFilterKeluarProyek] = useState('ALL');
   const [searchKeluar, setSearchKeluar] = useState('');
+  const [searchKeluarBarang, setSearchKeluarBarang] = useState('');
+  const [searchKeluarUnit, setSearchKeluarUnit] = useState('');
+  const [searchKeluarKet, setSearchKeluarKet] = useState('');
 
   const [searchMasterBarang, setSearchMasterBarang] = useState('');
+
+  // FILTER & SEARCH UNTUK PEMINDAHAN BARANG (MUTASI)
+  const [filterMutasiDariProyek, setFilterMutasiDariProyek] = useState('ALL');
+  const [filterMutasiKeProyek, setFilterMutasiKeProyek] = useState('ALL');
+  const [searchMutasiBarang, setSearchMutasiBarang] = useState('');
+  const [searchMutasiKet, setSearchMutasiKet] = useState('');
+
+  // MODAL STATES UNTUK PEMINDAHAN BARANG
+  const [isMutasiModalOpen, setIsMutasiModalOpen] = useState(false);
+  const [editingMutasiId, setEditingMutasiId] = useState(null);
+  const [mutasiFormData, setMutasiFormData] = useState({
+    tanggal: getTodayDateString(),
+    dariProyek: 'Ashoka View',
+    keProyek: 'Ashoka Park',
+    kode: '',
+    namaBarang: '',
+    qty: '',
+    satuan: 'Sak',
+    keterangan: ''
+  });
 
   // MODAL STATES UNTUK PERSEDIAAN
   const [isMasterBarangModalOpen, setIsMasterBarangModalOpen] = useState(false);
@@ -1120,6 +1172,9 @@ export const TeknikModule = () => {
       });
       fetchCloudStore(STORAGE_KEY_PERSEDIAAN_KELUAR, null).then(val => {
         if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanBarangKeluar(val);
+      });
+      fetchCloudStore(STORAGE_KEY_PERSEDIAAN_MUTASI, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanMutasiBarang(val);
       });
     };
 
@@ -3126,41 +3181,152 @@ export const TeknikModule = () => {
   };
 
   const persediaanSummaryList = useMemo(() => {
-    return persediaanMasterBarang.map(item => {
-      const matchingMasuk = persediaanBarangMasuk.filter(m => 
-        (m.kode?.trim().toUpperCase() === item.kode?.trim().toUpperCase() ||
-         m.namaBarang?.trim().toLowerCase() === item.nama?.trim().toLowerCase()) &&
-        (filterPersediaanProyek === 'ALL' || m.proyek === filterPersediaanProyek)
-      );
-
-      const matchingKeluar = persediaanBarangKeluar.filter(k =>
-        (k.kode?.trim().toUpperCase() === item.kode?.trim().toUpperCase() ||
-         k.namaBarang?.trim().toLowerCase() === item.nama?.trim().toLowerCase()) &&
-        (filterPersediaanProyek === 'ALL' || k.proyek === filterPersediaanProyek)
-      );
-
-      const totalQtyMasuk = matchingMasuk.reduce((sum, m) => sum + (Number(m.qty) || 0), 0);
-      const totalNilaiMasuk = matchingMasuk.reduce((sum, m) => sum + ((Number(m.qty) || 0) * (Number(m.hargaSatuan) || 0)), 0);
-      const avgHarga = totalQtyMasuk > 0 ? Math.round(totalNilaiMasuk / totalQtyMasuk) : 0;
-
-      const totalQtyKeluar = matchingKeluar.reduce((sum, k) => sum + (Number(k.qty) || 0), 0);
-      const sisaQty = Math.max(0, totalQtyMasuk - totalQtyKeluar);
-      const totalNilaiSisa = sisaQty * avgHarga;
-      const totalNilaiKeluar = matchingKeluar.reduce((sum, k) => sum + ((Number(k.qty) || 0) * (Number(k.avgHarga) || avgHarga)), 0);
-
-      return {
-        ...item,
-        satuan: normalizeSatuan(item.satuan),
-        totalQtyMasuk,
-        totalNilaiMasuk,
-        totalQtyKeluar,
-        sisaQty,
-        avgHarga,
-        totalNilaiSisa,
-        totalNilaiKeluar
-      };
+    // 1. Identifikasi seluruh proyek yang memiliki catatan transaksi (Barang Masuk, Mutasi, atau Keluar)
+    // Aturan: Jika proyek belum pernah di-input barang, jangan dimasukkan dulu ke daftar persediaan
+    const activeProjectSet = new Set();
+    persediaanBarangMasuk.forEach(m => {
+      const p = (m.proyek || '').trim();
+      if (p) activeProjectSet.add(p);
     });
-  }, [persediaanMasterBarang, persediaanBarangMasuk, persediaanBarangKeluar, filterPersediaanProyek]);
+    persediaanMutasiBarang.forEach(t => {
+      const pKe = (t.keProyek || '').trim();
+      const pDari = (t.dariProyek || '').trim();
+      if (pKe) activeProjectSet.add(pKe);
+      if (pDari) activeProjectSet.add(pDari);
+    });
+    persediaanBarangKeluar.forEach(k => {
+      const p = (k.proyek || '').trim();
+      if (p) activeProjectSet.add(p);
+    });
+
+    const activeProjects = Array.from(activeProjectSet);
+    const summaryRows = [];
+
+    activeProjects.forEach(p => {
+      // 2. Kumpulkan seluruh item barang yang pernah di-input / ditransaksikan pada proyek ini
+      const itemsMap = new Map();
+
+      persediaanBarangMasuk.filter(m => (m.proyek || '').trim() === p).forEach(m => {
+        const cleanKode = (m.kode || '').trim().toUpperCase();
+        const cleanNama = (m.namaBarang || '').trim();
+        const key = cleanKode || cleanNama.toLowerCase();
+        if (key && !itemsMap.has(key)) {
+          itemsMap.set(key, { kode: cleanKode, nama: cleanNama, satuan: normalizeSatuan(m.satuan) });
+        }
+      });
+
+      persediaanMutasiBarang.filter(t => (t.keProyek || '').trim() === p || (t.dariProyek || '').trim() === p).forEach(t => {
+        const cleanKode = (t.kode || '').trim().toUpperCase();
+        const cleanNama = (t.namaBarang || '').trim();
+        const key = cleanKode || cleanNama.toLowerCase();
+        if (key && !itemsMap.has(key)) {
+          itemsMap.set(key, { kode: cleanKode, nama: cleanNama, satuan: normalizeSatuan(t.satuan) });
+        }
+      });
+
+      persediaanBarangKeluar.filter(k => (k.proyek || '').trim() === p).forEach(k => {
+        const cleanKode = (k.kode || '').trim().toUpperCase();
+        const cleanNama = (k.namaBarang || '').trim();
+        const key = cleanKode || cleanNama.toLowerCase();
+        if (key && !itemsMap.has(key)) {
+          itemsMap.set(key, { kode: cleanKode, nama: cleanNama, satuan: normalizeSatuan(k.satuan) });
+        }
+      });
+
+      // 3. Hitung persediaan untuk tiap barang di proyek ini
+      itemsMap.forEach((itemMeta) => {
+        const cleanKode = itemMeta.kode;
+        const cleanNama = itemMeta.nama;
+
+        const matchingMasuk = persediaanBarangMasuk.filter(m =>
+          (m.proyek || '').trim() === p &&
+          ((cleanKode && (m.kode || '').trim().toUpperCase() === cleanKode) ||
+           (cleanNama && (m.namaBarang || '').trim().toLowerCase() === cleanNama.toLowerCase()))
+        );
+
+        const matchingMutasiMasuk = persediaanMutasiBarang.filter(t =>
+          (t.keProyek || '').trim() === p &&
+          ((cleanKode && (t.kode || '').trim().toUpperCase() === cleanKode) ||
+           (cleanNama && (t.namaBarang || '').trim().toLowerCase() === cleanNama.toLowerCase()))
+        );
+
+        const matchingMutasiKeluar = persediaanMutasiBarang.filter(t =>
+          (t.dariProyek || '').trim() === p &&
+          ((cleanKode && (t.kode || '').trim().toUpperCase() === cleanKode) ||
+           (cleanNama && (t.namaBarang || '').trim().toLowerCase() === cleanNama.toLowerCase()))
+        );
+
+        const matchingKeluar = persediaanBarangKeluar.filter(k =>
+          (k.proyek || '').trim() === p &&
+          ((cleanKode && (k.kode || '').trim().toUpperCase() === cleanKode) ||
+           (cleanNama && (k.namaBarang || '').trim().toLowerCase() === cleanNama.toLowerCase()))
+        );
+
+        const totalQtyMasuk = matchingMasuk.reduce((sum, m) => sum + (Number(m.qty) || 0), 0);
+        const totalNilaiMasuk = matchingMasuk.reduce((sum, m) => sum + ((Number(m.qty) || 0) * (Number(m.hargaSatuan) || 0)), 0);
+        const avgHargaMasuk = totalQtyMasuk > 0 ? Math.round(totalNilaiMasuk / totalQtyMasuk) : 0;
+
+        const mutasiMasukQty = matchingMutasiMasuk.reduce((sum, t) => sum + (Number(t.qty) || 0), 0);
+        const mutasiKeluarQty = matchingMutasiKeluar.reduce((sum, t) => sum + (Number(t.qty) || 0), 0);
+        const mutasiNetQty = mutasiMasukQty - mutasiKeluarQty;
+
+        const totalQtyKeluar = matchingKeluar.reduce((sum, k) => sum + (Number(k.qty) || 0), 0);
+        const sisaQty = Math.max(0, totalQtyMasuk + mutasiMasukQty - mutasiKeluarQty - totalQtyKeluar);
+
+        const masterItem = persediaanMasterBarang.find(b =>
+          (cleanKode && (b.kode || '').trim().toUpperCase() === cleanKode) ||
+          (cleanNama && (b.nama || '').trim().toLowerCase() === cleanNama.toLowerCase())
+        );
+
+        const finalSatuan = normalizeSatuan(itemMeta.satuan || masterItem?.satuan || 'Sak');
+        const avgHarga = avgHargaMasuk > 0 ? avgHargaMasuk : 0;
+        const totalNilaiSisa = sisaQty * avgHarga;
+        const totalNilaiKeluar = matchingKeluar.reduce((sum, k) => sum + ((Number(k.qty) || 0) * (Number(k.avgHarga) || avgHarga)), 0);
+
+        summaryRows.push({
+          id: `${p}_${cleanKode || cleanNama}`,
+          proyek: p,
+          kode: cleanKode || masterItem?.kode || '-',
+          nama: cleanNama || masterItem?.nama || '-',
+          satuan: finalSatuan,
+          totalQtyMasuk,
+          totalNilaiMasuk,
+          mutasiMasukQty,
+          mutasiKeluarQty,
+          mutasiNetQty,
+          totalQtyKeluar,
+          sisaQty,
+          avgHarga,
+          totalNilaiSisa,
+          totalNilaiKeluar
+        });
+      });
+    });
+
+    // 4. Filter Proyek jika bukan 'ALL'
+    let result = summaryRows;
+    if (filterPersediaanProyek !== 'ALL') {
+      result = result.filter(item => item.proyek === filterPersediaanProyek);
+    }
+
+    // 5. Pengurutan (Default: Sesuai Proyek A-Z, lalu Nama Barang)
+    result.sort((a, b) => {
+      if (sortPersediaanBy === 'nama') {
+        return (a.nama || '').localeCompare(b.nama || '');
+      } else if (sortPersediaanBy === 'sisa_desc') {
+        return (b.sisaQty || 0) - (a.sisaQty || 0);
+      } else if (sortPersediaanBy === 'sisa_asc') {
+        return (a.sisaQty || 0) - (b.sisaQty || 0);
+      } else {
+        // Default: urutkan sesuai proyek
+        const pDiff = (a.proyek || '').localeCompare(b.proyek || '');
+        if (pDiff !== 0) return pDiff;
+        return (a.nama || '').localeCompare(b.nama || '');
+      }
+    });
+
+    return result;
+  }, [persediaanMasterBarang, persediaanBarangMasuk, persediaanBarangKeluar, persediaanMutasiBarang, filterPersediaanProyek, sortPersediaanBy]);
 
   const filteredDaftarPersediaan = useMemo(() => {
     return persediaanSummaryList.filter(item => {
@@ -3169,7 +3335,8 @@ export const TeknikModule = () => {
       return (
         (item.kode || '').toLowerCase().includes(q) ||
         (item.nama || '').toLowerCase().includes(q) ||
-        (item.satuan || '').toLowerCase().includes(q)
+        (item.satuan || '').toLowerCase().includes(q) ||
+        (item.proyek || '').toLowerCase().includes(q)
       );
     });
   }, [persediaanSummaryList, searchPersediaan]);
@@ -3177,33 +3344,79 @@ export const TeknikModule = () => {
   const filteredBarangMasuk = useMemo(() => {
     return persediaanBarangMasuk.filter(item => {
       if (filterMasukProyek !== 'ALL' && item.proyek !== filterMasukProyek) return false;
-      if (!searchMasuk) return true;
-      const q = searchMasuk.toLowerCase().trim();
-      return (
-        (item.kode || '').toLowerCase().includes(q) ||
-        (item.namaBarang || '').toLowerCase().includes(q) ||
-        (item.vendor || '').toLowerCase().includes(q) ||
-        (item.keterangan || '').toLowerCase().includes(q) ||
-        (item.tanggal || '').includes(q)
-      );
+      if (searchMasuk) {
+        const q = searchMasuk.toLowerCase().trim();
+        const matchAll = (item.kode || '').toLowerCase().includes(q) ||
+          (item.namaBarang || '').toLowerCase().includes(q) ||
+          (item.vendor || '').toLowerCase().includes(q) ||
+          (item.keterangan || '').toLowerCase().includes(q) ||
+          (item.tanggal || '').includes(q);
+        if (!matchAll) return false;
+      }
+      if (searchMasukBarang) {
+        const qB = searchMasukBarang.toLowerCase().trim();
+        const matchB = (item.kode || '').toLowerCase().includes(qB) || (item.namaBarang || '').toLowerCase().includes(qB);
+        if (!matchB) return false;
+      }
+      if (searchMasukVendor) {
+        const qV = searchMasukVendor.toLowerCase().trim();
+        if (!(item.vendor || '').toLowerCase().includes(qV)) return false;
+      }
+      if (searchMasukNota) {
+        const qN = searchMasukNota.toLowerCase().trim();
+        if (!(item.keterangan || '').toLowerCase().includes(qN)) return false;
+      }
+      return true;
     }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
-  }, [persediaanBarangMasuk, filterMasukProyek, searchMasuk]);
+  }, [persediaanBarangMasuk, filterMasukProyek, searchMasuk, searchMasukBarang, searchMasukVendor, searchMasukNota]);
 
   const filteredBarangKeluar = useMemo(() => {
     return persediaanBarangKeluar.filter(item => {
       if (filterKeluarProyek !== 'ALL' && item.proyek !== filterKeluarProyek) return false;
-      if (!searchKeluar) return true;
-      const q = searchKeluar.toLowerCase().trim();
-      return (
-        (item.kode || '').toLowerCase().includes(q) ||
-        (item.namaBarang || '').toLowerCase().includes(q) ||
-        (item.blok || '').toLowerCase().includes(q) ||
-        (item.noUnit || '').toLowerCase().includes(q) ||
-        (item.fasum || '').toLowerCase().includes(q) ||
-        (item.tanggal || '').includes(q)
-      );
+      if (searchKeluar) {
+        const q = searchKeluar.toLowerCase().trim();
+        const matchAll = (item.kode || '').toLowerCase().includes(q) ||
+          (item.namaBarang || '').toLowerCase().includes(q) ||
+          (item.blok || '').toLowerCase().includes(q) ||
+          (item.noUnit || '').toLowerCase().includes(q) ||
+          (item.fasum || '').toLowerCase().includes(q) ||
+          (item.tanggal || '').includes(q);
+        if (!matchAll) return false;
+      }
+      if (searchKeluarBarang) {
+        const qB = searchKeluarBarang.toLowerCase().trim();
+        const matchB = (item.kode || '').toLowerCase().includes(qB) || (item.namaBarang || '').toLowerCase().includes(qB);
+        if (!matchB) return false;
+      }
+      if (searchKeluarUnit) {
+        const qU = searchKeluarUnit.toLowerCase().trim();
+        const matchU = (item.blok || '').toLowerCase().includes(qU) || (item.noUnit || '').toLowerCase().includes(qU);
+        if (!matchU) return false;
+      }
+      if (searchKeluarKet) {
+        const qK = searchKeluarKet.toLowerCase().trim();
+        if (!(item.fasum || '').toLowerCase().includes(qK)) return false;
+      }
+      return true;
     }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
-  }, [persediaanBarangKeluar, filterKeluarProyek, searchKeluar]);
+  }, [persediaanBarangKeluar, filterKeluarProyek, searchKeluar, searchKeluarBarang, searchKeluarUnit, searchKeluarKet]);
+
+  const filteredPersediaanMutasi = useMemo(() => {
+    return persediaanMutasiBarang.filter(item => {
+      if (filterMutasiDariProyek !== 'ALL' && item.dariProyek !== filterMutasiDariProyek) return false;
+      if (filterMutasiKeProyek !== 'ALL' && item.keProyek !== filterMutasiKeProyek) return false;
+      if (searchMutasiBarang) {
+        const qB = searchMutasiBarang.toLowerCase().trim();
+        const matchB = (item.kode || '').toLowerCase().includes(qB) || (item.namaBarang || '').toLowerCase().includes(qB);
+        if (!matchB) return false;
+      }
+      if (searchMutasiKet) {
+        const qK = searchMutasiKet.toLowerCase().trim();
+        if (!(item.keterangan || '').toLowerCase().includes(qK)) return false;
+      }
+      return true;
+    }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+  }, [persediaanMutasiBarang, filterMutasiDariProyek, filterMutasiKeProyek, searchMutasiBarang, searchMutasiKet]);
 
   const filteredMasterBarang = useMemo(() => {
     return persediaanMasterBarang.filter(item => {
@@ -3579,6 +3792,139 @@ export const TeknikModule = () => {
     }
   };
 
+  // HANDLER: PEMINDAHAN BARANG (MUTASI ANTAR PROYEK)
+  const handleOpenAddMutasiBarang = (initialKode = '', initialNama = '', initialProyek = '', initialSatuan = 'Sak') => {
+    setEditingMutasiId(null);
+    const sourceProject = initialProyek || (filterPersediaanProyek !== 'ALL' ? filterPersediaanProyek : 'Ashoka View');
+    setMutasiFormData({
+      tanggal: getTodayDateString(),
+      dariProyek: sourceProject,
+      keProyek: (sourceProject === 'Ashoka Park' ? 'Ashoka View' : 'Ashoka Park'),
+      kode: initialKode || '',
+      namaBarang: initialNama || '',
+      qty: '',
+      satuan: normalizeSatuan(initialSatuan || 'Sak'),
+      keterangan: ''
+    });
+    setIsMutasiModalOpen(true);
+  };
+
+  const handleOpenEditMutasiBarang = (item) => {
+    setEditingMutasiId(item.id);
+    setMutasiFormData({
+      tanggal: item.tanggal || getTodayDateString(),
+      dariProyek: item.dariProyek || 'Ashoka View',
+      keProyek: item.keProyek || 'Ashoka Park',
+      kode: item.kode || '',
+      namaBarang: item.namaBarang || '',
+      qty: item.qty || '',
+      satuan: normalizeSatuan(item.satuan || 'Sak'),
+      keterangan: item.keterangan || ''
+    });
+    setIsMutasiModalOpen(true);
+  };
+
+  const handleSaveMutasiBarang = (e) => {
+    e.preventDefault();
+    const cleanKode = (mutasiFormData.kode || '').trim().toUpperCase();
+    const cleanNama = (mutasiFormData.namaBarang || '').trim();
+    const qtyNum = parseFloat(String(mutasiFormData.qty).replace(',', '.')) || 0;
+
+    if (!mutasiFormData.dariProyek || !mutasiFormData.keProyek) {
+      alert('Silakan tentukan Proyek Asal dan Proyek Tujuan!');
+      return;
+    }
+    if (mutasiFormData.dariProyek.trim().toLowerCase() === mutasiFormData.keProyek.trim().toLowerCase()) {
+      alert('Proyek asal dan proyek tujuan tidak boleh sama!');
+      return;
+    }
+    if (!cleanNama) {
+      alert('Silakan pilih atau ketik nama material / barang!');
+      return;
+    }
+    if (qtyNum <= 0) {
+      alert('Jumlah (Qty) yang dipindahkan harus lebih dari 0!');
+      return;
+    }
+
+    // Periksa ketersediaan stok di proyek asal
+    const stockInSource = persediaanSummaryList.find(s =>
+      s.proyek === mutasiFormData.dariProyek &&
+      ((cleanKode && s.kode?.trim().toUpperCase() === cleanKode) ||
+       (cleanNama && s.nama?.trim().toLowerCase() === cleanNama.toLowerCase()))
+    );
+
+    const existingMutasiQty = editingMutasiId
+      ? (Number(persediaanMutasiBarang.find(t => t.id === editingMutasiId)?.qty) || 0)
+      : 0;
+    const availableInSource = (stockInSource ? stockInSource.sisaQty : 0) + existingMutasiQty;
+
+    if (qtyNum > availableInSource && availableInSource > 0) {
+      if (!window.confirm(`⚠️ Perhatian: Qty transfer (${qtyNum}) melebihi sisa stok yang ada di ${mutasiFormData.dariProyek} (${availableInSource}). Tetap lanjutkan pemindahan barang?`)) {
+        return;
+      }
+    }
+
+    // Auto-sync ke master barang jika belum ada
+    let itemMaster = persediaanMasterBarang.find(b =>
+      (cleanKode && b.kode.trim().toUpperCase() === cleanKode) ||
+      b.nama.trim().toLowerCase() === cleanNama.toLowerCase()
+    );
+
+    let finalKode = cleanKode;
+    if (!itemMaster) {
+      if (!finalKode || persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === finalKode)) {
+        let maxNum = 0;
+        persediaanMasterBarang.forEach(b => {
+          const m = b.kode?.match(/\d+/);
+          if (m) {
+            const n = parseInt(m[0], 10);
+            if (n > maxNum) maxNum = n;
+          }
+        });
+        finalKode = `BRG-${String(maxNum + 1).padStart(3, '0')}`;
+      }
+      const newMaster = {
+        id: `BRG-${Date.now().toString().slice(-4)}`,
+        kode: finalKode,
+        nama: cleanNama,
+        satuan: normalizeSatuan(mutasiFormData.satuan || 'Sak')
+      };
+      updateAndSaveMasterBarang([...persediaanMasterBarang, newMaster]);
+    } else {
+      finalKode = itemMaster.kode;
+    }
+
+    const payload = {
+      ...mutasiFormData,
+      kode: finalKode,
+      namaBarang: cleanNama,
+      qty: qtyNum,
+      satuan: normalizeSatuan(mutasiFormData.satuan || itemMaster?.satuan || 'Sak'),
+      keterangan: (mutasiFormData.keterangan || '').trim()
+    };
+
+    if (editingMutasiId) {
+      const nextList = persediaanMutasiBarang.map(t => t.id === editingMutasiId ? { ...payload, id: editingMutasiId } : t);
+      updateAndSaveMutasiBarang(nextList, `Catatan pemindahan barang "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        ...payload,
+        id: `MTS-${Date.now().toString().slice(-4)}`
+      };
+      updateAndSaveMutasiBarang([newItem, ...persediaanMutasiBarang], `Pemindahan ${qtyNum} ${payload.satuan} "${cleanNama}" dari ${payload.dariProyek} ke ${payload.keProyek} berhasil dicatat!`, 'success');
+    }
+    setIsMutasiModalOpen(false);
+  };
+
+  const handleDeleteMutasiBarang = (id) => {
+    const item = persediaanMutasiBarang.find(t => t.id === id);
+    if (window.confirm(`Hapus riwayat pemindahan barang "${item?.namaBarang || id}"?`)) {
+      const nextList = persediaanMutasiBarang.filter(t => t.id !== id);
+      updateAndSaveMutasiBarang(nextList, `Riwayat pemindahan barang "${item?.namaBarang}" berhasil dihapus.`, 'info');
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -3944,18 +4290,40 @@ export const TeknikModule = () => {
             >
               <Package size={16} /> 📦 Data Base Barang ({persediaanMasterBarang.length})
             </button>
+
+            {/* 6. Pemindahan Barang (Mutasi Antar Proyek) */}
+            <button
+              type="button"
+              onClick={() => setSubTabPersediaan('mutasi')}
+              style={{
+                padding: '7px 16px',
+                borderRadius: '8px',
+                fontSize: '0.86rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                border: subTabPersediaan === 'mutasi' ? '2px solid #3b82f6' : '1px solid #475569',
+                background: subTabPersediaan === 'mutasi' ? '#2563eb' : '#1e293b',
+                color: subTabPersediaan === 'mutasi' ? '#ffffff' : '#cbd5e1',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: subTabPersediaan === 'mutasi' ? '0 2px 8px rgba(37, 99, 235, 0.4)' : 'none',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <RefreshCw size={16} /> 🔄 Pemindahan Barang ({persediaanMutasiBarang.length})
+            </button>
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* LEVEL 2: SUB-MENU DATA BASE TERPADU (6 PILIHAN DATA BASE UTAMA)           */}
+      {/* LEVEL 2: SUB-MENU DATA BASE TERPADU TEKNIK                                */}
       {/* 1. Data Base Vendor                                                       */}
       {/* 2. Data Base Tenaga Kerja                                                 */}
       {/* 3. Data Base Karyawan                                                     */}
       {/* 4. Data Base Unit                                                         */}
-      {/* 5. Data Base Konsumen                                                     */}
-      {/* 6. Data Base Calon Konsumen                                               */}
+      {/* (Data Base Konsumen & Calon Konsumen telah dipindahkan ke modul Marketing)*/}
       {/* ========================================================================= */}
       {mainCategory === 'database' && (
         <div style={{ marginBottom: '1.25rem' }}>
@@ -4051,52 +4419,6 @@ export const TeknikModule = () => {
               }}
             >
               <Home size={15} /> 4. Unit ({databaseUnitRows.length})
-            </button>
-
-            {/* 5. Konsumen */}
-            <button
-              type="button"
-              onClick={() => setSubTabDatabase('konsumen')}
-              style={{
-                padding: '7px 14px',
-                borderRadius: '8px',
-                fontSize: '0.84rem',
-                fontWeight: 900,
-                cursor: 'pointer',
-                border: subTabDatabase === 'konsumen' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'konsumen' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'konsumen' ? '#ffffff' : '#cbd5e1',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: subTabDatabase === 'konsumen' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Users size={15} /> 5. Konsumen ({databaseKonsumenRows.length})
-            </button>
-
-            {/* 6. Calon Konsumen */}
-            <button
-              type="button"
-              onClick={() => setSubTabDatabase('calon_konsumen')}
-              style={{
-                padding: '7px 14px',
-                borderRadius: '8px',
-                fontSize: '0.84rem',
-                fontWeight: 900,
-                cursor: 'pointer',
-                border: subTabDatabase === 'calon_konsumen' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'calon_konsumen' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'calon_konsumen' ? '#ffffff' : '#cbd5e1',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: subTabDatabase === 'calon_konsumen' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <UserPlus size={15} /> 6. Calon Konsumen ({databaseCalonKonsumenRows.length})
             </button>
           </div>
         </div>
@@ -9122,23 +9444,37 @@ export const TeknikModule = () => {
                     </button>
                   </div>
 
-                  {/* Search & Filter Masuk */}
-                  <div style={{ display: 'flex', gap: '5px', marginBottom: '0.65rem' }}>
+                  {/* Search & Filter Masuk (Dipisah: Barang, Vendor, Nota) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '0.65rem' }}>
                     <input
                       type="text"
-                      placeholder="Cari barang / vendor masuk..."
-                      value={searchMasuk}
-                      onChange={(e) => setSearchMasuk(e.target.value)}
-                      style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.78rem', padding: '4px 8px', outline: 'none' }}
+                      placeholder="Cari Kode / Barang..."
+                      value={searchMasukBarang}
+                      onChange={(e) => setSearchMasukBarang(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cari Vendor..."
+                      value={searchMasukVendor}
+                      onChange={(e) => setSearchMasukVendor(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#fbbf24', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cari No. Nota / Ket..."
+                      value={searchMasukNota}
+                      onChange={(e) => setSearchMasukNota(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
                     />
                     <select
                       value={filterMasukProyek}
                       onChange={(e) => setFilterMasukProyek(e.target.value)}
                       style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8', fontSize: '0.76rem', fontWeight: 800, padding: '4px' }}
                     >
-                      <option value="ALL">Semua</option>
-                      <option value="Ashoka View">View</option>
-                      <option value="Ashoka Park">Park</option>
+                      <option value="ALL">Semua Proyek</option>
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
                     </select>
                   </div>
 
@@ -9219,23 +9555,37 @@ export const TeknikModule = () => {
                     </button>
                   </div>
 
-                  {/* Search & Filter Keluar */}
-                  <div style={{ display: 'flex', gap: '5px', marginBottom: '0.65rem' }}>
+                  {/* Search & Filter Keluar (Dipisah: Barang, Blok/Unit, Fasum/Ket) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '0.65rem' }}>
                     <input
                       type="text"
-                      placeholder="Cari pemakaian / blok..."
-                      value={searchKeluar}
-                      onChange={(e) => setSearchKeluar(e.target.value)}
-                      style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.78rem', padding: '4px 8px', outline: 'none' }}
+                      placeholder="Cari Kode / Barang..."
+                      value={searchKeluarBarang}
+                      onChange={(e) => setSearchKeluarBarang(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cari Blok / No. Unit..."
+                      value={searchKeluarUnit}
+                      onChange={(e) => setSearchKeluarUnit(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#38bdf8', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cari Fasum / Keperluan..."
+                      value={searchKeluarKet}
+                      onChange={(e) => setSearchKeluarKet(e.target.value)}
+                      style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#f472b6', fontSize: '0.76rem', padding: '4px 7px', outline: 'none' }}
                     />
                     <select
                       value={filterKeluarProyek}
                       onChange={(e) => setFilterKeluarProyek(e.target.value)}
                       style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#f472b6', fontSize: '0.76rem', fontWeight: 800, padding: '4px' }}
                     >
-                      <option value="ALL">Semua</option>
-                      <option value="Ashoka View">View</option>
-                      <option value="Ashoka Park">Park</option>
+                      <option value="ALL">Semua Proyek</option>
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
                     </select>
                   </div>
 
@@ -9310,22 +9660,39 @@ export const TeknikModule = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <BarChart3 size={20} color="#10b981" /> Daftar Persediaan (Sisa Stok Real-Time)
+                      <BarChart3 size={20} color="#10b981" /> Daftar Persediaan (Sisa Stok Real-Time per Proyek)
                     </h4>
                     <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
-                      Kalkulasi otomatis: Sisa Qty = (Qty Masuk - Qty Keluar) | Avg Harga = (Total Biaya Masuk / Qty Masuk) | Jumlah = Sisa Qty × Avg Harga
+                      Kalkulasi otomatis per proyek: Sisa Qty = (Masuk + Mutasi Masuk - Mutasi Keluar - Keluar) | Hanya proyek & barang yang sudah di-input.
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Pengurutan Proyek / Barang */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <ArrowDownAZ size={14} color="#34d399" />
+                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#cbd5e1' }}>Urutkan:</span>
+                      <select
+                        value={sortPersediaanBy}
+                        onChange={(e) => setSortPersediaanBy(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: '#34d399', fontSize: '0.78rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                      >
+                        <option value="proyek" style={{ background: '#0f172a', color: '#ffffff' }}>Sesuai Proyek (A-Z)</option>
+                        <option value="nama" style={{ background: '#0f172a', color: '#ffffff' }}>Nama Barang (A-Z)</option>
+                        <option value="sisa_desc" style={{ background: '#0f172a', color: '#ffffff' }}>Sisa Terbanyak</option>
+                        <option value="sisa_asc" style={{ background: '#0f172a', color: '#ffffff' }}>Sisa Menipis / Habis</option>
+                      </select>
+                    </div>
+
+                    {/* Search Persediaan */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
                       <Search size={14} color="#94a3b8" />
                       <input
                         type="text"
-                        placeholder="Cari kode / nama material..."
+                        placeholder="Cari kode / barang / proyek..."
                         value={searchPersediaan}
                         onChange={(e) => setSearchPersediaan(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '200px', outline: 'none' }}
+                        style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '190px', outline: 'none' }}
                       />
                       {searchPersediaan && (
                         <button onClick={() => setSearchPersediaan('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -9333,31 +9700,43 @@ export const TeknikModule = () => {
                         </button>
                       )}
                     </div>
+
+                    {/* Tombol Catat Pemindahan */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAddMutasiBarang()}
+                      style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#ffffff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)' }}
+                    >
+                      <RefreshCw size={13} /> + Pindah Barang
+                    </button>
                   </div>
                 </div>
 
                 {/* Tabel Daftar Persediaan */}
                 <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
-                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px' }}>
                     <thead>
                       <tr style={{ background: '#10b981', color: '#000000' }}>
-                        <th style={{ width: '45px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                        <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Kode</th>
-                        <th style={{ minWidth: '220px', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Barang</th>
-                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Masuk</th>
-                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Qty Keluar</th>
-                        <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Qty (Sisa)</th>
-                        <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem', whiteSpace: 'nowrap' }}>Satuan</th>
-                        <th style={{ width: '130px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Avg Harga</th>
-                        <th style={{ width: '160px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.9rem', background: '#059669', color: '#ffffff' }}>Jumlah (Rp)</th>
-                        <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Status Stok</th>
+                        <th style={{ width: '40px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>No.</th>
+                        <th style={{ width: '110px', border: '1px solid #059669', padding: '8px 8px', fontWeight: 900, fontSize: '0.84rem' }}>Proyek</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Kode</th>
+                        <th style={{ minWidth: '180px', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Nama Barang</th>
+                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Masuk</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Mutasi (+/-)</th>
+                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Keluar</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.88rem', background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
+                        <th style={{ width: '70px', minWidth: '70px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem', whiteSpace: 'nowrap' }}>Satuan</th>
+                        <th style={{ width: '115px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Avg Harga</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.88rem', background: '#059669', color: '#ffffff' }}>Jumlah (Rp)</th>
+                        <th style={{ width: '95px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Status</th>
+                        <th style={{ width: '130px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>Pintasan</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredDaftarPersediaan.length === 0 ? (
                         <tr>
-                          <td colSpan={10} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
-                            Data persediaan tidak ditemukan
+                          <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                            Data persediaan kosong / belum ada barang yang di-input untuk proyek ini
                           </td>
                         </tr>
                       ) : (
@@ -9367,9 +9746,23 @@ export const TeknikModule = () => {
                           return (
                             <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                              <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8' }}>
+                                <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
+                                  {item.proyek}
+                                </span>
+                              </td>
                               <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
                               <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 10px' }}>{item.nama}</td>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyMasuk}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', padding: '7px 6px' }}>
+                                {item.mutasiNetQty !== 0 ? (
+                                  <span style={{ color: item.mutasiNetQty > 0 ? '#34d399' : '#f87171', fontWeight: 900 }}>
+                                    {item.mutasiNetQty > 0 ? `+${item.mutasiNetQty}` : item.mutasiNetQty}
+                                  </span>
+                                ) : (
+                                  <span style={{ color: '#64748b' }}>-</span>
+                                )}
+                              </td>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyKeluar}</td>
                               <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
                                 {item.sisaQty}
@@ -9396,6 +9789,63 @@ export const TeknikModule = () => {
                                   </span>
                                 )}
                               </td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                                <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingMasukId(null);
+                                      setBarangMasukFormData({
+                                        tanggal: getTodayDateString(),
+                                        proyek: item.proyek || 'Ashoka View',
+                                        kode: item.kode,
+                                        namaBarang: item.nama,
+                                        qty: '',
+                                        satuan: item.satuan,
+                                        hargaSatuan: item.avgHarga || '',
+                                        vendor: '',
+                                        keterangan: ''
+                                      });
+                                      setIsBarangMasukModalOpen(true);
+                                    }}
+                                    title="+ Tambah Stok Masuk"
+                                    style={{ background: 'rgba(2, 132, 199, 0.25)', color: '#38bdf8', border: '1px solid #0284c7', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
+                                  >
+                                    +Masuk
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingKeluarId(null);
+                                      setBarangKeluarFormData({
+                                        tanggal: getTodayDateString(),
+                                        proyek: item.proyek || 'Ashoka View',
+                                        kode: item.kode,
+                                        namaBarang: item.nama,
+                                        qty: '',
+                                        satuan: item.satuan,
+                                        avgHarga: item.avgHarga || 0,
+                                        blok: 'A',
+                                        noUnit: '01',
+                                        fasum: ''
+                                      });
+                                      setIsBarangKeluarModalOpen(true);
+                                    }}
+                                    title="- Catat Keluar / Pakai"
+                                    style={{ background: 'rgba(219, 39, 119, 0.25)', color: '#f472b6', border: '1px solid #db2777', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
+                                  >
+                                    -Keluar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenAddMutasiBarang(item.kode, item.nama, item.proyek, item.satuan)}
+                                    title="🔄 Pindah Stok Antar Proyek"
+                                    style={{ background: 'rgba(37, 99, 235, 0.25)', color: '#60a5fa', border: '1px solid #2563eb', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
+                                  >
+                                    🔄Pindah
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                           );
                         })
@@ -9403,7 +9853,7 @@ export const TeknikModule = () => {
                     </tbody>
                     <tfoot>
                       <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #10b981' }}>
-                        <td colSpan={5} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
+                        <td colSpan={7} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
                           TOTAL KESELURUHAN NILAI PERSEDIAAN :
                         </td>
                         <td style={{ textAlign: 'center', padding: '9px 6px', color: '#34d399', fontSize: '0.95rem', border: '1px solid #334155' }}>
@@ -9414,7 +9864,7 @@ export const TeknikModule = () => {
                         <td style={{ textAlign: 'right', padding: '9px 12px', color: '#10b981', fontSize: '1.05rem', border: '1px solid #334155' }}>
                           Rp {formatRupiah(filteredDaftarPersediaan.reduce((sum, it) => sum + (it.totalNilaiSisa || 0), 0))}
                         </td>
-                        <td style={{ border: '1px solid #334155' }}></td>
+                        <td colSpan={2} style={{ border: '1px solid #334155' }}></td>
                       </tr>
                     </tfoot>
                   </table>
@@ -9454,6 +9904,22 @@ export const TeknikModule = () => {
                     </select>
                   </div>
 
+                  {/* Urutkan Berdasarkan Proyek / Nama / Stok */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8' }}>Urut:</span>
+                    <select
+                      value={sortPersediaanBy}
+                      onChange={(e) => setSortPersediaanBy(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="proyek_asc" style={{ background: '#0f172a', color: '#ffffff' }}>🏢 Urutkan Sesuai Proyek (A-Z)</option>
+                      <option value="nama_asc" style={{ background: '#0f172a', color: '#ffffff' }}>🔤 Urutkan Nama Barang (A-Z)</option>
+                      <option value="sisa_desc" style={{ background: '#0f172a', color: '#ffffff' }}>📦 Sisa Stok Terbanyak</option>
+                      <option value="sisa_asc" style={{ background: '#0f172a', color: '#ffffff' }}>⚠️ Sisa Stok Tersedikit</option>
+                      <option value="nilai_desc" style={{ background: '#0f172a', color: '#ffffff' }}>💰 Nilai Persediaan Tertinggi</option>
+                    </select>
+                  </div>
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
                     <Search size={14} color="#94a3b8" />
                     <input
@@ -9472,6 +9938,14 @@ export const TeknikModule = () => {
 
                   <button
                     type="button"
+                    onClick={() => handleOpenAddMutasiBarang()}
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#ffffff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 900, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}
+                  >
+                    <RefreshCw size={15} /> + Pindah Stok Antar Proyek
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={handlePrint}
                     style={{ background: '#334155', color: '#ffffff', border: '1px solid #475569', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
                   >
@@ -9485,7 +9959,7 @@ export const TeknikModule = () => {
                 <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #334155' }}>
                   <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Total Item Terdaftar</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
-                    {persediaanMasterBarang.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Barang</span>
+                    {persediaanSummaryList.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Item Proyek</span>
                   </div>
                 </div>
                 <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #0284c7' }}>
@@ -9510,26 +9984,28 @@ export const TeknikModule = () => {
 
               {/* Table */}
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px' }}>
                   <thead>
                     <tr style={{ background: '#10b981', color: '#000000' }}>
                       <th style={{ width: '45px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>No.</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
-                      <th style={{ minWidth: '220px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Keluar</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
+                      <th style={{ width: '120px', border: '1px solid #059669', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Mutasi (+/-)</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Keluar</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
                       <th style={{ width: '65px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
-                      <th style={{ width: '130px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Avg Harga Satuan</th>
-                      <th style={{ width: '160px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Jumlah Nilai (Rp)</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Status</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>Pintasan</th>
+                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Avg Harga</th>
+                      <th style={{ width: '150px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Jumlah Nilai (Rp)</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Status</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>Pintasan</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredDaftarPersediaan.length === 0 ? (
                       <tr>
-                        <td colSpan={11} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
                           Tidak ada data persediaan sesuai filter
                         </td>
                       </tr>
@@ -9540,9 +10016,23 @@ export const TeknikModule = () => {
                         return (
                           <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8', whiteSpace: 'nowrap' }}>
+                              <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
+                                {item.proyek}
+                              </span>
+                            </td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
                             <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 10px' }}>{item.nama}</td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyMasuk}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', padding: '7px 6px' }}>
+                              {item.mutasiNetQty !== 0 ? (
+                                <span style={{ color: item.mutasiNetQty > 0 ? '#34d399' : '#f87171', fontWeight: 900 }}>
+                                  {item.mutasiNetQty > 0 ? `+${item.mutasiNetQty}` : item.mutasiNetQty}
+                                </span>
+                              ) : (
+                                <span style={{ color: '#64748b' }}>-</span>
+                              )}
+                            </td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 6px' }}>{item.totalQtyKeluar}</td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
                               {item.sisaQty}
@@ -9570,14 +10060,14 @@ export const TeknikModule = () => {
                               )}
                             </td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
-                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                              <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
                                 <button
                                   type="button"
                                   onClick={() => {
                                     setEditingMasukId(null);
                                     setBarangMasukFormData({
                                       tanggal: getTodayDateString(),
-                                      proyek: 'Ashoka View',
+                                      proyek: item.proyek || 'Ashoka View',
                                       kode: item.kode,
                                       namaBarang: item.nama,
                                       qty: '',
@@ -9589,9 +10079,9 @@ export const TeknikModule = () => {
                                     setIsBarangMasukModalOpen(true);
                                   }}
                                   title="+ Tambah Stok Masuk"
-                                  style={{ background: 'rgba(2, 132, 199, 0.25)', color: '#38bdf8', border: '1px solid #0284c7', borderRadius: '4px', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                  style={{ background: 'rgba(2, 132, 199, 0.25)', color: '#38bdf8', border: '1px solid #0284c7', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
                                 >
-                                  + Masuk
+                                  +Masuk
                                 </button>
                                 <button
                                   type="button"
@@ -9599,7 +10089,7 @@ export const TeknikModule = () => {
                                     setEditingKeluarId(null);
                                     setBarangKeluarFormData({
                                       tanggal: getTodayDateString(),
-                                      proyek: 'Ashoka View',
+                                      proyek: item.proyek || 'Ashoka View',
                                       kode: item.kode,
                                       namaBarang: item.nama,
                                       qty: '',
@@ -9612,9 +10102,17 @@ export const TeknikModule = () => {
                                     setIsBarangKeluarModalOpen(true);
                                   }}
                                   title="+ Catat Stok Keluar"
-                                  style={{ background: 'rgba(219, 39, 119, 0.25)', color: '#f472b6', border: '1px solid #db2777', borderRadius: '4px', padding: '3px 6px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                                  style={{ background: 'rgba(219, 39, 119, 0.25)', color: '#f472b6', border: '1px solid #db2777', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
                                 >
-                                  + Keluar
+                                  -Keluar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAddMutasiBarang(item.kode, item.nama, item.proyek, item.satuan)}
+                                  title="🔄 Pindah Stok Antar Proyek"
+                                  style={{ background: 'rgba(37, 99, 235, 0.25)', color: '#60a5fa', border: '1px solid #2563eb', borderRadius: '4px', padding: '2px 5px', fontSize: '0.68rem', fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                  🔄Pindah
                                 </button>
                               </div>
                             </td>
@@ -9625,7 +10123,7 @@ export const TeknikModule = () => {
                   </tbody>
                   <tfoot>
                     <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #10b981' }}>
-                      <td colSpan={5} style={{ textAlign: 'right', padding: '10px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
+                      <td colSpan={7} style={{ textAlign: 'right', padding: '10px 12px', color: '#ffffff', fontSize: '0.9rem' }}>
                         TOTAL KESELURUHAN NILAI PERSEDIAAN :
                       </td>
                       <td style={{ textAlign: 'center', padding: '10px 6px', color: '#34d399', fontSize: '1rem', border: '1px solid #334155' }}>
@@ -9674,18 +10172,53 @@ export const TeknikModule = () => {
                     </select>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
-                    <Search size={14} color="#94a3b8" />
+                  {/* 1. Cari Barang */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#38bdf8" />
                     <input
                       type="text"
-                      placeholder="Cari barang / vendor / nota..."
-                      value={searchMasuk}
-                      onChange={(e) => setSearchMasuk(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                      placeholder="Cari barang / kode..."
+                      value={searchMasukBarang}
+                      onChange={(e) => setSearchMasukBarang(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '135px', outline: 'none' }}
                     />
-                    {searchMasuk && (
-                      <button onClick={() => setSearchMasuk('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                        <X size={13} />
+                    {searchMasukBarang && (
+                      <button onClick={() => setSearchMasukBarang('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 2. Cari Vendor */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#fbbf24" />
+                    <input
+                      type="text"
+                      placeholder="Cari vendor..."
+                      value={searchMasukVendor}
+                      onChange={(e) => setSearchMasukVendor(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                    />
+                    {searchMasukVendor && (
+                      <button onClick={() => setSearchMasukVendor('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 3. Cari No. Nota / Keterangan */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari nota / ket..."
+                      value={searchMasukNota}
+                      onChange={(e) => setSearchMasukNota(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                    />
+                    {searchMasukNota && (
+                      <button onClick={() => setSearchMasukNota('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
                       </button>
                     )}
                   </div>
@@ -9815,18 +10348,53 @@ export const TeknikModule = () => {
                     </select>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
-                    <Search size={14} color="#94a3b8" />
+                  {/* 1. Cari Barang */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#f472b6" />
                     <input
                       type="text"
-                      placeholder="Cari pemakaian / blok / fasum..."
-                      value={searchKeluar}
-                      onChange={(e) => setSearchKeluar(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
+                      placeholder="Cari barang / kode..."
+                      value={searchKeluarBarang}
+                      onChange={(e) => setSearchKeluarBarang(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '135px', outline: 'none' }}
                     />
-                    {searchKeluar && (
-                      <button onClick={() => setSearchKeluar('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                        <X size={13} />
+                    {searchKeluarBarang && (
+                      <button onClick={() => setSearchKeluarBarang('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 2. Cari Blok / No. Unit */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#38bdf8" />
+                    <input
+                      type="text"
+                      placeholder="Cari blok / unit..."
+                      value={searchKeluarUnit}
+                      onChange={(e) => setSearchKeluarUnit(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                    />
+                    {searchKeluarUnit && (
+                      <button onClick={() => setSearchKeluarUnit('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 3. Cari Fasum / Keterangan */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari fasum / ket..."
+                      value={searchKeluarKet}
+                      onChange={(e) => setSearchKeluarKet(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                    />
+                    {searchKeluarKet && (
+                      <button onClick={() => setSearchKeluarKet('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
                       </button>
                     )}
                   </div>
@@ -10035,6 +10603,179 @@ export const TeknikModule = () => {
                       })
                     )}
                   </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------------------- */}
+          {/* VIEW 6: PEMINDAHAN BARANG / MUTASI ANTAR PROYEK (FULL VIEW)           */}
+          {/* --------------------------------------------------------------------- */}
+          {subTabPersediaan === 'mutasi' && (
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #2563eb', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <RefreshCw size={22} color="#60a5fa" /> Riwayat Pemindahan Material (Mutasi Antar Proyek)
+                  </h3>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                    Pencatatan transfer stok material antar lokasi proyek (mengurangi stok proyek asal & menambah stok proyek tujuan)
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  {/* Filter Dari Proyek */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f87171' }}>Dari:</span>
+                    <select
+                      value={filterMutasiDariProyek}
+                      onChange={(e) => setFilterMutasiDariProyek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#f87171', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Asal</option>
+                      <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                      <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    </select>
+                  </div>
+
+                  {/* Filter Ke Proyek */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #475569' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#34d399' }}>Ke:</span>
+                    <select
+                      value={filterMutasiKeProyek}
+                      onChange={(e) => setFilterMutasiKeProyek(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#34d399', fontSize: '0.82rem', fontWeight: 900, outline: 'none', cursor: 'pointer' }}
+                    >
+                      <option value="ALL" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Tujuan</option>
+                      <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
+                      <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    </select>
+                  </div>
+
+                  {/* Cari Barang */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#60a5fa" />
+                    <input
+                      type="text"
+                      placeholder="Cari kode / barang..."
+                      value={searchMutasiBarang}
+                      onChange={(e) => setSearchMutasiBarang(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '135px', outline: 'none' }}
+                    />
+                    {searchMutasiBarang && (
+                      <button onClick={() => setSearchMutasiBarang('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Cari Keterangan */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <Search size={13} color="#94a3b8" />
+                    <input
+                      type="text"
+                      placeholder="Cari keterangan..."
+                      value={searchMutasiKet}
+                      onChange={(e) => setSearchMutasiKet(e.target.value)}
+                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800, width: '120px', outline: 'none' }}
+                    />
+                    {searchMutasiKet && (
+                      <button onClick={() => setSearchMutasiKet('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Tombol Catat Pemindahan */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAddMutasiBarang()}
+                    style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)' }}
+                  >
+                    <Plus size={16} /> + Catat Pemindahan Barang
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabel Pemindahan Barang */}
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #2563eb' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
+                  <thead>
+                    <tr style={{ background: '#2563eb', color: '#ffffff' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
+                      <th style={{ width: '130px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Dari Proyek (Asal)</th>
+                      <th style={{ width: '30px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 2px', fontWeight: 900 }}>➡️</th>
+                      <th style={{ width: '130px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Ke Proyek (Tujuan)</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Nama Material / Barang</th>
+                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Qty Pindah</th>
+                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Satuan</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Keterangan / Alasan Transfer</th>
+                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPersediaanMutasi.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} style={{ textAlign: 'center', padding: '2.5rem', color: '#94a3b8' }}>
+                          Belum ada riwayat pemindahan barang antar proyek. Klik <strong>"+ Catat Pemindahan Barang"</strong> untuk memulai.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPersediaanMutasi.map((m, idx) => (
+                        <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
+                          <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                          <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#f87171', fontWeight: 800 }}>
+                            <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444' }}>
+                              {m.dariProyek}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 2px', color: '#60a5fa', fontWeight: 900 }}>➡️</td>
+                          <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#34d399', fontWeight: 800 }}>
+                            <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981' }}>
+                              {m.keProyek}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
+                          <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#60a5fa', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
+                          <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#cbd5e1' }}>{m.keterangan || '-'}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
+                            <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditMutasiBarang(m)}
+                                title="Edit Pemindahan"
+                                style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteMutasiBarang(m.id)}
+                                title="Hapus Pemindahan"
+                                style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '2px' }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ background: '#0f172a', fontWeight: 900, borderTop: '2px solid #2563eb' }}>
+                      <td colSpan={7} style={{ textAlign: 'right', padding: '9px 12px', color: '#ffffff' }}>TOTAL BARANG DIPINDAHKAN :</td>
+                      <td style={{ textAlign: 'center', padding: '9px 6px', color: '#60a5fa', fontSize: '0.95rem', border: '1px solid #334155' }}>
+                        {filteredPersediaanMutasi.reduce((sum, it) => sum + (Number(it.qty) || 0), 0)}
+                      </td>
+                      <td colSpan={3} style={{ border: '1px solid #334155' }}></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -10572,269 +11313,6 @@ export const TeknikModule = () => {
                                   if (window.confirm(`Hapus Unit "${row.proyek} Blok ${row.blok} No ${row.nomor}"?`)) {
                                     setDatabaseUnitRows(prev => prev.filter(u => u.id !== row.id));
                                     showNotification(`Unit berhasil dihapus.`, 'warning');
-                                  }
-                                }}
-                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* --------------------------------------------------------------------- */}
-          {/* 5. TABEL DATA BASE KONSUMEN (Nama | No HP | NIK | NPWP | Alamat ...)  */}
-          {/* --------------------------------------------------------------------- */}
-          {subTabDatabase === 'konsumen' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Users size={22} color="#fbbf24" /> Data Base Konsumen ({databaseKonsumenRows.length} Pembeli)
-                  </h3>
-                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
-                    Master data konsumen pembeli unit, kelengkapan berkas KTP/NIK, NPWP, alamat dan sumber referensi
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
-                    <Search size={14} color="#94a3b8" />
-                    <input
-                      type="text"
-                      placeholder="Cari Konsumen / NIK / No HP..."
-                      value={searchDbKonsumen}
-                      onChange={(e) => setSearchDbKonsumen(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
-                    />
-                    {searchDbKonsumen && (
-                      <button onClick={() => setSearchDbKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                        <X size={13} />
-                      </button>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingKonsumenId(null);
-                      setKonsumenFormData({
-                        nama: '', noHp: '', nik: '', npwp: '', alamat: '', referensi: '', ktpFile: null, ktpFileName: ''
-                      });
-                      setIsKonsumenModalOpen(true);
-                    }}
-                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
-                  >
-                    <Plus size={16} /> Tambah Konsumen
-                  </button>
-                </div>
-              </div>
-
-              {/* Table Konsumen */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px' }}>
-                  <thead>
-                    <tr style={{ background: '#f59e0b', color: '#000000' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
-                      <th style={{ width: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NIK</th>
-                      <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                      <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Upload KTP</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {databaseKonsumenRows
-                      .filter(r => !searchDbKonsumen || [r.nama, r.noHp, r.nik, r.npwp, r.alamat, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
-                      .map((row, idx) => (
-                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
-                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
-                              </div>
-                              <span>{row.nama}</span>
-                            </div>
-                          </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>{row.noHp || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.npwp || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
-                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                              {row.referensi || '-'}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
-                            {row.ktpFile || row.ktpFileName ? (
-                              <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <FileCheck size={14} color="#10b981" /> Ada KTP
-                              </span>
-                            ) : (
-                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Belum ada</span>
-                            )}
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEditingKonsumenId(row.id);
-                                  setKonsumenFormData({
-                                    nama: row.nama || '',
-                                    noHp: row.noHp || '',
-                                    nik: row.nik || '',
-                                    npwp: row.npwp || '',
-                                    alamat: row.alamat || '',
-                                    referensi: row.referensi || '',
-                                    ktpFile: row.ktpFile || null,
-                                    ktpFileName: row.ktpFileName || ''
-                                  });
-                                  setIsKonsumenModalOpen(true);
-                                }}
-                                style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                              >
-                                <Edit3 size={12} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (window.confirm(`Hapus Konsumen "${row.nama}"?`)) {
-                                    setDatabaseKonsumenRows(prev => prev.filter(k => k.id !== row.id));
-                                    showNotification(`Konsumen "${row.nama}" berhasil dihapus.`, 'warning');
-                                  }
-                                }}
-                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* --------------------------------------------------------------------- */}
-          {/* 6. TABEL DATA BASE CALON KONSUMEN (Nama | No HP | Domisili | Referensi)*/}
-          {/* --------------------------------------------------------------------- */}
-          {subTabDatabase === 'calon_konsumen' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #ec4899', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <UserPlus size={22} color="#f472b6" /> Data Base Calon Konsumen ({databaseCalonKonsumenRows.length} Prospek)
-                  </h3>
-                  <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
-                    Daftar calon pembeli prospektif, domisili asal, nomor kontak dan saluran referensi
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
-                    <Search size={14} color="#94a3b8" />
-                    <input
-                      type="text"
-                      placeholder="Cari Prospek / Domisili..."
-                      value={searchDbCalonKonsumen}
-                      onChange={(e) => setSearchDbCalonKonsumen(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '180px', outline: 'none' }}
-                    />
-                    {searchDbCalonKonsumen && (
-                      <button onClick={() => setSearchDbCalonKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                        <X size={13} />
-                      </button>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingCalonKonsumenId(null);
-                      setCalonKonsumenFormData({ nama: '', noHp: '', domisili: '', referensi: '' });
-                      setIsCalonKonsumenModalOpen(true);
-                    }}
-                    style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.4)' }}
-                  >
-                    <Plus size={16} /> Tambah Calon Konsumen
-                  </button>
-                </div>
-              </div>
-
-              {/* Table Calon Konsumen */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #db2777' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '650px' }}>
-                  <thead>
-                    <tr style={{ background: '#ec4899', color: '#ffffff' }}>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '220px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Calon Konsumen</th>
-                      <th style={{ width: '160px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
-                      <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {databaseCalonKonsumenRows
-                      .filter(r => !searchDbCalonKonsumen || [r.nama, r.noHp, r.domisili, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbCalonKonsumen.toLowerCase().trim())))
-                      .map((row, idx) => (
-                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
-                                {row.nama ? row.nama.charAt(0).toUpperCase() : 'P'}
-                              </div>
-                              <span>{row.nama}</span>
-                            </div>
-                          </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <Phone size={13} /> {row.noHp || '-'}
-                            </span>
-                          </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <MapPin size={13} color="#f472b6" /> {row.domisili || '-'}
-                            </span>
-                          </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
-                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: '1px solid rgba(236, 72, 153, 0.3)' }}>
-                              {row.referensi || '-'}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEditingCalonKonsumenId(row.id);
-                                  setCalonKonsumenFormData({ nama: row.nama || '', noHp: row.noHp || '', domisili: row.domisili || '', referensi: row.referensi || '' });
-                                  setIsCalonKonsumenModalOpen(true);
-                                }}
-                                style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
-                              >
-                                <Edit3 size={12} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (window.confirm(`Hapus Calon Konsumen "${row.nama}"?`)) {
-                                    setDatabaseCalonKonsumenRows(prev => prev.filter(c => c.id !== row.id));
-                                    showNotification(`Calon Konsumen "${row.nama}" berhasil dihapus.`, 'warning');
                                   }
                                 }}
                                 style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
@@ -13111,244 +13589,186 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL MASTER 4: KONSUMEN (Nama, HP, NIK, NPWP, Alamat, Referensi, Upload) */}
+      {/* MODAL PERSEDIAAN: PEMINDAHAN BARANG (MUTASI MATERIAL ANTAR PROYEK)        */}
       {/* ========================================================================= */}
-      {isKonsumenModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+      {isMutasiModalOpen && (
+        <div className="modal-backdrop" style={{ zIndex: 1100 }}>
+          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #2563eb', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Users size={20} color="#fbbf24" />
-                {editingKonsumenId ? 'Edit Data Base Konsumen' : 'Data Base Konsumen (Tambah Baru)'}
+                <RefreshCw size={20} color="#60a5fa" />
+                {editingMutasiId ? 'Edit Pemindahan Material (Mutasi)' : 'Catat Pemindahan Material Antar Proyek'}
               </h3>
-              <button onClick={() => setIsKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => setIsMutasiModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!konsumenFormData.nama.trim()) {
-                alert('Nama konsumen wajib diisi!');
-                return;
-              }
-              if (editingKonsumenId) {
-                setDatabaseKonsumenRows(prev => prev.map(k => k.id === editingKonsumenId ? { ...k, ...konsumenFormData } : k));
-                showNotification(`Data Konsumen "${konsumenFormData.nama}" berhasil diperbarui!`, 'success');
-              } else {
-                const newK = {
-                  id: `KNS-${Date.now().toString().slice(-4)}`,
-                  ...konsumenFormData
-                };
-                setDatabaseKonsumenRows(prev => [...prev, newK]);
-                showNotification(`Konsumen "${konsumenFormData.nama}" berhasil didaftarkan!`, 'success');
-              }
-              setIsKonsumenModalOpen(false);
-            }}>
+            <form onSubmit={handleSaveMutasiBarang}>
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
+                  
+                  <div style={{ marginBottom: '1rem', padding: '8px 12px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid #2563eb', fontSize: '0.78rem', color: '#93c5fd', lineHeight: 1.4 }}>
+                    ℹ️ <strong>Mutasi Stok Antar Proyek:</strong> Qty barang akan otomatis dipotong dari proyek asal dan ditambahkan ke stok proyek tujuan secara real-time.
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '130px 15px 1fr', rowGap: '0.85rem', alignItems: 'center' }}>
                     
-                    {/* Nama */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
+                    {/* Tanggal */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Tanggal Pindah</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
-                      type="text"
+                      type="date"
                       required
-                      placeholder="Nama lengkap konsumen..."
-                      value={konsumenFormData.nama}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nama: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      value={mutasiFormData.tanggal}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, tanggal: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* No. HP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    {/* Dari Proyek (Asal) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f87171' }}>Dari Proyek (Asal)</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="0812-xxxx-xxxx"
-                      value={konsumenFormData.noHp}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, noHp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
+                    <select
+                      value={mutasiFormData.dariProyek}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, dariProyek: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #ef4444', borderRadius: '6px', color: '#f87171', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                    </select>
 
-                    {/* NIK */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NIK</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="16 digit NIK KTP..."
-                      value={konsumenFormData.nik}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nik: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
-
-                    {/* NPWP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NPWP</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="Nomor NPWP..."
-                      value={konsumenFormData.npwp}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, npwp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
-
-                    {/* Alamat */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Alamat</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="Alamat domisili lengkap..."
-                      value={konsumenFormData.alamat}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, alamat: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
-
-                    {/* Referensi */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
-                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
-                    <input
-                      type="text"
-                      placeholder="Pameran / Brosur / Teman / Instagram..."
-                      value={konsumenFormData.referensi}
-                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, referensi: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
-
-                    {/* Upload NIK / KTP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload NIK/KTP</div>
+                    {/* Ke Proyek (Tujuan) */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#34d399' }}>Ke Proyek (Tujuan)</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <div>
-                      <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        id="konsumen-ktp-upload"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setKonsumenFormData(prev => ({ ...prev, ktpFileName: file.name, ktpFile: 'uploaded' }));
-                          }
-                        }}
-                      />
-                      <label
-                        htmlFor="konsumen-ktp-upload"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          background: 'rgba(245, 158, 11, 0.2)',
-                          border: '1px dashed #f59e0b',
-                          color: '#fbbf24',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          fontSize: '0.82rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
+                      <select
+                        value={mutasiFormData.keProyek}
+                        onChange={(e) => setMutasiFormData({ ...mutasiFormData, keProyek: e.target.value })}
+                        style={{ width: '100%', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#34d399', fontWeight: 900, padding: '6px 10px', fontSize: '0.86rem' }}
                       >
-                        <Upload size={14} /> {konsumenFormData.ktpFileName ? `File: ${konsumenFormData.ktpFileName}` : 'Pilih Foto / Berkas KTP'}
-                      </label>
+                        <option value="Ashoka Park">Ashoka Park</option>
+                        <option value="Ashoka View">Ashoka View</option>
+                      </select>
+                      {mutasiFormData.dariProyek.trim().toLowerCase() === mutasiFormData.keProyek.trim().toLowerCase() && (
+                        <div style={{ color: '#f87171', fontSize: '0.74rem', fontWeight: 800, marginTop: '4px' }}>
+                          ⚠️ Proyek asal dan tujuan tidak boleh sama!
+                        </div>
+                      )}
                     </div>
 
-                  </div>
-                </div>
-              </div>
+                    {/* Pilih Material dari Master */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#c084fc' }}>Pilih Master</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={mutasiFormData.kode}
+                      onChange={(e) => {
+                        const itm = persediaanMasterBarang.find(b => b.kode === e.target.value);
+                        if (itm) {
+                          setMutasiFormData({
+                            ...mutasiFormData,
+                            kode: itm.kode,
+                            namaBarang: itm.nama,
+                            satuan: normalizeSatuan(itm.satuan)
+                          });
+                        }
+                      }}
+                      style={{ background: '#0f172a', border: '1.5px solid #a855f7', borderRadius: '6px', color: '#c084fc', fontWeight: 800, padding: '6px 10px', fontSize: '0.84rem' }}
+                    >
+                      <option value="">-- Pilih dari Master Barang --</option>
+                      {persediaanMasterBarang.map(b => (
+                        <option key={b.id || b.kode} value={b.kode}>[{b.kode}] {b.nama} ({normalizeSatuan(b.satuan)})</option>
+                      ))}
+                    </select>
 
-              <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000000' }}>
-                  💾 Simpan Data Base Konsumen
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL MASTER 5: CALON KONSUMEN (Nama, No HP, Domisili, Referensi)         */}
-      {/* ========================================================================= */}
-      {isCalonKonsumenModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #ec4899', color: '#ffffff' }}>
-            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
-              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <UserPlus size={20} color="#f472b6" />
-                {editingCalonKonsumenId ? 'Edit Data Base Calon Konsumen' : 'Data Base Calon Konsumen (Tambah Baru)'}
-              </h3>
-              <button onClick={() => setIsCalonKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!calonKonsumenFormData.nama.trim()) {
-                alert('Nama calon konsumen wajib diisi!');
-                return;
-              }
-              if (editingCalonKonsumenId) {
-                setDatabaseCalonKonsumenRows(prev => prev.map(c => c.id === editingCalonKonsumenId ? { ...c, ...calonKonsumenFormData } : c));
-                showNotification(`Data Calon Konsumen "${calonKonsumenFormData.nama}" berhasil diperbarui!`, 'success');
-              } else {
-                const newC = {
-                  id: `CLK-${Date.now().toString().slice(-4)}`,
-                  ...calonKonsumenFormData
-                };
-                setDatabaseCalonKonsumenRows(prev => [...prev, newC]);
-                showNotification(`Calon Konsumen "${calonKonsumenFormData.nama}" berhasil didaftarkan!`, 'success');
-              }
-              setIsCalonKonsumenModalOpen(false);
-            }}>
-              <div className="modal-body">
-                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '90px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
-                    
-                    {/* Nama */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
+                    {/* Kode Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Kode Barang</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
                       required
-                      placeholder="Nama prospek / calon pembeli..."
-                      value={calonKonsumenFormData.nama}
-                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, nama: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #ec4899', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      placeholder="Contoh: SMN-01"
+                      value={mutasiFormData.kode}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, kode: e.target.value.toUpperCase() })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#c084fc', fontWeight: 900, padding: '5px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* No. HP */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    {/* Nama Barang */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Nama Barang</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
-                      placeholder="0812-xxxx-xxxx"
-                      value={calonKonsumenFormData.noHp}
-                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, noHp: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      required
+                      placeholder="Nama material bahan bangunan..."
+                      value={mutasiFormData.namaBarang}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, namaBarang: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
                     />
 
-                    {/* Domisili */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Domisili</div>
+                    {/* Info Stok di Proyek Asal */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#94a3b8' }}>Stok Asal</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      {(() => {
+                        const stockInSource = persediaanSummaryList.find(s => 
+                          s.proyek === mutasiFormData.dariProyek && 
+                          (s.kode === mutasiFormData.kode || s.nama.toLowerCase() === (mutasiFormData.namaBarang || '').toLowerCase().trim())
+                        );
+                        const sisaStok = stockInSource ? stockInSource.sisaQty : 0;
+                        return (
+                          <div style={{ padding: '5px 8px', borderRadius: '6px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #334155', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ color: '#94a3b8' }}>Sisa di {mutasiFormData.dariProyek}:</span>
+                            <strong style={{ color: sisaStok > 0 ? '#34d399' : '#f87171', fontWeight: 900 }}>
+                              {sisaStok} {normalizeSatuan(mutasiFormData.satuan || 'Sak')}
+                            </strong>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Qty Pindah */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Qty Dipindah</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
-                      type="text"
-                      placeholder="Kota / Wilayah tempat tinggal..."
-                      value={calonKonsumenFormData.domisili}
-                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, domisili: e.target.value })}
+                      type="number"
+                      required
+                      min="0.01"
+                      step="any"
+                      placeholder="Jumlah yang dipindahkan..."
+                      value={mutasiFormData.qty}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, qty: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #2563eb', borderRadius: '6px', color: '#60a5fa', fontWeight: 900, padding: '5px 10px', fontSize: '0.9rem' }}
+                    />
+
+                    {/* Satuan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Satuan</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <select
+                      value={normalizeSatuan(mutasiFormData.satuan)}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, satuan: normalizeSatuan(e.target.value) })}
                       style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
-                    />
+                    >
+                      <option value="Sak">Sak</option>
+                      <option value="Batang">Batang</option>
+                      <option value="M³">M³ (Kubik)</option>
+                      <option value="Truck">Truck / Rit</option>
+                      <option value="Buah">Buah</option>
+                      <option value="Pcs">Pcs</option>
+                      <option value="Kg">Kg</option>
+                      <option value="Roll">Roll</option>
+                      <option value="LBR">LBR (Lembar)</option>
+                      <option value="Dus">Dus / Box</option>
+                      <option value="Pail">Pail / Kaleng</option>
+                    </select>
 
-                    {/* Referensi */}
-                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    {/* Keterangan */}
+                    <div style={{ fontWeight: 900, fontSize: '0.84rem', color: '#f8fafc' }}>Keterangan</div>
                     <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
                     <input
                       type="text"
-                      placeholder="Brosur / Spanduk / Web / Sales..."
-                      value={calonKonsumenFormData.referensi}
-                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensi: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                      placeholder="Alasan / tujuan pemindahan..."
+                      value={mutasiFormData.keterangan}
+                      onChange={(e) => setMutasiFormData({ ...mutasiFormData, keterangan: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
                     />
 
                   </div>
@@ -13356,9 +13776,9 @@ export const TeknikModule = () => {
               </div>
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', fontWeight: 900 }}>
-                  💾 Simpan Calon Konsumen
+                <button type="button" className="btn btn-secondary" onClick={() => setIsMutasiModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', fontWeight: 900, color: '#ffffff' }}>
+                  💾 Simpan Pemindahan Material
                 </button>
               </div>
             </form>

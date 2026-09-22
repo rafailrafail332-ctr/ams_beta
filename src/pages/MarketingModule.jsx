@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import { 
   TrendingUp, 
   DollarSign, 
   Users, 
+  UserPlus,
+  Phone,
+  MapPin,
+  FileCheck,
   Target, 
   Plus, 
   Search, 
@@ -37,6 +42,87 @@ import {
   Trash2
 } from 'lucide-react';
 
+const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
+const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
+
+const initialDbKonsumen = [
+  {
+    id: 'KNS-001',
+    nama: 'Budi Santoso',
+    noHp: '0812-9988-7766',
+    nik: '3374102908850003',
+    npwp: '09.254.341.2-508.000',
+    alamat: 'Jl. Pemuda No. 142, Semarang Tengah',
+    referensi: 'Pameran Mall Ciputra',
+    ktpFile: 'uploaded',
+    ktpFileName: 'ktp_budi_santoso.pdf'
+  },
+  {
+    id: 'KNS-002',
+    nama: 'Siti Rahmawati',
+    noHp: '0813-1122-3344',
+    nik: '3374025501900001',
+    npwp: '12.876.432.1-508.000',
+    alamat: 'Jl. Gajahmada No. 88, Semarang',
+    referensi: 'Brosur Marketing',
+    ktpFile: null,
+    ktpFileName: ''
+  },
+  {
+    id: 'KNS-003',
+    nama: 'Dr. Ahmad Fauzi',
+    noHp: '0857-4455-6677',
+    nik: '3374081203780004',
+    npwp: '45.678.901.2-508.000',
+    alamat: 'Jl. Pandanaran No. 25, Semarang',
+    referensi: 'Referral Dokter Teman',
+    ktpFile: 'uploaded',
+    ktpFileName: 'ktp_dr_ahmad_fauzi.jpg'
+  },
+  {
+    id: 'KNS-004',
+    nama: 'Ibu Ratna Pertiwi',
+    noHp: '0813-8877-6655',
+    nik: '3374116209870002',
+    npwp: '78.901.234.5-508.000',
+    alamat: 'Jl. Majapahit No. 50, Semarang Timur',
+    referensi: 'Walk-In Customer',
+    ktpFile: null,
+    ktpFileName: ''
+  }
+];
+
+const initialDbCalonKonsumen = [
+  {
+    id: 'CLK-001',
+    nama: 'Bpk. Hendra Kurniawan',
+    noHp: '0812-3344-5566',
+    domisili: 'Semarang Barat',
+    referensi: 'Instagram Ads'
+  },
+  {
+    id: 'CLK-002',
+    nama: 'Ibu Dewi Sartika',
+    noHp: '0858-7788-9900',
+    domisili: 'Ungaran Barat, Kab. Semarang',
+    referensi: 'Spanduk Gerbang Perumahan'
+  },
+  {
+    id: 'CLK-003',
+    nama: 'Bpk. Agus Setiawan',
+    noHp: '0857-1122-3344',
+    domisili: 'Pedurungan, Semarang',
+    referensi: 'Facebook Ads'
+  },
+  {
+    id: 'CLK-004',
+    nama: 'Dr. Maya Indah',
+    noHp: '0811-9988-7711',
+    domisili: 'Banyumanik, Semarang',
+    referensi: 'Referral Konsumen'
+  }
+];
+
 export const MarketingModule = () => {
   const { currentUser, activeSubTab, setActiveSubTab, showNotification } = useApp();
   const [search, setSearch] = useState('');
@@ -48,8 +134,219 @@ export const MarketingModule = () => {
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Active Tab Control (Default to leads if subTab is 'leads' or 'default')
-  const currentSubView = (activeSubTab === 'spr') ? 'spr' : 'leads';
+  // Active Tab Control (leads, spr, konsumen, calon_konsumen)
+  const currentSubView = 
+    activeSubTab === 'spr' ? 'spr' :
+    activeSubTab === 'konsumen' ? 'konsumen' :
+    activeSubTab === 'calon_konsumen' ? 'calon_konsumen' :
+    'leads';
+
+  // -------------------------------------------------------------
+  // DATA BASE KONSUMEN & CALON KONSUMEN STORE
+  // -------------------------------------------------------------
+  const [databaseKonsumenRows, setDatabaseKonsumenRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DB_KONSUMEN);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialDbKonsumen;
+  });
+
+  const [databaseCalonKonsumenRows, setDatabaseCalonKonsumenRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DB_CALON_KONSUMEN);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return initialDbCalonKonsumen;
+  });
+
+  // Cloud Sync for Konsumen & Calon Konsumen
+  useEffect(() => {
+    fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
+      if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseKonsumenRows(val);
+    });
+    fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
+      if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
+    });
+
+    const interval = setInterval(() => {
+      fetchCloudStore(STORAGE_KEY_DB_KONSUMEN, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseKonsumenRows(val);
+      });
+      fetchCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseCalonKonsumenRows(val);
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const updateAndSaveKonsumen = (nextList, notifText = '', notifType = 'success') => {
+    setDatabaseKonsumenRows(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_DB_KONSUMEN, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_KONSUMEN, nextList).catch(() => {});
+    if (notifText) showNotification(notifText, notifType);
+  };
+
+  const updateAndSaveCalonKonsumen = (nextList, notifText = '', notifType = 'success') => {
+    setDatabaseCalonKonsumenRows(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_DB_CALON_KONSUMEN, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, nextList).catch(() => {});
+    if (notifText) showNotification(notifText, notifType);
+  };
+
+  // State: Modal & Form Data Konsumen
+  const [searchDbKonsumen, setSearchDbKonsumen] = useState('');
+  const [isKonsumenModalOpen, setIsKonsumenModalOpen] = useState(false);
+  const [editingKonsumenId, setEditingKonsumenId] = useState(null);
+  const [konsumenFormData, setKonsumenFormData] = useState({
+    nama: '',
+    noHp: '',
+    nik: '',
+    npwp: '',
+    alamat: '',
+    referensi: '',
+    ktpFile: null,
+    ktpFileName: ''
+  });
+
+  // State: Modal & Form Data Calon Konsumen
+  const [searchDbCalonKonsumen, setSearchDbCalonKonsumen] = useState('');
+  const [isCalonKonsumenModalOpen, setIsCalonKonsumenModalOpen] = useState(false);
+  const [editingCalonKonsumenId, setEditingCalonKonsumenId] = useState(null);
+  const [calonKonsumenFormData, setCalonKonsumenFormData] = useState({
+    nama: '',
+    noHp: '',
+    domisili: '',
+    referensi: ''
+  });
+
+  // Handlers for Konsumen
+  const handleOpenAddKonsumen = () => {
+    setEditingKonsumenId(null);
+    setKonsumenFormData({
+      nama: '',
+      noHp: '',
+      nik: '',
+      npwp: '',
+      alamat: '',
+      referensi: '',
+      ktpFile: null,
+      ktpFileName: ''
+    });
+    setIsKonsumenModalOpen(true);
+  };
+
+  const handleOpenEditKonsumen = (row) => {
+    setEditingKonsumenId(row.id);
+    setKonsumenFormData({
+      nama: row.nama || '',
+      noHp: row.noHp || '',
+      nik: row.nik || '',
+      npwp: row.npwp || '',
+      alamat: row.alamat || '',
+      referensi: row.referensi || '',
+      ktpFile: row.ktpFile || null,
+      ktpFileName: row.ktpFileName || ''
+    });
+    setIsKonsumenModalOpen(true);
+  };
+
+  const handleSaveKonsumen = (e) => {
+    e.preventDefault();
+    if (!konsumenFormData.nama.trim()) {
+      showNotification('Nama konsumen wajib diisi!', 'warning');
+      return;
+    }
+    if (editingKonsumenId) {
+      const nextList = databaseKonsumenRows.map(k => k.id === editingKonsumenId ? { ...k, ...konsumenFormData } : k);
+      updateAndSaveKonsumen(nextList, `Data Konsumen "${konsumenFormData.nama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newK = {
+        id: `KNS-${Date.now().toString().slice(-4)}`,
+        ...konsumenFormData
+      };
+      updateAndSaveKonsumen([newK, ...databaseKonsumenRows], `Konsumen "${konsumenFormData.nama}" berhasil didaftarkan!`, 'success');
+    }
+    setIsKonsumenModalOpen(false);
+  };
+
+  const handleDeleteKonsumen = (id, name) => {
+    if (window.confirm(`Hapus Konsumen "${name}"?`)) {
+      const nextList = databaseKonsumenRows.filter(k => k.id !== id);
+      updateAndSaveKonsumen(nextList, `Konsumen "${name}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // Handlers for Calon Konsumen
+  const handleOpenAddCalonKonsumen = () => {
+    setEditingCalonKonsumenId(null);
+    setCalonKonsumenFormData({
+      nama: '',
+      noHp: '',
+      domisili: '',
+      referensi: ''
+    });
+    setIsCalonKonsumenModalOpen(true);
+  };
+
+  const handleOpenEditCalonKonsumen = (row) => {
+    setEditingCalonKonsumenId(row.id);
+    setCalonKonsumenFormData({
+      nama: row.nama || '',
+      noHp: row.noHp || '',
+      domisili: row.domisili || '',
+      referensi: row.referensi || ''
+    });
+    setIsCalonKonsumenModalOpen(true);
+  };
+
+  const handleSaveCalonKonsumen = (e) => {
+    e.preventDefault();
+    if (!calonKonsumenFormData.nama.trim()) {
+      showNotification('Nama calon konsumen wajib diisi!', 'warning');
+      return;
+    }
+    if (editingCalonKonsumenId) {
+      const nextList = databaseCalonKonsumenRows.map(c => c.id === editingCalonKonsumenId ? { ...c, ...calonKonsumenFormData } : c);
+      updateAndSaveCalonKonsumen(nextList, `Data Calon Konsumen "${calonKonsumenFormData.nama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newC = {
+        id: `CLK-${Date.now().toString().slice(-4)}`,
+        ...calonKonsumenFormData
+      };
+      updateAndSaveCalonKonsumen([newC, ...databaseCalonKonsumenRows], `Calon Konsumen "${calonKonsumenFormData.nama}" berhasil didaftarkan!`, 'success');
+    }
+    setIsCalonKonsumenModalOpen(false);
+  };
+
+  const handleDeleteCalonKonsumen = (id, name) => {
+    if (window.confirm(`Hapus Calon Konsumen "${name}"?`)) {
+      const nextList = databaseCalonKonsumenRows.filter(c => c.id !== id);
+      updateAndSaveCalonKonsumen(nextList, `Calon Konsumen "${name}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleOpenWACustomer = (phone, name) => {
+    const phoneNum = phone ? phone.replace(/[^0-9]/g, '') : '';
+    if (!phoneNum) {
+      showNotification('Nomor telepon belum diisi!', 'warning');
+      return;
+    }
+    const cleanNum = phoneNum.startsWith('0') ? '62' + phoneNum.slice(1) : phoneNum;
+    const msg = `Halo Bapak/Ibu ${name},\n\nTerima kasih telah mempercayakan hunian Anda kepada Ashoka. Apakah ada yang bisa kami bantu hari ini? 😊`;
+    window.open(`https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
 
   // -------------------------------------------------------------
   // CRM LEADS & KOMISI SALES TRACKER STORE
@@ -531,24 +828,35 @@ export const MarketingModule = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Modul Marketing & Sales</h1>
-          <p className="page-subtitle">Pipeline CRM Prospek Leads, Tracker Komisi Sales (2.5%), & Unggah Dokumen Transaksi SPR.</p>
+          <p className="page-subtitle">Pipeline CRM Prospek Leads, Tracker Komisi Sales (2.5%), Dokumen SPR, & Data Base Konsumen.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {currentSubView === 'leads' ? (
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {currentSubView === 'leads' && (
             <button className="btn btn-primary" onClick={handleOpenAddLead}>
               <Plus size={16} /> Tambah Lead Prospek Baru
             </button>
-          ) : (
+          )}
+          {currentSubView === 'spr' && (
             <button className="btn btn-primary" onClick={handleOpenAdd}>
               <Plus size={16} /> Input Transaksi Penjualan
+            </button>
+          )}
+          {currentSubView === 'konsumen' && (
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#000000', fontWeight: 900 }} onClick={handleOpenAddKonsumen}>
+              <Plus size={16} /> + Tambah Konsumen Baru
+            </button>
+          )}
+          {currentSubView === 'calon_konsumen' && (
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
+              <Plus size={16} /> + Tambah Calon Konsumen
             </button>
           )}
         </div>
       </div>
 
       {/* SUB-MODULE TABS NAVIGATION */}
-      <div className="tab-list" style={{ marginBottom: '1.5rem' }}>
+      <div className="tab-list" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <button
           className={`tab-item ${currentSubView === 'leads' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('leads')}
@@ -562,6 +870,34 @@ export const MarketingModule = () => {
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}
         >
           <FileText size={16} /> 2. Transaksi Penjualan & Upload Dokumen SPR
+        </button>
+        <button
+          className={`tab-item ${currentSubView === 'konsumen' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('konsumen')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'konsumen' ? '#f59e0b' : undefined,
+            color: currentSubView === 'konsumen' ? '#fbbf24' : undefined
+          }}
+        >
+          <Users size={16} color="#fbbf24" /> 3. Data Base Konsumen ({databaseKonsumenRows.length})
+        </button>
+        <button
+          className={`tab-item ${currentSubView === 'calon_konsumen' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('calon_konsumen')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'calon_konsumen' ? '#ec4899' : undefined,
+            color: currentSubView === 'calon_konsumen' ? '#f472b6' : undefined
+          }}
+        >
+          <UserPlus size={16} color="#f472b6" /> 4. Data Base Calon Konsumen ({databaseCalonKonsumenRows.length})
         </button>
       </div>
 
@@ -933,6 +1269,250 @@ export const MarketingModule = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* TAB 3: DATA BASE KONSUMEN                                                 */}
+      {/* ========================================================================= */}
+      {currentSubView === 'konsumen' && (
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Users size={22} color="#fbbf24" /> Data Base Konsumen ({databaseKonsumenRows.length} Pembeli)
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                Master data konsumen pembeli unit perumahan, kelengkapan berkas KTP/NIK, NPWP, alamat dan saluran referensi
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                <Search size={14} color="#94a3b8" />
+                <input
+                  type="text"
+                  placeholder="Cari Konsumen / NIK / No HP..."
+                  value={searchDbKonsumen}
+                  onChange={(e) => setSearchDbKonsumen(e.target.value)}
+                  style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '190px', outline: 'none' }}
+                />
+                {searchDbKonsumen && (
+                  <button onClick={() => setSearchDbKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenAddKonsumen}
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000000', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}
+              >
+                <Plus size={16} /> Tambah Konsumen
+              </button>
+            </div>
+          </div>
+
+          {/* Table Konsumen */}
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
+            <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
+              <thead>
+                <tr style={{ background: '#f59e0b', color: '#000000' }}>
+                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                  <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
+                  <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
+                  <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NIK</th>
+                  <th style={{ width: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NPWP</th>
+                  <th style={{ minWidth: '200px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                  <th style={{ width: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
+                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Upload KTP</th>
+                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {databaseKonsumenRows
+                  .filter(r => !searchDbKonsumen || [r.nama, r.noHp, r.nik, r.npwp, r.alamat, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
+                  .map((row, idx) => (
+                    <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                            {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
+                          </div>
+                          <span>{row.nama}</span>
+                        </div>
+                      </td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
+                          title="Chat via WhatsApp"
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                        >
+                          <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                        </button>
+                      </td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.npwp || '-'}</td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
+                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                          {row.referensi || '-'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                        {row.ktpFile || row.ktpFileName ? (
+                          <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <FileCheck size={14} color="#10b981" /> Ada KTP
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Belum ada</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditKonsumen(row)}
+                            title="Edit Konsumen"
+                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteKonsumen(row.id, row.nama)}
+                            title="Hapus Konsumen"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: DATA BASE CALON KONSUMEN                                           */}
+      {/* ========================================================================= */}
+      {currentSubView === 'calon_konsumen' && (
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #ec4899', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <UserPlus size={22} color="#f472b6" /> Data Base Calon Konsumen ({databaseCalonKonsumenRows.length} Prospek)
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
+                Daftar calon pembeli prospektif, domisili asal, nomor kontak WhatsApp dan saluran promosi
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#0f172a', padding: '5px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+                <Search size={14} color="#94a3b8" />
+                <input
+                  type="text"
+                  placeholder="Cari Prospek / Domisili..."
+                  value={searchDbCalonKonsumen}
+                  onChange={(e) => setSearchDbCalonKonsumen(e.target.value)}
+                  style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800, width: '190px', outline: 'none' }}
+                />
+                {searchDbCalonKonsumen && (
+                  <button onClick={() => setSearchDbCalonKonsumen('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenAddCalonKonsumen}
+                style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.4)' }}
+              >
+                <Plus size={16} /> Tambah Calon Konsumen
+              </button>
+            </div>
+          </div>
+
+          {/* Table Calon Konsumen */}
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #db2777' }}>
+            <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '750px' }}>
+              <thead>
+                <tr style={{ background: '#ec4899', color: '#ffffff' }}>
+                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                  <th style={{ minWidth: '220px', border: '1px solid #db2777', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Calon Konsumen</th>
+                  <th style={{ width: '170px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
+                  <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                  <th style={{ width: '180px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
+                  <th style={{ width: '120px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {databaseCalonKonsumenRows
+                  .filter(r => !searchDbCalonKonsumen || [r.nama, r.noHp, r.domisili, r.referensi].some(v => (v || '').toLowerCase().includes(searchDbCalonKonsumen.toLowerCase().trim())))
+                  .map((row, idx) => (
+                    <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
+                            {row.nama ? row.nama.charAt(0).toUpperCase() : 'P'}
+                          </div>
+                          <span>{row.nama}</span>
+                        </div>
+                      </td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
+                          title="Chat via WhatsApp"
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                        >
+                          <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
+                        </button>
+                      </td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <MapPin size={13} color="#f472b6" /> {row.domisili || '-'}
+                        </span>
+                      </td>
+                      <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
+                        <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: '1px solid rgba(236, 72, 153, 0.3)' }}>
+                          {row.referensi || '-'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCalonKonsumen(row)}
+                            title="Edit Calon Konsumen"
+                            style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCalonKonsumen(row.id, row.nama)}
+                            title="Hapus Calon Konsumen"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid #ef4444', padding: '4px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* MODAL: TAMBAH / EDIT LEAD PROSPEK                                          */}
       {/* ========================================================================= */}
       {isLeadModalOpen && (
@@ -1191,6 +1771,239 @@ export const MarketingModule = () => {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setIsViewUploadedSprModalOpen(false)}>Tutup</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL MASTER: DATA BASE KONSUMEN                                         */}
+      {/* ========================================================================= */}
+      {isKonsumenModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <Users size={20} color="#fbbf24" />
+                {editingKonsumenId ? 'Edit Data Base Konsumen' : 'Data Base Konsumen (Tambah Baru)'}
+              </h3>
+              <button onClick={() => setIsKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveKonsumen}>
+              <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
+                    
+                    {/* Nama */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama Konsumen</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama lengkap konsumen..."
+                      value={konsumenFormData.nama}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nama: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. HP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP / WA</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="0812-xxxx-xxxx"
+                      value={konsumenFormData.noHp}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, noHp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* NIK */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NIK (KTP)</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="16 digit NIK KTP..."
+                      value={konsumenFormData.nik}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, nik: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* NPWP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>NPWP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Nomor NPWP..."
+                      value={konsumenFormData.npwp}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, npwp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Alamat */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Alamat Domisili</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Alamat domisili lengkap..."
+                      value={konsumenFormData.alamat}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, alamat: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Referensi */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Pameran / Brosur / Teman / Instagram..."
+                      value={konsumenFormData.referensi}
+                      onChange={(e) => setKonsumenFormData({ ...konsumenFormData, referensi: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Upload NIK / KTP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Upload KTP / NIK</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        id="marketing-konsumen-ktp-upload"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setKonsumenFormData(prev => ({
+                                ...prev,
+                                ktpFileName: file.name,
+                                ktpFile: event.target.result
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="marketing-konsumen-ktp-upload"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'rgba(245, 158, 11, 0.2)',
+                          border: '1px dashed #f59e0b',
+                          color: '#fbbf24',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Upload size={14} /> {konsumenFormData.ktpFileName ? `Berkas: ${konsumenFormData.ktpFileName}` : 'Pilih Foto / Dokumen KTP'}
+                      </label>
+                      {konsumenFormData.ktpFileName && (
+                        <div style={{ fontSize: '0.72rem', color: '#10b981', marginTop: '4px', fontWeight: 700 }}>
+                          ✓ Siap disimpan bersama data konsumen
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsKonsumenModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 900, color: '#000000' }}>
+                  💾 Simpan Data Base Konsumen
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL MASTER: DATA BASE CALON KONSUMEN                                    */}
+      {/* ========================================================================= */}
+      {isCalonKonsumenModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #ec4899', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
+                <UserPlus size={20} color="#f472b6" />
+                {editingCalonKonsumenId ? 'Edit Data Base Calon Konsumen' : 'Data Base Calon Konsumen (Tambah Baru)'}
+              </h3>
+              <button onClick={() => setIsCalonKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCalonKonsumen}>
+              <div className="modal-body">
+                <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '90px 15px 1fr', rowGap: '0.8rem', alignItems: 'center' }}>
+                    
+                    {/* Nama */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Nama</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nama prospek / calon pembeli..."
+                      value={calonKonsumenFormData.nama}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, nama: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #ec4899', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* No. HP */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>No. HP</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="0812-xxxx-xxxx"
+                      value={calonKonsumenFormData.noHp}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, noHp: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Domisili */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Domisili</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Kota / Wilayah tempat tinggal..."
+                      value={calonKonsumenFormData.domisili}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, domisili: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                    {/* Referensi */}
+                    <div style={{ fontWeight: 900, fontSize: '0.86rem', color: '#f8fafc' }}>Referensi</div>
+                    <div style={{ fontWeight: 900, color: '#94a3b8' }}>:</div>
+                    <input
+                      type="text"
+                      placeholder="Brosur / Spanduk / Web / Sales..."
+                      value={calonKonsumenFormData.referensi}
+                      onChange={(e) => setCalonKonsumenFormData({ ...calonKonsumenFormData, referensi: e.target.value })}
+                      style={{ background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f472b6', fontWeight: 800, padding: '5px 10px', fontSize: '0.86rem' }}
+                    />
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', fontWeight: 900 }}>
+                  💾 Simpan Calon Konsumen
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
