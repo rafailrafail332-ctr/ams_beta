@@ -3118,6 +3118,13 @@ export const TeknikModule = () => {
   // =========================================================================
   // LOGIKA, PERHITUNGAN & HANDLER SUB-MODUL PERSEDIAAN
   // =========================================================================
+  const normalizeSatuan = (s) => {
+    if (!s) return '';
+    const trimmed = String(s).trim();
+    if (trimmed.toLowerCase() === 'lembar') return 'LBR';
+    return trimmed;
+  };
+
   const persediaanSummaryList = useMemo(() => {
     return persediaanMasterBarang.map(item => {
       const matchingMasuk = persediaanBarangMasuk.filter(m => 
@@ -3143,6 +3150,7 @@ export const TeknikModule = () => {
 
       return {
         ...item,
+        satuan: normalizeSatuan(item.satuan),
         totalQtyMasuk,
         totalNilaiMasuk,
         totalQtyKeluar,
@@ -3258,14 +3266,14 @@ export const TeknikModule = () => {
       return;
     }
     if (editingBarangId) {
-      const nextList = persediaanMasterBarang.map(b => b.id === editingBarangId ? { ...b, kode: cleanKode, nama: cleanNama, satuan: barangFormData.satuan } : b);
+      const nextList = persediaanMasterBarang.map(b => b.id === editingBarangId ? { ...b, kode: cleanKode, nama: cleanNama, satuan: normalizeSatuan(barangFormData.satuan || 'Sak') } : b);
       updateAndSaveMasterBarang(nextList, `Data Barang "${cleanNama}" berhasil diperbarui!`, 'success');
     } else {
       const newB = {
         id: `BRG-${Date.now().toString().slice(-4)}`,
         kode: cleanKode,
         nama: cleanNama,
-        satuan: barangFormData.satuan || 'Sak'
+        satuan: normalizeSatuan(barangFormData.satuan || 'Sak')
       };
       updateAndSaveMasterBarang([...persediaanMasterBarang, newB], `Barang "${cleanNama}" berhasil didaftarkan ke Database!`, 'success');
 
@@ -3402,7 +3410,7 @@ export const TeknikModule = () => {
         id: `BRG-${Date.now().toString().slice(-4)}`,
         kode: cleanKode,
         nama: cleanNama,
-        satuan: (barangMasukFormData.satuan || 'Sak').trim()
+        satuan: normalizeSatuan((barangMasukFormData.satuan || 'Sak').trim())
       };
       updatedMaster.push(newMaster);
       updateAndSaveMasterBarang(updatedMaster);
@@ -3418,7 +3426,7 @@ export const TeknikModule = () => {
       kode: cleanKode,
       namaBarang: cleanNama,
       qty: qtyNum,
-      satuan: (barangMasukFormData.satuan || itemMaster?.satuan || 'Sak').trim(),
+      satuan: normalizeSatuan((barangMasukFormData.satuan || itemMaster?.satuan || 'Sak').trim()),
       hargaSatuan: hargaNum,
       vendor: (barangMasukFormData.vendor || '').trim(),
       keterangan: (barangMasukFormData.keterangan || '').trim()
@@ -3516,7 +3524,7 @@ export const TeknikModule = () => {
         id: `BRG-${Date.now().toString().slice(-4)}`,
         kode: cleanKode,
         nama: cleanNama,
-        satuan: (barangKeluarFormData.satuan || 'Sak').trim()
+        satuan: normalizeSatuan((barangKeluarFormData.satuan || 'Sak').trim())
       };
       updatedMaster.push(newMaster);
       updateAndSaveMasterBarang(updatedMaster);
@@ -3545,7 +3553,7 @@ export const TeknikModule = () => {
       ...barangKeluarFormData,
       kode: cleanKode,
       namaBarang: cleanNama,
-      satuan: (barangKeluarFormData.satuan || itemMaster?.satuan || 'Sak').trim(),
+      satuan: normalizeSatuan((barangKeluarFormData.satuan || itemMaster?.satuan || 'Sak').trim()),
       qty: qtyNum,
       avgHarga: autoAvg
     };
@@ -9070,7 +9078,7 @@ export const TeknikModule = () => {
                             <tr key={b.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#c084fc', border: '1px solid #334155', padding: '5px 4px' }}>{b.kode}</td>
                               <td style={{ fontWeight: 800, color: '#f8fafc', border: '1px solid #334155', padding: '5px 8px' }}>{b.nama}</td>
-                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '5px 4px' }}>{b.satuan}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '5px 4px' }}>{normalizeSatuan(b.satuan)}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
                                 <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
                                   <button
@@ -9164,7 +9172,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{m.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#10b981', fontWeight: 900 }}>{m.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{m.satuan}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#f59e0b', fontWeight: 800 }}>{m.vendor || '-'}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
@@ -9262,7 +9270,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{k.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#f43f5e', fontWeight: 900 }}>{k.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{k.satuan}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
@@ -9729,7 +9737,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#10b981', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{m.satuan}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#10b981', fontWeight: 900 }}>Rp {formatRupiah(totalBiaya)}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>{m.vendor || '-'}</td>
@@ -9871,7 +9879,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{k.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#f43f5e', fontWeight: 900, fontSize: '0.92rem' }}>{k.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{k.satuan}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 900 }}>Rp {formatRupiah(nilaiPemakaian)}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
@@ -9993,7 +10001,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 6px' }}>{idx + 1}</td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 10px' }}>{b.kode}</td>
                             <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 12px' }}>{b.nama}</td>
-                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 8px' }}>{b.satuan}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 8px' }}>{normalizeSatuan(b.satuan)}</td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyMasuk || 0}</td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyKeluar || 0}</td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: (summary?.sisaQty || 0) <= 0 ? '#f87171' : '#34d399', border: '1px solid #334155', padding: '7px 8px' }}>
@@ -13441,7 +13449,7 @@ export const TeknikModule = () => {
                         <option value="Pcs">Pcs</option>
                         <option value="Kg">Kg</option>
                         <option value="Roll">Roll</option>
-                        <option value="Lembar">Lembar</option>
+                        <option value="LBR">LBR (Lembar)</option>
                         <option value="Meter">Meter</option>
                         <option value="Rit">Rit / Truk</option>
                         <option value="Unit">Unit</option>
@@ -13453,7 +13461,7 @@ export const TeknikModule = () => {
                         <option value="Zak">Zak</option>
                       </datalist>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
-                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'LBR', 'Meter', 'Rit'].map(unit => (
                           <button
                             key={unit}
                             type="button"
@@ -13865,7 +13873,7 @@ export const TeknikModule = () => {
                         <option value="Pcs">Pcs</option>
                         <option value="Kg">Kg</option>
                         <option value="Roll">Roll</option>
-                        <option value="Lembar">Lembar</option>
+                        <option value="LBR">LBR (Lembar)</option>
                         <option value="Meter">Meter</option>
                         <option value="Rit">Rit / Truk</option>
                         <option value="Unit">Unit</option>
@@ -13877,7 +13885,7 @@ export const TeknikModule = () => {
                         <option value="Zak">Zak</option>
                       </datalist>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
-                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'LBR', 'Meter', 'Rit'].map(unit => (
                           <button
                             key={unit}
                             type="button"
@@ -14469,7 +14477,7 @@ export const TeknikModule = () => {
                         <option value="Pcs">Pcs</option>
                         <option value="Kg">Kg</option>
                         <option value="Roll">Roll</option>
-                        <option value="Lembar">Lembar</option>
+                        <option value="LBR">LBR (Lembar)</option>
                         <option value="Meter">Meter</option>
                         <option value="Rit">Rit / Truk</option>
                         <option value="Unit">Unit</option>
@@ -14481,7 +14489,7 @@ export const TeknikModule = () => {
                         <option value="Zak">Zak</option>
                       </datalist>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
-                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Meter', 'Rit'].map(unit => (
+                        {['Sak', 'Btg', 'M3', 'Dus', 'Pcs', 'Kg', 'LBR', 'Meter', 'Rit'].map(unit => (
                           <button
                             key={unit}
                             type="button"
