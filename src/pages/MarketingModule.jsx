@@ -468,6 +468,9 @@ export const MarketingModule = () => {
       fetchCloudStore(STORAGE_KEY_DB_UNIT, null).then(val => {
         if (val !== null && val !== undefined && Array.isArray(val)) setDatabaseUnitRows(val);
       });
+      fetchCloudStore('ams_sales_list_clean_v2', null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val) && val.length > 0) setSalesList(val);
+      });
     };
 
     doFetch();
@@ -1172,10 +1175,14 @@ export const MarketingModule = () => {
   };
 
   const [salesList, setSalesList] = useState(getSavedSalesList);
+  const [isSaveSprSuccessModalOpen, setIsSaveSprSuccessModalOpen] = useState(false);
+  const [savedSprSuccessData, setSavedSprSuccessData] = useState(null);
+  const [highlightedSalesId, setHighlightedSalesId] = useState(null);
 
   useEffect(() => {
     try {
       localStorage.setItem('ams_sales_list_clean_v2', JSON.stringify(salesList));
+      saveCloudStore('ams_sales_list_clean_v2', salesList).catch(() => {});
     } catch (e) {}
   }, [salesList]);
 
@@ -1425,9 +1432,35 @@ export const MarketingModule = () => {
     }
   };
 
+  const handlePrintOfficialSprDirect = (spr) => {
+    let iframe = document.getElementById('spr-print-isolated-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'spr-print-isolated-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '1020px';
+      iframe.style.height = '1450px';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    const html = generateOfficialSprPrintHtml(spr);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }, 400);
+  };
+
   const handleSaveOfficialSpr = () => {
     if (!sprOfficial.unitNo || !sprOfficial.customerName) {
-      showNotification('Nomor unit dan nama pembeli wajib diisi!', 'warning');
+      showNotification('Nomor unit dan nama pembeli wajib diisi sebelum menyimpan!', 'warning');
       return;
     }
 
@@ -1436,10 +1469,13 @@ export const MarketingModule = () => {
     const finalNet = netUnit + netPlus;
     const bookingFee = sprOfficial.skemaRows[0]?.jumlah || 10000000;
 
+    let savedItem = null;
+    let nextSalesList = [];
+
     if (sprOfficial.editingSalesId) {
-      setSalesList(prev => prev.map(s => {
+      nextSalesList = salesList.map(s => {
         if (s.id === sprOfficial.editingSalesId) {
-          return {
+          savedItem = {
             ...s,
             unitNo: `${sprOfficial.blok}-${sprOfficial.unitNo}`,
             cluster: sprOfficial.projectName,
@@ -1452,13 +1488,18 @@ export const MarketingModule = () => {
             notes: `SPR No: ${sprOfficial.sprNumber}`,
             sprOfficialState: { ...sprOfficial }
           };
+          return savedItem;
         }
         return s;
-      }));
-      showNotification(`Transaksi SPR Unit ${sprOfficial.blok}-${sprOfficial.unitNo} berhasil diperbarui!`);
+      });
+      setSalesList(nextSalesList);
+      showNotification(`Transaksi SPR Unit ${sprOfficial.blok}-${sprOfficial.unitNo} berhasil diperbarui!`, 'success');
+      setSavedSprSuccessData({ item: savedItem, isNew: false });
+      setIsSaveSprSuccessModalOpen(true);
     } else {
-      const newSaleItem = {
-        id: `SLS-${String(salesList.length + 1).padStart(3, '0')}`,
+      const newId = `SLS-${String(salesList.length + 1).padStart(3, '0')}`;
+      savedItem = {
+        id: newId,
         unitNo: `${sprOfficial.blok}-${sprOfficial.unitNo}`,
         cluster: sprOfficial.projectName,
         customerName: sprOfficial.customerName,
@@ -1476,9 +1517,18 @@ export const MarketingModule = () => {
         sprUploadedBy: null,
         sprOfficialState: { ...sprOfficial }
       };
-      setSalesList([newSaleItem, ...salesList]);
-      showNotification(`TRANSAKSI SPR RESMI TERSIMPAN! Unit ${newSaleItem.unitNo} atas nama ${newSaleItem.customerName} berhasil masuk ke daftar transaksi.`);
+      nextSalesList = [savedItem, ...salesList];
+      setSalesList(nextSalesList);
+      setSprOfficial(prev => ({ ...prev, editingSalesId: newId }));
+      showNotification(`TRANSAKSI SPR RESMI TERSIMPAN! Unit ${savedItem.unitNo} atas nama ${savedItem.customerName} berhasil masuk ke daftar transaksi.`, 'success');
+      setSavedSprSuccessData({ item: savedItem, isNew: true });
+      setIsSaveSprSuccessModalOpen(true);
     }
+
+    try {
+      localStorage.setItem('ams_sales_list_clean_v2', JSON.stringify(nextSalesList));
+      saveCloudStore('ams_sales_list_clean_v2', nextSalesList).catch(() => {});
+    } catch (e) {}
   };
 
   const handleLoadToOfficialSpr = (item) => {
@@ -1487,6 +1537,8 @@ export const MarketingModule = () => {
         ...item.sprOfficialState,
         editingSalesId: item.id
       });
+      setSprKonsumenSearchQuery(item.sprOfficialState.customerName || item.customerName || '');
+      setSprUnitSearchQuery(`[${item.sprOfficialState.projectName || 'Proyek'}] Blok ${item.sprOfficialState.blok} No. ${item.sprOfficialState.unitNo} • ${item.sprOfficialState.unitType || ''}`);
     } else {
       const parts = (item.unitNo || '').split(/[-_ ]+/);
       const b = parts.length > 1 ? parts[0] : 'A';
@@ -1513,6 +1565,8 @@ export const MarketingModule = () => {
         ],
         termsRows: tpl.defaultTerms.map((t, idx) => ({ id: idx + 1, text: t }))
       });
+      setSprKonsumenSearchQuery(item.customerName || '');
+      setSprUnitSearchQuery(item.unitNo || '');
     }
     setActiveSubTab('input_spr');
     showNotification(`Formulir SPR untuk transaksi ${item.id} (${item.customerName}) dibuka.`);
@@ -2762,8 +2816,8 @@ export const MarketingModule = () => {
                 <FileCheck2 size={24} />
               </div>
               <div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Dokumen SPR Ter-Upload</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{salesList.filter(s => s.sprFileUrl).length} / {salesList.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Tersimpan</span></div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Dokumen SPR Terbit / Upload</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{salesList.filter(s => s.sprFileUrl || s.sprOfficialState).length} / {salesList.length} <span style={{ fontSize: '0.8rem', color: 'var(--success)' }}>Tersimpan</span></div>
               </div>
             </div>
 
@@ -2868,9 +2922,23 @@ export const MarketingModule = () => {
                     </tr>
                   ) : (
                     filteredSales.map((item) => (
-                      <tr key={item.id}>
+                      <tr
+                        key={item.id}
+                        style={{
+                          background: item.id === highlightedSalesId ? 'rgba(16, 185, 129, 0.14)' : undefined,
+                          borderLeft: item.id === highlightedSalesId ? '4px solid #10b981' : undefined,
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
                       <td>
-                        <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{item.id}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{item.id}</span>
+                          {item.id === highlightedSalesId && (
+                            <span style={{ fontSize: '0.65rem', background: '#10b981', color: '#000', padding: '1px 5px', borderRadius: '4px', fontWeight: 900 }}>
+                              BARU
+                            </span>
+                          )}
+                        </div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Unit {item.unitNo}</div>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>{item.cluster}</div>
                       </td>
@@ -2883,7 +2951,25 @@ export const MarketingModule = () => {
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>BF: {formatRupiah(item.bookingFee)}</div>
                       </td>
                       <td>
-                        {item.sprFileUrl ? (
+                        {item.sprOfficialState ? (
+                          <div>
+                            <span className="badge badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginBottom: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981' }}>
+                              <FileCheck2 size={13} /> Dokumen SPR Terbit
+                            </span>
+                            <div style={{ fontSize: '0.72rem', color: '#60a5fa', fontWeight: 700 }}>
+                              {item.sprOfficialState.sprNumber || item.notes?.replace('SPR No: ', '')}
+                            </div>
+                            {item.sprFileUrl ? (
+                              <div style={{ fontSize: '0.68rem', color: '#10b981', marginTop: '2px' }}>
+                                <ShieldCheck size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> File Fisik: {item.sprFileName}
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>
+                                Formulir Digital MKT-FR
+                              </div>
+                            )}
+                          </div>
+                        ) : item.sprFileUrl ? (
                           <div>
                             <span className="badge badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginBottom: '4px' }}>
                               <ShieldCheck size={13} /> Dokumen TER-UPLOAD
@@ -2911,13 +2997,33 @@ export const MarketingModule = () => {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          {item.sprOfficialState && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handlePrintOfficialSprDirect(item.sprOfficialState)}
+                              style={{ fontSize: '0.72rem', gap: '0.25rem', color: '#f59e0b', borderColor: '#f59e0b', fontWeight: 800 }}
+                              title="Cetak Langsung Lembar Dokumen SPR Resmi (A4)"
+                            >
+                              <Printer size={13} /> Cetak SPR
+                            </button>
+                          )}
+
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleLoadToOfficialSpr(item)}
+                            style={{ fontSize: '0.72rem', gap: '0.25rem', color: '#38bdf8', borderColor: '#38bdf8', fontWeight: 700 }}
+                            title="Buka / Sunting Formulir SPR Resmi MKT-FR"
+                          >
+                            <FileCheck2 size={13} /> Form SPR
+                          </button>
+
                           <button
                             className="btn btn-primary btn-sm"
                             onClick={() => triggerUploadForSales(item.id)}
                             style={{ fontSize: '0.72rem', gap: '0.25rem' }}
                             title="Unggah / Perbarui File Dokumen SPR Resmi"
                           >
-                            <Upload size={13} /> Upload SPR
+                            <Upload size={13} /> Upload File
                           </button>
 
                           {item.sprFileUrl && (
@@ -2929,14 +3035,6 @@ export const MarketingModule = () => {
                               <Eye size={13} /> Lihat Berkas
                             </button>
                           )}
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleLoadToOfficialSpr(item)}
-                            style={{ fontSize: '0.72rem', gap: '0.25rem', color: '#f59e0b', borderColor: '#f59e0b' }}
-                            title="Buka / Sunting Formulir SPR Resmi MKT-FR"
-                          >
-                            <FileCheck2 size={13} /> Form SPR
-                          </button>
 
                           <button
                             className="btn btn-secondary btn-sm"
@@ -3090,6 +3188,12 @@ export const MarketingModule = () => {
                     </button>
                   </div>
 
+                  {sprOfficial.editingSalesId && (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '5px 12px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#34d399', fontSize: '0.78rem', fontWeight: 800 }}>
+                      <CheckCircle2 size={14} /> Terhubung: {sprOfficial.editingSalesId}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -3112,10 +3216,10 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}
                     title="Simpan data SPR ini ke tabel Transaksi Penjualan & SPR"
                   >
-                    <Check size={16} /> Simpan ke Transaksi
+                    <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui di Transaksi' : 'Simpan ke Transaksi'}
                   </button>
                 </div>
               </div>
@@ -4136,7 +4240,7 @@ export const MarketingModule = () => {
                     onClick={handleSaveOfficialSpr}
                     style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                   >
-                    <Check size={16} /> Simpan ke Transaksi Penjualan
+                    <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi Penjualan' : 'Simpan ke Transaksi Penjualan'}
                   </button>
                 </div>
               </div>
@@ -4155,7 +4259,12 @@ export const MarketingModule = () => {
                 >
                   <ChevronLeft size={16} /> Kembali ke Formulir Input
                 </button>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {sprOfficial.editingSalesId && (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', color: '#34d399', fontSize: '0.75rem', fontWeight: 800 }}>
+                      <CheckCircle2 size={13} /> Terhubung: {sprOfficial.editingSalesId}
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -4168,9 +4277,9 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}
                   >
-                    <Check size={16} /> Simpan ke Transaksi
+                    <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi' : 'Simpan ke Transaksi'}
                   </button>
                 </div>
               </div>
@@ -5713,6 +5822,83 @@ export const MarketingModule = () => {
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button className="btn btn-primary" onClick={() => window.print()}>
                   <Printer size={16} /> Cetak / Download PDF (SPR)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SUCCESS: TRANSAKSI & SPR BERHASIL DISIMPAN */}
+      {isSaveSprSuccessModalOpen && savedSprSuccessData && (
+        <div className="modal-backdrop" style={{ zIndex: 100000, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', width: '92%', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0,0,0,0.9), 0 0 25px rgba(16, 185, 129, 0.35)', padding: '1.75rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem', color: '#10b981' }}>
+                <CheckCircle2 size={36} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#ffffff' }}>
+                {savedSprSuccessData.isNew ? 'Berhasil Disimpan ke Transaksi Penjualan!' : 'Transaksi SPR Berhasil Diperbarui!'}
+              </h3>
+              <p style={{ margin: '6px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                Data SPR resmi kini sudah terhubung ke <strong>Modul 2. Transaksi Penjualan & Upload Dokumen SPR</strong>.
+              </p>
+            </div>
+
+            <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem', fontSize: '0.82rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                <span style={{ color: '#94a3b8' }}>ID Transaksi:</span>
+                <span style={{ fontWeight: 800, color: '#60a5fa' }}>{savedSprSuccessData.item.id}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                <span style={{ color: '#94a3b8' }}>Nomor SPR Resmi:</span>
+                <span style={{ fontWeight: 800, color: '#fbbf24' }}>{savedSprSuccessData.item.notes?.replace('SPR No: ', '')}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                <span style={{ color: '#94a3b8' }}>Unit Properti:</span>
+                <span style={{ fontWeight: 700, color: '#ffffff' }}>Unit {savedSprSuccessData.item.unitNo} ({savedSprSuccessData.item.cluster})</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+                <span style={{ color: '#94a3b8' }}>Nama Pembeli:</span>
+                <span style={{ fontWeight: 700, color: '#ffffff' }}>{savedSprSuccessData.item.customerName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px dashed #334155' }}>
+                <span style={{ color: '#94a3b8' }}>Total Nilai Net Transaksi:</span>
+                <span style={{ fontWeight: 900, color: '#34d399', fontSize: '0.95rem' }}>{formatRupiah(savedSprSuccessData.item.hargaUnit)}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setIsSaveSprSuccessModalOpen(false);
+                  setHighlightedSalesId(savedSprSuccessData.item.id);
+                  setActiveSubTab('spr');
+                }}
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 800, padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.86rem' }}
+              >
+                <ArrowRight size={17} /> Buka Tab 2: Transaksi Penjualan & Dokumen SPR
+              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    handlePrintSprOfficial();
+                  }}
+                  style={{ flex: 1, background: '#f59e0b', color: '#000', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem' }}
+                >
+                  <Printer size={15} /> Cetak Lembar SPR
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsSaveSprSuccessModalOpen(false)}
+                  style={{ flex: 1, background: '#334155', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}
+                >
+                  Tetap di Formulir
                 </button>
               </div>
             </div>
