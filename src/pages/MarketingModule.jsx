@@ -2945,12 +2945,56 @@ export const MarketingModule = () => {
                     </h3>
                   </div>
                   <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                    Tampilan lembar cetak di bawah ini <strong>100% persis dengan formulir fisik kantor</strong>. Anda dapat mengetik langsung pada garis isian atau menggunakan tombol autofill database di bawah ini.
+                    Input data secara nyaman melalui formulir digital di bawah ini. Hasil cetak akan <strong>100% identik dengan berkas fisik kantor asli</strong> (Kop surat, logo, tabel navy, 11 syarat pembayaran, dan tanda tangan).
                   </p>
                 </div>
 
-                {/* ACTION BUTTONS */}
+                {/* VIEW MODE TOGGLE & ACTIONS */}
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {/* Segmented Switcher: Form vs Preview */}
+                  <div style={{ display: 'flex', background: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSprViewMode('form')}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: sprViewMode === 'form' ? '#f59e0b' : 'transparent',
+                        color: sprViewMode === 'form' ? '#000000' : '#94a3b8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <FileText size={14} /> Formulir Input
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSprViewMode('preview')}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: sprViewMode === 'preview' ? '#38bdf8' : 'transparent',
+                        color: sprViewMode === 'preview' ? '#000000' : '#94a3b8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <Eye size={14} /> Preview Lembar Cetak
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -3093,12 +3137,613 @@ export const MarketingModule = () => {
             </div>
 
             {/* ========================================================================= */}
+            {/* TAMPILAN 1: FORMULIR INPUT DIGITAL ERGONOMIS (MODE FORM - DEFAULT)         */}
+            {/* ========================================================================= */}
+            {sprViewMode === 'form' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* CARD 1: INFORMASI DOKUMEN & TANGGAL */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileText size={18} /> 1. Informasi Dokumen & Tanggal
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Nomor SPR Resmi</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.sprNumber}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, sprNumber: e.target.value })}
+                        placeholder="Nomor SPR"
+                        style={{ fontWeight: 700, color: '#fbbf24' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Tanggal Pemesanan</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={sprOfficial.sprDate}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, sprDate: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Perusahaan & Proyek Terpilih</label>
+                      <div style={{ padding: '0.55rem 0.85rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.82rem', color: '#ffffff' }}>
+                          {sprOfficial.companyName} ({sprOfficial.projectName})
+                        </span>
+                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: sprOfficial.headerAccentColor, color: '#fff', fontWeight: 800 }}>
+                          {sprOfficial.formCode}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 2: DATA CALON PEMBELI / KONSUMEN */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Users size={18} /> 2. Data Calon Pembeli / Pemesan
+                    </h4>
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>*Sesuai KTP / Identitas Resmi Konsumen</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Nama Lengkap Pemesan *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerName}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerName: e.target.value, consumerSignName: e.target.value })}
+                        placeholder="Nama lengkap sesuai KTP"
+                        style={{ fontWeight: 700 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>No. KTP / NIK (16 Digit)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerNik}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerNik: e.target.value })}
+                        placeholder="3201..."
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Nomor NPWP</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerNpwp}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerNpwp: e.target.value })}
+                        placeholder="00.000.000.0-000.000"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Pekerjaan / Bidang Usaha</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerJob}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerJob: e.target.value })}
+                        placeholder="Karyawan Swasta / PNS / Wiraswasta"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>No. HP / WhatsApp (Aktif) *</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerPhoneHp}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerPhoneHp: e.target.value })}
+                        placeholder="0812-xxxx-xxxx"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>No. Telepon Rumah / Kantor</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.customerPhoneHome}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerPhoneHome: e.target.value })}
+                        placeholder="021-xxxxxxx"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Alamat E-mail</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={sprOfficial.customerEmail}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerEmail: e.target.value })}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                    <div className="form-group" style={{ gridColumn: '1 / -1', marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Alamat Lengkap (KTP / Domisili)</label>
+                      <textarea
+                        className="form-control"
+                        rows={2}
+                        value={sprOfficial.customerAddress}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, customerAddress: e.target.value })}
+                        placeholder="Jl. ..., RT/RW ..., Kelurahan, Kecamatan, Kota/Kabupaten, Kode Pos"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 3: DATA UNIT RUMAH & SPESIFIKASI */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Home size={18} /> 3. Data Spesifikasi Unit Rumah
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Type Rumah</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.unitType}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, unitType: e.target.value })}
+                        placeholder="Tipe 36/72"
+                        style={{ fontWeight: 700 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Blok</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.blok}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, blok: e.target.value })}
+                        placeholder="A, B, C..."
+                        style={{ fontWeight: 800 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Nomor Unit</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.unitNo}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, unitNo: e.target.value })}
+                        placeholder="01, 02..."
+                        style={{ fontWeight: 800 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Luas Tanah Standar (m²)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.luasTanah || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, luasTanah: Number(e.target.value) || 0 })}
+                        placeholder="72"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Luas Bangunan (m²)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.luasBangunan || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, luasBangunan: Number(e.target.value) || 0 })}
+                        placeholder="36"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Penambahan Luas Tanah (m²)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.penambahanLuasTanah || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, penambahanLuasTanah: Number(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#10b981' }}>Total Luas Tanah (m²)</label>
+                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #10b981', fontWeight: 900, color: '#34d399', fontSize: '0.95rem' }}>
+                        {sprTotalLt} m²
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 4: RINCIAN HARGA & NILAI BOOKING / DISKON */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#eab308', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <DollarSign size={18} /> 4. Rincian Harga Jual & Diskon Transaksi
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    {/* Harga Jual */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Harga Jual Unit (Rp)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.hargaJual || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, hargaJual: Number(e.target.value) || 0 })}
+                        placeholder="650000000"
+                        style={{ fontWeight: 700 }}
+                      />
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.hargaJual)}</div>
+                    </div>
+                    {/* Diskon Harga Jual */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Diskon Unit Rumah (Rp)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.discHargaJual || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, discHargaJual: Number(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.discHargaJual)}</div>
+                    </div>
+                    {/* Net Harga Jual Unit */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Unit Rumah</label>
+                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0' }}>
+                        {formatRupiah(sprNetUnit)}
+                      </div>
+                    </div>
+
+                    {/* Nilai Penambahan Luas */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Nilai Penambahan Luas Tanah (Rp)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.nilaiPenambahanLuas || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, nilaiPenambahanLuas: Number(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.nilaiPenambahanLuas)}</div>
+                    </div>
+                    {/* Diskon Penambahan Luas */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Diskon Penambahan Luas (Rp)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={sprOfficial.discPenambahanLuas || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, discPenambahanLuas: Number(e.target.value) || 0 })}
+                        placeholder="0"
+                      />
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.discPenambahanLuas)}</div>
+                    </div>
+                    {/* Net Nilai Penambahan */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Penambahan Luas</label>
+                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0' }}>
+                        {formatRupiah(sprNetLuasTambah)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* HIGHLIGHT TOTAL NET PENJUALAN */}
+                  <div style={{ marginTop: '1rem', padding: '1rem', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25))', border: '1.5px solid #f59e0b', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase' }}>
+                        Total Bersih Nilai SPR (Net Keseluruhan)
+                      </div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>
+                        {formatRupiah(sprTotalNet)}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 700 }}>Terbilang:</div>
+                      <div style={{ fontSize: '0.82rem', color: '#ffffff', fontStyle: 'italic', fontWeight: 600 }}>
+                        "{terbilang(sprTotalNet)}"
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 5: CARA PEMBAYARAN & JADWAL */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Calendar size={18} /> 5. Skema & Jadwal Pembayaran
+                      </h4>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: '#94a3b8' }}>
+                        Tahapan pembayaran Booking Fee, DP, Pelunasan KPR / Cicilan Tunai
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleAddSkemaRow}
+                      style={{ background: '#7e22ce', color: '#fff', border: 'none', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <Plus size={14} /> Tambah Baris Skema
+                    </button>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="custom-table" style={{ width: '100%', marginBottom: '0.75rem' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ width: '40px', textAlign: 'center' }}>No</th>
+                          <th style={{ width: '32%' }}>Skema Pembayaran</th>
+                          <th style={{ width: '22%' }}>Jumlah Nominal (Rp)</th>
+                          <th style={{ width: '20%' }}>Jadwal / Waktu</th>
+                          <th>Keterangan</th>
+                          <th style={{ width: '50px', textAlign: 'center' }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sprOfficial.skemaRows.map((row, idx) => (
+                          <tr key={row.id}>
+                            <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control"
+                                value={row.skema}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSprOfficial(prev => ({
+                                    ...prev,
+                                    skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, skema: val } : r)
+                                  }));
+                                }}
+                                placeholder="Contoh: Uang Muka (DP)"
+                                style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem' }}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                className="form-control"
+                                value={row.jumlah || ''}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value) || 0;
+                                  setSprOfficial(prev => ({
+                                    ...prev,
+                                    skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
+                                  }));
+                                }}
+                                placeholder="0"
+                                style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem', fontWeight: 800, color: '#34d399', textAlign: 'right' }}
+                              />
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textAlign: 'right', marginTop: '2px' }}>
+                                {formatRupiah(row.jumlah)}
+                              </div>
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control"
+                                value={row.jadwal}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSprOfficial(prev => ({
+                                    ...prev,
+                                    skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jadwal: val } : r)
+                                  }));
+                                }}
+                                placeholder="Maks. 14 hari"
+                                style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem' }}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control"
+                                value={row.keterangan}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSprOfficial(prev => ({
+                                    ...prev,
+                                    skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, keterangan: val } : r)
+                                  }));
+                                }}
+                                placeholder="Transfer ke Mandiri / BRI"
+                                style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem' }}
+                              />
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSkemaRow(row.id)}
+                                style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                                title="Hapus baris"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Summary Skema Pembayaran */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', padding: '0.85rem 1rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total Nominal Skema Pembayaran: </span>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#34d399', marginLeft: '6px' }}>
+                        {formatRupiah(sprTotalSkema)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                      Terbilang: "{terbilang(sprTotalSkema)}"
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 6: KETENTUAN KHUSUS & PROMO (TERMS & CONDITIONS) */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#ec4899', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <FileText size={18} /> 6. Ketentuan & Promo Spesial (Terms & Conditions)
+                      </h4>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: '#94a3b8' }}>
+                        Daftar klausul fasilitas, promo (Free BPHTB, Jetpump, dll) yang tercantum di lembar SPR
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleAddTermRow}
+                      style={{ background: '#be185d', color: '#fff', border: 'none', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <Plus size={14} /> Tambah Ketentuan
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {sprOfficial.termsRows.map((term, idx) => (
+                      <div key={term.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1', width: '24px', textAlign: 'center' }}>
+                          {idx + 1}.
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={term.text}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              termsRows: prev.termsRows.map(t => t.id === term.id ? { ...t, text: val } : t)
+                            }));
+                          }}
+                          style={{ fontSize: '0.82rem', padding: '0.5rem 0.75rem' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTermRow(term.id)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                          title="Hapus poin ketentuan"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CARD 7: PIHAK PENANDATANGAN SPR */}
+                <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
+                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <CheckCircle2 size={18} /> 7. Pihak Penandatangan SPR
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Admin Marketing</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.adminMarketing}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, adminMarketing: e.target.value })}
+                        placeholder="Amanda Chesyariani Hermawan"
+                        style={{ fontWeight: 700 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Supervisor Marketing (SPV)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.spv}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, spv: e.target.value })}
+                        placeholder="Yulieka"
+                        style={{ fontWeight: 700 }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Konsumen / Pemesan</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={sprOfficial.consumerSignName || sprOfficial.customerName}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, consumerSignName: e.target.value })}
+                        placeholder="Nama Konsumen"
+                        style={{ fontWeight: 700 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* BOTTOM ACTION BAR */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', flexWrap: 'wrap', padding: '1rem 0' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setSprViewMode('preview')}
+                    style={{ background: '#1e293b', borderColor: '#38bdf8', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Eye size={16} /> Preview Lembar Cetak A4
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handlePrintSprOfficial}
+                    style={{ background: '#f59e0b', color: '#000000', fontWeight: 900, border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Printer size={16} /> Cetak SPR (A4)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveOfficialSpr}
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Check size={16} /> Simpan ke Transaksi Penjualan
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* TAMPILAN PREVIEW CONTROLS DI LAYAR (HANYA AKTIF SAAT PREVIEW MODE)         */}
+            {/* ========================================================================= */}
+            {sprViewMode === 'preview' && (
+              <div className="no-print" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', background: '#0f172a', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1.5px solid #38bdf8' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSprViewMode('form')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#38bdf8', borderColor: '#38bdf8' }}
+                >
+                  <ChevronLeft size={16} /> Kembali ke Formulir Input
+                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handlePrintSprOfficial}
+                    style={{ background: '#f59e0b', color: '#000000', fontWeight: 900, border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Printer size={16} /> Cetak Lembar Ini (A4)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveOfficialSpr}
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <Check size={16} /> Simpan ke Transaksi
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ========================================================================= */}
             {/* DOKUMEN CETAK SURAT PEMESANAN RUMAH (SPR) FISIK CETAK                      */}
             {/* 100% PERSIS DENGAN BERKAS FISIK ASLI KANTOR SESUAI FOTO                    */}
             {/* ========================================================================= */}
             <div
               id="spr-official-print-document"
               style={{
+                display: sprViewMode === 'preview' ? 'block' : 'none',
                 maxWidth: '740px',
                 margin: '0 auto',
                 background: '#ffffff',
@@ -3199,25 +3844,16 @@ export const MarketingModule = () => {
                   <div style={{ display: 'flex', alignItems: 'center', width: '270px' }}>
                     <span style={{ width: '60px', fontWeight: 600 }}>Nomor</span>
                     <span style={{ width: '12px' }}>:</span>
-                    <input
-                      type="text"
-                      className="spr-line-input"
-                      value={sprOfficial.sprNumber}
-                      onChange={(e) => setSprOfficial({ ...sprOfficial, sprNumber: e.target.value })}
-                      style={{ flex: 1, border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700, padding: '0 2px' }}
-                    />
+                    <span style={{ flex: 1, borderBottom: '1px solid #000', fontWeight: 700, padding: '0 2px' }}>
+                      {sprOfficial.sprNumber || '-'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', width: '270px' }}>
                     <span style={{ width: '60px', fontWeight: 600 }}>Tanggal</span>
                     <span style={{ width: '12px' }}>:</span>
-                    <input
-                      type="text"
-                      className="spr-line-input"
-                      value={sprOfficial.sprDate}
-                      onChange={(e) => setSprOfficial({ ...sprOfficial, sprDate: e.target.value })}
-                      placeholder="YYYY-MM-DD"
-                      style={{ flex: 1, border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700, padding: '0 2px' }}
-                    />
+                    <span style={{ flex: 1, borderBottom: '1px solid #000', fontWeight: 700, padding: '0 2px' }}>
+                      {sprOfficial.sprDate || '-'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -3233,117 +3869,81 @@ export const MarketingModule = () => {
                       <td style={{ width: '110px', padding: '1px 0', fontWeight: 600 }}>Nama</td>
                       <td style={{ width: '12px', padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerName}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerName: e.target.value, consumerSignName: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700, padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', fontWeight: 700, padding: '0 2px' }}>
+                          {sprOfficial.customerName || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Alamat</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerAddress}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerAddress: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerAddress || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0' }}></td>
                       <td style={{ padding: '1px 0' }}></td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerAddress2 || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerAddress2: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerAddress2 || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>No. KTP</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerNik}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerNik: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerNik || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>NPWP</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerNpwp}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerNpwp: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerNpwp || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>No. Telepon</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerPhoneHome}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerPhoneHome: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerPhoneHome || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Handphone</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerPhoneHp}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerPhoneHp: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700, padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', fontWeight: 700, padding: '0 2px' }}>
+                          {sprOfficial.customerPhoneHp || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>E-mail</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerEmail}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerEmail: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerEmail || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                     <tr style={{ height: '17px' }}>
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Pekerjaan</td>
                       <td style={{ padding: '1px 0' }}>:</td>
                       <td style={{ padding: '1px 0' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.customerJob}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, customerJob: e.target.value })}
-                          style={{ width: '100%', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', padding: '0 2px' }}
-                        />
+                        <div style={{ width: '100%', borderBottom: '1px solid #000', padding: '0 2px' }}>
+                          {sprOfficial.customerJob || '\u00A0'}
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -3362,13 +3962,9 @@ export const MarketingModule = () => {
                       <td style={{ width: '145px', padding: '1px 0', fontWeight: 600 }}>Type</td>
                       <td style={{ width: '12px' }}>:</td>
                       <td colSpan={5}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.unitType}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, unitType: e.target.value })}
-                          style={{ width: '200px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '180px', borderBottom: '1px solid #000', fontWeight: 700 }}>
+                          {sprOfficial.unitType || '\u00A0'}
+                        </span>
                       </td>
                     </tr>
 
@@ -3377,23 +3973,15 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Blok</td>
                       <td>:</td>
                       <td style={{ width: '130px' }}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.blok}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, blok: e.target.value })}
-                          style={{ width: '90px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '80px', borderBottom: '1px solid #000', fontWeight: 700 }}>
+                          {sprOfficial.blok || '\u00A0'}
+                        </span>
                       </td>
                       <td style={{ width: '45px', fontWeight: 600 }}>No. :</td>
                       <td colSpan={3}>
-                        <input
-                          type="text"
-                          className="spr-line-input"
-                          value={sprOfficial.unitNo}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, unitNo: e.target.value })}
-                          style={{ width: '90px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '80px', borderBottom: '1px solid #000', fontWeight: 700 }}>
+                          {sprOfficial.unitNo || '\u00A0'}
+                        </span>
                       </td>
                     </tr>
 
@@ -3402,13 +3990,9 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Luas Tanah</td>
                       <td>:</td>
                       <td colSpan={5}>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.luasTanah || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, luasTanah: Number(e.target.value) || 0 })}
-                          style={{ width: '80px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        /> m2
+                        <span style={{ display: 'inline-block', minWidth: '70px', borderBottom: '1px solid #000', textAlign: 'center', fontWeight: 700 }}>
+                          {sprOfficial.luasTanah || 0}
+                        </span> m2
                       </td>
                     </tr>
 
@@ -3417,13 +4001,9 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Luas Bangunan</td>
                       <td>:</td>
                       <td colSpan={5}>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.luasBangunan || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, luasBangunan: Number(e.target.value) || 0 })}
-                          style={{ width: '80px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        /> m2
+                        <span style={{ display: 'inline-block', minWidth: '70px', borderBottom: '1px solid #000', textAlign: 'center', fontWeight: 700 }}>
+                          {sprOfficial.luasBangunan || 0}
+                        </span> m2
                       </td>
                     </tr>
 
@@ -3432,13 +4012,9 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Penambahan Luas Tanah</td>
                       <td>:</td>
                       <td style={{ width: '130px' }}>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.penambahanLuasTanah || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, penambahanLuasTanah: Number(e.target.value) || 0 })}
-                          style={{ width: '80px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px' }}
-                        /> m2
+                        <span style={{ display: 'inline-block', minWidth: '70px', borderBottom: '1px solid #000', textAlign: 'center' }}>
+                          {sprOfficial.penambahanLuasTanah || 0}
+                        </span> m2
                       </td>
                       <td colSpan={2} style={{ fontWeight: 600, width: '130px' }}>Total Luas Tanah :</td>
                       <td colSpan={2}>
@@ -3453,23 +4029,15 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Harga Jual</td>
                       <td>:</td>
                       <td style={{ width: '150px' }}>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.hargaJual || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, hargaJual: Number(e.target.value) || 0 })}
-                          style={{ width: '120px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px', fontWeight: 700 }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '120px', borderBottom: '1px solid #000', fontWeight: 700 }}>
+                          {Number(sprOfficial.hargaJual) > 0 ? formatRupiah(sprOfficial.hargaJual) : '\u00A0'}
+                        </span>
                       </td>
                       <td style={{ width: '45px', fontWeight: 600 }}>Disc :</td>
                       <td style={{ width: '100px' }}>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.discHargaJual || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, discHargaJual: Number(e.target.value) || 0 })}
-                          style={{ width: '85px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px' }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '85px', borderBottom: '1px solid #000' }}>
+                          {Number(sprOfficial.discHargaJual) > 0 ? formatRupiah(sprOfficial.discHargaJual) : '-'}
+                        </span>
                       </td>
                       <td style={{ width: '75px', fontWeight: 600 }}>Harga Net :</td>
                       <td>
@@ -3484,23 +4052,15 @@ export const MarketingModule = () => {
                       <td style={{ padding: '1px 0', fontWeight: 600 }}>Nilai Penambahan Luas</td>
                       <td>:</td>
                       <td>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.nilaiPenambahanLuas || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, nilaiPenambahanLuas: Number(e.target.value) || 0 })}
-                          style={{ width: '120px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px' }}
-                        /> -
+                        <span style={{ display: 'inline-block', minWidth: '120px', borderBottom: '1px solid #000' }}>
+                          {Number(sprOfficial.nilaiPenambahanLuas) > 0 ? formatRupiah(sprOfficial.nilaiPenambahanLuas) : '-'}
+                        </span> -
                       </td>
                       <td style={{ fontWeight: 600 }}>Disc :</td>
                       <td>
-                        <input
-                          type="number"
-                          className="spr-line-input"
-                          value={sprOfficial.discPenambahanLuas || ''}
-                          onChange={(e) => setSprOfficial({ ...sprOfficial, discPenambahanLuas: Number(e.target.value) || 0 })}
-                          style={{ width: '85px', border: 'none', borderBottom: '1px solid #000', fontSize: '9.5px' }}
-                        />
+                        <span style={{ display: 'inline-block', minWidth: '85px', borderBottom: '1px solid #000' }}>
+                          {Number(sprOfficial.discPenambahanLuas) > 0 ? formatRupiah(sprOfficial.discPenambahanLuas) : '-'}
+                        </span>
                       </td>
                       <td style={{ fontWeight: 600 }}>Harga Net :</td>
                       <td>
@@ -3542,14 +4102,6 @@ export const MarketingModule = () => {
                   <div style={{ fontWeight: 800, fontSize: '10px', textTransform: 'uppercase' }}>
                     III. CARA PEMBAYARAN
                   </div>
-                  <button
-                    type="button"
-                    className="no-print"
-                    onClick={handleAddSkemaRow}
-                    style={{ fontSize: '9px', padding: '1px 6px', background: '#334155', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    + Tambah Baris
-                  </button>
                 </div>
 
                 {/* Tabel Skema Pembayaran */}
@@ -3557,83 +4109,22 @@ export const MarketingModule = () => {
                   <thead>
                     <tr style={{ background: sprOfficial.headerAccentColor, color: '#ffffff', height: '20px' }}>
                       <th style={{ border: '1px solid #000000', padding: '2px 4px', width: '28px', textAlign: 'center' }}>No.</th>
-                      <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left', width: '32%' }}>Skema Pembayaran</th>
+                      <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left', width: '33%' }}>Skema Pembayaran</th>
                       <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'right', width: '22%' }}>Jumlah</th>
                       <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left', width: '20%' }}>Jadwal</th>
                       <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left' }}>Keterangan</th>
-                      <th className="no-print" style={{ border: '1px solid #000000', width: '20px' }}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {sprOfficial.skemaRows.map((row, idx) => (
                       <tr key={row.id} style={{ height: '19px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 4px' }}>
-                          <input
-                            type="text"
-                            value={row.skema}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSprOfficial(prev => ({
-                                ...prev,
-                                skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, skema: val } : r)
-                              }));
-                            }}
-                            style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '9px' }}
-                          />
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.skema}</td>
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px', textAlign: 'right', fontWeight: 700 }}>
+                          {Number(row.jumlah) > 0 ? formatRupiah(row.jumlah) : '-'}
                         </td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 4px', textAlign: 'right' }}>
-                          <input
-                            type="number"
-                            value={row.jumlah || ''}
-                            onChange={(e) => {
-                              const val = Number(e.target.value) || 0;
-                              setSprOfficial(prev => ({
-                                ...prev,
-                                skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
-                              }));
-                            }}
-                            placeholder="0"
-                            style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'right', fontSize: '9px', fontWeight: 700 }}
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 4px' }}>
-                          <input
-                            type="text"
-                            value={row.jadwal}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSprOfficial(prev => ({
-                                ...prev,
-                                skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jadwal: val } : r)
-                              }));
-                            }}
-                            style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '9px' }}
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 4px' }}>
-                          <input
-                            type="text"
-                            value={row.keterangan}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSprOfficial(prev => ({
-                                ...prev,
-                                skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, keterangan: val } : r)
-                              }));
-                            }}
-                            style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '9px' }}
-                          />
-                        </td>
-                        <td className="no-print" style={{ border: '1px solid #000000', textAlign: 'center', padding: '1px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSkemaRow(row.id)}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}
-                          >
-                            <X size={11} />
-                          </button>
-                        </td>
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.jadwal}</td>
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.keterangan}</td>
                       </tr>
                     ))}
                     {/* Row Total */}
@@ -3644,7 +4135,6 @@ export const MarketingModule = () => {
                       </td>
                       <td style={{ border: '1px solid #000000' }}></td>
                       <td style={{ border: '1px solid #000000' }}></td>
-                      <td className="no-print" style={{ border: '1px solid #000000' }}></td>
                     </tr>
                   </tbody>
                 </table>
@@ -3660,45 +4150,20 @@ export const MarketingModule = () => {
                     <tr style={{ background: sprOfficial.headerAccentColor, color: '#ffffff', height: '18px' }}>
                       <th style={{ border: '1px solid #000000', padding: '2px 4px', width: '28px', textAlign: 'center' }}>No.</th>
                       <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left' }}>Term & Condition (Syarat dan Kondisi)</th>
-                      <th className="no-print" style={{ border: '1px solid #000000', width: '20px' }}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {sprOfficial.termsRows.map((term, idx) => (
                       <tr key={term.id} style={{ height: '18px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>
-                          <input
-                            type="text"
-                            value={term.text}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSprOfficial(prev => ({
-                                ...prev,
-                                termsRows: prev.termsRows.map(t => t.id === term.id ? { ...t, text: val } : t)
-                              }));
-                            }}
-                            style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '9px' }}
-                          />
-                        </td>
-                        <td className="no-print" style={{ border: '1px solid #000000', textAlign: 'center', padding: '1px' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteTermRow(term.id)}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}
-                          >
-                            <X size={11} />
-                          </button>
-                        </td>
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{term.text}</td>
                       </tr>
                     ))}
-                    {/* Empty pad row if only 1 term */}
                     {sprOfficial.termsRows.length < 3 && (
                       Array.from({ length: 3 - sprOfficial.termsRows.length }).map((_, i) => (
                         <tr key={`pad-${i}`} style={{ height: '18px' }}>
                           <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{sprOfficial.termsRows.length + i + 1}</td>
-                          <td style={{ border: '1px solid #000000', padding: '1px 6px' }}></td>
-                          <td className="no-print" style={{ border: '1px solid #000000' }}></td>
+                          <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>&nbsp;</td>
                         </tr>
                       ))
                     )}
@@ -3793,40 +4258,24 @@ export const MarketingModule = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', textAlign: 'center', fontSize: '8.5px' }}>
                   {/* Admin Marketing */}
                   <div>
-                    <div style={{ fontWeight: 800, paddingBottom: '1px' }}>
-                      <input
-                        type="text"
-                        value={sprOfficial.adminMarketing || 'Amanda Chesyariani Hermawan'}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, adminMarketing: e.target.value })}
-                        style={{ textAlign: 'center', fontWeight: 800, fontSize: '8.5px', border: 'none', width: '100%', background: 'transparent' }}
-                      />
+                    <div style={{ fontWeight: 800, paddingBottom: '1px', borderBottom: '1px solid #000', display: 'inline-block' }}>
+                      {sprOfficial.adminMarketing || 'Amanda Chesyariani Hermawan'}
                     </div>
                     <div style={{ color: '#222', marginTop: '1px' }}>Admin Marketing</div>
                   </div>
 
                   {/* SPV */}
                   <div>
-                    <div style={{ fontWeight: 800, paddingBottom: '1px' }}>
-                      <input
-                        type="text"
-                        value={sprOfficial.spv || 'Yulieka'}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, spv: e.target.value })}
-                        style={{ textAlign: 'center', fontWeight: 800, fontSize: '8.5px', border: 'none', width: '100%', background: 'transparent' }}
-                      />
+                    <div style={{ fontWeight: 800, paddingBottom: '1px', borderBottom: '1px solid #000', display: 'inline-block' }}>
+                      {sprOfficial.spv || 'Yulieka'}
                     </div>
                     <div style={{ color: '#222', marginTop: '1px' }}>SPV</div>
                   </div>
 
                   {/* Konsumen */}
                   <div>
-                    <div style={{ fontWeight: 800, paddingBottom: '1px' }}>
-                      <input
-                        type="text"
-                        value={sprOfficial.consumerSignName || sprOfficial.customerName || 'Konsumen'}
-                        placeholder="Konsumen"
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, consumerSignName: e.target.value })}
-                        style={{ textAlign: 'center', fontWeight: 800, fontSize: '8.5px', border: 'none', width: '100%', background: 'transparent' }}
-                      />
+                    <div style={{ fontWeight: 800, paddingBottom: '1px', borderBottom: '1px solid #000', display: 'inline-block' }}>
+                      {sprOfficial.consumerSignName || sprOfficial.customerName || 'Konsumen'}
                     </div>
                     <div style={{ color: '#222', marginTop: '1px' }}>Konsumen</div>
                   </div>
