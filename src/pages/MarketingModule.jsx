@@ -1178,6 +1178,7 @@ export const MarketingModule = () => {
   const [isSaveSprSuccessModalOpen, setIsSaveSprSuccessModalOpen] = useState(false);
   const [savedSprSuccessData, setSavedSprSuccessData] = useState(null);
   const [highlightedSalesId, setHighlightedSalesId] = useState(null);
+  const [salesDateFilter, setSalesDateFilter] = useState('');
 
   useEffect(() => {
     try {
@@ -2417,12 +2418,16 @@ export const MarketingModule = () => {
   });
 
   const filteredSales = salesList.filter((s) => {
+    const itemDate = s.bookingDate || s.sprOfficialState?.sprDate || '';
     const matchesSearch =
       s.unitNo.toLowerCase().includes(search.toLowerCase()) ||
       s.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      s.salesPerson.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || s.status === statusFilter;
-    return matchesSearch && matchesStatus;
+      s.salesPerson.toLowerCase().includes(search.toLowerCase()) ||
+      itemDate.toLowerCase().includes(search.toLowerCase()) ||
+      (s.notes && s.notes.toLowerCase().includes(search.toLowerCase()));
+
+    const matchesDate = !salesDateFilter || itemDate === salesDateFilter || itemDate.startsWith(salesDateFilter);
+    return matchesSearch && matchesDate;
   });
 
   const totalOmzet = salesList.reduce((acc, curr) => acc + (curr.status === 'Closed / Sold' ? curr.hargaUnit : 0), 0);
@@ -2858,18 +2863,58 @@ export const MarketingModule = () => {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Filter size={16} color="var(--text-muted)" />
-                <select
-                  className="form-control"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{ minWidth: '200px' }}
-                >
-                  <option value="All">Semua Status Marketing</option>
-                  <option value="Closed / Sold">Closed / Sold</option>
-                  <option value="Booking / SPR">Booking / SPR</option>
-                  <option value="Prospek Hot">Prospek Hot</option>
-                </select>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'rgba(15, 23, 42, 0.85)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  padding: '4px 10px',
+                  gap: '0.5rem'
+                }}>
+                  <Calendar size={16} style={{ color: '#38bdf8' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    Search Tanggal:
+                  </span>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={salesDateFilter}
+                    onChange={(e) => setSalesDateFilter(e.target.value)}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#ffffff',
+                      fontSize: '0.85rem',
+                      padding: '2px 4px',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      width: '135px'
+                    }}
+                  />
+                  {salesDateFilter && (
+                    <button
+                      type="button"
+                      onClick={() => setSalesDateFilter('')}
+                      title="Reset Filter Tanggal"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        color: '#f87171',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        fontSize: '0.72rem',
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px'
+                      }}
+                    >
+                      <X size={12} /> Reset
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -2897,26 +2942,40 @@ export const MarketingModule = () => {
                           <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
                             <FileText size={28} />
                           </div>
-                          <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>Belum Ada Data Transaksi Penjualan & SPR</div>
-                          <div style={{ fontSize: '0.82rem', color: 'var(--text-subtle)', maxWidth: '460px', lineHeight: 1.5 }}>
-                            Data transaksi penjualan & SPR telah dikosongkan. Anda dapat mengimpor file Excel (.xlsx / .xls) yang berisi daftar penjualan atau menginput transaksi secara manual.
+                          <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
+                            {salesDateFilter || search ? 'Tidak Ada Transaksi yang Cocok dengan Pencarian' : 'Belum Ada Data Transaksi Penjualan & SPR'}
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-subtle)', maxWidth: '460px', lineHeight: 1.5 }}>
+                            {salesDateFilter || search
+                              ? `Tidak ditemukan transaksi untuk ${salesDateFilter ? `tanggal "${salesDateFilter}"` : ''} ${search ? `kata kunci "${search}"` : ''}. Silakan reset filter untuk melihat semua data.`
+                              : 'Data transaksi penjualan & SPR telah dikosongkan. Anda dapat mengimpor file Excel (.xlsx / .xls) yang berisi daftar penjualan atau menginput transaksi secara manual.'}
+                          </div>
+                          {(salesDateFilter || search) ? (
                             <button
                               className="btn btn-secondary btn-sm"
-                              onClick={() => excelFileInputRef.current?.click()}
-                              style={{ background: '#059669', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                              onClick={() => { setSalesDateFilter(''); setSearch(''); }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem', fontWeight: 700 }}
                             >
-                              <Upload size={14} /> Import File Excel (.xlsx)
+                              <X size={14} /> Reset Filter Tanggal & Pencarian
                             </button>
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={handleOpenAdd}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
-                            >
-                              <Plus size={14} /> + Input Transaksi Manual
-                            </button>
-                          </div>
+                          ) : (
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => excelFileInputRef.current?.click()}
+                                style={{ background: '#059669', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                              >
+                                <Upload size={14} /> Import File Excel (.xlsx)
+                              </button>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={handleOpenAdd}
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                              >
+                                <Plus size={14} /> + Input Transaksi Manual
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -2994,6 +3053,11 @@ export const MarketingModule = () => {
                         }`}>
                           {item.status}
                         </span>
+                        {(item.bookingDate || item.sprOfficialState?.sprDate) && (
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Calendar size={11} color="#38bdf8" /> {item.bookingDate || item.sprOfficialState?.sprDate}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
