@@ -1285,6 +1285,39 @@ export const MarketingModule = () => {
   });
 
   const [sprViewMode, setSprViewMode] = useState('form'); // 'form' | 'preview'
+  const [sprKonsumenSearchQuery, setSprKonsumenSearchQuery] = useState('');
+  const [isSprKonsumenDropdownOpen, setIsSprKonsumenDropdownOpen] = useState(false);
+  const sprKonsumenSearchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sprKonsumenSearchRef.current && !sprKonsumenSearchRef.current.contains(e.target)) {
+        setIsSprKonsumenDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredSprKonsumenList = useMemo(() => {
+    const q = sprKonsumenSearchQuery.trim().toLowerCase();
+    const filterItem = (item) => {
+      if (!q) return true;
+      const nama = (item.nama || '').toLowerCase();
+      const noHp = (item.noHp || '').toLowerCase();
+      const blok = (item.blok || '').toLowerCase();
+      const nomor = (item.nomor || '').toLowerCase();
+      const proyek = (item.proyek || '').toLowerCase();
+      const nik = (item.nik || '').toLowerCase();
+      return nama.includes(q) || noHp.includes(q) || blok.includes(q) || nomor.includes(q) || proyek.includes(q) || nik.includes(q);
+    };
+
+    return {
+      konsumen: databaseKonsumenRows.filter(filterItem),
+      hotProspek: databaseHotProspekRows.filter(filterItem),
+      calon: databaseCalonKonsumenRows.filter(filterItem)
+    };
+  }, [sprKonsumenSearchQuery, databaseKonsumenRows, databaseHotProspekRows, databaseCalonKonsumenRows]);
 
   useEffect(() => {
     try {
@@ -1319,9 +1352,14 @@ export const MarketingModule = () => {
     showNotification(`Unit ${unit.blok}-${unit.nomor} (${unit.type}) berhasil dimuat ke formulir SPR.`);
   };
 
-  const handleSelectKonsumenToSpr = (konsumenId) => {
-    const allKonsumen = [...databaseKonsumenRows, ...databaseHotProspekRows, ...databaseCalonKonsumenRows];
-    const k = allKonsumen.find(item => String(item.id) === String(konsumenId));
+  const handleSelectKonsumenToSpr = (kOrId) => {
+    let k = null;
+    if (typeof kOrId === 'object' && kOrId !== null) {
+      k = kOrId;
+    } else {
+      const allKonsumen = [...databaseKonsumenRows, ...databaseHotProspekRows, ...databaseCalonKonsumenRows];
+      k = allKonsumen.find(item => String(item.id) === String(kOrId));
+    }
     if (!k) return;
     setSprOfficial(prev => ({
       ...prev,
@@ -1334,12 +1372,16 @@ export const MarketingModule = () => {
       customerJob: k.pekerjaan || prev.customerJob,
       consumerSignName: k.nama || prev.consumerSignName
     }));
+    setSprKonsumenSearchQuery(k.nama || '');
+    setIsSprKonsumenDropdownOpen(false);
     showNotification(`Data konsumen ${k.nama} berhasil dimuat ke formulir SPR.`);
   };
 
   const handleResetOfficialSpr = () => {
     if (window.confirm('Buat formulir SPR baru? Isian saat ini akan direset.')) {
       setSprOfficial(getInitialSprOfficial());
+      setSprKonsumenSearchQuery('');
+      setIsSprKonsumenDropdownOpen(false);
       showNotification('Formulir SPR baru siap diisi.');
     }
   };
@@ -3103,36 +3145,220 @@ export const MarketingModule = () => {
                   </select>
                 </div>
 
-                {/* Quick Fill From Database Konsumen */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#34d399', marginBottom: '0.4rem' }}>
-                    ⚡ AMBIL DARI DATABASE PEMBELI / KONSUMEN:
-                  </label>
-                  <select
-                    className="form-control"
-                    style={{ fontSize: '0.8rem', background: '#0f172a', color: '#ffffff', borderColor: '#334155' }}
-                    onChange={(e) => {
-                      if (e.target.value) handleSelectKonsumenToSpr(e.target.value);
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>-- Pilih Konsumen untuk Auto-Fill Identitas --</option>
-                    <optgroup label="Konsumen Resmi (Closing)">
-                      {databaseKonsumenRows.map(k => (
-                        <option key={`k-${k.id}`} value={k.id}>{k.nama} (Unit {k.blok}-{k.nomor} • {k.proyek}) - {k.noHp}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Hot Prospek">
-                      {databaseHotProspekRows.map(h => (
-                        <option key={`h-${h.id}`} value={h.id}>{h.nama} ({h.unitMinat || 'Hot'}) - {h.noHp}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Calon Konsumen">
-                      {databaseCalonKonsumenRows.map(c => (
-                        <option key={`c-${c.id}`} value={c.id}>{c.nama} - {c.noHp}</option>
-                      ))}
-                    </optgroup>
-                  </select>
+                {/* Quick Fill From Database Konsumen (Search / Ketik Dulu) */}
+                <div ref={sprKonsumenSearchRef} style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', margin: 0 }}>
+                      ⚡ AMBIL DARI DATABASE PEMBELI / KONSUMEN:
+                    </label>
+                    {sprKonsumenSearchQuery && (
+                      <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        Terpilih: <strong style={{ color: '#34d399' }}>{sprKonsumenSearchQuery}</strong>
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="-- Ketik Nama / No HP / Unit untuk Mencari Konsumen --"
+                      value={sprKonsumenSearchQuery}
+                      onChange={(e) => {
+                        setSprKonsumenSearchQuery(e.target.value);
+                        setIsSprKonsumenDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsSprKonsumenDropdownOpen(true)}
+                      style={{
+                        fontSize: '0.8rem',
+                        background: '#0f172a',
+                        color: '#ffffff',
+                        borderColor: isSprKonsumenDropdownOpen ? '#34d399' : '#334155',
+                        paddingRight: sprKonsumenSearchQuery ? '2.2rem' : '0.75rem',
+                        fontWeight: sprKonsumenSearchQuery ? 700 : 400
+                      }}
+                    />
+
+                    {sprKonsumenSearchQuery ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSprKonsumenSearchQuery('');
+                          setIsSprKonsumenDropdownOpen(true);
+                        }}
+                        title="Hapus pencarian"
+                        style={{
+                          position: 'absolute',
+                          right: '8px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          pointerEvents: 'none',
+                          color: '#64748b'
+                        }}
+                      >
+                        <Search size={14} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dropdown Pilihan di Bawah Input */}
+                  {isSprKonsumenDropdownOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        zIndex: 60,
+                        maxHeight: '280px',
+                        overflowY: 'auto',
+                        background: '#0f172a',
+                        border: '1.5px solid #34d399',
+                        borderRadius: '8px',
+                        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.7)',
+                        padding: '0.4rem'
+                      }}
+                    >
+                      {filteredSprKonsumenList.konsumen.length === 0 &&
+                       filteredSprKonsumenList.hotProspek.length === 0 &&
+                       filteredSprKonsumenList.calon.length === 0 ? (
+                        <div style={{ padding: '0.9rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.78rem' }}>
+                          Tidak ditemukan konsumen yang cocok dengan "<strong>{sprKonsumenSearchQuery}</strong>"
+                        </div>
+                      ) : (
+                        <>
+                          {/* Group 1: Konsumen Resmi (Closing) */}
+                          {filteredSprKonsumenList.konsumen.length > 0 && (
+                            <div style={{ marginBottom: '0.35rem' }}>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#34d399', padding: '0.2rem 0.5rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                                Konsumen Resmi (Closing) ({filteredSprKonsumenList.konsumen.length})
+                              </div>
+                              {filteredSprKonsumenList.konsumen.map(k => (
+                                <div
+                                  key={`k-${k.id}`}
+                                  onClick={() => handleSelectKonsumenToSpr(k)}
+                                  style={{
+                                    padding: '0.45rem 0.65rem',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.78rem',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <div>
+                                    <div style={{ fontWeight: 700, color: '#ffffff' }}>{k.nama}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                      Unit {k.blok}-{k.nomor} • {k.proyek} {k.noHp ? `• ${k.noHp}` : ''}
+                                    </div>
+                                  </div>
+                                  <span style={{ fontSize: '0.65rem', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    Pilih
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Group 2: Hot Prospek */}
+                          {filteredSprKonsumenList.hotProspek.length > 0 && (
+                            <div style={{ marginBottom: '0.35rem' }}>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#f59e0b', padding: '0.2rem 0.5rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                                Hot Prospek ({filteredSprKonsumenList.hotProspek.length})
+                              </div>
+                              {filteredSprKonsumenList.hotProspek.map(h => (
+                                <div
+                                  key={`h-${h.id}`}
+                                  onClick={() => handleSelectKonsumenToSpr(h)}
+                                  style={{
+                                    padding: '0.45rem 0.65rem',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.78rem',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <div>
+                                    <div style={{ fontWeight: 700, color: '#ffffff' }}>{h.nama}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                      Minat: {h.unitMinat || 'Hot'} {h.noHp ? `• ${h.noHp}` : ''}
+                                    </div>
+                                  </div>
+                                  <span style={{ fontSize: '0.65rem', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    Pilih
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Group 3: Calon Konsumen */}
+                          {filteredSprKonsumenList.calon.length > 0 && (
+                            <div>
+                              <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#38bdf8', padding: '0.2rem 0.5rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                                Calon Konsumen ({filteredSprKonsumenList.calon.length})
+                              </div>
+                              {filteredSprKonsumenList.calon.map(c => (
+                                <div
+                                  key={`c-${c.id}`}
+                                  onClick={() => handleSelectKonsumenToSpr(c)}
+                                  style={{
+                                    padding: '0.45rem 0.65rem',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.78rem',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <div>
+                                    <div style={{ fontWeight: 700, color: '#ffffff' }}>{c.nama}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                      {c.noHp || '-'} {c.sumberInfo ? `• ${c.sumberInfo}` : ''}
+                                    </div>
+                                  </div>
+                                  <span style={{ fontSize: '0.65rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    Pilih
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
