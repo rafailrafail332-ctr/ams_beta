@@ -46,7 +46,6 @@ import {
   ArrowRight,
   Mail
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -304,7 +303,6 @@ export const MarketingModule = () => {
 
   // Hidden File Input Ref for Device SPR Upload (.pdf, .jpg, .png)
   const sprFileInputRef = useRef(null);
-  const excelFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
   // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit)
@@ -1286,7 +1284,13 @@ export const MarketingModule = () => {
         if (parsed.template === 'YSP' && (!parsed.logoUrl || parsed.logoUrl.includes('AP_Logo'))) {
           parsed.logoUrl = '/assets/img/ashoka_park_logo.png';
         }
-        return parsed;
+        if (!Array.isArray(parsed.skemaRows) || parsed.skemaRows.length === 0) {
+          parsed.skemaRows = getInitialSprOfficial().skemaRows;
+        }
+        if (!Array.isArray(parsed.termsRows) || parsed.termsRows.length === 0) {
+          parsed.termsRows = getInitialSprOfficial().termsRows;
+        }
+        return { ...getInitialSprOfficial(), ...parsed };
       }
     } catch (e) {}
     return getInitialSprOfficial();
@@ -1429,8 +1433,20 @@ export const MarketingModule = () => {
       setIsSprKonsumenDropdownOpen(false);
       setSprUnitSearchQuery('');
       setIsSprUnitDropdownOpen(false);
+      setSprViewMode('form');
       showNotification('Formulir SPR baru siap diisi.');
     }
+  };
+
+  const handleCreateNewOfficialSpr = () => {
+    setSprOfficial(getInitialSprOfficial());
+    setSprKonsumenSearchQuery('');
+    setIsSprKonsumenDropdownOpen(false);
+    setSprUnitSearchQuery('');
+    setIsSprUnitDropdownOpen(false);
+    setSprViewMode('form');
+    setActiveSubTab('input_spr');
+    showNotification('Formulir SPR Resmi baru siap diisi.', 'success');
   };
 
   const handlePrintOfficialSprDirect = (spr) => {
@@ -1468,7 +1484,7 @@ export const MarketingModule = () => {
     const netUnit = Math.max(0, (Number(sprOfficial.hargaJual) || 0) - (Number(sprOfficial.discHargaJual) || 0));
     const netPlus = Math.max(0, (Number(sprOfficial.nilaiPenambahanLuas) || 0) - (Number(sprOfficial.discPenambahanLuas) || 0));
     const finalNet = netUnit + netPlus;
-    const bookingFee = sprOfficial.skemaRows[0]?.jumlah || 10000000;
+    const bookingFee = (sprOfficial.skemaRows || [])[0]?.jumlah || 10000000;
 
     let savedItem = null;
     let nextSalesList = [];
@@ -1569,6 +1585,7 @@ export const MarketingModule = () => {
       setSprKonsumenSearchQuery(item.customerName || '');
       setSprUnitSearchQuery(item.unitNo || '');
     }
+    setSprViewMode('form');
     setActiveSubTab('input_spr');
     showNotification(`Formulir SPR untuk transaksi ${item.id} (${item.customerName}) dibuka.`);
   };
@@ -2166,120 +2183,6 @@ export const MarketingModule = () => {
     }
   };
 
-  const handleExcelImport = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-
-        if (!jsonData || jsonData.length === 0) {
-          showNotification('File Excel kosong atau format tabel tidak terdeteksi!', 'warning');
-          return;
-        }
-
-        const cleanNumber = (val) => {
-          if (typeof val === 'number') return val;
-          if (!val) return 0;
-          const cleaned = String(val).replace(/[^0-9]/g, '');
-          return Number(cleaned) || 0;
-        };
-
-        const importedRows = jsonData.map((row, idx) => {
-          const getVal = (candidates) => {
-            for (const key of Object.keys(row)) {
-              const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-              for (const cand of candidates) {
-                const cleanCand = cand.toLowerCase().replace(/[^a-z0-9]/g, '');
-                if (cleanKey.includes(cleanCand)) {
-                  return row[key];
-                }
-              }
-            }
-            return '';
-          };
-
-          const rawUnit = getVal(['unit', 'kavling', 'blok', 'no unit', 'nounit']);
-          const rawCluster = getVal(['cluster', 'klaster', 'proyek', 'tipe', 'type']);
-          const rawName = getVal(['nama', 'konsumen', 'pembeli', 'customer', 'pemesan', 'klien']);
-          const rawPhone = getVal(['hp', 'nohp', 'telp', 'telepon', 'phone', 'wa', 'whatsapp', 'kontak']);
-          const rawSales = getVal(['sales', 'marketing', 'agent', 'agen', 'pemasar']);
-          const rawHarga = getVal(['hargajual', 'hargaunit', 'harga', 'nilai', 'price', 'omzet', 'netto', 'plafon']);
-          const rawBooking = getVal(['bookingfee', 'booking', 'bf', 'utj', 'tandajadi', 'dp', 'uangmuka']);
-          const rawStatus = getVal(['status', 'tahap', 'keteranganstatus']);
-          const rawDate = getVal(['tanggal', 'tgl', 'date', 'tglbooking', 'tgltransaksi']);
-          const rawNotes = getVal(['keterangan', 'catatan', 'notes', 'skemabayar', 'skema']);
-
-          const hargaUnit = cleanNumber(rawHarga);
-          const bookingFee = cleanNumber(rawBooking);
-
-          let status = 'Booking / SPR';
-          const statusStr = String(rawStatus || '').toLowerCase();
-          if (statusStr.includes('closed') || statusStr.includes('sold') || statusStr.includes('lunas') || statusStr.includes('akad')) {
-            status = 'Closed / Sold';
-          } else if (statusStr.includes('hot') || statusStr.includes('prospek')) {
-            status = 'Prospek Hot';
-          }
-
-          let bookingDate = new Date().toISOString().split('T')[0];
-          if (rawDate) {
-            if (typeof rawDate === 'number') {
-              const dateObj = new Date((rawDate - 25569) * 86400 * 1000);
-              if (!isNaN(dateObj.getTime())) {
-                bookingDate = dateObj.toISOString().split('T')[0];
-              }
-            } else {
-              const strDate = String(rawDate).trim();
-              if (strDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                bookingDate = strDate;
-              } else if (strDate.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}$/)) {
-                const parts = strDate.split(/[\/\-\.]/);
-                if (parts.length === 3) {
-                  let [d, m, y] = parts;
-                  if (y.length === 2) y = '20' + y;
-                  bookingDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-                }
-              }
-            }
-          }
-
-          return {
-            id: `SLS-${String(idx + 1).padStart(3, '0')}`,
-            unitNo: String(rawUnit || `Unit ${idx + 1}`).trim(),
-            cluster: String(rawCluster || 'Cluster Emerald').trim(),
-            customerName: String(rawName || `Konsumen ${idx + 1}`).trim(),
-            customerPhone: String(rawPhone || '-').trim(),
-            salesPerson: String(rawSales || currentUser?.name || 'Staf Marketing').trim(),
-            hargaUnit: hargaUnit || 650000000,
-            bookingFee: bookingFee || 10000000,
-            status,
-            bookingDate,
-            notes: String(rawNotes || '').trim(),
-            sprFileUrl: null,
-            sprFileType: null,
-            sprFileName: null,
-            sprUploadDate: null,
-            sprUploadedBy: null
-          };
-        });
-
-        setSalesList(importedRows);
-        showNotification(`BERHASIL IMPORT! ${importedRows.length} data transaksi penjualan & SPR berhasil diimpor dari file Excel.`);
-      } catch (err) {
-        console.error('Excel Import Error:', err);
-        showNotification('Gagal membaca file Excel. Pastikan file berformat .xlsx atau .xls yang valid.', 'error');
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    if (e.target) e.target.value = '';
-  };
-
   const handleClearAllSales = () => {
     if (window.confirm('Apakah Anda yakin ingin MENGHAPUS SEMUA data transaksi penjualan & SPR? Data tabel akan dikosongkan.')) {
       setSalesList([]);
@@ -2312,13 +2215,13 @@ export const MarketingModule = () => {
     setEditingSales(null);
     setFormData({
       unitNo: '',
-      cluster: 'Cluster Emerald',
+      cluster: 'Ashoka View',
       customerName: '',
       customerPhone: '',
-      salesPerson: 'Adhi Himawan, S.E.Sy (General Manager)',
+      salesPerson: 'Amanda Chesyariani Hermawan (Admin Marketing)',
       hargaUnit: 650000000,
       bookingFee: 10000000,
-      status: 'Prospek Hot',
+      status: 'Booking / SPR',
       bookingDate: new Date().toISOString().split('T')[0],
       notes: ''
     });
@@ -2331,12 +2234,12 @@ export const MarketingModule = () => {
       unitNo: item.unitNo,
       cluster: item.cluster,
       customerName: item.customerName,
-      customerPhone: item.customerPhone,
+      customerPhone: item.customerPhone || '',
       salesPerson: item.salesPerson,
-      hargaUnit: item.hargaUnit,
-      bookingFee: item.bookingFee,
+      hargaUnit: item.hargaUnit || 650000000,
+      bookingFee: item.bookingFee || 10000000,
       status: item.status,
-      bookingDate: item.bookingDate,
+      bookingDate: item.bookingDate || new Date().toISOString().split('T')[0],
       notes: item.notes || ''
     });
     setIsModalOpen(true);
@@ -2350,21 +2253,25 @@ export const MarketingModule = () => {
     }
 
     if (editingSales) {
-      setSalesList((prev) =>
-        prev.map((s) => (s.id === editingSales.id ? { ...s, ...formData } : s))
-      );
-      showNotification(`Data Penjualan Unit ${formData.unitNo} berhasil diperbarui!`);
+      const updatedList = salesList.map((s) => (s.id === editingSales.id ? { ...s, ...formData } : s));
+      setSalesList(updatedList);
+      setHighlightedSalesId(editingSales.id);
+      showNotification(`Data Penjualan Unit ${formData.unitNo} berhasil diperbarui!`, 'success');
     } else {
+      const newId = `SLS-${String(salesList.length + 1).padStart(3, '0')}`;
       const newItem = {
         ...formData,
-        id: `SLS-00${salesList.length + 1}`,
+        id: newId,
+        hargaUnit: Number(formData.hargaUnit) || 0,
+        bookingFee: Number(formData.bookingFee) || 0,
         sprFileUrl: null,
         sprFileName: null,
         sprUploadDate: null,
         sprUploadedBy: null
       };
       setSalesList([newItem, ...salesList]);
-      showNotification(`Transaksi/Prospek Penjualan Unit ${formData.unitNo} berhasil dibuat!`);
+      setHighlightedSalesId(newId);
+      showNotification(`Transaksi Penjualan Unit ${formData.unitNo} (${formData.customerName}) berhasil dibuat!`, 'success');
     }
     setIsModalOpen(false);
   };
@@ -2443,15 +2350,6 @@ export const MarketingModule = () => {
         onChange={handleSprFileUpload}
       />
 
-      {/* Hidden File Input for Excel Import */}
-      <input
-        type="file"
-        ref={excelFileInputRef}
-        accept=".xlsx, .xls, .csv"
-        style={{ display: 'none' }}
-        onChange={handleExcelImport}
-      />
-
       {/* Page Header */}
       <div className="page-header">
         <div>
@@ -2470,21 +2368,10 @@ export const MarketingModule = () => {
               <button
                 className="btn btn-primary"
                 style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                onClick={() => {
-                  handleResetOfficialSpr();
-                  setActiveSubTab('input_spr');
-                }}
+                onClick={handleCreateNewOfficialSpr}
                 title="Buka Formulir Input SPR Resmi (MKT-FR-00 & MKT-FR-01)"
               >
                 <FileCheck2 size={16} /> + Buat Form SPR Resmi
-              </button>
-              <button
-                className="btn btn-secondary"
-                style={{ background: '#059669', color: '#ffffff', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                onClick={() => excelFileInputRef.current?.click()}
-                title="Import data transaksi penjualan & SPR dari file Excel (.xlsx / .xls)"
-              >
-                <Upload size={16} /> Import Excel (.xlsx)
               </button>
               {salesList.length > 0 && (
                 <button
@@ -2496,8 +2383,13 @@ export const MarketingModule = () => {
                   <Trash2 size={16} /> Kosongkan Data
                 </button>
               )}
-              <button className="btn btn-secondary" onClick={handleOpenAdd}>
-                <Plus size={16} /> Input Cepat
+              <button
+                className="btn btn-secondary"
+                onClick={handleOpenAdd}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                title="Buka formulir input cepat transaksi penjualan"
+              >
+                <Plus size={16} /> + Input Cepat
               </button>
             </div>
           )}
@@ -2948,7 +2840,7 @@ export const MarketingModule = () => {
                           <div style={{ fontSize: '0.82rem', color: 'var(--text-subtle)', maxWidth: '460px', lineHeight: 1.5 }}>
                             {salesDateFilter || search
                               ? `Tidak ditemukan transaksi untuk ${salesDateFilter ? `tanggal "${salesDateFilter}"` : ''} ${search ? `kata kunci "${search}"` : ''}. Silakan reset filter untuk melihat semua data.`
-                              : 'Data transaksi penjualan & SPR telah dikosongkan. Anda dapat mengimpor file Excel (.xlsx / .xls) yang berisi daftar penjualan atau menginput transaksi secara manual.'}
+                              : 'Data transaksi penjualan & SPR telah dikosongkan. Anda dapat membuat formulir SPR resmi baru atau menginput transaksi cepat secara manual.'}
                           </div>
                           {(salesDateFilter || search) ? (
                             <button
@@ -2961,18 +2853,18 @@ export const MarketingModule = () => {
                           ) : (
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                               <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => excelFileInputRef.current?.click()}
-                                style={{ background: '#059669', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                                className="btn btn-primary btn-sm"
+                                onClick={handleCreateNewOfficialSpr}
+                                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}
                               >
-                                <Upload size={14} /> Import File Excel (.xlsx)
+                                <FileCheck2 size={14} /> + Buat Form SPR Resmi
                               </button>
                               <button
-                                className="btn btn-primary btn-sm"
+                                className="btn btn-secondary btn-sm"
                                 onClick={handleOpenAdd}
                                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
                               >
-                                <Plus size={14} /> + Input Transaksi Manual
+                                <Plus size={14} /> + Input Cepat
                               </button>
                             </div>
                           )}
@@ -3082,6 +2974,15 @@ export const MarketingModule = () => {
                           </button>
 
                           <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleOpenEdit(item)}
+                            style={{ fontSize: '0.72rem', gap: '0.25rem', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+                            title="Edit Cepat Transaksi Ini"
+                          >
+                            <Edit3 size={13} /> Edit
+                          </button>
+
+                          <button
                             className="btn btn-primary btn-sm"
                             onClick={() => triggerUploadForSales(item.id)}
                             style={{ fontSize: '0.72rem', gap: '0.25rem' }}
@@ -3131,7 +3032,7 @@ export const MarketingModule = () => {
         const sprTotalDisc = (Number(sprOfficial.discHargaJual) || 0) + (Number(sprOfficial.discPenambahanLuas) || 0);
         const sprTotalNet = sprNetUnit + sprNetLuasTambah;
         const sprTotalLt = (Number(sprOfficial.luasTanah) || 0) + (Number(sprOfficial.penambahanLuasTanah) || 0);
-        const sprTotalSkema = sprOfficial.skemaRows.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+        const sprTotalSkema = (sprOfficial.skemaRows || []).reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
         return (
           <div style={{ marginBottom: '2.5rem' }}>
@@ -4085,7 +3986,7 @@ export const MarketingModule = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sprOfficial.skemaRows.map((row, idx) => (
+                        {(sprOfficial.skemaRows || []).map((row, idx) => (
                           <tr key={row.id}>
                             <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
                             <td>
@@ -4207,7 +4108,7 @@ export const MarketingModule = () => {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {sprOfficial.termsRows.map((term, idx) => (
+                    {(sprOfficial.termsRows || []).map((term, idx) => (
                       <div key={term.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#cbd5e1', width: '24px', textAlign: 'center' }}>
                           {idx + 1}.
@@ -4729,7 +4630,7 @@ export const MarketingModule = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {sprOfficial.skemaRows.map((row, idx) => (
+                    {(sprOfficial.skemaRows || []).map((row, idx) => (
                       <tr key={row.id} style={{ height: '19px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.skema}</td>
@@ -4766,16 +4667,16 @@ export const MarketingModule = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {sprOfficial.termsRows.map((term, idx) => (
+                    {(sprOfficial.termsRows || []).map((term, idx) => (
                       <tr key={term.id} style={{ height: '18px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{term.text}</td>
                       </tr>
                     ))}
-                    {sprOfficial.termsRows.length < 3 && (
-                      Array.from({ length: 3 - sprOfficial.termsRows.length }).map((_, i) => (
+                    {(!sprOfficial.termsRows || sprOfficial.termsRows.length < 3) && (
+                      Array.from({ length: 3 - (sprOfficial.termsRows?.length || 0) }).map((_, i) => (
                         <tr key={`pad-${i}`} style={{ height: '18px' }}>
-                          <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{sprOfficial.termsRows.length + i + 1}</td>
+                          <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{(sprOfficial.termsRows?.length || 0) + i + 1}</td>
                           <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>&nbsp;</td>
                         </tr>
                       ))
@@ -5650,6 +5551,221 @@ export const MarketingModule = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: INPUT CEPAT / EDIT TRANSAKSI PENJUALAN & SPR                      */}
+      {/* ========================================================================= */}
+      {isModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={18} color="var(--accent-primary)" />
+                {editingSales ? `Edit Transaksi Penjualan: ${editingSales.id}` : '+ Input Cepat Transaksi Penjualan'}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveSales}>
+              <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                {/* Auto-fill from DB Helper */}
+                <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Sparkles size={14} /> AUTO-FILL DARI DATABASE (OPSIONAL)
+                  </div>
+                  <div className="grid-2" style={{ gap: '0.5rem' }}>
+                    <div>
+                      <select
+                        className="form-control"
+                        style={{ fontSize: '0.78rem' }}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (!val) return;
+                          const k = [...databaseKonsumenRows, ...databaseCalonKonsumenRows, ...databaseHotProspekRows].find(x => x.id === val);
+                          if (k) {
+                            setFormData(prev => ({
+                              ...prev,
+                              customerName: k.nama || prev.customerName,
+                              customerPhone: k.phone || k.telepon || prev.customerPhone
+                            }));
+                          }
+                        }}
+                      >
+                        <option value="">-- Pilih dari DB Konsumen --</option>
+                        {databaseKonsumenRows.map(k => (
+                          <option key={k.id} value={k.id}>Konsumen: {k.nama} ({k.unit || k.phone || '-'})</option>
+                        ))}
+                        {databaseHotProspekRows.map(h => (
+                          <option key={h.id} value={h.id}>Hot Prospek: {h.nama}</option>
+                        ))}
+                        {databaseCalonKonsumenRows.map(c => (
+                          <option key={c.id} value={c.id}>Calon Konsumen: {c.nama}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <select
+                        className="form-control"
+                        style={{ fontSize: '0.78rem' }}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (!val) return;
+                          const u = databaseUnitRows.find(x => x.id === val);
+                          if (u) {
+                            setFormData(prev => ({
+                              ...prev,
+                              unitNo: `${u.blok}-${u.nomor}`,
+                              cluster: u.proyek || prev.cluster,
+                              hargaUnit: Number(u.harga) > 0 ? Number(u.harga) : prev.hargaUnit
+                            }));
+                          }
+                        }}
+                      >
+                        <option value="">-- Pilih dari DB Unit --</option>
+                        {databaseUnitRows.map(u => (
+                          <option key={u.id} value={u.id}>[{u.proyek}] Blok {u.blok} No {u.nomor} ({u.type})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nomor Unit <span style={{ color: 'var(--danger)' }}>*</span></label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: A-01 atau B-05"
+                      value={formData.unitNo}
+                      onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Cluster / Proyek Perumahan</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Ashoka View / Ashoka Park"
+                      value={formData.cluster}
+                      onChange={(e) => setFormData({ ...formData, cluster: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nama Konsumen / Pembeli <span style={{ color: 'var(--danger)' }}>*</span></label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Nama lengkap konsumen"
+                      value={formData.customerName}
+                      onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">No. HP / WhatsApp Konsumen</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="0812-xxxx-xxxx"
+                      value={formData.customerPhone}
+                      onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Harga Jual Unit (Rp)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="650000000"
+                      value={formData.hargaUnit}
+                      onChange={(e) => setFormData({ ...formData, hargaUnit: Number(e.target.value) || 0 })}
+                    />
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {formatRupiah(formData.hargaUnit)}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Uang Tanda Jadi / Booking Fee (Rp)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="10000000"
+                      value={formData.bookingFee}
+                      onChange={(e) => setFormData({ ...formData, bookingFee: Number(e.target.value) || 0 })}
+                    />
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                      {formatRupiah(formData.bookingFee)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Tanggal Transaksi / Booking</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={formData.bookingDate}
+                      onChange={(e) => setFormData({ ...formData, bookingDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status Penjualan</label>
+                    <select
+                      className="form-control"
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    >
+                      <option value="Booking / SPR">Booking / SPR</option>
+                      <option value="Prospek Hot">Prospek Hot</option>
+                      <option value="Closed / Sold">Closed / Sold</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Sales Person / Marketing In-Charge</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Nama Sales / Admin Marketing"
+                    value={formData.salesPerson}
+                    onChange={(e) => setFormData({ ...formData, salesPerson: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Catatan Tambahan (Keterangan)</label>
+                  <textarea
+                    className="form-control"
+                    rows="2"
+                    placeholder="Keterangan unit, diskon, atau promo..."
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+                  Batal
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ fontWeight: 800 }}>
+                  {editingSales ? 'Perbarui Transaksi' : 'Simpan Transaksi Penjualan'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
