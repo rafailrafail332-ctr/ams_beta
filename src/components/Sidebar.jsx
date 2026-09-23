@@ -121,10 +121,11 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'mkt-leads', title: '1. Pipeline CRM Leads & Komisi Sales', moduleKey: 'marketing', subTabKey: 'leads', icon: Users, color: '#FBBF24' },
         { id: 'mkt-spr', title: '2. Transaksi Unit & Upload Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: FileText, color: '#FBBF24' },
-        { id: 'mkt-konsumen', title: '3. Data Base Konsumen (Calon, Hot, Closing)', moduleKey: 'marketing', subTabKey: 'db_konsumen', icon: Users, color: '#F59E0B' },
-        { id: 'mkt-unit', title: '4. Data Base Unit Properti', moduleKey: 'marketing', subTabKey: 'db_unit', icon: Building2, color: '#38BDF8' },
-        { id: 'cr-tickets', title: '5. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
-        { id: 'cr-handover', title: '6. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
+        { id: 'mkt-input-spr', title: '3. Input Formulir SPR Resmi', moduleKey: 'marketing', subTabKey: 'input_spr', icon: FileCheck, color: '#10B981' },
+        { id: 'mkt-konsumen', title: '4. Data Base Konsumen (Calon, Hot, Closing)', moduleKey: 'marketing', subTabKey: 'db_konsumen', icon: Users, color: '#F59E0B' },
+        { id: 'mkt-unit', title: '5. Data Base Unit Properti', moduleKey: 'marketing', subTabKey: 'db_unit', icon: Building2, color: '#38BDF8' },
+        { id: 'cr-tickets', title: '6. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'cr-handover', title: '7. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
       ];
     }
 

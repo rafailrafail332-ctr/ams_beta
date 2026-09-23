@@ -58,6 +58,27 @@ const formatRupiah = (val) => {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
 };
 
+const terbilang = (n) => {
+  const bilangan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+  const num = Math.floor(Math.abs(Number(n) || 0));
+  if (num === 0) return 'Nol Rupiah';
+
+  const convert = (x) => {
+    if (x < 12) return bilangan[x];
+    if (x < 20) return convert(x - 10) + ' Belas';
+    if (x < 100) return convert(Math.floor(x / 10)) + ' Puluh' + (x % 10 !== 0 ? ' ' + convert(x % 10) : '');
+    if (x < 200) return 'Seratus' + (x - 100 !== 0 ? ' ' + convert(x - 100) : '');
+    if (x < 1000) return convert(Math.floor(x / 100)) + ' Ratus' + (x % 100 !== 0 ? ' ' + convert(x % 100) : '');
+    if (x < 2000) return 'Seribu' + (x - 1000 !== 0 ? ' ' + convert(x - 1000) : '');
+    if (x < 1000000) return convert(Math.floor(x / 1000)) + ' Ribu' + (x % 1000 !== 0 ? ' ' + convert(x % 1000) : '');
+    if (x < 1000000000) return convert(Math.floor(x / 1000000)) + ' Juta' + (x % 1000000 !== 0 ? ' ' + convert(x % 1000000) : '');
+    if (x < 1000000000000) return convert(Math.floor(x / 1000000000)) + ' Milyar' + (x % 1000000000 !== 0 ? ' ' + convert(x % 1000000000) : '');
+    return convert(Math.floor(x / 1000000000000)) + ' Triliun' + (x % 1000000000000 !== 0 ? ' ' + convert(x % 1000000000000) : '');
+  };
+
+  return convert(num).trim() + ' Rupiah';
+};
+
 // 1. Initial Data Base Konsumen (Pembeli Resmi & Closing)
 const initialDbKonsumen = [
   {
@@ -286,8 +307,9 @@ export const MarketingModule = () => {
   const excelFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Sub-view Tab Control (leads, spr, db_konsumen, db_unit)
+  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit)
   const currentSubView = 
+    (activeSubTab === 'input_spr' || activeSubTab === 'form_spr') ? 'input_spr' :
     activeSubTab === 'spr' ? 'spr' :
     (activeSubTab === 'unit' || activeSubTab === 'db_unit') ? 'db_unit' :
     (activeSubTab === 'konsumen' || activeSubTab === 'calon_konsumen' || activeSubTab === 'calon' || activeSubTab === 'hot_prospek' || activeSubTab === 'hot' || activeSubTab === 'db_konsumen') ? 'db_konsumen' :
@@ -1157,6 +1179,297 @@ export const MarketingModule = () => {
     } catch (e) {}
   }, [salesList]);
 
+  // =============================================================
+  // OFFICIAL SPR DOCUMENT STATE & TEMPLATES (MKT-FR-00 & MKT-FR-01)
+  // Sesuai Foto Fisik Dokumen Resmi PT Yazfi Gema & PT Yazfi Setia
+  // =============================================================
+  const TEMPLATE_YGP = {
+    template: 'YGP',
+    companyName: 'PT. YAZFI GEMA PERSADA',
+    companyAddress: 'Komplek Bishub Blok RA Nomor 3, Kelurahan Pabuaran, Kecamatan Gunung Sindur, Kabupaten Bogor - Jawa Barat',
+    companyPhone: '021-75678196',
+    projectName: 'ASHOKA VIEW',
+    projectAddress: 'Jl. Intan 1, Cidokom, Gunung Sindur - Bogor, Jawa Barat',
+    formCode: 'MKT-FR-00',
+    logoUrl: '/assets/img/logo_gp.png',
+    headerAccentColor: '#8a4b1f',
+    footerBarColor: '#df894f',
+    banks: [
+      { name: 'Mandiri', cabang: 'Jakarta - Gandaria', norek: '126-0091991991', atasNama: 'PT. YAZFI GEMA PERSADA' },
+      { name: 'BRI', cabang: 'Ciledug', norek: '039-201-000-521-302', atasNama: 'PT. YAZFI GEMA PERSADA' }
+    ],
+    defaultTerms: [
+      'Free BPHTB, AJB, BBN, IMB dan Peningkatan SHM',
+      'Free Mesin jet pump dan Landscape Taman'
+    ]
+  };
+
+  const TEMPLATE_YSP = {
+    template: 'YSP',
+    companyName: 'PT YAZFI SETIA PERSADA',
+    companyAddress: 'Komplek Bishub Blok RA Nomor 3, Kelurahan Pabuaran, Kecamatan Gunung Sindur, Kabupaten Bogor - Jawa Barat',
+    companyPhone: '021-75678196',
+    projectName: 'ASHOKA PARK',
+    projectAddress: 'Jalan Jampang, Gunung Sindur, Kabupaten Bogor, Jawa Barat',
+    formCode: 'MKT-FR-01',
+    logoUrl: '/assets/img/AP_Logo.png',
+    headerAccentColor: '#1e40af',
+    footerBarColor: '#2563eb',
+    banks: [
+      { name: 'Bank Mandiri', cabang: 'Gandaria - Jakarta', norek: '126-00-2022122-1', atasNama: 'PT YAZFI SETIA PERSADA' },
+      { name: 'Bank Rakyat Indonesia (BRI)', cabang: 'Radio Dalam - Jakarta', norek: '0430.01.000856.30.1', atasNama: 'PT YAZFI SETIA PERSADA' }
+    ],
+    defaultTerms: [
+      'Free Surat-surat sampai SHM, Mesin Jet Pump'
+    ]
+  };
+
+  const getInitialSprOfficial = () => ({
+    ...TEMPLATE_YGP,
+    editingSalesId: null,
+    sprNumber: `SPR/YGP/AV/${new Date().getFullYear()}/${String(Math.floor(100 + Math.random() * 900))}`,
+    sprDate: new Date().toISOString().split('T')[0],
+
+    // I. DATA PEMBELI
+    customerName: '',
+    customerAddress: '',
+    customerNik: '',
+    customerNpwp: '',
+    customerPhoneHome: '',
+    customerPhoneHp: '',
+    customerEmail: '',
+    customerJob: '',
+
+    // II. DATA UNIT RUMAH
+    unitType: 'Tipe 36/72',
+    blok: 'A',
+    unitNo: '01',
+    luasTanah: 72,
+    luasBangunan: 36,
+    penambahanLuasTanah: 0,
+    hargaJual: 650000000,
+    discHargaJual: 0,
+    nilaiPenambahanLuas: 0,
+    discPenambahanLuas: 0,
+
+    // III. CARA PEMBAYARAN
+    skemaRows: [
+      { id: 1, skema: 'Uang Tanda Jadi (Booking Fee)', jumlah: 10000000, jadwal: 'Saat Pemesanan', keterangan: 'Non-refundable' },
+      { id: 2, skema: 'Uang Muka (DP)', jumlah: 55000000, jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
+      { id: 3, skema: 'Pelunasan / Plafond KPR', jumlah: 585000000, jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra' }
+    ],
+    termsRows: [
+      { id: 1, text: 'Free BPHTB, AJB, BBN, IMB dan Peningkatan SHM' },
+      { id: 2, text: 'Free Mesin jet pump dan Landscape Taman' }
+    ],
+
+    // Tanda Tangan
+    adminMarketing: 'Amanda Chesyariani Hermawan',
+    spv: 'Yulieka',
+    consumerSignName: ''
+  });
+
+  const [sprOfficial, setSprOfficial] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_official_spr_draft_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return getInitialSprOfficial();
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_official_spr_draft_v1', JSON.stringify(sprOfficial));
+    } catch (e) {}
+  }, [sprOfficial]);
+
+  const handleSwitchSprTemplate = (templateKey) => {
+    const tpl = templateKey === 'YSP' ? TEMPLATE_YSP : TEMPLATE_YGP;
+    const prefix = templateKey === 'YSP' ? 'SPR/YSP/AP' : 'SPR/YGP/AV';
+    setSprOfficial(prev => ({
+      ...prev,
+      ...tpl,
+      sprNumber: `${prefix}/${new Date().getFullYear()}/${String(Math.floor(100 + Math.random() * 900))}`,
+      termsRows: tpl.defaultTerms.map((t, idx) => ({ id: idx + 1, text: t }))
+    }));
+    showNotification(`Template SPR berganti ke ${tpl.companyName} (${tpl.projectName})`);
+  };
+
+  const handleSelectUnitToSpr = (unitId) => {
+    const unit = databaseUnitRows.find(u => String(u.id) === String(unitId));
+    if (!unit) return;
+    setSprOfficial(prev => ({
+      ...prev,
+      unitType: unit.type || prev.unitType,
+      blok: unit.blok || prev.blok,
+      unitNo: unit.nomor || prev.unitNo,
+      luasTanah: Number(unit.lt) || prev.luasTanah,
+      luasBangunan: Number(unit.lb) || prev.luasBangunan,
+      hargaJual: Number(unit.harga) || prev.hargaJual
+    }));
+    showNotification(`Unit ${unit.blok}-${unit.nomor} (${unit.type}) berhasil dimuat ke formulir SPR.`);
+  };
+
+  const handleSelectKonsumenToSpr = (konsumenId) => {
+    const allKonsumen = [...databaseKonsumenRows, ...databaseHotProspekRows, ...databaseCalonKonsumenRows];
+    const k = allKonsumen.find(item => String(item.id) === String(konsumenId));
+    if (!k) return;
+    setSprOfficial(prev => ({
+      ...prev,
+      customerName: k.nama || prev.customerName,
+      customerAddress: k.alamat || prev.customerAddress,
+      customerNik: k.nik || prev.customerNik,
+      customerNpwp: k.npwp || prev.customerNpwp,
+      customerPhoneHp: k.noHp || prev.customerPhoneHp,
+      customerEmail: k.email || prev.customerEmail,
+      customerJob: k.pekerjaan || prev.customerJob,
+      consumerSignName: k.nama || prev.consumerSignName
+    }));
+    showNotification(`Data konsumen ${k.nama} berhasil dimuat ke formulir SPR.`);
+  };
+
+  const handleResetOfficialSpr = () => {
+    if (window.confirm('Buat formulir SPR baru? Isian saat ini akan direset.')) {
+      setSprOfficial(getInitialSprOfficial());
+      showNotification('Formulir SPR baru siap diisi.');
+    }
+  };
+
+  const handleSaveOfficialSpr = () => {
+    if (!sprOfficial.unitNo || !sprOfficial.customerName) {
+      showNotification('Nomor unit dan nama pembeli wajib diisi!', 'warning');
+      return;
+    }
+
+    const netUnit = Math.max(0, (Number(sprOfficial.hargaJual) || 0) - (Number(sprOfficial.discHargaJual) || 0));
+    const netPlus = Math.max(0, (Number(sprOfficial.nilaiPenambahanLuas) || 0) - (Number(sprOfficial.discPenambahanLuas) || 0));
+    const finalNet = netUnit + netPlus;
+    const bookingFee = sprOfficial.skemaRows[0]?.jumlah || 10000000;
+
+    if (sprOfficial.editingSalesId) {
+      setSalesList(prev => prev.map(s => {
+        if (s.id === sprOfficial.editingSalesId) {
+          return {
+            ...s,
+            unitNo: `${sprOfficial.blok}-${sprOfficial.unitNo}`,
+            cluster: sprOfficial.projectName,
+            customerName: sprOfficial.customerName,
+            customerPhone: sprOfficial.customerPhoneHp || s.customerPhone,
+            salesPerson: sprOfficial.adminMarketing || s.salesPerson,
+            hargaUnit: finalNet,
+            bookingFee: bookingFee,
+            bookingDate: sprOfficial.sprDate,
+            notes: `SPR No: ${sprOfficial.sprNumber}`,
+            sprOfficialState: { ...sprOfficial }
+          };
+        }
+        return s;
+      }));
+      showNotification(`Transaksi SPR Unit ${sprOfficial.blok}-${sprOfficial.unitNo} berhasil diperbarui!`);
+    } else {
+      const newSaleItem = {
+        id: `SLS-${String(salesList.length + 1).padStart(3, '0')}`,
+        unitNo: `${sprOfficial.blok}-${sprOfficial.unitNo}`,
+        cluster: sprOfficial.projectName,
+        customerName: sprOfficial.customerName,
+        customerPhone: sprOfficial.customerPhoneHp || '-',
+        salesPerson: sprOfficial.adminMarketing || 'Amanda Chesyariani Hermawan (Admin Marketing)',
+        hargaUnit: finalNet,
+        bookingFee: bookingFee,
+        status: 'Booking / SPR',
+        bookingDate: sprOfficial.sprDate,
+        notes: `SPR No: ${sprOfficial.sprNumber}`,
+        sprFileUrl: null,
+        sprFileType: null,
+        sprFileName: null,
+        sprUploadDate: null,
+        sprUploadedBy: null,
+        sprOfficialState: { ...sprOfficial }
+      };
+      setSalesList([newSaleItem, ...salesList]);
+      showNotification(`TRANSAKSI SPR RESMI TERSIMPAN! Unit ${newSaleItem.unitNo} atas nama ${newSaleItem.customerName} berhasil masuk ke daftar transaksi.`);
+    }
+  };
+
+  const handleLoadToOfficialSpr = (item) => {
+    if (item.sprOfficialState) {
+      setSprOfficial({
+        ...item.sprOfficialState,
+        editingSalesId: item.id
+      });
+    } else {
+      const parts = (item.unitNo || '').split(/[-_ ]+/);
+      const b = parts.length > 1 ? parts[0] : 'A';
+      const u = parts.length > 1 ? parts.slice(1).join('-') : (item.unitNo || '01');
+      
+      const isPark = (item.cluster || '').toLowerCase().includes('park');
+      const tpl = isPark ? TEMPLATE_YSP : TEMPLATE_YGP;
+
+      setSprOfficial({
+        ...tpl,
+        editingSalesId: item.id,
+        sprNumber: item.notes?.includes('SPR No:') ? item.notes.replace('SPR No:', '').trim() : `SPR/${tpl.template}/${isPark ? 'AP' : 'AV'}/${new Date().getFullYear()}/${item.id}`,
+        sprDate: item.bookingDate || new Date().toISOString().split('T')[0],
+        customerName: item.customerName || '',
+        customerPhoneHp: item.customerPhone || '',
+        consumerSignName: item.customerName || '',
+        blok: b,
+        unitNo: u,
+        hargaJual: item.hargaUnit || 650000000,
+        skemaRows: [
+          { id: 1, skema: 'Uang Tanda Jadi (Booking Fee)', jumlah: item.bookingFee || 10000000, jadwal: item.bookingDate || 'Saat Pemesanan', keterangan: 'Non-refundable' },
+          { id: 2, skema: 'Uang Muka (DP)', jumlah: Math.round((item.hargaUnit || 650000000) * 0.1), jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
+          { id: 3, skema: 'Pelunasan / Plafond KPR', jumlah: Math.max(0, (item.hargaUnit || 650000000) - Math.round((item.hargaUnit || 650000000) * 0.1) - (item.bookingFee || 10000000)), jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra' }
+        ],
+        termsRows: tpl.defaultTerms.map((t, idx) => ({ id: idx + 1, text: t }))
+      });
+    }
+    setActiveSubTab('input_spr');
+    showNotification(`Formulir SPR untuk transaksi ${item.id} (${item.customerName}) dibuka.`);
+  };
+
+  const handleAddSkemaRow = () => {
+    setSprOfficial(prev => ({
+      ...prev,
+      skemaRows: [
+        ...prev.skemaRows,
+        { id: Date.now(), skema: 'Tahap Pembayaran', jumlah: 0, jadwal: 'Sesuai Kesepakatan', keterangan: 'Bank Transfer' }
+      ]
+    }));
+  };
+
+  const handleDeleteSkemaRow = (id) => {
+    if (sprOfficial.skemaRows.length <= 1) {
+      showNotification('Minimal harus ada 1 baris skema pembayaran!', 'warning');
+      return;
+    }
+    setSprOfficial(prev => ({
+      ...prev,
+      skemaRows: prev.skemaRows.filter(r => r.id !== id)
+    }));
+  };
+
+  const handleAddTermRow = () => {
+    setSprOfficial(prev => ({
+      ...prev,
+      termsRows: [
+        ...prev.termsRows,
+        { id: Date.now(), text: 'Ketentuan / Promo Tambahan' }
+      ]
+    }));
+  };
+
+  const handleDeleteTermRow = (id) => {
+    if (sprOfficial.termsRows.length <= 1) {
+      showNotification('Minimal harus ada 1 syarat & ketentuan!', 'warning');
+      return;
+    }
+    setSprOfficial(prev => ({
+      ...prev,
+      termsRows: prev.termsRows.filter(r => r.id !== id)
+    }));
+  };
+
   // Form State for Sales Item
   const [formData, setFormData] = useState({
     unitNo: '',
@@ -1583,6 +1896,17 @@ export const MarketingModule = () => {
           {currentSubView === 'spr' && (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
+                className="btn btn-primary"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={() => {
+                  handleResetOfficialSpr();
+                  setActiveSubTab('input_spr');
+                }}
+                title="Buka Formulir Input SPR Resmi (MKT-FR-00 & MKT-FR-01)"
+              >
+                <FileCheck2 size={16} /> + Buat Form SPR Resmi
+              </button>
+              <button
                 className="btn btn-secondary"
                 style={{ background: '#059669', color: '#ffffff', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 onClick={() => excelFileInputRef.current?.click()}
@@ -1600,8 +1924,36 @@ export const MarketingModule = () => {
                   <Trash2 size={16} /> Kosongkan Data
                 </button>
               )}
-              <button className="btn btn-primary" onClick={handleOpenAdd}>
-                <Plus size={16} /> Input Transaksi Penjualan
+              <button className="btn btn-secondary" onClick={handleOpenAdd}>
+                <Plus size={16} /> Input Cepat
+              </button>
+            </div>
+          )}
+          {currentSubView === 'input_spr' && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                className="btn btn-secondary"
+                style={{ background: '#334155', color: '#f8fafc', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={() => setActiveSubTab('spr')}
+                title="Kembali ke Tabel Daftar Penjualan & SPR"
+              >
+                <ChevronLeft size={16} /> Kembali ke Tabel
+              </button>
+              <button
+                className="btn btn-secondary"
+                style={{ background: '#f59e0b', color: '#000000', border: 'none', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={() => window.print()}
+                title="Cetak Formulir SPR Resmi ke Printer / PDF Ukuran A4"
+              >
+                <Printer size={16} /> Cetak SPR (A4)
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={handleSaveOfficialSpr}
+                title="Simpan Transaksi SPR ini ke Database Penjualan"
+              >
+                <Check size={16} /> Simpan Transaksi SPR
               </button>
             </div>
           )}
@@ -1619,7 +1971,7 @@ export const MarketingModule = () => {
       </div>
 
       {/* SUB-MODULE TABS NAVIGATION (SESUAI HIRARKI DATA BASE) */}
-      <div className="tab-list" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+      <div className="tab-list no-print" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <button
           className={`tab-item ${currentSubView === 'leads' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('leads')}
@@ -1635,6 +1987,20 @@ export const MarketingModule = () => {
           <FileText size={16} /> 2. Transaksi Penjualan & Upload Dokumen SPR
         </button>
         <button
+          className={`tab-item ${currentSubView === 'input_spr' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('input_spr')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'input_spr' ? '#f59e0b' : undefined,
+            color: currentSubView === 'input_spr' ? '#fbbf24' : undefined
+          }}
+        >
+          <FileCheck2 size={16} color="#fbbf24" /> 3. Formulir Input SPR Resmi (MKT-FR)
+        </button>
+        <button
           className={`tab-item ${currentSubView === 'db_konsumen' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('db_konsumen')}
           style={{
@@ -1646,7 +2012,7 @@ export const MarketingModule = () => {
             color: currentSubView === 'db_konsumen' ? '#34d399' : undefined
           }}
         >
-          <Users size={16} color="#34d399" /> 3. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
+          <Users size={16} color="#34d399" /> 4. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
         </button>
         <button
           className={`tab-item ${currentSubView === 'db_unit' ? 'active' : ''}`}
@@ -1660,7 +2026,7 @@ export const MarketingModule = () => {
             color: currentSubView === 'db_unit' ? '#60a5fa' : undefined
           }}
         >
-          <Home size={16} color="#60a5fa" /> 4. Data Base Unit Properti ({databaseUnitRows.length})
+          <Home size={16} color="#60a5fa" /> 5. Data Base Unit Properti ({databaseUnitRows.length})
         </button>
       </div>
 
@@ -2025,7 +2391,7 @@ export const MarketingModule = () => {
                             <Upload size={13} /> Upload SPR
                           </button>
 
-                          {item.sprFileUrl ? (
+                          {item.sprFileUrl && (
                             <button
                               className="btn btn-secondary btn-sm"
                               onClick={() => { setSelectedSprViewItem(item); setIsViewUploadedSprModalOpen(true); }}
@@ -2033,15 +2399,15 @@ export const MarketingModule = () => {
                             >
                               <Eye size={13} /> Lihat Berkas
                             </button>
-                          ) : (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleOpenSprModal(item)}
-                              style={{ fontSize: '0.72rem', gap: '0.25rem' }}
-                            >
-                              <Printer size={13} /> Cetak Form
-                            </button>
                           )}
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleLoadToOfficialSpr(item)}
+                            style={{ fontSize: '0.72rem', gap: '0.25rem', color: '#f59e0b', borderColor: '#f59e0b' }}
+                            title="Buka / Sunting Formulir SPR Resmi MKT-FR"
+                          >
+                            <FileCheck2 size={13} /> Form SPR
+                          </button>
 
                           <button
                             className="btn btn-secondary btn-sm"
@@ -2064,7 +2430,838 @@ export const MarketingModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: DATA BASE KONSUMEN                                                 */}
+      {/* SUB-VIEW 3: FORMULIR INPUT SPR RESMI (MKT-FR-00 & MKT-FR-01)              */}
+      {/* 100% IDENTIK DENGAN DOKUMEN FISIK ASLI DARI FOTO                          */}
+      {/* ========================================================================= */}
+      {currentSubView === 'input_spr' && (
+        <div style={{ marginBottom: '2.5rem' }}>
+          {/* CSS KHUSUS PRINT A4 DOKUMEN RESMI SPR */}
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden !important;
+              }
+              #spr-official-print-document, #spr-official-print-document * {
+                visibility: visible !important;
+              }
+              #spr-official-print-document {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 10mm 15mm 10mm 15mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .no-print, .no-print * {
+                display: none !important;
+              }
+              .spr-print-input {
+                border: none !important;
+                border-bottom: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                font-family: inherit !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                outline: none !important;
+              }
+              .spr-print-input::placeholder {
+                color: transparent !important;
+              }
+              @page {
+                size: A4 portrait;
+                margin: 6mm 10mm 6mm 10mm;
+              }
+            }
+          `}</style>
+
+          {/* CONTROL TOOLBAR (NO-PRINT) */}
+          <div className="glass-card no-print" style={{ marginBottom: '1.5rem', padding: '1.25rem', background: '#1e293b', border: '1.5px solid #f59e0b', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <FileCheck2 size={22} color="#f59e0b" />
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ffffff' }}>
+                    Formulir Input Surat Pemesanan Rumah (SPR) Resmi
+                  </h3>
+                </div>
+                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                  Desain & susunan dokumen 100% identik dengan lembar fisik kantor. Data dapat langsung dicetak A4 atau disimpan ke daftar transaksi.
+                </p>
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleResetOfficialSpr}
+                  style={{ background: '#334155', color: '#ffffff', fontWeight: 700 }}
+                  title="Kosongkan form dan buat SPR baru"
+                >
+                  <Sparkles size={15} /> Buat Baru
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => window.print()}
+                  style={{ background: '#f59e0b', color: '#000000', fontWeight: 900, border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  title="Cetak lembar SPR ini ke kertas A4 / simpan sebagai PDF"
+                >
+                  <Printer size={16} /> Cetak SPR (A4)
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSaveOfficialSpr}
+                  style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  title="Simpan data SPR ini ke tabel Transaksi Penjualan & SPR"
+                >
+                  <Check size={16} /> Simpan ke Transaksi
+                </button>
+              </div>
+            </div>
+
+            {/* TEMPLATE PICKER & AUTOFILL SELECTORS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid #334155' }}>
+              {/* Template Switcher */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b', marginBottom: '0.4rem' }}>
+                  PILIH PERUSAHAAN & TEMPLATE PROYEK:
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchSprTemplate('YGP')}
+                    style={{
+                      flex: 1,
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: sprOfficial.template === 'YGP' ? '2px solid #f59e0b' : '1px solid #475569',
+                      background: sprOfficial.template === 'YGP' ? 'rgba(245, 158, 11, 0.2)' : '#0f172a',
+                      color: sprOfficial.template === 'YGP' ? '#fbbf24' : '#94a3b8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <span>PT. YAZFI GEMA PERSADA</span>
+                    <span style={{ fontSize: '0.7rem', padding: '1px 5px', background: '#935427', color: '#fff', borderRadius: '4px' }}>MKT-FR-00</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchSprTemplate('YSP')}
+                    style={{
+                      flex: 1,
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: sprOfficial.template === 'YSP' ? '2px solid #3b82f6' : '1px solid #475569',
+                      background: sprOfficial.template === 'YSP' ? 'rgba(59, 130, 246, 0.2)' : '#0f172a',
+                      color: sprOfficial.template === 'YSP' ? '#60a5fa' : '#94a3b8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <span>PT YAZFI SETIA PERSADA</span>
+                    <span style={{ fontSize: '0.7rem', padding: '1px 5px', background: '#1d4ed8', color: '#fff', borderRadius: '4px' }}>MKT-FR-01</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Fill From Database Unit */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#60a5fa', marginBottom: '0.4rem' }}>
+                  ⚡ AMBIL DARI DATABASE UNIT:
+                </label>
+                <select
+                  className="form-control"
+                  style={{ fontSize: '0.8rem', background: '#0f172a', color: '#ffffff', borderColor: '#334155' }}
+                  onChange={(e) => {
+                    if (e.target.value) handleSelectUnitToSpr(e.target.value);
+                  }}
+                  defaultValue=""
+                >
+                  <option value="" disabled>-- Pilih Unit untuk Auto-Fill Spesifikasi & Harga --</option>
+                  {databaseUnitRows.map(u => (
+                    <option key={u.id} value={u.id}>
+                      [{u.proyek}] Blok {u.blok} No. {u.nomor} • {u.type} (LB: {u.lb}m² / LT: {u.lt}m²) - {formatRupiah(u.harga)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quick Fill From Database Konsumen */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#34d399', marginBottom: '0.4rem' }}>
+                  ⚡ AMBIL DARI DATABASE PEMBELI / KONSUMEN:
+                </label>
+                <select
+                  className="form-control"
+                  style={{ fontSize: '0.8rem', background: '#0f172a', color: '#ffffff', borderColor: '#334155' }}
+                  onChange={(e) => {
+                    if (e.target.value) handleSelectKonsumenToSpr(e.target.value);
+                  }}
+                  defaultValue=""
+                >
+                  <option value="" disabled>-- Pilih Konsumen untuk Auto-Fill Identitas --</option>
+                  <optgroup label="Konsumen Resmi (Closing)">
+                    {databaseKonsumenRows.map(k => (
+                      <option key={`k-${k.id}`} value={k.id}>{k.nama} (Unit {k.blok}-{k.nomor} • {k.proyek}) - {k.noHp}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Hot Prospek">
+                    {databaseHotProspekRows.map(h => (
+                      <option key={`h-${h.id}`} value={h.id}>{h.nama} ({h.unitMinat || 'Hot'}) - {h.noHp}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Calon Konsumen">
+                    {databaseCalonKonsumenRows.map(c => (
+                      <option key={`c-${c.id}`} value={c.id}>{c.nama} - {c.noHp}</option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* DOKUMEN SURAT PEMESANAN RUMAH (SPR) FISIK CETAK */}
+          <div
+            id="spr-official-print-document"
+            style={{
+              maxWidth: '840px',
+              margin: '0 auto',
+              background: '#ffffff',
+              color: '#000000',
+              padding: '30px 42px',
+              borderRadius: '6px',
+              boxShadow: '0 12px 35px rgba(0,0,0,0.3)',
+              fontFamily: "'Arial', 'Helvetica', sans-serif",
+              fontSize: '11px',
+              lineHeight: 1.35,
+              position: 'relative'
+            }}
+          >
+            {/* KOP SURAT / HEADER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px' }}>
+              {/* Kiri: Logo & Nama Perusahaan */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1.2 }}>
+                <img
+                  src={sprOfficial.logoUrl}
+                  alt="Logo Perusahaan"
+                  style={{ height: '46px', maxWidth: '110px', objectFit: 'contain' }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '11.5px', textTransform: 'uppercase', color: '#000000' }}>
+                    {sprOfficial.companyName}
+                  </div>
+                  <div style={{ fontSize: '9px', lineHeight: 1.25, color: '#111111', whiteSpace: 'pre-line', marginTop: '2px' }}>
+                    {sprOfficial.companyAddress}
+                  </div>
+                  <div style={{ fontSize: '9px', color: '#111111' }}>
+                    {sprOfficial.companyPhone}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tengah: Nama & Alamat Proyek */}
+              <div style={{ flex: 1, paddingLeft: '10px' }}>
+                <div style={{ fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', color: '#000000', letterSpacing: '0.4px' }}>
+                  {sprOfficial.projectName}
+                </div>
+                <div style={{ fontSize: '9px', lineHeight: 1.25, color: '#111111', whiteSpace: 'pre-line', marginTop: '2px' }}>
+                  {sprOfficial.projectAddress}
+                </div>
+              </div>
+
+              {/* Kanan: Badge Kode Form */}
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <div style={{
+                  border: `1.5px solid ${sprOfficial.headerAccentColor}`,
+                  borderRadius: '3px',
+                  padding: '2px 8px',
+                  fontSize: '10px',
+                  fontWeight: 800,
+                  color: sprOfficial.headerAccentColor,
+                  background: '#fcf8f3',
+                  display: 'inline-block'
+                }}>
+                  {sprOfficial.formCode}
+                </div>
+                {sprOfficial.template === 'YGP' && (
+                  <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '17px', fontWeight: 'bold', color: '#444444', marginTop: '2px' }}>
+                    Ashoka View
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* GARIS PEMBATAS KOP SURAT */}
+            <div style={{ height: '2px', background: '#000000', margin: '8px 0 10px 0' }} />
+
+            {/* JUDUL FORMULIR */}
+            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+              <div style={{ fontSize: '13.5px', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                SURAT PEMESANAN RUMAH
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '4px', fontSize: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>Nomor :</span>
+                  <input
+                    type="text"
+                    className="spr-print-input"
+                    value={sprOfficial.sprNumber}
+                    onChange={(e) => setSprOfficial({ ...sprOfficial, sprNumber: e.target.value })}
+                    style={{ border: 'none', borderBottom: '1px dashed #666', width: '180px', fontSize: '10px', fontWeight: 700 }}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontWeight: 700 }}>Tanggal :</span>
+                  <input
+                    type="date"
+                    className="spr-print-input"
+                    value={sprOfficial.sprDate}
+                    onChange={(e) => setSprOfficial({ ...sprOfficial, sprDate: e.target.value })}
+                    style={{ border: 'none', borderBottom: '1px dashed #666', fontSize: '10px', fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* I. DATA PEMBELI */}
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ fontWeight: 800, fontSize: '10.5px', marginBottom: '4px', textTransform: 'uppercase' }}>
+                I. DATA PEMBELI
+              </div>
+              <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+                <tbody>
+                  {[
+                    { label: 'Nama', key: 'customerName', placeholder: 'Nama Lengkap Konsumen' },
+                    { label: 'Alamat', key: 'customerAddress', placeholder: 'Alamat KTP / Domisili Lengkap' },
+                    { label: 'No. KTP', key: 'customerNik', placeholder: 'Nomor Induk Kependudukan (16 digit)' },
+                    { label: 'NPWP', key: 'customerNpwp', placeholder: 'Nomor Pokok Wajib Pajak' },
+                    { label: 'No. Telepon', key: 'customerPhoneHome', placeholder: 'Nomor Telepon Rumah / Kantor' },
+                    { label: 'Handphone', key: 'customerPhoneHp', placeholder: 'Nomor HP / WhatsApp Aktif' },
+                    { label: 'E-mail', key: 'customerEmail', placeholder: 'Alamat Email Konsumen' },
+                    { label: 'Pekerjaan', key: 'customerJob', placeholder: 'Pekerjaan / Bidang Usaha' }
+                  ].map((field) => (
+                    <tr key={field.key} style={{ height: '18px' }}>
+                      <td style={{ width: '110px', padding: '1px 0', verticalAlign: 'middle', fontWeight: 600 }}>{field.label}</td>
+                      <td style={{ width: '12px', padding: '1px 0', verticalAlign: 'middle' }}>:</td>
+                      <td style={{ padding: '1px 0', verticalAlign: 'middle' }}>
+                        <input
+                          type="text"
+                          className="spr-print-input"
+                          value={sprOfficial[field.key]}
+                          placeholder={field.placeholder}
+                          onChange={(e) => setSprOfficial({ ...sprOfficial, [field.key]: e.target.value })}
+                          style={{ width: '100%', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', padding: '1px 0', color: '#000000', background: 'transparent' }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* II. DATA UNIT RUMAH */}
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ fontWeight: 800, fontSize: '10.5px', marginBottom: '4px', textTransform: 'uppercase' }}>
+                II. DATA UNIT RUMAH
+              </div>
+              <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
+                <tbody>
+                  {/* Type */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ width: '150px', padding: '1px 0', fontWeight: 600 }}>Type</td>
+                    <td style={{ width: '12px' }}>:</td>
+                    <td colSpan={5}>
+                      <input
+                        type="text"
+                        className="spr-print-input"
+                        value={sprOfficial.unitType}
+                        placeholder="Contoh: Tipe 36/72"
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, unitType: e.target.value })}
+                        style={{ width: '220px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                  </tr>
+
+                  {/* Blok & No */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Blok</td>
+                    <td>:</td>
+                    <td style={{ width: '120px' }}>
+                      <input
+                        type="text"
+                        className="spr-print-input"
+                        value={sprOfficial.blok}
+                        placeholder="Blok"
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, blok: e.target.value })}
+                        style={{ width: '70px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                    <td style={{ width: '40px', fontWeight: 600 }}>No. :</td>
+                    <td colSpan={3}>
+                      <input
+                        type="text"
+                        className="spr-print-input"
+                        value={sprOfficial.unitNo}
+                        placeholder="Nomor"
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, unitNo: e.target.value })}
+                        style={{ width: '70px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                  </tr>
+
+                  {/* Luas Tanah & Luas Bangunan */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Luas Tanah</td>
+                    <td>:</td>
+                    <td colSpan={5}>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.luasTanah || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, luasTanah: Number(e.target.value) || 0 })}
+                        style={{ width: '60px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      /> m2
+                    </td>
+                  </tr>
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Luas Bangunan</td>
+                    <td>:</td>
+                    <td colSpan={5}>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.luasBangunan || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, luasBangunan: Number(e.target.value) || 0 })}
+                        style={{ width: '60px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      /> m2
+                    </td>
+                  </tr>
+
+                  {/* Penambahan Luas Tanah & Total Luas Tanah */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Penambahan Luas Tanah</td>
+                    <td>:</td>
+                    <td style={{ width: '120px' }}>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.penambahanLuasTanah || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, penambahanLuasTanah: Number(e.target.value) || 0 })}
+                        style={{ width: '60px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      /> m2
+                    </td>
+                    <td colSpan={2} style={{ fontWeight: 600 }}>Total Luas Tanah :</td>
+                    <td colSpan={2}>
+                      <span style={{ fontWeight: 700, padding: '0 4px', borderBottom: '1px solid #000' }}>
+                        {(Number(sprOfficial.luasTanah) || 0) + (Number(sprOfficial.penambahanLuasTanah) || 0)}
+                      </span> m2
+                    </td>
+                  </tr>
+
+                  {/* Harga Jual - Disc - Harga Net */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Harga Jual</td>
+                    <td>:</td>
+                    <td style={{ width: '130px' }}>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.hargaJual || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, hargaJual: Number(e.target.value) || 0 })}
+                        style={{ width: '110px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', fontWeight: 600, background: 'transparent' }}
+                      />
+                    </td>
+                    <td style={{ width: '45px', fontWeight: 600 }}>Disc :</td>
+                    <td style={{ width: '90px' }}>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.discHargaJual || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, discHargaJual: Number(e.target.value) || 0 })}
+                        style={{ width: '80px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                    <td style={{ width: '75px', fontWeight: 600 }}>Harga Net :</td>
+                    <td>
+                      <span style={{ fontWeight: 700, borderBottom: '1px solid #000' }}>
+                        {formatRupiah(Math.max(0, (Number(sprOfficial.hargaJual) || 0) - (Number(sprOfficial.discHargaJual) || 0)))}
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Nilai Penambahan Luas - Disc - Harga Net */}
+                  <tr style={{ height: '18px' }}>
+                    <td style={{ padding: '1px 0', fontWeight: 600 }}>Nilai Penambahan Luas</td>
+                    <td>:</td>
+                    <td>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.nilaiPenambahanLuas || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, nilaiPenambahanLuas: Number(e.target.value) || 0 })}
+                        style={{ width: '110px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                    <td style={{ fontWeight: 600 }}>Disc :</td>
+                    <td>
+                      <input
+                        type="number"
+                        className="spr-print-input"
+                        value={sprOfficial.discPenambahanLuas || ''}
+                        onChange={(e) => setSprOfficial({ ...sprOfficial, discPenambahanLuas: Number(e.target.value) || 0 })}
+                        style={{ width: '80px', border: 'none', borderBottom: '1px dotted #999', fontSize: '10px', background: 'transparent' }}
+                      />
+                    </td>
+                    <td style={{ fontWeight: 600 }}>Harga Net :</td>
+                    <td>
+                      <span style={{ fontWeight: 700, borderBottom: '1px solid #000' }}>
+                        {formatRupiah(Math.max(0, (Number(sprOfficial.nilaiPenambahanLuas) || 0) - (Number(sprOfficial.discPenambahanLuas) || 0)))}
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Total Harga Jual - Disc - Total Harga Net */}
+                  <tr style={{ height: '18px', fontWeight: 800 }}>
+                    <td style={{ padding: '2px 0' }}>Total Harga Jual</td>
+                    <td>:</td>
+                    <td>
+                      <span style={{ borderBottom: '1px solid #000', padding: '0 2px' }}>
+                        {formatRupiah((Number(sprOfficial.hargaJual) || 0) + (Number(sprOfficial.nilaiPenambahanLuas) || 0))}
+                      </span>
+                    </td>
+                    <td>Disc :</td>
+                    <td>
+                      <span style={{ borderBottom: '1px solid #000', padding: '0 2px' }}>
+                        {formatRupiah((Number(sprOfficial.discHargaJual) || 0) + (Number(sprOfficial.discPenambahanLuas) || 0))}
+                      </span>
+                    </td>
+                    <td>Harga Net :</td>
+                    <td>
+                      <span style={{ borderBottom: '2px solid #000', padding: '0 4px', fontWeight: 900 }}>
+                        {formatRupiah(
+                          Math.max(0, (Number(sprOfficial.hargaJual) || 0) - (Number(sprOfficial.discHargaJual) || 0)) +
+                          Math.max(0, (Number(sprOfficial.nilaiPenambahanLuas) || 0) - (Number(sprOfficial.discPenambahanLuas) || 0))
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* III. CARA PEMBAYARAN */}
+            <div style={{ marginBottom: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <div style={{ fontWeight: 800, fontSize: '10.5px', textTransform: 'uppercase' }}>
+                  III. CARA PEMBAYARAN
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm no-print"
+                  onClick={handleAddSkemaRow}
+                  style={{ fontSize: '0.68rem', padding: '2px 6px', height: 'auto' }}
+                  title="Tambah baris tahap pembayaran"
+                >
+                  + Tambah Baris Skema
+                </button>
+              </div>
+
+              {/* Tabel Skema Pembayaran */}
+              <table style={{ width: '100%', fontSize: '9.5px', borderCollapse: 'collapse', border: '1px solid #000000', marginBottom: '4px' }}>
+                <thead>
+                  <tr style={{ background: sprOfficial.template === 'YGP' ? '#f5d6bb' : '#cadcf0', height: '20px' }}>
+                    <th style={{ border: '1px solid #000000', padding: '2px 4px', width: '28px', textAlign: 'center' }}>No.</th>
+                    <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left', width: '30%' }}>Skema Pembayaran</th>
+                    <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'right', width: '24%' }}>Jumlah</th>
+                    <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left', width: '22%' }}>Jadwal</th>
+                    <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left' }}>Keterangan</th>
+                    <th className="no-print" style={{ border: '1px solid #000000', padding: '2px', width: '24px' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sprOfficial.skemaRows.map((row, idx) => (
+                    <tr key={row.id} style={{ height: '20px' }}>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px' }}>
+                        <input
+                          type="text"
+                          className="spr-print-input"
+                          value={row.skema}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, skema: val } : r)
+                            }));
+                          }}
+                          style={{ width: '100%', border: 'none', fontSize: '9.5px', background: 'transparent' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'right' }}>
+                        <input
+                          type="number"
+                          className="spr-print-input"
+                          value={row.jumlah || ''}
+                          onChange={(e) => {
+                            const val = Number(e.target.value) || 0;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
+                            }));
+                          }}
+                          style={{ width: '100%', border: 'none', textAlign: 'right', fontWeight: 700, fontSize: '9.5px', background: 'transparent' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px' }}>
+                        <input
+                          type="text"
+                          className="spr-print-input"
+                          value={row.jadwal}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jadwal: val } : r)
+                            }));
+                          }}
+                          style={{ width: '100%', border: 'none', fontSize: '9.5px', background: 'transparent' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px' }}>
+                        <input
+                          type="text"
+                          className="spr-print-input"
+                          value={row.keterangan}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, keterangan: val } : r)
+                            }));
+                          }}
+                          style={{ width: '100%', border: 'none', fontSize: '9.5px', background: 'transparent' }}
+                        />
+                      </td>
+                      <td className="no-print" style={{ border: '1px solid #000000', textAlign: 'center', padding: '1px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSkemaRow(row.id)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}
+                          title="Hapus baris"
+                        >
+                          <X size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Row Total */}
+                  <tr style={{ height: '22px', fontWeight: 800, background: sprOfficial.template === 'YGP' ? '#fbeadd' : '#e6eff9' }}>
+                    <td colSpan={2} style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'center' }}>Total Pembayaran</td>
+                    <td style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'right', fontWeight: 900 }}>
+                      {formatRupiah(sprOfficial.skemaRows.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0))}
+                    </td>
+                    <td style={{ border: '1px solid #000000' }}></td>
+                    <td style={{ border: '1px solid #000000' }}></td>
+                    <td className="no-print" style={{ border: '1px solid #000000' }}></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Terbilang */}
+              <div style={{ fontSize: '9.5px', fontWeight: 700, margin: '3px 0 6px 0', fontStyle: 'italic' }}>
+                Terbilang : {'{ ' + terbilang(sprOfficial.skemaRows.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0)) + ' }'}
+              </div>
+
+              {/* Tabel Term & Condition */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '4px 0 2px 0' }}>
+                <span style={{ fontSize: '9px', fontWeight: 700, color: '#444' }}>Ketentuan & Promo Spesial:</span>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm no-print"
+                  onClick={handleAddTermRow}
+                  style={{ fontSize: '0.68rem', padding: '1px 5px', height: 'auto' }}
+                  title="Tambah poin syarat dan kondisi"
+                >
+                  + Tambah T&C
+                </button>
+              </div>
+              <table style={{ width: '100%', fontSize: '9.5px', borderCollapse: 'collapse', border: '1px solid #000000' }}>
+                <thead>
+                  <tr style={{ background: sprOfficial.template === 'YGP' ? '#f5d6bb' : '#cadcf0', height: '18px' }}>
+                    <th style={{ border: '1px solid #000000', padding: '2px 4px', width: '28px', textAlign: 'center' }}>No.</th>
+                    <th style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'left' }}>Term & Condition (Syarat dan Kondisi)</th>
+                    <th className="no-print" style={{ border: '1px solid #000000', padding: '2px', width: '24px' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sprOfficial.termsRows.map((term, idx) => (
+                    <tr key={term.id} style={{ height: '18px' }}>
+                      <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
+                      <td style={{ border: '1px solid #000000', padding: '2px 6px' }}>
+                        <input
+                          type="text"
+                          className="spr-print-input"
+                          value={term.text}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSprOfficial(prev => ({
+                              ...prev,
+                              termsRows: prev.termsRows.map(t => t.id === term.id ? { ...t, text: val } : t)
+                            }));
+                          }}
+                          style={{ width: '100%', border: 'none', fontSize: '9.5px', background: 'transparent' }}
+                        />
+                      </td>
+                      <td className="no-print" style={{ border: '1px solid #000000', textAlign: 'center', padding: '1px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTermRow(term.id)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 0 }}
+                          title="Hapus baris T&C"
+                        >
+                          <X size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* IV. SYARAT PEMBAYARAN */}
+            <div style={{ marginBottom: '14px', fontSize: '8.5px', lineHeight: 1.3 }}>
+              <div style={{ fontWeight: 800, fontSize: '10.5px', marginBottom: '3px', textTransform: 'uppercase' }}>
+                IV. SYARAT PEMBAYARAN
+              </div>
+              <ol style={{ paddingLeft: '14px', margin: '2px 0 0 0' }}>
+                <li style={{ marginBottom: '2px' }}>Uang tanda jadi (booking fee) tidak termasuk harga jual, dan jika terjadi pembatalan tidak dapat dikembalikan.</li>
+                <li style={{ marginBottom: '4px' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '2px' }}>Pembayaran dilakukan melalui transfer ke :</div>
+                  {/* Table Rekening Bank */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', margin: '2px 0 4px 0', fontSize: '8.5px' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: '50%', paddingRight: '12px', verticalAlign: 'top' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <tbody>
+                              <tr><td style={{ width: '60px', fontWeight: 600 }}>Bank</td><td style={{ width: '8px' }}>:</td><td>{sprOfficial.banks[0]?.name}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>Cabang</td><td>:</td><td>{sprOfficial.banks[0]?.cabang}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>No. Rek</td><td>:</td><td style={{ fontWeight: 700 }}>{sprOfficial.banks[0]?.norek}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>Atas Nama</td><td>:</td><td style={{ fontWeight: 700 }}>{sprOfficial.banks[0]?.atasNama}</td></tr>
+                            </tbody>
+                          </table>
+                        </td>
+                        <td style={{ width: '50%', paddingLeft: '12px', verticalAlign: 'top' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <tbody>
+                              <tr><td style={{ width: '60px', fontWeight: 600 }}>Bank</td><td style={{ width: '8px' }}>:</td><td>{sprOfficial.banks[1]?.name}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>Cabang</td><td>:</td><td>{sprOfficial.banks[1]?.cabang}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>No. Rek</td><td>:</td><td style={{ fontWeight: 700 }}>{sprOfficial.banks[1]?.norek}</td></tr>
+                              <tr><td style={{ fontWeight: 600 }}>Atas Nama</td><td>:</td><td style={{ fontWeight: 700 }}>{sprOfficial.banks[1]?.atasNama}</td></tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+                <li style={{ marginBottom: '2px' }}>Harga jual mengikat sesuai dengan yang tercantum dalam Surat Pesanan Rumah.</li>
+                <li style={{ marginBottom: '2px' }}>Apabila ada pembatalan sepihak dari pihak konsumen, dana atas pembayaran yang telah disetorkan akan dikenakan pinalti sesuai ketentuan pada PHDP dan SKJB</li>
+                <li style={{ marginBottom: '2px' }}>Kelengkapan atas dokumen pembelian (berkas persyaratan) diserahkan paling lambat 14 hari setelah booking fee</li>
+                <li style={{ marginBottom: '2px' }}>Apabila terjadi perubahan nama atau pindah kavling, maka dikenakan biaya administrasi Rp. 1.000.000,- (satu juta rupiah)</li>
+                <li style={{ marginBottom: '2px' }}>Jika terjadi pembatalan secara sepihak oleh Customer dana yang sudah disetorkan akan dikembalikan sebesar 70% dari nilai yang disetorkan, sebagai biaya pengganti penahanan unit</li>
+                <li style={{ marginBottom: '2px' }}>
+                  Pembelian unit rumah Indent selama 18 bulan sejak pelunasan uang muka untuk pembayaran cash keras dan Syariah (Cicil ke Developer)<br />
+                  Pembelian unit rumah Indent selama 12 bulan terhitung sejak pelaksanaan akad kredit pada Bank Penyedia Fasilitas KPR
+                </li>
+                <li style={{ marginBottom: '2px' }}>Sebelum di sahkan siteplan oleh Dinas PUPR, maka digunakan pra siteplan untuk menentukan/memilih unit rumah, yang masih memungkinkan terjadinya perubahan tata letak unit rumah</li>
+                <li style={{ marginBottom: '2px' }}>Pembayaran akan dinyatakan sah apabila sudah diterima di rekening perusahaan yang ditentukan</li>
+                <li style={{ marginBottom: '2px' }}>Hal-hal yang belum diatur dalam Surat Pesanan Rumah ini, akan diatur dalam PPJB (Perjanjian Pengikatan Jual Beli)</li>
+              </ol>
+            </div>
+
+            {/* TANDA TANGAN 3 PIHAK */}
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', fontWeight: 700, marginBottom: '45px' }}>
+                <div style={{ textTransform: 'uppercase' }}>{sprOfficial.companyName}</div>
+                <div style={{ paddingRight: '20px' }}>Konsumen,</div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', textAlign: 'center', fontSize: '9px' }}>
+                {/* Admin Marketing */}
+                <div>
+                  <div style={{ fontWeight: 800, borderBottom: '1px solid #000000', paddingBottom: '2px', display: 'inline-block', minWidth: '160px' }}>
+                    <input
+                      type="text"
+                      className="spr-print-input"
+                      value={sprOfficial.adminMarketing}
+                      onChange={(e) => setSprOfficial({ ...sprOfficial, adminMarketing: e.target.value })}
+                      style={{ textAlign: 'center', fontWeight: 800, fontSize: '9px', border: 'none', width: '100%', background: 'transparent' }}
+                    />
+                  </div>
+                  <div style={{ color: '#333', marginTop: '2px' }}>Admin Marketing</div>
+                </div>
+
+                {/* SPV */}
+                <div>
+                  <div style={{ fontWeight: 800, borderBottom: '1px solid #000000', paddingBottom: '2px', display: 'inline-block', minWidth: '120px' }}>
+                    <input
+                      type="text"
+                      className="spr-print-input"
+                      value={sprOfficial.spv}
+                      onChange={(e) => setSprOfficial({ ...sprOfficial, spv: e.target.value })}
+                      style={{ textAlign: 'center', fontWeight: 800, fontSize: '9px', border: 'none', width: '100%', background: 'transparent' }}
+                    />
+                  </div>
+                  <div style={{ color: '#333', marginTop: '2px' }}>SPV</div>
+                </div>
+
+                {/* Konsumen */}
+                <div>
+                  <div style={{ fontWeight: 800, borderBottom: '1px solid #000000', paddingBottom: '2px', display: 'inline-block', minWidth: '160px' }}>
+                    <input
+                      type="text"
+                      className="spr-print-input"
+                      value={sprOfficial.consumerSignName || sprOfficial.customerName || 'Konsumen'}
+                      placeholder="Nama Konsumen"
+                      onChange={(e) => setSprOfficial({ ...sprOfficial, consumerSignName: e.target.value })}
+                      style={{ textAlign: 'center', fontWeight: 800, fontSize: '9px', border: 'none', width: '100%', background: 'transparent' }}
+                    />
+                  </div>
+                  <div style={{ color: '#333', marginTop: '2px' }}>Konsumen</div>
+                </div>
+              </div>
+            </div>
+
+            {/* DEKORASI AKSEN WARNA BAWAH DOKUMEN SESUAI FOTO */}
+            <div style={{ height: '7px', background: sprOfficial.footerBarColor, marginTop: '18px', borderRadius: '2px' }} />
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: DATA BASE KONSUMEN                                                 */}
       {/* ========================================================================= */}
       {/* ========================================================================= */}
       {/* TAB 3: DATA BASE KONSUMEN (CALON KONSUMEN, HOT PROSPEK, KONSUMEN RESMI)   */}
