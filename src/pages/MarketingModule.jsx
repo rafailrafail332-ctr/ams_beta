@@ -1437,13 +1437,403 @@ export const MarketingModule = () => {
     showNotification(`Formulir SPR untuk transaksi ${item.id} (${item.customerName}) dibuka.`);
   };
 
-  const handlePrintSprOfficial = () => {
-    const printElem = document.getElementById('spr-official-print-document');
-    if (!printElem) {
-      window.print();
-      return;
-    }
+  const generateOfficialSprPrintHtml = (spr) => {
+    const netUnit = Math.max(0, (Number(spr.hargaJual) || 0) - (Number(spr.discHargaJual) || 0));
+    const netPlus = Math.max(0, (Number(spr.nilaiPenambahanLuas) || 0) - (Number(spr.discPenambahanLuas) || 0));
+    const totalHarga = (Number(spr.hargaJual) || 0) + (Number(spr.nilaiPenambahanLuas) || 0);
+    const totalDisc = (Number(spr.discHargaJual) || 0) + (Number(spr.discPenambahanLuas) || 0);
+    const totalNet = netUnit + netPlus;
+    const totalLt = (Number(spr.luasTanah) || 0) + (Number(spr.penambahanLuasTanah) || 0);
+    const totalSkema = (spr.skemaRows || []).reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
+    const escape = (val) => {
+      if (val === null || val === undefined) return '';
+      return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    const fmtRupiah = (val) => {
+      const num = Number(val) || 0;
+      return 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
+    };
+
+    const isYsp = spr.template === 'YSP';
+    const accentColor = spr.headerAccentColor || '#2b5282';
+    const footerColor = spr.footerBarColor || accentColor;
+
+    const bank1 = spr.banks?.[0] || { name: 'Bank Mandiri', cabang: 'Gandaria - Jakarta', norek: '126-00-2022122-1', atasNama: 'PT YAZFI SETIA PERSADA' };
+    const bank2 = spr.banks?.[1] || { name: 'Bank Rakyat Indonesia (BRI)', cabang: 'Radio Dalam - Jakarta', norek: '0430.01.000856.30.1', atasNama: 'PT YAZFI SETIA PERSADA' };
+
+    return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Surat Pemesanan Rumah - ${escape(spr.sprNumber || 'SPR')}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 4mm 8mm 4mm 8mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #000000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 8.5px;
+      line-height: 1.25;
+      width: 100%;
+    }
+    .spr-print-sheet {
+      width: 100%;
+      max-width: 690px;
+      margin: 0 auto;
+      padding: 0;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .line-val {
+      border-bottom: 1px solid #000000;
+      min-height: 13px;
+      display: inline-block;
+      vertical-align: bottom;
+      font-weight: 700;
+      padding: 0 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+  </style>
+</head>
+<body>
+  <div class="spr-print-sheet">
+    <!-- Header Kop Surat -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+      <div style="display: flex; align-items: flex-start; gap: 8px; flex: 1.2;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 75px; flex-shrink: 0; text-align: center;">
+          <img src="${escape(spr.logoUrl)}" style="height: 38px; max-width: 70px; object-fit: contain;" onerror="this.style.display='none'" />
+          ${isYsp ? `
+            <div style="font-size: 6.5px; font-weight: 800; color: #1e3a8a; margin-top: 1px;">Persada Four Land</div>
+            <div style="font-size: 5.5px; color: #555;">PT. Yazfi Setia Persada</div>
+          ` : ''}
+        </div>
+        <div>
+          <div style="font-weight: 800; font-size: 9.5px; text-transform: uppercase;">${escape(spr.companyName)}</div>
+          <div style="font-size: 7.5px; line-height: 1.2; color: #111; margin-top: 1px; white-space: pre-line;">${escape(spr.companyAddress)}</div>
+          <div style="font-size: 7.5px; color: #111;">${escape(spr.companyPhone)}</div>
+        </div>
+      </div>
+
+      <div style="flex: 1; padding-left: 8px;">
+        <div style="font-weight: 800; font-size: 10px; text-transform: uppercase;">${escape(spr.projectName)}</div>
+        <div style="font-size: 7.5px; line-height: 1.2; color: #111; margin-top: 1px; white-space: pre-line;">${escape(spr.projectAddress)}</div>
+      </div>
+
+      <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+        <div style="background: ${accentColor}; color: #ffffff; border-radius: 4px; padding: 2px 7px; font-size: 8.5px; font-weight: 800; display: inline-block;">
+          ${escape(spr.formCode)}
+        </div>
+        ${!isYsp ? `
+          <div style="font-family: Georgia, serif; font-style: italic; font-size: 14px; font-weight: bold; color: #444;">
+            Ashoka View
+          </div>
+        ` : ''}
+      </div>
+    </div>
+
+    <!-- Garis Pemisah Kop -->
+    <div style="height: 1.5px; background: #000000; margin: 5px 0 6px 0;"></div>
+
+    <!-- Judul Dokumen -->
+    <div style="text-align: center; margin-bottom: 5px;">
+      <div style="display: inline-block; border: 1.5px solid #000000; padding: 2px 18px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+        SURAT PEMESANAN RUMAH
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 3px; font-size: 8px;">
+        <div style="display: flex; width: 230px;">
+          <span style="width: 50px; font-weight: 600;">Nomor</span>
+          <span style="width: 10px;">:</span>
+          <span class="line-val" style="flex: 1;">${escape(spr.sprNumber) || '&nbsp;'}</span>
+        </div>
+        <div style="display: flex; width: 230px;">
+          <span style="width: 50px; font-weight: 600;">Tanggal</span>
+          <span style="width: 10px;">:</span>
+          <span class="line-val" style="flex: 1;">${escape(spr.sprDate) || '&nbsp;'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- I. DATA PEMBELI -->
+    <div style="margin-bottom: 5px;">
+      <div style="font-weight: 800; font-size: 8.5px; margin-bottom: 2px; text-transform: uppercase;">I. DATA PEMBELI</div>
+      <table style="font-size: 8px;">
+        <tbody>
+          <tr style="height: 14px;">
+            <td style="width: 85px; font-weight: 600;">Nama</td>
+            <td style="width: 8px;">:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerName) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Alamat</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerAddress) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td></td><td></td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerAddress2) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">No. KTP</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerNik) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">NPWP</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerNpwp) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">No. Telepon</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerPhoneHome) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Handphone</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerPhoneHp) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">E-mail</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerEmail) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Pekerjaan</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100%;">${escape(spr.customerJob) || '&nbsp;'}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- II. DATA UNIT RUMAH -->
+    <div style="margin-bottom: 5px;">
+      <div style="font-weight: 800; font-size: 8.5px; margin-bottom: 2px; text-transform: uppercase;">II. DATA UNIT RUMAH</div>
+      <table style="font-size: 8px;">
+        <tbody>
+          <tr style="height: 14px;">
+            <td style="width: 115px; font-weight: 600;">Type</td>
+            <td style="width: 8px;">:</td>
+            <td colspan="5"><span class="line-val" style="width: 150px;">${escape(spr.unitType) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Blok</td>
+            <td>:</td>
+            <td style="width: 100px;"><span class="line-val" style="width: 75px;">${escape(spr.blok) || '&nbsp;'}</span></td>
+            <td style="width: 35px; font-weight: 600;">No. :</td>
+            <td colspan="3"><span class="line-val" style="width: 75px;">${escape(spr.unitNo) || '&nbsp;'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Luas Tanah</td>
+            <td>:</td>
+            <td colspan="5"><span class="line-val" style="width: 60px; text-align: center;">${spr.luasTanah || 0}</span> m2</td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Luas Bangunan</td>
+            <td>:</td>
+            <td colspan="5"><span class="line-val" style="width: 60px; text-align: center;">${spr.luasBangunan || 0}</span> m2</td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Penambahan Luas Tanah</td>
+            <td>:</td>
+            <td style="width: 100px;"><span class="line-val" style="width: 60px; text-align: center;">${spr.penambahanLuasTanah || 0}</span> m2</td>
+            <td colspan="2" style="font-weight: 600; width: 100px;">Total Luas Tanah :</td>
+            <td colspan="2"><span class="line-val" style="width: 50px; text-align: center;">${totalLt}</span> m2</td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Harga Jual</td>
+            <td>:</td>
+            <td style="width: 120px;"><span class="line-val" style="width: 100px;">${Number(spr.hargaJual) > 0 ? fmtRupiah(spr.hargaJual) : '&nbsp;'}</span></td>
+            <td style="width: 35px; font-weight: 600;">Disc :</td>
+            <td style="width: 90px;"><span class="line-val" style="width: 75px;">${Number(spr.discHargaJual) > 0 ? fmtRupiah(spr.discHargaJual) : '-'}</span></td>
+            <td style="width: 65px; font-weight: 600;">Harga Net :</td>
+            <td><span class="line-val" style="width: 110px;">${netUnit > 0 ? fmtRupiah(netUnit) + ' -' : '-'}</span></td>
+          </tr>
+          <tr style="height: 14px;">
+            <td style="font-weight: 600;">Nilai Penambahan Luas</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100px;">${Number(spr.nilaiPenambahanLuas) > 0 ? fmtRupiah(spr.nilaiPenambahanLuas) + ' -' : '-'}</span></td>
+            <td style="font-weight: 600;">Disc :</td>
+            <td><span class="line-val" style="width: 75px;">${Number(spr.discPenambahanLuas) > 0 ? fmtRupiah(spr.discPenambahanLuas) : '-'}</span></td>
+            <td style="font-weight: 600;">Harga Net :</td>
+            <td><span class="line-val" style="width: 110px;">${netPlus > 0 ? fmtRupiah(netPlus) + ' -' : '-'}</span></td>
+          </tr>
+          <tr style="height: 14px; font-weight: 800;">
+            <td>Total Harga Jual</td>
+            <td>:</td>
+            <td><span class="line-val" style="width: 100px;">${totalHarga > 0 ? fmtRupiah(totalHarga) + ' -' : '-'}</span></td>
+            <td>Disc :</td>
+            <td><span class="line-val" style="width: 75px;">${totalDisc > 0 ? fmtRupiah(totalDisc) : '-'}</span></td>
+            <td>Harga Net :</td>
+            <td><span class="line-val" style="width: 110px; font-weight: 900;">${totalNet > 0 ? fmtRupiah(totalNet) + ' -' : '-'}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- III. CARA PEMBAYARAN -->
+    <div style="margin-bottom: 5px;">
+      <div style="font-weight: 800; font-size: 8.5px; margin-bottom: 2px; text-transform: uppercase;">III. CARA PEMBAYARAN</div>
+      <table style="border: 1px solid #000000; font-size: 7.5px;">
+        <thead>
+          <tr style="background: ${accentColor}; color: #ffffff; height: 16px;">
+            <th style="border: 1px solid #000000; width: 25px; text-align: center;">No.</th>
+            <th style="border: 1px solid #000000; text-align: left; padding: 1px 4px; width: 33%;">Skema Pembayaran</th>
+            <th style="border: 1px solid #000000; text-align: right; padding: 1px 4px; width: 22%;">Jumlah</th>
+            <th style="border: 1px solid #000000; text-align: left; padding: 1px 4px; width: 22%;">Jadwal</th>
+            <th style="border: 1px solid #000000; text-align: left; padding: 1px 4px;">Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(spr.skemaRows || []).map((row, idx) => `
+            <tr style="height: 14px;">
+              <td style="border: 1px solid #000000; text-align: center;">${idx + 1}</td>
+              <td style="border: 1px solid #000000; padding: 1px 4px;">${escape(row.skema)}</td>
+              <td style="border: 1px solid #000000; text-align: right; padding: 1px 4px; font-weight: 700;">${Number(row.jumlah) > 0 ? fmtRupiah(row.jumlah) : '-'}</td>
+              <td style="border: 1px solid #000000; padding: 1px 4px;">${escape(row.jadwal)}</td>
+              <td style="border: 1px solid #000000; padding: 1px 4px;">${escape(row.keterangan)}</td>
+            </tr>
+          `).join('')}
+          <tr style="height: 16px; background: ${accentColor}; color: #ffffff; font-weight: 800;">
+            <td colspan="2" style="border: 1px solid #000000; text-align: center;">Total Pembayaran</td>
+            <td style="border: 1px solid #000000; text-align: right; padding: 1px 4px; font-weight: 900;">${totalSkema > 0 ? fmtRupiah(totalSkema) : '-'}</td>
+            <td style="border: 1px solid #000000;"></td>
+            <td style="border: 1px solid #000000;"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size: 7.5px; font-weight: 600; margin: 2px 0 3px 0;">
+        Terbilang : ( ${totalSkema > 0 ? terbilang(totalSkema) : '/'} )
+      </div>
+
+      <!-- Tabel Term & Condition -->
+      <table style="border: 1px solid #000000; font-size: 7.5px;">
+        <thead>
+          <tr style="background: ${accentColor}; color: #ffffff; height: 15px;">
+            <th style="border: 1px solid #000000; width: 25px; text-align: center;">No.</th>
+            <th style="border: 1px solid #000000; text-align: left; padding: 1px 4px;">Term & Condition (Syarat dan Kondisi)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(spr.termsRows || []).map((term, idx) => `
+            <tr style="height: 13px;">
+              <td style="border: 1px solid #000000; text-align: center;">${idx + 1}</td>
+              <td style="border: 1px solid #000000; padding: 1px 4px;">${escape(term.text)}</td>
+            </tr>
+          `).join('')}
+          ${(!spr.termsRows || spr.termsRows.length < 3) ? Array.from({ length: 3 - (spr.termsRows?.length || 0) }).map((_, i) => `
+            <tr style="height: 13px;">
+              <td style="border: 1px solid #000000; text-align: center;">${(spr.termsRows?.length || 0) + i + 1}</td>
+              <td style="border: 1px solid #000000; padding: 1px 4px;">&nbsp;</td>
+            </tr>
+          `).join('') : ''}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- IV. SYARAT PEMBAYARAN -->
+    <div style="margin-bottom: 5px; font-size: 6.8px; line-height: 1.15;">
+      <div style="font-weight: 800; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">IV. SYARAT PEMBAYARAN</div>
+      <ol style="padding-left: 11px; margin: 0;">
+        <li style="margin-bottom: 1px;">Uang tanda jadi (booking fee) tidak termasuk harga jual, dan jika terjadi pembatalan tidak dapat dikembalikan.</li>
+        <li style="margin-bottom: 2px;">
+          <div style="font-weight: 700;">Pembayaran dilakukan melalui transfer ke :</div>
+          <div style="display: flex; gap: 20px; margin: 1px 0 2px 4px;">
+            <div style="flex: 1;">
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Bank</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank1.name)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Cabang</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank1.cabang)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">No. Rek</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1; font-weight: 700;">${escape(bank1.norek)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Atas Nama</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank1.atasNama)}</span></div>
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Bank</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank2.name)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Cabang</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank2.cabang)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">No. Rek</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1; font-weight: 700;">${escape(bank2.norek)}</span></div>
+              <div style="display: flex;"><span style="width: 44px; font-weight: 600;">Atas Nama</span><span style="width: 6px;">:</span><span class="line-val" style="flex: 1;">${escape(bank2.atasNama)}</span></div>
+            </div>
+          </div>
+        </li>
+        <li style="margin-bottom: 1px;">Harga jual mengikat sesuai dengan yang tercantum dalam Surat Pesanan Rumah.</li>
+        <li style="margin-bottom: 1px;">Apabila ada pembatalan sepihak dari pihak konsumen, dana atas pembayaran yang telah disetorkan akan dikenakan pinalti sesuai ketentuan pada PHDP dan SKJB</li>
+        <li style="margin-bottom: 1px;">Kelengkapan atas dokumen pembelian (berkas persyaratan) diserahkan paling lambat 14 hari setelah booking fee</li>
+        <li style="margin-bottom: 1px;">Apabila terjadi perubahan nama atau pindah kavling, maka dikenakan biaya administrasi Rp. 1.000.000,- (satu juta rupiah)</li>
+        <li style="margin-bottom: 1px;">Jika terjadi pembatalan dengan alasan apapun baik KPR Ataupun Syariah Developer maupun Cash Keras/Bertahap dana yang sudah disetorkan akan dikembalikan sebesar 70% dari nilai yang disetorkan, sebagai biaya pengganti penahanan unit</li>
+        <li style="margin-bottom: 1px;">
+          Pembelian unit rumah Indent selama 12 bulan sejak pelunasan uang muka untuk pembayaran cash keras dan Syariah (Cicil ke Developer)<br />
+          Pembelian unit rumah Indent selama 12 bulan terhitung sejak pelaksanaan akad kredit pada Bank Penyedia Fasilitas KPR
+        </li>
+        <li style="margin-bottom: 1px;">Sebelum di sahkan siteplan oleh Dinas PUPR, maka digunakan pra siteplan untuk menentukan/memilih unit rumah, yang masih memungkinkan terjadinya perubahan tata letak unit rumah</li>
+        <li style="margin-bottom: 1px;">Pembayaran akan dinyatakan sah apabila sudah diterima di rekening perusahaan yang ditentukan</li>
+        <li style="margin-bottom: 1px;">Hal-hal yang belum diatur dalam Surat Pesanan Rumah ini, akan diatur dalam PPJB (Perjanjian Pengikatan Jual Beli)</li>
+      </ol>
+    </div>
+
+    <!-- Tanda Tangan -->
+    <div style="margin-top: 8px;">
+      <div style="display: flex; justify-content: space-between; font-size: 8px; font-weight: 700;">
+        <div style="text-transform: uppercase;">${escape(spr.companyName)}</div>
+        <div style="padding-right: 25px;">Konsumen,</div>
+      </div>
+
+      <div style="height: 30px;"></div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; font-size: 7.5px;">
+        <div>
+          <div style="font-weight: 800; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 1px;">
+            ${escape(spr.adminMarketing) || 'Amanda Chesyariani Hermawan'}
+          </div>
+          <div style="color: #222; margin-top: 1px;">Admin Marketing</div>
+        </div>
+
+        <div>
+          <div style="font-weight: 800; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 1px;">
+            ${escape(spr.spv) || 'Yulieka'}
+          </div>
+          <div style="color: #222; margin-top: 1px;">SPV</div>
+        </div>
+
+        <div>
+          <div style="font-weight: 800; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 1px;">
+            ${escape(spr.consumerSignName || spr.customerName) || 'Konsumen'}
+          </div>
+          <div style="color: #222; margin-top: 1px;">Konsumen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Bar -->
+    <div style="height: 5px; background: ${footerColor}; margin-top: 10px; border-radius: 1px;"></div>
+  </div>
+</body>
+</html>`;
+  };
+
+  const handlePrintSprOfficial = () => {
     let iframe = document.getElementById('spr-print-isolated-iframe');
     if (!iframe) {
       iframe = document.createElement('iframe');
@@ -1457,71 +1847,16 @@ export const MarketingModule = () => {
       document.body.appendChild(iframe);
     }
 
+    const html = generateOfficialSprPrintHtml(sprOfficial);
     const doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
-    doc.write(`
-      <!DOCTYPE html>
-      <html lang="id">
-        <head>
-          <meta charset="UTF-8">
-          <title>Surat Pemesanan Rumah - ${sprOfficial.sprNumber || 'SPR'}</title>
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 6mm 10mm 6mm 10mm;
-            }
-            * {
-              box-sizing: border-box;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              background: #ffffff;
-              color: #000000;
-              font-family: Arial, Helvetica, sans-serif;
-              font-size: 10px;
-              line-height: 1.35;
-            }
-            .no-print {
-              display: none !important;
-            }
-            input, select, textarea {
-              border: none !important;
-              outline: none !important;
-              background: transparent !important;
-              font-family: inherit !important;
-              font-size: inherit !important;
-              color: #000000 !important;
-              padding: 0 !important;
-              margin: 0 !important;
-              box-shadow: none !important;
-            }
-            .spr-line-input {
-              border: none !important;
-              border-bottom: 1px solid #000000 !important;
-              background: transparent !important;
-              font-family: inherit !important;
-              font-size: inherit !important;
-              color: #000000 !important;
-              padding: 0 2px !important;
-            }
-          </style>
-        </head>
-        <body>
-          <div style="max-width: 820px; margin: 0 auto; background: #ffffff; padding: 15px 25px;">
-            ${printElem.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
+    doc.write(html);
     doc.close();
 
     setTimeout(() => {
       iframe.contentWindow.focus();
       iframe.contentWindow.print();
-    }, 350);
+    }, 400);
   };
 
   const handleAddSkemaRow = () => {
@@ -2561,11 +2896,13 @@ export const MarketingModule = () => {
               @media print {
                 @page {
                   size: A4 portrait !important;
-                  margin: 6mm 10mm 6mm 10mm !important;
+                  margin: 4mm 8mm 4mm 8mm !important;
                 }
                 body {
                   background: #ffffff !important;
                   color: #000000 !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
                 }
                 .no-print, .no-print * {
                   display: none !important;
@@ -2575,11 +2912,15 @@ export const MarketingModule = () => {
                   visibility: visible !important;
                   position: relative !important;
                   width: 100% !important;
-                  max-width: 100% !important;
-                  margin: 0 !important;
+                  max-width: 690px !important;
+                  margin: 0 auto !important;
                   padding: 0 !important;
                   box-shadow: none !important;
                   border: none !important;
+                  font-size: 8.5px !important;
+                  line-height: 1.25 !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
                 }
                 .spr-line-input {
                   border: none !important;
@@ -2758,16 +3099,16 @@ export const MarketingModule = () => {
             <div
               id="spr-official-print-document"
               style={{
-                maxWidth: '820px',
+                maxWidth: '740px',
                 margin: '0 auto',
                 background: '#ffffff',
                 color: '#000000',
-                padding: '24px 38px',
+                padding: '16px 24px',
                 borderRadius: '4px',
                 boxShadow: '0 10px 35px rgba(0,0,0,0.3)',
                 fontFamily: "'Arial', 'Helvetica', sans-serif",
-                fontSize: '10px',
-                lineHeight: 1.35,
+                fontSize: '9.5px',
+                lineHeight: 1.3,
                 position: 'relative'
               }}
             >
