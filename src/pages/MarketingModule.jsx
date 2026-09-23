@@ -2978,7 +2978,20 @@ export const MarketingModule = () => {
             `}</style>
 
             {/* CONTROL TOOLBAR & AUTOFILL TOOLS (NO-PRINT) */}
-            <div className="glass-card no-print" style={{ marginBottom: '1.25rem', padding: '1.25rem', background: '#1e293b', border: '1.5px solid #f59e0b', borderRadius: '12px' }}>
+            <div
+              className="no-print"
+              style={{
+                marginBottom: '1.25rem',
+                padding: '1.25rem',
+                background: '#1e293b',
+                border: '1.5px solid #f59e0b',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                position: 'relative',
+                zIndex: 100,
+                overflow: 'visible'
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
@@ -3069,7 +3082,7 @@ export const MarketingModule = () => {
               </div>
 
               {/* TEMPLATE PICKER & AUTOFILL SELECTORS */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid #334155' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid #334155', position: 'relative', zIndex: 101, overflow: 'visible' }}>
                 {/* Template Switcher */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b', marginBottom: '0.4rem' }}>
@@ -3146,7 +3159,7 @@ export const MarketingModule = () => {
                 </div>
 
                 {/* Quick Fill From Database Konsumen (Search / Ketik Dulu) */}
-                <div ref={sprKonsumenSearchRef} style={{ position: 'relative' }}>
+                <div ref={sprKonsumenSearchRef} style={{ position: 'relative', zIndex: 105 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', margin: 0 }}>
                       ⚡ AMBIL DARI DATABASE PEMBELI / KONSUMEN:
@@ -3162,13 +3175,14 @@ export const MarketingModule = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="-- Ketik Nama / No HP / Unit untuk Mencari Konsumen --"
+                      placeholder="🔍 Ketik nama / no HP konsumen..."
                       value={sprKonsumenSearchQuery}
                       onChange={(e) => {
                         setSprKonsumenSearchQuery(e.target.value);
                         setIsSprKonsumenDropdownOpen(true);
                       }}
                       onFocus={() => setIsSprKonsumenDropdownOpen(true)}
+                      onClick={() => setIsSprKonsumenDropdownOpen(true)}
                       style={{
                         fontSize: '0.8rem',
                         background: '#0f172a',
@@ -3227,16 +3241,23 @@ export const MarketingModule = () => {
                         top: 'calc(100% + 4px)',
                         left: 0,
                         right: 0,
-                        zIndex: 60,
+                        minWidth: '320px',
+                        zIndex: 99999,
                         maxHeight: '280px',
                         overflowY: 'auto',
                         background: '#0f172a',
-                        border: '1.5px solid #34d399',
+                        border: '2px solid #34d399',
                         borderRadius: '8px',
-                        boxShadow: '0 12px 30px rgba(0, 0, 0, 0.7)',
+                        boxShadow: '0 20px 45px rgba(0, 0, 0, 0.95), 0 0 15px rgba(52, 211, 153, 0.3)',
                         padding: '0.4rem'
                       }}
                     >
+                      {!sprKonsumenSearchQuery && (
+                        <div style={{ padding: '0.4rem 0.6rem', fontSize: '0.73rem', color: '#94a3b8', borderBottom: '1px solid #334155', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <Search size={13} color="#34d399" />
+                          <span>Ketik nama/no HP untuk memfilter, atau pilih langsung:</span>
+                        </div>
+                      )}
                       {filteredSprKonsumenList.konsumen.length === 0 &&
                        filteredSprKonsumenList.hotProspek.length === 0 &&
                        filteredSprKonsumenList.calon.length === 0 ? (
@@ -3254,6 +3275,10 @@ export const MarketingModule = () => {
                               {filteredSprKonsumenList.konsumen.map(k => (
                                 <div
                                   key={`k-${k.id}`}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleSelectKonsumenToSpr(k);
+                                  }}
                                   onClick={() => handleSelectKonsumenToSpr(k)}
                                   style={{
                                     padding: '0.45rem 0.65rem',
@@ -3291,6 +3316,10 @@ export const MarketingModule = () => {
                               {filteredSprKonsumenList.hotProspek.map(h => (
                                 <div
                                   key={`h-${h.id}`}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleSelectKonsumenToSpr(h);
+                                  }}
                                   onClick={() => handleSelectKonsumenToSpr(h)}
                                   style={{
                                     padding: '0.45rem 0.65rem',
@@ -3328,6 +3357,10 @@ export const MarketingModule = () => {
                               {filteredSprKonsumenList.calon.map(c => (
                                 <div
                                   key={`c-${c.id}`}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleSelectKonsumenToSpr(c);
+                                  }}
                                   onClick={() => handleSelectKonsumenToSpr(c)}
                                   style={{
                                     padding: '0.45rem 0.65rem',
