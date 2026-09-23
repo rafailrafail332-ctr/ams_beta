@@ -1800,8 +1800,8 @@ export const MarketingModule = () => {
         <div style="padding-right: 25px;">Konsumen,</div>
       </div>
 
-      <!-- Ruang Tanda Tangan Lega untuk TTD, Cap & Materai -->
-      <div style="height: 55px;"></div>
+      <!-- Ruang Tanda Tangan Lega untuk TTD, Cap & Materai (Jauhan Sesuai Permintaan) -->
+      <div style="height: 80px;"></div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center; font-size: 8.5px;">
         <div>
@@ -4254,8 +4254,8 @@ export const MarketingModule = () => {
                   <div style={{ paddingRight: '25px' }}>Konsumen,</div>
                 </div>
 
-                {/* RUANG TANDA TANGAN LEGA UNTUK TTD, CAP PERUSAHAAN & MATERAI */}
-                <div style={{ height: '55px' }} />
+                {/* RUANG TANDA TANGAN LEGA UNTUK TTD, CAP PERUSAHAAN & MATERAI (JAUHAN SESUAI PERMINTAAN) */}
+                <div style={{ height: '80px' }} />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', textAlign: 'center', fontSize: '8.5px' }}>
                   {/* Admin Marketing */}
