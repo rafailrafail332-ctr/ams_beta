@@ -1305,6 +1305,15 @@ export const MarketingModule = () => {
   const [isSprUnitDropdownOpen, setIsSprUnitDropdownOpen] = useState(false);
   const sprUnitSearchRef = useRef(null);
 
+  // Modal Sales Search States (Combobox Ketik Dulu)
+  const [modalKonsumenSearchQuery, setModalKonsumenSearchQuery] = useState('');
+  const [isModalKonsumenDropdownOpen, setIsModalKonsumenDropdownOpen] = useState(false);
+  const modalKonsumenSearchRef = useRef(null);
+
+  const [modalUnitSearchQuery, setModalUnitSearchQuery] = useState('');
+  const [isModalUnitDropdownOpen, setIsModalUnitDropdownOpen] = useState(false);
+  const modalUnitSearchRef = useRef(null);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (sprKonsumenSearchRef.current && !sprKonsumenSearchRef.current.contains(e.target)) {
@@ -1312,6 +1321,12 @@ export const MarketingModule = () => {
       }
       if (sprUnitSearchRef.current && !sprUnitSearchRef.current.contains(e.target)) {
         setIsSprUnitDropdownOpen(false);
+      }
+      if (modalKonsumenSearchRef.current && !modalKonsumenSearchRef.current.contains(e.target)) {
+        setIsModalKonsumenDropdownOpen(false);
+      }
+      if (modalUnitSearchRef.current && !modalUnitSearchRef.current.contains(e.target)) {
+        setIsModalUnitDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1360,6 +1375,72 @@ export const MarketingModule = () => {
       );
     });
   }, [sprUnitSearchQuery, databaseUnitRows]);
+
+  // Filtered Lists for Quick Modal Auto-fill
+  const filteredModalKonsumenList = useMemo(() => {
+    const q = modalKonsumenSearchQuery.trim().toLowerCase();
+    const filterItem = (item) => {
+      if (!q) return true;
+      const nama = (item.nama || '').toLowerCase();
+      const noHp = (item.noHp || item.phone || item.telepon || '').toLowerCase();
+      const blok = (item.blok || '').toLowerCase();
+      const nomor = (item.nomor || '').toLowerCase();
+      const proyek = (item.proyek || '').toLowerCase();
+      const unit = (item.unit || '').toLowerCase();
+      return nama.includes(q) || noHp.includes(q) || blok.includes(q) || nomor.includes(q) || proyek.includes(q) || unit.includes(q);
+    };
+
+    return {
+      konsumen: databaseKonsumenRows.filter(filterItem),
+      hotProspek: databaseHotProspekRows.filter(filterItem),
+      calon: databaseCalonKonsumenRows.filter(filterItem)
+    };
+  }, [modalKonsumenSearchQuery, databaseKonsumenRows, databaseHotProspekRows, databaseCalonKonsumenRows]);
+
+  const filteredModalUnitList = useMemo(() => {
+    const q = modalUnitSearchQuery.trim().toLowerCase();
+    if (!q) return databaseUnitRows;
+    return databaseUnitRows.filter(u => {
+      const proyek = (u.proyek || '').toLowerCase();
+      const blok = (u.blok || '').toLowerCase();
+      const nomor = (u.nomor || '').toLowerCase();
+      const type = (u.type || '').toLowerCase();
+      const unitStr = `${blok}-${nomor}`.toLowerCase();
+      const fullStr = `${proyek} blok ${blok} no ${nomor} ${type}`.toLowerCase();
+      return (
+        proyek.includes(q) ||
+        blok.includes(q) ||
+        nomor.includes(q) ||
+        type.includes(q) ||
+        unitStr.includes(q) ||
+        fullStr.includes(q)
+      );
+    });
+  }, [modalUnitSearchQuery, databaseUnitRows]);
+
+  const handleSelectModalKonsumen = (k) => {
+    setFormData(prev => ({
+      ...prev,
+      customerName: k.nama || prev.customerName,
+      customerPhone: k.noHp || k.phone || k.telepon || prev.customerPhone
+    }));
+    setModalKonsumenSearchQuery(k.nama || '');
+    setIsModalKonsumenDropdownOpen(false);
+    showNotification(`Data konsumen "${k.nama}" berhasil dimuat.`);
+  };
+
+  const handleSelectModalUnit = (u) => {
+    const unitNo = `${u.blok}-${u.nomor}`;
+    setFormData(prev => ({
+      ...prev,
+      unitNo,
+      cluster: u.proyek || prev.cluster,
+      hargaUnit: Number(u.harga) > 0 ? Number(u.harga) : prev.hargaUnit
+    }));
+    setModalUnitSearchQuery(`[${u.proyek}] Blok ${u.blok} No. ${u.nomor} • ${u.type}`);
+    setIsModalUnitDropdownOpen(false);
+    showNotification(`Unit Blok ${u.blok} No. ${u.nomor} berhasil dimuat.`);
+  };
 
   useEffect(() => {
     try {
@@ -2225,6 +2306,10 @@ export const MarketingModule = () => {
       bookingDate: new Date().toISOString().split('T')[0],
       notes: ''
     });
+    setModalKonsumenSearchQuery('');
+    setIsModalKonsumenDropdownOpen(false);
+    setModalUnitSearchQuery('');
+    setIsModalUnitDropdownOpen(false);
     setIsModalOpen(true);
   };
 
@@ -2242,6 +2327,10 @@ export const MarketingModule = () => {
       bookingDate: item.bookingDate || new Date().toISOString().split('T')[0],
       notes: item.notes || ''
     });
+    setModalKonsumenSearchQuery(item.customerName || '');
+    setIsModalKonsumenDropdownOpen(false);
+    setModalUnitSearchQuery(item.unitNo ? `[${item.cluster || 'Proyek'}] Unit ${item.unitNo}` : '');
+    setIsModalUnitDropdownOpen(false);
     setIsModalOpen(true);
   };
 
@@ -5573,63 +5662,379 @@ export const MarketingModule = () => {
             <form onSubmit={handleSaveSales}>
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                 {/* Auto-fill from DB Helper */}
-                <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem', position: 'relative', zIndex: 105, overflow: 'visible' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <Sparkles size={14} /> AUTO-FILL DARI DATABASE (OPSIONAL)
                   </div>
-                  <div className="grid-2" style={{ gap: '0.5rem' }}>
-                    <div>
-                      <select
-                        className="form-control"
-                        style={{ fontSize: '0.78rem' }}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (!val) return;
-                          const k = [...databaseKonsumenRows, ...databaseCalonKonsumenRows, ...databaseHotProspekRows].find(x => x.id === val);
-                          if (k) {
-                            setFormData(prev => ({
-                              ...prev,
-                              customerName: k.nama || prev.customerName,
-                              customerPhone: k.phone || k.telepon || prev.customerPhone
-                            }));
-                          }
-                        }}
-                      >
-                        <option value="">-- Pilih dari DB Konsumen --</option>
-                        {databaseKonsumenRows.map(k => (
-                          <option key={k.id} value={k.id}>Konsumen: {k.nama} ({k.unit || k.phone || '-'})</option>
-                        ))}
-                        {databaseHotProspekRows.map(h => (
-                          <option key={h.id} value={h.id}>Hot Prospek: {h.nama}</option>
-                        ))}
-                        {databaseCalonKonsumenRows.map(c => (
-                          <option key={c.id} value={c.id}>Calon Konsumen: {c.nama}</option>
-                        ))}
-                      </select>
+                  <div className="grid-2" style={{ gap: '0.75rem' }}>
+                    {/* Combobox 1: Konsumen (Ketik Dulu) */}
+                    <div ref={modalKonsumenSearchRef} style={{ position: 'relative', zIndex: 108 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                        <label style={{ fontSize: '0.73rem', fontWeight: 800, color: '#34d399', margin: 0 }}>
+                          ⚡ AMBIL DARI DATABASE PEMBELI / KONSUMEN:
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="🔍 Ketik nama / no HP konsumen..."
+                          value={modalKonsumenSearchQuery}
+                          onChange={(e) => {
+                            setModalKonsumenSearchQuery(e.target.value);
+                            setIsModalKonsumenDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsModalKonsumenDropdownOpen(true)}
+                          onClick={() => setIsModalKonsumenDropdownOpen(true)}
+                          style={{
+                            fontSize: '0.78rem',
+                            background: '#0f172a',
+                            color: '#ffffff',
+                            borderColor: isModalKonsumenDropdownOpen ? '#34d399' : '#334155',
+                            paddingRight: modalKonsumenSearchQuery ? '2rem' : '0.65rem',
+                            fontWeight: modalKonsumenSearchQuery ? 700 : 400
+                          }}
+                        />
+                        {modalKonsumenSearchQuery ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalKonsumenSearchQuery('');
+                              setIsModalKonsumenDropdownOpen(true);
+                            }}
+                            title="Hapus pencarian konsumen"
+                            style={{
+                              position: 'absolute',
+                              right: '6px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#94a3b8',
+                              cursor: 'pointer',
+                              padding: '2px',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <X size={13} />
+                          </button>
+                        ) : (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              right: '8px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              pointerEvents: 'none',
+                              color: '#64748b'
+                            }}
+                          >
+                            <Search size={13} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dropdown Options */}
+                      {isModalKonsumenDropdownOpen && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 4px)',
+                            left: 0,
+                            right: 0,
+                            minWidth: '280px',
+                            zIndex: 99999,
+                            maxHeight: '220px',
+                            overflowY: 'auto',
+                            background: '#0f172a',
+                            border: '2px solid #34d399',
+                            borderRadius: '8px',
+                            boxShadow: '0 15px 35px rgba(0, 0, 0, 0.95), 0 0 12px rgba(52, 211, 153, 0.3)',
+                            padding: '0.35rem'
+                          }}
+                        >
+                          {!modalKonsumenSearchQuery && (
+                            <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.72rem', color: '#94a3b8', borderBottom: '1px solid #334155', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <Search size={12} color="#34d399" />
+                              <span>Ketik nama untuk memfilter, atau pilih langsung:</span>
+                            </div>
+                          )}
+
+                          {filteredModalKonsumenList.konsumen.length === 0 &&
+                           filteredModalKonsumenList.hotProspek.length === 0 &&
+                           filteredModalKonsumenList.calon.length === 0 ? (
+                            <div style={{ padding: '0.8rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem' }}>
+                              Tidak ditemukan data konsumen untuk "<strong>{modalKonsumenSearchQuery}</strong>"
+                            </div>
+                          ) : (
+                            <div>
+                              {filteredModalKonsumenList.konsumen.length > 0 && (
+                                <div style={{ marginBottom: '0.4rem' }}>
+                                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#34d399', padding: '0.15rem 0.4rem', textTransform: 'uppercase' }}>
+                                    Konsumen Resmi Closing ({filteredModalKonsumenList.konsumen.length})
+                                  </div>
+                                  {filteredModalKonsumenList.konsumen.map(k => (
+                                    <div
+                                      key={`mk-${k.id}`}
+                                      onMouseDown={(e) => { e.preventDefault(); handleSelectModalKonsumen(k); }}
+                                      onClick={() => handleSelectModalKonsumen(k)}
+                                      style={{
+                                        padding: '0.4rem 0.55rem',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        borderBottom: '1px solid rgba(51, 65, 85, 0.3)'
+                                      }}
+                                      onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                      <div>
+                                        <div style={{ fontWeight: 700, color: '#ffffff' }}>{k.nama}</div>
+                                        <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                          {k.unit ? `Unit: ${k.unit}` : ''} {k.phone || k.telepon ? `• ${k.phone || k.telepon}` : ''}
+                                        </div>
+                                      </div>
+                                      <span style={{ fontSize: '0.62rem', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                                        Pilih
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {filteredModalKonsumenList.hotProspek.length > 0 && (
+                                <div style={{ marginBottom: '0.4rem' }}>
+                                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f59e0b', padding: '0.15rem 0.4rem', textTransform: 'uppercase' }}>
+                                    Hot Prospek ({filteredModalKonsumenList.hotProspek.length})
+                                  </div>
+                                  {filteredModalKonsumenList.hotProspek.map(h => (
+                                    <div
+                                      key={`mh-${h.id}`}
+                                      onMouseDown={(e) => { e.preventDefault(); handleSelectModalKonsumen(h); }}
+                                      onClick={() => handleSelectModalKonsumen(h)}
+                                      style={{
+                                        padding: '0.4rem 0.55rem',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        borderBottom: '1px solid rgba(51, 65, 85, 0.3)'
+                                      }}
+                                      onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                      <div>
+                                        <div style={{ fontWeight: 700, color: '#ffffff' }}>{h.nama}</div>
+                                        <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                          {h.telepon || h.phone || '-'}
+                                        </div>
+                                      </div>
+                                      <span style={{ fontSize: '0.62rem', background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                                        Pilih
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {filteredModalKonsumenList.calon.length > 0 && (
+                                <div>
+                                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#ec4899', padding: '0.15rem 0.4rem', textTransform: 'uppercase' }}>
+                                    Calon Konsumen ({filteredModalKonsumenList.calon.length})
+                                  </div>
+                                  {filteredModalKonsumenList.calon.map(c => (
+                                    <div
+                                      key={`mc-${c.id}`}
+                                      onMouseDown={(e) => { e.preventDefault(); handleSelectModalKonsumen(c); }}
+                                      onClick={() => handleSelectModalKonsumen(c)}
+                                      style={{
+                                        padding: '0.4rem 0.55rem',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        borderBottom: '1px solid rgba(51, 65, 85, 0.3)'
+                                      }}
+                                      onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                    >
+                                      <div>
+                                        <div style={{ fontWeight: 700, color: '#ffffff' }}>{c.nama}</div>
+                                        <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                          {c.telepon || c.phone || '-'}
+                                        </div>
+                                      </div>
+                                      <span style={{ fontSize: '0.62rem', background: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                                        Pilih
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <select
-                        className="form-control"
-                        style={{ fontSize: '0.78rem' }}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (!val) return;
-                          const u = databaseUnitRows.find(x => x.id === val);
-                          if (u) {
-                            setFormData(prev => ({
-                              ...prev,
-                              unitNo: `${u.blok}-${u.nomor}`,
-                              cluster: u.proyek || prev.cluster,
-                              hargaUnit: Number(u.harga) > 0 ? Number(u.harga) : prev.hargaUnit
-                            }));
-                          }
-                        }}
-                      >
-                        <option value="">-- Pilih dari DB Unit --</option>
-                        {databaseUnitRows.map(u => (
-                          <option key={u.id} value={u.id}>[{u.proyek}] Blok {u.blok} No {u.nomor} ({u.type})</option>
-                        ))}
-                      </select>
+
+                    {/* Combobox 2: Unit (Ketik Dulu) */}
+                    <div ref={modalUnitSearchRef} style={{ position: 'relative', zIndex: 107 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                        <label style={{ fontSize: '0.73rem', fontWeight: 800, color: '#60a5fa', margin: 0 }}>
+                          ⚡ AMBIL DARI DATABASE UNIT:
+                        </label>
+                      </div>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="🔍 Ketik blok / no unit / tipe..."
+                          value={modalUnitSearchQuery}
+                          onChange={(e) => {
+                            setModalUnitSearchQuery(e.target.value);
+                            setIsModalUnitDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsModalUnitDropdownOpen(true)}
+                          onClick={() => setIsModalUnitDropdownOpen(true)}
+                          style={{
+                            fontSize: '0.78rem',
+                            background: '#0f172a',
+                            color: '#ffffff',
+                            borderColor: isModalUnitDropdownOpen ? '#60a5fa' : '#334155',
+                            paddingRight: modalUnitSearchQuery ? '2rem' : '0.65rem',
+                            fontWeight: modalUnitSearchQuery ? 700 : 400
+                          }}
+                        />
+                        {modalUnitSearchQuery ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setModalUnitSearchQuery('');
+                              setIsModalUnitDropdownOpen(true);
+                            }}
+                            title="Hapus pencarian unit"
+                            style={{
+                              position: 'absolute',
+                              right: '6px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#94a3b8',
+                              cursor: 'pointer',
+                              padding: '2px',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <X size={13} />
+                          </button>
+                        ) : (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              right: '8px',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              pointerEvents: 'none',
+                              color: '#64748b'
+                            }}
+                          >
+                            <Search size={13} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dropdown Options */}
+                      {isModalUnitDropdownOpen && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 4px)',
+                            left: 0,
+                            right: 0,
+                            minWidth: '280px',
+                            zIndex: 99999,
+                            maxHeight: '220px',
+                            overflowY: 'auto',
+                            background: '#0f172a',
+                            border: '2px solid #60a5fa',
+                            borderRadius: '8px',
+                            boxShadow: '0 15px 35px rgba(0, 0, 0, 0.95), 0 0 12px rgba(96, 165, 250, 0.3)',
+                            padding: '0.35rem'
+                          }}
+                        >
+                          {!modalUnitSearchQuery && (
+                            <div style={{ padding: '0.35rem 0.5rem', fontSize: '0.72rem', color: '#94a3b8', borderBottom: '1px solid #334155', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <Search size={12} color="#60a5fa" />
+                              <span>Ketik blok/nomor untuk memfilter, atau pilih langsung:</span>
+                            </div>
+                          )}
+
+                          {filteredModalUnitList.length === 0 ? (
+                            <div style={{ padding: '0.8rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem' }}>
+                              Tidak ditemukan unit untuk "<strong>{modalUnitSearchQuery}</strong>"
+                            </div>
+                          ) : (
+                            <div>
+                              <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#60a5fa', padding: '0.15rem 0.4rem', textTransform: 'uppercase' }}>
+                                Unit Tersedia ({filteredModalUnitList.length})
+                              </div>
+                              {filteredModalUnitList.map(u => (
+                                <div
+                                  key={`mu-${u.id}`}
+                                  onMouseDown={(e) => { e.preventDefault(); handleSelectModalUnit(u); }}
+                                  onClick={() => handleSelectModalUnit(u)}
+                                  style={{
+                                    padding: '0.4rem 0.55rem',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.75rem',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderBottom: '1px solid rgba(51, 65, 85, 0.3)'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <div>
+                                    <div style={{ fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                      <span>[{u.proyek}] Blok {u.blok} No. {u.nomor}</span>
+                                      {u.status && (
+                                        <span style={{
+                                          fontSize: '0.62rem',
+                                          padding: '1px 4px',
+                                          borderRadius: '3px',
+                                          background: u.status === 'Tersedia' ? 'rgba(52, 211, 153, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                          color: u.status === 'Tersedia' ? '#34d399' : '#fbbf24',
+                                          fontWeight: 800
+                                        }}>
+                                          {u.status}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                      {u.type} • <strong style={{ color: '#60a5fa' }}>{formatRupiah(u.harga)}</strong>
+                                    </div>
+                                  </div>
+                                  <span style={{ fontSize: '0.62rem', background: 'rgba(96, 165, 250, 0.2)', color: '#60a5fa', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                                    Pilih
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
