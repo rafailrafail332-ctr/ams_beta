@@ -46,6 +46,7 @@ import {
   ArrowRight,
   Mail
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -282,6 +283,7 @@ export const MarketingModule = () => {
 
   // Hidden File Input Ref for Device SPR Upload (.pdf, .jpg, .png)
   const sprFileInputRef = useRef(null);
+  const excelFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
   // Sub-view Tab Control (leads, spr, db_konsumen, db_unit)
@@ -1131,70 +1133,17 @@ export const MarketingModule = () => {
   const [isViewUploadedSprModalOpen, setIsViewUploadedSprModalOpen] = useState(false);
   const [selectedSprViewItem, setSelectedSprViewItem] = useState(null);
 
-  // Initial Sales & Marketing Data with Uploaded SPR Files Store
-  const initialSalesData = [
-    {
-      id: 'SLS-001',
-      unitNo: 'A-01',
-      cluster: 'Cluster Emerald',
-      customerName: 'Budi Santoso',
-      customerPhone: '0812-9988-7766',
-      salesPerson: 'Adhi Himawan, S.E.Sy (General Manager)',
-      hargaUnit: 650000000,
-      bookingFee: 10000000,
-      status: 'Closed / Sold',
-      bookingDate: '2025-01-05',
-      notes: 'Lunas Booking Fee & DP 10%',
-      sprFileUrl: null,
-      sprFileType: null,
-      sprFileName: null,
-      sprUploadDate: null,
-      sprUploadedBy: null
-    },
-    {
-      id: 'SLS-002',
-      unitNo: 'A-02',
-      cluster: 'Cluster Emerald',
-      customerName: 'Siti Rahmawati',
-      customerPhone: '0813-1122-3344',
-      salesPerson: 'Adhi Himawan, S.E.Sy (General Manager)',
-      hargaUnit: 670000000,
-      bookingFee: 10000000,
-      status: 'Booking / SPR',
-      bookingDate: '2025-01-20',
-      notes: 'Pengajuan SP3K KPR BCA',
-      sprFileUrl: null,
-      sprFileType: null,
-      sprFileName: null,
-      sprUploadDate: null,
-      sprUploadedBy: null
-    },
-    {
-      id: 'SLS-003',
-      unitNo: 'B-05',
-      cluster: 'Cluster Sapphire',
-      customerName: 'Dr. Ahmad Fauzi',
-      customerPhone: '0857-4455-6677',
-      salesPerson: 'Yazid Hizbullah, S.E.,S.T (Direktur Utama)',
-      hargaUnit: 890000000,
-      bookingFee: 15000000,
-      status: 'Booking / SPR',
-      bookingDate: '2025-03-10',
-      notes: 'Skema Cash Bertahap 12x',
-      sprFileUrl: null,
-      sprFileType: null,
-      sprFileName: null,
-      sprUploadDate: null,
-      sprUploadedBy: null
-    }
-  ];
+  // Initial Sales & Marketing Data (Dikosongkan sesuai permintaan user, siap diinput manual / diimport dari Excel)
+  const initialSalesData = [];
 
   const getSavedSalesList = () => {
     try {
-      const saved = localStorage.getItem('ams_sales_list_clean_v1');
+      // Hapus data dummy lama v1 jika ada
+      localStorage.removeItem('ams_sales_list_clean_v1');
+      const saved = localStorage.getItem('ams_sales_list_clean_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {}
     return initialSalesData;
@@ -1204,7 +1153,7 @@ export const MarketingModule = () => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_sales_list_clean_v1', JSON.stringify(salesList));
+      localStorage.setItem('ams_sales_list_clean_v2', JSON.stringify(salesList));
     } catch (e) {}
   }, [salesList]);
 
@@ -1333,6 +1282,131 @@ export const MarketingModule = () => {
     if (window.confirm(`Hapus data transaksi penjualan unit ${unitNo}?`)) {
       setSalesList(prev => prev.filter(s => s.id !== id));
       showNotification(`Data transaksi unit ${unitNo} berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const handleExcelImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!jsonData || jsonData.length === 0) {
+          showNotification('File Excel kosong atau format tabel tidak terdeteksi!', 'warning');
+          return;
+        }
+
+        const cleanNumber = (val) => {
+          if (typeof val === 'number') return val;
+          if (!val) return 0;
+          const cleaned = String(val).replace(/[^0-9]/g, '');
+          return Number(cleaned) || 0;
+        };
+
+        const importedRows = jsonData.map((row, idx) => {
+          const getVal = (candidates) => {
+            for (const key of Object.keys(row)) {
+              const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+              for (const cand of candidates) {
+                const cleanCand = cand.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (cleanKey.includes(cleanCand)) {
+                  return row[key];
+                }
+              }
+            }
+            return '';
+          };
+
+          const rawUnit = getVal(['unit', 'kavling', 'blok', 'no unit', 'nounit']);
+          const rawCluster = getVal(['cluster', 'klaster', 'proyek', 'tipe', 'type']);
+          const rawName = getVal(['nama', 'konsumen', 'pembeli', 'customer', 'pemesan', 'klien']);
+          const rawPhone = getVal(['hp', 'nohp', 'telp', 'telepon', 'phone', 'wa', 'whatsapp', 'kontak']);
+          const rawSales = getVal(['sales', 'marketing', 'agent', 'agen', 'pemasar']);
+          const rawHarga = getVal(['hargajual', 'hargaunit', 'harga', 'nilai', 'price', 'omzet', 'netto', 'plafon']);
+          const rawBooking = getVal(['bookingfee', 'booking', 'bf', 'utj', 'tandajadi', 'dp', 'uangmuka']);
+          const rawStatus = getVal(['status', 'tahap', 'keteranganstatus']);
+          const rawDate = getVal(['tanggal', 'tgl', 'date', 'tglbooking', 'tgltransaksi']);
+          const rawNotes = getVal(['keterangan', 'catatan', 'notes', 'skemabayar', 'skema']);
+
+          const hargaUnit = cleanNumber(rawHarga);
+          const bookingFee = cleanNumber(rawBooking);
+
+          let status = 'Booking / SPR';
+          const statusStr = String(rawStatus || '').toLowerCase();
+          if (statusStr.includes('closed') || statusStr.includes('sold') || statusStr.includes('lunas') || statusStr.includes('akad')) {
+            status = 'Closed / Sold';
+          } else if (statusStr.includes('hot') || statusStr.includes('prospek')) {
+            status = 'Prospek Hot';
+          }
+
+          let bookingDate = new Date().toISOString().split('T')[0];
+          if (rawDate) {
+            if (typeof rawDate === 'number') {
+              const dateObj = new Date((rawDate - 25569) * 86400 * 1000);
+              if (!isNaN(dateObj.getTime())) {
+                bookingDate = dateObj.toISOString().split('T')[0];
+              }
+            } else {
+              const strDate = String(rawDate).trim();
+              if (strDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                bookingDate = strDate;
+              } else if (strDate.match(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}$/)) {
+                const parts = strDate.split(/[\/\-\.]/);
+                if (parts.length === 3) {
+                  let [d, m, y] = parts;
+                  if (y.length === 2) y = '20' + y;
+                  bookingDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+                }
+              }
+            }
+          }
+
+          return {
+            id: `SLS-${String(idx + 1).padStart(3, '0')}`,
+            unitNo: String(rawUnit || `Unit ${idx + 1}`).trim(),
+            cluster: String(rawCluster || 'Cluster Emerald').trim(),
+            customerName: String(rawName || `Konsumen ${idx + 1}`).trim(),
+            customerPhone: String(rawPhone || '-').trim(),
+            salesPerson: String(rawSales || currentUser?.name || 'Staf Marketing').trim(),
+            hargaUnit: hargaUnit || 650000000,
+            bookingFee: bookingFee || 10000000,
+            status,
+            bookingDate,
+            notes: String(rawNotes || '').trim(),
+            sprFileUrl: null,
+            sprFileType: null,
+            sprFileName: null,
+            sprUploadDate: null,
+            sprUploadedBy: null
+          };
+        });
+
+        setSalesList(importedRows);
+        showNotification(`BERHASIL IMPORT! ${importedRows.length} data transaksi penjualan & SPR berhasil diimpor dari file Excel.`);
+      } catch (err) {
+        console.error('Excel Import Error:', err);
+        showNotification('Gagal membaca file Excel. Pastikan file berformat .xlsx atau .xls yang valid.', 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    if (e.target) e.target.value = '';
+  };
+
+  const handleClearAllSales = () => {
+    if (window.confirm('Apakah Anda yakin ingin MENGHAPUS SEMUA data transaksi penjualan & SPR? Data tabel akan dikosongkan.')) {
+      setSalesList([]);
+      try {
+        localStorage.removeItem('ams_sales_list_clean_v1');
+        localStorage.removeItem('ams_sales_list_clean_v2');
+      } catch (e) {}
+      showNotification('Semua data transaksi penjualan & SPR telah berhasil dikosongkan.', 'warning');
     }
   };
 
@@ -1484,6 +1558,15 @@ export const MarketingModule = () => {
         onChange={handleSprFileUpload}
       />
 
+      {/* Hidden File Input for Excel Import */}
+      <input
+        type="file"
+        ref={excelFileInputRef}
+        accept=".xlsx, .xls, .csv"
+        style={{ display: 'none' }}
+        onChange={handleExcelImport}
+      />
+
       {/* Page Header */}
       <div className="page-header">
         <div>
@@ -1498,9 +1581,29 @@ export const MarketingModule = () => {
             </button>
           )}
           {currentSubView === 'spr' && (
-            <button className="btn btn-primary" onClick={handleOpenAdd}>
-              <Plus size={16} /> Input Transaksi Penjualan
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button
+                className="btn btn-secondary"
+                style={{ background: '#059669', color: '#ffffff', border: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={() => excelFileInputRef.current?.click()}
+                title="Import data transaksi penjualan & SPR dari file Excel (.xlsx / .xls)"
+              >
+                <Upload size={16} /> Import Excel (.xlsx)
+              </button>
+              {salesList.length > 0 && (
+                <button
+                  className="btn btn-secondary"
+                  style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  onClick={handleClearAllSales}
+                  title="Hapus / Kosongkan semua data transaksi penjualan & SPR"
+                >
+                  <Trash2 size={16} /> Kosongkan Data
+                </button>
+              )}
+              <button className="btn btn-primary" onClick={handleOpenAdd}>
+                <Plus size={16} /> Input Transaksi Penjualan
+              </button>
+            </div>
           )}
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
             <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
@@ -1838,8 +1941,39 @@ export const MarketingModule = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSales.map((item) => (
-                    <tr key={item.id}>
+                  {filteredSales.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                            <FileText size={28} />
+                          </div>
+                          <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>Belum Ada Data Transaksi Penjualan & SPR</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-subtle)', maxWidth: '460px', lineHeight: 1.5 }}>
+                            Data transaksi penjualan & SPR telah dikosongkan. Anda dapat mengimpor file Excel (.xlsx / .xls) yang berisi daftar penjualan atau menginput transaksi secara manual.
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => excelFileInputRef.current?.click()}
+                              style={{ background: '#059669', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                            >
+                              <Upload size={14} /> Import File Excel (.xlsx)
+                            </button>
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={handleOpenAdd}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+                            >
+                              <Plus size={14} /> + Input Transaksi Manual
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSales.map((item) => (
+                      <tr key={item.id}>
                       <td>
                         <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{item.id}</div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Unit {item.unitNo}</div>
@@ -1920,7 +2054,8 @@ export const MarketingModule = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
