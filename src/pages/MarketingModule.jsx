@@ -1289,10 +1289,17 @@ export const MarketingModule = () => {
   const [isSprKonsumenDropdownOpen, setIsSprKonsumenDropdownOpen] = useState(false);
   const sprKonsumenSearchRef = useRef(null);
 
+  const [sprUnitSearchQuery, setSprUnitSearchQuery] = useState('');
+  const [isSprUnitDropdownOpen, setIsSprUnitDropdownOpen] = useState(false);
+  const sprUnitSearchRef = useRef(null);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (sprKonsumenSearchRef.current && !sprKonsumenSearchRef.current.contains(e.target)) {
         setIsSprKonsumenDropdownOpen(false);
+      }
+      if (sprUnitSearchRef.current && !sprUnitSearchRef.current.contains(e.target)) {
+        setIsSprUnitDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1319,6 +1326,29 @@ export const MarketingModule = () => {
     };
   }, [sprKonsumenSearchQuery, databaseKonsumenRows, databaseHotProspekRows, databaseCalonKonsumenRows]);
 
+  const filteredSprUnitList = useMemo(() => {
+    const q = sprUnitSearchQuery.trim().toLowerCase();
+    if (!q) return databaseUnitRows;
+    return databaseUnitRows.filter(u => {
+      const proyek = (u.proyek || '').toLowerCase();
+      const blok = (u.blok || '').toLowerCase();
+      const nomor = (u.nomor || '').toLowerCase();
+      const type = (u.type || '').toLowerCase();
+      const unitStr = `${blok}-${nomor}`.toLowerCase();
+      const unitStr2 = `${blok} ${nomor}`.toLowerCase();
+      const fullStr = `${proyek} blok ${blok} no ${nomor} ${type}`.toLowerCase();
+      return (
+        proyek.includes(q) ||
+        blok.includes(q) ||
+        nomor.includes(q) ||
+        type.includes(q) ||
+        unitStr.includes(q) ||
+        unitStr2.includes(q) ||
+        fullStr.includes(q)
+      );
+    });
+  }, [sprUnitSearchQuery, databaseUnitRows]);
+
   useEffect(() => {
     try {
       localStorage.setItem('ams_official_spr_draft_v1', JSON.stringify(sprOfficial));
@@ -1337,8 +1367,13 @@ export const MarketingModule = () => {
     showNotification(`Template SPR berganti ke ${tpl.companyName} (${tpl.projectName})`);
   };
 
-  const handleSelectUnitToSpr = (unitId) => {
-    const unit = databaseUnitRows.find(u => String(u.id) === String(unitId));
+  const handleSelectUnitToSpr = (unitOrId) => {
+    let unit = null;
+    if (typeof unitOrId === 'object' && unitOrId !== null) {
+      unit = unitOrId;
+    } else {
+      unit = databaseUnitRows.find(u => String(u.id) === String(unitOrId));
+    }
     if (!unit) return;
     setSprOfficial(prev => ({
       ...prev,
@@ -1349,6 +1384,8 @@ export const MarketingModule = () => {
       luasBangunan: Number(unit.lb) || prev.luasBangunan,
       hargaJual: Number(unit.harga) || prev.hargaJual
     }));
+    setSprUnitSearchQuery(`[${unit.proyek}] Blok ${unit.blok} No. ${unit.nomor} • ${unit.type}`);
+    setIsSprUnitDropdownOpen(false);
     showNotification(`Unit ${unit.blok}-${unit.nomor} (${unit.type}) berhasil dimuat ke formulir SPR.`);
   };
 
@@ -1382,6 +1419,8 @@ export const MarketingModule = () => {
       setSprOfficial(getInitialSprOfficial());
       setSprKonsumenSearchQuery('');
       setIsSprKonsumenDropdownOpen(false);
+      setSprUnitSearchQuery('');
+      setIsSprUnitDropdownOpen(false);
       showNotification('Formulir SPR baru siap diisi.');
     }
   };
@@ -3136,26 +3175,167 @@ export const MarketingModule = () => {
                   </div>
                 </div>
 
-                {/* Quick Fill From Database Unit */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#60a5fa', marginBottom: '0.4rem' }}>
-                    ⚡ AMBIL DARI DATABASE UNIT:
-                  </label>
-                  <select
-                    className="form-control"
-                    style={{ fontSize: '0.8rem', background: '#0f172a', color: '#ffffff', borderColor: '#334155' }}
-                    onChange={(e) => {
-                      if (e.target.value) handleSelectUnitToSpr(e.target.value);
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>-- Pilih Unit untuk Auto-Fill Spesifikasi & Harga --</option>
-                    {databaseUnitRows.map(u => (
-                      <option key={u.id} value={u.id}>
-                        [{u.proyek}] Blok {u.blok} No. {u.nomor} • {u.type} (LB: {u.lb}m² / LT: {u.lt}m²) - {formatRupiah(u.harga)}
-                      </option>
-                    ))}
-                  </select>
+                {/* Quick Fill From Database Unit (Search / Ketik Dulu) */}
+                <div ref={sprUnitSearchRef} style={{ position: 'relative', zIndex: 106 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#60a5fa', margin: 0 }}>
+                      ⚡ AMBIL DARI DATABASE UNIT:
+                    </label>
+                    {sprUnitSearchQuery && (
+                      <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        Terpilih: <strong style={{ color: '#60a5fa' }}>{sprOfficial.blok ? `Blok ${sprOfficial.blok}-${sprOfficial.unitNo}` : sprUnitSearchQuery}</strong>
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="🔍 Ketik blok / no unit / tipe rumah..."
+                      value={sprUnitSearchQuery}
+                      onChange={(e) => {
+                        setSprUnitSearchQuery(e.target.value);
+                        setIsSprUnitDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsSprUnitDropdownOpen(true)}
+                      onClick={() => setIsSprUnitDropdownOpen(true)}
+                      style={{
+                        fontSize: '0.8rem',
+                        background: '#0f172a',
+                        color: '#ffffff',
+                        borderColor: isSprUnitDropdownOpen ? '#60a5fa' : '#334155',
+                        paddingRight: sprUnitSearchQuery ? '2.2rem' : '0.75rem',
+                        fontWeight: sprUnitSearchQuery ? 700 : 400
+                      }}
+                    />
+
+                    {sprUnitSearchQuery ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSprUnitSearchQuery('');
+                          setIsSprUnitDropdownOpen(true);
+                        }}
+                        title="Hapus pencarian unit"
+                        style={{
+                          position: 'absolute',
+                          right: '8px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          pointerEvents: 'none',
+                          color: '#64748b'
+                        }}
+                      >
+                        <Search size={14} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dropdown Pilihan Unit di Bawah Input */}
+                  {isSprUnitDropdownOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        minWidth: '320px',
+                        zIndex: 99999,
+                        maxHeight: '280px',
+                        overflowY: 'auto',
+                        background: '#0f172a',
+                        border: '2px solid #60a5fa',
+                        borderRadius: '8px',
+                        boxShadow: '0 20px 45px rgba(0, 0, 0, 0.95), 0 0 15px rgba(96, 165, 250, 0.3)',
+                        padding: '0.4rem'
+                      }}
+                    >
+                      {!sprUnitSearchQuery && (
+                        <div style={{ padding: '0.4rem 0.6rem', fontSize: '0.73rem', color: '#94a3b8', borderBottom: '1px solid #334155', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <Search size={13} color="#60a5fa" />
+                          <span>Ketik blok/nomor untuk memfilter, atau pilih langsung:</span>
+                        </div>
+                      )}
+
+                      {filteredSprUnitList.length === 0 ? (
+                        <div style={{ padding: '0.9rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.78rem' }}>
+                          Tidak ditemukan unit yang cocok dengan "<strong>{sprUnitSearchQuery}</strong>"
+                        </div>
+                      ) : (
+                        <div>
+                          <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#60a5fa', padding: '0.2rem 0.5rem', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            Daftar Unit Tersedia ({filteredSprUnitList.length})
+                          </div>
+                          {filteredSprUnitList.map(u => (
+                            <div
+                              key={`u-${u.id}`}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectUnitToSpr(u);
+                              }}
+                              onClick={() => handleSelectUnitToSpr(u)}
+                              style={{
+                                padding: '0.45rem 0.65rem',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                transition: 'background 0.12s ease',
+                                borderBottom: '1px solid rgba(51, 65, 85, 0.3)'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = '#1e293b'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                            >
+                              <div>
+                                <div style={{ fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <span>[{u.proyek}] Blok {u.blok} No. {u.nomor}</span>
+                                  {u.status && (
+                                    <span style={{
+                                      fontSize: '0.65rem',
+                                      padding: '1px 5px',
+                                      borderRadius: '4px',
+                                      background: u.status === 'Tersedia' ? 'rgba(52, 211, 153, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                      color: u.status === 'Tersedia' ? '#34d399' : '#fbbf24',
+                                      fontWeight: 800
+                                    }}>
+                                      {u.status}
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                  {u.type} (LB: {u.lb}m² / LT: {u.lt}m²) • <strong style={{ color: '#60a5fa' }}>{formatRupiah(u.harga)}</strong>
+                                </div>
+                              </div>
+                              <span style={{ fontSize: '0.65rem', background: 'rgba(96, 165, 250, 0.15)', color: '#60a5fa', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                Pilih
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick Fill From Database Konsumen (Search / Ketik Dulu) */}
