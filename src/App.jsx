@@ -17,6 +17,7 @@ import { HumanResourcesModule } from './pages/HumanResourcesModule';
 import { CustomerRelationModule } from './pages/CustomerRelationModule';
 import { ProcurementModule } from './pages/ProcurementModule';
 import { UserManagement } from './pages/UserManagement';
+import { PiutangKonsumenModule } from './pages/PiutangKonsumenModule';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Lock, ArrowLeft } from 'lucide-react';
 
@@ -90,6 +91,8 @@ function AppContent() {
         return 'Procurement & Pengadaan Vendor Material';
       case 'users':
         return 'Manajemen Users';
+      case 'piutang-konsumen':
+        return 'Piutang Konsumen (DP & Angsuran)';
       default:
         return 'Dashboard Overview';
     }
@@ -161,6 +164,7 @@ function AppContent() {
               {currentTab === 'customer-relation' && <CustomerRelationModule />}
               {currentTab === 'procurement' && <ProcurementModule />}
               {currentTab === 'users' && <UserManagement />}
+              {currentTab === 'piutang-konsumen' && <PiutangKonsumenModule />}
             </div>
           </ErrorBoundary>
         )}

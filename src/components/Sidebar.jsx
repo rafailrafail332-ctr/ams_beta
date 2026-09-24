@@ -124,8 +124,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'mkt-input-spr', title: '3. Input Formulir SPR Resmi', moduleKey: 'marketing', subTabKey: 'input_spr', icon: FileCheck, color: '#10B981' },
         { id: 'mkt-konsumen', title: '4. Data Base Konsumen (Calon, Hot, Closing)', moduleKey: 'marketing', subTabKey: 'db_konsumen', icon: Users, color: '#F59E0B' },
         { id: 'mkt-unit', title: '5. Data Base Unit Properti', moduleKey: 'marketing', subTabKey: 'db_unit', icon: Building2, color: '#38BDF8' },
-        { id: 'cr-tickets', title: '6. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
-        { id: 'cr-handover', title: '7. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
+        { id: 'mkt-piutang', title: '6. Piutang Konsumen (DP & Angsuran)', moduleKey: 'marketing', subTabKey: 'piutang_konsumen', icon: CreditCard, color: '#F59E0B' },
+        { id: 'cr-tickets', title: '7. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'cr-handover', title: '8. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
       ];
     }
 
@@ -176,6 +177,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'manager', mainTitle: 'Manajer Operasional', tab: 'manager', icon: Briefcase, color: '#38BDF8' },
     { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#F97316' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
+    { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
     { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
     { id: 'ga', mainTitle: 'General Affair', tab: 'ga', icon: ShieldCheck, color: '#38BDF8' },

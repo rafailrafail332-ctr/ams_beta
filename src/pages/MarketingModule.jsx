@@ -44,8 +44,10 @@ import {
   Flame,
   Home,
   ArrowRight,
-  Mail
+  Mail,
+  CreditCard
 } from 'lucide-react';
+import { PiutangKonsumenModule } from './PiutangKonsumenModule';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -305,8 +307,9 @@ export const MarketingModule = () => {
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit)
+  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit, piutang_konsumen)
   const currentSubView = 
+    (activeSubTab === 'piutang' || activeSubTab === 'piutang_konsumen' || activeSubTab === 'piutang-konsumen') ? 'piutang_konsumen' :
     (activeSubTab === 'input_spr' || activeSubTab === 'form_spr') ? 'input_spr' :
     activeSubTab === 'spr' ? 'spr' :
     (activeSubTab === 'unit' || activeSubTab === 'db_unit') ? 'db_unit' :
@@ -2657,6 +2660,20 @@ export const MarketingModule = () => {
           }}
         >
           <Home size={16} color="#60a5fa" /> 5. Data Base Unit Properti ({databaseUnitRows.length})
+        </button>
+        <button
+          className={`tab-item ${currentSubView === 'piutang_konsumen' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('piutang_konsumen')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'piutang_konsumen' ? '#d97706' : undefined,
+            color: currentSubView === 'piutang_konsumen' ? '#f59e0b' : undefined
+          }}
+        >
+          <CreditCard size={16} color="#f59e0b" /> 6. Piutang Konsumen (DP & Angsuran)
         </button>
       </div>
 
@@ -5793,6 +5810,13 @@ export const MarketingModule = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 6: PIUTANG KONSUMEN (CICILAN DP & ANGSURAN)                           */}
+      {/* ========================================================================= */}
+      {currentSubView === 'piutang_konsumen' && (
+        <PiutangKonsumenModule />
       )}
 
       {/* ========================================================================= */}
