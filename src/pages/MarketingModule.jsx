@@ -4187,6 +4187,9 @@ export const MarketingModule = () => {
                             <td>
                               {isPlafondRow ? (
                                 <div>
+                                  <div style={{ fontSize: '0.71rem', color: '#38bdf8', textAlign: 'right', marginBottom: '4px', fontWeight: 700 }}>
+                                    ⚡ Otomatis Sisa Wajib Bayar
+                                  </div>
                                   <input
                                     type="text"
                                     className="form-control"
@@ -4203,9 +4206,6 @@ export const MarketingModule = () => {
                                       textAlign: 'right'
                                     }}
                                   />
-                                  <div style={{ fontSize: '0.66rem', color: '#38bdf8', textAlign: 'right', marginTop: '3px', fontWeight: 700 }}>
-                                    ⚡ Otomatis Sisa Wajib Bayar
-                                  </div>
                                 </div>
                               ) : (
                                 <div>
@@ -4286,7 +4286,7 @@ export const MarketingModule = () => {
                         </span>
                       </div>
                       <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
-                        Sisa kewajiban pelunasan konsumen (KPR Bank / Tunai)
+                        Sisa kewajiban pelunasan konsumen
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
