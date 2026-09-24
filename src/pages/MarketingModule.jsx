@@ -1979,7 +1979,7 @@ export const MarketingModule = () => {
             <tr style="height: 15.5px;">
               <td style="border: 1px solid #000000; text-align: center;">${idx + 1}</td>
               <td style="border: 1px solid #000000; padding: 1px 5px;">
-                ${isPlafond ? `<div style="font-size: 6.5px; color: #b45309; font-weight: 700; line-height: 1.1; margin-bottom: 1px;">Total Pengurangan: ${fmtRupiah(totalPengurangan)}</div>` : ''}
+                ${isPlafond ? `<div style="font-size: 6.5px; color: #b45309; font-weight: 700; line-height: 1.1; margin-bottom: 1px;">Total Pengurangan: ${fmtRupiah(totalPengurangan)} (Harga Net - UTJ - DP - Disc)</div>` : ''}
                 <div>${escape(row.skema)}</div>
               </td>
               <td style="border: 1px solid #000000; text-align: right; padding: 1px 5px; font-weight: 700;">${Number(row.jumlah) > 0 ? fmtRupiah(row.jumlah) : '-'}</td>
@@ -2084,7 +2084,7 @@ export const MarketingModule = () => {
           <div style="font-weight: 800; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 1px;">
             ${escape(spr.spv) || 'Yulieka'}
           </div>
-          <div style="color: #222; margin-top: 1px; font-size: 8px;">SPV</div>
+          <div style="color: #222; margin-top: 1px; font-size: 8px;">Marketing</div>
         </div>
 
         <div>
@@ -4126,7 +4126,7 @@ export const MarketingModule = () => {
                         <Calendar size={18} /> 5. Skema & Jadwal Pembayaran
                       </h4>
                       <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: '#94a3b8' }}>
-                        Tahapan pembayaran Booking Fee, DP, Pelunasan KPR / Cicilan Tunai
+                        Tahapan pembayaran
                       </p>
                     </div>
                     <button
@@ -4161,9 +4161,12 @@ export const MarketingModule = () => {
                             <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
                             <td>
                               {isPlafondRow && (
-                                <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <div style={{ fontSize: '0.71rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                   <span>Total Pengurangan:</span>
                                   <span style={{ color: '#fbbf24' }}>{formatRupiah(sprTotalPengurangan)}</span>
+                                  <span style={{ color: '#cbd5e1', fontSize: '0.68rem', fontWeight: 600 }}>
+                                    (Harga Net - Booking - DP - Disc)
+                                  </span>
                                 </div>
                               )}
                               <input
@@ -4184,9 +4187,6 @@ export const MarketingModule = () => {
                             <td>
                               {isPlafondRow ? (
                                 <div>
-                                  <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 800, textAlign: 'right', marginBottom: '4px' }}>
-                                    Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
-                                  </div>
                                   <input
                                     type="text"
                                     className="form-control"
@@ -4210,11 +4210,12 @@ export const MarketingModule = () => {
                               ) : (
                                 <div>
                                   <input
-                                    type="number"
+                                    type="text"
                                     className="form-control"
-                                    value={row.jumlah || ''}
+                                    value={row.jumlah ? Number(row.jumlah).toLocaleString('en-US') : ''}
                                     onChange={(e) => {
-                                      const val = Number(e.target.value) || 0;
+                                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                                      const val = raw ? parseInt(raw, 10) : 0;
                                       setSprOfficial(prev => ({
                                         ...prev,
                                         skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
@@ -4223,9 +4224,6 @@ export const MarketingModule = () => {
                                     placeholder="0"
                                     style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem', fontWeight: 800, color: '#34d399', textAlign: 'right' }}
                                   />
-                                  <div style={{ fontSize: '0.68rem', color: '#94a3b8', textAlign: 'right', marginTop: '2px' }}>
-                                    {formatRupiah(row.jumlah)}
-                                  </div>
                                 </div>
                               )}
                             </td>
@@ -4287,11 +4285,8 @@ export const MarketingModule = () => {
                           {formatRupiah(sprAutoPlafond)}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: '#fbbf24', marginTop: '3px', fontWeight: 700 }}>
-                        Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
-                        Harga Net {formatRupiah(sprTotalNet)} - Total Pengurangan {formatRupiah(sprTotalPengurangan)} = {formatRupiah(sprAutoPlafond)}
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
+                        Sisa kewajiban pelunasan konsumen (KPR Bank / Tunai)
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -4313,7 +4308,7 @@ export const MarketingModule = () => {
                         <FileText size={18} /> 6. Ketentuan & Promo Spesial (Terms & Conditions)
                       </h4>
                       <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: '#94a3b8' }}>
-                        Daftar klausul fasilitas, promo (Free BPHTB, Jetpump, dll) yang tercantum di lembar SPR
+                        Daftar klausul fasilitas, promo
                       </p>
                     </div>
                     <button
@@ -4376,7 +4371,7 @@ export const MarketingModule = () => {
                       />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Supervisor Marketing (SPV)</label>
+                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Marketing</label>
                       <input
                         type="text"
                         className="form-control"
@@ -4857,7 +4852,7 @@ export const MarketingModule = () => {
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>
                           {isPlafond && (
                             <div style={{ fontSize: '7px', color: '#b45309', fontWeight: 700, lineHeight: 1.1, marginBottom: '1px' }}>
-                              Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
+                              Total Pengurangan: {formatRupiah(sprTotalPengurangan)} (Harga Net - UTJ - DP - Disc)
                             </div>
                           )}
                           <div>{row.skema}</div>
@@ -5013,7 +5008,7 @@ export const MarketingModule = () => {
                     <div style={{ fontWeight: 800, paddingBottom: '1px', borderBottom: '1px solid #000', display: 'inline-block' }}>
                       {sprOfficial.spv || 'Yulieka'}
                     </div>
-                    <div style={{ color: '#222', marginTop: '1px' }}>SPV</div>
+                    <div style={{ color: '#222', marginTop: '1px' }}>Marketing</div>
                   </div>
 
                   {/* Konsumen */}
