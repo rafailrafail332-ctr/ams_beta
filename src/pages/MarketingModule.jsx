@@ -748,7 +748,7 @@ export const MarketingModule = () => {
     setTargetMoveHotItem(row);
     // Cari matching unit dari databaseUnitRows berdasarkan minat atau proyek
     const matchedUnit = databaseUnitRows.find(u => 
-      (row.minat && (row.minat.toLowerCase().includes(u.blok.toLowerCase()) || row.minat.toLowerCase().includes(u.type.toLowerCase()))) ||
+      (row.minat && (row.minat.toLowerCase().includes((u.blok || '').toLowerCase()) || row.minat.toLowerCase().includes((u.type || '').toLowerCase()))) ||
       (row.proyek && u.proyek === row.proyek)
     );
 
@@ -2224,15 +2224,20 @@ export const MarketingModule = () => {
 
   const handleSaveLead = (e) => {
     e.preventDefault();
+    const sanitizedLead = {
+      ...leadFormData,
+      budget: Number(leadFormData.budget) || 0,
+      commissionPct: Number(leadFormData.commissionPct) || 2.5
+    };
     if (editingLead) {
       setLeadsList((prev) =>
-        prev.map((l) => (l.id === editingLead.id ? { ...l, ...leadFormData } : l))
+        prev.map((l) => (l.id === editingLead.id ? { ...l, ...sanitizedLead } : l))
       );
       showNotification(`PROSPEK LEAD DIPERBARUI! Data ${leadFormData.customerName} tersimpan.`);
     } else {
       const newLead = {
         id: `LEAD-00${leadsList.length + 1}`,
-        ...leadFormData,
+        ...sanitizedLead,
         createdDate: new Date().toISOString().split('T')[0],
         commissionStatus: leadFormData.stage === 'Closed Sold' ? 'Pending ACC Finance' : 'Estimasi Prospek'
       };
@@ -2270,6 +2275,7 @@ export const MarketingModule = () => {
       try {
         localStorage.removeItem('ams_sales_list_clean_v1');
         localStorage.removeItem('ams_sales_list_clean_v2');
+        saveCloudStore('ams_sales_list_clean_v2', []).catch(() => {});
       } catch (e) {}
       showNotification('Semua data transaksi penjualan & SPR telah berhasil dikosongkan.', 'warning');
     }
@@ -2342,7 +2348,12 @@ export const MarketingModule = () => {
     }
 
     if (editingSales) {
-      const updatedList = salesList.map((s) => (s.id === editingSales.id ? { ...s, ...formData } : s));
+      const sanitizedSales = {
+        ...formData,
+        hargaUnit: Number(formData.hargaUnit) || 0,
+        bookingFee: Number(formData.bookingFee) || 0
+      };
+      const updatedList = salesList.map((s) => (s.id === editingSales.id ? { ...s, ...sanitizedSales } : s));
       setSalesList(updatedList);
       setHighlightedSalesId(editingSales.id);
       showNotification(`Data Penjualan Unit ${formData.unitNo} berhasil diperbarui!`, 'success');
@@ -2405,22 +2416,24 @@ export const MarketingModule = () => {
     .reduce((acc, curr) => acc + Math.round((curr.budget || 0) * ((curr.commissionPct || 2.5) / 100)), 0);
 
   const filteredLeads = leadsList.filter((l) => {
+    const searchLow = (search || '').toLowerCase();
     const matchesSearch =
-      l.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      l.unitInterest.toLowerCase().includes(search.toLowerCase()) ||
-      l.salesPerson.toLowerCase().includes(search.toLowerCase());
+      (l.customerName || '').toLowerCase().includes(searchLow) ||
+      (l.unitInterest || '').toLowerCase().includes(searchLow) ||
+      (l.salesPerson || '').toLowerCase().includes(searchLow);
     const matchesStage = statusFilter === 'All' || l.stage === statusFilter;
     return matchesSearch && matchesStage;
   });
 
   const filteredSales = salesList.filter((s) => {
+    const searchLow = (search || '').toLowerCase();
     const itemDate = s.bookingDate || s.sprOfficialState?.sprDate || '';
     const matchesSearch =
-      s.unitNo.toLowerCase().includes(search.toLowerCase()) ||
-      s.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      s.salesPerson.toLowerCase().includes(search.toLowerCase()) ||
-      itemDate.toLowerCase().includes(search.toLowerCase()) ||
-      (s.notes && s.notes.toLowerCase().includes(search.toLowerCase()));
+      (s.unitNo || '').toLowerCase().includes(searchLow) ||
+      (s.customerName || '').toLowerCase().includes(searchLow) ||
+      (s.salesPerson || '').toLowerCase().includes(searchLow) ||
+      itemDate.toLowerCase().includes(searchLow) ||
+      (s.notes && s.notes.toLowerCase().includes(searchLow));
 
     const matchesDate = !salesDateFilter || itemDate === salesDateFilter || itemDate.startsWith(salesDateFilter);
     return matchesSearch && matchesDate;
