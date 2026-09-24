@@ -1261,9 +1261,10 @@ export const MarketingModule = () => {
 
     // III. CARA PEMBAYARAN
     skemaRows: [
-      { id: 1, skema: 'Uang Tanda Jadi (Booking Fee)', jumlah: 10000000, jadwal: 'Saat Pemesanan', keterangan: 'Non-refundable' },
-      { id: 2, skema: 'Uang Muka (DP)', jumlah: 55000000, jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
-      { id: 3, skema: 'Pelunasan / Plafond KPR', jumlah: 585000000, jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra' }
+      { id: 1, skema: 'Uang Tanda Jadi (Booking)', jumlah: 0, jadwal: 'Saat Pemesanan', keterangan: 'Non-refundable' },
+      { id: 2, skema: 'Uang Muka (DP)', jumlah: 0, jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
+      { id: 3, skema: 'Discount', jumlah: 0, jadwal: '-', keterangan: 'Potongan Khusus' },
+      { id: 4, skema: 'Plafond Kredit', jumlah: 650000000, jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra', isAutoPlafond: true }
     ],
     termsRows: [
       { id: 1, text: 'Free BPHTB, AJB, BBN, IMB dan Peningkatan SHM' },
@@ -1284,7 +1285,7 @@ export const MarketingModule = () => {
         if (parsed.template === 'YSP' && (!parsed.logoUrl || parsed.logoUrl.includes('AP_Logo'))) {
           parsed.logoUrl = '/assets/img/ashoka_park_logo.png';
         }
-        if (!Array.isArray(parsed.skemaRows) || parsed.skemaRows.length === 0) {
+        if (!Array.isArray(parsed.skemaRows) || parsed.skemaRows.length === 0 || !parsed.skemaRows.some(r => r.skema && r.skema.toLowerCase().includes('discount'))) {
           parsed.skemaRows = getInitialSprOfficial().skemaRows;
         }
         if (!Array.isArray(parsed.termsRows) || parsed.termsRows.length === 0) {
@@ -1565,7 +1566,23 @@ export const MarketingModule = () => {
     const netUnit = Math.max(0, (Number(sprOfficial.hargaJual) || 0) - (Number(sprOfficial.discHargaJual) || 0));
     const netPlus = Math.max(0, (Number(sprOfficial.nilaiPenambahanLuas) || 0) - (Number(sprOfficial.discPenambahanLuas) || 0));
     const finalNet = netUnit + netPlus;
-    const bookingFee = (sprOfficial.skemaRows || [])[0]?.jumlah || 10000000;
+
+    const utj = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || sprOfficial.skemaRows?.[0]?.jumlah) || 0;
+    const dp = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || sprOfficial.skemaRows?.[1]?.jumlah) || 0;
+    const disc = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || sprOfficial.skemaRows?.[2]?.jumlah) || 0;
+    const otherSum = (sprOfficial.skemaRows || [])
+      .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+      .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+    const autoPlafond = Math.max(0, finalNet - utj - dp - disc - otherSum);
+
+    const savedSkemaRows = (sprOfficial.skemaRows || []).map(row => {
+      if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
+        return { ...row, jumlah: autoPlafond };
+      }
+      return row;
+    });
+
+    const bookingFee = utj || (sprOfficial.skemaRows || [])[0]?.jumlah || 10000000;
 
     let savedItem = null;
     let nextSalesList = [];
@@ -1584,7 +1601,7 @@ export const MarketingModule = () => {
             bookingFee: bookingFee,
             bookingDate: sprOfficial.sprDate,
             notes: `SPR No: ${sprOfficial.sprNumber}`,
-            sprOfficialState: { ...sprOfficial }
+            sprOfficialState: { ...sprOfficial, skemaRows: savedSkemaRows }
           };
           return savedItem;
         }
@@ -1613,7 +1630,7 @@ export const MarketingModule = () => {
         sprFileName: null,
         sprUploadDate: null,
         sprUploadedBy: null,
-        sprOfficialState: { ...sprOfficial }
+        sprOfficialState: { ...sprOfficial, skemaRows: savedSkemaRows }
       };
       nextSalesList = [savedItem, ...salesList];
       setSalesList(nextSalesList);
@@ -1657,9 +1674,10 @@ export const MarketingModule = () => {
         unitNo: u,
         hargaJual: item.hargaUnit || 650000000,
         skemaRows: [
-          { id: 1, skema: 'Uang Tanda Jadi (Booking Fee)', jumlah: item.bookingFee || 10000000, jadwal: item.bookingDate || 'Saat Pemesanan', keterangan: 'Non-refundable' },
-          { id: 2, skema: 'Uang Muka (DP)', jumlah: Math.round((item.hargaUnit || 650000000) * 0.1), jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
-          { id: 3, skema: 'Pelunasan / Plafond KPR', jumlah: Math.max(0, (item.hargaUnit || 650000000) - Math.round((item.hargaUnit || 650000000) * 0.1) - (item.bookingFee || 10000000)), jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra' }
+          { id: 1, skema: 'Uang Tanda Jadi (Booking)', jumlah: item.bookingFee || 0, jadwal: item.bookingDate || 'Saat Pemesanan', keterangan: 'Non-refundable' },
+          { id: 2, skema: 'Uang Muka (DP)', jumlah: 0, jadwal: 'Maks. 14 hari kerja', keterangan: 'Bank Transfer' },
+          { id: 3, skema: 'Discount', jumlah: 0, jadwal: '-', keterangan: 'Potongan Khusus' },
+          { id: 4, skema: 'Plafond Kredit', jumlah: Math.max(0, (item.hargaUnit || 650000000) - (item.bookingFee || 0)), jadwal: 'Saat Akad Kredit Bank', keterangan: 'KPR Bank Mitra', isAutoPlafond: true }
         ],
         termsRows: tpl.defaultTerms.map((t, idx) => ({ id: idx + 1, text: t }))
       });
@@ -1678,7 +1696,23 @@ export const MarketingModule = () => {
     const totalDisc = (Number(spr.discHargaJual) || 0) + (Number(spr.discPenambahanLuas) || 0);
     const totalNet = netUnit + netPlus;
     const totalLt = (Number(spr.luasTanah) || 0) + (Number(spr.penambahanLuasTanah) || 0);
-    const totalSkema = (spr.skemaRows || []).reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+
+    const utj = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || spr.skemaRows?.[0]?.jumlah) || 0;
+    const dp = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || spr.skemaRows?.[1]?.jumlah) || 0;
+    const disc = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || spr.skemaRows?.[2]?.jumlah) || 0;
+    const otherRowsSum = (spr.skemaRows || [])
+      .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+      .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+    const autoPlafond = Math.max(0, totalNet - utj - dp - disc - otherRowsSum);
+
+    const resolvedSkemaRows = (spr.skemaRows || []).map(row => {
+      if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
+        return { ...row, jumlah: autoPlafond };
+      }
+      return row;
+    });
+
+    const totalSkema = resolvedSkemaRows.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
     const escape = (val) => {
       if (val === null || val === undefined) return '';
@@ -1943,7 +1977,7 @@ export const MarketingModule = () => {
           </tr>
         </thead>
         <tbody>
-          ${(spr.skemaRows || []).map((row, idx) => `
+          ${resolvedSkemaRows.map((row, idx) => `
             <tr style="height: 15.5px;">
               <td style="border: 1px solid #000000; text-align: center;">${idx + 1}</td>
               <td style="border: 1px solid #000000; padding: 1px 5px;">${escape(row.skema)}</td>
@@ -2095,13 +2129,26 @@ export const MarketingModule = () => {
   };
 
   const handleAddSkemaRow = () => {
-    setSprOfficial(prev => ({
-      ...prev,
-      skemaRows: [
-        ...prev.skemaRows,
-        { id: Date.now(), skema: 'Tahap Pembayaran', jumlah: 0, jadwal: 'Sesuai Kesepakatan', keterangan: 'Bank Transfer' }
-      ]
-    }));
+    setSprOfficial(prev => {
+      const rows = [...(prev.skemaRows || [])];
+      const plafondIndex = rows.findIndex(r => r.isAutoPlafond || (r.skema && r.skema.toLowerCase().includes('plafond')));
+      const newRow = {
+        id: Date.now(),
+        skema: 'Tahap Pembayaran',
+        jumlah: 0,
+        jadwal: 'Sesuai Kesepakatan',
+        keterangan: 'Bank Transfer'
+      };
+      if (plafondIndex !== -1) {
+        rows.splice(plafondIndex, 0, newRow);
+      } else {
+        rows.push(newRow);
+      }
+      return {
+        ...prev,
+        skemaRows: rows
+      };
+    });
   };
 
   const handleDeleteSkemaRow = (id) => {
@@ -3134,7 +3181,23 @@ export const MarketingModule = () => {
         const sprTotalDisc = (Number(sprOfficial.discHargaJual) || 0) + (Number(sprOfficial.discPenambahanLuas) || 0);
         const sprTotalNet = sprNetUnit + sprNetLuasTambah;
         const sprTotalLt = (Number(sprOfficial.luasTanah) || 0) + (Number(sprOfficial.penambahanLuasTanah) || 0);
-        const sprTotalSkema = (sprOfficial.skemaRows || []).reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+
+        const sprUtj = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || sprOfficial.skemaRows?.[0]?.jumlah) || 0;
+        const sprDp = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || sprOfficial.skemaRows?.[1]?.jumlah) || 0;
+        const sprDisc = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || sprOfficial.skemaRows?.[2]?.jumlah) || 0;
+        const sprOtherRowsSum = (sprOfficial.skemaRows || [])
+          .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+          .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
+        const sprAutoPlafond = Math.max(0, sprTotalNet - sprUtj - sprDp - sprDisc - sprOtherRowsSum);
+
+        const resolvedSprSkemaRows = (sprOfficial.skemaRows || []).map(row => {
+          if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
+            return { ...row, jumlah: sprAutoPlafond };
+          }
+          return row;
+        });
+
+        const sprTotalSkema = resolvedSprSkemaRows.reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
 
         return (
           <div style={{ marginBottom: '2.5rem' }}>
@@ -4088,7 +4151,11 @@ export const MarketingModule = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(sprOfficial.skemaRows || []).map((row, idx) => (
+                        {(sprOfficial.skemaRows || []).map((row, idx) => {
+                          const isPlafondRow = row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'));
+                          const rowNominal = isPlafondRow ? sprAutoPlafond : (row.jumlah || 0);
+
+                          return (
                           <tr key={row.id}>
                             <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
                             <td>
@@ -4108,23 +4175,49 @@ export const MarketingModule = () => {
                               />
                             </td>
                             <td>
-                              <input
-                                type="number"
-                                className="form-control"
-                                value={row.jumlah || ''}
-                                onChange={(e) => {
-                                  const val = Number(e.target.value) || 0;
-                                  setSprOfficial(prev => ({
-                                    ...prev,
-                                    skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
-                                  }));
-                                }}
-                                placeholder="0"
-                                style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem', fontWeight: 800, color: '#34d399', textAlign: 'right' }}
-                              />
-                              <div style={{ fontSize: '0.68rem', color: '#94a3b8', textAlign: 'right', marginTop: '2px' }}>
-                                {formatRupiah(row.jumlah)}
-                              </div>
+                              {isPlafondRow ? (
+                                <div>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={formatRupiah(rowNominal)}
+                                    readOnly
+                                    title="Jumlah ini otomatis dihitung dari sisa harga net yang harus dibayar"
+                                    style={{
+                                      fontSize: '0.82rem',
+                                      padding: '0.45rem 0.65rem',
+                                      fontWeight: 900,
+                                      color: '#38bdf8',
+                                      background: 'rgba(56, 189, 248, 0.1)',
+                                      border: '1.5px solid #0284c7',
+                                      textAlign: 'right'
+                                    }}
+                                  />
+                                  <div style={{ fontSize: '0.66rem', color: '#38bdf8', textAlign: 'right', marginTop: '3px', fontWeight: 700 }}>
+                                    ⚡ Otomatis Sisa Wajib Bayar
+                                  </div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={row.jumlah || ''}
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value) || 0;
+                                      setSprOfficial(prev => ({
+                                        ...prev,
+                                        skemaRows: prev.skemaRows.map(r => r.id === row.id ? { ...r, jumlah: val } : r)
+                                      }));
+                                    }}
+                                    placeholder="0"
+                                    style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem', fontWeight: 800, color: '#34d399', textAlign: 'right' }}
+                                  />
+                                  <div style={{ fontSize: '0.68rem', color: '#94a3b8', textAlign: 'right', marginTop: '2px' }}>
+                                    {formatRupiah(row.jumlah)}
+                                  </div>
+                                </div>
+                              )}
                             </td>
                             <td>
                               <input
@@ -4169,7 +4262,8 @@ export const MarketingModule = () => {
                               </button>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -4177,13 +4271,23 @@ export const MarketingModule = () => {
                   {/* Summary Skema Pembayaran */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', padding: '0.85rem 1rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total Sisa Pembayaran: </span>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#34d399', marginLeft: '6px' }}>
-                        {formatRupiah(sprTotalSkema)}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>Plafond Kredit (Sisa yang Harus Dibayar): </span>
+                        <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#38bdf8', marginLeft: '4px' }}>
+                          {formatRupiah(sprAutoPlafond)}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
+                        Harga Net {formatRupiah(sprTotalNet)} - Booking {formatRupiah(sprUtj)} - DP {formatRupiah(sprDp)} - Disc {formatRupiah(sprDisc)}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>
-                      Terbilang: "{terbilang(sprTotalSkema)}"
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                        Total Keseluruhan: <span style={{ color: '#ffffff', fontWeight: 800 }}>{formatRupiah(sprTotalSkema)}</span>
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#fbbf24', fontStyle: 'italic', marginTop: '2px' }}>
+                        Terbilang: "{terbilang(sprTotalSkema)}"
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -4732,7 +4836,7 @@ export const MarketingModule = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {(sprOfficial.skemaRows || []).map((row, idx) => (
+                    {resolvedSprSkemaRows.map((row, idx) => (
                       <tr key={row.id} style={{ height: '19px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.skema}</td>
