@@ -1953,7 +1953,7 @@ export const MarketingModule = () => {
             </tr>
           `).join('')}
           <tr style="height: 18px; background: ${accentColor}; color: #ffffff; font-weight: 800;">
-            <td colspan="2" style="border: 1px solid #000000; text-align: center;">Total Pembayaran</td>
+            <td colspan="2" style="border: 1px solid #000000; text-align: center;">Total Sisa Pembayaran</td>
             <td style="border: 1px solid #000000; text-align: right; padding: 2px 5px; font-weight: 900;">${totalSkema > 0 ? fmtRupiah(totalSkema) : '-'}</td>
             <td style="border: 1px solid #000000;"></td>
             <td style="border: 1px solid #000000;"></td>
@@ -4177,7 +4177,7 @@ export const MarketingModule = () => {
                   {/* Summary Skema Pembayaran */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', padding: '0.85rem 1rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
                     <div>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total Nominal Skema Pembayaran: </span>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total Sisa Pembayaran: </span>
                       <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#34d399', marginLeft: '6px' }}>
                         {formatRupiah(sprTotalSkema)}
                       </span>
@@ -4745,7 +4745,7 @@ export const MarketingModule = () => {
                     ))}
                     {/* Row Total */}
                     <tr style={{ height: '20px', fontWeight: 800, background: sprOfficial.headerAccentColor, color: '#ffffff' }}>
-                      <td colSpan={2} style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'center' }}>Total Pembayaran</td>
+                      <td colSpan={2} style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'center' }}>Total Sisa Pembayaran</td>
                       <td style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'right', fontWeight: 900 }}>
                         {sprTotalSkema > 0 ? formatRupiah(sprTotalSkema) : '-'}
                       </td>
