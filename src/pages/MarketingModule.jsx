@@ -4172,7 +4172,7 @@ export const MarketingModule = () => {
                             <td style={{ textAlign: 'center', fontWeight: 800, paddingBottom: '0.85rem' }}>{idx + 1}</td>
                             <td style={{ verticalAlign: 'bottom' }}>
                               {isPlafondRow && (
-                                <div style={{ fontSize: '0.71rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                                <div style={{ fontSize: '0.71rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', paddingLeft: '2px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '5px' }}>
                                   <span>Total Pengurangan:</span>
                                   <span style={{ color: '#fbbf24' }}>{formatRupiah(sprTotalPengurangan)}</span>
                                   <span style={{ color: '#cbd5e1', fontSize: '0.68rem', fontWeight: 600 }}>
@@ -4364,40 +4364,50 @@ export const MarketingModule = () => {
                   <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <CheckCircle2 size={18} /> 7. Pihak Penandatangan SPR
                   </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Admin Marketing</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={sprOfficial.adminMarketing}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, adminMarketing: e.target.value })}
-                        placeholder="Amanda Chesyariani Hermawan"
-                        style={{ fontWeight: 700 }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Marketing</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={sprOfficial.spv}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, spv: e.target.value })}
-                        placeholder="Yulieka"
-                        style={{ fontWeight: 700 }}
-                      />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem' }}>Konsumen / Pemesan</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={sprOfficial.consumerSignName || sprOfficial.customerName}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, consumerSignName: e.target.value })}
-                        placeholder="Nama Konsumen"
-                        style={{ fontWeight: 700 }}
-                      />
-                    </div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
+                      <thead>
+                        <tr>
+                          <th style={{ width: '33.33%' }}>Admin Marketing</th>
+                          <th style={{ width: '33.33%' }}>Marketing</th>
+                          <th style={{ width: '33.33%' }}>Konsumen / Pemesan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={sprOfficial.adminMarketing}
+                              onChange={(e) => setSprOfficial({ ...sprOfficial, adminMarketing: e.target.value })}
+                              placeholder="Amanda Chesyariani Hermawan"
+                              style={{ fontWeight: 700, fontSize: '0.86rem' }}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={sprOfficial.spv}
+                              onChange={(e) => setSprOfficial({ ...sprOfficial, spv: e.target.value })}
+                              placeholder="Yulieka"
+                              style={{ fontWeight: 700, fontSize: '0.86rem' }}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={sprOfficial.consumerSignName || sprOfficial.customerName}
+                              onChange={(e) => setSprOfficial({ ...sprOfficial, consumerSignName: e.target.value })}
+                              placeholder="Nama Konsumen"
+                              style={{ fontWeight: 700, fontSize: '0.86rem' }}
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
