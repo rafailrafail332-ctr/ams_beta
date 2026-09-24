@@ -4029,40 +4029,45 @@ export const MarketingModule = () => {
 
                 {/* CARD 4: RINCIAN HARGA & NILAI BOOKING / DISKON */}
                 <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}>
-                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#eab308', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <DollarSign size={18} /> 4. Rincian Harga Jual & Diskon Transaksi
+                  <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 800, color: '#eab308' }}>
+                    4. Rincian Harga Jual & Diskon Transaksi
                   </h4>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                     {/* Harga Jual */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ fontSize: '0.78rem' }}>Harga Jual Unit (Rp)</label>
                       <input
-                        type="number"
+                        type="text"
                         className="form-control"
-                        value={sprOfficial.hargaJual || ''}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, hargaJual: Number(e.target.value) || 0 })}
-                        placeholder="650000000"
-                        style={{ fontWeight: 700 }}
+                        value={sprOfficial.hargaJual ? Number(sprOfficial.hargaJual).toLocaleString('en-US') : ''}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          setSprOfficial({ ...sprOfficial, hargaJual: raw ? parseInt(raw, 10) : 0 });
+                        }}
+                        placeholder="0"
+                        style={{ fontWeight: 700, textAlign: 'right' }}
                       />
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.hargaJual)}</div>
                     </div>
                     {/* Diskon Harga Jual */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ fontSize: '0.78rem' }}>Diskon Unit Rumah (Rp)</label>
                       <input
-                        type="number"
+                        type="text"
                         className="form-control"
-                        value={sprOfficial.discHargaJual || ''}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, discHargaJual: Number(e.target.value) || 0 })}
+                        value={sprOfficial.discHargaJual ? Number(sprOfficial.discHargaJual).toLocaleString('en-US') : ''}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          setSprOfficial({ ...sprOfficial, discHargaJual: raw ? parseInt(raw, 10) : 0 });
+                        }}
                         placeholder="0"
+                        style={{ fontWeight: 700, textAlign: 'right' }}
                       />
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.discHargaJual)}</div>
                     </div>
                     {/* Net Harga Jual Unit */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Unit Rumah</label>
-                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0' }}>
-                        {formatRupiah(sprNetUnit)}
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Unit Rumah (Rp)</label>
+                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0', textAlign: 'right' }}>
+                        {sprNetUnit ? Number(sprNetUnit).toLocaleString('en-US') : '0'}
                       </div>
                     </div>
 
@@ -4070,31 +4075,37 @@ export const MarketingModule = () => {
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ fontSize: '0.78rem' }}>Nilai Penambahan Luas Tanah (Rp)</label>
                       <input
-                        type="number"
+                        type="text"
                         className="form-control"
-                        value={sprOfficial.nilaiPenambahanLuas || ''}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, nilaiPenambahanLuas: Number(e.target.value) || 0 })}
+                        value={sprOfficial.nilaiPenambahanLuas ? Number(sprOfficial.nilaiPenambahanLuas).toLocaleString('en-US') : ''}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          setSprOfficial({ ...sprOfficial, nilaiPenambahanLuas: raw ? parseInt(raw, 10) : 0 });
+                        }}
                         placeholder="0"
+                        style={{ fontWeight: 700, textAlign: 'right' }}
                       />
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.nilaiPenambahanLuas)}</div>
                     </div>
                     {/* Diskon Penambahan Luas */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label" style={{ fontSize: '0.78rem' }}>Diskon Penambahan Luas (Rp)</label>
                       <input
-                        type="number"
+                        type="text"
                         className="form-control"
-                        value={sprOfficial.discPenambahanLuas || ''}
-                        onChange={(e) => setSprOfficial({ ...sprOfficial, discPenambahanLuas: Number(e.target.value) || 0 })}
+                        value={sprOfficial.discPenambahanLuas ? Number(sprOfficial.discPenambahanLuas).toLocaleString('en-US') : ''}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '');
+                          setSprOfficial({ ...sprOfficial, discPenambahanLuas: raw ? parseInt(raw, 10) : 0 });
+                        }}
                         placeholder="0"
+                        style={{ fontWeight: 700, textAlign: 'right' }}
                       />
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>{formatRupiah(sprOfficial.discPenambahanLuas)}</div>
                     </div>
                     {/* Net Nilai Penambahan */}
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Penambahan Luas</label>
-                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0' }}>
-                        {formatRupiah(sprNetLuasTambah)}
+                      <label className="form-label" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Harga Net Penambahan Luas (Rp)</label>
+                      <div style={{ padding: '0.65rem 0.95rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', fontWeight: 800, color: '#e2e8f0', textAlign: 'right' }}>
+                        {sprNetLuasTambah ? Number(sprNetLuasTambah).toLocaleString('en-US') : '0'}
                       </div>
                     </div>
                   </div>
@@ -4157,9 +4168,9 @@ export const MarketingModule = () => {
                           const rowNominal = isPlafondRow ? sprAutoPlafond : (row.jumlah || 0);
 
                           return (
-                          <tr key={row.id}>
-                            <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
-                            <td>
+                          <tr key={row.id} style={{ verticalAlign: 'bottom' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 800, paddingBottom: '0.85rem' }}>{idx + 1}</td>
+                            <td style={{ verticalAlign: 'bottom' }}>
                               {isPlafondRow && (
                                 <div style={{ fontSize: '0.71rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                   <span>Total Pengurangan:</span>
@@ -4184,29 +4195,24 @@ export const MarketingModule = () => {
                                 style={{ fontSize: '0.82rem', padding: '0.45rem 0.65rem' }}
                               />
                             </td>
-                            <td>
+                            <td style={{ verticalAlign: 'bottom' }}>
                               {isPlafondRow ? (
-                                <div>
-                                  <div style={{ fontSize: '0.71rem', color: '#38bdf8', textAlign: 'right', marginBottom: '4px', fontWeight: 700 }}>
-                                    ⚡ Otomatis Sisa Wajib Bayar
-                                  </div>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    value={formatRupiah(rowNominal)}
-                                    readOnly
-                                    title="Jumlah ini otomatis dihitung dari sisa harga net yang harus dibayar"
-                                    style={{
-                                      fontSize: '0.82rem',
-                                      padding: '0.45rem 0.65rem',
-                                      fontWeight: 900,
-                                      color: '#38bdf8',
-                                      background: 'rgba(56, 189, 248, 0.1)',
-                                      border: '1.5px solid #0284c7',
-                                      textAlign: 'right'
-                                    }}
-                                  />
-                                </div>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={rowNominal ? Number(rowNominal).toLocaleString('en-US') : '0'}
+                                  readOnly
+                                  title="Jumlah ini otomatis dihitung dari sisa harga net yang harus dibayar"
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    padding: '0.45rem 0.65rem',
+                                    fontWeight: 900,
+                                    color: '#38bdf8',
+                                    background: 'rgba(56, 189, 248, 0.1)',
+                                    border: '1.5px solid #0284c7',
+                                    textAlign: 'right'
+                                  }}
+                                />
                               ) : (
                                 <div>
                                   <input
