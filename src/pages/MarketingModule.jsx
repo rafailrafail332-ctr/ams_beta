@@ -1568,12 +1568,10 @@ export const MarketingModule = () => {
     const finalNet = netUnit + netPlus;
 
     const utj = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || sprOfficial.skemaRows?.[0]?.jumlah) || 0;
-    const dp = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || sprOfficial.skemaRows?.[1]?.jumlah) || 0;
-    const disc = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || sprOfficial.skemaRows?.[2]?.jumlah) || 0;
-    const otherSum = (sprOfficial.skemaRows || [])
-      .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+    const totalPengurangan = (sprOfficial.skemaRows || [])
+      .filter(r => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')))
       .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
-    const autoPlafond = Math.max(0, finalNet - utj - dp - disc - otherSum);
+    const autoPlafond = Math.max(0, finalNet - totalPengurangan);
 
     const savedSkemaRows = (sprOfficial.skemaRows || []).map(row => {
       if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
@@ -1698,12 +1696,10 @@ export const MarketingModule = () => {
     const totalLt = (Number(spr.luasTanah) || 0) + (Number(spr.penambahanLuasTanah) || 0);
 
     const utj = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || spr.skemaRows?.[0]?.jumlah) || 0;
-    const dp = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || spr.skemaRows?.[1]?.jumlah) || 0;
-    const disc = Number(spr.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || spr.skemaRows?.[2]?.jumlah) || 0;
-    const otherRowsSum = (spr.skemaRows || [])
-      .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+    const totalPengurangan = (spr.skemaRows || [])
+      .filter(r => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')))
       .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
-    const autoPlafond = Math.max(0, totalNet - utj - dp - disc - otherRowsSum);
+    const autoPlafond = Math.max(0, totalNet - totalPengurangan);
 
     const resolvedSkemaRows = (spr.skemaRows || []).map(row => {
       if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
@@ -1977,15 +1973,20 @@ export const MarketingModule = () => {
           </tr>
         </thead>
         <tbody>
-          ${resolvedSkemaRows.map((row, idx) => `
+          ${resolvedSkemaRows.map((row, idx) => {
+            const isPlafond = row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'));
+            return `
             <tr style="height: 15.5px;">
               <td style="border: 1px solid #000000; text-align: center;">${idx + 1}</td>
-              <td style="border: 1px solid #000000; padding: 1px 5px;">${escape(row.skema)}</td>
+              <td style="border: 1px solid #000000; padding: 1px 5px;">
+                ${isPlafond ? `<div style="font-size: 6.5px; color: #b45309; font-weight: 700; line-height: 1.1; margin-bottom: 1px;">Total Pengurangan: ${fmtRupiah(totalPengurangan)}</div>` : ''}
+                <div>${escape(row.skema)}</div>
+              </td>
               <td style="border: 1px solid #000000; text-align: right; padding: 1px 5px; font-weight: 700;">${Number(row.jumlah) > 0 ? fmtRupiah(row.jumlah) : '-'}</td>
               <td style="border: 1px solid #000000; padding: 1px 5px;">${escape(row.jadwal)}</td>
               <td style="border: 1px solid #000000; padding: 1px 5px;">${escape(row.keterangan)}</td>
             </tr>
-          `).join('')}
+          `}).join('')}
           <tr style="height: 18px; background: ${accentColor}; color: #ffffff; font-weight: 800;">
             <td colspan="2" style="border: 1px solid #000000; text-align: center;">Total Sisa Pembayaran</td>
             <td style="border: 1px solid #000000; text-align: right; padding: 2px 5px; font-weight: 900;">${totalSkema > 0 ? fmtRupiah(totalSkema) : '-'}</td>
@@ -3185,10 +3186,10 @@ export const MarketingModule = () => {
         const sprUtj = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('tanda jadi'))?.jumlah || sprOfficial.skemaRows?.[0]?.jumlah) || 0;
         const sprDp = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('uang muka'))?.jumlah || sprOfficial.skemaRows?.[1]?.jumlah) || 0;
         const sprDisc = Number(sprOfficial.skemaRows?.find(r => r.skema && r.skema.toLowerCase().includes('discount'))?.jumlah || sprOfficial.skemaRows?.[2]?.jumlah) || 0;
-        const sprOtherRowsSum = (sprOfficial.skemaRows || [])
-          .filter((r, i) => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')) && i > 2)
+        const sprTotalPengurangan = (sprOfficial.skemaRows || [])
+          .filter(r => !r.isAutoPlafond && !(r.skema && r.skema.toLowerCase().includes('plafond')))
           .reduce((acc, curr) => acc + (Number(curr.jumlah) || 0), 0);
-        const sprAutoPlafond = Math.max(0, sprTotalNet - sprUtj - sprDp - sprDisc - sprOtherRowsSum);
+        const sprAutoPlafond = Math.max(0, sprTotalNet - sprTotalPengurangan);
 
         const resolvedSprSkemaRows = (sprOfficial.skemaRows || []).map(row => {
           if (row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'))) {
@@ -4159,6 +4160,12 @@ export const MarketingModule = () => {
                           <tr key={row.id}>
                             <td style={{ textAlign: 'center', fontWeight: 800 }}>{idx + 1}</td>
                             <td>
+                              {isPlafondRow && (
+                                <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 800, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <span>Total Pengurangan:</span>
+                                  <span style={{ color: '#fbbf24' }}>{formatRupiah(sprTotalPengurangan)}</span>
+                                </div>
+                              )}
                               <input
                                 type="text"
                                 className="form-control"
@@ -4177,6 +4184,9 @@ export const MarketingModule = () => {
                             <td>
                               {isPlafondRow ? (
                                 <div>
+                                  <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 800, textAlign: 'right', marginBottom: '4px' }}>
+                                    Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
+                                  </div>
                                   <input
                                     type="text"
                                     className="form-control"
@@ -4272,13 +4282,16 @@ export const MarketingModule = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', padding: '0.85rem 1rem', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>Plafond Kredit (Sisa yang Harus Dibayar): </span>
+                        <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>Nominal Sisa Pembayaran: </span>
                         <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#38bdf8', marginLeft: '4px' }}>
                           {formatRupiah(sprAutoPlafond)}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
-                        Harga Net {formatRupiah(sprTotalNet)} - Booking {formatRupiah(sprUtj)} - DP {formatRupiah(sprDp)} - Disc {formatRupiah(sprDisc)}
+                      <div style={{ fontSize: '0.72rem', color: '#fbbf24', marginTop: '3px', fontWeight: 700 }}>
+                        Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                        Harga Net {formatRupiah(sprTotalNet)} - Total Pengurangan {formatRupiah(sprTotalPengurangan)} = {formatRupiah(sprAutoPlafond)}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -4836,17 +4849,27 @@ export const MarketingModule = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {resolvedSprSkemaRows.map((row, idx) => (
+                    {resolvedSprSkemaRows.map((row, idx) => {
+                      const isPlafond = row.isAutoPlafond || (row.skema && row.skema.toLowerCase().includes('plafond'));
+                      return (
                       <tr key={row.id} style={{ height: '19px' }}>
                         <td style={{ border: '1px solid #000000', padding: '2px 4px', textAlign: 'center' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.skema}</td>
+                        <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>
+                          {isPlafond && (
+                            <div style={{ fontSize: '7px', color: '#b45309', fontWeight: 700, lineHeight: 1.1, marginBottom: '1px' }}>
+                              Total Pengurangan: {formatRupiah(sprTotalPengurangan)}
+                            </div>
+                          )}
+                          <div>{row.skema}</div>
+                        </td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px', textAlign: 'right', fontWeight: 700 }}>
                           {Number(row.jumlah) > 0 ? formatRupiah(row.jumlah) : '-'}
                         </td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.jadwal}</td>
                         <td style={{ border: '1px solid #000000', padding: '1px 6px' }}>{row.keterangan}</td>
                       </tr>
-                    ))}
+                      );
+                    })}
                     {/* Row Total */}
                     <tr style={{ height: '20px', fontWeight: 800, background: sprOfficial.headerAccentColor, color: '#ffffff' }}>
                       <td colSpan={2} style={{ border: '1px solid #000000', padding: '2px 6px', textAlign: 'center' }}>Total Sisa Pembayaran</td>
