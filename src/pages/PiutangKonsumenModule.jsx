@@ -174,6 +174,7 @@ export const PiutangKonsumenModule = () => {
 
   // Receipt Modal State
   const [receiptData, setReceiptData] = useState(null);
+  const [kwitansiSelectRow, setKwitansiSelectRow] = useState(null);
 
   // Formatting helpers
   const formatRupiah = (val) => {
@@ -594,11 +595,335 @@ export const PiutangKonsumenModule = () => {
     showNotification('Data piutang konsumen berhasil dihapus.', 'info');
   };
 
-  // Print Kwitansi
+  // Helper Terbilang Bahasa Indonesia
+  const terbilang = (n) => {
+    const bilangan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+    const num = Math.floor(Math.abs(Number(n) || 0));
+    if (num === 0) return 'Nol Rupiah';
+
+    const convert = (x) => {
+      if (x < 12) return bilangan[x];
+      if (x < 20) return convert(x - 10) + ' Belas';
+      if (x < 100) return convert(Math.floor(x / 10)) + ' Puluh' + (x % 10 !== 0 ? ' ' + convert(x % 10) : '');
+      if (x < 200) return 'Seratus' + (x - 100 !== 0 ? ' ' + convert(x - 100) : '');
+      if (x < 1000) return convert(Math.floor(x / 100)) + ' Ratus' + (x % 100 !== 0 ? ' ' + convert(x % 100) : '');
+      if (x < 2000) return 'Seribu' + (x - 1000 !== 0 ? ' ' + convert(x - 1000) : '');
+      if (x < 1000000) return convert(Math.floor(x / 1000)) + ' Ribu' + (x % 1000 !== 0 ? ' ' + convert(x % 1000) : '');
+      if (x < 1000000000) return convert(Math.floor(x / 1000000)) + ' Juta' + (x % 1000000 !== 0 ? ' ' + convert(x % 1000000) : '');
+      if (x < 1000000000000) return convert(Math.floor(x / 1000000000)) + ' Milyar' + (x % 1000000000 !== 0 ? ' ' + convert(x % 1000000000) : '');
+      return convert(Math.floor(x / 1000000000000)) + ' Triliun' + (x % 1000000000000 !== 0 ? ' ' + convert(x % 1000000000000) : '');
+    };
+
+    return convert(num).trim() + ' Rupiah';
+  };
+
+  const formatTanggalIndo = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length < 3) return dateStr;
+    const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const day = parseInt(parts[2], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parts[0];
+    return `${day} ${monthNames[month] || month} ${year}`;
+  };
+
+  const generateKwitansiPrintHtml = ({ payment, type, row, kwitansiNo }) => {
+    const terbilangText = terbilang(payment.jumlah);
+    const tanggalIndo = formatTanggalIndo(payment.tanggal || new Date().toISOString().split('T')[0]);
+    const companyName = row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA';
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Kwitansi - ${kwitansiNo} - ${row.namaKonsumen}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 15mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 15px;
+    }
+    .kwitansi-card {
+      border: 3px double #92400e;
+      border-radius: 8px;
+      padding: 24px 30px;
+      background: #ffffff;
+      max-width: 820px;
+      margin: 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .k-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #b45309;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .company-name {
+      font-size: 20px;
+      font-weight: 900;
+      color: #92400e;
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+    .company-sub {
+      font-size: 11px;
+      color: #4b5563;
+      margin-top: 2px;
+    }
+    .title-box {
+      text-align: right;
+    }
+    .title-kwitansi {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-decoration: underline;
+      margin: 0;
+      color: #000000;
+    }
+    .no-kwitansi {
+      font-size: 12px;
+      font-weight: 800;
+      color: #b45309;
+      margin-top: 3px;
+    }
+    .k-row {
+      display: flex;
+      margin-bottom: 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+    .k-label {
+      width: 175px;
+      font-weight: 800;
+      color: #1f2937;
+      flex-shrink: 0;
+    }
+    .k-colon {
+      width: 15px;
+      font-weight: 800;
+    }
+    .k-val {
+      flex: 1;
+      border-bottom: 1px dashed #9ca3af;
+      padding-bottom: 2px;
+    }
+    .terbilang-box {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      padding: 7px 14px;
+      border-radius: 5px;
+      font-style: italic;
+      font-weight: 800;
+      color: #92400e;
+      font-size: 13.5px;
+    }
+    .nominal-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 20px;
+      padding-top: 10px;
+    }
+    .nominal-box {
+      display: inline-block;
+      border: 2px solid #000;
+      background: #f1f5f9;
+      padding: 10px 22px;
+      font-size: 21px;
+      font-weight: 900;
+      color: #047857;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .summary-strip {
+      margin-top: 14px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 11.5px;
+      display: flex;
+      justify-content: space-between;
+      color: #334155;
+    }
+    .signs {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      padding-top: 10px;
+    }
+    .sign-col {
+      width: 220px;
+      text-align: center;
+      font-size: 12.5px;
+    }
+    .sign-space {
+      height: 65px;
+    }
+    .sign-person {
+      font-weight: 800;
+      border-bottom: 1px solid #000;
+      padding-bottom: 3px;
+      font-size: 13px;
+    }
+    .stamp-pill {
+      display: inline-block;
+      border: 2px solid #059669;
+      color: #059669;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    @media print {
+      body { padding: 0; }
+      .kwitansi-card { box-shadow: none; max-width: 100%; border: 2px solid #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="kwitansi-card">
+    <div class="k-header">
+      <div>
+        <h1 class="company-name">${companyName}</h1>
+        <div class="company-sub">DEVELOPER & REAL ESTATE • ASHOKA RESIDENCE</div>
+        <div class="company-sub">Ruko Ashoka View, Jl. Pemuda No. 142, Kota Semarang • Telp: (024) 845-9988</div>
+      </div>
+      <div class="title-box">
+        <h2 class="title-kwitansi">KWITANSI</h2>
+        <div class="no-kwitansi">${kwitansiNo}</div>
+      </div>
+    </div>
+
+    <div class="k-row">
+      <div class="k-label">Telah Terima Dari</div>
+      <div class="k-colon">:</div>
+      <div class="k-val" style="font-size: 15px; font-weight: 900; text-transform: uppercase;">
+        ${row.namaKonsumen}
+      </div>
+    </div>
+
+    <div class="k-row" style="align-items: center;">
+      <div class="k-label">Uang Sejumlah</div>
+      <div class="k-colon">:</div>
+      <div class="k-val" style="border: none;">
+        <div class="terbilang-box">
+          # ${terbilangText} #
+        </div>
+      </div>
+    </div>
+
+    <div class="k-row">
+      <div class="k-label">Untuk Pembayaran</div>
+      <div class="k-colon">:</div>
+      <div class="k-val">
+        <strong>Pembayaran ${type}</strong> untuk pembelian unit properti <strong>${row.proyek}</strong>, 
+        Blok <strong>${row.blok}</strong> No. <strong>${row.noUnit}</strong> (Tipe ${row.type}, LB: ${row.lb} m², LT: ${row.ltTotal} m²).
+        ${payment.keterangan ? `<br/><span style="color: #4b5563; font-size: 12px;">Keterangan Berita: ${payment.keterangan}</span>` : ''}
+      </div>
+    </div>
+
+    <div class="summary-strip">
+      <span>Harga Net: <strong>${formatRupiah(row.hargaJualNet)}</strong></span>
+      <span>Booking: <strong>${formatRupiah(row.booking)}</strong></span>
+      <span>DP: <strong>${formatRupiah(row.totalDp)}</strong></span>
+      <span>Angsuran: <strong>${formatRupiah(row.totalAngsuran)}</strong></span>
+      <span>Sisa Saldo: <strong style="color: ${row.saldo <= 0 ? '#059669' : '#b45309'}">${row.saldo <= 0 ? 'LUNAS (Rp 0)' : formatRupiah(row.saldo)}</strong></span>
+    </div>
+
+    <div class="nominal-container">
+      <div>
+        <div style="font-size: 11px; color: #4b5563; font-weight: 800; margin-bottom: 4px;">JUMLAH:</div>
+        <div class="nominal-box">
+          Rp ${Number(payment.jumlah || 0).toLocaleString('id-ID')},-
+        </div>
+      </div>
+
+      <div style="text-align: right; font-size: 12.5px; color: #374151;">
+        Semarang, ${tanggalIndo}
+      </div>
+    </div>
+
+    <div class="signs">
+      <div class="sign-col">
+        <div>Penyetor / Konsumen,</div>
+        <div class="sign-space"></div>
+        <div class="sign-person">${row.namaKonsumen}</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 3px;">Pembeli Unit</div>
+      </div>
+
+      <div class="sign-col">
+        <div>Finance & Kasir,</div>
+        <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
+          <span class="stamp-pill">✓ LUNAS TERCATAT</span>
+        </div>
+        <div class="sign-person">${companyName}</div>
+        <div style="font-size: 11px; color: #6b7280; margin-top: 3px;">Bagian Keuangan & Kasir</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+  };
+
+  // Cetak Kwitansi Langsung (Isolated iframe Print)
+  const handlePrintKwitansiDirect = (payment, type, row) => {
+    let iframe = document.getElementById('kwitansi-print-isolated-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'kwitansi-print-isolated-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '900px';
+      iframe.style.height = '1200px';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    const tgl = payment.tanggal || new Date().toISOString().split('T')[0];
+    const kwitansiNo = `KW/${row.proyek?.includes('Park') ? 'YSP' : 'YGP'}/${tgl.slice(0, 4)}/${tgl.slice(5, 7)}/${String(Math.floor(100 + Math.random() * 900))}`;
+
+    const html = generateKwitansiPrintHtml({
+      payment,
+      type,
+      row,
+      kwitansiNo
+    });
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }, 400);
+  };
+
+  // Buka Modal Cetak / Pilih Kwitansi dari Baris Tabel
+  const handleOpenKwitansiModal = (row) => {
+    setKwitansiSelectRow(getCalculatedRow(row));
+  };
+
+  // Print Kwitansi Preview Modal
   const handlePrintReceipt = (payment, type, row) => {
     setReceiptData({
       payment,
-      type, // 'DP' or 'Angsuran'
+      type,
       row
     });
   };
@@ -1166,7 +1491,7 @@ export const PiutangKonsumenModule = () => {
                   style={{
                     padding: '11px 10px',
                     border: '1px solid #b45309',
-                    minWidth: '120px',
+                    minWidth: '200px',
                     textAlign: 'center',
                     background: '#047857'
                   }}
@@ -1345,6 +1670,29 @@ export const PiutangKonsumenModule = () => {
                           }}
                         >
                           <CreditCard size={13} /> Bayar
+                        </button>
+
+                        {/* TOMBOL CETAK KWITANSI (PILIH JENIS KWITANSI) */}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenKwitansiModal(row)}
+                          title="Cetak Bukti Kwitansi (Booking / DP / Angsuran / Rekap)"
+                          style={{
+                            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                            border: '1px solid #38bdf8',
+                            color: '#ffffff',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            padding: '4px 9px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                          }}
+                        >
+                          <Printer size={13} /> Kwitansi
                         </button>
 
                         {/* Edit Baris */}
@@ -1769,7 +2117,7 @@ export const PiutangKonsumenModule = () => {
                           <th style={{ width: '120px' }}>Tanggal</th>
                           <th style={{ width: '150px', textAlign: 'right' }}>Jumlah (Rp)</th>
                           <th>Keterangan</th>
-                          <th style={{ width: '110px', textAlign: 'center' }}>Aksi</th>
+                          <th style={{ width: '150px', textAlign: 'center' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1785,18 +2133,38 @@ export const PiutangKonsumenModule = () => {
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                 <button
                                   type="button"
-                                  onClick={() => handlePrintReceipt(p, 'DP (Uang Muka)', activePaymentRow)}
-                                  title="Cetak Bukti Kwitansi"
+                                  onClick={() => handlePrintKwitansiDirect(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
+                                  title="Cetak Bukti Kwitansi DP Ini"
+                                  style={{
+                                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                    border: '1px solid #38bdf8',
+                                    color: '#ffffff',
+                                    fontWeight: 800,
+                                    fontSize: '0.72rem',
+                                    borderRadius: '4px',
+                                    padding: '3px 8px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  <Printer size={12} /> Kwitansi
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePrintReceipt(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
+                                  title="Preview Kwitansi DP"
                                   style={{
                                     background: '#1e293b',
-                                    border: '1px solid #38bdf8',
-                                    color: '#38bdf8',
+                                    border: '1px solid #475569',
+                                    color: '#cbd5e1',
                                     borderRadius: '4px',
-                                    padding: '3px 7px',
+                                    padding: '3px 6px',
                                     cursor: 'pointer'
                                   }}
                                 >
-                                  <Printer size={12} />
+                                  <Eye size={12} />
                                 </button>
                                 <button
                                   type="button"
@@ -1954,7 +2322,7 @@ export const PiutangKonsumenModule = () => {
                           <th style={{ width: '120px' }}>Tanggal</th>
                           <th style={{ width: '150px', textAlign: 'right' }}>Jumlah (Rp)</th>
                           <th>Keterangan</th>
-                          <th style={{ width: '110px', textAlign: 'center' }}>Aksi</th>
+                          <th style={{ width: '150px', textAlign: 'center' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1970,18 +2338,38 @@ export const PiutangKonsumenModule = () => {
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                                 <button
                                   type="button"
-                                  onClick={() => handlePrintReceipt(p, 'Angsuran', activePaymentRow)}
-                                  title="Cetak Bukti Kwitansi"
+                                  onClick={() => handlePrintKwitansiDirect(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
+                                  title="Cetak Bukti Kwitansi Angsuran Ini"
+                                  style={{
+                                    background: 'linear-gradient(135deg, #7e22ce, #6b21a8)',
+                                    border: '1px solid #c084fc',
+                                    color: '#ffffff',
+                                    fontWeight: 800,
+                                    fontSize: '0.72rem',
+                                    borderRadius: '4px',
+                                    padding: '3px 8px',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  <Printer size={12} /> Kwitansi
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePrintReceipt(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
+                                  title="Preview Kwitansi Angsuran"
                                   style={{
                                     background: '#1e293b',
-                                    border: '1px solid #38bdf8',
-                                    color: '#38bdf8',
+                                    border: '1px solid #475569',
+                                    color: '#cbd5e1',
                                     borderRadius: '4px',
-                                    padding: '3px 7px',
+                                    padding: '3px 6px',
                                     cursor: 'pointer'
                                   }}
                                 >
-                                  <Printer size={12} />
+                                  <Eye size={12} />
                                 </button>
                                 <button
                                   type="button"
@@ -2362,7 +2750,499 @@ export const PiutangKonsumenModule = () => {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* MODAL PRINT KWITANSI PEMBAYARAN                              */}
+      {/* MODAL PILIH & CETAK KWITANSI (BOOKING, DP, ANGSURAN, REKAP)  */}
+      {/* ------------------------------------------------------------- */}
+      {kwitansiSelectRow && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.82)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 999990,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+        >
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '740px',
+              background: '#0f172a',
+              border: '1px solid #38bdf8',
+              borderRadius: '14px',
+              padding: '1.75rem',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+              color: '#f8fafc',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}
+          >
+            {/* Header Modal */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #334155', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1.4rem' }}>🖨️</span>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8' }}>
+                    Cetak Bukti Kwitansi Pembayaran
+                  </h3>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
+                  Konsumen: <strong style={{ color: '#ffffff' }}>{kwitansiSelectRow.namaKonsumen}</strong> • Properti: <strong style={{ color: '#fbbf24' }}>{kwitansiSelectRow.proyek} - Blok {kwitansiSelectRow.blok} No. {kwitansiSelectRow.noUnit}</strong> (Tipe {kwitansiSelectRow.type})
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setKwitansiSelectRow(null)}
+                style={{
+                  background: '#1e293b',
+                  border: '1px solid #475569',
+                  color: '#94a3b8',
+                  borderRadius: '6px',
+                  padding: '6px 10px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  lineHeight: 1
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Summary Box */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', background: '#1e293b', padding: '12px 14px', borderRadius: '8px', border: '1px solid #334155', marginBottom: '1.5rem', fontSize: '0.78rem' }}>
+              <div>
+                <div style={{ color: '#94a3b8' }}>Harga Net Unit:</div>
+                <div style={{ fontWeight: 800, color: '#ffffff' }}>{formatRupiah(kwitansiSelectRow.hargaJualNet)}</div>
+              </div>
+              <div>
+                <div style={{ color: '#94a3b8' }}>Total DP Masuk:</div>
+                <div style={{ fontWeight: 800, color: '#34d399' }}>{formatRupiah(kwitansiSelectRow.totalDp)}</div>
+              </div>
+              <div>
+                <div style={{ color: '#94a3b8' }}>Total Angsuran Masuk:</div>
+                <div style={{ fontWeight: 800, color: '#a78bfa' }}>{formatRupiah(kwitansiSelectRow.totalAngsuran)}</div>
+              </div>
+              <div>
+                <div style={{ color: '#94a3b8' }}>Sisa Saldo Piutang:</div>
+                <div style={{ fontWeight: 900, color: kwitansiSelectRow.saldo <= 0 ? '#10b981' : '#f87171' }}>
+                  {kwitansiSelectRow.saldo <= 0 ? '✓ LUNAS' : formatRupiah(kwitansiSelectRow.saldo)}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* 1. SEKSI BOOKING FEE */}
+              <div style={{ background: '#131d33', border: '1px solid #1e3a8a', borderRadius: '10px', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem', color: '#60a5fa' }}>📌</span>
+                      <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#93c5fd' }}>Uang Tanda Jadi (Booking Fee)</span>
+                      <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.4)' }}>
+                        Awal Pemesanan
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '4px' }}>
+                      Nominal Booking: <strong style={{ color: '#38bdf8', fontSize: '0.95rem' }}>{formatRupiah(kwitansiSelectRow.booking)}</strong>
+                      {kwitansiSelectRow.periode && <span style={{ color: '#94a3b8', marginLeft: '8px' }}>(Periode: {formatMonthYear(kwitansiSelectRow.periode)})</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const bkgPayment = {
+                          id: `bkg-${kwitansiSelectRow.id}`,
+                          tanggal: kwitansiSelectRow.periode ? `${kwitansiSelectRow.periode}-01` : new Date().toISOString().split('T')[0],
+                          jumlah: kwitansiSelectRow.booking,
+                          keterangan: `Pembayaran Uang Tanda Jadi (Booking Fee) Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
+                        handlePrintKwitansiDirect(bkgPayment, 'Uang Tanda Jadi (Booking Fee)', kwitansiSelectRow);
+                      }}
+                      disabled={!kwitansiSelectRow.booking || kwitansiSelectRow.booking <= 0}
+                      style={{
+                        background: kwitansiSelectRow.booking > 0 ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#334155',
+                        border: '1px solid #38bdf8',
+                        color: '#ffffff',
+                        fontWeight: 900,
+                        fontSize: '0.78rem',
+                        padding: '7px 12px',
+                        borderRadius: '6px',
+                        cursor: kwitansiSelectRow.booking > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Printer size={14} /> Cetak Kwitansi Booking
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const bkgPayment = {
+                          id: `bkg-${kwitansiSelectRow.id}`,
+                          tanggal: kwitansiSelectRow.periode ? `${kwitansiSelectRow.periode}-01` : new Date().toISOString().split('T')[0],
+                          jumlah: kwitansiSelectRow.booking,
+                          keterangan: `Pembayaran Uang Tanda Jadi (Booking Fee) Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
+                        handlePrintReceipt(bkgPayment, 'Uang Tanda Jadi (Booking Fee)', kwitansiSelectRow);
+                      }}
+                      disabled={!kwitansiSelectRow.booking || kwitansiSelectRow.booking <= 0}
+                      style={{
+                        background: '#1e293b',
+                        border: '1px solid #475569',
+                        color: '#cbd5e1',
+                        padding: '7px 10px',
+                        borderRadius: '6px',
+                        cursor: kwitansiSelectRow.booking > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.78rem'
+                      }}
+                    >
+                      <Eye size={13} /> Preview
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. SEKSI PEMBAYARAN DP (UANG MUKA) */}
+              <div style={{ background: '#122521', border: '1px solid #065f46', borderRadius: '10px', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1rem', color: '#10b981' }}>💳</span>
+                    <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#6ee7b7' }}>Pembayaran Uang Muka (DP)</span>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                      {(kwitansiSelectRow.dpPayments || []).length} Transaksi Tercatat
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem' }}>
+                    Total DP Masuk: <strong style={{ color: '#34d399', fontSize: '1rem' }}>{formatRupiah(kwitansiSelectRow.totalDp)}</strong>
+                  </div>
+                </div>
+
+                {(kwitansiSelectRow.dpPayments || []).length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(kwitansiSelectRow.dpPayments || []).map((p, pIdx) => (
+                      <div
+                        key={p.id || pIdx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: '#0a1614',
+                          border: '1px solid #134e4a',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem'
+                        }}
+                      >
+                        <div>
+                          <strong style={{ color: '#a7f3d0' }}>DP Termin {pIdx + 1}</strong> • <span style={{ color: '#94a3b8' }}>{p.tanggal}</span> • <strong style={{ color: '#ffffff' }}>{formatRupiah(p.jumlah)}</strong>
+                          {p.keterangan && <div style={{ fontSize: '0.72rem', color: '#6ee7b7', marginTop: '2px' }}>{p.keterangan}</div>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintKwitansiDirect(p, `DP (Uang Muka) Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            title="Cetak Kwitansi Termin Ini Langsung"
+                            style={{
+                              background: 'linear-gradient(135deg, #059669, #047857)',
+                              border: '1px solid #10b981',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              fontSize: '0.72rem',
+                              padding: '4px 9px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <Printer size={12} /> Cetak Kwitansi DP {pIdx + 1}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintReceipt(p, `DP (Uang Muka) Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            style={{
+                              background: '#1e293b',
+                              border: '1px solid #475569',
+                              color: '#cbd5e1',
+                              padding: '4px 7px',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Eye size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {(kwitansiSelectRow.dpPayments || []).length > 1 && (
+                      <div style={{ marginTop: '4px', textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const totalDpPayment = {
+                              id: `tot-dp-${kwitansiSelectRow.id}`,
+                              tanggal: kwitansiSelectRow.dpPayments[kwitansiSelectRow.dpPayments.length - 1]?.tanggal || new Date().toISOString().split('T')[0],
+                              jumlah: kwitansiSelectRow.totalDp,
+                              keterangan: `Total Akumulasi Pembayaran DP (Uang Muka) Sebanyak ${(kwitansiSelectRow.dpPayments || []).length} Kali Termin`
+                            };
+                            handlePrintKwitansiDirect(totalDpPayment, 'Total Akumulasi DP', kwitansiSelectRow);
+                          }}
+                          style={{
+                            background: '#047857',
+                            border: '1px solid #34d399',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            fontSize: '0.73rem',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <Printer size={12} /> Cetak Kwitansi Akumulasi Total DP ({formatRupiah(kwitansiSelectRow.totalDp)})
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '6px 0' }}>
+                    Belum ada riwayat pembayaran DP. Silakan klik tombol <strong>[Bayar]</strong> pada tabel utama untuk mencatat pembayaran DP konsumen.
+                  </div>
+                )}
+              </div>
+
+              {/* 3. SEKSI PEMBAYARAN ANGSURAN */}
+              <div style={{ background: '#251b36', border: '1px solid #6b21a8', borderRadius: '10px', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1rem', color: '#c084fc' }}>🏦</span>
+                    <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#e9d5ff' }}>Pembayaran Angsuran Konsumen</span>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: 'rgba(192, 132, 252, 0.2)', color: '#d8b4fe', border: '1px solid rgba(192, 132, 252, 0.4)' }}>
+                      {(kwitansiSelectRow.angsuranPayments || []).length} Transaksi Tercatat
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem' }}>
+                    Total Angsuran Masuk: <strong style={{ color: '#c084fc', fontSize: '1rem' }}>{formatRupiah(kwitansiSelectRow.totalAngsuran)}</strong>
+                  </div>
+                </div>
+
+                {(kwitansiSelectRow.angsuranPayments || []).length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(kwitansiSelectRow.angsuranPayments || []).map((p, pIdx) => (
+                      <div
+                        key={p.id || pIdx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: '#160e24',
+                          border: '1px solid #581c87',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem'
+                        }}
+                      >
+                        <div>
+                          <strong style={{ color: '#e9d5ff' }}>Angsuran Termin {pIdx + 1}</strong> • <span style={{ color: '#94a3b8' }}>{p.tanggal}</span> • <strong style={{ color: '#ffffff' }}>{formatRupiah(p.jumlah)}</strong>
+                          {p.keterangan && <div style={{ fontSize: '0.72rem', color: '#d8b4fe', marginTop: '2px' }}>{p.keterangan}</div>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintKwitansiDirect(p, `Angsuran Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            title="Cetak Kwitansi Angsuran Ini Langsung"
+                            style={{
+                              background: 'linear-gradient(135deg, #7e22ce, #6b21a8)',
+                              border: '1px solid #a855f7',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              fontSize: '0.72rem',
+                              padding: '4px 9px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <Printer size={12} /> Cetak Kwitansi Angsuran {pIdx + 1}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintReceipt(p, `Angsuran Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            style={{
+                              background: '#1e293b',
+                              border: '1px solid #475569',
+                              color: '#cbd5e1',
+                              padding: '4px 7px',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Eye size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {(kwitansiSelectRow.angsuranPayments || []).length > 1 && (
+                      <div style={{ marginTop: '4px', textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const totalAngPayment = {
+                              id: `tot-ang-${kwitansiSelectRow.id}`,
+                              tanggal: kwitansiSelectRow.angsuranPayments[kwitansiSelectRow.angsuranPayments.length - 1]?.tanggal || new Date().toISOString().split('T')[0],
+                              jumlah: kwitansiSelectRow.totalAngsuran,
+                              keterangan: `Total Akumulasi Pembayaran Angsuran Sebanyak ${(kwitansiSelectRow.angsuranPayments || []).length} Kali Termin`
+                            };
+                            handlePrintKwitansiDirect(totalAngPayment, 'Total Akumulasi Angsuran', kwitansiSelectRow);
+                          }}
+                          style={{
+                            background: '#6b21a8',
+                            border: '1px solid #c084fc',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            fontSize: '0.73rem',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <Printer size={12} /> Cetak Kwitansi Akumulasi Total Angsuran ({formatRupiah(kwitansiSelectRow.totalAngsuran)})
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '6px 0' }}>
+                    Belum ada riwayat pembayaran Angsuran. Silakan klik tombol <strong>[Bayar]</strong> pada tabel utama untuk mencatat pembayaran Angsuran.
+                  </div>
+                )}
+              </div>
+
+              {/* 4. SEKSI TOTAL AKUMULASI SELURUH PEMBAYARAN MASUK */}
+              <div style={{ background: '#2c1e0f', border: '1px solid #b45309', borderRadius: '10px', padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem', color: '#f59e0b' }}>📑</span>
+                      <span style={{ fontWeight: 900, fontSize: '0.95rem', color: '#fde68a' }}>Rekap Total Seluruh Pembayaran Masuk</span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '4px' }}>
+                      Akumulasi: Booking ({formatRupiah(kwitansiSelectRow.booking)}) + DP ({formatRupiah(kwitansiSelectRow.totalDp)}) + Angsuran ({formatRupiah(kwitansiSelectRow.totalAngsuran)})
+                    </div>
+                    <div style={{ marginTop: '4px', fontSize: '0.95rem' }}>
+                      Total Diterima: <strong style={{ color: '#fbbf24', fontSize: '1.05rem' }}>{formatRupiah(kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran)}</strong>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const grandTotal = kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran;
+                        const totalPayment = {
+                          id: `grand-tot-${kwitansiSelectRow.id}`,
+                          tanggal: new Date().toISOString().split('T')[0],
+                          jumlah: grandTotal,
+                          keterangan: `Total Seluruh Pembayaran Diterima (Booking Fee, Uang Muka DP, & Angsuran) untuk Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
+                        handlePrintKwitansiDirect(totalPayment, 'Akumulasi Seluruh Pembayaran Masuk', kwitansiSelectRow);
+                      }}
+                      disabled={(kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) <= 0}
+                      style={{
+                        background: 'linear-gradient(135deg, #d97706, #b45309)',
+                        border: '1px solid #f59e0b',
+                        color: '#ffffff',
+                        fontWeight: 900,
+                        fontSize: '0.78rem',
+                        padding: '7px 12px',
+                        borderRadius: '6px',
+                        cursor: (kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Printer size={14} /> Cetak Kwitansi Rekap Total
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const grandTotal = kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran;
+                        const totalPayment = {
+                          id: `grand-tot-${kwitansiSelectRow.id}`,
+                          tanggal: new Date().toISOString().split('T')[0],
+                          jumlah: grandTotal,
+                          keterangan: `Total Seluruh Pembayaran Diterima (Booking Fee, Uang Muka DP, & Angsuran) untuk Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
+                        handlePrintReceipt(totalPayment, 'Akumulasi Seluruh Pembayaran Masuk', kwitansiSelectRow);
+                      }}
+                      disabled={(kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) <= 0}
+                      style={{
+                        background: '#1e293b',
+                        border: '1px solid #475569',
+                        color: '#cbd5e1',
+                        padding: '7px 10px',
+                        borderRadius: '6px',
+                        cursor: (kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.78rem'
+                      }}
+                    >
+                      <Eye size={13} /> Preview
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #334155' }}>
+              <button
+                type="button"
+                onClick={() => setKwitansiSelectRow(null)}
+                style={{
+                  background: '#334155',
+                  color: '#f8fafc',
+                  border: 'none',
+                  padding: '7px 16px',
+                  borderRadius: '6px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem'
+                }}
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL PREVIEW KWITANSI PEMBAYARAN                             */}
       {/* ------------------------------------------------------------- */}
       {receiptData && (
         <div
@@ -2384,57 +3264,69 @@ export const PiutangKonsumenModule = () => {
             className="glass-card"
             style={{
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '620px',
               background: '#ffffff',
               color: '#000000',
               borderRadius: '12px',
               padding: '2rem',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9)'
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9)',
+              border: '2px double #b45309'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #b45309', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#b45309' }}>
-                  PT. YAZFI GEMA PERSADA
+                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#92400e' }}>
+                  {receiptData.row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
                 </h3>
-                <div style={{ fontSize: '0.75rem', color: '#555' }}>
-                  Developer & Real Estate • Ashoka Residence
+                <div style={{ fontSize: '0.75rem', color: '#4b5563' }}>
+                  DEVELOPER & REAL ESTATE • ASHOKA RESIDENCE
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#6b7280' }}>
+                  Ruko Ashoka View, Jl. Pemuda No. 142, Semarang
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 900, fontSize: '1rem', color: '#000' }}>KWITANSI RESMI</div>
-                <div style={{ fontSize: '0.75rem', color: '#555' }}>Tgl: {receiptData.payment.tanggal}</div>
+                <div style={{ fontWeight: 900, fontSize: '1.2rem', color: '#000', letterSpacing: '1px', textDecoration: 'underline' }}>KWITANSI</div>
+                <div style={{ fontSize: '0.75rem', color: '#b45309', fontWeight: 800 }}>Tgl: {receiptData.payment.tanggal}</div>
               </div>
             </div>
 
             <table style={{ width: '100%', fontSize: '0.85rem', marginBottom: '1.25rem', borderCollapse: 'collapse' }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: '4px 0', width: '140px', fontWeight: 700 }}>Telah Terima Dari</td>
-                  <td style={{ padding: '4px 0', fontWeight: 900 }}>: {receiptData.row.namaKonsumen}</td>
+                  <td style={{ padding: '6px 0', width: '150px', fontWeight: 700, color: '#374151' }}>Telah Terima Dari</td>
+                  <td style={{ padding: '6px 0', fontWeight: 900, fontSize: '0.95rem' }}>: {receiptData.row.namaKonsumen}</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 700 }}>Untuk Unit Properti</td>
-                  <td style={{ padding: '4px 0' }}>: {receiptData.row.proyek} - Blok {receiptData.row.blok} No. {receiptData.row.noUnit}</td>
+                  <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Uang Sejumlah</td>
+                  <td style={{ padding: '6px 0', fontStyle: 'italic', fontWeight: 800, color: '#92400e' }}>
+                    : # {terbilang(receiptData.payment.jumlah)} #
+                  </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 700 }}>Jenis Pembayaran</td>
-                  <td style={{ padding: '4px 0', fontWeight: 800, color: '#b45309' }}>: Pembayaran {receiptData.type}</td>
+                  <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Untuk Pembayaran</td>
+                  <td style={{ padding: '6px 0' }}>
+                    : <strong>Pembayaran {receiptData.type}</strong> unit <strong>{receiptData.row.proyek}</strong> Blok <strong>{receiptData.row.blok}</strong> No. <strong>{receiptData.row.noUnit}</strong> (Tipe {receiptData.row.type})
+                  </td>
                 </tr>
+                {receiptData.payment.keterangan && (
+                  <tr>
+                    <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Keterangan / Berita</td>
+                    <td style={{ padding: '6px 0', color: '#4b5563' }}>: {receiptData.payment.keterangan}</td>
+                  </tr>
+                )}
                 <tr>
-                  <td style={{ padding: '4px 0', fontWeight: 700 }}>Keterangan / Berita</td>
-                  <td style={{ padding: '4px 0' }}>: {receiptData.payment.keterangan || '-'}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '10px 0', fontWeight: 700 }}>Jumlah Pembayaran</td>
-                  <td style={{ padding: '10px 0', fontSize: '1.2rem', fontWeight: 900, color: '#047857' }}>
-                    : {formatRupiah(receiptData.payment.jumlah)}
+                  <td style={{ padding: '12px 0', fontWeight: 700, color: '#374151' }}>Jumlah Nominal</td>
+                  <td style={{ padding: '12px 0' }}>
+                    <span style={{ border: '2px solid #000', background: '#f1f5f9', padding: '6px 14px', borderRadius: '4px', fontSize: '1.15rem', fontWeight: 900, color: '#047857' }}>
+                      : {formatRupiah(receiptData.payment.jumlah)}
+                    </span>
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2rem', paddingTop: '1rem', borderTop: '1px dashed #ccc' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed #ccc' }}>
               <div style={{ textAlign: 'center', width: '180px' }}>
                 <div style={{ fontSize: '0.78rem', color: '#666', marginBottom: '45px' }}>Penyetor / Konsumen,</div>
                 <div style={{ fontWeight: 800, borderTop: '1px solid #000', paddingTop: '4px', fontSize: '0.82rem' }}>
@@ -2444,27 +3336,27 @@ export const PiutangKonsumenModule = () => {
               <div style={{ textAlign: 'center', width: '180px' }}>
                 <div style={{ fontSize: '0.78rem', color: '#666', marginBottom: '45px' }}>Finance & Kasir,</div>
                 <div style={{ fontWeight: 800, borderTop: '1px solid #000', paddingTop: '4px', fontSize: '0.82rem' }}>
-                  PT. Yazfi Gema Persada
+                  {receiptData.row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.5rem' }}>
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => setReceiptData(null)}
-                style={{ background: '#e2e8f0', color: '#000', border: 'none', fontWeight: 800 }}
+                style={{ background: '#e2e8f0', color: '#000', border: 'none', fontWeight: 800, padding: '7px 14px', borderRadius: '6px', cursor: 'pointer' }}
               >
                 Tutup
               </button>
               <button
                 type="button"
                 className="btn btn-primary btn-sm"
-                onClick={() => window.print()}
-                style={{ background: '#059669', color: '#fff', border: 'none', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '4px' }}
+                onClick={() => handlePrintKwitansiDirect(receiptData.payment, receiptData.type, receiptData.row)}
+                style={{ background: 'linear-gradient(135deg, #059669, #047857)', color: '#fff', border: 'none', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 16px', borderRadius: '6px', cursor: 'pointer' }}
               >
-                <Printer size={14} /> Cetak Kwitansi
+                <Printer size={15} /> Cetak Kwitansi Sekarang
               </button>
             </div>
           </div>
