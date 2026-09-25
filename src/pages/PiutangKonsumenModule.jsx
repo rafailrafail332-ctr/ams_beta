@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { fetchCloudStore, saveCloudStore } from '../supabase';
+import * as XLSX from 'xlsx';
 
 const STORAGE_KEY_PIUTANG = 'ams_piutang_konsumen_v1';
 
@@ -628,10 +629,90 @@ export const PiutangKonsumenModule = () => {
     return `${day} ${monthNames[month] || month} ${year}`;
   };
 
+  // Roman Month Helper for Receipt Numbering
+  const getRomanMonth = (monthNum) => {
+    const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    return roman[parseInt(monthNum, 10)] || 'VI';
+  };
+
+  // Generate Receipt Number Matching User Photos
+  const getKwitansiNumber = (row, dateStr) => {
+    const isPark = row.proyek?.toLowerCase().includes('park');
+    const d = dateStr ? new Date(dateStr) : new Date();
+    const year = isNaN(d.getFullYear()) ? '2026' : d.getFullYear();
+    const m = isNaN(d.getMonth()) ? 6 : d.getMonth() + 1;
+    const romanMonth = getRomanMonth(m);
+
+    if (isPark) {
+      // Photo 1 format: FIN 0001/AP/KWI/VI/2026
+      const seq = String(Math.floor(1 + Math.random() * 99)).padStart(4, '0');
+      return `FIN ${seq}/AP/KWI/${romanMonth}/${year}`;
+    } else {
+      // Photo 2 format: FIN-001/AV/KWI/VI/2026
+      const seq = String(Math.floor(1 + Math.random() * 99)).padStart(3, '0');
+      return `FIN-${seq}/AV/KWI/${romanMonth}/${year}`;
+    }
+  };
+
+  // Format Date with Bogor prefix (as seen in user photos)
+  const formatTanggalBogor = (dateStr) => {
+    if (!dateStr) {
+      const now = new Date();
+      return `Bogor, ${now.getDate()} ${['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][now.getMonth() + 1]} ${now.getFullYear()}`;
+    }
+    const parts = dateStr.split('-');
+    if (parts.length < 3) return `Bogor, ${dateStr}`;
+    const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const day = parseInt(parts[2], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parts[0];
+    return `Bogor, ${day} ${monthNames[month] || month} ${year}`;
+  };
+
+  // Template Configuration for Ashoka Park vs Ashoka View
+  const getKwitansiTemplateConfig = (row) => {
+    const isPark = row.proyek?.toLowerCase().includes('park');
+    if (isPark) {
+      // Foto Sebelah Kiri (Ashoka Park / Persada Four Land)
+      return {
+        isPark: true,
+        brandName: 'Persada Four Land',
+        companyName: 'PT. Yazfi Setia Persada',
+        companyNameUpper: 'PT. YAZFI SETIA PERSADA',
+        projectCode: 'AP',
+        accentColor: '#2b3a55', // Dark Navy Box
+        accentTextColor: '#ffffff',
+        footerBgColor: '#2b3a55',
+        footerTextColor: '#ffffff',
+        footerText: 'Komplek Ruko Bizhub, Blok RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor, Jawa Barat - Indonesia\nTelp. (021) 75678196',
+        notesCompany: 'PT. Yazfi Setia Persada',
+        signerName: 'Tarkum Aditiya'
+      };
+    } else {
+      // Foto Sebelah Kanan (Ashoka View / Gema Persada Land)
+      return {
+        isPark: false,
+        brandName: 'Gema Persada Land',
+        companyName: 'PT. YAZFI GEMA PERSADA',
+        companyNameUpper: 'PT YAZFI GEMA PERSADA',
+        projectCode: 'AV',
+        accentColor: '#d1a679', // Caramel / Tan / Gold Box
+        accentTextColor: '#1e2022',
+        footerBgColor: '#d1a679',
+        footerTextColor: '#1e2022',
+        footerText: 'Komplek Ruko Bizhub, Blok RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor, Jawa Barat - Indonesia. Telp. (021) 75678196',
+        notesCompany: 'PT. Yazfi Setia Persada',
+        signerName: 'Tarkum Aditiya'
+      };
+    }
+  };
+
+  // Generate Print HTML Exact Match to User's Two Photos
   const generateKwitansiPrintHtml = ({ payment, type, row, kwitansiNo }) => {
     const terbilangText = terbilang(payment.jumlah);
-    const tanggalIndo = formatTanggalIndo(payment.tanggal || new Date().toISOString().split('T')[0]);
-    const companyName = row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA';
+    const cfg = getKwitansiTemplateConfig(row);
+    const tanggalBogor = formatTanggalBogor(payment.tanggal);
+    const nominalFormatted = Number(payment.jumlah || 0).toLocaleString('id-ID');
 
     return `<!DOCTYPE html>
 <html>
@@ -641,241 +722,476 @@ export const PiutangKonsumenModule = () => {
   <style>
     @page {
       size: A4 portrait;
-      margin: 10mm 15mm;
+      margin: 8mm 12mm;
     }
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
     body {
-      font-family: 'Times New Roman', Times, serif;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 10px;
       background: #ffffff;
       color: #000000;
-      margin: 0;
-      padding: 15px;
     }
-    .kwitansi-card {
-      border: 3px double #92400e;
-      border-radius: 8px;
-      padding: 24px 30px;
+    .kwitansi-container {
+      border: 1.5px solid #334155;
       background: #ffffff;
+      width: 100%;
       max-width: 820px;
       margin: 0 auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: relative;
+      padding: 22px 26px 0;
     }
-    .k-header {
+    .k-top-header {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+    .k-brand-col {
+      display: flex;
       align-items: center;
-      border-bottom: 2px solid #b45309;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      gap: 12px;
     }
-    .company-name {
-      font-size: 20px;
-      font-weight: 900;
-      color: #92400e;
-      margin: 0;
-      letter-spacing: 0.5px;
+    .k-brand-text {
+      display: flex;
+      flex-direction: column;
     }
-    .company-sub {
+    .k-brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: 0.2px;
+    }
+    .k-company-sub {
       font-size: 11px;
-      color: #4b5563;
-      margin-top: 2px;
+      color: #475569;
+      margin-top: 1px;
     }
-    .title-box {
+    .k-banner-col {
       text-align: right;
     }
-    .title-kwitansi {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 3px;
-      text-decoration: underline;
-      margin: 0;
-      color: #000000;
-    }
-    .no-kwitansi {
-      font-size: 12px;
-      font-weight: 800;
-      color: #b45309;
-      margin-top: 3px;
-    }
-    .k-row {
-      display: flex;
-      margin-bottom: 12px;
+    .k-banner-box {
       font-size: 13.5px;
-      line-height: 1.5;
-    }
-    .k-label {
-      width: 175px;
       font-weight: 800;
-      color: #1f2937;
+      letter-spacing: 1px;
+      padding: 6px 26px;
+      text-align: center;
+      display: inline-block;
+    }
+    .k-receipt-no {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 5px;
+      letter-spacing: 0.2px;
+    }
+    .k-body-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .k-form-row {
+      display: flex;
+      align-items: center;
+    }
+    .k-label-col {
+      width: 155px;
       flex-shrink: 0;
     }
-    .k-colon {
-      width: 15px;
-      font-weight: 800;
-    }
-    .k-val {
-      flex: 1;
-      border-bottom: 1px dashed #9ca3af;
-      padding-bottom: 2px;
-    }
-    .terbilang-box {
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      padding: 7px 14px;
-      border-radius: 5px;
-      font-style: italic;
-      font-weight: 800;
-      color: #92400e;
-      font-size: 13.5px;
-    }
-    .nominal-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 20px;
-      padding-top: 10px;
-    }
-    .nominal-box {
-      display: inline-block;
-      border: 2px solid #000;
-      background: #f1f5f9;
-      padding: 10px 22px;
-      font-size: 21px;
-      font-weight: 900;
-      color: #047857;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-    }
-    .summary-strip {
-      margin-top: 14px;
-      padding: 8px 12px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      font-size: 11.5px;
-      display: flex;
-      justify-content: space-between;
-      color: #334155;
-    }
-    .signs {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-      padding-top: 10px;
-    }
-    .sign-col {
-      width: 220px;
-      text-align: center;
+    .k-lbl-id {
+      font-weight: 700;
       font-size: 12.5px;
+      color: #1e293b;
     }
-    .sign-space {
-      height: 65px;
+    .k-lbl-en {
+      font-style: italic;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 1px;
     }
-    .sign-person {
-      font-weight: 800;
-      border-bottom: 1px solid #000;
-      padding-bottom: 3px;
+    .k-colon {
+      width: 18px;
+      font-weight: 700;
       font-size: 13px;
+      color: #1e293b;
+      text-align: center;
     }
-    .stamp-pill {
-      display: inline-block;
-      border: 2px solid #059669;
-      color: #059669;
-      font-size: 10px;
+    .k-val-field {
+      flex: 1;
+      background: repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #e2e8f0 21px, #e2e8f0 22px);
+      border-bottom: 1px solid #94a3b8;
+      height: 24px;
+      line-height: 24px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+    }
+    .k-val-text {
+      font-size: 13px;
+      color: #0f172a;
+    }
+    .k-val-text.bold {
+      font-weight: 700;
+    }
+    .k-multiline-field {
+      flex: 1;
+      background: repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #cbd5e1 21px, #cbd5e1 22px);
+      border-bottom: 1px solid #94a3b8;
+      display: flex;
+      flex-direction: column;
+    }
+    .k-multi-line {
+      height: 22px;
+      line-height: 22px;
+      padding: 0 10px;
+      font-size: 12.5px;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .k-multi-line.bold {
+      font-weight: 700;
+    }
+    .k-divider-line {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .k-bottom-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+      padding-top: 4px;
+    }
+    .k-bottom-left {
+      width: 55%;
+    }
+    .k-rp-box {
+      display: inline-flex;
+      align-items: center;
+      border-top: 3px double #334155;
+      border-bottom: 3px double #334155;
+      background: #f1f5f9;
+      padding: 4px 18px;
+      min-width: 250px;
+      margin-bottom: 18px;
+    }
+    .k-rp-lbl {
+      font-weight: 800;
+      font-size: 13.5px;
+      letter-spacing: 2px;
+      color: #1e293b;
+      margin-right: 18px;
+    }
+    .k-rp-val {
       font-weight: 900;
-      padding: 2px 8px;
-      border-radius: 4px;
-      letter-spacing: 1px;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      color: #0f172a;
+    }
+    .k-notes-box {
+      font-size: 10.5px;
+      color: #334155;
+      line-height: 1.45;
+    }
+    .k-notes-title {
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .k-notes-item {
+      color: #475569;
+    }
+    .k-sheet-no {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 10px;
+    }
+    .k-bottom-right {
+      width: 40%;
+      text-align: center;
+    }
+    .k-sign-date {
+      font-size: 12.5px;
+      color: #1e293b;
+      margin-bottom: 3px;
+    }
+    .k-sign-company {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .k-stamp-sig-box {
+      position: relative;
+      width: 210px;
+      height: 75px;
+      margin: 4px auto 0;
+    }
+    .k-stamp-wrap {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transform: rotate(-5deg);
+      opacity: 0.88;
+    }
+    .k-stamp-txt {
+      font-size: 11px;
+      font-weight: 900;
+      color: #0284c7;
+      line-height: 1.1;
+      text-align: left;
+      letter-spacing: 0.4px;
+    }
+    .k-sig-svg {
+      width: 190px;
+      height: 75px;
+      position: absolute;
+      left: 5px;
+      top: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .k-signer-name-wrap {
+      margin-top: 2px;
+    }
+    .k-signer-name {
+      font-weight: 800;
+      font-size: 13px;
+      color: #0f172a;
+      border-bottom: 1.5px solid #000000;
+      padding-bottom: 1px;
+      display: inline-block;
+      min-width: 140px;
+    }
+    .k-footer-bar {
+      width: calc(100% + 52px);
+      margin-left: -26px;
+      padding: 7px 16px;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 500;
     }
     @media print {
       body { padding: 0; }
-      .kwitansi-card { box-shadow: none; max-width: 100%; border: 2px solid #000; }
+      .kwitansi-container { box-shadow: none; max-width: 100%; border: 1.5px solid #000; }
     }
   </style>
 </head>
 <body>
-  <div class="kwitansi-card">
-    <div class="k-header">
-      <div>
-        <h1 class="company-name">${companyName}</h1>
-        <div class="company-sub">DEVELOPER & REAL ESTATE • ASHOKA RESIDENCE</div>
-        <div class="company-sub">Ruko Ashoka View, Jl. Pemuda No. 142, Kota Semarang • Telp: (024) 845-9988</div>
+  <div class="kwitansi-container">
+    <!-- Top Header -->
+    <div class="k-top-header">
+      <!-- Left: Logo & Company -->
+      <div class="k-brand-col">
+        ${cfg.isPark ? `
+          <svg width="42" height="42" viewBox="0 0 100 100" fill="none">
+            <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
+            <rect x="52" y="16" width="32" height="32" rx="16" stroke="#2b3a55" stroke-width="11" fill="none"/>
+            <rect x="16" y="52" width="32" height="32" rx="16" stroke="#2b3a55" stroke-width="11" fill="none"/>
+            <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
+          </svg>
+        ` : `
+          <svg width="46" height="42" viewBox="0 0 110 90" fill="none">
+            <circle cx="36" cy="40" r="22" stroke="#d4a373" stroke-width="11" fill="none"/>
+            <circle cx="66" cy="38" r="22" stroke="#2b3a55" stroke-width="11" fill="none"/>
+            <rect x="55" y="38" width="11" height="42" rx="4" fill="#2b3a55"/>
+          </svg>
+        `}
+        <div class="k-brand-text">
+          <div class="k-brand-title">${cfg.brandName}</div>
+          <div class="k-company-sub">${cfg.companyName}</div>
+        </div>
       </div>
-      <div class="title-box">
-        <h2 class="title-kwitansi">KWITANSI</h2>
-        <div class="no-kwitansi">${kwitansiNo}</div>
-      </div>
-    </div>
 
-    <div class="k-row">
-      <div class="k-label">Telah Terima Dari</div>
-      <div class="k-colon">:</div>
-      <div class="k-val" style="font-size: 15px; font-weight: 900; text-transform: uppercase;">
-        ${row.namaKonsumen}
-      </div>
-    </div>
-
-    <div class="k-row" style="align-items: center;">
-      <div class="k-label">Uang Sejumlah</div>
-      <div class="k-colon">:</div>
-      <div class="k-val" style="border: none;">
-        <div class="terbilang-box">
-          # ${terbilangText} #
+      <!-- Right: Banner & No Kwitansi -->
+      <div class="k-banner-col">
+        <div class="k-banner-box" style="background-color: ${cfg.accentColor}; color: ${cfg.accentTextColor};">
+          KWITANSI PEMBAYARAN
+        </div>
+        <div class="k-receipt-no">
+          No. &nbsp;: &nbsp;<strong>${kwitansiNo}</strong>
         </div>
       </div>
     </div>
 
-    <div class="k-row">
-      <div class="k-label">Untuk Pembayaran</div>
-      <div class="k-colon">:</div>
-      <div class="k-val">
-        <strong>Pembayaran ${type}</strong> untuk pembelian unit properti <strong>${row.proyek}</strong>, 
-        Blok <strong>${row.blok}</strong> No. <strong>${row.noUnit}</strong> (Tipe ${row.type}, LB: ${row.lb} m², LT: ${row.ltTotal} m²).
-        ${payment.keterangan ? `<br/><span style="color: #4b5563; font-size: 12px;">Keterangan Berita: ${payment.keterangan}</span>` : ''}
-      </div>
-    </div>
-
-    <div class="summary-strip">
-      <span>Harga Net: <strong>${formatRupiah(row.hargaJualNet)}</strong></span>
-      <span>Booking: <strong>${formatRupiah(row.booking)}</strong></span>
-      <span>DP: <strong>${formatRupiah(row.totalDp)}</strong></span>
-      <span>Angsuran: <strong>${formatRupiah(row.totalAngsuran)}</strong></span>
-      <span>Sisa Saldo: <strong style="color: ${row.saldo <= 0 ? '#059669' : '#b45309'}">${row.saldo <= 0 ? 'LUNAS (Rp 0)' : formatRupiah(row.saldo)}</strong></span>
-    </div>
-
-    <div class="nominal-container">
-      <div>
-        <div style="font-size: 11px; color: #4b5563; font-weight: 800; margin-bottom: 4px;">JUMLAH:</div>
-        <div class="nominal-box">
-          Rp ${Number(payment.jumlah || 0).toLocaleString('id-ID')},-
+    <!-- 3 Data Rows -->
+    <div class="k-body-rows">
+      <!-- Row 1: Sudah Terima Dari -->
+      <div class="k-form-row">
+        <div class="k-label-col">
+          <div class="k-lbl-id">Sudah Terima Dari</div>
+          <div class="k-lbl-en">Received from</div>
+        </div>
+        <div class="k-colon">:</div>
+        <div class="k-val-field">
+          <span class="k-val-text bold">${(row.namaKonsumen || '').toUpperCase()}</span>
         </div>
       </div>
 
-      <div style="text-align: right; font-size: 12.5px; color: #374151;">
-        Semarang, ${tanggalIndo}
+      <!-- Row 2: Uang Sebesar -->
+      <div class="k-form-row">
+        <div class="k-label-col">
+          <div class="k-lbl-id">Uang Sebesar</div>
+          <div class="k-lbl-en">Amount Received</div>
+        </div>
+        <div class="k-colon">:</div>
+        <div class="k-val-field">
+          <span class="k-val-text bold">${terbilangText}</span>
+        </div>
+      </div>
+
+      <!-- Row 3: Untuk Pembayaran -->
+      <div class="k-form-row" style="align-items: flex-start;">
+        <div class="k-label-col" style="padding-top: 3px;">
+          <div class="k-lbl-id">Untuk Pembayaran</div>
+          <div class="k-lbl-en">In Payment Of</div>
+        </div>
+        <div class="k-colon" style="padding-top: 3px;">:</div>
+        <div class="k-multiline-field">
+          <div class="k-multi-line bold">Pembayaran ${type} Kavling ${row.proyek} Blok ${row.blok} No. ${row.noUnit}</div>
+          <div class="k-multi-line">Tipe ${row.type} (Luas Bangunan: ${row.lb || 0} m², Luas Tanah: ${row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0))} m²)</div>
+          <div class="k-multi-line">${payment.keterangan ? 'Keterangan: ' + payment.keterangan : ''}</div>
+          <div class="k-multi-line"></div>
+        </div>
       </div>
     </div>
 
-    <div class="signs">
-      <div class="sign-col">
-        <div>Penyetor / Konsumen,</div>
-        <div class="sign-space"></div>
-        <div class="sign-person">${row.namaKonsumen}</div>
-        <div style="font-size: 11px; color: #6b7280; margin-top: 3px;">Pembeli Unit</div>
+    <!-- Divider Line -->
+    <div class="k-divider-line" style="border-top: 1.5px solid ${cfg.isPark ? '#2b3a55' : '#c89666'};"></div>
+
+    <!-- Bottom Section -->
+    <div class="k-bottom-section">
+      <!-- Left: RP Box & Catatan -->
+      <div class="k-bottom-left">
+        <div class="k-rp-box">
+          <span class="k-rp-lbl">RP</span>
+          <span class="k-rp-val">${nominalFormatted},-</span>
+        </div>
+
+        <div class="k-notes-box">
+          <div class="k-notes-title">catatan :</div>
+          <div class="k-notes-item">1. Pembayaran dianggap sah apabila cek/bilyet giro telah dicairkan.</div>
+          <div class="k-notes-item">2. Pembayaran melalui transfer efektif diterima jika sudah tertera di rekening ${cfg.notesCompany}.</div>
+          <div class="k-sheet-no">Lembar 1</div>
+        </div>
       </div>
 
-      <div class="sign-col">
-        <div>Finance & Kasir,</div>
-        <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
-          <span class="stamp-pill">✓ LUNAS TERCATAT</span>
+      <!-- Right: Date, Company, Stamp, Signature -->
+      <div class="k-bottom-right">
+        <div class="k-sign-date">${tanggalBogor}</div>
+        <div class="k-sign-company">${cfg.companyNameUpper}</div>
+
+        <div class="k-stamp-sig-box">
+          <!-- Stamp -->
+          <div class="k-stamp-wrap">
+            ${cfg.isPark ? `
+              <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
+                <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
+                <rect x="52" y="16" width="32" height="32" rx="16" stroke="#0284c7" stroke-width="11" fill="none"/>
+                <rect x="16" y="52" width="32" height="32" rx="16" stroke="#0284c7" stroke-width="11" fill="none"/>
+                <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
+              </svg>
+              <div class="k-stamp-txt">
+                PT. YAZFI SETIA<br/>PERSADA
+              </div>
+            ` : `
+              <svg width="36" height="32" viewBox="0 0 110 90" fill="none">
+                <circle cx="36" cy="40" r="22" stroke="#d4a373" stroke-width="11" fill="none"/>
+                <circle cx="66" cy="38" r="22" stroke="#0284c7" stroke-width="11" fill="none"/>
+                <rect x="55" y="38" width="11" height="42" rx="4" fill="#0284c7"/>
+              </svg>
+              <div class="k-stamp-txt">
+                PT Yazfi Gema<br/>Persada
+              </div>
+            `}
+          </div>
+
+          <!-- Signature Stroke -->
+          <svg class="k-sig-svg" viewBox="0 0 190 75" fill="none">
+            <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 92 24 L 126 26" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
         </div>
-        <div class="sign-person">${companyName}</div>
-        <div style="font-size: 11px; color: #6b7280; margin-top: 3px;">Bagian Keuangan & Kasir</div>
+
+        <div class="k-signer-name-wrap">
+          <span class="k-signer-name">${cfg.signerName}</span>
+        </div>
       </div>
+    </div>
+
+    <!-- Full Width Footer Bar -->
+    <div class="k-footer-bar" style="background-color: ${cfg.footerBgColor}; color: ${cfg.footerTextColor};">
+      ${cfg.footerText.replace(/\n/g, '<br/>')}
     </div>
   </div>
 </body>
 </html>`;
+  };
+
+  // Download Kwitansi Format Excel (.xlsx) Sesuai Desain Foto
+  const handleDownloadKwitansiExcel = (payment, type, row) => {
+    try {
+      const cfg = getKwitansiTemplateConfig(row);
+      const kwitansiNo = getKwitansiNumber(row, payment.tanggal);
+      const tanggalBogor = formatTanggalBogor(payment.tanggal);
+      const terbilangText = terbilang(payment.jumlah);
+      const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
+
+      const wsData = [
+        [cfg.brandName, '', '', '', 'KWITANSI PEMBAYARAN'],
+        [cfg.companyName, '', '', '', `No.  : ${kwitansiNo}`],
+        [],
+        ['Sudah Terima Dari', ':', (row.namaKonsumen || '').toUpperCase()],
+        ['Received from', '', ''],
+        ['Uang Sebesar', ':', terbilangText],
+        ['Amount Received', '', ''],
+        ['Untuk Pembayaran', ':', `Pembayaran ${type} Kavling ${row.proyek} Blok ${row.blok} No. ${row.noUnit}`],
+        ['In Payment Of', '', `Tipe ${row.type} (LB: ${row.lb || 0} m², LT: ${ltTotal} m²)`],
+        ['', '', payment.keterangan ? `Keterangan: ${payment.keterangan}` : ''],
+        [],
+        ['====================================', '', '', '', tanggalBogor],
+        [`RP   ${Number(payment.jumlah || 0).toLocaleString('id-ID')},-`, '', '', '', cfg.companyNameUpper],
+        ['====================================', '', '', '', ''],
+        [],
+        ['catatan :', '', '', '', ''],
+        ['1. Pembayaran dianggap sah apabila cek/bilyet giro telah dicairkan.', '', '', '', ''],
+        [`2. Pembayaran melalui transfer efektif diterima jika sudah tertera di rekening ${cfg.notesCompany}.`, '', '', '', cfg.signerName],
+        ['Lembar 1', '', '', '', '( Penanggung Jawab Keuangan )'],
+        [],
+        [cfg.footerText.replace(/\n/g, ' - '), '', '', '', '']
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws['!cols'] = [
+        { wch: 22 },
+        { wch: 4 },
+        { wch: 38 },
+        { wch: 10 },
+        { wch: 34 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Kwitansi Resmi');
+
+      const safeName = (row.namaKonsumen || 'Konsumen').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safeUnit = `${row.blok || 'X'}-${row.noUnit || '0'}`;
+      const filename = `Kwitansi_${cfg.projectCode}_${safeUnit}_${safeName}.xlsx`;
+
+      XLSX.writeFile(wb, filename);
+      showNotification(`Kwitansi berhasil di-download format Excel: ${filename}`, 'success');
+    } catch (err) {
+      console.error('Download Excel error:', err);
+      showNotification('Gagal mengunduh kwitansi format Excel: ' + err.message, 'error');
+    }
   };
 
   // Cetak Kwitansi Langsung (Isolated iframe Print)
@@ -893,8 +1209,7 @@ export const PiutangKonsumenModule = () => {
       document.body.appendChild(iframe);
     }
 
-    const tgl = payment.tanggal || new Date().toISOString().split('T')[0];
-    const kwitansiNo = `KW/${row.proyek?.includes('Park') ? 'YSP' : 'YGP'}/${tgl.slice(0, 4)}/${tgl.slice(5, 7)}/${String(Math.floor(100 + Math.random() * 900))}`;
+    const kwitansiNo = getKwitansiNumber(row, payment.tanggal);
 
     const html = generateKwitansiPrintHtml({
       payment,
@@ -924,7 +1239,8 @@ export const PiutangKonsumenModule = () => {
     setReceiptData({
       payment,
       type,
-      row
+      row,
+      kwitansiNo: getKwitansiNumber(row, payment.tanggal)
     });
   };
 
@@ -2892,6 +3208,35 @@ export const PiutangKonsumenModule = () => {
                           jumlah: kwitansiSelectRow.booking,
                           keterangan: `Pembayaran Uang Tanda Jadi (Booking Fee) Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
                         };
+                        handleDownloadKwitansiExcel(bkgPayment, 'Uang Tanda Jadi (Booking Fee)', kwitansiSelectRow);
+                      }}
+                      disabled={!kwitansiSelectRow.booking || kwitansiSelectRow.booking <= 0}
+                      title="Download Excel Kwitansi Booking"
+                      style={{
+                        background: kwitansiSelectRow.booking > 0 ? 'linear-gradient(135deg, #10b981, #059669)' : '#334155',
+                        border: '1px solid #10b981',
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontSize: '0.78rem',
+                        padding: '7px 11px',
+                        borderRadius: '6px',
+                        cursor: kwitansiSelectRow.booking > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <FileText size={13} /> Excel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const bkgPayment = {
+                          id: `bkg-${kwitansiSelectRow.id}`,
+                          tanggal: kwitansiSelectRow.periode ? `${kwitansiSelectRow.periode}-01` : new Date().toISOString().split('T')[0],
+                          jumlah: kwitansiSelectRow.booking,
+                          keterangan: `Pembayaran Uang Tanda Jadi (Booking Fee) Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
                         handlePrintReceipt(bkgPayment, 'Uang Tanda Jadi (Booking Fee)', kwitansiSelectRow);
                       }}
                       disabled={!kwitansiSelectRow.booking || kwitansiSelectRow.booking <= 0}
@@ -2952,7 +3297,7 @@ export const PiutangKonsumenModule = () => {
                         <div style={{ display: 'flex', gap: '5px' }}>
                           <button
                             type="button"
-                            onClick={() => handlePrintKwitansiDirect(p, `DP (Uang Muka) Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            onClick={() => handlePrintKwitansiDirect(p, `Uang Muka (DP) Ke-${pIdx + 1}`, kwitansiSelectRow)}
                             title="Cetak Kwitansi Termin Ini Langsung"
                             style={{
                               background: 'linear-gradient(135deg, #059669, #047857)',
@@ -2972,7 +3317,27 @@ export const PiutangKonsumenModule = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handlePrintReceipt(p, `DP (Uang Muka) Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            onClick={() => handleDownloadKwitansiExcel(p, `Uang Muka (DP) Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            title="Download Excel Kwitansi DP Ini"
+                            style={{
+                              background: 'linear-gradient(135deg, #10b981, #059669)',
+                              border: '1px solid #34d399',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              fontSize: '0.72rem',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}
+                          >
+                            <FileText size={12} /> Excel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintReceipt(p, `Uang Muka (DP) Ke-${pIdx + 1}`, kwitansiSelectRow)}
                             style={{
                               background: '#1e293b',
                               border: '1px solid #475569',
@@ -2989,7 +3354,7 @@ export const PiutangKonsumenModule = () => {
                     ))}
 
                     {(kwitansiSelectRow.dpPayments || []).length > 1 && (
-                      <div style={{ marginTop: '4px', textAlign: 'right' }}>
+                      <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
                         <button
                           type="button"
                           onClick={() => {
@@ -3015,7 +3380,34 @@ export const PiutangKonsumenModule = () => {
                             gap: '5px'
                           }}
                         >
-                          <Printer size={12} /> Cetak Kwitansi Akumulasi Total DP ({formatRupiah(kwitansiSelectRow.totalDp)})
+                          <Printer size={12} /> Cetak Total DP ({formatRupiah(kwitansiSelectRow.totalDp)})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const totalDpPayment = {
+                              id: `tot-dp-${kwitansiSelectRow.id}`,
+                              tanggal: kwitansiSelectRow.dpPayments[kwitansiSelectRow.dpPayments.length - 1]?.tanggal || new Date().toISOString().split('T')[0],
+                              jumlah: kwitansiSelectRow.totalDp,
+                              keterangan: `Total Akumulasi Pembayaran DP (Uang Muka) Sebanyak ${(kwitansiSelectRow.dpPayments || []).length} Kali Termin`
+                            };
+                            handleDownloadKwitansiExcel(totalDpPayment, 'Total Akumulasi DP', kwitansiSelectRow);
+                          }}
+                          style={{
+                            background: '#059669',
+                            border: '1px solid #10b981',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            fontSize: '0.73rem',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <FileText size={12} /> Download Excel Total DP
                         </button>
                       </div>
                     )}
@@ -3085,6 +3477,26 @@ export const PiutangKonsumenModule = () => {
                           </button>
                           <button
                             type="button"
+                            onClick={() => handleDownloadKwitansiExcel(p, `Angsuran Ke-${pIdx + 1}`, kwitansiSelectRow)}
+                            title="Download Excel Kwitansi Angsuran Ini"
+                            style={{
+                              background: 'linear-gradient(135deg, #10b981, #059669)',
+                              border: '1px solid #34d399',
+                              color: '#ffffff',
+                              fontWeight: 800,
+                              fontSize: '0.72rem',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}
+                          >
+                            <FileText size={12} /> Excel
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handlePrintReceipt(p, `Angsuran Ke-${pIdx + 1}`, kwitansiSelectRow)}
                             style={{
                               background: '#1e293b',
@@ -3102,7 +3514,7 @@ export const PiutangKonsumenModule = () => {
                     ))}
 
                     {(kwitansiSelectRow.angsuranPayments || []).length > 1 && (
-                      <div style={{ marginTop: '4px', textAlign: 'right' }}>
+                      <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
                         <button
                           type="button"
                           onClick={() => {
@@ -3129,6 +3541,33 @@ export const PiutangKonsumenModule = () => {
                           }}
                         >
                           <Printer size={12} /> Cetak Kwitansi Akumulasi Total Angsuran ({formatRupiah(kwitansiSelectRow.totalAngsuran)})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const totalAngPayment = {
+                              id: `tot-ang-${kwitansiSelectRow.id}`,
+                              tanggal: kwitansiSelectRow.angsuranPayments[kwitansiSelectRow.angsuranPayments.length - 1]?.tanggal || new Date().toISOString().split('T')[0],
+                              jumlah: kwitansiSelectRow.totalAngsuran,
+                              keterangan: `Total Akumulasi Pembayaran Angsuran Sebanyak ${(kwitansiSelectRow.angsuranPayments || []).length} Kali Termin`
+                            };
+                            handleDownloadKwitansiExcel(totalAngPayment, 'Total Akumulasi Angsuran', kwitansiSelectRow);
+                          }}
+                          style={{
+                            background: '#059669',
+                            border: '1px solid #10b981',
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            fontSize: '0.73rem',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}
+                        >
+                          <FileText size={12} /> Download Excel Total Angsuran
                         </button>
                       </div>
                     )}
@@ -3195,6 +3634,35 @@ export const PiutangKonsumenModule = () => {
                           jumlah: grandTotal,
                           keterangan: `Total Seluruh Pembayaran Diterima (Booking Fee, Uang Muka DP, & Angsuran) untuk Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
                         };
+                        handleDownloadKwitansiExcel(totalPayment, 'Akumulasi Seluruh Pembayaran Masuk', kwitansiSelectRow);
+                      }}
+                      disabled={(kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) <= 0}
+                      style={{
+                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                        border: '1px solid #34d399',
+                        color: '#ffffff',
+                        fontWeight: 900,
+                        fontSize: '0.78rem',
+                        padding: '7px 12px',
+                        borderRadius: '6px',
+                        cursor: (kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) > 0 ? 'pointer' : 'not-allowed',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <FileText size={14} /> Download Excel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const grandTotal = kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran;
+                        const totalPayment = {
+                          id: `grand-tot-${kwitansiSelectRow.id}`,
+                          tanggal: new Date().toISOString().split('T')[0],
+                          jumlah: grandTotal,
+                          keterangan: `Total Seluruh Pembayaran Diterima (Booking Fee, Uang Muka DP, & Angsuran) untuk Unit ${kwitansiSelectRow.blok}-${kwitansiSelectRow.noUnit}`
+                        };
                         handlePrintReceipt(totalPayment, 'Akumulasi Seluruh Pembayaran Masuk', kwitansiSelectRow);
                       }}
                       disabled={(kwitansiSelectRow.booking + kwitansiSelectRow.totalDp + kwitansiSelectRow.totalAngsuran) <= 0}
@@ -3242,126 +3710,281 @@ export const PiutangKonsumenModule = () => {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* MODAL PREVIEW KWITANSI PEMBAYARAN                             */}
+      {/* MODAL PREVIEW KWITANSI PEMBAYARAN (DESAIN FOTO ASLI)          */}
       {/* ------------------------------------------------------------- */}
-      {receiptData && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
-            zIndex: 999999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem'
-          }}
-        >
+      {receiptData && (() => {
+        const cfg = getKwitansiTemplateConfig(receiptData.row);
+        const kwitansiNo = receiptData.kwitansiNo || getKwitansiNumber(receiptData.row, receiptData.payment.tanggal);
+        const tanggalBogor = formatTanggalBogor(receiptData.payment.tanggal);
+        const terbilangText = terbilang(receiptData.payment.jumlah);
+        const nominalFormatted = Number(receiptData.payment.jumlah || 0).toLocaleString('id-ID');
+        const ltTotal = receiptData.row.ltTotal || (Number(receiptData.row.lt || 0) + Number(receiptData.row.ltPlus || 0));
+
+        return (
           <div
-            className="glass-card"
             style={{
-              width: '100%',
-              maxWidth: '620px',
-              background: '#ffffff',
-              color: '#000000',
-              borderRadius: '12px',
-              padding: '2rem',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.9)',
-              border: '2px double #b45309'
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.88)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 999999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #b45309', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#92400e' }}>
-                  {receiptData.row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
-                </h3>
-                <div style={{ fontSize: '0.75rem', color: '#4b5563' }}>
-                  DEVELOPER & REAL ESTATE • ASHOKA RESIDENCE
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '820px',
+                background: '#ffffff',
+                color: '#000000',
+                borderRadius: '8px',
+                padding: '24px 26px 0',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+                border: '1.5px solid #334155',
+                maxHeight: '92vh',
+                overflowY: 'auto',
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                position: 'relative'
+              }}
+            >
+              {/* Top Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '22px' }}>
+                {/* Brand Col */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {cfg.isPark ? (
+                    <svg width="42" height="42" viewBox="0 0 100 100" fill="none">
+                      <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
+                      <rect x="52" y="16" width="32" height="32" rx="16" stroke="#2b3a55" strokeWidth="11" fill="none" />
+                      <rect x="16" y="52" width="32" height="32" rx="16" stroke="#2b3a55" strokeWidth="11" fill="none" />
+                      <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
+                    </svg>
+                  ) : (
+                    <svg width="46" height="42" viewBox="0 0 110 90" fill="none">
+                      <circle cx="36" cy="40" r="22" stroke="#d4a373" strokeWidth="11" fill="none" />
+                      <circle cx="66" cy="38" r="22" stroke="#2b3a55" strokeWidth="11" fill="none" />
+                      <rect x="55" y="38" width="11" height="42" rx="4" fill="#2b3a55" />
+                    </svg>
+                  )}
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.2px' }}>
+                      {cfg.brandName}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#475569', marginTop: '1px' }}>
+                      {cfg.companyName}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#6b7280' }}>
-                  Ruko Ashoka View, Jl. Pemuda No. 142, Semarang
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 900, fontSize: '1.2rem', color: '#000', letterSpacing: '1px', textDecoration: 'underline' }}>KWITANSI</div>
-                <div style={{ fontSize: '0.75rem', color: '#b45309', fontWeight: 800 }}>Tgl: {receiptData.payment.tanggal}</div>
-              </div>
-            </div>
 
-            <table style={{ width: '100%', fontSize: '0.85rem', marginBottom: '1.25rem', borderCollapse: 'collapse' }}>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '6px 0', width: '150px', fontWeight: 700, color: '#374151' }}>Telah Terima Dari</td>
-                  <td style={{ padding: '6px 0', fontWeight: 900, fontSize: '0.95rem' }}>: {receiptData.row.namaKonsumen}</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Uang Sejumlah</td>
-                  <td style={{ padding: '6px 0', fontStyle: 'italic', fontWeight: 800, color: '#92400e' }}>
-                    : # {terbilang(receiptData.payment.jumlah)} #
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Untuk Pembayaran</td>
-                  <td style={{ padding: '6px 0' }}>
-                    : <strong>Pembayaran {receiptData.type}</strong> unit <strong>{receiptData.row.proyek}</strong> Blok <strong>{receiptData.row.blok}</strong> No. <strong>{receiptData.row.noUnit}</strong> (Tipe {receiptData.row.type})
-                  </td>
-                </tr>
-                {receiptData.payment.keterangan && (
-                  <tr>
-                    <td style={{ padding: '6px 0', fontWeight: 700, color: '#374151' }}>Keterangan / Berita</td>
-                    <td style={{ padding: '6px 0', color: '#4b5563' }}>: {receiptData.payment.keterangan}</td>
-                  </tr>
-                )}
-                <tr>
-                  <td style={{ padding: '12px 0', fontWeight: 700, color: '#374151' }}>Jumlah Nominal</td>
-                  <td style={{ padding: '12px 0' }}>
-                    <span style={{ border: '2px solid #000', background: '#f1f5f9', padding: '6px 14px', borderRadius: '4px', fontSize: '1.15rem', fontWeight: 900, color: '#047857' }}>
-                      : {formatRupiah(receiptData.payment.jumlah)}
+                {/* Banner Col */}
+                <div style={{ textAlign: 'right' }}>
+                  <div
+                    style={{
+                      background: cfg.accentColor,
+                      color: cfg.accentTextColor,
+                      padding: '6px 26px',
+                      fontWeight: 800,
+                      fontSize: '13.5px',
+                      letterSpacing: '1px',
+                      display: 'inline-block'
+                    }}
+                  >
+                    KWITANSI PEMBAYARAN
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', marginTop: '5px' }}>
+                    No. &nbsp;: &nbsp;<strong>{kwitansiNo}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body 3 rows */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                {/* Row 1: Sudah Terima Dari */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ width: '155px', flexShrink: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: '#1e293b' }}>Sudah Terima Dari</div>
+                    <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#64748b', marginTop: '1px' }}>Received from</div>
+                  </div>
+                  <div style={{ width: '18px', fontWeight: 700, fontSize: '13px', color: '#1e293b', textAlign: 'center' }}>:</div>
+                  <div style={{ flex: 1, background: 'repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #e2e8f0 21px, #e2e8f0 22px)', borderBottom: '1px solid #94a3b8', height: '24px', lineHeight: '24px', padding: '0 10px', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                      {(receiptData.row.namaKonsumen || '').toUpperCase()}
                     </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed #ccc' }}>
-              <div style={{ textAlign: 'center', width: '180px' }}>
-                <div style={{ fontSize: '0.78rem', color: '#666', marginBottom: '45px' }}>Penyetor / Konsumen,</div>
-                <div style={{ fontWeight: 800, borderTop: '1px solid #000', paddingTop: '4px', fontSize: '0.82rem' }}>
-                  {receiptData.row.namaKonsumen}
+                {/* Row 2: Uang Sebesar */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ width: '155px', flexShrink: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: '#1e293b' }}>Uang Sebesar</div>
+                    <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#64748b', marginTop: '1px' }}>Amount Received</div>
+                  </div>
+                  <div style={{ width: '18px', fontWeight: 700, fontSize: '13px', color: '#1e293b', textAlign: 'center' }}>:</div>
+                  <div style={{ flex: 1, background: 'repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #e2e8f0 21px, #e2e8f0 22px)', borderBottom: '1px solid #94a3b8', height: '24px', lineHeight: '24px', padding: '0 10px', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                      {terbilangText}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row 3: Untuk Pembayaran */}
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <div style={{ width: '155px', flexShrink: 0, paddingTop: '3px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: '#1e293b' }}>Untuk Pembayaran</div>
+                    <div style={{ fontStyle: 'italic', fontSize: '11px', color: '#64748b', marginTop: '1px' }}>In Payment Of</div>
+                  </div>
+                  <div style={{ width: '18px', fontWeight: 700, fontSize: '13px', color: '#1e293b', textAlign: 'center', paddingTop: '3px' }}>:</div>
+                  <div style={{ flex: 1, background: 'repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #cbd5e1 21px, #cbd5e1 22px)', borderBottom: '1px solid #94a3b8', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Pembayaran {receiptData.type} Kavling {receiptData.row.proyek} Blok {receiptData.row.blok} No. {receiptData.row.noUnit}
+                    </div>
+                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Tipe {receiptData.row.type} (Luas Bangunan: {receiptData.row.lb || 0} m², Luas Tanah: {ltTotal} m²)
+                    </div>
+                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {receiptData.payment.keterangan ? 'Keterangan: ' + receiptData.payment.keterangan : ''}
+                    </div>
+                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px' }}></div>
+                  </div>
                 </div>
               </div>
-              <div style={{ textAlign: 'center', width: '180px' }}>
-                <div style={{ fontSize: '0.78rem', color: '#666', marginBottom: '45px' }}>Finance & Kasir,</div>
-                <div style={{ fontWeight: 800, borderTop: '1px solid #000', paddingTop: '4px', fontSize: '0.82rem' }}>
-                  {receiptData.row.proyek?.includes('Park') ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+
+              {/* Divider Line */}
+              <div style={{ width: '100%', borderTop: `1.5px solid ${cfg.isPark ? '#2b3a55' : '#c89666'}`, marginBottom: '16px' }} />
+
+              {/* Bottom Section */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '22px', paddingTop: '4px' }}>
+                {/* Left: RP & Catatan */}
+                <div style={{ width: '55%' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', borderTop: '3px double #334155', borderBottom: '3px double #334155', background: '#f1f5f9', padding: '4px 18px', minWidth: '250px', marginBottom: '18px' }}>
+                    <span style={{ fontWeight: 800, fontSize: '13.5px', letterSpacing: '2px', color: '#1e293b', marginRight: '18px' }}>RP</span>
+                    <span style={{ fontWeight: 900, fontSize: '16px', letterSpacing: '0.5px', color: '#0f172a' }}>
+                      {nominalFormatted},-
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: '10.5px', color: '#334155', lineHeight: 1.45 }}>
+                    <div style={{ fontWeight: 700, marginBottom: '2px' }}>catatan :</div>
+                    <div style={{ color: '#475569' }}>1. Pembayaran dianggap sah apabila cek/bilyet giro telah dicairkan.</div>
+                    <div style={{ color: '#475569' }}>2. Pembayaran melalui transfer efektif diterima jika sudah tertera di rekening ${cfg.notesCompany}.</div>
+                    <div style={{ fontSize: '10px', color: '#64748b', marginTop: '10px' }}>Lembar 1</div>
+                  </div>
+                </div>
+
+                {/* Right: Date, Company, Stamp, Signature */}
+                <div style={{ width: '40%', textAlign: 'center' }}>
+                  <div style={{ fontSize: '12.5px', color: '#1e293b', marginBottom: '3px' }}>{tanggalBogor}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{cfg.companyNameUpper}</div>
+
+                  <div style={{ position: 'relative', width: '210px', height: '75px', margin: '4px auto 0' }}>
+                    {/* Stamp */}
+                    <div style={{ position: 'absolute', right: '10px', top: '10px', display: 'flex', alignItems: 'center', gap: '6px', transform: 'rotate(-5deg)', opacity: 0.88 }}>
+                      {cfg.isPark ? (
+                        <>
+                          <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
+                            <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
+                            <rect x="52" y="16" width="32" height="32" rx="16" stroke="#0284c7" strokeWidth="11" fill="none" />
+                            <rect x="16" y="52" width="32" height="32" rx="16" stroke="#0284c7" strokeWidth="11" fill="none" />
+                            <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
+                          </svg>
+                          <div style={{ fontSize: '11px', fontWeight: 900, color: '#0284c7', lineHeight: 1.1, textAlign: 'left', letterSpacing: '0.4px' }}>
+                            PT. YAZFI SETIA<br />PERSADA
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <svg width="36" height="32" viewBox="0 0 110 90" fill="none">
+                            <circle cx="36" cy="40" r="22" stroke="#d4a373" strokeWidth="11" fill="none" />
+                            <circle cx="66" cy="38" r="22" stroke="#0284c7" strokeWidth="11" fill="none" />
+                            <rect x="55" y="38" width="11" height="42" rx="4" fill="#0284c7" />
+                          </svg>
+                          <div style={{ fontSize: '11px', fontWeight: 900, color: '#0284c7', lineHeight: 1.1, textAlign: 'left', letterSpacing: '0.4px' }}>
+                            PT Yazfi Gema<br />Persada
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Signature */}
+                    <svg style={{ width: '190px', height: '75px', position: 'absolute', left: '5px', top: 0, pointerEvents: 'none', zIndex: 2 }} viewBox="0 0 190 75" fill="none">
+                      <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 92 24 L 126 26" stroke="#111827" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </div>
+
+                  <div style={{ marginTop: '2px' }}>
+                    <span style={{ fontWeight: 800, fontSize: '13px', color: '#0f172a', borderBottom: '1.5px solid #000000', paddingBottom: '1px', display: 'inline-block', minWidth: '140px' }}>
+                      {cfg.signerName}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.5rem' }}>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setReceiptData(null)}
-                style={{ background: '#e2e8f0', color: '#000', border: 'none', fontWeight: 800, padding: '7px 14px', borderRadius: '6px', cursor: 'pointer' }}
-              >
-                Tutup
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => handlePrintKwitansiDirect(receiptData.payment, receiptData.type, receiptData.row)}
-                style={{ background: 'linear-gradient(135deg, #059669, #047857)', color: '#fff', border: 'none', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 16px', borderRadius: '6px', cursor: 'pointer' }}
-              >
-                <Printer size={15} /> Cetak Kwitansi Sekarang
-              </button>
+              {/* Footer Bar */}
+              <div style={{ width: 'calc(100% + 52px)', marginLeft: '-26px', padding: '7px 16px', textAlign: 'center', fontSize: '10px', lineHeight: 1.35, fontWeight: 500, background: cfg.footerBgColor, color: cfg.footerTextColor }}>
+                {cfg.footerText.split('\n').map((line, lIdx) => (
+                  <div key={lIdx}>{line}</div>
+                ))}
+              </div>
+
+              {/* Action Buttons at bottom of modal */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px 0', borderTop: '1px solid #e2e8f0', marginTop: '14px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setReceiptData(null)}
+                  style={{ background: '#475569', color: '#ffffff', border: 'none', fontWeight: 800, padding: '7px 14px', borderRadius: '6px', cursor: 'pointer' }}
+                >
+                  ✕ Tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadKwitansiExcel(receiptData.payment, receiptData.type, receiptData.row)}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                  }}
+                >
+                  <FileText size={15} /> Download Excel (.xlsx)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePrintKwitansiDirect(receiptData.payment, receiptData.type, receiptData.row)}
+                  style={{
+                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                  }}
+                >
+                  <Printer size={15} /> Cetak / Download PDF
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
