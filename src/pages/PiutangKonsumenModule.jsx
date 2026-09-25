@@ -25,7 +25,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { fetchCloudStore, saveCloudStore } from '../supabase';
 import * as XLSX from 'xlsx';
-import { ASHOKA_PARK_SIGNATURE_BASE64 } from './ashokaParkSignatureBase64';
+import { ASHOKA_PARK_SIGNATURE_BASE64, PERSADA_FOUR_LAND_LOGO_BASE64 } from './ashokaParkSignatureBase64';
 
 const STORAGE_KEY_PIUTANG = 'ams_piutang_konsumen_v1';
 
@@ -994,12 +994,7 @@ export const PiutangKonsumenModule = () => {
       <!-- Left: Logo & Company -->
       <div class="k-brand-col">
         ${cfg.isPark ? `
-          <svg width="42" height="42" viewBox="0 0 100 100" fill="none">
-            <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
-            <rect x="52" y="16" width="32" height="32" rx="16" stroke="#2b3a55" stroke-width="11" fill="none"/>
-            <rect x="16" y="52" width="32" height="32" rx="16" stroke="#2b3a55" stroke-width="11" fill="none"/>
-            <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
-          </svg>
+          <img src="${PERSADA_FOUR_LAND_LOGO_BASE64}" alt="Persada Four Land Logo" style="width: 44px; height: 44px; object-fit: contain; display: block;" />
         ` : `
           <svg width="46" height="42" viewBox="0 0 110 90" fill="none">
             <circle cx="36" cy="40" r="22" stroke="#d4a373" stroke-width="11" fill="none"/>
@@ -3753,12 +3748,11 @@ export const PiutangKonsumenModule = () => {
                 {/* Brand Col */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {cfg.isPark ? (
-                    <svg width="42" height="42" viewBox="0 0 100 100" fill="none">
-                      <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
-                      <rect x="52" y="16" width="32" height="32" rx="16" stroke="#2b3a55" strokeWidth="11" fill="none" />
-                      <rect x="16" y="52" width="32" height="32" rx="16" stroke="#2b3a55" strokeWidth="11" fill="none" />
-                      <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
-                    </svg>
+                    <img
+                      src={PERSADA_FOUR_LAND_LOGO_BASE64}
+                      alt="Persada Four Land Logo"
+                      style={{ width: '44px', height: '44px', objectFit: 'contain', display: 'block' }}
+                    />
                   ) : (
                     <svg width="46" height="42" viewBox="0 0 110 90" fill="none">
                       <circle cx="36" cy="40" r="22" stroke="#d4a373" strokeWidth="11" fill="none" />
