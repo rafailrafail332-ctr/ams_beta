@@ -135,7 +135,8 @@ export const PiutangKonsumenModule = () => {
   const [filterProyek, setFilterProyek] = useState('ALL');
   const [filterType, setFilterType] = useState('ALL');
   const [filterBlok, setFilterBlok] = useState('ALL');
-  const [filterPeriode, setFilterPeriode] = useState('');
+  const [filterBulan, setFilterBulan] = useState('ALL'); // 'ALL' | '01'..'12'
+  const [filterTahun, setFilterTahun] = useState('ALL'); // 'ALL' | '2025'..'2028'
   const [searchTerm, setSearchTerm] = useState('');
 
   // Payment Modal State
@@ -188,6 +189,44 @@ export const PiutangKonsumenModule = () => {
     return Number(val).toLocaleString('en-US');
   };
 
+  const formatMonthYear = (periodeStr) => {
+    if (!periodeStr) return '';
+    const parts = periodeStr.split('-');
+    if (parts.length < 2) return periodeStr;
+    const year = parts[0];
+    const month = parts[1];
+    const monthNames = {
+      '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+      '05': 'Mei', '06': 'Jun', '07': 'Jul', '08': 'Agt',
+      '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Des'
+    };
+    return `${monthNames[month] || month} ${year}`;
+  };
+
+  // Dynamic Years for Filter Options
+  const tahunOptions = useMemo(() => {
+    const years = new Set(['2024', '2025', '2026', '2027', '2028']);
+    piutangList.forEach((p) => {
+      if (p.periode) {
+        const y = p.periode.split('-')[0];
+        if (y && y.length === 4) years.add(y);
+      }
+      (p.dpPayments || []).forEach((dp) => {
+        if (dp.tanggal) {
+          const y = dp.tanggal.split('-')[0];
+          if (y && y.length === 4) years.add(y);
+        }
+      });
+      (p.angsuranPayments || []).forEach((ang) => {
+        if (ang.tanggal) {
+          const y = ang.tanggal.split('-')[0];
+          if (y && y.length === 4) years.add(y);
+        }
+      });
+    });
+    return Array.from(years).sort();
+  }, [piutangList]);
+
   // Calculated Row Values
   const getCalculatedRow = (item) => {
     const hargaJual = Number(item.hargaJual || 0);
@@ -219,7 +258,7 @@ export const PiutangKonsumenModule = () => {
     };
   };
 
-  // Filtered Rows
+  // Filtered Rows (Filtering Proyek, Type, Blok, Bulan, Tahun, Search)
   const filteredRows = useMemo(() => {
     return piutangList
       .map(getCalculatedRow)
@@ -227,7 +266,27 @@ export const PiutangKonsumenModule = () => {
         if (filterProyek !== 'ALL' && row.proyek !== filterProyek) return false;
         if (filterType !== 'ALL' && row.type !== filterType) return false;
         if (filterBlok !== 'ALL' && row.blok !== filterBlok) return false;
-        if (filterPeriode && !row.periode?.includes(filterPeriode)) return false;
+
+        // Filter Periode (Bulan & Tahun)
+        if (filterTahun !== 'ALL' || filterBulan !== 'ALL') {
+          if (filterTahun !== 'ALL' && filterBulan !== 'ALL') {
+            const targetPeriod = `${filterTahun}-${filterBulan}`;
+            const matchRow = row.periode?.startsWith(targetPeriod);
+            const matchDp = (row.dpPayments || []).some((p) => p.tanggal?.startsWith(targetPeriod));
+            const matchAng = (row.angsuranPayments || []).some((p) => p.tanggal?.startsWith(targetPeriod));
+            if (!matchRow && !matchDp && !matchAng) return false;
+          } else if (filterTahun !== 'ALL') {
+            const matchRow = row.periode?.startsWith(filterTahun);
+            const matchDp = (row.dpPayments || []).some((p) => p.tanggal?.startsWith(filterTahun));
+            const matchAng = (row.angsuranPayments || []).some((p) => p.tanggal?.startsWith(filterTahun));
+            if (!matchRow && !matchDp && !matchAng) return false;
+          } else if (filterBulan !== 'ALL') {
+            const matchRow = row.periode ? row.periode.split('-')[1] === filterBulan : false;
+            const matchDp = (row.dpPayments || []).some((p) => p.tanggal?.split('-')[1] === filterBulan);
+            const matchAng = (row.angsuranPayments || []).some((p) => p.tanggal?.split('-')[1] === filterBulan);
+            if (!matchRow && !matchDp && !matchAng) return false;
+          }
+        }
 
         if (searchTerm) {
           const s = searchTerm.toLowerCase();
@@ -242,7 +301,7 @@ export const PiutangKonsumenModule = () => {
 
         return true;
       });
-  }, [piutangList, filterProyek, filterType, filterBlok, filterPeriode, searchTerm]);
+  }, [piutangList, filterProyek, filterType, filterBlok, filterBulan, filterTahun, searchTerm]);
 
   // Aggregate Totals for Table Footer
   const totals = useMemo(() => {
@@ -781,8 +840,8 @@ export const PiutangKonsumenModule = () => {
             </select>
           </div>
 
-          {/* Periode Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          {/* Periode Filter (Bulan & Tahun) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span
               style={{
                 background: '#d97706',
@@ -790,42 +849,94 @@ export const PiutangKonsumenModule = () => {
                 fontWeight: 800,
                 fontSize: '0.78rem',
                 padding: '3px 8px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
               }}
             >
-              Periode :
+              <Calendar size={13} /> Periode :
             </span>
-            <input
-              type="month"
-              value={filterPeriode}
-              onChange={(e) => setFilterPeriode(e.target.value)}
+
+            {/* Filter Bulan */}
+            <select
+              value={filterBulan}
+              onChange={(e) => setFilterBulan(e.target.value)}
+              title="Filter Berdasarkan Bulan"
               style={{
                 background: '#0f172a',
                 border: '1px solid #475569',
                 color: '#ffffff',
-                padding: '3px 8px',
+                padding: '4px 10px',
                 borderRadius: '6px',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 outline: 'none'
               }}
-            />
-            {filterPeriode && (
+            >
+              <option value="ALL">Semua Bulan</option>
+              <option value="01">Januari</option>
+              <option value="02">Februari</option>
+              <option value="03">Maret</option>
+              <option value="04">April</option>
+              <option value="05">Mei</option>
+              <option value="06">Juni</option>
+              <option value="07">Juli</option>
+              <option value="08">Agustus</option>
+              <option value="09">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+
+            {/* Filter Tahun */}
+            <select
+              value={filterTahun}
+              onChange={(e) => setFilterTahun(e.target.value)}
+              title="Filter Berdasarkan Tahun"
+              style={{
+                background: '#0f172a',
+                border: '1px solid #475569',
+                color: '#ffffff',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                outline: 'none'
+              }}
+            >
+              <option value="ALL">Semua Tahun</option>
+              {tahunOptions.map((thn) => (
+                <option key={thn} value={thn}>
+                  {thn}
+                </option>
+              ))}
+            </select>
+
+            {/* Tombol Reset Periode */}
+            {(filterBulan !== 'ALL' || filterTahun !== 'ALL') && (
               <button
                 type="button"
-                onClick={() => setFilterPeriode('')}
-                title="Reset periode"
+                onClick={() => {
+                  setFilterBulan('ALL');
+                  setFilterTahun('ALL');
+                }}
+                title="Reset filter periode"
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid #ef4444',
                   color: '#f87171',
                   cursor: 'pointer',
-                  fontSize: '0.8rem',
+                  fontSize: '0.74rem',
                   fontWeight: 800,
-                  padding: '2px 4px'
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px'
                 }}
               >
-                ✕
+                ✕ Reset
               </button>
             )}
           </div>
@@ -1085,22 +1196,39 @@ export const PiutangKonsumenModule = () => {
                     {/* Nama Konsumen */}
                     <td style={{ padding: '9px 12px', border: '1px solid #334155', fontWeight: 800 }}>
                       <div style={{ color: '#ffffff', fontSize: '0.84rem' }}>{row.namaKonsumen}</div>
-                      {isLunas && (
-                        <span
-                          style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 900,
-                            color: '#10b981',
-                            background: 'rgba(16, 185, 129, 0.15)',
-                            padding: '1px 6px',
-                            borderRadius: '4px',
-                            display: 'inline-block',
-                            marginTop: '2px'
-                          }}
-                        >
-                          ✓ LUNAS
-                        </span>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                        {row.periode && (
+                          <span
+                            style={{
+                              fontSize: '0.67rem',
+                              color: '#38bdf8',
+                              background: 'rgba(56, 189, 248, 0.1)',
+                              border: '1px solid rgba(56, 189, 248, 0.25)',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              fontWeight: 700
+                            }}
+                            title={`Periode Transaksi: ${formatMonthYear(row.periode)}`}
+                          >
+                            📅 {formatMonthYear(row.periode)}
+                          </span>
+                        )}
+                        {isLunas && (
+                          <span
+                            style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 900,
+                              color: '#10b981',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              display: 'inline-block'
+                            }}
+                          >
+                            ✓ LUNAS
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Proyek */}
@@ -2088,14 +2216,46 @@ export const PiutangKonsumenModule = () => {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, marginBottom: '4px' }}>
-                    Periode (Bulan-Tahun):
+                    Periode Transaksi (Bulan & Tahun):
                   </label>
-                  <input
-                    type="month"
-                    className="form-control"
-                    value={rowFormData.periode}
-                    onChange={(e) => setRowFormData({ ...rowFormData, periode: e.target.value })}
-                  />
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <select
+                      className="form-control"
+                      value={(rowFormData.periode || '').split('-')[1] || '09'}
+                      onChange={(e) => {
+                        const y = (rowFormData.periode || '2026-09').split('-')[0] || '2026';
+                        setRowFormData({ ...rowFormData, periode: `${y}-${e.target.value}` });
+                      }}
+                      style={{ fontSize: '0.8rem', padding: '0.45rem' }}
+                    >
+                      <option value="01">Januari</option>
+                      <option value="02">Februari</option>
+                      <option value="03">Maret</option>
+                      <option value="04">April</option>
+                      <option value="05">Mei</option>
+                      <option value="06">Juni</option>
+                      <option value="07">Juli</option>
+                      <option value="08">Agustus</option>
+                      <option value="09">September</option>
+                      <option value="10">Oktober</option>
+                      <option value="11">November</option>
+                      <option value="12">Desember</option>
+                    </select>
+
+                    <select
+                      className="form-control"
+                      value={(rowFormData.periode || '').split('-')[0] || '2026'}
+                      onChange={(e) => {
+                        const m = (rowFormData.periode || '2026-09').split('-')[1] || '09';
+                        setRowFormData({ ...rowFormData, periode: `${e.target.value}-${m}` });
+                      }}
+                      style={{ fontSize: '0.8rem', padding: '0.45rem', width: '105px' }}
+                    >
+                      {tahunOptions.map((y) => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
