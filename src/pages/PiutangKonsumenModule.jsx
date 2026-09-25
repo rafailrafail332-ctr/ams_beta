@@ -25,6 +25,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { fetchCloudStore, saveCloudStore } from '../supabase';
 import * as XLSX from 'xlsx';
+import { ASHOKA_PARK_SIGNATURE_BASE64 } from './ashokaParkSignatureBase64';
 
 const STORAGE_KEY_PIUTANG = 'ams_piutang_konsumen_v1';
 
@@ -1090,20 +1091,14 @@ export const PiutangKonsumenModule = () => {
         <div class="k-sign-date">${tanggalBogor}</div>
         <div class="k-sign-company">${cfg.companyNameUpper}</div>
 
-        <div class="k-stamp-sig-box">
-          <!-- Stamp -->
-          <div class="k-stamp-wrap">
-            ${cfg.isPark ? `
-              <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
-                <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
-                <rect x="52" y="16" width="32" height="32" rx="16" stroke="#0284c7" stroke-width="11" fill="none"/>
-                <rect x="16" y="52" width="32" height="32" rx="16" stroke="#0284c7" stroke-width="11" fill="none"/>
-                <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" stroke-width="11" fill="none"/>
-              </svg>
-              <div class="k-stamp-txt">
-                PT. YAZFI SETIA<br/>PERSADA
-              </div>
-            ` : `
+        ${cfg.isPark ? `
+          <div style="display: flex; justify-content: center; margin-top: 4px; margin-bottom: 2px;">
+            <img src="${ASHOKA_PARK_SIGNATURE_BASE64}" alt="Tanda Tangan & Stempel PT. Yazfi Setia Persada" style="width: 215px; height: auto; display: block;" />
+          </div>
+        ` : `
+          <div class="k-stamp-sig-box">
+            <!-- Stamp -->
+            <div class="k-stamp-wrap">
               <svg width="36" height="32" viewBox="0 0 110 90" fill="none">
                 <circle cx="36" cy="40" r="22" stroke="#d4a373" stroke-width="11" fill="none"/>
                 <circle cx="66" cy="38" r="22" stroke="#0284c7" stroke-width="11" fill="none"/>
@@ -1112,19 +1107,19 @@ export const PiutangKonsumenModule = () => {
               <div class="k-stamp-txt">
                 PT Yazfi Gema<br/>Persada
               </div>
-            `}
+            </div>
+
+            <!-- Signature Stroke -->
+            <svg class="k-sig-svg" viewBox="0 0 190 75" fill="none">
+              <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M 92 24 L 126 26" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
           </div>
 
-          <!-- Signature Stroke -->
-          <svg class="k-sig-svg" viewBox="0 0 190 75" fill="none">
-            <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 92 24 L 126 26" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-        </div>
-
-        <div class="k-signer-name-wrap">
-          <span class="k-signer-name">${cfg.signerName}</span>
-        </div>
+          <div class="k-signer-name-wrap">
+            <span class="k-signer-name">${cfg.signerName}</span>
+          </div>
+        `}
       </div>
     </div>
 
@@ -3881,23 +3876,19 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ fontSize: '12.5px', color: '#1e293b', marginBottom: '3px' }}>{tanggalBogor}</div>
                   <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{cfg.companyNameUpper}</div>
 
-                  <div style={{ position: 'relative', width: '210px', height: '75px', margin: '4px auto 0' }}>
-                    {/* Stamp */}
-                    <div style={{ position: 'absolute', right: '10px', top: '10px', display: 'flex', alignItems: 'center', gap: '6px', transform: 'rotate(-5deg)', opacity: 0.88 }}>
-                      {cfg.isPark ? (
-                        <>
-                          <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
-                            <rect x="16" y="16" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
-                            <rect x="52" y="16" width="32" height="32" rx="16" stroke="#0284c7" strokeWidth="11" fill="none" />
-                            <rect x="16" y="52" width="32" height="32" rx="16" stroke="#0284c7" strokeWidth="11" fill="none" />
-                            <rect x="52" y="52" width="32" height="32" rx="16" stroke="#d97706" strokeWidth="11" fill="none" />
-                          </svg>
-                          <div style={{ fontSize: '11px', fontWeight: 900, color: '#0284c7', lineHeight: 1.1, textAlign: 'left', letterSpacing: '0.4px' }}>
-                            PT. YAZFI SETIA<br />PERSADA
-                          </div>
-                        </>
-                      ) : (
-                        <>
+                  {cfg.isPark ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px', marginBottom: '2px' }}>
+                      <img
+                        src={ASHOKA_PARK_SIGNATURE_BASE64}
+                        alt="Tanda Tangan & Stempel PT. Yazfi Setia Persada"
+                        style={{ width: '215px', height: 'auto', display: 'block' }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ position: 'relative', width: '210px', height: '75px', margin: '4px auto 0' }}>
+                        {/* Stamp */}
+                        <div style={{ position: 'absolute', right: '10px', top: '10px', display: 'flex', alignItems: 'center', gap: '6px', transform: 'rotate(-5deg)', opacity: 0.88 }}>
                           <svg width="36" height="32" viewBox="0 0 110 90" fill="none">
                             <circle cx="36" cy="40" r="22" stroke="#d4a373" strokeWidth="11" fill="none" />
                             <circle cx="66" cy="38" r="22" stroke="#0284c7" strokeWidth="11" fill="none" />
@@ -3906,22 +3897,22 @@ export const PiutangKonsumenModule = () => {
                           <div style={{ fontSize: '11px', fontWeight: 900, color: '#0284c7', lineHeight: 1.1, textAlign: 'left', letterSpacing: '0.4px' }}>
                             PT Yazfi Gema<br />Persada
                           </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
 
-                    {/* Signature */}
-                    <svg style={{ width: '190px', height: '75px', position: 'absolute', left: '5px', top: 0, pointerEvents: 'none', zIndex: 2 }} viewBox="0 0 190 75" fill="none">
-                      <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M 92 24 L 126 26" stroke="#111827" strokeWidth="1.8" strokeLinecap="round" />
-                    </svg>
-                  </div>
+                        {/* Signature */}
+                        <svg style={{ width: '190px', height: '75px', position: 'absolute', left: '5px', top: 0, pointerEvents: 'none', zIndex: 2 }} viewBox="0 0 190 75" fill="none">
+                          <path d="M 25 58 C 35 48, 48 35, 55 42 C 62 48, 68 55, 78 35 C 88 15, 95 10, 102 18 C 108 25, 112 40, 122 30 C 130 22, 138 18, 148 24 C 135 42, 120 54, 98 60 C 65 68, 38 68, 22 66" stroke="#111827" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M 92 24 L 126 26" stroke="#111827" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
+                      </div>
 
-                  <div style={{ marginTop: '2px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '13px', color: '#0f172a', borderBottom: '1.5px solid #000000', paddingBottom: '1px', display: 'inline-block', minWidth: '140px' }}>
-                      {cfg.signerName}
-                    </span>
-                  </div>
+                      <div style={{ marginTop: '2px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '13px', color: '#0f172a', borderBottom: '1.5px solid #000000', paddingBottom: '1px', display: 'inline-block', minWidth: '140px' }}>
+                          {cfg.signerName}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
