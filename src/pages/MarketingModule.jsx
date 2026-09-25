@@ -45,9 +45,11 @@ import {
   Home,
   ArrowRight,
   Mail,
-  CreditCard
+  CreditCard,
+  BarChart3
 } from 'lucide-react';
 import { PiutangKonsumenModule } from './PiutangKonsumenModule';
+import { MarketingGrafikModule } from './MarketingGrafikModule';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -307,8 +309,9 @@ export const MarketingModule = () => {
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit, piutang_konsumen)
+  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit, piutang_konsumen, grafik)
   const currentSubView = 
+    (activeSubTab === 'grafik' || activeSubTab === 'grafik_penjualan' || activeSubTab === 'grafik-penjualan' || activeSubTab === 'chart') ? 'grafik' :
     (activeSubTab === 'piutang' || activeSubTab === 'piutang_konsumen' || activeSubTab === 'piutang-konsumen') ? 'piutang_konsumen' :
     (activeSubTab === 'input_spr' || activeSubTab === 'form_spr') ? 'input_spr' :
     activeSubTab === 'spr' ? 'spr' :
@@ -2674,6 +2677,20 @@ export const MarketingModule = () => {
           }}
         >
           <CreditCard size={16} color="#f59e0b" /> 6. Piutang Konsumen (DP & Angsuran)
+        </button>
+        <button
+          className={`tab-item ${currentSubView === 'grafik' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('grafik')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'grafik' ? '#8b5cf6' : undefined,
+            color: currentSubView === 'grafik' ? '#c084fc' : undefined
+          }}
+        >
+          <BarChart3 size={16} color="#c084fc" /> 7. Grafik Penjualan (Bulan & Tahun)
         </button>
       </div>
 
@@ -5817,6 +5834,16 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {currentSubView === 'piutang_konsumen' && (
         <PiutangKonsumenModule />
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 7: GRAFIK PENJUALAN PERBULAN & PERTAHUN                               */}
+      {/* ========================================================================= */}
+      {currentSubView === 'grafik' && (
+        <MarketingGrafikModule
+          salesList={salesList}
+          databaseKonsumenRows={databaseKonsumenRows}
+        />
       )}
 
       {/* ========================================================================= */}

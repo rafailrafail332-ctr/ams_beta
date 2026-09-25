@@ -36,6 +36,7 @@ import {
   Calculator,
   TrendingUp,
   PieChart,
+  BarChart3,
   LogOut
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -125,8 +126,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'mkt-konsumen', title: '4. Data Base Konsumen (Calon, Hot, Closing)', moduleKey: 'marketing', subTabKey: 'db_konsumen', icon: Users, color: '#F59E0B' },
         { id: 'mkt-unit', title: '5. Data Base Unit Properti', moduleKey: 'marketing', subTabKey: 'db_unit', icon: Building2, color: '#38BDF8' },
         { id: 'mkt-piutang', title: '6. Piutang Konsumen (DP & Angsuran)', moduleKey: 'marketing', subTabKey: 'piutang_konsumen', icon: CreditCard, color: '#F59E0B' },
-        { id: 'cr-tickets', title: '7. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
-        { id: 'cr-handover', title: '8. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
+        { id: 'mkt-grafik', title: '7. Grafik Penjualan (Bulan & Tahun)', moduleKey: 'marketing', subTabKey: 'grafik', icon: BarChart3, color: '#8B5CF6' },
+        { id: 'cr-tickets', title: '8. Customer Relation & Garansi Konsumen', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' },
+        { id: 'cr-handover', title: '9. BAST Serah Terima Kunci & Meteran', moduleKey: 'customer-relation', subTabKey: 'handover', icon: KeyRound, color: '#FB7185' }
       ];
     }
 
