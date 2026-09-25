@@ -76,8 +76,14 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
     const list = [];
     const seen = new Map();
 
-    // 1. Dari Data Base Konsumen (Pembeli Resmi & Closing)
+    // 1. Dari Data Base Konsumen (Pembeli Resmi & Closing Sah)
     (databaseKonsumenRows || []).forEach(c => {
+      // Pastikan status adalah closing jika ada status
+      const cStatus = (c.status || '').toLowerCase();
+      if (c.status && !cStatus.includes('closing') && !cStatus.includes('closed') && !cStatus.includes('sold') && !cStatus.includes('akad') && !cStatus.includes('lunas')) {
+        return;
+      }
+
       const key = `${(c.proyek || '').toLowerCase()}_${c.blok}_${c.nomor}_${(c.nama || '').toLowerCase()}`.replace(/\s+/g, '');
       if (!seen.has(key)) {
         let date = c.tanggal || c.tanggalClosing || '';
@@ -113,13 +119,23 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           year: date.slice(0, 4),
           month: date.slice(5, 7),
           marketing,
-          status: 'Closing Resmi'
+          status: c.status || 'Closed / Sold'
         });
       }
     });
 
-    // 2. Dari Transaksi Penjualan & SPR Resmi (salesList)
+    // 2. Dari Transaksi Penjualan & SPR Resmi (salesList) - STRICTLY KHUSUS CLOSING SAJA!
     (salesList || []).forEach(s => {
+      // KHUSUS STATUS CLOSING SAJA (Closed, Closing, Sold, Akad, Lunas)
+      // Strict: Abaikan jika 'Booking / SPR', 'Prospek Hot', 'Draft', dll.
+      const sStatus = (s.status || '').toLowerCase();
+      const isClosing = sStatus.includes('closing') ||
+                        sStatus.includes('closed') ||
+                        sStatus.includes('sold') ||
+                        sStatus.includes('akad') ||
+                        sStatus.includes('lunas');
+      if (!isClosing) return; // ABAIKAN data non-closing!
+
       const key = `${(s.cluster || s.sprOfficialState?.projectName || '').toLowerCase()}_${s.unitNo}_${(s.customerName || '').toLowerCase()}`.replace(/\s+/g, '');
       if (!seen.has(key)) {
         const project = (s.cluster || s.sprOfficialState?.projectName || '').toLowerCase().includes('park') ? 'Ashoka Park' : 'Ashoka View';
@@ -145,7 +161,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           year: date.slice(0, 4),
           month: date.slice(5, 7),
           marketing,
-          status: s.status || 'Closing / SPR'
+          status: s.status || 'Closing Resmi'
         });
       }
     });
@@ -939,19 +955,123 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           padding: '1.25rem'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.2rem', paddingBottom: '1rem', borderBottom: '1px solid #1e293b' }}>
           <div>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Building2 size={18} color="#34d399" />
               Daftar Konsumen Closing ({filteredSales.length} Transaksi)
             </h3>
-            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-              Tabel ini menampilkan konsumen closing yang tersaring sesuai filter tahun/bulan/proyek di atas.
+            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>
+              Tabel ini menampilkan konsumen closing yang tersaring sesuai filter tahun/bulan/proyek. Khusus status closing sah (non-closing tidak ditampilkan).
             </div>
           </div>
 
-          <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
-            Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(totalOmzetClosing)}</strong>
+          {/* QUICK TOOLBAR FILTERS LANGSUNG DI ATAS TABEL */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Filter Tahun */}
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '4px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 700 }}>Tahun:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#34d399',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              >
+                <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Tahun</option>
+                {availableYears.map(yr => (
+                  <option key={yr} value={yr} style={{ background: '#0f172a', color: '#fff' }}>Tahun {yr}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter Bulan */}
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '4px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 700 }}>Bulan:</span>
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#38bdf8',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              >
+                <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Bulan (12 Bln)</option>
+                {NAMA_BULAN.map((nama, idx) => {
+                  const val = String(idx + 1).padStart(2, '0');
+                  return (
+                    <option key={val} value={val} style={{ background: '#0f172a', color: '#fff' }}>
+                      {nama}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* Filter Proyek */}
+            <div style={{ display: 'flex', alignItems: 'center', background: '#1e293b', padding: '4px 10px', borderRadius: '8px', border: '1px solid #334155' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 700 }}>Proyek:</span>
+              <select
+                value={filterProject}
+                onChange={(e) => setFilterProject(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#fbbf24',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              >
+                <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Proyek</option>
+                <option value="Ashoka View" style={{ background: '#0f172a', color: '#fff' }}>Ashoka View</option>
+                <option value="Ashoka Park" style={{ background: '#0f172a', color: '#fff' }}>Ashoka Park</option>
+              </select>
+            </div>
+
+            {/* Badge Khusus Closing */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.4)',
+                color: '#34d399',
+                fontSize: '0.74rem',
+                fontWeight: 800
+              }}
+              title="Filter otomatis: Hanya transaksi berstatus closing yang dimasukkan ke modul ini"
+            >
+              <CheckCircle2 size={13} color="#10b981" />
+              <span>Status: Khusus Closing Saja</span>
+            </div>
+
+            {/* Total Omzet Tag */}
+            <div style={{
+              padding: '4px 10px',
+              borderRadius: '8px',
+              background: '#090d16',
+              border: '1px solid #334155',
+              fontSize: '0.75rem',
+              color: '#cbd5e1'
+            }}>
+              Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(totalOmzetClosing)}</strong>
+            </div>
           </div>
         </div>
 
@@ -968,6 +1088,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                 <th style={{ padding: '9px 12px', textAlign: 'right' }}>Uang Masuk DP+UTJ</th>
                 <th style={{ padding: '9px 12px', textAlign: 'left' }}>Marketing</th>
                 <th style={{ padding: '9px 12px', textAlign: 'center' }}>Tanggal Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -1009,11 +1130,28 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                     <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: '#38bdf8' }}>
                       {s.date}
                     </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#34d399',
+                        border: '1px solid rgba(16, 185, 129, 0.3)'
+                      }}>
+                        <CheckCircle2 size={11} />
+                        {s.status || 'Closed / Sold'}
+                      </span>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' }}>
+                  <td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' }}>
                     Tidak ada transaksi closing yang sesuai dengan filter tahun/bulan/proyek ini.
                   </td>
                 </tr>
@@ -1031,8 +1169,11 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                   <td style={{ padding: '9px 12px', textAlign: 'right', color: '#fbbf24' }}>
                     {formatRupiah(totalCashIn)}
                   </td>
-                  <td colSpan={2} style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8' }}>
+                  <td style={{ padding: '9px 12px', color: '#cbd5e1' }}>
                     {totalUnitClosing} Unit Closing
+                  </td>
+                  <td colSpan={2} style={{ padding: '9px 12px', textAlign: 'center', color: '#34d399', fontSize: '0.74rem' }}>
+                    ✓ Khusus Closing Sah
                   </td>
                 </tr>
               </tfoot>
