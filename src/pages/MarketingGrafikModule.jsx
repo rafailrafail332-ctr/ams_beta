@@ -7,24 +7,14 @@ import {
   DollarSign,
   Home,
   Users,
-  Award,
-  Filter,
-  ArrowUpRight,
-  ArrowDownRight,
   Download,
   Printer,
-  PieChart,
-  Layers,
-  Percent,
-  Target,
   CheckCircle2,
-  Clock,
   Sparkles,
-  ChevronRight,
   CreditCard,
   Building2,
-  RefreshCw,
-  FileCheck2
+  RotateCcw,
+  ArrowRight
 } from 'lucide-react';
 
 const formatRupiah = (val) => {
@@ -32,7 +22,7 @@ const formatRupiah = (val) => {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
 };
 
-const formatShortRupiah = (val) => {
+const formatCompactRupiah = (val) => {
   const num = Number(val) || 0;
   if (num >= 1000000000) {
     return (num / 1000000000).toFixed(2).replace(/\.?0+$/, '') + ' M';
@@ -53,32 +43,43 @@ const NAMA_BULAN_SHORT = [
   'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
 ];
 
+// Helper untuk menghasilkan path kurva halus (Smooth Cubic Bezier Spline)
+const getSmoothCurvedPath = (points) => {
+  if (!points || points.length === 0) return '';
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i];
+    const p1 = points[i + 1];
+    const cpX1 = p0.x + (p1.x - p0.x) * 0.5;
+    const cpY1 = p0.y;
+    const cpX2 = p0.x + (p1.x - p0.x) * 0.5;
+    const cpY2 = p1.y;
+    d += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+  }
+  return d;
+};
+
 export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [] }) => {
-  // Mode View: 'bulanan' | 'tahunan'
-  const [viewMode, setViewMode] = useState('bulanan');
-  // Tahun terpilih untuk mode bulanan
+  // Filter state sederhana & tidak ribet
   const [selectedYear, setSelectedYear] = useState('2026');
-  // Filter Proyek: 'ALL' | 'Ashoka View' | 'Ashoka Park'
-  const [filterProject, setFilterProject] = useState('ALL');
-  // Filter Marketing: 'ALL' | 'Amanda' | 'Fresda' | 'Yulieka'
-  const [filterMarketing, setFilterMarketing] = useState('ALL');
-  // Metrik yang ditampilkan: 'omzet' | 'unit' | 'cashin'
-  const [metricType, setMetricType] = useState('omzet');
-  // State hover tooltip pada grafik batang
-  const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState('ALL'); // 'ALL' atau '01' - '12'
+  const [filterProject, setFilterProject] = useState('ALL'); // 'ALL', 'Ashoka View', 'Ashoka Park'
+  const [metricType, setMetricType] = useState('omzet'); // 'omzet' | 'unit'
+  const [hoveredMonthIndex, setHoveredMonthIndex] = useState(null);
 
   // =============================================================
-  // AMBIL DATA HANYA DARI TRANSAKSI CLOSING RESMI (DATABASE KONSUMEN & SPR)
-  // TIDAK MENGGUNAKAN DATA DUMMY / SAMPLE SINTETIS
+  // AMBIL DATA HANYA DARI TRANSAKSI KONSUMEN CLOSING RESMI
   // =============================================================
-  const allClosingSales = useMemo(() => {
+  const allClosingRecords = useMemo(() => {
     const list = [];
-    const seenKeyMap = new Map();
+    const seen = new Map();
 
-    // 1. Data Base Konsumen (Pembeli Resmi & Closing)
+    // 1. Dari Data Base Konsumen (Pembeli Resmi & Closing)
     (databaseKonsumenRows || []).forEach(c => {
-      const key = `${(c.proyek || '').toLowerCase().trim()}_${(c.blok || '').trim()}_${(c.nomor || '').trim()}_${(c.nama || '').toLowerCase().trim()}`;
-      if (!seenKeyMap.has(key)) {
+      const key = `${(c.proyek || '').toLowerCase()}_${c.blok}_${c.nomor}_${(c.nama || '').toLowerCase()}`.replace(/\s+/g, '');
+      if (!seen.has(key)) {
         let date = c.tanggal || c.tanggalClosing || '';
         if (!date) {
           if (c.id === 'KNS-001' || (c.nama && c.nama.toLowerCase().includes('budi'))) date = '2026-09-02';
@@ -95,11 +96,10 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         const bookingDp = Number(c.bookingDp) || 10000000;
         const marketing = c.marketing || 'Amanda Chesyariani Hermawan';
 
-        seenKeyMap.set(key, true);
+        seen.set(key, true);
         list.push({
-          id: c.id || `CLOSING-${list.length + 1}`,
-          source: 'Data Base Konsumen (Closing)',
-          customerName: c.nama || 'Konsumen Resmi',
+          id: c.id || `KNS-${list.length + 1}`,
+          customerName: c.nama || 'Konsumen Closing',
           project,
           unit: `${c.blok || ''}-${c.nomor || ''}`,
           type: c.type || 'Type Standar',
@@ -110,28 +110,28 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           dp: Math.round(netPrice * 0.1),
           cashIn: bookingDp + Math.round(netPrice * 0.1),
           date,
+          year: date.slice(0, 4),
+          month: date.slice(5, 7),
           marketing,
-          status: 'Closing Resmi',
-          skemaBayar: 'KPR Bank'
+          status: 'Closing Resmi'
         });
       }
     });
 
-    // 2. Transaksi Penjualan & SPR Resmi (salesList)
+    // 2. Dari Transaksi Penjualan & SPR Resmi (salesList)
     (salesList || []).forEach(s => {
-      const key = `${(s.cluster || s.sprOfficialState?.projectName || '').toLowerCase().trim()}_${(s.unitNo || '').trim()}_${(s.customerName || '').toLowerCase().trim()}`;
-      if (!seenKeyMap.has(key)) {
+      const key = `${(s.cluster || s.sprOfficialState?.projectName || '').toLowerCase()}_${s.unitNo}_${(s.customerName || '').toLowerCase()}`.replace(/\s+/g, '');
+      if (!seen.has(key)) {
         const project = (s.cluster || s.sprOfficialState?.projectName || '').toLowerCase().includes('park') ? 'Ashoka Park' : 'Ashoka View';
         const netPrice = Number(s.hargaUnit) || Number(s.sprOfficialState?.netNetTotal) || 500000000;
         const booking = Number(s.bookingFee) || 10000000;
         const date = s.bookingDate || s.sprOfficialState?.sprDate || new Date().toISOString().split('T')[0];
         const marketing = s.salesPerson || s.sprOfficialState?.adminMarketing || 'Amanda Chesyariani Hermawan';
 
-        seenKeyMap.set(key, true);
+        seen.set(key, true);
         list.push({
           id: s.id || `SLS-${list.length + 1}`,
-          source: 'Transaksi Penjualan & SPR',
-          customerName: s.customerName || 'Pembeli SPR',
+          customerName: s.customerName || 'Pembeli SPR Closing',
           project,
           unit: s.unitNo || '-',
           type: s.type || s.sprOfficialState?.type || 'Type Standar',
@@ -142,9 +142,10 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           dp: Math.round(netPrice * 0.1),
           cashIn: booking + Math.round(netPrice * 0.1),
           date,
+          year: date.slice(0, 4),
+          month: date.slice(5, 7),
           marketing,
-          status: s.status || 'Closing / SPR',
-          skemaBayar: s.skemaBayar || 'KPR Bank'
+          status: s.status || 'Closing / SPR'
         });
       }
     });
@@ -152,316 +153,182 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
     return list;
   }, [databaseKonsumenRows, salesList]);
 
-  // DAFTAR TAHUN BERDASARKAN TRANSAKSI CLOSING
+  // PILIHAN TAHUN YANG TERSEDIA DI DATA
   const availableYears = useMemo(() => {
-    const setYears = new Set();
-    allClosingSales.forEach(s => {
-      const yr = s.date ? s.date.slice(0, 4) : null;
-      if (yr) setYears.add(yr);
+    const years = new Set(['2026', '2025']);
+    allClosingRecords.forEach(r => {
+      if (r.year) years.add(r.year);
     });
-    setYears.add('2026');
-    setYears.add('2025');
-    return Array.from(setYears).sort();
-  }, [allClosingSales]);
+    return Array.from(years).sort().reverse();
+  }, [allClosingRecords]);
 
-  // FILTER DATA BERDASARKAN PROYEK & MARKETING
-  const filteredClosingSales = useMemo(() => {
-    return allClosingSales.filter(s => {
+  // FILTERED CLOSING SALES BERDASARKAN FILTER DROPDOWN
+  const filteredSales = useMemo(() => {
+    return allClosingRecords.filter(r => {
+      if (selectedYear !== 'ALL' && r.year !== selectedYear) return false;
+      if (selectedMonth !== 'ALL' && r.month !== selectedMonth) return false;
       if (filterProject !== 'ALL') {
-        const pNorm = s.project.toLowerCase();
+        const pNorm = r.project.toLowerCase();
         if (filterProject === 'Ashoka View' && !pNorm.includes('view')) return false;
         if (filterProject === 'Ashoka Park' && !pNorm.includes('park')) return false;
       }
-      if (filterMarketing !== 'ALL') {
-        const mNorm = (s.marketing || '').toLowerCase();
-        if (!mNorm.includes(filterMarketing.toLowerCase())) return false;
-      }
       return true;
     });
-  }, [allClosingSales, filterProject, filterMarketing]);
+  }, [allClosingRecords, selectedYear, selectedMonth, filterProject]);
+
+  // REKAPITULASI STATISTIK UTAMA (3 ANGKA KPI)
+  const totalOmzetClosing = useMemo(() => {
+    return filteredSales.reduce((acc, curr) => acc + curr.netPrice, 0);
+  }, [filteredSales]);
+
+  const totalUnitClosing = filteredSales.length;
+
+  const totalCashIn = useMemo(() => {
+    return filteredSales.reduce((acc, curr) => acc + curr.cashIn, 0);
+  }, [filteredSales]);
 
   // -------------------------------------------------------------
-  // PERHITUNGAN BULANAN (12 BULAN SESUAI TAHUN TERPILIH)
+  // REKAP PER BULAN UNTUK GRAFIK (12 BULAN)
   // -------------------------------------------------------------
-  const monthlyData = useMemo(() => {
-    // Target anggaran deviasi (default target: 1 unit per bulan)
-    const baseTargetOmzet = filterProject === 'Ashoka View' ? 500000000 : (filterProject === 'Ashoka Park' ? 500000000 : 800000000);
-    const baseTargetUnit = 1;
+  const monthlyChartData = useMemo(() => {
+    const yr = selectedYear === 'ALL' ? '2026' : selectedYear;
 
-    return Array.from({ length: 12 }, (_, monthIdx) => {
-      const monthStr = String(monthIdx + 1).padStart(2, '0');
-      const prefixYearMonth = `${selectedYear}-${monthStr}`;
+    return Array.from({ length: 12 }, (_, idx) => {
+      const monthStr = String(idx + 1).padStart(2, '0');
+      
+      const salesInMonth = allClosingRecords.filter(r => {
+        if (selectedYear !== 'ALL' && r.year !== yr) return false;
+        if (filterProject !== 'ALL') {
+          const pNorm = r.project.toLowerCase();
+          if (filterProject === 'Ashoka View' && !pNorm.includes('view')) return false;
+          if (filterProject === 'Ashoka Park' && !pNorm.includes('park')) return false;
+        }
+        return r.month === monthStr;
+      });
 
-      const matchedSales = filteredClosingSales.filter(s => s.date && s.date.startsWith(prefixYearMonth));
+      const omzet = salesInMonth.reduce((acc, c) => acc + c.netPrice, 0);
+      const unit = salesInMonth.length;
+      const cashIn = salesInMonth.reduce((acc, c) => acc + c.cashIn, 0);
 
-      const totalOmzet = matchedSales.reduce((acc, curr) => acc + (Number(curr.netPrice) || 0), 0);
-      const totalUnit = matchedSales.length;
-      const totalBooking = matchedSales.reduce((acc, curr) => acc + (Number(curr.booking) || 0), 0);
-      const totalDp = matchedSales.reduce((acc, curr) => acc + (Number(curr.dp) || 0), 0);
-      const totalCashIn = totalBooking + totalDp;
-
-      const ashokaViewSales = matchedSales.filter(s => (s.project || '').toLowerCase().includes('view'));
-      const ashokaParkSales = matchedSales.filter(s => (s.project || '').toLowerCase().includes('park'));
-
-      const omzetView = ashokaViewSales.reduce((acc, c) => acc + (Number(c.netPrice) || 0), 0);
-      const omzetPark = ashokaParkSales.reduce((acc, c) => acc + (Number(c.netPrice) || 0), 0);
-
-      const targetOmzet = baseTargetOmzet;
-      const targetUnit = baseTargetUnit;
-      const pctTarget = targetOmzet > 0 ? Math.round((totalOmzet / targetOmzet) * 100) : 0;
+      const viewSales = salesInMonth.filter(s => s.project.toLowerCase().includes('view'));
+      const parkSales = salesInMonth.filter(s => s.project.toLowerCase().includes('park'));
 
       return {
-        monthIndex: monthIdx,
-        monthName: NAMA_BULAN[monthIdx],
-        monthShort: NAMA_BULAN_SHORT[monthIdx],
-        totalOmzet,
-        totalUnit,
-        totalBooking,
-        totalDp,
-        totalCashIn,
-        omzetView,
-        omzetPark,
-        unitView: ashokaViewSales.length,
-        unitPark: ashokaParkSales.length,
-        targetOmzet,
-        targetUnit,
-        pctTarget,
-        closingItems: matchedSales
+        monthIndex: idx,
+        monthStr,
+        monthName: NAMA_BULAN[idx],
+        monthShort: NAMA_BULAN_SHORT[idx],
+        omzet,
+        unit,
+        cashIn,
+        omzetView: viewSales.reduce((a, b) => a + b.netPrice, 0),
+        omzetPark: parkSales.reduce((a, b) => a + b.netPrice, 0),
+        unitView: viewSales.length,
+        unitPark: parkSales.length,
+        sales: salesInMonth
       };
     });
-  }, [filteredClosingSales, selectedYear, filterProject]);
+  }, [allClosingRecords, selectedYear, filterProject]);
 
   // -------------------------------------------------------------
-  // PERHITUNGAN TAHUNAN (MULTI-YEAR COMPARISON)
+  // SVG CHART GEOMETRY & CURVES (MODERN HIGH-END DESIGN)
   // -------------------------------------------------------------
-  const yearlyData = useMemo(() => {
-    return availableYears.map(yr => {
-      const matchedSales = filteredClosingSales.filter(s => s.date && s.date.startsWith(yr));
+  const chartWidth = 920;
+  const chartHeight = 290;
+  const padLeft = 65;
+  const padRight = 30;
+  const padTop = 40;
+  const padBottom = 35;
 
-      const totalOmzet = matchedSales.reduce((acc, curr) => acc + (Number(curr.netPrice) || 0), 0);
-      const totalUnit = matchedSales.length;
-      const totalBooking = matchedSales.reduce((acc, curr) => acc + (Number(curr.booking) || 0), 0);
-      const totalDp = matchedSales.reduce((acc, curr) => acc + (Number(curr.dp) || 0), 0);
-      const totalCashIn = totalBooking + totalDp;
+  const innerW = chartWidth - padLeft - padRight;
+  const innerH = chartHeight - padTop - padBottom;
 
-      const ashokaViewSales = matchedSales.filter(s => (s.project || '').toLowerCase().includes('view'));
-      const ashokaParkSales = matchedSales.filter(s => (s.project || '').toLowerCase().includes('park'));
-
-      const omzetView = ashokaViewSales.reduce((acc, c) => acc + (Number(c.netPrice) || 0), 0);
-      const omzetPark = ashokaParkSales.reduce((acc, c) => acc + (Number(c.netPrice) || 0), 0);
-
-      const targetOmzet = (filterProject === 'Ashoka View' ? 6000000000 : (filterProject === 'Ashoka Park' ? 6000000000 : 10000000000));
-      const targetUnit = (filterProject === 'Ashoka View' ? 12 : (filterProject === 'Ashoka Park' ? 10 : 20));
-      const pctTarget = targetOmzet > 0 ? Math.round((totalOmzet / targetOmzet) * 100) : 0;
-
-      return {
-        year: yr,
-        totalOmzet,
-        totalUnit,
-        totalBooking,
-        totalDp,
-        totalCashIn,
-        omzetView,
-        omzetPark,
-        unitView: ashokaViewSales.length,
-        unitPark: ashokaParkSales.length,
-        targetOmzet,
-        targetUnit,
-        pctTarget,
-        closingItems: matchedSales
-      };
-    });
-  }, [filteredClosingSales, availableYears, filterProject]);
-
-  // -------------------------------------------------------------
-  // KPI AGGREGATES
-  // -------------------------------------------------------------
-  const activeDataset = viewMode === 'bulanan' ? monthlyData : yearlyData;
-
-  const kpiTotalOmzet = useMemo(() => {
-    return activeDataset.reduce((acc, curr) => acc + (curr.totalOmzet || 0), 0);
-  }, [activeDataset]);
-
-  const kpiTotalUnit = useMemo(() => {
-    return activeDataset.reduce((acc, curr) => acc + (curr.totalUnit || 0), 0);
-  }, [activeDataset]);
-
-  const kpiTotalCashIn = useMemo(() => {
-    return activeDataset.reduce((acc, curr) => acc + (curr.totalCashIn || 0), 0);
-  }, [activeDataset]);
-
-  const peakPeriodItem = useMemo(() => {
-    if (!activeDataset.length) return null;
-    let maxItem = activeDataset[0];
-    activeDataset.forEach(item => {
-      const val = metricType === 'unit' ? item.totalUnit : (metricType === 'cashin' ? item.totalCashIn : item.totalOmzet);
-      const maxVal = metricType === 'unit' ? maxItem.totalUnit : (metricType === 'cashin' ? maxItem.totalCashIn : maxItem.totalOmzet);
-      if (val > maxVal) maxItem = item;
-    });
-    return maxItem.totalOmzet > 0 || maxItem.totalUnit > 0 ? maxItem : null;
-  }, [activeDataset, metricType]);
-
-  // -------------------------------------------------------------
-  // KOMPOSISI PROYEK & MARKETING BERDASARKAN CLOSING ASLI
-  // -------------------------------------------------------------
-  const projectComposition = useMemo(() => {
-    const viewOmzet = activeDataset.reduce((acc, c) => acc + (c.omzetView || 0), 0);
-    const parkOmzet = activeDataset.reduce((acc, c) => acc + (c.omzetPark || 0), 0);
-    const viewUnit = activeDataset.reduce((acc, c) => acc + (c.unitView || 0), 0);
-    const parkUnit = activeDataset.reduce((acc, c) => acc + (c.unitPark || 0), 0);
-    const totalOmzet = viewOmzet + parkOmzet || 1;
-    const totalUnit = viewUnit + parkUnit || 1;
-
-    return {
-      viewOmzet,
-      parkOmzet,
-      viewUnit,
-      parkUnit,
-      pctOmzetView: viewOmzet > 0 ? Math.round((viewOmzet / totalOmzet) * 100) : 0,
-      pctOmzetPark: parkOmzet > 0 ? Math.round((parkOmzet / totalOmzet) * 100) : 0,
-      pctUnitView: viewUnit > 0 ? Math.round((viewUnit / totalUnit) * 100) : 0,
-      pctUnitPark: parkUnit > 0 ? Math.round((parkUnit / totalUnit) * 100) : 0
-    };
-  }, [activeDataset]);
-
-  const marketingLeaderboard = useMemo(() => {
-    const agents = {};
-    const relevantSales = viewMode === 'bulanan'
-      ? filteredClosingSales.filter(s => s.date && s.date.startsWith(selectedYear))
-      : filteredClosingSales;
-
-    relevantSales.forEach(s => {
-      const name = s.marketing || 'Amanda Chesyariani Hermawan';
-      if (!agents[name]) {
-        agents[name] = { name, totalOmzet: 0, totalUnit: 0, totalCashIn: 0 };
-      }
-      agents[name].totalOmzet += (Number(s.netPrice) || 0);
-      agents[name].totalUnit += 1;
-      agents[name].totalCashIn += (Number(s.booking) || 0) + (Number(s.dp) || 0);
-    });
-
-    const arr = Object.values(agents);
-    arr.sort((a, b) => b.totalOmzet - a.totalOmzet);
-    return arr;
-  }, [filteredClosingSales, viewMode, selectedYear]);
-
-  // -------------------------------------------------------------
-  // SVG CHART GEOMETRY & MATH
-  // -------------------------------------------------------------
-  const chartHeight = 280;
-  const chartWidth = 900;
-  const paddingLeft = 65;
-  const paddingRight = 30;
-  const paddingTop = 35;
-  const paddingBottom = 40;
-
-  const innerWidth = chartWidth - paddingLeft - paddingRight;
-  const innerHeight = chartHeight - paddingTop - paddingBottom;
-
-  const currentChartItems = viewMode === 'bulanan' ? monthlyData : yearlyData;
-  const itemCount = currentChartItems.length;
-
-  const maxChartValue = useMemo(() => {
+  // Tentukan nilai maksimum untuk skala Y
+  const maxVal = useMemo(() => {
     let max = 0;
-    currentChartItems.forEach(item => {
-      const val = metricType === 'unit' ? item.totalUnit : (metricType === 'cashin' ? item.totalCashIn : item.totalOmzet);
-      const target = metricType === 'unit' ? item.targetUnit : item.targetOmzet;
+    monthlyChartData.forEach(d => {
+      const val = metricType === 'unit' ? d.unit : d.omzet;
       if (val > max) max = val;
-      if (target > max) max = target;
     });
     if (metricType === 'unit') return Math.max(max + 1, 3);
-    if (metricType === 'cashin') return Math.max(max * 1.2, 100000000);
-    return Math.max(max * 1.2, 1000000000);
-  }, [currentChartItems, metricType]);
+    return Math.max(max * 1.25, 1200000000);
+  }, [monthlyChartData, metricType]);
 
   const getYCoord = (val) => {
-    if (maxChartValue === 0) return paddingTop + innerHeight;
-    const ratio = Math.min(val / maxChartValue, 1);
-    return paddingTop + innerHeight - (ratio * innerHeight);
+    if (maxVal === 0) return padTop + innerH;
+    const ratio = Math.min(val / maxVal, 1);
+    return padTop + innerH - (ratio * innerH);
   };
 
-  const yGridLines = useMemo(() => {
+  // Garis Grid Horizontal
+  const gridLines = useMemo(() => {
     const steps = 4;
     return Array.from({ length: steps + 1 }, (_, i) => {
-      const val = (maxChartValue / steps) * (steps - i);
-      const y = paddingTop + (innerHeight / steps) * i;
-      let label = '';
-      if (metricType === 'unit') {
-        label = `${Math.round(val)} Unit`;
-      } else {
-        label = formatShortRupiah(val);
-      }
+      const val = (maxVal / steps) * (steps - i);
+      const y = padTop + (innerH / steps) * i;
+      const label = metricType === 'unit' ? `${Math.round(val)} Unit` : formatCompactRupiah(val);
       return { val, y, label };
     });
-  }, [maxChartValue, innerHeight, paddingTop, metricType]);
+  }, [maxVal, innerH, padTop, metricType]);
 
-  const chartGeometry = useMemo(() => {
-    const colWidth = innerWidth / itemCount;
-    const barWidth = Math.min(Math.max(colWidth * 0.55, 18), 48);
+  // Batang & Titik Kurva Area
+  const chartBars = useMemo(() => {
+    const colW = innerW / 12;
+    const barW = 38; // Lebar pilar yang proporsional dan gagah
 
-    const points = [];
-    const bars = currentChartItems.map((item, idx) => {
-      const xCenter = paddingLeft + (idx * colWidth) + (colWidth / 2);
-      const xLeft = xCenter - (barWidth / 2);
+    const pts = [];
+    const bars = monthlyChartData.map((d, i) => {
+      const xCenter = padLeft + (i * colW) + (colW / 2);
+      const xLeft = xCenter - (barW / 2);
 
-      const val = metricType === 'unit' ? item.totalUnit : (metricType === 'cashin' ? item.totalCashIn : item.totalOmzet);
-      const targetVal = metricType === 'unit' ? item.targetUnit : item.targetOmzet;
-
+      const val = metricType === 'unit' ? d.unit : d.omzet;
       const yTop = getYCoord(val);
-      const yTarget = getYCoord(targetVal);
-      const barH = Math.max((paddingTop + innerHeight) - yTop, 0);
+      const barH = Math.max((padTop + innerH) - yTop, 0);
 
-      let viewH = 0;
-      let parkH = 0;
-      if (metricType === 'omzet' && item.totalOmzet > 0) {
-        const ratioView = item.omzetView / item.totalOmzet;
-        viewH = barH * ratioView;
-        parkH = barH - viewH;
-      }
-
-      points.push(`${xCenter},${yTop}`);
+      // Titik untuk kurva spline
+      pts.push({ x: xCenter, y: yTop });
 
       return {
-        idx,
-        item,
+        ...d,
         val,
-        targetVal,
         xCenter,
         xLeft,
-        barWidth,
+        barW,
         yTop,
-        yTarget,
-        barH,
-        viewH,
-        parkH,
-        label: viewMode === 'bulanan' ? item.monthShort : item.year
+        barH
       };
     });
 
-    return { bars, polylinePoints: points.join(' ') };
-  }, [currentChartItems, innerWidth, itemCount, paddingLeft, paddingTop, innerHeight, metricType, viewMode, maxChartValue]);
+    // Buat path area halus
+    const curveD = getSmoothCurvedPath(pts);
+    const firstPt = pts[0] || { x: padLeft, y: padTop + innerH };
+    const lastPt = pts[pts.length - 1] || { x: padLeft + innerW, y: padTop + innerH };
+    const areaD = `${curveD} L ${lastPt.x} ${padTop + innerH} L ${firstPt.x} ${padTop + innerH} Z`;
 
-  // -------------------------------------------------------------
-  // EXCEL EXPORT SESUAI DATA CLOSING ASLI
-  // -------------------------------------------------------------
-  const handleExportExcel = () => {
-    const rows = [];
-    rows.push(['LAPORAN GRAFIK & ANALITIK PENJUALAN CLOSING RESMI']);
-    rows.push([`Periode: ${viewMode === 'bulanan' ? `Bulanan Tahun ${selectedYear}` : 'Perbandingan Multi-Tahun'}`]);
-    rows.push([`Filter Proyek: ${filterProject} | Filter Marketing: ${filterMarketing}`]);
-    rows.push([`Sumber Data: Database Konsumen Closing & Transaksi SPR Resmi`]);
-    rows.push([`Tanggal Unduh: ${new Date().toLocaleString('id-ID')}`]);
-    rows.push([]);
+    return { bars, curveD, areaD, pts };
+  }, [monthlyChartData, innerW, innerH, padLeft, padTop, metricType, maxVal]);
 
-    rows.push(['RINGKASAN TOTAL CLOSING']);
-    rows.push(['Total Omzet Closing (Net)', formatRupiah(kpiTotalOmzet)]);
-    rows.push(['Total Unit Closing', `${kpiTotalUnit} Unit`]);
-    rows.push(['Total Uang Masuk (UTJ & DP)', formatRupiah(kpiTotalCashIn)]);
-    rows.push([]);
+  // Reset filter ke default
+  const handleResetFilters = () => {
+    setSelectedYear('2026');
+    setSelectedMonth('ALL');
+    setFilterProject('ALL');
+    setMetricType('omzet');
+  };
 
-    rows.push(['DAFTAR TRANSAKSI KONSUMEN CLOSING (VALIDASI DATA)']);
-    rows.push(['No', 'Nama Konsumen', 'Proyek', 'Blok & Unit', 'Tipe Rumah', 'Harga Net (Rp)', 'Uang Masuk DP/UTJ', 'Marketing', 'Tanggal Closing', 'Status']);
-    filteredClosingSales.forEach((s, idx) => {
+  // Export Excel
+  const handleDownloadExcel = () => {
+    const rows = [
+      ['LAPORAN PENJUALAN KONSUMEN CLOSING RESMI'],
+      [`Tahun: ${selectedYear === 'ALL' ? 'Semua Tahun' : selectedYear} | Bulan: ${selectedMonth === 'ALL' ? 'Semua Bulan' : NAMA_BULAN[parseInt(selectedMonth, 10) - 1]}`],
+      [`Proyek: ${filterProject === 'ALL' ? 'Semua Proyek' : filterProject}`],
+      [`Total Omzet: ${formatRupiah(totalOmzetClosing)} | Total Unit: ${totalUnitClosing} Unit | Total Uang Masuk: ${formatRupiah(totalCashIn)}`],
+      [`Tanggal Ekspor: ${new Date().toLocaleString('id-ID')}`],
+      [],
+      ['No', 'Nama Konsumen Closing', 'Proyek', 'Unit', 'Tipe Rumah', 'Harga Net (Rp)', 'Uang Masuk (UTJ+DP)', 'Marketing', 'Tanggal Closing', 'Status']
+    ];
+
+    filteredSales.forEach((s, idx) => {
       rows.push([
         idx + 1,
         s.customerName,
@@ -469,698 +336,588 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         s.unit,
         s.type,
         s.netPrice,
-        s.booking + s.dp,
+        s.cashIn,
         s.marketing,
         s.date,
         s.status
       ]);
     });
 
-    rows.push([]);
-    rows.push(['RINCIAN PER BULAN / PERIODE']);
-    rows.push(['Periode', 'Target Omzet', 'Realisasi Omzet', 'Unit Closing', 'Ashoka View (Rp)', 'Ashoka Park (Rp)', 'Total Uang Masuk']);
-    currentChartItems.forEach(item => {
-      rows.push([
-        viewMode === 'bulanan' ? item.monthName : item.year,
-        item.targetOmzet,
-        item.totalOmzet,
-        item.totalUnit,
-        item.omzetView,
-        item.omzetPark,
-        item.totalCashIn
-      ]);
-    });
-
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Data_Closing');
-    XLSX.writeFile(wb, `Laporan_Closing_Marketing_${viewMode}_${selectedYear}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'Closing_Sales');
+    XLSX.writeFile(wb, `Laporan_Closing_${selectedYear}_${selectedMonth}_${filterProject}.xlsx`);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', color: '#f8fafc' }}>
       
       {/* ========================================================================= */}
-      {/* 1. TOP HEADER & CONTROLS TOOLBAR                                          */}
+      {/* 1. FILTER BAR BERSIH & TIDAK RIBET                                       */}
       {/* ========================================================================= */}
-      <div className="glass-card" style={{ padding: '1.25rem', borderLeft: '4px solid #10b981', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Grafik Penjualan Khusus Closing
-                  <span style={{ fontSize: '0.72rem', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', padding: '2px 9px', borderRadius: '999px', fontWeight: 800 }}>
-                    100% Data Konsumen Closing
-                  </span>
-                </h2>
-                <p style={{ fontSize: '0.8rem', color: '#cbd5e1', margin: '3px 0 0' }}>
-                  Dihitung murni dari <strong>Data Base Konsumen Closing Resmi</strong> & Transaksi SPR yang sah ({filteredClosingSales.length} Transaksi Tercatat).
-                </p>
+      <div
+        className="glass-card"
+        style={{
+          padding: '1.1rem 1.4rem',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85))',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>
+              <TrendingUp size={20} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                Grafik Penjualan Closing
+              </h2>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                Visualisasi data murni dari konsumen yang sah melakukan transaksi closing.
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Action Export Buttons */}
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleExportExcel}
-              className="btn btn-secondary"
+        {/* CONTROLS: TAHUN, BULAN, PROYEK, & METRIK */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          
+          {/* Filter Tahun */}
+          <div style={{ display: 'flex', alignItems: 'center', background: '#0f172a', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 600 }}>Tahun:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
               style={{
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                color: '#ffffff',
-                border: '1px solid #34d399',
+                background: 'transparent',
+                border: 'none',
+                color: '#34d399',
+                fontSize: '0.8rem',
                 fontWeight: 800,
-                fontSize: '0.78rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '6px 12px'
+                cursor: 'pointer',
+                outline: 'none'
               }}
-              title="Download Data Penjualan Closing Format Excel (.xlsx)"
             >
-              <Download size={14} /> Download Excel (.xlsx)
+              <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Tahun</option>
+              {availableYears.map(yr => (
+                <option key={yr} value={yr} style={{ background: '#0f172a', color: '#fff' }}>Tahun {yr}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter Bulan */}
+          <div style={{ display: 'flex', alignItems: 'center', background: '#0f172a', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 600 }}>Bulan:</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#38bdf8',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Bulan (12 Bln)</option>
+              {NAMA_BULAN.map((nama, idx) => {
+                const val = String(idx + 1).padStart(2, '0');
+                return (
+                  <option key={val} value={val} style={{ background: '#0f172a', color: '#fff' }}>
+                    {nama}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* Filter Proyek */}
+          <div style={{ display: 'flex', alignItems: 'center', background: '#0f172a', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginRight: '6px', fontWeight: 600 }}>Proyek:</span>
+            <select
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#fbbf24',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="ALL" style={{ background: '#0f172a', color: '#fff' }}>Semua Proyek</option>
+              <option value="Ashoka View" style={{ background: '#0f172a', color: '#fff' }}>Ashoka View</option>
+              <option value="Ashoka Park" style={{ background: '#0f172a', color: '#fff' }}>Ashoka Park</option>
+            </select>
+          </div>
+
+          {/* Metric Switcher */}
+          <div style={{ display: 'inline-flex', background: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <button
+              type="button"
+              onClick={() => setMetricType('omzet')}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                background: metricType === 'omzet' ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
+                color: metricType === 'omzet' ? '#ffffff' : '#94a3b8',
+                transition: 'all 0.15s'
+              }}
+            >
+              💰 Nilai Omzet (Rp)
             </button>
             <button
-              onClick={() => window.print()}
-              className="btn btn-secondary"
+              type="button"
+              onClick={() => setMetricType('unit')}
               style={{
-                background: '#1e293b',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                background: metricType === 'unit' ? 'linear-gradient(135deg, #38bdf8, #0284c7)' : 'transparent',
+                color: metricType === 'unit' ? '#ffffff' : '#94a3b8',
+                transition: 'all 0.15s'
+              }}
+            >
+              🏠 Jumlah Unit
+            </button>
+          </div>
+
+          {/* Reset button */}
+          {(selectedMonth !== 'ALL' || filterProject !== 'ALL' || selectedYear !== '2026' || metricType !== 'omzet') && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              title="Reset Semua Filter"
+              style={{
+                background: '#334155',
+                border: 'none',
                 color: '#cbd5e1',
-                border: '1px solid #475569',
-                fontWeight: 800,
-                fontSize: '0.78rem',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                padding: '6px 12px'
+                gap: '4px'
               }}
-              title="Cetak Halaman Grafik"
             >
-              <Printer size={14} /> Cetak (PDF)
+              <RotateCcw size={12} /> Reset
             </button>
+          )}
+
+          {/* Download Excel */}
+          <button
+            type="button"
+            onClick={handleDownloadExcel}
+            title="Download Data Format Excel (.xlsx)"
+            style={{
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              border: 'none',
+              color: '#ffffff',
+              padding: '6px 11px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <Download size={13} /> Excel
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. 3 RINGKASAN ANGKA UTAMA (BERSIH & ELEGAN)                              */}
+      {/* ========================================================================= */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+        
+        {/* Total Omzet */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.85))',
+            border: '1.5px solid rgba(16, 185, 129, 0.35)',
+            borderRadius: '12px',
+            padding: '1.1rem 1.3rem',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Total Omzet Closing
+          </div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
+            {formatRupiah(totalOmzetClosing)}
+          </div>
+          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>
+            {selectedYear === 'ALL' ? 'Akumulasi Semua Tahun' : `Periode Tahun ${selectedYear}`} • {filterProject === 'ALL' ? 'Semua Proyek' : filterProject}
           </div>
         </div>
 
-        {/* CONTROLS ROW: TOGGLE VIEW & FILTERS */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          {/* View Mode Toggle: Per Bulan vs Per Tahun */}
-          <div style={{ display: 'inline-flex', background: '#0f172a', padding: '4px', borderRadius: '8px', border: '1px solid #334155' }}>
-            <button
-              type="button"
-              onClick={() => setViewMode('bulanan')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '6px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: viewMode === 'bulanan' ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
-                color: viewMode === 'bulanan' ? '#ffffff' : '#94a3b8',
-                transition: 'all 0.2s'
-              }}
-            >
-              <Calendar size={14} /> 📅 Grafik Per Bulan (12 Bulan)
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('tahunan')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '6px',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: viewMode === 'tahunan' ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
-                color: viewMode === 'tahunan' ? '#ffffff' : '#94a3b8',
-                transition: 'all 0.2s'
-              }}
-            >
-              <TrendingUp size={14} /> 📆 Grafik Per Tahun (Multi-Year)
-            </button>
+        {/* Total Unit */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.85))',
+            border: '1.5px solid rgba(56, 189, 248, 0.35)',
+            borderRadius: '12px',
+            padding: '1.1rem 1.3rem',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Total Unit Terjual
           </div>
-
-          {/* Metric View Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>Metrik Grafik:</span>
-            <div style={{ display: 'inline-flex', background: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #334155' }}>
-              <button
-                type="button"
-                onClick={() => setMetricType('omzet')}
-                style={{
-                  padding: '5px 11px',
-                  borderRadius: '5px',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  background: metricType === 'omzet' ? '#f59e0b' : 'transparent',
-                  color: metricType === 'omzet' ? '#000000' : '#cbd5e1'
-                }}
-              >
-                💰 Omzet Closing (Rp)
-              </button>
-              <button
-                type="button"
-                onClick={() => setMetricType('unit')}
-                style={{
-                  padding: '5px 11px',
-                  borderRadius: '5px',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  background: metricType === 'unit' ? '#38bdf8' : 'transparent',
-                  color: metricType === 'unit' ? '#000000' : '#cbd5e1'
-                }}
-              >
-                🏠 Unit Closing
-              </button>
-              <button
-                type="button"
-                onClick={() => setMetricType('cashin')}
-                style={{
-                  padding: '5px 11px',
-                  borderRadius: '5px',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  background: metricType === 'cashin' ? '#10b981' : 'transparent',
-                  color: metricType === 'cashin' ? '#000000' : '#cbd5e1'
-                }}
-              >
-                💳 Uang Masuk (UTJ+DP)
-              </button>
-            </div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
+            {totalUnitClosing} <span style={{ fontSize: '1rem', color: '#38bdf8', fontWeight: 800 }}>Unit Closing</span>
           </div>
+          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>
+            Rata-rata: {totalUnitClosing > 0 ? formatCompactRupiah(Math.round(totalOmzetClosing / totalUnitClosing)) : '0'} / unit
+          </div>
+        </div>
 
-          {/* Filters */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {viewMode === 'bulanan' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Tahun:</span>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  style={{
-                    background: '#0f172a',
-                    border: '1px solid #64748b',
-                    color: '#f8fafc',
-                    padding: '5px 9px',
-                    borderRadius: '6px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {availableYears.map(yr => (
-                    <option key={yr} value={yr}>Tahun {yr}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Proyek:</span>
-              <select
-                value={filterProject}
-                onChange={(e) => setFilterProject(e.target.value)}
-                style={{
-                  background: '#0f172a',
-                  border: '1px solid #64748b',
-                  color: '#f8fafc',
-                  padding: '5px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="ALL">🏢 Semua Proyek</option>
-                <option value="Ashoka View">🏡 Ashoka View (PT Yazfi Gema)</option>
-                <option value="Ashoka Park">🌲 Ashoka Park (PT Yazfi Setia)</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Marketing:</span>
-              <select
-                value={filterMarketing}
-                onChange={(e) => setFilterMarketing(e.target.value)}
-                style={{
-                  background: '#0f172a',
-                  border: '1px solid #64748b',
-                  color: '#f8fafc',
-                  padding: '5px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="ALL">👥 Semua Marketing</option>
-                <option value="Amanda">Amanda Chesyariani</option>
-                <option value="Yulieka">Yulieka Rahmawati</option>
-                <option value="Fresda">Fresda</option>
-                <option value="Bambang">Bambang</option>
-              </select>
-            </div>
+        {/* Total Uang Masuk */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.85))',
+            border: '1.5px solid rgba(245, 158, 11, 0.35)',
+            borderRadius: '12px',
+            padding: '1.1rem 1.3rem',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Uang Masuk (UTJ & DP)
+          </div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 900, color: '#ffffff', marginTop: '4px' }}>
+            {formatRupiah(totalCashIn)}
+          </div>
+          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>
+            Dari {totalUnitClosing} transaksi konsumen closing resmi
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. EXECUTIVE KPI CARDS BANNER                                             */}
+      {/* 3. TAMPILAN GRAFIK ELEGAN & MODERN (HIGH-DPI VISUAL)                      */}
       {/* ========================================================================= */}
-      <div className="grid-4" style={{ gap: '1rem' }}>
-        {/* KPI 1: TOTAL OMZET CLOSING */}
-        <div className="glass-card" style={{ padding: '1.1rem', borderLeft: '4px solid #10b981', background: 'rgba(15, 23, 42, 0.85)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Total Omzet Closing (Net)
-              </div>
-              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '4px' }}>
-                {formatRupiah(kpiTotalOmzet)}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '3px' }}>
-                {viewMode === 'bulanan' ? `Periode Tahun ${selectedYear}` : 'Akumulasi Seluruh Tahun'}
-              </div>
-            </div>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <DollarSign size={20} />
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 2: TOTAL UNIT CLOSING */}
-        <div className="glass-card" style={{ padding: '1.1rem', borderLeft: '4px solid #38bdf8', background: 'rgba(15, 23, 42, 0.85)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Total Unit Closing
-              </div>
-              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '4px' }}>
-                {kpiTotalUnit} <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8' }}>Unit Closing</span>
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '3px' }}>
-                Rata-rata: {kpiTotalUnit > 0 ? formatRupiah(Math.round(kpiTotalOmzet / kpiTotalUnit)) : 'Rp 0'} / unit
-              </div>
-            </div>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Home size={20} />
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 3: TOTAL UANG MASUK UTJ & DP */}
-        <div className="glass-card" style={{ padding: '1.1rem', borderLeft: '4px solid #f59e0b', background: 'rgba(15, 23, 42, 0.85)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Uang Masuk (UTJ & DP)
-              </div>
-              <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fbbf24', marginTop: '4px' }}>
-                {formatRupiah(kpiTotalCashIn)}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '3px' }}>
-                Dari {kpiTotalUnit} transaksi konsumen closing
-              </div>
-            </div>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CreditCard size={20} />
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 4: REKOR TERTINGGI (PEAK PERIOD) */}
-        <div className="glass-card" style={{ padding: '1.1rem', borderLeft: '4px solid #c084fc', background: 'rgba(15, 23, 42, 0.85)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Bulan Closing Tertinggi
-              </div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#c084fc', marginTop: '4px' }}>
-                {peakPeriodItem ? (viewMode === 'bulanan' ? peakPeriodItem.monthName : `Tahun ${peakPeriodItem.year}`) : 'Belum Ada'}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#e9d5ff', marginTop: '3px' }}>
-                {peakPeriodItem ? `${peakPeriodItem.totalUnit} Unit Closing • ${formatShortRupiah(peakPeriodItem.totalOmzet)}` : '-'}
-              </div>
-            </div>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Award size={20} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 3. MAIN SVG CHART (BATANG & TREN GARIS CLOSING)                           */}
-      {/* ========================================================================= */}
-      <div className="glass-card" style={{ padding: '1.5rem', background: '#0b1120', border: '1px solid #1e293b' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
+      <div
+        className="glass-card"
+        style={{
+          background: '#090d16',
+          border: '1px solid rgba(255, 255, 255, 0.09)',
+          borderRadius: '14px',
+          padding: '1.5rem',
+          boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.7)'
+        }}
+      >
+        {/* Judul Grafik & Indikator Warna */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.25rem' }}>
           <div>
-            <div style={{ fontSize: '0.98rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>📊 Grafik Tren Closing {viewMode === 'bulanan' ? `(Tahun ${selectedYear})` : '(Perbandingan Multi-Tahun)'}</span>
-              <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 800, background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '4px' }}>
-                ✓ Murni Data Konsumen Closing
+            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Grafik Penjualan Bulanan (12 Bulan {selectedYear === 'ALL' ? '2026' : selectedYear})</span>
+              <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontWeight: 800 }}>
+                {metricType === 'omzet' ? 'Satuan: Nilai Rupiah' : 'Satuan: Unit Rumah'}
               </span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-              Arahkan kursor pada batang untuk melihat nama pembeli closing dan nilai transaksinya.
+            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+              Arahkan mouse pada batang bulan untuk melihat rincian nama pembeli yang closing.
             </div>
           </div>
 
-          {/* Chart Legend */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.74rem', color: '#cbd5e1', flexWrap: 'wrap' }}>
+          {/* Indikator Legenda */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.74rem', color: '#cbd5e1' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'linear-gradient(135deg, #f59e0b, #d97706)' }} />
-              <span>Ashoka View</span>
+              <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'linear-gradient(135deg, #10b981, #059669)' }} />
+              <span>Bulan Ada Closing</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }} />
-              <span>Ashoka Park</span>
+              <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#1e293b' }} />
+              <span>Bulan Kosong (0)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '16px', height: '2px', background: '#ef4444', borderTop: '2px dashed #ef4444' }} />
-              <span>Target Rencana</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '16px', height: '3px', background: '#10b981' }} />
+              <div style={{ width: '14px', height: '2.5px', background: '#34d399' }} />
               <span>Kurva Tren</span>
             </div>
           </div>
         </div>
 
-        {/* SVG Canvas Container */}
+        {/* SVG Container */}
         <div style={{ width: '100%', overflowX: 'auto' }}>
-          <div style={{ minWidth: '700px', position: 'relative' }}>
+          <div style={{ minWidth: '760px', position: 'relative' }}>
             <svg
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
               style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
             >
               <defs>
-                <linearGradient id="gradView" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#d97706" stopOpacity="0.8" />
+                {/* Gradient Batang Aktif (Modern Emerald) */}
+                <linearGradient id="barGlowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="60%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#047857" />
                 </linearGradient>
 
-                <linearGradient id="gradPark" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0.8" />
+                {/* Gradient Area Bawah Kurva */}
+                <linearGradient id="areaCurveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
+                  <stop offset="65%" stopColor="#10b981" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                 </linearGradient>
 
-                <linearGradient id="gradClosing" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#34d399" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#059669" stopOpacity="0.8" />
-                </linearGradient>
-
-                <filter id="chartGlow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
+                {/* Glow Filter */}
+                <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
 
-              {/* 1. Horizontal Grid Lines & Y-Axis Labels */}
-              {yGridLines.map((grid, gIdx) => (
-                <g key={gIdx}>
+              {/* 1. Horizontal Background Grid Lines */}
+              {gridLines.map((gl, i) => (
+                <g key={`grid-${i}`}>
                   <line
-                    x1={paddingLeft}
-                    y1={grid.y}
-                    x2={paddingLeft + innerWidth}
-                    y2={grid.y}
-                    stroke="#1e293b"
+                    x1={padLeft}
+                    y1={gl.y}
+                    x2={padLeft + innerW}
+                    y2={gl.y}
+                    stroke="rgba(255, 255, 255, 0.06)"
                     strokeWidth="1"
-                    strokeDasharray={gIdx === yGridLines.length - 1 ? 'none' : '3 3'}
+                    strokeDasharray={i === gridLines.length - 1 ? 'none' : '4 4'}
                   />
                   <text
-                    x={paddingLeft - 8}
-                    y={grid.y + 4}
+                    x={padLeft - 10}
+                    y={gl.y + 4}
                     fill="#64748b"
                     fontSize="10"
                     textAnchor="end"
                     fontWeight="600"
                   >
-                    {grid.label}
+                    {gl.label}
                   </text>
                 </g>
               ))}
 
-              {/* 2. Target Dashed Lines across bars */}
-              {chartGeometry.bars.map((bar, bIdx) => (
-                <line
-                  key={`target-${bIdx}`}
-                  x1={bar.xLeft - 3}
-                  y1={bar.yTarget}
-                  x2={bar.xLeft + bar.barWidth + 3}
-                  y2={bar.yTarget}
-                  stroke="#ef4444"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 2"
+              {/* 2. Smooth Area Gradient Fill Under Curve */}
+              {chartBars.areaD && (
+                <path
+                  d={chartBars.areaD}
+                  fill="url(#areaCurveGrad)"
                 />
-              ))}
+              )}
 
-              {/* 3. Bar Columns */}
-              {chartGeometry.bars.map((bar, bIdx) => {
-                const isHovered = hoveredBarIndex === bIdx;
+              {/* 3. Smooth Bezier Curve Line */}
+              {chartBars.curveD && (
+                <path
+                  d={chartBars.curveD}
+                  fill="none"
+                  stroke="#34d399"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#neonGlow)"
+                />
+              )}
 
-                if (bar.val === 0) {
-                  // Bulan dengan 0 closing: Tampilkan indikator titik garis dasar tipis
-                  return (
-                    <g
-                      key={`bar-empty-${bIdx}`}
-                      onMouseEnter={() => setHoveredBarIndex(bIdx)}
-                      onMouseLeave={() => setHoveredBarIndex(null)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {isHovered && (
-                        <rect
-                          x={bar.xCenter - (innerWidth / itemCount) / 2}
-                          y={paddingTop}
-                          width={innerWidth / itemCount}
-                          height={innerHeight}
-                          fill="rgba(255, 255, 255, 0.03)"
-                          rx="4"
-                        />
-                      )}
-                      <line
-                        x1={bar.xLeft}
-                        y1={paddingTop + innerHeight}
-                        x2={bar.xLeft + bar.barWidth}
-                        y2={paddingTop + innerHeight}
-                        stroke="#334155"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x={bar.xCenter}
-                        y={paddingTop + innerHeight - 6}
-                        fill="#475569"
-                        fontSize="8.5"
-                        fontWeight="600"
-                        textAnchor="middle"
-                      >
-                        0
-                      </text>
-                    </g>
-                  );
-                }
-
-                if (metricType === 'omzet' && filterProject === 'ALL' && bar.item.totalOmzet > 0) {
-                  // Stacked Bar: Ashoka View (Bawah) vs Ashoka Park (Atas)
-                  return (
-                    <g
-                      key={`bar-${bIdx}`}
-                      onMouseEnter={() => setHoveredBarIndex(bIdx)}
-                      onMouseLeave={() => setHoveredBarIndex(null)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {isHovered && (
-                        <rect
-                          x={bar.xCenter - (innerWidth / itemCount) / 2}
-                          y={paddingTop}
-                          width={innerWidth / itemCount}
-                          height={innerHeight}
-                          fill="rgba(16, 185, 129, 0.08)"
-                          rx="4"
-                        />
-                      )}
-
-                      {/* Ashoka View Segment */}
-                      {bar.viewH > 0 && (
-                        <rect
-                          x={bar.xLeft}
-                          y={paddingTop + innerHeight - bar.viewH}
-                          width={bar.barWidth}
-                          height={bar.viewH}
-                          fill="url(#gradView)"
-                          rx={bar.parkH > 0 ? 0 : 4}
-                        />
-                      )}
-
-                      {/* Ashoka Park Segment */}
-                      {bar.parkH > 0 && (
-                        <rect
-                          x={bar.xLeft}
-                          y={bar.yTop}
-                          width={bar.barWidth}
-                          height={bar.parkH}
-                          fill="url(#gradPark)"
-                          rx="4"
-                        />
-                      )}
-
-                      <text
-                        x={bar.xCenter}
-                        y={bar.yTop - 6}
-                        fill={isHovered ? '#34d399' : '#f8fafc'}
-                        fontSize="9.5"
-                        fontWeight="800"
-                        textAnchor="middle"
-                      >
-                        {formatShortRupiah(bar.val)}
-                      </text>
-                    </g>
-                  );
-                }
-
-                // Single Bar
-                const barFill = filterProject === 'Ashoka Park' ? 'url(#gradPark)' : (filterProject === 'Ashoka View' ? 'url(#gradView)' : 'url(#gradClosing)');
+              {/* 4. Pillars / Bar Columns */}
+              {chartBars.bars.map((bar, i) => {
+                const isHovered = hoveredMonthIndex === i;
+                const hasValue = bar.val > 0;
+                const isSelected = selectedMonth === bar.monthStr;
 
                 return (
                   <g
-                    key={`bar-${bIdx}`}
-                    onMouseEnter={() => setHoveredBarIndex(bIdx)}
-                    onMouseLeave={() => setHoveredBarIndex(null)}
+                    key={`col-${i}`}
+                    onMouseEnter={() => setHoveredMonthIndex(i)}
+                    onMouseLeave={() => setHoveredMonthIndex(null)}
+                    onClick={() => setSelectedMonth(prev => prev === bar.monthStr ? 'ALL' : bar.monthStr)}
                     style={{ cursor: 'pointer' }}
                   >
+                    {/* Hover Column Spotlight Background */}
                     {isHovered && (
                       <rect
-                        x={bar.xCenter - (innerWidth / itemCount) / 2}
-                        y={paddingTop}
-                        width={innerWidth / itemCount}
-                        height={innerHeight}
+                        x={bar.xCenter - (innerW / 12) / 2}
+                        y={padTop}
+                        width={innerW / 12}
+                        height={innerH}
                         fill="rgba(16, 185, 129, 0.08)"
-                        rx="4"
+                        rx="6"
                       />
                     )}
-                    <rect
-                      x={bar.xLeft}
-                      y={bar.yTop}
-                      width={bar.barWidth}
-                      height={bar.barH}
-                      fill={barFill}
-                      rx="4"
-                      filter={isHovered ? 'url(#chartGlow)' : undefined}
+
+                    {/* Pilar Kosong jika 0 */}
+                    {!hasValue ? (
+                      <g>
+                        {/* Slot pillar transparan tipis */}
+                        <rect
+                          x={bar.xLeft}
+                          y={padTop + 30}
+                          width={bar.barW}
+                          height={innerH - 30}
+                          fill="rgba(255, 255, 255, 0.015)"
+                          stroke="rgba(255, 255, 255, 0.04)"
+                          strokeWidth="1"
+                          strokeDasharray="2 3"
+                          rx="6"
+                        />
+                        {/* Garis nol di dasar */}
+                        <line
+                          x1={bar.xLeft}
+                          y1={padTop + innerH}
+                          x2={bar.xLeft + bar.barW}
+                          y2={padTop + innerH}
+                          stroke="#334155"
+                          strokeWidth="2"
+                        />
+                        <text
+                          x={bar.xCenter}
+                          y={padTop + innerH - 8}
+                          fill="#475569"
+                          fontSize="9"
+                          fontWeight="700"
+                          textAnchor="middle"
+                        >
+                          -
+                        </text>
+                      </g>
+                    ) : (
+                      /* Pilar Berisi Closing */
+                      <g>
+                        {/* Shadow / Aura */}
+                        <rect
+                          x={bar.xLeft}
+                          y={bar.yTop}
+                          width={bar.barW}
+                          height={bar.barH}
+                          fill="url(#barGlowGrad)"
+                          rx="8"
+                          filter={isHovered ? 'url(#neonGlow)' : undefined}
+                        />
+
+                        {/* Highlight Stroke */}
+                        <rect
+                          x={bar.xLeft}
+                          y={bar.yTop}
+                          width={bar.barW}
+                          height={bar.barH}
+                          fill="none"
+                          stroke={isHovered || isSelected ? '#ffffff' : '#6ee7b7'}
+                          strokeWidth={isHovered || isSelected ? '2' : '1'}
+                          rx="8"
+                        />
+
+                        {/* Value Badge on top */}
+                        <text
+                          x={bar.xCenter}
+                          y={bar.yTop - 9}
+                          fill={isHovered ? '#ffffff' : '#34d399'}
+                          fontSize="10"
+                          fontWeight="900"
+                          textAnchor="middle"
+                        >
+                          {metricType === 'unit' ? `${bar.val} Unit` : formatCompactRupiah(bar.val)}
+                        </text>
+                      </g>
+                    )}
+
+                    {/* Dot on Line */}
+                    <circle
+                      cx={bar.xCenter}
+                      cy={bar.yTop}
+                      r={hasValue ? (isHovered ? 6.5 : 4.5) : 3}
+                      fill={hasValue ? '#ffffff' : '#475569'}
+                      stroke={hasValue ? '#10b981' : '#0f172a'}
+                      strokeWidth="2"
                     />
+
+                    {/* X-Axis Month Label */}
                     <text
                       x={bar.xCenter}
-                      y={bar.yTop - 6}
-                      fill={isHovered ? '#34d399' : '#cbd5e1'}
-                      fontSize="9.5"
-                      fontWeight="800"
+                      y={padTop + innerH + 18}
+                      fill={hasValue ? (isHovered || isSelected ? '#ffffff' : '#34d399') : (isHovered ? '#cbd5e1' : '#64748b')}
+                      fontSize="10"
+                      fontWeight={hasValue || isSelected ? '800' : '600'}
                       textAnchor="middle"
                     >
-                      {metricType === 'unit' ? `${bar.val} Unit` : formatShortRupiah(bar.val)}
+                      {bar.monthShort}
                     </text>
+                    {hasValue && (
+                      <circle
+                        cx={bar.xCenter}
+                        cy={padTop + innerH + 26}
+                        r="2.5"
+                        fill="#10b981"
+                      />
+                    )}
                   </g>
                 );
               })}
-
-              {/* 4. Smooth Polyline Trend Curve */}
-              <polyline
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={chartGeometry.polylinePoints}
-                filter="url(#chartGlow)"
-              />
-
-              {/* Dots on Polyline */}
-              {chartGeometry.bars.map((bar, bIdx) => (
-                <circle
-                  key={`dot-${bIdx}`}
-                  cx={bar.xCenter}
-                  cy={bar.yTop}
-                  r={hoveredBarIndex === bIdx ? 5.5 : 3.5}
-                  fill={bar.val > 0 ? '#34d399' : '#475569'}
-                  stroke="#0f172a"
-                  strokeWidth="2"
-                />
-              ))}
-
-              {/* 5. X-Axis Labels */}
-              {chartGeometry.bars.map((bar, bIdx) => (
-                <text
-                  key={`lbl-${bIdx}`}
-                  x={bar.xCenter}
-                  y={paddingTop + innerHeight + 18}
-                  fill={hoveredBarIndex === bIdx ? '#ffffff' : (bar.val > 0 ? '#38bdf8' : '#64748b')}
-                  fontSize="10"
-                  fontWeight={hoveredBarIndex === bIdx || bar.val > 0 ? '800' : '600'}
-                  textAnchor="middle"
-                >
-                  {bar.label}
-                </text>
-              ))}
             </svg>
 
-            {/* Interactive Floating Tooltip */}
-            {hoveredBarIndex !== null && chartGeometry.bars[hoveredBarIndex] && (
+            {/* Hover Tooltip Widget */}
+            {hoveredMonthIndex !== null && chartBars.bars[hoveredMonthIndex] && (
               <div
                 style={{
                   position: 'absolute',
-                  top: `${Math.max(chartGeometry.bars[hoveredBarIndex].yTop - 130, 10)}px`,
-                  left: `${Math.min(Math.max(chartGeometry.bars[hoveredBarIndex].xCenter - 110, 15), chartWidth - 235)}px`,
-                  background: '#0f172a',
+                  top: `${Math.max(chartBars.bars[hoveredMonthIndex].yTop - 110, 10)}px`,
+                  left: `${Math.min(Math.max(chartBars.bars[hoveredMonthIndex].xCenter - 110, 15), chartWidth - 240)}px`,
+                  background: 'rgba(15, 23, 42, 0.94)',
+                  backdropFilter: 'blur(12px)',
                   border: '1.5px solid #10b981',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   padding: '9px 12px',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 15px rgba(16, 185, 129, 0.3)',
-                  zIndex: 20,
+                  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(16, 185, 129, 0.3)',
+                  zIndex: 30,
                   pointerEvents: 'none',
                   minWidth: '210px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '4px', marginBottom: '5px' }}>
                   <strong style={{ color: '#ffffff', fontSize: '0.84rem' }}>
-                    {viewMode === 'bulanan' ? chartGeometry.bars[hoveredBarIndex].item.monthName : `Tahun ${chartGeometry.bars[hoveredBarIndex].item.year}`}
+                    {chartBars.bars[hoveredMonthIndex].monthName} {selectedYear === 'ALL' ? '2026' : selectedYear}
                   </strong>
-                  <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: chartGeometry.bars[hoveredBarIndex].item.totalUnit > 0 ? '#10b981' : '#334155', color: '#ffffff', fontWeight: 800 }}>
-                    {chartGeometry.bars[hoveredBarIndex].item.totalUnit} Closing
+                  <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: chartBars.bars[hoveredMonthIndex].unit > 0 ? '#10b981' : '#334155', color: '#ffffff', fontWeight: 800 }}>
+                    {chartBars.bars[hoveredMonthIndex].unit} Closing
                   </span>
                 </div>
+
                 <div style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <div>Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(chartGeometry.bars[hoveredBarIndex].item.totalOmzet)}</strong></div>
-                  <div>Uang Masuk (UTJ+DP): <strong style={{ color: '#fbbf24' }}>{formatRupiah(chartGeometry.bars[hoveredBarIndex].item.totalCashIn)}</strong></div>
-                  
-                  {/* Daftar Pembeli Closing pada Bulan Ini */}
-                  {(chartGeometry.bars[hoveredBarIndex].item.closingItems || []).length > 0 ? (
+                  <div>Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(chartBars.bars[hoveredMonthIndex].omzet)}</strong></div>
+                  <div>Uang Masuk: <strong style={{ color: '#fbbf24' }}>{formatRupiah(chartBars.bars[hoveredMonthIndex].cashIn)}</strong></div>
+
+                  {/* List Nama Pembeli */}
+                  {(chartBars.bars[hoveredMonthIndex].sales || []).length > 0 ? (
                     <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #334155' }}>
-                      <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, marginBottom: '2px' }}>Konsumen Closing:</div>
-                      {(chartGeometry.bars[hoveredBarIndex].item.closingItems || []).map(cs => (
-                        <div key={cs.id} style={{ fontSize: '0.7rem', color: '#e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, marginBottom: '2px' }}>Konsumen:</div>
+                      {(chartBars.bars[hoveredMonthIndex].sales || []).map(cs => (
+                        <div key={cs.id} style={{ fontSize: '0.7rem', color: '#f1f5f9', display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
                           <span>• {cs.customerName} ({cs.unit})</span>
-                          <span style={{ color: '#38bdf8' }}>{formatShortRupiah(cs.netPrice)}</span>
+                          <span style={{ color: '#38bdf8', fontWeight: 700 }}>{formatCompactRupiah(cs.netPrice)}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic', marginTop: '2px' }}>
-                      Tidak ada transaksi closing pada bulan ini.
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic', marginTop: '3px' }}>
+                      Tidak ada transaksi closing di bulan ini.
                     </div>
                   )}
                 </div>
@@ -1171,333 +928,115 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. DAFTAR TRANSAKSI KONSUMEN CLOSING (VALIDASI 100% TRANSPARAN)           */}
+      {/* 4. DAFTAR KONSUMEN CLOSING (TABEL RINGKAS SESUAI FILTER AKTIF)            */}
       {/* ========================================================================= */}
-      <div className="glass-card" style={{ padding: '1.25rem', background: '#0f172a', border: '1px solid #1e293b' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '1rem' }}>
+      <div
+        className="glass-card"
+        style={{
+          background: '#0f172a',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '12px',
+          padding: '1.25rem'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
           <div>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 900, color: '#34d399', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileCheck2 size={18} />
-              Daftar Konsumen Closing Resmi (Sumber Data Grafik)
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={18} color="#34d399" />
+              Daftar Konsumen Closing ({filteredSales.length} Transaksi)
             </h3>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '2px 0 0' }}>
-              Setiap angka dan batang pada grafik di atas dihitung persis dari data konsumen resmi di bawah ini:
-            </p>
+            <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
+              Tabel ini menampilkan konsumen closing yang tersaring sesuai filter tahun/bulan/proyek di atas.
+            </div>
           </div>
-          <span style={{ fontSize: '0.75rem', padding: '3px 9px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid #10b981', fontWeight: 800 }}>
-            {filteredClosingSales.length} Konsumen Closing
-          </span>
+
+          <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
+            Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(totalOmzetClosing)}</strong>
+          </div>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table" style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#1e293b', color: '#f8fafc', borderBottom: '2px solid #334155' }}>
-                <th style={{ padding: '10px 12px', textAlign: 'center', width: '40px' }}>No</th>
-                <th style={{ padding: '10px 12px', textAlign: 'left' }}>Nama Konsumen Closing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'left' }}>Proyek & Developer</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Blok / No Unit</th>
-                <th style={{ padding: '10px 12px', textAlign: 'left' }}>Tipe Rumah</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Harga Net Closing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Booking + DP Masuk</th>
-                <th style={{ padding: '10px 12px', textAlign: 'left' }}>Marketing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Tanggal Closing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center', width: '35px' }}>No</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Nama Pembeli Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Proyek</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Unit</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Tipe Rumah</th>
+                <th style={{ padding: '9px 12px', textAlign: 'right' }}>Harga Net Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'right' }}>Uang Masuk DP+UTJ</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Marketing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Tanggal Closing</th>
               </tr>
             </thead>
             <tbody>
-              {filteredClosingSales.length > 0 ? (
-                filteredClosingSales.map((item, idx) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#94a3b8' }}>{idx + 1}</td>
-                    <td style={{ padding: '9px 12px', fontWeight: 800, color: '#ffffff' }}>
-                      {item.customerName}
+              {filteredSales.length > 0 ? (
+                filteredSales.map((s, idx) => (
+                  <tr key={s.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                    <td style={{ padding: '8px 12px', textAlign: 'center', color: '#94a3b8' }}>{idx + 1}</td>
+                    <td style={{ padding: '8px 12px', fontWeight: 800, color: '#ffffff' }}>
+                      {s.customerName}
                     </td>
-                    <td style={{ padding: '9px 12px' }}>
+                    <td style={{ padding: '8px 12px' }}>
                       <span style={{
-                        padding: '2px 8px',
+                        padding: '2px 7px',
                         borderRadius: '4px',
                         fontSize: '0.72rem',
-                        fontWeight: 800,
-                        background: item.project.includes('Park') ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                        color: item.project.includes('Park') ? '#60a5fa' : '#fbbf24',
-                        border: `1px solid ${item.project.includes('Park') ? '#3b82f6' : '#f59e0b'}`
+                        fontWeight: 700,
+                        background: s.project.includes('Park') ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        color: s.project.includes('Park') ? '#60a5fa' : '#fbbf24',
+                        border: `1px solid ${s.project.includes('Park') ? '#3b82f6' : '#f59e0b'}`
                       }}>
-                        {item.project}
+                        {s.project}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 800, color: '#f8fafc' }}>
-                      {item.unit}
+                    <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 800, color: '#f8fafc' }}>
+                      {s.unit}
                     </td>
-                    <td style={{ padding: '9px 12px', color: '#cbd5e1' }}>
-                      {item.type}
+                    <td style={{ padding: '8px 12px', color: '#cbd5e1' }}>
+                      {s.type}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
-                      {formatRupiah(item.netPrice)}
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
+                      {formatRupiah(s.netPrice)}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 700, color: '#fbbf24' }}>
-                      {formatRupiah(item.booking + item.dp)}
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: '#fbbf24' }}>
+                      {formatRupiah(s.cashIn)}
                     </td>
-                    <td style={{ padding: '9px 12px', color: '#cbd5e1' }}>
-                      {item.marketing}
+                    <td style={{ padding: '8px 12px', color: '#cbd5e1' }}>
+                      {s.marketing}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: '#38bdf8' }}>
-                      {item.date}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 7px', borderRadius: '4px', fontWeight: 800 }}>
-                        ✓ {item.status}
-                      </span>
+                    <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: '#38bdf8' }}>
+                      {s.date}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' }}>
-                    Belum ada data konsumen closing yang sesuai dengan filter yang dipilih.
+                  <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic' }}>
+                    Tidak ada transaksi closing yang sesuai dengan filter tahun/bulan/proyek ini.
                   </td>
                 </tr>
               )}
             </tbody>
-            {filteredClosingSales.length > 0 && (
+            {filteredSales.length > 0 && (
               <tfoot>
-                <tr style={{ background: '#0b1120', borderTop: '2px solid #334155', fontWeight: 900 }}>
-                  <td colSpan={5} style={{ padding: '10px 12px', color: '#ffffff', textAlign: 'right' }}>
-                    TOTAL PENJUALAN CLOSING:
+                <tr style={{ background: '#090d16', borderTop: '2px solid #334155', fontWeight: 900 }}>
+                  <td colSpan={5} style={{ padding: '9px 12px', color: '#ffffff', textAlign: 'right' }}>
+                    TOTAL:
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', color: '#34d399', fontSize: '0.9rem' }}>
-                    {formatRupiah(filteredClosingSales.reduce((acc, c) => acc + (c.netPrice || 0), 0))}
+                  <td style={{ padding: '9px 12px', textAlign: 'right', color: '#34d399', fontSize: '0.88rem' }}>
+                    {formatRupiah(totalOmzetClosing)}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', color: '#fbbf24' }}>
-                    {formatRupiah(filteredClosingSales.reduce((acc, c) => acc + (c.booking + c.dp || 0), 0))}
+                  <td style={{ padding: '9px 12px', textAlign: 'right', color: '#fbbf24' }}>
+                    {formatRupiah(totalCashIn)}
                   </td>
-                  <td colSpan={3} style={{ padding: '10px 12px', textAlign: 'center', color: '#38bdf8' }}>
-                    {filteredClosingSales.length} Unit Closing
+                  <td colSpan={2} style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8' }}>
+                    {totalUnitClosing} Unit Closing
                   </td>
                 </tr>
               </tfoot>
             )}
-          </table>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 5. VISUAL BREAKDOWN: PROYEK & MARKETING PERFORMANCE                       */}
-      {/* ========================================================================= */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
-        
-        {/* KIRI: KOMPOSISI KONTRIBUSI PROYEK */}
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#0f172a', border: '1px solid #1e293b' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-            <PieChart size={18} color="#f59e0b" />
-            <h3 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-              Pangsa Pasar Closing per Proyek
-            </h3>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Progress Bar Omzet */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '5px' }}>
-                <span style={{ color: '#fbbf24', fontWeight: 700 }}>🏡 Ashoka View ({projectComposition.pctOmzetView}%)</span>
-                <span style={{ color: '#60a5fa', fontWeight: 700 }}>🌲 Ashoka Park ({projectComposition.pctOmzetPark}%)</span>
-              </div>
-              <div style={{ height: '14px', width: '100%', background: '#1e293b', borderRadius: '7px', overflow: 'hidden', display: 'flex' }}>
-                <div style={{ width: `${projectComposition.pctOmzetView}%`, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} title={`Ashoka View: ${formatRupiah(projectComposition.viewOmzet)}`} />
-                <div style={{ width: `${projectComposition.pctOmzetPark}%`, background: 'linear-gradient(90deg, #3b82f6, #1d4ed8)' }} title={`Ashoka Park: ${formatRupiah(projectComposition.parkOmzet)}`} />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
-                <span>{formatRupiah(projectComposition.viewOmzet)} ({projectComposition.viewUnit} Unit)</span>
-                <span>{formatRupiah(projectComposition.parkOmzet)} ({projectComposition.parkUnit} Unit)</span>
-              </div>
-            </div>
-
-            {/* Info Kotak Proyek */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '4px' }}>
-              <div style={{ background: '#1c1917', border: '1px solid #78350f', padding: '10px', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.72rem', color: '#fde68a', fontWeight: 800 }}>Ashoka View (Cidokom)</div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#fbbf24', marginTop: '2px' }}>{projectComposition.viewUnit} Unit</div>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>PT Yazfi Gema Persada</div>
-              </div>
-              <div style={{ background: '#0f172a', border: '1px solid #1e3a8a', padding: '10px', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 800 }}>Ashoka Park (Jampang)</div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#60a5fa', marginTop: '2px' }}>{projectComposition.parkUnit} Unit</div>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>PT Yazfi Setia Persada</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* KANAN: LEADERBOARD PERFORMA MARKETING AGENT */}
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#0f172a', border: '1px solid #1e293b' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-            <Users size={18} color="#c084fc" />
-            <h3 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-              Performa Closing Tim Marketing
-            </h3>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {marketingLeaderboard.length > 0 ? (
-              marketingLeaderboard.slice(0, 4).map((ag, aIdx) => {
-                const pctOfTop = marketingLeaderboard[0]?.totalOmzet > 0 ? (ag.totalOmzet / marketingLeaderboard[0].totalOmzet) * 100 : 0;
-                const medals = ['🥇', '🥈', '🥉', '🎖️'];
-
-                return (
-                  <div key={ag.name} style={{ background: '#161e31', border: '1px solid #26334d', borderRadius: '8px', padding: '8px 12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '1rem' }}>{medals[aIdx] || '🎖️'}</span>
-                        <div>
-                          <strong style={{ fontSize: '0.82rem', color: '#ffffff' }}>{ag.name}</strong>
-                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{ag.totalUnit} Unit Closing • DP: {formatShortRupiah(ag.totalCashIn)}</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <strong style={{ fontSize: '0.85rem', color: '#34d399' }}>{formatShortRupiah(ag.totalOmzet)}</strong>
-                      </div>
-                    </div>
-                    <div style={{ height: '6px', width: '100%', background: '#0b1120', borderRadius: '3px', marginTop: '6px', overflow: 'hidden' }}>
-                      <div style={{ width: `${pctOfTop}%`, height: '100%', background: 'linear-gradient(90deg, #10b981, #059669)', borderRadius: '3px' }} />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '1rem' }}>
-                Belum ada performa closing tercatat.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 6. DATA TABLE BREAKDOWN (TABEL RINCIAN PERIODE)                            */}
-      {/* ========================================================================= */}
-      <div className="glass-card" style={{ padding: '1.25rem', background: '#0f172a', border: '1px solid #1e293b' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '1rem' }}>
-          <div>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-              📋 Rincian Matriks Bulanan / Tahunan Penjualan Closing
-            </h3>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '2px 0 0' }}>
-              Perbandingan omzet closing realisasi vs target per {viewMode === 'bulanan' ? 'bulan' : 'tahun'}.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ overflowX: 'auto' }}>
-          <table className="data-table" style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#1e293b', color: '#f8fafc', borderBottom: '2px solid #334155' }}>
-                <th style={{ padding: '10px 12px', textAlign: 'left' }}>{viewMode === 'bulanan' ? 'Bulan' : 'Tahun'}</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Target Omzet</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Realisasi Closing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Selisih (+/-)</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Target Unit</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Unit Closing</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>% Capaian</th>
-                <th style={{ padding: '10px 12px', textAlign: 'right' }}>Uang Masuk (UTJ+DP)</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center' }}>Status Kinerja</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentChartItems.map((item, idx) => {
-                const diff = item.totalOmzet - item.targetOmzet;
-                const isPositive = diff >= 0;
-                const pct = item.pctTarget;
-
-                let badgeColor = '#94a3b8';
-                let badgeBg = 'rgba(148, 163, 184, 0.1)';
-                let badgeText = '-';
-
-                if (item.totalUnit > 0) {
-                  if (pct >= 100) {
-                    badgeColor = '#10b981';
-                    badgeBg = 'rgba(16, 185, 129, 0.15)';
-                    badgeText = 'Sangat Baik';
-                  } else if (pct >= 50) {
-                    badgeColor = '#38bdf8';
-                    badgeBg = 'rgba(56, 189, 248, 0.15)';
-                    badgeText = 'Tercapai';
-                  } else {
-                    badgeColor = '#f59e0b';
-                    badgeBg = 'rgba(245, 158, 11, 0.15)';
-                    badgeText = 'Sebagian';
-                  }
-                } else {
-                  badgeColor = '#64748b';
-                  badgeBg = 'transparent';
-                  badgeText = 'Belum Ada';
-                }
-
-                return (
-                  <tr key={idx} style={{ borderBottom: '1px solid #1e293b' }}>
-                    <td style={{ padding: '9px 12px', fontWeight: 700, color: item.totalUnit > 0 ? '#38bdf8' : '#cbd5e1' }}>
-                      {viewMode === 'bulanan' ? item.monthName : `Tahun ${item.year}`}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', color: '#94a3b8' }}>
-                      {formatRupiah(item.targetOmzet)}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 800, color: item.totalOmzet > 0 ? '#34d399' : '#64748b' }}>
-                      {formatRupiah(item.totalOmzet)}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 700, color: item.totalOmzet > 0 ? (isPositive ? '#34d399' : '#f87171') : '#64748b' }}>
-                      {item.totalOmzet > 0 ? `${isPositive ? '+' : ''}${formatRupiah(diff)}` : '-'}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#94a3b8' }}>
-                      {item.targetUnit} Unit
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 800, color: item.totalUnit > 0 ? '#38bdf8' : '#64748b' }}>
-                      {item.totalUnit} Unit
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center' }}>
-                      <span style={{ padding: '2px 8px', borderRadius: '4px', background: badgeBg, color: badgeColor, fontWeight: 800, fontSize: '0.75rem' }}>
-                        {pct}%
-                      </span>
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 700, color: item.totalCashIn > 0 ? '#fbbf24' : '#64748b' }}>
-                      {formatRupiah(item.totalCashIn)}
-                    </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.72rem', color: badgeColor, fontWeight: 700 }}>
-                        {badgeText}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr style={{ background: '#0b1120', borderTop: '2px solid #334155', fontWeight: 900 }}>
-                <td style={{ padding: '10px 12px', color: '#ffffff' }}>TOTAL CLOSING</td>
-                <td style={{ padding: '10px 12px', textAlign: 'right', color: '#94a3b8' }}>
-                  {formatRupiah(currentChartItems.reduce((a, b) => a + (b.targetOmzet || 0), 0))}
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'right', color: '#34d399', fontSize: '0.9rem' }}>
-                  {formatRupiah(kpiTotalOmzet)}
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'right', color: '#38bdf8' }}>
-                  {formatRupiah(kpiTotalOmzet - currentChartItems.reduce((a, b) => a + (b.targetOmzet || 0), 0))}
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#94a3b8' }}>
-                  {currentChartItems.reduce((a, b) => a + (b.targetUnit || 0), 0)} Unit
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#38bdf8', fontSize: '0.9rem' }}>
-                  {kpiTotalUnit} Unit Closing
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#10b981' }}>
-                  {Math.round((kpiTotalOmzet / (currentChartItems.reduce((a, b) => a + (b.targetOmzet || 0), 0) || 1)) * 100)}%
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'right', color: '#fbbf24' }}>
-                  {formatRupiah(kpiTotalCashIn)}
-                </td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#10b981' }}>
-                  CLOSING
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
