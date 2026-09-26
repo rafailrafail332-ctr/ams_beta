@@ -84,9 +84,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
         { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#F97316' },
         { id: 'hrga-security', title: '9. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'hres-spk', title: '10. SPK Rekanan & Vendor', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
-        { id: 'hres-legalitas', title: '11. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
-        { id: 'proc-logistik', title: '12. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
+        { id: 'proc-logistik', title: '10. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
 
@@ -186,7 +184,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#F97316' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
-    { id: 'hr-ga', mainTitle: 'HR & GA (9 Fitur)', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
+    { id: 'hr-ga', mainTitle: 'HR & GA', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
     { id: 'legal', mainTitle: 'Legal Corporate', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
     { id: 'cr', mainTitle: 'Customer Relation (STK)', tab: 'customer-relation', icon: HeartHandshake, color: '#FB7185' },

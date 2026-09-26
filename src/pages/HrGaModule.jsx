@@ -769,7 +769,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               Departemen Human Resources & General Affair
             </div>
             <div style={{ color: '#bfdbfe', fontSize: '0.8rem', marginTop: '2px' }}>
-              Sistem Tata Kelola Karyawan, Fasilitas Kantor, Aset & Operasional Lapangan (9 Sub-Fitur Resmi)
+              Sistem Tata Kelola Karyawan, Fasilitas Kantor, Aset & Operasional Lapangan
             </div>
           </div>
         </div>

@@ -12,8 +12,6 @@ import { TeknikModule } from './pages/TeknikModule';
 import { MarketingModule } from './pages/MarketingModule';
 import { LegalModule } from './pages/LegalModule';
 import { FinanceModule } from './pages/FinanceModule';
-import { GeneralAffairModule } from './pages/GeneralAffairModule';
-import { HumanResourcesModule } from './pages/HumanResourcesModule';
 import { HrGaModule } from './pages/HrGaModule';
 import { CustomerRelationModule } from './pages/CustomerRelationModule';
 import { ProcurementModule } from './pages/ProcurementModule';
@@ -86,7 +84,7 @@ function AppContent() {
         return 'Finance & Payment';
       case 'hr-ga':
       case 'ga':
-        return 'HR & GA (Human Resources & General Affair)';
+        return 'HR & GA';
       case 'customer-relation':
         return 'Customer Relation & After-Sales Properti';
       case 'procurement':
