@@ -92,16 +92,11 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('legal') || roleLower.includes('salma')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'hres-spk', title: '1. SPK Surat Perintah Kerja', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
-        { id: 'hres-legalitas', title: '2. Legalitas Dokumen PT', moduleKey: 'legal', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
-        { id: 'hres-perizinan', title: '3. Perizinan Kawasan (8 Tahap)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
-        { id: 'hres-litigasi', title: '4. Litigasi & Advokasi Hukum', moduleKey: 'legal', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' },
-        { id: 'legal-shgb', title: '5. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
-        { id: 'legal-pbg', title: '6. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
-        { id: 'legal-split', title: '7. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
-        { id: 'legal-apht', title: '8. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
-        { id: 'legal-ppjb', title: '9. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
-        { id: 'legal-dispute', title: '10. Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' }
+        { id: 'leg-spk', title: '1. SPK (SPK Vendor)', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'leg-perusahaan', title: '2. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas-perusahaan', icon: FileCheck, color: '#38BDF8' },
+        { id: 'leg-proyek', title: '3. Legalitas Proyek', moduleKey: 'legal', subTabKey: 'legalitas-proyek', icon: Building2, color: '#C084FC' },
+        { id: 'leg-perizinan', title: '4. Perizinan (PPKR, Siteplan, PBG)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
+        { id: 'leg-litigasi', title: '5. Litigasi & Advokasi Hukum', moduleKey: 'legal', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' }
       ];
     }
 
