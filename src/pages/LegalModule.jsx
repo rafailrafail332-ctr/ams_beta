@@ -25,6 +25,7 @@ import {
   FileSpreadsheet,
   Check,
   Award,
+  ChevronLeft,
   ChevronRight,
   Info,
   UploadCloud,
@@ -166,58 +167,60 @@ export const LegalModule = () => {
     return dStr;
   };
 
-  // Exact 3 default rows as shown in user's reference image
+  // Exact 3 default rows as shown in user's reference image (dengan dukungan multi upload / geser 2 berkas)
   const defaultSpkMouList = [
     {
       id: 'SPK-MOU-01',
       noDok: 'xxx/xxx/xxx',
       tanggalDok: '2025-10-15',
+      project: 'Ashoka Park',
       nama: 'PT. Yan',
       kategori: 'Vendor',
       judulDokumen: 'SPK unit blok C1',
       catatan: 'SPK dibatalkan',
-      scope: 'Pekerjaan Pembangunan Unit Rumah Blok C1 Kawasan Ashoka Park',
-      project: 'Ashoka Park',
-      contractVal: 185000000,
-      paymentTerms: 'Termin 1 (30%), Termin 2 (40%), Pelunasan (30%)',
       pic: 'Wahyu Salma Septiani, S.H',
-      fileName: 'SPK_Unit_Blok_C1.pdf',
+      fileName: 'SPK_Unit_Blok_C1_Hal1.pdf',
       fileSize: '1.2 MB',
-      fileData: ''
+      fileData: '',
+      files: [
+        { name: 'SPK_Unit_Blok_C1_Hal1.pdf', size: '1.2 MB', data: '', type: 'application/pdf' },
+        { name: 'SPK_Unit_Blok_C1_Lampiran_Teknis.pdf', size: '2.4 MB', data: '', type: 'application/pdf' }
+      ]
     },
     {
       id: 'SPK-MOU-02',
       noDok: 'xxx/xxx/xxx',
       tanggalDok: '2025-10-16',
+      project: 'Ashoka Park',
       nama: 'Purna',
       kategori: 'Notari',
       judulDokumen: 'Tagihan biaya AJB',
       catatan: '',
-      scope: 'Biaya Pengurusan Akta Jual Beli (AJB) & Balik Nama Sertifikat Konsumen',
-      project: 'Ashoka Park',
-      contractVal: 32500000,
-      paymentTerms: 'Pembayaran Lunas Saat Penandatanganan Akta',
       pic: 'Wahyu Salma Septiani, S.H',
       fileName: 'Tagihan_Biaya_AJB_Purna.pdf',
       fileSize: '850 KB',
-      fileData: ''
+      fileData: '',
+      files: [
+        { name: 'Tagihan_Biaya_AJB_Purna.pdf', size: '850 KB', data: '', type: 'application/pdf' }
+      ]
     },
     {
       id: 'SPK-MOU-03',
       noDok: 'xxx/xxx/xxx',
       tanggalDok: '2025-10-17',
+      project: 'Ashoka View',
       nama: 'Kopeasi ABC',
       kategori: 'Klien',
       judulDokumen: 'MoU Kerja sama penjualan',
       catatan: 'Masa berlaku 31/12/2027',
-      scope: 'Nota Kesepahaman (MoU) Program Penjualan Rumah Kolektif Karyawan',
-      project: 'Ashoka View',
-      contractVal: 750000000,
-      paymentTerms: 'Fasilitas KPR Kolektif & Subsidi Biaya Administrasi',
       pic: 'Wahyu Salma Septiani, S.H',
-      fileName: 'MoU_Kerjasama_Penjualan_Koperasi_ABC.pdf',
-      fileSize: '2.4 MB',
-      fileData: ''
+      fileName: 'MoU_Kerjasama_Koperasi_ABC_Part1.pdf',
+      fileSize: '1.8 MB',
+      fileData: '',
+      files: [
+        { name: 'MoU_Kerjasama_Koperasi_ABC_Part1.pdf', size: '1.8 MB', data: '', type: 'application/pdf' },
+        { name: 'MoU_Kerjasama_Koperasi_ABC_Part2_Unit.pdf', size: '2.1 MB', data: '', type: 'application/pdf' }
+      ]
     }
   ];
 
@@ -244,21 +247,18 @@ export const LegalModule = () => {
   const [isSpkModalOpen, setIsSpkModalOpen] = useState(false);
   const [editingSpkId, setEditingSpkId] = useState(null);
   const [viewingSpk, setViewingSpk] = useState(null);
+  const [currentFileSlide, setCurrentFileSlide] = useState(0);
+
+  // Form input SPK (MOU): Sederhana tanpa nilai kontrak, lingkup kerja, dan sistem pembayaran
   const [spkForm, setSpkForm] = useState({
     noDok: '',
     tanggalDok: new Date().toISOString().split('T')[0],
+    project: 'Ashoka Park',
     nama: '',
     kategori: 'Vendor',
     judulDokumen: '',
     catatan: '',
-    scope: '',
-    project: 'Ashoka Park',
-    contractVal: '',
-    paymentTerms: 'Termin Progres 50%, Pelunasan BAST 50%',
-    pic: 'Wahyu Salma Septiani, S.H',
-    fileName: '',
-    fileSize: '',
-    fileData: ''
+    files: []
   });
 
   const handleOpenAddSpk = () => {
@@ -267,58 +267,68 @@ export const LegalModule = () => {
     setSpkForm({
       noDok: nextNo,
       tanggalDok: new Date().toISOString().split('T')[0],
+      project: 'Ashoka Park',
       nama: '',
       kategori: 'Vendor',
       judulDokumen: '',
       catatan: '',
-      scope: '',
-      project: 'Ashoka Park',
-      contractVal: '',
-      paymentTerms: 'Termin Progres 50%, Pelunasan BAST 50%',
-      pic: currentUser?.name || 'Wahyu Salma Septiani, S.H',
-      fileName: '',
-      fileSize: '',
-      fileData: ''
+      files: []
     });
     setIsSpkModalOpen(true);
   };
 
   const handleOpenEditSpk = (spk) => {
     setEditingSpkId(spk.id);
+    const existingFiles = (spk.files && spk.files.length > 0)
+      ? spk.files
+      : (spk.fileName ? [{ name: spk.fileName, size: spk.fileSize, data: spk.fileData, type: 'file' }] : []);
     setSpkForm({
       noDok: spk.noDok || spk.spkNo || '',
       tanggalDok: spk.tanggalDok || spk.issueDate || new Date().toISOString().split('T')[0],
+      project: spk.project || 'Ashoka Park',
       nama: spk.nama || spk.vendorName || '',
       kategori: spk.kategori || 'Vendor',
       judulDokumen: spk.judulDokumen || spk.scope || '',
       catatan: spk.catatan || spk.notes || '',
-      scope: spk.scope || '',
-      project: spk.project || 'Ashoka Park',
-      contractVal: spk.contractVal || '',
-      paymentTerms: spk.paymentTerms || '',
-      pic: spk.pic || 'Wahyu Salma Septiani, S.H',
-      fileName: spk.fileName || '',
-      fileSize: spk.fileSize || '',
-      fileData: spk.fileData || ''
+      files: existingFiles
     });
     setIsSpkModalOpen(true);
   };
 
-  const handleSpkFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setSpkForm(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileSize: formatFileSize(file.size),
-          fileData: uploadEvent.target.result
-        }));
-        showNotification(`File berkas "${file.name}" siap diunggah!`, 'info');
-      };
-      reader.readAsDataURL(file);
-    }
+  // Multiple File Upload Handler (Bisa upload 2 atau lebih berkas dan digeser)
+  const handleSpkMultiFilesChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (!selectedFiles.length) return;
+
+    const readers = selectedFiles.map(file => {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          resolve({
+            name: file.name,
+            size: formatFileSize(file.size),
+            type: file.type,
+            data: uploadEvent.target.result
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readers).then(newFiles => {
+      setSpkForm(prev => ({
+        ...prev,
+        files: [...(prev.files || []), ...newFiles]
+      }));
+      showNotification(`${newFiles.length} berkas berhasil ditambahkan! Anda dapat menggeser berkas ke kiri/kanan.`, 'info');
+    });
+  };
+
+  const handleRemoveSpkFormFile = (idx) => {
+    setSpkForm(prev => ({
+      ...prev,
+      files: (prev.files || []).filter((_, i) => i !== idx)
+    }));
   };
 
   const handleQuickAddVendorToDb = () => {
@@ -354,18 +364,24 @@ export const LegalModule = () => {
       return;
     }
 
+    const primaryFile = spkForm.files?.[0];
+    const payload = {
+      ...spkForm,
+      fileName: primaryFile?.name || '',
+      fileSize: primaryFile?.size || '',
+      fileData: primaryFile?.data || ''
+    };
+
     if (editingSpkId) {
       setSpkList(prev => prev.map(s => s.id === editingSpkId ? {
         ...s,
-        ...spkForm,
-        contractVal: Number(spkForm.contractVal) || 0
+        ...payload
       } : s));
       showNotification(`Dokumen SPK (MOU) ${spkForm.noDok} berhasil diperbarui!`, 'success');
     } else {
       const newSpk = {
         id: `SPK-MOU-${Date.now()}`,
-        ...spkForm,
-        contractVal: Number(spkForm.contractVal) || 0
+        ...payload
       };
       setSpkList([newSpk, ...spkList]);
       showNotification(`Dokumen SPK (MOU) ${newSpk.noDok} berhasil ditambahkan!`, 'success');
@@ -1091,156 +1107,172 @@ export const LegalModule = () => {
                     <th style={{ padding: '11px 8px', textAlign: 'center', width: '50px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No.</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No. Dok</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', width: '120px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Proyek</th>
                     <th style={{ padding: '11px 14px', width: '160px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Nama</th>
                     <th style={{ padding: '11px 12px', width: '110px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Kategori</th>
                     <th style={{ padding: '11px 14px', minWidth: '220px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '90px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Berkas</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '110px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Berkas</th>
                     <th style={{ padding: '11px 14px', minWidth: '180px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Catatan</th>
                     <th style={{ padding: '11px 10px', textAlign: 'center', width: '120px', fontWeight: 900 }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSpkList.map((spk, idx) => (
-                    <tr
-                      key={spk.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
-                        transition: 'background 0.15s'
-                      }}
-                    >
-                      {/* 1. No. */}
-                      <td style={{ padding: '10px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b' }}>
-                        {idx + 1}
-                      </td>
+                  {filteredSpkList.map((spk, idx) => {
+                    const fileCount = spk.files && spk.files.length > 0 ? spk.files.length : (spk.fileName ? 1 : 0);
+                    return (
+                      <tr
+                        key={spk.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b' }}>
+                          {idx + 1}
+                        </td>
 
-                      {/* 2. No. Dok */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
-                        {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
-                      </td>
+                        {/* 2. No. Dok */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
+                          {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
+                        </td>
 
-                      {/* 3. Tanggal Dokumen */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b' }}>
-                        {formatDisplayDate(spk.tanggalDok || spk.issueDate)}
-                      </td>
+                        {/* 3. Tanggal Dokumen */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b' }}>
+                          {formatDisplayDate(spk.tanggalDok || spk.issueDate)}
+                        </td>
 
-                      {/* 4. Nama (dari Database Vendor) */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
-                        <div style={{ fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>{spk.nama || spk.vendorName}</span>
-                        </div>
-                        {vendorDbList.some(v => v.nama.toLowerCase() === (spk.nama || spk.vendorName || '').toLowerCase()) && (
-                          <div style={{ fontSize: '0.66rem', color: '#38bdf8', marginTop: '1px' }}>
-                            ✓ Data Base Vendor
-                          </div>
-                        )}
-                      </td>
-
-                      {/* 5. Kategori */}
-                      <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background:
-                              (spk.kategori || '').toLowerCase().includes('notar') ? 'rgba(192, 132, 252, 0.15)' :
-                              (spk.kategori || '').toLowerCase().includes('klien') ? 'rgba(56, 189, 248, 0.15)' :
-                              'rgba(251, 146, 60, 0.15)',
-                            color:
-                              (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
-                              (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
-                              '#fb923c',
-                            fontWeight: 800
-                          }}
-                        >
-                          {spk.kategori || 'Vendor'}
-                        </span>
-                      </td>
-
-                      {/* 6. Judul Dokumen */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
-                        <div style={{ color: '#f1f5f9', fontWeight: 700 }}>
-                          {spk.judulDokumen || spk.scope || '-'}
-                        </div>
-                        {spk.project && (
-                          <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
-                            {spk.project}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* 7. Berkas (Tombol View persis di gambar) */}
-                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
-                        <button
-                          onClick={() => setViewingSpk(spk)}
-                          style={{
-                            background: '#38bdf8',
-                            color: '#090d16',
-                            border: 'none',
-                            padding: '4px 14px',
-                            borderRadius: '5px',
-                            fontWeight: 900,
-                            fontSize: '0.75rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
-                            transition: 'transform 0.1s'
-                          }}
-                          title="Lihat Data Dokumen SPK (MOU)"
-                        >
-                          <Eye size={12} />
-                          <span>View</span>
-                        </button>
-                      </td>
-
-                      {/* 8. Catatan */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
-                        {spk.catatan ? (
+                        {/* 4. Proyek (Tambahan Setelah Tanggal Dokumen) */}
+                        <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
                           <span
                             style={{
-                              fontSize: '0.73rem',
-                              fontWeight: 700,
-                              color: spk.catatan.toLowerCase().includes('batal') ? '#f87171' : '#fde047'
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: spk.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                              color: spk.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24',
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap'
                             }}
                           >
-                            {spk.catatan}
+                            {spk.project || 'Ashoka Park'}
                           </span>
-                        ) : (
-                          <span style={{ color: '#64748b' }}>-</span>
-                        )}
-                      </td>
+                        </td>
 
-                      {/* 9. Aksi */}
-                      <td style={{ padding: '10px 10px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '5px' }}>
-                          <button
-                            onClick={() => setViewingSpk(spk)}
-                            title="Pratinjau & Cetak Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                        {/* 5. Nama (dari Database Vendor) */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                          <div style={{ fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{spk.nama || spk.vendorName}</span>
+                          </div>
+                          {vendorDbList.some(v => v.nama.toLowerCase() === (spk.nama || spk.vendorName || '').toLowerCase()) && (
+                            <div style={{ fontSize: '0.66rem', color: '#38bdf8', marginTop: '1px' }}>
+                              ✓ Data Base Vendor
+                            </div>
+                          )}
+                        </td>
+
+                        {/* 6. Kategori */}
+                        <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background:
+                                (spk.kategori || '').toLowerCase().includes('notar') ? 'rgba(192, 132, 252, 0.15)' :
+                                (spk.kategori || '').toLowerCase().includes('klien') ? 'rgba(56, 189, 248, 0.15)' :
+                                'rgba(251, 146, 60, 0.15)',
+                              color:
+                                (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
+                                (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
+                                '#fb923c',
+                              fontWeight: 800
+                            }}
                           >
-                            <Printer size={12} />
-                          </button>
+                            {spk.kategori || 'Vendor'}
+                          </span>
+                        </td>
+
+                        {/* 7. Judul Dokumen */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                          <div style={{ color: '#f1f5f9', fontWeight: 700 }}>
+                            {spk.judulDokumen || spk.scope || '-'}
+                          </div>
+                        </td>
+
+                        {/* 8. Berkas (Tombol View dengan indikator jumlah berkas & geser) */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
                           <button
-                            onClick={() => handleOpenEditSpk(spk)}
-                            title="Edit Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
+                            style={{
+                              background: '#38bdf8',
+                              color: '#090d16',
+                              border: 'none',
+                              padding: '4px 10px',
+                              borderRadius: '5px',
+                              fontWeight: 900,
+                              fontSize: '0.74rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                              transition: 'transform 0.1s'
+                            }}
+                            title="Lihat Data Dokumen SPK (MOU)"
                           >
-                            <Edit3 size={12} />
+                            <Eye size={12} />
+                            <span>View {fileCount >= 2 ? `(${fileCount} Berkas ⇄)` : 'View'}</span>
                           </button>
-                          <button
-                            onClick={() => handleDeleteSpk(spk.id, spk.noDok || spk.spkNo)}
-                            title="Hapus Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+
+                        {/* 9. Catatan */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                          {spk.catatan ? (
+                            <span
+                              style={{
+                                fontSize: '0.73rem',
+                                fontWeight: 700,
+                                color: spk.catatan.toLowerCase().includes('batal') ? '#f87171' : '#fde047'
+                              }}
+                            >
+                              {spk.catatan}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#64748b' }}>-</span>
+                          )}
+                        </td>
+
+                        {/* 10. Aksi */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px' }}>
+                            <button
+                              onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
+                              title="Pratinjau & Cetak Dokumen"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleOpenEditSpk(spk)}
+                              title="Edit Dokumen"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSpk(spk.id, spk.noDok || spk.spkNo)}
+                              title="Hapus Dokumen"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -2045,57 +2077,68 @@ export const LegalModule = () => {
                 </div>
               </div>
 
-              {/* BARIS 5: Lingkup Pekerjaan / Detail MoU */}
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Lingkup Pekerjaan / Ketentuan MoU</label>
-                <textarea
-                  rows="2"
-                  placeholder="e.g. Pelaksanaan pekerjaan konstruksi rumah kavling atau klausul nota kesepahaman"
-                  value={spkForm.scope}
-                  onChange={(e) => setSpkForm({ ...spkForm, scope: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
-
-              {/* BARIS 6: Nilai Kontrak (Rp) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nilai Kontrak / Biaya (Rp)</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 185000000"
-                    value={spkForm.contractVal}
-                    onChange={(e) => setSpkForm({ ...spkForm, contractVal: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
+              {/* Upload Berkas Dokumen (Mendukung upload 2 berkas atau lebih & bisa digeser) */}
+              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.76rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <UploadCloud size={16} />
+                    <span>Unggah Berkas Fisik (Bisa upload 2 atau lebih berkas)</span>
+                  </label>
+                  <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700 }}>
+                    {spkForm.files?.length || 0} Berkas Terpilih
+                  </span>
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Sistem Pembayaran / Termin</label>
-                  <input
-                    type="text"
-                    value={spkForm.paymentTerms}
-                    onChange={(e) => setSpkForm({ ...spkForm, paymentTerms: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
 
-              {/* Upload Berkas Dokumen */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                  <UploadCloud size={14} />
-                  <span>Unggah Berkas Fisik (PDF / Scan Gambar / DOC)</span>
-                </label>
                 <input
                   type="file"
+                  multiple
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleSpkFileChange}
-                  style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                  onChange={handleSpkMultiFilesChange}
+                  style={{ fontSize: '0.78rem', color: '#cbd5e1', width: '100%', marginBottom: '8px' }}
                 />
-                {spkForm.fileName && (
-                  <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={12} />
-                    <span>File terlampir: {spkForm.fileName} ({spkForm.fileSize})</span>
+
+                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginBottom: '8px' }}>
+                  💡 Tips: Anda dapat memilih lebih dari 1 file sekaligus (misal 2 lembar scan / PDF kontrak & lampiran) dan bisa digeser kiri/kanan saat dilihat.
+                </div>
+
+                {/* Daftar Berkas Terpilih */}
+                {spkForm.files && spkForm.files.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+                    {spkForm.files.map((f, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: '#090d16',
+                          border: '1px solid #1e293b',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          fontSize: '0.74rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          <span style={{ background: 'rgba(251, 146, 60, 0.2)', color: '#fb923c', padding: '1px 6px', borderRadius: '3px', fontWeight: 800, fontSize: '0.66rem' }}>
+                            #{idx + 1}
+                          </span>
+                          <FileText size={13} color="#38bdf8" />
+                          <span style={{ color: '#f1f5f9', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {f.name}
+                          </span>
+                          <span style={{ color: '#64748b', fontSize: '0.68rem' }}>({f.size})</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSpkFormFile(idx)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px', fontSize: '0.8rem' }}
+                          title="Hapus file ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -2865,56 +2908,213 @@ export const LegalModule = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {viewingSpk.fileData && (
-                  <button
-                    onClick={() => handleViewFile(viewingSpk.fileData, viewingSpk.fileName)}
-                    className="btn btn-secondary btn-sm"
-                    style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem' }}
-                  >
-                    <Paperclip size={13} />
-                    <span>Berkas Terlampir ({viewingSpk.fileSize || 'File'})</span>
-                  </button>
-                )}
+              {(() => {
+                const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
+                  ? viewingSpk.files
+                  : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize, data: viewingSpk.fileData, type: 'file' }] : []);
 
-                <button
-                  onClick={() => window.print()}
-                  className="btn btn-primary btn-sm"
-                  style={{
-                    background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.78rem',
-                    fontWeight: 800,
-                    padding: '7px 14px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
-                  }}
-                >
-                  <Printer size={15} />
-                  <span>🖨️ Cetak / Print Dokumen</span>
-                </button>
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {activeFiles.length > 0 && activeFiles[currentFileSlide]?.data && (
+                      <button
+                        onClick={() => handleViewFile(activeFiles[currentFileSlide].data, activeFiles[currentFileSlide].name)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem' }}
+                      >
+                        <Paperclip size={13} />
+                        <span>Unduh Berkas #{currentFileSlide + 1}</span>
+                      </button>
+                    )}
 
-                <button
-                  onClick={() => setViewingSpk(null)}
-                  style={{
-                    background: '#1e293b',
-                    border: '1px solid #334155',
-                    color: '#cbd5e1',
-                    borderRadius: '8px',
-                    padding: '6px 12px',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+                    <button
+                      onClick={() => window.print()}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
+                      }}
+                    >
+                      <Printer size={15} />
+                      <span>🖨️ Cetak / Print Dokumen</span>
+                    </button>
+
+                    <button
+                      onClick={() => setViewingSpk(null)}
+                      style={{
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#cbd5e1',
+                        borderRadius: '8px',
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
+
+            {/* AREA CAROUSEL / SLIDER JIKA ADA 2 BERKAS ATAU LEBIH (BISA DIGESER KIRI & KANAN) */}
+            {(() => {
+              const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
+                ? viewingSpk.files
+                : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize, data: viewingSpk.fileData, type: 'file' }] : []);
+
+              if (activeFiles.length === 0) return null;
+
+              return (
+                <div className="no-print" style={{ margin: '1.2rem 1.2rem 0 1.2rem', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Paperclip size={16} color="#fb923c" />
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff' }}>
+                        Berkas Terlampir ({activeFiles.length} Berkas Fisik)
+                      </span>
+                      {activeFiles.length >= 2 && (
+                        <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontWeight: 800 }}>
+                          ⇄ Bisa digeser ke kiri dan kanan
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Tombol Geser Kiri & Kanan */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentFileSlide(prev => prev > 0 ? prev - 1 : activeFiles.length - 1)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#fb923c',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas sebelumnya"
+                        >
+                          <ChevronLeft size={16} />
+                          <span>Geser Kiri</span>
+                        </button>
+
+                        <span style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 800, padding: '0 4px' }}>
+                          {currentFileSlide + 1} / {activeFiles.length}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setCurrentFileSlide(prev => prev < activeFiles.length - 1 ? prev + 1 : 0)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#fb923c',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas selanjutnya"
+                        >
+                          <span>Geser Kanan</span>
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Berkas yang Aktif Saat Ini */}
+                  <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f1f5f9' }}>
+                            Berkas #{currentFileSlide + 1}: {activeFiles[currentFileSlide]?.name}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                            Ukuran File: {activeFiles[currentFileSlide]?.size || 'Digital'} &bull; Format Dokumen
+                          </div>
+                        </div>
+                      </div>
+
+                      {activeFiles[currentFileSlide]?.data ? (
+                        <button
+                          type="button"
+                          onClick={() => handleViewFile(activeFiles[currentFileSlide].data, activeFiles[currentFileSlide].name)}
+                          className="btn btn-primary btn-sm"
+                          style={{ fontSize: '0.74rem', background: '#0284c7', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        >
+                          <Eye size={13} />
+                          <span>Buka File di Layar Penuh</span>
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Arsip Digital Tersimpan</span>
+                      )}
+                    </div>
+
+                    {/* Pratinjau Gambar jika format Image */}
+                    {activeFiles[currentFileSlide]?.data && activeFiles[currentFileSlide].data.startsWith('data:image') && (
+                      <div style={{ marginTop: '10px', textAlign: 'center', maxHeight: '300px', overflow: 'hidden', borderRadius: '6px', background: '#000' }}>
+                        <img
+                          src={activeFiles[currentFileSlide].data}
+                          alt={activeFiles[currentFileSlide].name}
+                          style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Indikator Titik Carousel (Dots) */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+                        {activeFiles.map((f, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setCurrentFileSlide(idx)}
+                            style={{
+                              width: idx === currentFileSlide ? '22px' : '8px',
+                              height: '8px',
+                              borderRadius: '4px',
+                              background: idx === currentFileSlide ? '#fb923c' : '#334155',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            title={`Geser ke ${f.name}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Dokumen Lembar Resmi Cetak / Print Area */}
             <div
@@ -2985,6 +3185,14 @@ export const LegalModule = () => {
                       <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.nama || viewingSpk.vendorName}</strong> ({viewingSpk.kategori || 'Vendor'})</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
+                      <td style={{ padding: '6px 8px' }}>: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Proyek Kawasan</td>
+                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingSpk.project || 'Ashoka Park'}</span></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                       <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Dokumen</td>
                       <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Vendor'}</span></td>
                     </tr>
@@ -2993,32 +3201,20 @@ export const LegalModule = () => {
                       <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.judulDokumen || viewingSpk.scope}</strong></td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Lingkup Pekerjaan / Hal</td>
-                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.scope || viewingSpk.judulDokumen || '-'}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kawasan Proyek</td>
-                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.project || 'Ashoka Park'}</td>
-                    </tr>
-                    {Number(viewingSpk.contractVal) > 0 && (
-                      <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Nilai Kontrak / Biaya</td>
-                        <td style={{ padding: '6px 8px' }}>: <strong style={{ fontSize: '0.9rem', color: '#047857' }}>{formatRupiah(viewingSpk.contractVal)}</strong> (Nett / Termasuk Pajak)</td>
-                      </tr>
-                    )}
-                    {viewingSpk.paymentTerms && (
-                      <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Sistem Pembayaran</td>
-                        <td style={{ padding: '6px 8px' }}>: {viewingSpk.paymentTerms}</td>
-                      </tr>
-                    )}
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                       <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
                       <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700, color: viewingSpk.catatan?.toLowerCase().includes('batal') ? '#b91c1c' : '#1e293b' }}>{viewingSpk.catatan || '-'}</span></td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik</td>
-                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.fileName ? `Terlampir (${viewingSpk.fileName} - ${viewingSpk.fileSize || 'File Digital'})` : 'Dokumen Fisik Tersimpan di Arsip Legal'}</td>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik Terlampir</td>
+                      <td style={{ padding: '6px 8px' }}>
+                        {(() => {
+                          const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
+                            ? viewingSpk.files
+                            : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize }] : []);
+                          if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Arsip Legal';
+                          return activeFiles.map((f, i) => `Berkas ${i + 1}: ${f.name} (${f.size || 'Digital'})`).join('; ');
+                        })()}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
