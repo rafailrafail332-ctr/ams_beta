@@ -780,12 +780,68 @@ export const PiutangKonsumenModule = () => {
     }
   };
 
+  // Format 4 baris "Untuk Pembayaran / In Payment Of" pada kwitansi resmi
+  const formatUntukPembayaranLines = (payment, type = '', row = {}) => {
+    if (!row) return ['', '', '', ''];
+    const typeStr = (type || '').toLowerCase();
+    const isAngsuran = typeStr.includes('angsuran');
+    const isDp = typeStr.includes('dp') || typeStr.includes('uang muka');
+    const isBooking = typeStr.includes('booking') || typeStr.includes('tanda jadi');
+
+    const blokStr = row.blok
+      ? (row.blok.toString().trim().toLowerCase().startsWith('blok')
+          ? row.blok.toString().trim()
+          : `Blok ${row.blok.toString().trim()}`)
+      : '';
+    const noStr = row.noUnit
+      ? (row.noUnit.toString().trim().toLowerCase().startsWith('no')
+          ? row.noUnit.toString().trim()
+          : `No. ${row.noUnit.toString().trim()}`)
+      : '';
+    const unitIdent = [row.proyek, blokStr, noStr].filter(Boolean).join(' ');
+
+    if (isAngsuran) {
+      let keNum = '';
+      if (row.angsuranPayments && row.angsuranPayments.length > 0 && payment?.id) {
+        const idx = row.angsuranPayments.findIndex((p) => p.id === payment.id);
+        if (idx >= 0) keNum = `${idx + 1}`;
+      }
+      if (!keNum) {
+        const match = (type || '').match(/\d+/);
+        if (match) keNum = match[0];
+      }
+      const labelKe = keNum ? `pembayaran ke ${keNum}` : 'pembayaran angsuran';
+      return [`${unitIdent}  ${labelKe}`, '', '', ''];
+    }
+
+    if (isDp) {
+      let keNum = '';
+      if (row.dpPayments && row.dpPayments.length > 0 && payment?.id) {
+        const idx = row.dpPayments.findIndex((p) => p.id === payment.id);
+        if (idx >= 0) keNum = `${idx + 1}`;
+      }
+      if (!keNum) {
+        const match = (type || '').match(/\d+/);
+        if (match) keNum = match[0];
+      }
+      const labelKe = keNum ? `pembayaran DP ke ${keNum}` : 'pembayaran DP';
+      return [`${unitIdent}  ${labelKe}`, '', '', ''];
+    }
+
+    if (isBooking) {
+      return [`${unitIdent}  pembayaran Uang Tanda Jadi (Booking Fee)`, '', '', ''];
+    }
+
+    return [`${unitIdent}  pembayaran ${type}`, '', '', ''];
+  };
+
   // Generate Print HTML Exact Match to User's Two Photos
   const generateKwitansiPrintHtml = ({ payment, type, row, kwitansiNo }) => {
     const terbilangText = terbilang(payment.jumlah);
     const cfg = getKwitansiTemplateConfig(row);
     const tanggalBogor = formatTanggalBogor(payment.tanggal);
     const nominalFormatted = Number(payment.jumlah || 0).toLocaleString('id-ID');
+    const paymentLines = formatUntukPembayaranLines(payment, type, row);
 
     return `<!DOCTYPE html>
 <html>
@@ -1125,10 +1181,10 @@ export const PiutangKonsumenModule = () => {
         </div>
         <div class="k-colon" style="padding-top: 3px;">:</div>
         <div class="k-multiline-field">
-          <div class="k-multi-line bold">Pembayaran ${type} Kavling ${row.proyek} Blok ${row.blok} No. ${row.noUnit}</div>
-          <div class="k-multi-line">Tipe ${row.type} (Luas Bangunan: ${row.lb || 0} m², Luas Tanah: ${row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0))} m²)</div>
-          <div class="k-multi-line">${payment.keterangan ? 'Keterangan: ' + payment.keterangan : ''}</div>
-          <div class="k-multi-line"></div>
+          <div class="k-multi-line bold">${paymentLines[0] || ''}</div>
+          <div class="k-multi-line">${paymentLines[1] || ''}</div>
+          <div class="k-multi-line">${paymentLines[2] || ''}</div>
+          <div class="k-multi-line">${paymentLines[3] || ''}</div>
         </div>
       </div>
     </div>
@@ -1207,6 +1263,7 @@ export const PiutangKonsumenModule = () => {
       const tanggalBogor = formatTanggalBogor(payment.tanggal);
       const terbilangText = terbilang(payment.jumlah);
       const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
+      const paymentLines = formatUntukPembayaranLines(payment, type, row);
 
       const wsData = [
         [cfg.brandName, '', '', '', 'KWITANSI PEMBAYARAN'],
@@ -1216,9 +1273,10 @@ export const PiutangKonsumenModule = () => {
         ['Received from', '', ''],
         ['Uang Sebesar', ':', terbilangText],
         ['Amount Received', '', ''],
-        ['Untuk Pembayaran', ':', `Pembayaran ${type} Kavling ${row.proyek} Blok ${row.blok} No. ${row.noUnit}`],
-        ['In Payment Of', '', `Tipe ${row.type} (LB: ${row.lb || 0} m², LT: ${ltTotal} m²)`],
-        ['', '', payment.keterangan ? `Keterangan: ${payment.keterangan}` : ''],
+        ['Untuk Pembayaran', ':', paymentLines[0] || ''],
+        ['In Payment Of', '', paymentLines[1] || ''],
+        ['', '', paymentLines[2] || ''],
+        ['', '', paymentLines[3] || ''],
         [],
         ['====================================', '', '', '', tanggalBogor],
         [`RP   ${Number(payment.jumlah || 0).toLocaleString('id-ID')},-`, '', '', '', cfg.companyNameUpper],
@@ -4092,6 +4150,7 @@ export const PiutangKonsumenModule = () => {
         const terbilangText = terbilang(receiptData.payment.jumlah);
         const nominalFormatted = Number(receiptData.payment.jumlah || 0).toLocaleString('id-ID');
         const ltTotal = receiptData.row.ltTotal || (Number(receiptData.row.lt || 0) + Number(receiptData.row.ltPlus || 0));
+        const previewPaymentLines = formatUntukPembayaranLines(receiptData.payment, receiptData.type, receiptData.row);
 
         return (
           <div
@@ -4213,15 +4272,17 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ width: '18px', fontWeight: 700, fontSize: '13px', color: '#1e293b', textAlign: 'center', paddingTop: '3px' }}>:</div>
                   <div style={{ flex: 1, background: 'repeating-linear-gradient(to bottom, #ffffff 0px, #ffffff 21px, #cbd5e1 21px, #cbd5e1 22px)', borderBottom: '1px solid #94a3b8', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Pembayaran {receiptData.type} Kavling {receiptData.row.proyek} Blok {receiptData.row.blok} No. {receiptData.row.noUnit}
+                      {previewPaymentLines[0] || ''}
                     </div>
                     <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Tipe {receiptData.row.type} (Luas Bangunan: {receiptData.row.lb || 0} m², Luas Tanah: {ltTotal} m²)
+                      {previewPaymentLines[1] || ''}
                     </div>
                     <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px', fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {receiptData.payment.keterangan ? 'Keterangan: ' + receiptData.payment.keterangan : ''}
+                      {previewPaymentLines[2] || ''}
                     </div>
-                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px' }}></div>
+                    <div style={{ height: '22px', lineHeight: '22px', padding: '0 10px' }}>
+                      {previewPaymentLines[3] || ''}
+                    </div>
                   </div>
                 </div>
               </div>
