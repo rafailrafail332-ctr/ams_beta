@@ -155,6 +155,9 @@ export const PiutangKonsumenModule = () => {
   const [newAngsuranNominal, setNewAngsuranNominal] = useState('');
   const [newAngsuranKeterangan, setNewAngsuranKeterangan] = useState('');
 
+  // Editing state for individual payment in history (DP / Angsuran)
+  const [editingPayment, setEditingPayment] = useState(null);
+
   // Add/Edit Row Modal State
   const [isRowModalOpen, setIsRowModalOpen] = useState(false);
   const [editingRowId, setEditingRowId] = useState(null);
@@ -398,6 +401,7 @@ export const PiutangKonsumenModule = () => {
     setNewDpKeterangan('');
     setNewAngsuranNominal('');
     setNewAngsuranKeterangan('');
+    setEditingPayment(null);
   };
 
   // Add DP Payment
@@ -502,6 +506,74 @@ export const PiutangKonsumenModule = () => {
     const updatedRow = updatedList.find((i) => i.id === activePaymentRow.id);
     setActivePaymentRow(getCalculatedRow(updatedRow));
     showNotification('Riwayat pembayaran angsuran berhasil dihapus.', 'info');
+  };
+
+  // Start Editing Payment in History
+  const handleStartEditPayment = (payment, type) => {
+    setEditingPayment({
+      id: payment.id,
+      type, // 'dp' | 'angsuran'
+      tanggal: payment.tanggal || new Date().toISOString().split('T')[0],
+      jumlah: payment.jumlah || 0,
+      keterangan: payment.keterangan || ''
+    });
+  };
+
+  // Save Edited Payment in History
+  const handleSaveEditPayment = () => {
+    if (!editingPayment || !activePaymentRow) return;
+
+    const raw = (editingPayment.jumlah || '').toString().replace(/[^0-9]/g, '');
+    const nominal = parseInt(raw, 10);
+    if (!nominal || nominal <= 0) {
+      showNotification('Masukkan jumlah nominal pembayaran yang valid!', 'warning');
+      return;
+    }
+
+    const isDp = editingPayment.type === 'dp';
+    const updatedList = piutangList.map((item) => {
+      if (item.id === activePaymentRow.id) {
+        if (isDp) {
+          const dpPayments = (item.dpPayments || []).map((p) => {
+            if (p.id === editingPayment.id) {
+              return {
+                ...p,
+                tanggal: editingPayment.tanggal,
+                jumlah: nominal,
+                keterangan: (editingPayment.keterangan || '').trim() || 'Pembayaran DP'
+              };
+            }
+            return p;
+          });
+          return { ...item, dpPayments };
+        } else {
+          const angsuranPayments = (item.angsuranPayments || []).map((p) => {
+            if (p.id === editingPayment.id) {
+              return {
+                ...p,
+                tanggal: editingPayment.tanggal,
+                jumlah: nominal,
+                keterangan: (editingPayment.keterangan || '').trim() || 'Pembayaran Angsuran'
+              };
+            }
+            return p;
+          });
+          return { ...item, angsuranPayments };
+        }
+      }
+      return item;
+    });
+
+    persistPiutangList(updatedList);
+    const updatedRow = updatedList.find((i) => i.id === activePaymentRow.id);
+    setActivePaymentRow(getCalculatedRow(updatedRow));
+    setEditingPayment(null);
+    showNotification(`Riwayat pembayaran ${isDp ? 'DP' : 'Angsuran'} berhasil diperbarui!`, 'success');
+  };
+
+  // Cancel Editing Payment
+  const handleCancelEditPayment = () => {
+    setEditingPayment(null);
   };
 
   // Open Add / Edit Row Modal
@@ -1923,13 +1995,36 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Dp (Klik untuk kelola DP) */}
-                    <td style={{ textAlign: 'right', padding: '9px 9px', border: '1px solid #334155', fontWeight: 900, color: '#fbbf24' }}>
-                      <div>{formatNumber(row.totalDp)}</div>
-                      {(row.dpPayments || []).length > 0 && (
-                        <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
-                          {(row.dpPayments || []).length}x bayar
-                        </div>
-                      )}
+                    <td
+                      style={{
+                        textAlign: 'right',
+                        padding: '8px 10px',
+                        border: '1px solid #334155',
+                        fontWeight: 900,
+                        color: '#fbbf24',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleOpenPaymentModal(row, 'dp')}
+                      title="Klik untuk melihat riwayat / history & edit pembayaran DP"
+                    >
+                      <div style={{ fontSize: '0.88rem' }}>{formatNumber(row.totalDp)}</div>
+                      <div
+                        style={{
+                          fontSize: '0.68rem',
+                          color: '#94a3b8',
+                          fontWeight: 600,
+                          marginTop: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          gap: '3px',
+                          textDecoration: 'underline',
+                          textDecorationStyle: 'dotted'
+                        }}
+                      >
+                        <Clock size={10} color="#94a3b8" />
+                        <span>{(row.dpPayments || []).length}x bayar (History & Edit)</span>
+                      </div>
                     </td>
 
                     {/* Sisa Pembayaran */}
@@ -1938,13 +2033,36 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Angsuran (Klik untuk kelola Angsuran) */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', border: '1px solid #334155', fontWeight: 900, color: '#c084fc' }}>
-                      <div>{formatNumber(row.totalAngsuran)}</div>
-                      {(row.angsuranPayments || []).length > 0 && (
-                        <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
-                          {(row.angsuranPayments || []).length}x bayar
-                        </div>
-                      )}
+                    <td
+                      style={{
+                        textAlign: 'right',
+                        padding: '8px 10px',
+                        border: '1px solid #334155',
+                        fontWeight: 900,
+                        color: '#c084fc',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleOpenPaymentModal(row, 'angsuran')}
+                      title="Klik untuk melihat riwayat / history & edit pembayaran Angsuran"
+                    >
+                      <div style={{ fontSize: '0.88rem' }}>{formatNumber(row.totalAngsuran)}</div>
+                      <div
+                        style={{
+                          fontSize: '0.68rem',
+                          color: '#94a3b8',
+                          fontWeight: 600,
+                          marginTop: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          gap: '3px',
+                          textDecoration: 'underline',
+                          textDecorationStyle: 'dotted'
+                        }}
+                      >
+                        <Clock size={10} color="#94a3b8" />
+                        <span>{(row.angsuranPayments || []).length}x bayar (History & Edit)</span>
+                      </div>
                     </td>
 
                     {/* Saldo Akhir */}
@@ -2162,7 +2280,7 @@ export const PiutangKonsumenModule = () => {
                     gap: '0.6rem'
                   }}
                 >
-                  <CreditCard size={22} color="#10b981" /> Kelola Pembayaran: {activePaymentRow.namaKonsumen}
+                  <CreditCard size={22} color="#10b981" /> Riwayat & Edit Pembayaran: {activePaymentRow.namaKonsumen}
                 </h3>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '3px' }}>
                   {activePaymentRow.proyek} • Blok {activePaymentRow.blok} No. {activePaymentRow.noUnit} ({activePaymentRow.type})
@@ -2171,7 +2289,10 @@ export const PiutangKonsumenModule = () => {
 
               <button
                 type="button"
-                onClick={() => setActivePaymentRow(null)}
+                onClick={() => {
+                  setActivePaymentRow(null);
+                  setEditingPayment(null);
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -2245,7 +2366,10 @@ export const PiutangKonsumenModule = () => {
             >
               <button
                 type="button"
-                onClick={() => setPaymentSubTab('dp')}
+                onClick={() => {
+                  setPaymentSubTab('dp');
+                  setEditingPayment(null);
+                }}
                 style={{
                   padding: '0.75rem 1.25rem',
                   border: 'none',
@@ -2260,7 +2384,7 @@ export const PiutangKonsumenModule = () => {
                   gap: '0.5rem'
                 }}
               >
-                💳 Pembayaran DP (Uang Muka)
+                💳 Riwayat & Edit DP (Uang Muka)
                 <span
                   style={{
                     background: paymentSubTab === 'dp' ? '#f59e0b' : '#334155',
@@ -2277,7 +2401,10 @@ export const PiutangKonsumenModule = () => {
 
               <button
                 type="button"
-                onClick={() => setPaymentSubTab('angsuran')}
+                onClick={() => {
+                  setPaymentSubTab('angsuran');
+                  setEditingPayment(null);
+                }}
                 style={{
                   padding: '0.75rem 1.25rem',
                   border: 'none',
@@ -2292,7 +2419,7 @@ export const PiutangKonsumenModule = () => {
                   gap: '0.5rem'
                 }}
               >
-                🏦 Pembayaran Angsuran
+                🏦 Riwayat & Edit Angsuran
                 <span
                   style={{
                     background: paymentSubTab === 'angsuran' ? '#a855f7' : '#334155',
@@ -2427,70 +2554,203 @@ export const PiutangKonsumenModule = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(activePaymentRow.dpPayments || []).map((p, idx) => (
-                          <tr key={p.id || idx}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                            <td style={{ fontWeight: 700 }}>{p.tanggal}</td>
-                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
-                              {formatRupiah(p.jumlah)}
-                            </td>
-                            <td>{p.keterangan || '-'}</td>
-                            <td style={{ textAlign: 'center' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => handlePrintKwitansiDirect(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
-                                  title="Cetak Bukti Kwitansi DP Ini"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                                    border: '1px solid #38bdf8',
-                                    color: '#ffffff',
-                                    fontWeight: 800,
-                                    fontSize: '0.72rem',
-                                    borderRadius: '4px',
-                                    padding: '3px 8px',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '3px'
-                                  }}
-                                >
-                                  <Printer size={12} /> Kwitansi
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handlePrintReceipt(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
-                                  title="Preview Kwitansi DP"
-                                  style={{
-                                    background: '#1e293b',
-                                    border: '1px solid #475569',
-                                    color: '#cbd5e1',
-                                    borderRadius: '4px',
-                                    padding: '3px 6px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <Eye size={12} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteDpPayment(p.id)}
-                                  title="Hapus data pembayaran ini"
-                                  style={{
-                                    background: 'rgba(239, 68, 68, 0.2)',
-                                    border: '1px solid #ef4444',
-                                    color: '#f87171',
-                                    borderRadius: '4px',
-                                    padding: '3px 7px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {(activePaymentRow.dpPayments || []).map((p, idx) => {
+                          const isEditing = editingPayment && editingPayment.id === p.id;
+                          if (isEditing) {
+                            return (
+                              <tr key={p.id || idx} style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid #38bdf8' }}>
+                                <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8' }}>{idx + 1}</td>
+                                <td>
+                                  <input
+                                    type="date"
+                                    className="form-control"
+                                    value={editingPayment.tanggal}
+                                    onChange={(e) => setEditingPayment({ ...editingPayment, tanggal: e.target.value })}
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#ffffff',
+                                      border: '1px solid #38bdf8',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={editingPayment.jumlah ? Number(editingPayment.jumlah).toLocaleString('en-US') : ''}
+                                    onChange={(e) => {
+                                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                                      setEditingPayment({ ...editingPayment, jumlah: raw });
+                                    }}
+                                    placeholder="Nominal DP"
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#34d399',
+                                      fontWeight: 800,
+                                      textAlign: 'right',
+                                      border: '1px solid #38bdf8',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={editingPayment.keterangan}
+                                    onChange={(e) => setEditingPayment({ ...editingPayment, keterangan: e.target.value })}
+                                    placeholder="Keterangan DP"
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#ffffff',
+                                      border: '1px solid #38bdf8',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={handleSaveEditPayment}
+                                      title="Simpan Perubahan DP"
+                                      style={{
+                                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                                        border: 'none',
+                                        color: '#ffffff',
+                                        fontWeight: 800,
+                                        fontSize: '0.72rem',
+                                        borderRadius: '4px',
+                                        padding: '4px 8px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px'
+                                      }}
+                                    >
+                                      <CheckCircle2 size={12} /> Simpan
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleCancelEditPayment}
+                                      title="Batal Edit"
+                                      style={{
+                                        background: '#334155',
+                                        border: '1px solid #64748b',
+                                        color: '#cbd5e1',
+                                        fontWeight: 700,
+                                        fontSize: '0.72rem',
+                                        borderRadius: '4px',
+                                        padding: '4px 7px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px'
+                                      }}
+                                    >
+                                      <X size={12} /> Batal
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          }
+
+                          return (
+                            <tr key={p.id || idx}>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                              <td style={{ fontWeight: 700 }}>{p.tanggal}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
+                                {formatRupiah(p.jumlah)}
+                              </td>
+                              <td>{p.keterangan || '-'}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEditPayment(p, 'dp')}
+                                    title="Edit riwayat pembayaran DP ini"
+                                    style={{
+                                      background: 'rgba(234, 179, 8, 0.15)',
+                                      border: '1px solid #eab308',
+                                      color: '#facc15',
+                                      borderRadius: '4px',
+                                      padding: '3px 7px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 800
+                                    }}
+                                  >
+                                    <Edit3 size={11} /> Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrintKwitansiDirect(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
+                                    title="Cetak Bukti Kwitansi DP Ini"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                      border: '1px solid #38bdf8',
+                                      color: '#ffffff',
+                                      fontWeight: 800,
+                                      fontSize: '0.72rem',
+                                      borderRadius: '4px',
+                                      padding: '3px 8px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                  >
+                                    <Printer size={12} /> Kwitansi
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrintReceipt(p, `DP (Uang Muka) Ke-${idx + 1}`, activePaymentRow)}
+                                    title="Preview Kwitansi DP"
+                                    style={{
+                                      background: '#1e293b',
+                                      border: '1px solid #475569',
+                                      color: '#cbd5e1',
+                                      borderRadius: '4px',
+                                      padding: '3px 6px',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Eye size={12} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteDpPayment(p.id)}
+                                    title="Hapus data pembayaran ini"
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.2)',
+                                      border: '1px solid #ef4444',
+                                      color: '#f87171',
+                                      borderRadius: '4px',
+                                      padding: '3px 7px',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                         {(activePaymentRow.dpPayments || []).length === 0 && (
                           <tr>
                             <td colSpan={5} style={{ textAlign: 'center', padding: '1.5rem', color: '#94a3b8' }}>
@@ -2632,70 +2892,203 @@ export const PiutangKonsumenModule = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(activePaymentRow.angsuranPayments || []).map((p, idx) => (
-                          <tr key={p.id || idx}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                            <td style={{ fontWeight: 700 }}>{p.tanggal}</td>
-                            <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
-                              {formatRupiah(p.jumlah)}
-                            </td>
-                            <td>{p.keterangan || '-'}</td>
-                            <td style={{ textAlign: 'center' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => handlePrintKwitansiDirect(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
-                                  title="Cetak Bukti Kwitansi Angsuran Ini"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #7e22ce, #6b21a8)',
-                                    border: '1px solid #c084fc',
-                                    color: '#ffffff',
-                                    fontWeight: 800,
-                                    fontSize: '0.72rem',
-                                    borderRadius: '4px',
-                                    padding: '3px 8px',
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '3px'
-                                  }}
-                                >
-                                  <Printer size={12} /> Kwitansi
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handlePrintReceipt(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
-                                  title="Preview Kwitansi Angsuran"
-                                  style={{
-                                    background: '#1e293b',
-                                    border: '1px solid #475569',
-                                    color: '#cbd5e1',
-                                    borderRadius: '4px',
-                                    padding: '3px 6px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <Eye size={12} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteAngsuranPayment(p.id)}
-                                  title="Hapus data pembayaran angsuran ini"
-                                  style={{
-                                    background: 'rgba(239, 68, 68, 0.2)',
-                                    border: '1px solid #ef4444',
-                                    color: '#f87171',
-                                    borderRadius: '4px',
-                                    padding: '3px 7px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {(activePaymentRow.angsuranPayments || []).map((p, idx) => {
+                          const isEditing = editingPayment && editingPayment.id === p.id;
+                          if (isEditing) {
+                            return (
+                              <tr key={p.id || idx} style={{ background: 'rgba(192, 132, 252, 0.12)', border: '1px solid #c084fc' }}>
+                                <td style={{ textAlign: 'center', fontWeight: 800, color: '#c084fc' }}>{idx + 1}</td>
+                                <td>
+                                  <input
+                                    type="date"
+                                    className="form-control"
+                                    value={editingPayment.tanggal}
+                                    onChange={(e) => setEditingPayment({ ...editingPayment, tanggal: e.target.value })}
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#ffffff',
+                                      border: '1px solid #c084fc',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={editingPayment.jumlah ? Number(editingPayment.jumlah).toLocaleString('en-US') : ''}
+                                    onChange={(e) => {
+                                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                                      setEditingPayment({ ...editingPayment, jumlah: raw });
+                                    }}
+                                    placeholder="Nominal Angsuran"
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#34d399',
+                                      fontWeight: 800,
+                                      textAlign: 'right',
+                                      border: '1px solid #c084fc',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={editingPayment.keterangan}
+                                    onChange={(e) => setEditingPayment({ ...editingPayment, keterangan: e.target.value })}
+                                    placeholder="Keterangan Angsuran"
+                                    style={{
+                                      fontSize: '0.78rem',
+                                      padding: '0.3rem 0.4rem',
+                                      background: '#0f172a',
+                                      color: '#ffffff',
+                                      border: '1px solid #c084fc',
+                                      borderRadius: '4px',
+                                      width: '100%'
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={handleSaveEditPayment}
+                                      title="Simpan Perubahan Angsuran"
+                                      style={{
+                                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                                        border: 'none',
+                                        color: '#ffffff',
+                                        fontWeight: 800,
+                                        fontSize: '0.72rem',
+                                        borderRadius: '4px',
+                                        padding: '4px 8px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px'
+                                      }}
+                                    >
+                                      <CheckCircle2 size={12} /> Simpan
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleCancelEditPayment}
+                                      title="Batal Edit"
+                                      style={{
+                                        background: '#334155',
+                                        border: '1px solid #64748b',
+                                        color: '#cbd5e1',
+                                        fontWeight: 700,
+                                        fontSize: '0.72rem',
+                                        borderRadius: '4px',
+                                        padding: '4px 7px',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px'
+                                      }}
+                                    >
+                                      <X size={12} /> Batal
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          }
+
+                          return (
+                            <tr key={p.id || idx}>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                              <td style={{ fontWeight: 700 }}>{p.tanggal}</td>
+                              <td style={{ textAlign: 'right', fontWeight: 900, color: '#34d399' }}>
+                                {formatRupiah(p.jumlah)}
+                              </td>
+                              <td>{p.keterangan || '-'}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEditPayment(p, 'angsuran')}
+                                    title="Edit riwayat pembayaran angsuran ini"
+                                    style={{
+                                      background: 'rgba(234, 179, 8, 0.15)',
+                                      border: '1px solid #eab308',
+                                      color: '#facc15',
+                                      borderRadius: '4px',
+                                      padding: '3px 7px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 800
+                                    }}
+                                  >
+                                    <Edit3 size={11} /> Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrintKwitansiDirect(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
+                                    title="Cetak Bukti Kwitansi Angsuran Ini"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #7e22ce, #6b21a8)',
+                                      border: '1px solid #c084fc',
+                                      color: '#ffffff',
+                                      fontWeight: 800,
+                                      fontSize: '0.72rem',
+                                      borderRadius: '4px',
+                                      padding: '3px 8px',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                  >
+                                    <Printer size={12} /> Kwitansi
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrintReceipt(p, `Angsuran Ke-${idx + 1}`, activePaymentRow)}
+                                    title="Preview Kwitansi Angsuran"
+                                    style={{
+                                      background: '#1e293b',
+                                      border: '1px solid #475569',
+                                      color: '#cbd5e1',
+                                      borderRadius: '4px',
+                                      padding: '3px 6px',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Eye size={12} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteAngsuranPayment(p.id)}
+                                    title="Hapus data pembayaran angsuran ini"
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.2)',
+                                      border: '1px solid #ef4444',
+                                      color: '#f87171',
+                                      borderRadius: '4px',
+                                      padding: '3px 7px',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                         {(activePaymentRow.angsuranPayments || []).length === 0 && (
                           <tr>
                             <td colSpan={5} style={{ textAlign: 'center', padding: '1.5rem', color: '#94a3b8' }}>
