@@ -248,6 +248,15 @@ export const LegalModule = () => {
   const [editingSpkId, setEditingSpkId] = useState(null);
   const [viewingSpk, setViewingSpk] = useState(null);
   const [currentFileSlide, setCurrentFileSlide] = useState(0);
+  const [spkPrintChoice, setSpkPrintChoice] = useState('surat'); // 'surat' | 'berkas' | 'all'
+  const spkModalRef = useRef(null);
+
+  useEffect(() => {
+    if (viewingSpk) {
+      if (spkModalRef.current) spkModalRef.current.scrollTop = 0;
+      setSpkPrintChoice('surat');
+    }
+  }, [viewingSpk]);
 
   // Form input SPK (MOU): Sederhana tanpa nilai kontrak, lingkup kerja, dan sistem pembayaran
   const [spkForm, setSpkForm] = useState({
@@ -547,6 +556,15 @@ export const LegalModule = () => {
   const [editingLegalitasId, setEditingLegalitasId] = useState(null);
   const [viewingLegalitas, setViewingLegalitas] = useState(null);
   const [currentLegalitasFileSlide, setCurrentLegalitasFileSlide] = useState(0);
+  const [legalitasPrintChoice, setLegalitasPrintChoice] = useState('surat'); // 'surat' | 'berkas' | 'all'
+  const legalitasModalRef = useRef(null);
+
+  useEffect(() => {
+    if (viewingLegalitas) {
+      if (legalitasModalRef.current) legalitasModalRef.current.scrollTop = 0;
+      setLegalitasPrintChoice('surat');
+    }
+  }, [viewingLegalitas]);
 
   const [legalitasForm, setLegalitasForm] = useState({
     noDok: 'xxx/xxx/xxx',
@@ -809,95 +827,252 @@ export const LegalModule = () => {
   };
 
   // =========================================================================
-  // 3. DATA STORE: PERIZINAN (PPKR, SITEPLAN, PBG) - KOSONG
+  // 3. DATA STORE: PERIZINAN (PPKR, SITEPLAN, PBG) - TABEL & FILTER LENGKAP
   // =========================================================================
+  const defaultPerizinanList = [
+    {
+      id: 'PRZ-01',
+      noDok: '050/PPKR/DPMPTSP/2025/11',
+      tanggalDok: '2025-11-10',
+      project: 'Ashoka Park',
+      nama: 'Dinas Tata Ruang & DPMPTSP',
+      kategori: 'PPKR',
+      judulDokumen: 'Persetujuan Kesesuaian Tata Ruang Kawasan 5.2 Ha',
+      catatan: 'Masa berlaku 3 tahun, siap lanjut Siteplan',
+      pic: 'Wahyu Salma Septiani, S.H',
+      files: [
+        { name: 'PPKR_Ashoka_Park_Kawasan.pdf', size: '2.4 MB', data: '', type: 'application/pdf' },
+        { name: 'Peta_Zonasi_Ruang_DPMPTSP.pdf', size: '3.1 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'PRZ-02',
+      noDok: '648/SK-SP/DPKPP/2026/01',
+      tanggalDok: '2026-01-14',
+      project: 'Ashoka Park',
+      nama: 'Dinas DPKPP Kab. Bogor',
+      kategori: 'Siteplan',
+      judulDokumen: 'Pengesahan Gambar Siteplan 120 Unit Perumahan',
+      catatan: 'Kavling komersil & fasos fasum disetujui',
+      pic: 'Wahyu Salma Septiani, S.H',
+      files: [
+        { name: 'Siteplan_Pengesahan_DPKPP.pdf', size: '4.8 MB', data: '', type: 'application/pdf' },
+        { name: 'Peta_Jalan_Drainase_Fasos.pdf', size: '2.9 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'PRZ-03',
+      noDok: 'PBG-320104-18022026-001',
+      tanggalDok: '2026-02-18',
+      project: 'Ashoka View',
+      nama: 'DPMPTSP & SIMBG PUPR',
+      kategori: 'PBG',
+      judulDokumen: 'Persetujuan Bangunan Gedung Induk & Cluster Ruby',
+      catatan: 'Retribusi lunas, pengawasan berkala tim TABG',
+      pic: 'Wahyu Salma Septiani, S.H',
+      files: [
+        { name: 'Sertifikat_PBG_Ashoka_View.pdf', size: '3.2 MB', data: '', type: 'application/pdf' },
+        { name: 'Rekomendasi_Teknis_TABG.pdf', size: '1.7 MB', data: '', type: 'application/pdf' }
+      ]
+    }
+  ];
+
   const [perizinanList, setPerizinanList] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_legal_perizinan_v4_clean');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('ams_legal_perizinan_v5_table');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {}
-    return []; // Clean empty baseline
+    return defaultPerizinanList;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_legal_perizinan_v4_clean', JSON.stringify(perizinanList));
+      localStorage.setItem('ams_legal_perizinan_v5_table', JSON.stringify(perizinanList));
     } catch (e) {}
   }, [perizinanList]);
 
+  const [searchPerizinan, setSearchPerizinan] = useState('');
+  const [filterPerizinanKategori, setFilterPerizinanKategori] = useState('ALL');
+  const [filterPerizinanProject, setFilterPerizinanProject] = useState('ALL');
   const [isPerizinanModalOpen, setIsPerizinanModalOpen] = useState(false);
+  const [editingPerizinanId, setEditingPerizinanId] = useState(null);
+  const [viewingPerizinan, setViewingPerizinan] = useState(null);
+  const [perizinanFileSlide, setPerizinanFileSlide] = useState(0);
+  const [perizinanPrintChoice, setPerizinanPrintChoice] = useState('surat'); // 'surat' | 'berkas' | 'all'
+  const perizinanModalRef = useRef(null);
+
+  useEffect(() => {
+    if (viewingPerizinan) {
+      if (perizinanModalRef.current) perizinanModalRef.current.scrollTop = 0;
+      setPerizinanPrintChoice('surat');
+    }
+  }, [viewingPerizinan]);
+
   const [perizinanForm, setPerizinanForm] = useState({
-    category: 'PPKR',
-    title: '',
-    noSk: '',
+    noDok: '',
+    tanggalDok: new Date().toISOString().split('T')[0],
     project: 'Ashoka Park',
-    agency: 'DPMPTSP & Dinas Tata Ruang',
-    issueDate: new Date().toISOString().split('T')[0],
-    validity: '3 Tahun',
-    progress: 100,
-    status: 'Terbit Resmi Disetujui',
-    details: '',
-    fileName: '',
-    fileSize: '',
-    fileData: ''
+    nama: '',
+    kategori: 'PPKR',
+    judulDokumen: '',
+    catatan: '',
+    files: []
   });
 
-  const handleOpenAddPerizinan = (defaultCat = 'PPKR') => {
+  const handleOpenAddPerizinan = (cat = 'PPKR') => {
+    setEditingPerizinanId(null);
+    const resolvedCat = ['PPKR', 'Siteplan', 'PBG'].includes(cat) ? cat : 'PPKR';
     setPerizinanForm({
-      category: defaultCat !== 'ALL' ? defaultCat : 'PPKR',
-      title: '',
-      noSk: '',
-      project: 'Ashoka Park',
-      agency: defaultCat === 'Siteplan' ? 'Dinas Perkim & PUPR' : defaultCat === 'PBG' ? 'DPMPTSP & SIMBG PUPR' : 'DPMPTSP & Dinas Tata Ruang',
-      issueDate: new Date().toISOString().split('T')[0],
-      validity: '3 Tahun',
-      progress: 100,
-      status: 'Terbit Resmi Disetujui',
-      details: '',
-      fileName: '',
-      fileSize: '',
-      fileData: ''
+      noDok: `PRZ/AMS/${new Date().getFullYear()}/${String(perizinanList.length + 1).padStart(3, '0')}`,
+      tanggalDok: new Date().toISOString().split('T')[0],
+      project: filterPerizinanProject !== 'ALL' ? filterPerizinanProject : 'Ashoka Park',
+      nama: resolvedCat === 'Siteplan' ? 'Dinas DPKPP Kab. Bogor' : resolvedCat === 'PBG' ? 'DPMPTSP & SIMBG PUPR' : 'Dinas Tata Ruang & DPMPTSP',
+      kategori: resolvedCat,
+      judulDokumen: '',
+      catatan: '',
+      files: []
     });
     setIsPerizinanModalOpen(true);
   };
 
-  const handlePerizinanFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleOpenEditPerizinan = (item) => {
+    setEditingPerizinanId(item.id);
+    setPerizinanForm({
+      noDok: item.noDok || '',
+      tanggalDok: item.tanggalDok || '',
+      project: item.project || 'Ashoka Park',
+      nama: item.nama || '',
+      kategori: item.kategori || 'PPKR',
+      judulDokumen: item.judulDokumen || '',
+      catatan: item.catatan || '',
+      files: item.files && item.files.length > 0
+        ? [...item.files]
+        : (item.fileName ? [{ name: item.fileName, size: item.fileSize, data: item.fileData, type: 'file' }] : [])
+    });
+    setIsPerizinanModalOpen(true);
+  };
+
+  const handlePerizinanMultiFilesChange = (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    let loadedCount = 0;
+    const newFileObjects = [];
+
+    selectedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
-        setPerizinanForm(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileSize: formatFileSize(file.size),
-          fileData: uploadEvent.target.result
-        }));
-        showNotification(`File perizinan "${file.name}" siap diunggah!`, 'info');
+        newFileObjects.push({
+          name: file.name,
+          size: formatFileSize(file.size),
+          data: uploadEvent.target.result,
+          type: file.type || 'file'
+        });
+        loadedCount++;
+        if (loadedCount === selectedFiles.length) {
+          setPerizinanForm(prev => ({
+            ...prev,
+            files: [...prev.files, ...newFileObjects]
+          }));
+          showNotification(`${selectedFiles.length} berkas berhasil ditambahkan!`, 'info');
+        }
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const handleRemovePerizinanFormFile = (indexToRemove) => {
+    setPerizinanForm(prev => ({
+      ...prev,
+      files: prev.files.filter((_, idx) => idx !== indexToRemove)
+    }));
   };
 
   const handleSavePerizinan = (e) => {
     e.preventDefault();
-    if (!perizinanForm.title || !perizinanForm.noSk) {
-      showNotification('Mohon lengkapi Judul Izin dan Nomor SK Perizinan!', 'warning');
+    if (!perizinanForm.judulDokumen || !perizinanForm.noDok) {
+      showNotification('Mohon lengkapi Judul Dokumen dan Nomor Dokumen Perizinan!', 'warning');
       return;
     }
-    const newPermit = {
-      id: `PRZ-${Date.now()}`,
-      ...perizinanForm,
-      progress: Number(perizinanForm.progress) || 100
-    };
-    setPerizinanList([newPermit, ...perizinanList]);
+
+    if (editingPerizinanId) {
+      setPerizinanList(prev => prev.map(p => {
+        if (p.id === editingPerizinanId) {
+          return {
+            ...p,
+            ...perizinanForm,
+            fileName: perizinanForm.files[0]?.name || '',
+            fileSize: perizinanForm.files[0]?.size || '',
+            fileData: perizinanForm.files[0]?.data || ''
+          };
+        }
+        return p;
+      }));
+      showNotification(`Dokumen Perizinan "${perizinanForm.judulDokumen}" berhasil diperbarui!`, 'success');
+    } else {
+      const newPermit = {
+        id: `PRZ-${Date.now()}`,
+        ...perizinanForm,
+        fileName: perizinanForm.files[0]?.name || '',
+        fileSize: perizinanForm.files[0]?.size || '',
+        fileData: perizinanForm.files[0]?.data || '',
+        pic: 'Wahyu Salma Septiani, S.H'
+      };
+      setPerizinanList([newPermit, ...perizinanList]);
+      showNotification(`Dokumen Perizinan "${newPermit.judulDokumen}" berhasil ditambahkan!`, 'success');
+    }
     setIsPerizinanModalOpen(false);
-    showNotification(`Izin "${newPermit.title}" berhasil diunggah & disimpan!`, 'success');
   };
 
   const handleDeletePerizinan = (id, title) => {
-    if (window.confirm(`Hapus berkas perizinan ${title}?`)) {
+    if (window.confirm(`Hapus berkas perizinan "${title || 'ini'}"?`)) {
       setPerizinanList(prev => prev.filter(p => p.id !== id));
-      showNotification(`Berkas perizinan ${title} berhasil dihapus.`, 'warning');
+      showNotification(`Berkas perizinan berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredPerizinanList = useMemo(() => {
+    return perizinanList.filter(p => {
+      const s = (searchPerizinan || '').toLowerCase();
+      const matchSearch = !s ||
+        (p.noDok || '').toLowerCase().includes(s) ||
+        (p.nama || '').toLowerCase().includes(s) ||
+        (p.judulDokumen || '').toLowerCase().includes(s) ||
+        (p.catatan || '').toLowerCase().includes(s) ||
+        (p.project || '').toLowerCase().includes(s) ||
+        (p.kategori || '').toLowerCase().includes(s);
+
+      const matchKategori = filterPerizinanKategori === 'ALL' || (p.kategori || '').toLowerCase() === filterPerizinanKategori.toLowerCase();
+      const matchProject = filterPerizinanProject === 'ALL' || (p.project || 'Ashoka Park') === filterPerizinanProject;
+
+      return matchSearch && matchKategori && matchProject;
+    });
+  }, [perizinanList, searchPerizinan, filterPerizinanKategori, filterPerizinanProject]);
+
+  const exportPerizinanToExcel = () => {
+    try {
+      const exportData = filteredPerizinanList.map((p, idx) => ({
+        'No.': idx + 1,
+        'No. Dok': p.noDok || '-',
+        'Tanggal Dokumen': formatDisplayDate(p.tanggalDok),
+        'Proyek': p.project || '-',
+        'Nama': p.nama || '-',
+        'Kategori': p.kategori || '-',
+        'Judul Dokumen': p.judulDokumen || '-',
+        'Catatan': p.catatan || '-',
+        'Jumlah Berkas': p.files ? p.files.length : (p.fileName ? 1 : 0)
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Perizinan Kawasan');
+      XLSX.writeFile(wb, `AMS_Perizinan_Kawasan_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data Perizinan berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
     }
   };
 
@@ -1820,152 +1995,371 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
-      {/* MODUL 3: PERIZINAN (SUB-MODUL: PPKR, SITEPLAN, PBG)                      */}
+      {/* MODUL 3: PERIZINAN (PPKR, SITEPLAN, PBG) - FORMAT TABEL LENGKAP           */}
       {/* ========================================================================= */}
       {activeTab === 'perizinan' && (
         <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem' }}>
-            <div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={20} color="#34d399" />
-                <span>Perizinan Kawasan (PPKR, Siteplan, PBG)</span>
-                <span style={{ fontSize: '0.72rem', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
-                  {perizinanList.length} Izin Terdaftar
-                </span>
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                Pelacakan & unggah izin resmi pemanfaatan ruang (PPKR), pengesahan Siteplan kawasan, dan Persetujuan Bangunan Gedung (PBG).
+          {/* Header Title & Badge Perizinan */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span
+                style={{
+                  background: '#ffedd5',
+                  border: '1.5px solid #f97316',
+                  color: '#ea580c',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  padding: '4px 14px',
+                  borderRadius: '8px',
+                  letterSpacing: '0.3px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                Perizinan
+              </span>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                Pelacakan & registrasi izin resmi pemanfaatan ruang (PPKR), pengesahan Siteplan kawasan, dan Persetujuan Bangunan Gedung (PBG).
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                {['ALL', 'PPKR', 'Siteplan', 'PBG'].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setPerizinanSubTab(item)}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      border: perizinanSubTab === item ? '1.5px solid #34d399' : '1px solid #334155',
-                      background: perizinanSubTab === item ? 'rgba(52, 211, 153, 0.2)' : '#0f172a',
-                      color: perizinanSubTab === item ? '#34d399' : '#94a3b8',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {item === 'ALL' ? 'Semua Perizinan' : item}
-                  </button>
-                ))}
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={exportPerizinanToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  color: '#34d399'
+                }}
+              >
+                <FileSpreadsheet size={14} />
+                <span>Unduh Excel</span>
+              </button>
 
               <button
-                onClick={() => handleOpenAddPerizinan(perizinanSubTab)}
+                onClick={() => handleOpenAddPerizinan(filterPerizinanKategori !== 'ALL' ? filterPerizinanKategori : 'PPKR')}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#059669', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
+                style={{
+                  background: '#059669',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)'
+                }}
               >
-                <UploadCloud size={14} />
-                <span>+ Upload Berkas Perizinan</span>
+                <Plus size={15} />
+                <span>+ Tambah Dokumen Perizinan</span>
               </button>
             </div>
           </div>
 
-          {/* Cards List Perizinan / Empty State */}
-          {perizinanList.filter(p => perizinanSubTab === 'ALL' || p.category.toLowerCase() === perizinanSubTab.toLowerCase()).length === 0 ? (
+          {/* Filter Pills Kategori Dokumen Perizinan */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+            {[
+              { id: 'ALL', label: 'Semua Perizinan' },
+              { id: 'PPKR', label: 'PPKR' },
+              { id: 'Siteplan', label: 'Siteplan' },
+              { id: 'PBG', label: 'PBG' }
+            ].map(cat => {
+              const isActive = filterPerizinanKategori === cat.id;
+              const count = cat.id === 'ALL'
+                ? perizinanList.length
+                : perizinanList.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilterPerizinanKategori(cat.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: isActive ? '1.5px solid #059669' : '1px solid #334155',
+                    background: isActive ? 'rgba(5, 150, 105, 0.15)' : '#0f172a',
+                    color: isActive ? '#34d399' : '#94a3b8',
+                    fontSize: '0.76rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: isActive ? '#059669' : '#1e293b',
+                      color: isActive ? '#ffffff' : '#94a3b8',
+                      fontWeight: 900
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1', minWidth: '240px', maxWidth: '380px' }}>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                <input
+                  type="text"
+                  placeholder="Cari nomor dokumen, instansi, judul izin..."
+                  value={searchPerizinan}
+                  onChange={(e) => setSearchPerizinan(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px 7px 32px',
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#f8fafc',
+                    fontSize: '0.78rem'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Dropdown Filter Kategori */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Filter size={13} color="#94a3b8" />
+                <select
+                  value={filterPerizinanKategori}
+                  onChange={(e) => setFilterPerizinanKategori(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+                >
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="PPKR">PPKR</option>
+                  <option value="Siteplan">Siteplan</option>
+                  <option value="PBG">PBG</option>
+                </select>
+              </div>
+
+              {/* Dropdown Filter Proyek */}
+              <select
+                value={filterPerizinanProject}
+                onChange={(e) => setFilterPerizinanProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tabel Utama Perizinan: No. | No. Dok | Tanggal Dokumen | Proyek | Nama | Kategori | Judul Dokumen | Berkas | Catatan | Aksi */}
+          {filteredPerizinanList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.1)', color: '#34d399', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <ShieldCheck size={28} />
               </div>
               <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Perizinan</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                Data perizinan masih kosong. Klik tombol di bawah untuk mengunggah dokumen PPKR, Siteplan, atau PBG Kawasan.
+                Daftar dokumen perizinan masih kosong. Klik tombol di bawah untuk menambah atau mengunggah dokumen baru.
               </div>
               <button
-                onClick={() => handleOpenAddPerizinan(perizinanSubTab)}
+                onClick={() => handleOpenAddPerizinan(filterPerizinanKategori !== 'ALL' ? filterPerizinanKategori : 'PPKR')}
                 className="btn btn-primary btn-sm"
                 style={{ background: '#059669', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
               >
-                <UploadCloud size={15} />
-                <span>+ Upload Berkas Perizinan Sekarang</span>
+                <Plus size={15} />
+                <span>+ Tambah Dokumen Perizinan Sekarang</span>
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {perizinanList
-                .filter(p => perizinanSubTab === 'ALL' || p.category.toLowerCase() === perizinanSubTab.toLowerCase())
-                .map(p => (
-                  <div key={p.id} style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '12px', padding: '1.2rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', fontWeight: 900 }}>
-                            {p.category}
-                          </span>
-                          <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: p.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: p.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24', fontWeight: 800 }}>
-                            {p.project}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', marginTop: '6px' }}>
-                          {p.title}
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, marginTop: '2px' }}>
-                          {p.noSk}
-                        </div>
-                      </div>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', textAlign: 'left', fontWeight: 900, whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '10px 14px', width: '50px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>No.</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>No. Dok</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Proyek</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Nama</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Kategori</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Judul Dokumen</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Berkas</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Catatan</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPerizinanList.map((doc, idx) => (
+                    <tr
+                      key={doc.id}
+                      style={{
+                        background: idx % 2 === 0 ? '#0b1120' : '#090d16',
+                        borderBottom: '1px solid #1e293b',
+                        whiteSpace: 'nowrap',
+                        verticalAlign: 'middle'
+                      }}
+                    >
+                      {/* 1. No */}
+                      <td style={{ padding: '10px 14px', color: '#94a3b8', fontWeight: 700, whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {idx + 1}
+                      </td>
 
-                      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontSize: '0.72rem', padding: '3px 10px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontWeight: 800 }}>
-                            {p.status}
-                          </span>
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 14px', fontWeight: 800, color: '#f8fafc', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {doc.noDok || '-'}
+                      </td>
+
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 14px', color: '#cbd5e1', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDisplayDate(doc.tanggalDok)}
+                      </td>
+
+                      {/* 4. Proyek */}
+                      <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontWeight: 800,
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background: doc.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            color: doc.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {doc.project || 'Ashoka Park'}
+                        </span>
+                      </td>
+
+                      {/* 5. Nama (Instansi / Pejabat / Pemohon) - Lurus tanpa teks turun */}
+                      <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {doc.nama || '-'}
+                        </span>
+                      </td>
+
+                      {/* 6. Kategori */}
+                      <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background:
+                              doc.kategori === 'PPKR' ? 'rgba(56, 189, 248, 0.15)' :
+                              doc.kategori === 'Siteplan' ? 'rgba(52, 211, 153, 0.15)' :
+                              'rgba(245, 158, 11, 0.15)',
+                            color:
+                              doc.kategori === 'PPKR' ? '#38bdf8' :
+                              doc.kategori === 'Siteplan' ? '#34d399' :
+                              '#fbbf24',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {doc.kategori || 'PPKR'}
+                        </span>
+                      </td>
+
+                      {/* 7. Judul Dokumen */}
+                      <td style={{ padding: '10px 14px', fontWeight: 800, color: '#f8fafc', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {doc.judulDokumen || '-'}
+                      </td>
+
+                      {/* 8. Berkas - Tombol "View" Saja Bersih */}
+                      <td style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setViewingPerizinan(doc);
+                            setPerizinanFileSlide(0);
+                            setPerizinanPrintChoice('surat');
+                          }}
+                          style={{
+                            background: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontWeight: 800,
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)',
+                            transition: 'transform 0.1s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title="Lihat Pratinjau Dokumen & Berkas"
+                        >
+                          <Eye size={13} />
+                          <span>View</span>
+                        </button>
+                      </td>
+
+                      {/* 9. Catatan */}
+                      <td style={{ padding: '10px 14px', color: '#cbd5e1', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {doc.catatan || '-'}
+                      </td>
+
+                      {/* 10. Aksi (Ubah & Hapus) */}
+                      <td style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
                           <button
-                            onClick={() => handleDeletePerizinan(p.id, p.title)}
-                            title="Hapus Izin"
-                            style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                            type="button"
+                            onClick={() => handleOpenEditPerizinan(doc)}
+                            style={{
+                              background: '#1e293b',
+                              border: '1px solid #334155',
+                              color: '#fbbf24',
+                              padding: '5px 7px',
+                              borderRadius: '5px',
+                              cursor: 'pointer',
+                              fontSize: '0.72rem'
+                            }}
+                            title="Edit Dokumen Perizinan"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePerizinan(doc.id, doc.judulDokumen)}
+                            style={{
+                              background: '#1e293b',
+                              border: '1px solid #334155',
+                              color: '#ef4444',
+                              padding: '5px 7px',
+                              borderRadius: '5px',
+                              cursor: 'pointer',
+                              fontSize: '0.72rem'
+                            }}
+                            title="Hapus Dokumen Perizinan"
                           >
                             <Trash2 size={13} />
                           </button>
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                          Instansi: <strong style={{ color: '#fff' }}>{p.agency}</strong>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar Perizinan */}
-                    <div style={{ marginTop: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8', marginBottom: '4px' }}>
-                        <span>Progress Validasi Dinas Teknis:</span>
-                        <strong style={{ color: '#34d399' }}>{p.progress}% Selesai</strong>
-                      </div>
-                      <div style={{ height: '6px', background: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${p.progress}%`, height: '100%', background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)' }} />
-                      </div>
-                    </div>
-
-                    {p.details && (
-                      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #1e293b', fontSize: '0.74rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-                        {p.details}
-                      </div>
-                    )}
-
-                    <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }}>
-                      {p.fileName ? (
-                        <button
-                          onClick={() => handleViewFile(p.fileData, p.fileName)}
-                          style={{ background: 'rgba(52, 211, 153, 0.15)', border: '1px solid #34d399', color: '#34d399', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                        >
-                          <Eye size={12} />
-                          <span>Lihat Berkas Izin ({p.fileSize})</span>
-                        </button>
-                      ) : (
-                        <span style={{ color: '#64748b' }}>Tanggal Terbit: {p.issueDate}</span>
-                      )}
-                      <span style={{ color: '#94a3b8' }}>Masa Berlaku: {p.validity}</span>
-                    </div>
-                  </div>
-                ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -2743,20 +3137,21 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 4: UPLOAD BERKAS PERIZINAN (PPKR, SITEPLAN, PBG)                     */}
+      {/* MODAL 4: TAMBAH / EDIT DOKUMEN PERIZINAN (PPKR, SITEPLAN, PBG)            */}
       {/* ========================================================================= */}
       {isPerizinanModalOpen && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
+            background: 'rgba(0, 0, 0, 0.88)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             zIndex: 99999,
-            padding: '1rem'
+            padding: '2rem 1rem',
+            overflowY: 'auto'
           }}
         >
           <div
@@ -2765,139 +3160,230 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               border: '1.5px solid #059669',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '560px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
+              maxWidth: '620px',
               padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+              margin: 'auto 0'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>➕ Upload Berkas Perizinan (PPKR / Siteplan / PBG)</div>
-              <button onClick={() => setIsPerizinanModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-            </div>
-
-            <form onSubmit={handleSavePerizinan} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Perizinan *</label>
-                  <select
-                    value={perizinanForm.category}
-                    onChange={(e) => setPerizinanForm({ ...perizinanForm, category: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="PPKR">PPKR (Kesesuaian Ruang)</option>
-                    <option value="Siteplan">Siteplan (Pengesahan Kawasan)</option>
-                    <option value="PBG">PBG (Persetujuan Bangunan Gedung)</option>
-                  </select>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#34d399', padding: '6px', borderRadius: '8px' }}>
+                  <ShieldCheck size={20} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek Kawasan *</label>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>
+                    {editingPerizinanId ? 'Edit Dokumen Perizinan' : 'Tambah Dokumen Perizinan Baru'}
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    PPKR, Pengesahan Siteplan, dan Persetujuan Bangunan Gedung (PBG)
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setIsPerizinanModalOpen(false); setEditingPerizinanId(null); }}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePerizinan} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Row 1: No Dok & Tanggal */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                    Nomor Dokumen *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 050/PPKR/DPMPTSP/2025/11"
+                    value={perizinanForm.noDok}
+                    onChange={(e) => setPerizinanForm({ ...perizinanForm, noDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                    Tanggal Dokumen *
+                  </label>
+                  <input
+                    type="date"
+                    value={perizinanForm.tanggalDok}
+                    onChange={(e) => setPerizinanForm({ ...perizinanForm, tanggalDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Proyek & Kategori */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                    Proyek Kawasan *
+                  </label>
                   <select
                     value={perizinanForm.project}
                     onChange={(e) => setPerizinanForm({ ...perizinanForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
                   >
                     <option value="Ashoka Park">Ashoka Park</option>
                     <option value="Ashoka View">Ashoka View</option>
                   </select>
                 </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                    Kategori Perizinan *
+                  </label>
+                  <select
+                    value={perizinanForm.kategori}
+                    onChange={(e) => {
+                      const newCat = e.target.value;
+                      let defaultNama = perizinanForm.nama;
+                      if (!defaultNama || defaultNama.includes('Dinas') || defaultNama.includes('DPMPTSP')) {
+                        defaultNama = newCat === 'Siteplan' ? 'Dinas DPKPP Kab. Bogor' : newCat === 'PBG' ? 'DPMPTSP & SIMBG PUPR' : 'Dinas Tata Ruang & DPMPTSP';
+                      }
+                      setPerizinanForm({ ...perizinanForm, kategori: newCat, nama: defaultNama });
+                    }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  >
+                    <option value="PPKR">PPKR (Kesesuaian Tata Ruang)</option>
+                    <option value="Siteplan">Siteplan (Pengesahan Kawasan)</option>
+                    <option value="PBG">PBG (Persetujuan Bangunan Gedung)</option>
+                  </select>
+                </div>
               </div>
 
+              {/* Row 3: Nama (Instansi / Pejabat / Pemohon) */}
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Dokumen / Izin *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                  Nama (Instansi Penerbit / Rekanan / Pemohon) *
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Persetujuan Kesesuaian Kegiatan Pemanfaatan Ruang (PPKR)"
-                  value={perizinanForm.title}
-                  onChange={(e) => setPerizinanForm({ ...perizinanForm, title: e.target.value })}
+                  list="perizinan-instansi-suggestions"
+                  placeholder="e.g. Dinas Tata Ruang & DPMPTSP / Dinas DPKPP Kab. Bogor"
+                  value={perizinanForm.nama}
+                  onChange={(e) => setPerizinanForm({ ...perizinanForm, nama: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
                 />
+                <datalist id="perizinan-instansi-suggestions">
+                  <option value="Dinas Tata Ruang & DPMPTSP" />
+                  <option value="Dinas DPKPP Kab. Bogor" />
+                  <option value="DPMPTSP & SIMBG PUPR" />
+                  <option value="Kantor Pertanahan ATR/BPN" />
+                  <option value="Dinas Lingkungan Hidup (DLH)" />
+                  <option value="Tim TABG Dinas Bangunan Gedung" />
+                </datalist>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor SK / Izin Resmi *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. SK No. 503/KKPR/2024 / PBG No..."
-                    value={perizinanForm.noSk}
-                    onChange={(e) => setPerizinanForm({ ...perizinanForm, noSk: e.target.value })}
-                    required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Instansi Penerbit</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. DPMPTSP / Dinas PUPR"
-                    value={perizinanForm.agency}
-                    onChange={(e) => setPerizinanForm({ ...perizinanForm, agency: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Terbit</label>
-                  <input
-                    type="date"
-                    value={perizinanForm.issueDate}
-                    onChange={(e) => setPerizinanForm({ ...perizinanForm, issueDate: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Progres Validasi (%)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={perizinanForm.progress}
-                    onChange={(e) => setPerizinanForm({ ...perizinanForm, progress: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
-
+              {/* Row 4: Judul Dokumen */}
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Detail & Catatan Teknis Izin</label>
-                <textarea
-                  rows="2"
-                  placeholder="Keterangan KDB/KLB, alokasi PSU, zonasi, atau rekomendasi dinas..."
-                  value={perizinanForm.details}
-                  onChange={(e) => setPerizinanForm({ ...perizinanForm, details: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                  Judul Dokumen Perizinan *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Persetujuan Kesesuaian Tata Ruang Kawasan 5.2 Ha / Pengesahan Gambar Siteplan"
+                  value={perizinanForm.judulDokumen}
+                  onChange={(e) => setPerizinanForm({ ...perizinanForm, judulDokumen: e.target.value })}
+                  required
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              {/* Upload File Attachment */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
+              {/* Row 5: Catatan */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
+                  Catatan / Keterangan
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Masa berlaku 3 tahun, siap lanjut permohonan siteplan"
+                  value={perizinanForm.catatan}
+                  onChange={(e) => setPerizinanForm({ ...perizinanForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                />
+              </div>
+
+              {/* Row 6: Upload Multi-Berkas (Dukungan Geser Kiri / Kanan) */}
+              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '10px', padding: '14px' }}>
                 <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                  <UploadCloud size={14} />
-                  <span>Upload Berkas SK Izin / Gambar Siteplan (PDF / Scan / DWG)</span>
+                  <UploadCloud size={16} />
+                  <span>Upload Berkas Dokumen (Bisa pilih 2 berkas atau lebih)</span>
                 </label>
                 <input
                   type="file"
+                  multiple
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg"
-                  onChange={handlePerizinanFileChange}
-                  style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                  onChange={handlePerizinanMultiFilesChange}
+                  style={{ fontSize: '0.78rem', color: '#cbd5e1' }}
                 />
-                {perizinanForm.fileName && (
-                  <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={12} />
-                    <span>File siap: {perizinanForm.fileName} ({perizinanForm.fileSize})</span>
+
+                {perizinanForm.files && perizinanForm.files.length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Daftar Berkas Terpilih ({perizinanForm.files.length} Berkas):
+                    </div>
+                    {perizinanForm.files.map((fileObj, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: '#090d16',
+                          border: '1px solid #1e293b',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          fontSize: '0.74rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CheckCircle2 size={13} color="#34d399" />
+                          <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{fileObj.name}</span>
+                          <span style={{ color: '#64748b' }}>({fileObj.size})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePerizinanFormFile(idx)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ef4444',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                          }}
+                          title="Hapus file ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
+              {/* Action Buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsPerizinanModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#059669' }}>
-                  Simpan & Unggah Izin
+                <button
+                  type="button"
+                  onClick={() => { setIsPerizinanModalOpen(false); setEditingPerizinanId(null); }}
+                  className="btn btn-secondary btn-sm"
+                  style={{ background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  style={{ background: '#059669', color: '#ffffff', fontWeight: 800, padding: '7px 18px', borderRadius: '6px' }}
+                >
+                  {editingPerizinanId ? 'Perbarui Dokumen Perizinan' : 'Simpan Dokumen Perizinan'}
                 </button>
               </div>
             </form>
@@ -3070,10 +3556,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             background: 'rgba(0, 0, 0, 0.88)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             zIndex: 99999,
-            padding: '1rem'
+            padding: '2rem 1rem',
+            overflowY: 'auto'
           }}
         >
           {/* Print CSS styling scoped for SPK (MOU) */}
@@ -3082,20 +3569,22 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               @media print {
                 @page {
                   size: A4 portrait;
-                  margin: 12mm 15mm 12mm 15mm;
+                  margin: 10mm 12mm 10mm 12mm;
                 }
-                body {
+                html, body {
                   background: #ffffff !important;
                   color: #000000 !important;
+                  height: auto !important;
+                  overflow: visible !important;
                 }
                 body * {
                   visibility: hidden !important;
                 }
-                #spk-print-area, #spk-print-area * {
+                .spk-printable-container, .spk-printable-container * {
                   visibility: visible !important;
                 }
-                #spk-print-area {
-                  position: fixed !important;
+                .spk-printable-container {
+                  position: absolute !important;
                   left: 0 !important;
                   top: 0 !important;
                   width: 100% !important;
@@ -3114,17 +3603,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           </style>
 
           <div
+            ref={spkModalRef}
             style={{
               background: '#090d16',
               border: '1.5px solid #fb923c',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '820px',
-              maxHeight: '92vh',
+              maxWidth: '840px',
+              maxHeight: '90vh',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+              margin: 'auto 0'
             }}
           >
             {/* Top Header Controls (Hidden on Print) */}
@@ -3139,7 +3630,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 background: '#0f172a',
                 position: 'sticky',
                 top: 0,
-                zIndex: 10
+                zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '10px'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -3162,7 +3655,63 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize, data: viewingSpk.fileData, type: 'file' }] : []);
 
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Selector Pilihan Cetak (Surat Saja / Berkas Doang / Keduanya) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#090d16', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>Pilihan Cetak:</span>
+                      <button
+                        type="button"
+                        onClick={() => setSpkPrintChoice('surat')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: spkPrintChoice === 'surat' ? '#ea580c' : 'transparent',
+                          color: spkPrintChoice === 'surat' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📄 Surat Saja
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSpkPrintChoice('berkas')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: spkPrintChoice === 'berkas' ? '#ea580c' : 'transparent',
+                          color: spkPrintChoice === 'berkas' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📎 Berkas Doang
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSpkPrintChoice('all')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: spkPrintChoice === 'all' ? '#ea580c' : 'transparent',
+                          color: spkPrintChoice === 'all' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📑 Keduanya
+                      </button>
+                    </div>
+
                     {activeFiles.length > 0 && (
                       <button
                         type="button"
@@ -3208,7 +3757,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       }}
                     >
                       <Printer size={15} />
-                      <span>🖨️ Cetak / Print Dokumen</span>
+                      <span>🖨️ Cetak {spkPrintChoice === 'surat' ? 'Surat' : spkPrintChoice === 'berkas' ? 'Berkas' : 'Semua'}</span>
                     </button>
 
                     <button
@@ -3403,135 +3952,882 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               );
             })()}
 
-            {/* Dokumen Lembar Resmi Cetak / Print Area */}
+            {/* WRAPPER PRINT AREA SPK (BISA SURAT SAJA / BERKAS DOANG / KEDUANYA) */}
+            <div className="spk-printable-container">
+              {/* 1. DOKUMEN LEMBAR RESMI CETAK (SURAT) */}
+              {spkPrintChoice !== 'berkas' && (
+                <div
+                  id="spk-print-area"
+                  className="printable-spk-document"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                  }}
+                >
+                  {/* KOP SURAT RESMI */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
+                        PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
+                      </div>
+                      <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                        Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                        LEGAL & PERIZINAN
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Dokumen Terverifikasi AMS
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* JUDUL DOKUMEN & NOMOR */}
+                  <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
+                      SURAT PERINTAH KERJA (SPK) / MEMORANDUM OF UNDERSTANDING (MOU)
+                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginTop: '4px' }}>
+                      Nomor Dokumen: {viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                      Tanggal Dokumen: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}
+                    </div>
+                  </div>
+
+                  {/* KONTEN RINCIAN DOKUMEN LENGKAP */}
+                  <div style={{ fontSize: '0.82rem', lineHeight: '1.65', color: '#0f172a' }}>
+                    <p style={{ textAlign: 'justify', marginBottom: '10px' }}>
+                      Pada hari ini, <strong>{formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</strong>, telah dibuat dan disepakati dokumen resmi antara pihak-pihak sebagai berikut:
+                    </p>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px', fontSize: '0.82rem' }}>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, width: '180px', color: '#334155' }}>Pihak I (Pemberi Tugas)</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}</strong> (Manajemen AMS Properti)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Pihak II (Penerima Tugas)</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.nama || viewingSpk.vendorName}</strong> ({viewingSpk.kategori || 'Vendor'})</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
+                          <td style={{ padding: '6px 8px' }}>: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Proyek Kawasan</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingSpk.project || 'Ashoka Park'}</span></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Dokumen</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Vendor'}</span></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Judul Dokumen</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.judulDokumen || viewingSpk.scope}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700, color: viewingSpk.catatan?.toLowerCase().includes('batal') ? '#b91c1c' : '#1e293b' }}>{viewingSpk.catatan || '-'}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik Terlampir</td>
+                          <td style={{ padding: '6px 8px' }}>
+                            {(() => {
+                              const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
+                                ? viewingSpk.files
+                                : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize }] : []);
+                              if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Arsip Legal';
+                              return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
+                            })()}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    {/* KLAUSUL PASAL BAKU */}
+                    <div style={{ marginTop: '10px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify' }}>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 1 (Kewajiban Pelaksanaan):</strong> Pihak II sepakat untuk mematuhi dan melaksanakan seluruh lingkup pekerjaan atau kesepakatan sesuai dengan standar mutu, spesifikasi teknis, dan waktu yang telah disepakati bersama.</p>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 2 (Hak Pembayaran & Legalitas):</strong> Pihak I berhak memeriksa hasil kerja fisik/dokumen sebelum melakukan pembayaran termin atau proses pengikatan notaris sesuai jadwal kesepakatan.</p>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 3 (Ketentuan Sanksi & Masa Berlaku):</strong> Apabila terjadi pembatalan atau kelalaian kewajiban tanpa persetujuan tertulis dari kedua belah pihak, maka segala catatan dan ketentuan sanksi sebagaimana tertera pada Catatan Dokumen ini berlaku mengikat secara hukum.</p>
+                    </div>
+
+                    {/* KOLOM TANDA TANGAN */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
+                      <div style={{ width: '220px' }}>
+                        <div>PIHAK PERTAMA,</div>
+                        <div style={{ fontWeight: 700 }}>{viewingSpk.project === 'Ashoka Park' ? 'PT. Yazfi Setia Persada' : 'PT. Yazfi Gema Persada'}</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.pic || 'Wahyu Salma Septiani, S.H'}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                      </div>
+
+                      <div style={{ width: '220px' }}>
+                        <div>PIHAK KEDUA,</div>
+                        <div style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Penerima Tugas'} / Rekanan</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.nama || viewingSpk.vendorName}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Penanggung Jawab / Pimpinan</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. LEMBAR CETAK BERKAS LAMPIRAN SPK (MUNCUL JIKA PILIH BERKAS DOANG ATAU KEDUANYA) */}
+              {spkPrintChoice !== 'surat' && (
+                <div
+                  id="spk-berkas-print-area"
+                  className="printable-spk-berkas"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    pageBreakBefore: spkPrintChoice === 'all' ? 'always' : 'auto'
+                  }}
+                >
+                  {/* Header Lampiran Berkas SPK */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                        {viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                        LAMPIRAN BERKAS DOKUMEN RESMI SPK (MOU)
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        No. Dok: <strong>{viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}</strong> &bull; {viewingSpk.judulDokumen || viewingSpk.scope}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ border: '1.5px solid #000', padding: '4px 10px', fontSize: '0.74rem', fontWeight: 900 }}>
+                        LAMPIRAN BERKAS
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Halaman Lampiran Terverifikasi
+                      </div>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
+                      ? viewingSpk.files
+                      : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize, data: viewingSpk.fileData, type: 'file' }] : []);
+                    const currentFile = activeFiles[currentFileSlide] || activeFiles[0];
+
+                    return (
+                      <div>
+                        <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.8rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '6px' }}>
+                            <strong style={{ color: '#334155' }}>Nama Berkas:</strong>
+                            <span>{currentFile?.name || 'Dokumen Fisik Terarsip'}</span>
+                            <strong style={{ color: '#334155' }}>Ukuran File:</strong>
+                            <span>{currentFile?.size || 'Digital'}</span>
+                            <strong style={{ color: '#334155' }}>Rekanan Terkait:</strong>
+                            <span>{viewingSpk.nama || viewingSpk.vendorName} ({viewingSpk.kategori || 'Vendor'})</span>
+                          </div>
+                        </div>
+
+                        {/* Tampilan Konten Gambar / Visual Berkas */}
+                        {currentFile?.data && currentFile.data.startsWith('data:image') ? (
+                          <div style={{ textAlign: 'center', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                            <img
+                              src={currentFile.data}
+                              alt={currentFile.name}
+                              style={{ maxWidth: '100%', maxHeight: '750px', objectFit: 'contain' }}
+                            />
+                          </div>
+                        ) : (
+                          <div style={{ border: '2px dashed #94a3b8', borderRadius: '10px', padding: '3rem 1.5rem', textAlign: 'center', background: '#f8fafc' }}>
+                            <FileText size={54} color="#ea580c" style={{ margin: '0 auto 12px auto' }} />
+                            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
+                              {currentFile?.name || 'Berkas Dokumen SPK'}
+                            </div>
+                            <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '6px' }}>
+                              Berkas format digital terverifikasi dalam sistem arsip legalitas perusahaan.
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '12px' }}>
+                              Divalidasi untuk lampiran berkas kerja sama proyek {viewingSpk.project || 'Ashoka Park'}.
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pengesahan Lampiran */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '12px', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+                          <div style={{ color: '#64748b' }}>
+                            Dicetak dari AMS Modern: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div>Divalidasi oleh:</div>
+                            <div style={{ fontWeight: 900, textDecoration: 'underline', marginTop: '30px' }}>{viewingSpk.pic || 'Wahyu Salma Septiani, S.H'}</div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Legal & Perizinan</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PRATINJAU DOKUMEN & CETAK RESMI PERIZINAN KAWASAN                   */}
+      {/* ========================================================================= */}
+      {viewingPerizinan && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '2rem 1rem',
+            overflowY: 'auto'
+          }}
+        >
+          {/* Print CSS styling scoped for Perizinan */}
+          <style>
+            {`
+              @media print {
+                @page {
+                  size: A4 portrait;
+                  margin: 10mm 12mm 10mm 12mm;
+                }
+                html, body {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                }
+                body * {
+                  visibility: hidden !important;
+                }
+                .perizinan-printable-container, .perizinan-printable-container * {
+                  visibility: visible !important;
+                }
+                .perizinan-printable-container {
+                  position: absolute !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}
+          </style>
+
+          <div
+            ref={perizinanModalRef}
+            style={{
+              background: '#090d16',
+              border: '1.5px solid #059669',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '840px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+              margin: 'auto 0'
+            }}
+          >
+            {/* Top Header Controls (Hidden on Print) */}
             <div
-              id="spk-print-area"
-              className="printable-spk-document"
+              className="no-print"
               style={{
-                background: '#ffffff',
-                color: '#000000',
-                padding: '2.5rem',
-                margin: '1.2rem',
-                borderRadius: '10px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.4rem',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '10px'
               }}
             >
-              {/* KOP SURAT RESMI */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#34d399', padding: '7px', borderRadius: '8px' }}>
+                  <ShieldCheck size={20} />
+                </div>
                 <div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
+                    Pratinjau Dokumen Perizinan ({viewingPerizinan.kategori})
                   </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
-                    PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
-                  </div>
-                  <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
-                    Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
-                    LEGAL & PERIZINAN
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
-                    Dokumen Terverifikasi AMS
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    No. Dok: <strong style={{ color: '#34d399' }}>{viewingPerizinan.noDok || 'xxx/xxx/xxx'}</strong> &bull; Proyek: <strong style={{ color: '#ffffff' }}>{viewingPerizinan.project || '-'}</strong>
                   </div>
                 </div>
               </div>
 
-              {/* JUDUL DOKUMEN & NOMOR */}
-              <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-                <div style={{ fontSize: '1.15rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
-                  SURAT PERINTAH KERJA (SPK) / MEMORANDUM OF UNDERSTANDING (MOU)
-                </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginTop: '4px' }}>
-                  Nomor Dokumen: {viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-                  Tanggal Dokumen: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}
-                </div>
-              </div>
+              {(() => {
+                const activeFiles = (viewingPerizinan.files && viewingPerizinan.files.length > 0)
+                  ? viewingPerizinan.files
+                  : (viewingPerizinan.fileName ? [{ name: viewingPerizinan.fileName, size: viewingPerizinan.fileSize, data: viewingPerizinan.fileData, type: 'file' }] : []);
 
-              {/* KONTEN RINCIAN DOKUMEN LENGKAP */}
-              <div style={{ fontSize: '0.82rem', lineHeight: '1.65', color: '#0f172a' }}>
-                <p style={{ textAlign: 'justify', marginBottom: '10px' }}>
-                  Pada hari ini, <strong>{formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</strong>, telah dibuat dan disepakati dokumen resmi antara pihak-pihak sebagai berikut:
-                </p>
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Selector Pilihan Cetak */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#090d16', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>Pilihan Cetak:</span>
+                      <button
+                        type="button"
+                        onClick={() => setPerizinanPrintChoice('surat')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: perizinanPrintChoice === 'surat' ? '#059669' : 'transparent',
+                          color: perizinanPrintChoice === 'surat' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📄 Surat Saja
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPerizinanPrintChoice('berkas')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: perizinanPrintChoice === 'berkas' ? '#059669' : 'transparent',
+                          color: perizinanPrintChoice === 'berkas' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📎 Berkas Doang
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPerizinanPrintChoice('all')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: perizinanPrintChoice === 'all' ? '#059669' : 'transparent',
+                          color: perizinanPrintChoice === 'all' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📑 Keduanya
+                      </button>
+                    </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px', fontSize: '0.82rem' }}>
-                  <tbody>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, width: '180px', color: '#334155' }}>Pihak I (Pemberi Tugas)</td>
-                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}</strong> (Manajemen AMS Properti)</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Pihak II (Penerima Tugas)</td>
-                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.nama || viewingSpk.vendorName}</strong> ({viewingSpk.kategori || 'Vendor'})</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
-                      <td style={{ padding: '6px 8px' }}>: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Proyek Kawasan</td>
-                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingSpk.project || 'Ashoka Park'}</span></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Dokumen</td>
-                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Vendor'}</span></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Judul Dokumen</td>
-                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.judulDokumen || viewingSpk.scope}</strong></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
-                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700, color: viewingSpk.catatan?.toLowerCase().includes('batal') ? '#b91c1c' : '#1e293b' }}>{viewingSpk.catatan || '-'}</span></td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik Terlampir</td>
-                      <td style={{ padding: '6px 8px' }}>
-                        {(() => {
-                          const activeFiles = (viewingSpk.files && viewingSpk.files.length > 0)
-                            ? viewingSpk.files
-                            : (viewingSpk.fileName ? [{ name: viewingSpk.fileName, size: viewingSpk.fileSize }] : []);
-                          if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Arsip Legal';
-                          return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
-                        })()}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                    {activeFiles.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadFile(activeFiles[perizinanFileSlide]?.data, activeFiles[perizinanFileSlide]?.name)}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.76rem',
+                          fontWeight: 800,
+                          background: '#059669',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '7px 13px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.35)'
+                        }}
+                        title={`Unduh ${activeFiles[perizinanFileSlide]?.name || 'Berkas'}`}
+                      >
+                        <Download size={14} />
+                        <span>Unduh Berkas</span>
+                      </button>
+                    )}
 
-                {/* KLAUSUL PASAL BAKU */}
-                <div style={{ marginTop: '10px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify' }}>
-                  <p style={{ marginBottom: '6px' }}><strong>Pasal 1 (Kewajiban Pelaksanaan):</strong> Pihak II sepakat untuk mematuhi dan melaksanakan seluruh lingkup pekerjaan atau kesepakatan sesuai dengan standar mutu, spesifikasi teknis, dan waktu yang telah disepakati bersama.</p>
-                  <p style={{ marginBottom: '6px' }}><strong>Pasal 2 (Hak Pembayaran & Legalitas):</strong> Pihak I berhak memeriksa hasil kerja fisik/dokumen sebelum melakukan pembayaran termin atau proses pengikatan notaris sesuai jadwal kesepakatan.</p>
-                  <p style={{ marginBottom: '6px' }}><strong>Pasal 3 (Ketentuan Sanksi & Masa Berlaku):</strong> Apabila terjadi pembatalan atau kelalaian kewajiban tanpa persetujuan tertulis dari kedua belah pihak, maka segala catatan dan ketentuan sanksi sebagaimana tertera pada Catatan Dokumen ini berlaku mengikat secara hukum.</p>
-                </div>
+                    <button
+                      onClick={() => window.print()}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        background: '#059669',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)'
+                      }}
+                    >
+                      <Printer size={15} />
+                      <span>🖨️ Cetak {perizinanPrintChoice === 'surat' ? 'Surat' : perizinanPrintChoice === 'berkas' ? 'Berkas' : 'Semua'}</span>
+                    </button>
 
-                {/* KOLOM TANDA TANGAN */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
-                  <div style={{ width: '220px' }}>
-                    <div>PIHAK PERTAMA,</div>
-                    <div style={{ fontWeight: 700 }}>{viewingSpk.project === 'Ashoka Park' ? 'PT. Yazfi Setia Persada' : 'PT. Yazfi Gema Persada'}</div>
-                    <div style={{ height: '60px' }} />
-                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.pic || 'Wahyu Salma Septiani, S.H'}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                    <button
+                      onClick={() => setViewingPerizinan(null)}
+                      style={{
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#cbd5e1',
+                        borderRadius: '8px',
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* AREA CAROUSEL / SLIDER BERKAS (BISA DIGESER KIRI & KANAN) */}
+            {(() => {
+              const activeFiles = (viewingPerizinan.files && viewingPerizinan.files.length > 0)
+                ? viewingPerizinan.files
+                : (viewingPerizinan.fileName ? [{ name: viewingPerizinan.fileName, size: viewingPerizinan.fileSize, data: viewingPerizinan.fileData, type: 'file' }] : []);
+
+              if (activeFiles.length === 0) return null;
+
+              return (
+                <div className="no-print" style={{ margin: '1.2rem 1.2rem 0 1.2rem', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Paperclip size={16} color="#34d399" />
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff' }}>
+                        Berkas Terlampir ({viewingPerizinan.kategori})
+                      </span>
+                      {activeFiles.length >= 2 && (
+                        <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', fontWeight: 800 }}>
+                          ⇄ Bisa digeser ke kiri dan kanan
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Tombol Geser Kiri & Kanan */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setPerizinanFileSlide(prev => prev > 0 ? prev - 1 : activeFiles.length - 1)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#34d399',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas sebelumnya"
+                        >
+                          <ChevronLeft size={16} />
+                          <span>Geser Kiri</span>
+                        </button>
+
+                        <span style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 800, padding: '0 4px' }}>
+                          {perizinanFileSlide + 1} / {activeFiles.length}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setPerizinanFileSlide(prev => prev < activeFiles.length - 1 ? prev + 1 : 0)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#34d399',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas selanjutnya"
+                        >
+                          <span>Geser Kanan</span>
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <div style={{ width: '220px' }}>
-                    <div>PIHAK KEDUA,</div>
-                    <div style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Penerima Tugas'} / Rekanan</div>
-                    <div style={{ height: '60px' }} />
-                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.nama || viewingSpk.vendorName}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Penanggung Jawab / Pimpinan</div>
+                  {/* Card Berkas yang Aktif Saat Ini */}
+                  <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f1f5f9' }}>
+                            {activeFiles[perizinanFileSlide]?.name || 'Berkas Dokumen Perizinan'}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                            Ukuran File: {activeFiles[perizinanFileSlide]?.size || 'Digital'} &bull; Format Dokumen Perizinan
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadFile(activeFiles[perizinanFileSlide]?.data, activeFiles[perizinanFileSlide]?.name)}
+                          className="btn btn-primary btn-sm"
+                          style={{
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            background: '#059669',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            border: 'none',
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
+                          }}
+                          title="Unduh Berkas ke Komputer"
+                        >
+                          <Download size={13} />
+                          <span>Unduh Berkas</span>
+                        </button>
+
+                        {activeFiles[perizinanFileSlide]?.data ? (
+                          <button
+                            type="button"
+                            onClick={() => handleViewFile(activeFiles[perizinanFileSlide].data, activeFiles[perizinanFileSlide].name)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ fontSize: '0.74rem', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '5px', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                          >
+                            <Eye size={13} />
+                            <span>Buka Preview</span>
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {/* Pratinjau Gambar jika format Image */}
+                    {activeFiles[perizinanFileSlide]?.data && activeFiles[perizinanFileSlide].data.startsWith('data:image') && (
+                      <div style={{ marginTop: '10px', textAlign: 'center', maxHeight: '300px', overflow: 'hidden', borderRadius: '6px', background: '#000' }}>
+                        <img
+                          src={activeFiles[perizinanFileSlide].data}
+                          alt={activeFiles[perizinanFileSlide].name}
+                          style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Indikator Titik Carousel (Dots) */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+                        {activeFiles.map((f, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setPerizinanFileSlide(idx)}
+                            style={{
+                              width: idx === perizinanFileSlide ? '22px' : '8px',
+                              height: '8px',
+                              borderRadius: '4px',
+                              background: idx === perizinanFileSlide ? '#34d399' : '#334155',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            title={`Geser ke ${f.name}`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              );
+            })()}
+
+            {/* WRAPPER PRINT AREA PERIZINAN */}
+            <div className="perizinan-printable-container">
+              {/* 1. DOKUMEN LEMBAR RESMI CETAK PERIZINAN (SURAT) */}
+              {perizinanPrintChoice !== 'berkas' && (
+                <div
+                  id="perizinan-print-area"
+                  className="printable-perizinan-document"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                  }}
+                >
+                  {/* KOP SURAT RESMI */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {viewingPerizinan.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
+                        PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
+                      </div>
+                      <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                        Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-block', border: '2px solid #059669', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#059669' }}>
+                        PERIZINAN KAWASAN
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Dokumen Terverifikasi AMS
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* JUDUL DOKUMEN & NOMOR */}
+                  <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
+                      SURAT PERSETUJUAN PERIZINAN KAWASAN ({viewingPerizinan.kategori})
+                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginTop: '4px' }}>
+                      Nomor Dokumen: {viewingPerizinan.noDok || 'xxx/xxx/xxx'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                      Tanggal Dokumen: {formatDisplayDate(viewingPerizinan.tanggalDok)}
+                    </div>
+                  </div>
+
+                  {/* KONTEN RINCIAN PERIZINAN */}
+                  <div style={{ fontSize: '0.82rem', lineHeight: '1.65', color: '#0f172a' }}>
+                    <p style={{ textAlign: 'justify', marginBottom: '10px' }}>
+                      Berdasarkan regulasi tata ruang dan perizinan pembangunan perumahan, lembar register dokumen perizinan resmi ini diterbitkan untuk keperluan verifikasi teknis sebagai berikut:
+                    </p>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px', fontSize: '0.82rem' }}>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, width: '200px', color: '#334155' }}>Pihak Pengembang</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingPerizinan.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}</strong> (AMS Properti)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Instansi / Dinas Terkait</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingPerizinan.nama || '-'}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
+                          <td style={{ padding: '6px 8px' }}>: {formatDisplayDate(viewingPerizinan.tanggalDok)}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Proyek Kawasan</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#059669' }}>{viewingPerizinan.project || 'Ashoka Park'}</span></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Perizinan</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#059669' }}>{viewingPerizinan.kategori || 'PPKR'}</span></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Judul Dokumen Perizinan</td>
+                          <td style={{ padding: '6px 8px' }}>: <strong>{viewingPerizinan.judulDokumen || '-'}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Teknis</td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700 }}>{viewingPerizinan.catatan || '-'}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik Terlampir</td>
+                          <td style={{ padding: '6px 8px' }}>
+                            {(() => {
+                              const activeFiles = (viewingPerizinan.files && viewingPerizinan.files.length > 0)
+                                ? viewingPerizinan.files
+                                : (viewingPerizinan.fileName ? [{ name: viewingPerizinan.fileName, size: viewingPerizinan.fileSize }] : []);
+                              if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Arsip Legal';
+                              return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
+                            })()}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    {/* KLAUSUL PASAL BAKU PERIZINAN */}
+                    <div style={{ marginTop: '10px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify' }}>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 1 (Kesesuaian Tata Ruang & Rancang Bangun):</strong> Seluruh pelaksanaan pembangunan perumahan di kawasan wajib tunduk pada gambar rencana dan ketentuan teknis tata ruang yang telah disahkan.</p>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 2 (Keaslian & Validitas Legalitas):</strong> Dokumen perizinan ini merupakan arsip legal resmi yang telah diverifikasi oleh tim legal pengembang bersama instansi yang berwenang.</p>
+                      <p style={{ marginBottom: '6px' }}><strong>Pasal 3 (Ketentuan Pengawasan & Kepatuhan):</strong> Pengembang berkomitmen menyediakan fasilitas sosial, fasilitas umum, dan mematuhi batas garis sempadan bangunan sesuai standar yang ditetapkan.</p>
+                    </div>
+
+                    {/* KOLOM TANDA TANGAN */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
+                      <div style={{ width: '220px' }}>
+                        <div>PIHAK PENGEMBANG,</div>
+                        <div style={{ fontWeight: 700 }}>{viewingPerizinan.project === 'Ashoka Park' ? 'PT. Yazfi Setia Persada' : 'PT. Yazfi Gema Persada'}</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingPerizinan.pic || 'Wahyu Salma Septiani, S.H'}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                      </div>
+
+                      <div style={{ width: '220px' }}>
+                        <div>INSTANSI / REKANAN TERKAIT,</div>
+                        <div style={{ fontWeight: 700 }}>{viewingPerizinan.nama || 'Instansi Terkait'}</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Pejabat / Penanggung Jawab</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pengesahan Dokumen</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. LEMBAR CETAK BERKAS LAMPIRAN PERIZINAN */}
+              {perizinanPrintChoice !== 'surat' && (
+                <div
+                  id="perizinan-berkas-print-area"
+                  className="printable-perizinan-berkas"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    pageBreakBefore: perizinanPrintChoice === 'all' ? 'always' : 'auto'
+                  }}
+                >
+                  {/* Header Lampiran Berkas Perizinan */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                        {viewingPerizinan.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                        LAMPIRAN BERKAS DOKUMEN RESMI ({viewingPerizinan.kategori})
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        No. Dok: <strong>{viewingPerizinan.noDok || 'xxx/xxx/xxx'}</strong> &bull; {viewingPerizinan.judulDokumen || '-'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ border: '1.5px solid #000', padding: '4px 10px', fontSize: '0.74rem', fontWeight: 900 }}>
+                        LAMPIRAN BERKAS
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Halaman Lampiran Terverifikasi
+                      </div>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const activeFiles = (viewingPerizinan.files && viewingPerizinan.files.length > 0)
+                      ? viewingPerizinan.files
+                      : (viewingPerizinan.fileName ? [{ name: viewingPerizinan.fileName, size: viewingPerizinan.fileSize, data: viewingPerizinan.fileData, type: 'file' }] : []);
+                    const currentFile = activeFiles[perizinanFileSlide] || activeFiles[0];
+
+                    return (
+                      <div>
+                        <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.8rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '6px' }}>
+                            <strong style={{ color: '#334155' }}>Nama Berkas:</strong>
+                            <span>{currentFile?.name || 'Berkas Dokumen Perizinan'}</span>
+                            <strong style={{ color: '#334155' }}>Ukuran File:</strong>
+                            <span>{currentFile?.size || 'Digital'}</span>
+                            <strong style={{ color: '#334155' }}>Instansi Terkait:</strong>
+                            <span>{viewingPerizinan.nama || '-'}</span>
+                          </div>
+                        </div>
+
+                        {/* Tampilan Gambar / Visual */}
+                        {currentFile?.data && currentFile.data.startsWith('data:image') ? (
+                          <div style={{ textAlign: 'center', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                            <img
+                              src={currentFile.data}
+                              alt={currentFile.name}
+                              style={{ maxWidth: '100%', maxHeight: '750px', objectFit: 'contain' }}
+                            />
+                          </div>
+                        ) : (
+                          <div style={{ border: '2px dashed #94a3b8', borderRadius: '10px', padding: '3rem 1.5rem', textAlign: 'center', background: '#f8fafc' }}>
+                            <ShieldCheck size={54} color="#059669" style={{ margin: '0 auto 12px auto' }} />
+                            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
+                              {currentFile?.name || 'Berkas Dokumen Perizinan'}
+                            </div>
+                            <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '6px' }}>
+                              Berkas format digital terverifikasi dalam sistem arsip perizinan legalitas kawasan.
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '12px' }}>
+                              Divalidasi untuk perizinan proyek {viewingPerizinan.project || 'Ashoka Park'}.
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pengesahan Lampiran */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '12px', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+                          <div style={{ color: '#64748b' }}>
+                            Dicetak dari AMS Modern: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div>Divalidasi oleh:</div>
+                            <div style={{ fontWeight: 900, textDecoration: 'underline', marginTop: '30px' }}>{viewingPerizinan.pic || 'Wahyu Salma Septiani, S.H'}</div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Legal & Perizinan</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -3548,31 +4844,44 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             background: 'rgba(0, 0, 0, 0.88)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             zIndex: 99999,
-            padding: '1rem'
+            padding: '2rem 1rem',
+            overflowY: 'auto'
           }}
         >
           {/* Print CSS styling scoped for Legalitas */}
           <style>
             {`
               @media print {
+                @page {
+                  size: A4 portrait;
+                  margin: 10mm 12mm 10mm 12mm;
+                }
+                html, body {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                }
                 body * {
-                  visibility: hidden;
+                  visibility: hidden !important;
                 }
-                #legalitas-print-area, #legalitas-print-area * {
-                  visibility: visible;
+                .legalitas-printable-container, .legalitas-printable-container * {
+                  visibility: visible !important;
                 }
-                #legalitas-print-area {
-                  position: absolute;
-                  left: 0;
-                  top: 0;
-                  width: 100%;
-                  margin: 0;
-                  padding: 20mm;
-                  background: white !important;
-                  color: black !important;
+                .legalitas-printable-container {
+                  position: absolute !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
                 }
                 .no-print {
                   display: none !important;
@@ -3582,18 +4891,20 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           </style>
 
           <div
+            ref={legalitasModalRef}
             style={{
               background: '#0b1120',
               border: '2px solid #ea580c',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '880px',
-              maxHeight: '92vh',
+              maxHeight: '90vh',
               overflowY: 'auto',
               boxShadow: '0 25px 60px -15px rgba(234, 88, 12, 0.3)',
               position: 'relative',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              margin: 'auto 0'
             }}
           >
             {/* Top Header Controls (Hidden on Print) */}
@@ -3608,7 +4919,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 background: '#0f172a',
                 position: 'sticky',
                 top: 0,
-                zIndex: 10
+                zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '10px'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -3631,7 +4944,63 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize, data: viewingLegalitas.fileData, type: 'file' }] : []);
 
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {/* Selector Pilihan Cetak (Surat Saja / Berkas Doang / Keduanya) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#090d16', padding: '3px 8px', borderRadius: '8px', border: '1px solid #334155' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>Pilihan Cetak:</span>
+                      <button
+                        type="button"
+                        onClick={() => setLegalitasPrintChoice('surat')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: legalitasPrintChoice === 'surat' ? '#ea580c' : 'transparent',
+                          color: legalitasPrintChoice === 'surat' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📄 Surat Saja
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLegalitasPrintChoice('berkas')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: legalitasPrintChoice === 'berkas' ? '#ea580c' : 'transparent',
+                          color: legalitasPrintChoice === 'berkas' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📎 Berkas Doang
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLegalitasPrintChoice('all')}
+                        style={{
+                          padding: '4px 9px',
+                          borderRadius: '6px',
+                          fontSize: '0.73rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          border: 'none',
+                          background: legalitasPrintChoice === 'all' ? '#ea580c' : 'transparent',
+                          color: legalitasPrintChoice === 'all' ? '#ffffff' : '#94a3b8',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        📑 Keduanya
+                      </button>
+                    </div>
+
                     {activeFiles.length > 0 && (
                       <button
                         type="button"
@@ -3873,120 +5242,225 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             })()}
 
             {/* Dokumen Lembar Resmi Cetak / Print Area */}
-            <div
-              id="legalitas-print-area"
-              style={{
-                background: '#ffffff',
-                color: '#000000',
-                padding: '2.5rem',
-                margin: '1.2rem',
-                borderRadius: '10px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-              }}
-            >
-              {/* KOP SURAT RESMI */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
-                  </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
-                    PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
-                  </div>
-                  <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
-                    Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
-                    LEGALITAS RESMI
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
-                    Terdaftar di Brankas Legal HO
-                  </div>
-                </div>
-              </div>
-
-              {/* JUDUL DOKUMEN & NOMOR */}
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'underline' }}>
-                  LEMBAR ARSIP LEGALITAS CORPORATE
-                </div>
-                <div style={{ fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
-                  Kategori: <strong>{viewingLegalitas.category}</strong> &bull; Nomor: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong>
-                </div>
-              </div>
-
-              {/* RINCIAN TABEL DOKUMEN RESMI */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                  <tbody>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ width: '220px', padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Nomor Dokumen / SK</td>
-                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
-                      <td style={{ padding: '7px 8px' }}>: {formatDisplayDate(viewingLegalitas.tanggalDok)}</td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Kategori Legalitas</td>
-                      <td style={{ padding: '7px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingLegalitas.category}</span></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Instansi / Penerbit</td>
-                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.penerbit || '-'}</strong></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Jenis Dokumen Resmi</td>
-                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.jenisDokumen || '-'}</strong></td>
-                    </tr>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
-                      <td style={{ padding: '7px 8px' }}>: <span>{viewingLegalitas.catatan || '-'}</span></td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Terlampir</td>
-                      <td style={{ padding: '7px 8px' }}>
-                        {(() => {
-                          const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
-                            ? viewingLegalitas.files
-                            : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize }] : []);
-                          if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Brankas Legal HO';
-                          return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
-                        })()}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                {/* KLAUSUL KEABSAHAN */}
-                <div style={{ marginTop: '14px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify', color: '#334155' }}>
-                  <p style={{ marginBottom: '6px' }}><strong>Pernyataan Keabsahan:</strong> Dokumen ini merupakan salinan arsip legalitas resmi yang telah tercatat dan diverifikasi keasliannya dalam basis data Asset & Property Management System (AMS) PT. Yazfi Gema Persada / PT. Yazfi Setia Persada.</p>
-                </div>
-
-                {/* KOLOM TANDA TANGAN */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
-                  <div style={{ width: '220px' }}>
-                    <div>DIVERIFIKASI OLEH,</div>
-                    <div style={{ fontWeight: 700 }}>Departemen Legal & Perizinan</div>
-                    <div style={{ height: '60px' }} />
-                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+            <div className="legalitas-printable-container">
+              {/* 1. LEMBAR ARSIP LEGALITAS CORPORATE RESMI */}
+              {legalitasPrintChoice !== 'berkas' && (
+                <div
+                  id="legalitas-print-area"
+                  className="printable-legalitas-surat"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    pageBreakAfter: legalitasPrintChoice === 'all' ? 'always' : 'auto'
+                  }}
+                >
+                  {/* KOP SURAT RESMI */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
+                      </div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
+                        PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
+                      </div>
+                      <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                        Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                        LEGALITAS RESMI
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Terdaftar di Brankas Legal HO
+                      </div>
+                    </div>
                   </div>
 
-                  <div style={{ width: '220px' }}>
-                    <div>MENGETAHUI / DISETUJUI,</div>
-                    <div style={{ fontWeight: 700 }}>Direksi Perusahaan</div>
-                    <div style={{ height: '60px' }} />
-                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Direktur Utama</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>PT. Yazfi Gema / Setia Persada</div>
+                  {/* JUDUL DOKUMEN & NOMOR */}
+                  <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'underline' }}>
+                      LEMBAR ARSIP LEGALITAS CORPORATE
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
+                      Kategori: <strong>{viewingLegalitas.category}</strong> &bull; Nomor: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong>
+                    </div>
+                  </div>
+
+                  {/* RINCIAN TABEL DOKUMEN RESMI */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ width: '220px', padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Nomor Dokumen / SK</td>
+                          <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
+                          <td style={{ padding: '7px 8px' }}>: {formatDisplayDate(viewingLegalitas.tanggalDok)}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Kategori Legalitas</td>
+                          <td style={{ padding: '7px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingLegalitas.category}</span></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Instansi / Penerbit</td>
+                          <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.penerbit || '-'}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Jenis Dokumen Resmi</td>
+                          <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.jenisDokumen || '-'}</strong></td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
+                          <td style={{ padding: '7px 8px' }}>: <span>{viewingLegalitas.catatan || '-'}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Terlampir</td>
+                          <td style={{ padding: '7px 8px' }}>
+                            {(() => {
+                              const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
+                                ? viewingLegalitas.files
+                                : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize }] : []);
+                              if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Brankas Legal HO';
+                              return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
+                            })()}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    {/* KLAUSUL KEABSAHAN */}
+                    <div style={{ marginTop: '14px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify', color: '#334155' }}>
+                      <p style={{ marginBottom: '6px' }}><strong>Pernyataan Keabsahan:</strong> Dokumen ini merupakan salinan arsip legalitas resmi yang telah tercatat dan diverifikasi keasliannya dalam basis data Asset & Property Management System (AMS) PT. Yazfi Gema Persada / PT. Yazfi Setia Persada.</p>
+                    </div>
+
+                    {/* KOLOM TANDA TANGAN */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
+                      <div style={{ width: '220px' }}>
+                        <div>DIVERIFIKASI OLEH,</div>
+                        <div style={{ fontWeight: 700 }}>Departemen Legal & Perizinan</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                      </div>
+
+                      <div style={{ width: '220px' }}>
+                        <div>MENGETAHUI / DISETUJUI,</div>
+                        <div style={{ fontWeight: 700 }}>Direksi Perusahaan</div>
+                        <div style={{ height: '60px' }} />
+                        <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Direktur Utama</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>PT. Yazfi Gema / Setia Persada</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* 2. LEMBAR CETAK BERKAS LAMPIRAN LEGALITAS */}
+              {legalitasPrintChoice !== 'surat' && (
+                <div
+                  id="legalitas-berkas-print-area"
+                  className="printable-legalitas-berkas"
+                  style={{
+                    background: '#ffffff',
+                    color: '#000000',
+                    padding: '2.5rem',
+                    margin: '1.2rem',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    pageBreakBefore: legalitasPrintChoice === 'all' ? 'always' : 'auto'
+                  }}
+                >
+                  {/* Header Lampiran Berkas Legalitas */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                        PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
+                      </div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                        LAMPIRAN BERKAS DOKUMEN LEGALITAS ({viewingLegalitas.category})
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        No. Dok: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong> &bull; {viewingLegalitas.jenisDokumen || '-'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ border: '1.5px solid #000', padding: '4px 10px', fontSize: '0.74rem', fontWeight: 900 }}>
+                        LAMPIRAN LEGALITAS
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                        Dokumen Resmi Terverifikasi
+                      </div>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
+                      ? viewingLegalitas.files
+                      : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize, data: viewingLegalitas.fileData, type: 'file' }] : []);
+                    const currentFile = activeFiles[currentLegalitasFileSlide] || activeFiles[0];
+
+                    return (
+                      <div>
+                        <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '0.8rem' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '6px' }}>
+                            <strong style={{ color: '#334155' }}>Nama Berkas:</strong>
+                            <span>{currentFile?.name || 'Berkas Dokumen Legalitas'}</span>
+                            <strong style={{ color: '#334155' }}>Ukuran File:</strong>
+                            <span>{currentFile?.size || 'Digital'}</span>
+                            <strong style={{ color: '#334155' }}>Instansi / Penerbit:</strong>
+                            <span>{viewingLegalitas.penerbit || '-'}</span>
+                          </div>
+                        </div>
+
+                        {/* Tampilan Gambar / Visual */}
+                        {currentFile?.data && currentFile.data.startsWith('data:image') ? (
+                          <div style={{ textAlign: 'center', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                            <img
+                              src={currentFile.data}
+                              alt={currentFile.name}
+                              style={{ maxWidth: '100%', maxHeight: '750px', objectFit: 'contain' }}
+                            />
+                          </div>
+                        ) : (
+                          <div style={{ border: '2px dashed #94a3b8', borderRadius: '10px', padding: '3rem 1.5rem', textAlign: 'center', background: '#f8fafc' }}>
+                            <FileCheck size={54} color="#ea580c" style={{ margin: '0 auto 12px auto' }} />
+                            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
+                              {currentFile?.name || 'Berkas Dokumen Legalitas'}
+                            </div>
+                            <div style={{ fontSize: '0.84rem', color: '#475569', marginTop: '6px' }}>
+                              Berkas format digital terverifikasi dalam sistem arsip brankas legal corporate.
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '12px' }}>
+                              Divalidasi untuk perseroan PT Yazfi Gema Persada / PT Yazfi Setia Persada.
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pengesahan Lampiran */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2.5rem', paddingTop: '12px', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+                          <div style={{ color: '#64748b' }}>
+                            Dicetak dari AMS Modern: {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div>Divalidasi oleh:</div>
+                            <div style={{ fontWeight: 900, textDecoration: 'underline', marginTop: '30px' }}>Wahyu Salma Septiani, S.H</div>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </div>
