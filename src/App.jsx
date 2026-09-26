@@ -105,24 +105,16 @@ function AppContent() {
   const isAllowed = canAccessModule(currentTab);
 
   return (
-    <div className="app-container">
-      <Sidebar
+    <div className="app-container" style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Header 
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
-        onLogout={handleLogout}
-      />
-      <Header 
-        onToggleSidebar={toggleSidebar} 
-        isSidebarOpen={isSidebarOpen}
         activeTitle={getActiveTitle()} 
         onLogout={handleLogout}
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
-      <main className="main-content">
+      <main className="main-content" style={{ marginLeft: 0, width: '100%', maxWidth: '100%', padding: '1.5rem', boxSizing: 'border-box' }}>
         {!isAllowed ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '2rem auto' }}>
             <div style={{

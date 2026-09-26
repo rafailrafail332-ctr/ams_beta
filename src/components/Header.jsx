@@ -2,12 +2,21 @@ import React, { useState } from 'react';
 import { Menu, Sun, Moon, Bell, Search, User, LogOut, Settings, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }) => {
+export const Header = ({ currentTab, setCurrentTab, activeTitle, onLogout, onOpenProfile }) => {
   const { theme, toggleTheme, currentUser, getAvatarUrl } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const avatarUrl = getAvatarUrl(currentUser);
+
+  const navModules = [
+    { key: 'teknik', label: 'Teknik' },
+    { key: 'legal', label: 'legal' },
+    { key: 'marketing', label: 'Marketing' },
+    { key: 'hr-ga', label: 'HR & GA' },
+    { key: 'finance', label: 'Finance' },
+    { key: 'todo-attendance', label: 'TO -DO LIST' }
+  ];
 
   return (
     <header
@@ -24,38 +33,62 @@ export const Header = ({ onToggleSidebar, activeTitle, onLogout, onOpenProfile }
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        padding: '0 1.25rem',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
     >
-      {/* Left side: Toggle & Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      {/* Left side: Brand Logo + Top Navigation Hub */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', overflowX: 'auto', flex: 1, paddingRight: '1rem' }}>
         <button
-          onClick={onToggleSidebar}
+          type="button"
+          onClick={() => setCurrentTab && setCurrentTab('dashboard')}
           style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-main)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.5rem',
-            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            gap: '8px',
+            background: currentTab === 'dashboard' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.06)',
+            border: currentTab === 'dashboard' ? '1.5px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '10px',
+            padding: '5px 12px',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'all 0.15s ease'
           }}
+          title="Kembali ke Beranda Utama (Central Hub)"
         >
-          <Menu size={20} />
+          <img src="/company-logo.png" alt="AMS Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '1rem', letterSpacing: '0.04em' }}>AMS</span>
+          <span style={{ fontSize: '0.72rem', color: currentTab === 'dashboard' ? '#fbbf24' : '#94a3b8', fontWeight: 800 }}>Hub</span>
         </button>
 
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', fontWeight: 600 }}>
-            Ashoka Management &bull; {activeTitle}
-          </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            Real-Time Housing Project Tracking 
-            <span className="badge badge-warning" style={{ fontSize: '0.7rem', cursor: 'pointer' }} onClick={onOpenProfile} title="Klik untuk membuka Profil Saya">
-              <ShieldCheck size={12} /> {currentUser?.role}
-            </span>
-          </div>
+        {/* Top Module Navigation Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', flexShrink: 0 }}>
+          {navModules.map((m) => {
+            const isTabActive = currentTab === m.key || (m.key === 'teknik' && currentTab?.startsWith('teknik')) || (m.key === 'legal' && (currentTab === 'legal' || currentTab === 'hr')) || (m.key === 'hr-ga' && (currentTab === 'hr-ga' || currentTab === 'ga'));
+            return (
+              <button
+                key={m.key}
+                type="button"
+                onClick={() => setCurrentTab && setCurrentTab(m.key)}
+                style={{
+                  background: isTabActive ? '#ea580c' : 'rgba(30, 41, 59, 0.75)',
+                  color: isTabActive ? '#ffffff' : '#cbd5e1',
+                  border: isTabActive ? '1px solid #ea580c' : '1px solid rgba(255, 255, 255, 0.1)',
+                  padding: '6px 13px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: isTabActive ? 900 : 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  boxShadow: isTabActive ? '0 2px 8px rgba(234, 88, 12, 0.35)' : 'none'
+                }}
+                title={`Buka Modul ${m.label}`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
