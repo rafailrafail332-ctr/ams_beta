@@ -2005,26 +2005,21 @@ export const PiutangKonsumenModule = () => {
                         cursor: 'pointer'
                       }}
                       onClick={() => handleOpenPaymentModal(row, 'dp')}
-                      title="Klik untuk melihat riwayat / history & edit pembayaran DP"
+                      title="Klik untuk melihat riwayat & edit pembayaran DP"
                     >
                       <div style={{ fontSize: '0.88rem' }}>{formatNumber(row.totalDp)}</div>
-                      <div
-                        style={{
-                          fontSize: '0.68rem',
-                          color: '#94a3b8',
-                          fontWeight: 600,
-                          marginTop: '2px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          gap: '3px',
-                          textDecoration: 'underline',
-                          textDecorationStyle: 'dotted'
-                        }}
-                      >
-                        <Clock size={10} color="#94a3b8" />
-                        <span>{(row.dpPayments || []).length}x bayar (History & Edit)</span>
-                      </div>
+                      {(row.dpPayments || []).length > 0 && (
+                        <div
+                          style={{
+                            fontSize: '0.68rem',
+                            color: '#94a3b8',
+                            fontWeight: 600,
+                            marginTop: '2px'
+                          }}
+                        >
+                          {(row.dpPayments || []).length}x bayar
+                        </div>
+                      )}
                     </td>
 
                     {/* Sisa Pembayaran */}
@@ -2043,26 +2038,21 @@ export const PiutangKonsumenModule = () => {
                         cursor: 'pointer'
                       }}
                       onClick={() => handleOpenPaymentModal(row, 'angsuran')}
-                      title="Klik untuk melihat riwayat / history & edit pembayaran Angsuran"
+                      title="Klik untuk melihat riwayat & edit pembayaran Angsuran"
                     >
                       <div style={{ fontSize: '0.88rem' }}>{formatNumber(row.totalAngsuran)}</div>
-                      <div
-                        style={{
-                          fontSize: '0.68rem',
-                          color: '#94a3b8',
-                          fontWeight: 600,
-                          marginTop: '2px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          gap: '3px',
-                          textDecoration: 'underline',
-                          textDecorationStyle: 'dotted'
-                        }}
-                      >
-                        <Clock size={10} color="#94a3b8" />
-                        <span>{(row.angsuranPayments || []).length}x bayar (History & Edit)</span>
-                      </div>
+                      {(row.angsuranPayments || []).length > 0 && (
+                        <div
+                          style={{
+                            fontSize: '0.68rem',
+                            color: '#94a3b8',
+                            fontWeight: 600,
+                            marginTop: '2px'
+                          }}
+                        >
+                          {(row.angsuranPayments || []).length}x bayar
+                        </div>
+                      )}
                     </td>
 
                     {/* Saldo Akhir */}
