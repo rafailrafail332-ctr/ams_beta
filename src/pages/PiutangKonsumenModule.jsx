@@ -177,9 +177,19 @@ export const PiutangKonsumenModule = () => {
     catatan: ''
   });
 
-  // Receipt Modal State
+  // Receipt & Rekap Modal State
   const [receiptData, setReceiptData] = useState(null);
   const [kwitansiSelectRow, setKwitansiSelectRow] = useState(null);
+  const [rekapModalRow, setRekapModalRow] = useState(null);
+
+  const formatDateSlash = (d) => {
+    if (!d) return '-';
+    const parts = d.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return d;
+  };
 
   // Formatting helpers
   const formatRupiah = (val) => {
@@ -1364,6 +1374,391 @@ export const PiutangKonsumenModule = () => {
     });
   };
 
+  // Generate Print HTML Rekapitulasi Pembayaran (Persis Desain Foto User)
+  const generateRekapPrintHtml = (row) => {
+    const grandTotal = (row.totalDp || 0) + (row.totalAngsuran || 0) + (row.booking || 0);
+    const noSpr = row.noSpr || `SPR/${row.proyek?.toLowerCase().includes('park') ? 'AP' : 'AV'}/${row.blok}-${row.noUnit}/${row.periode || '2026'}`;
+    const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Rekapitulasi Pembayaran - ${row.namaKonsumen} (${row.proyek} Blok ${row.blok} No. ${row.noUnit})</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 10px;
+      background: #ffffff;
+      color: #000000;
+    }
+    .rekap-container {
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+    .rekap-banner {
+      background-color: #f5af81;
+      padding: 10px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #000000;
+      margin-bottom: 20px;
+    }
+    .meta-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 14px;
+    }
+    .meta-col {
+      flex: 1;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+    .meta-label {
+      width: 125px;
+      font-weight: 600;
+      color: #000000;
+    }
+    .meta-colon {
+      width: 18px;
+      text-align: center;
+      font-weight: 700;
+      color: #000000;
+    }
+    .meta-val {
+      flex: 1;
+      border-bottom: 1px solid #000000;
+      padding-left: 6px;
+      padding-bottom: 2px;
+      font-weight: 700;
+      color: #000000;
+      min-height: 19px;
+    }
+    .divider-line {
+      border-bottom: 2px solid #000000;
+      margin: 14px 0 18px;
+    }
+    .sec-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      text-decoration: underline;
+      color: #000000;
+      margin-bottom: 10px;
+    }
+    .pay-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 4px;
+    }
+    .pay-table td {
+      padding: 4px 10px;
+      font-size: 13px;
+      color: #000000;
+    }
+    .subtotal-bar {
+      background-color: #fde8db;
+      border-top: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      padding: 6px 10px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #000000;
+      margin: 12px 0 18px;
+    }
+    .grand-bar {
+      background-color: #f5af81;
+      border-top: 1px solid #000000;
+      border-bottom: 3px double #000000;
+      padding: 7px 10px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #000000;
+      margin-bottom: 12px;
+    }
+    @media print {
+      body { padding: 0; }
+      .rekap-container { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="rekap-container">
+    <div class="rekap-banner">REKAPITULASI PEMBAYARAN</div>
+
+    <div class="meta-grid">
+      <div class="meta-col">
+        <div class="meta-row">
+          <span class="meta-label">Nama Konsumen</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.namaKonsumen || ''}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Proyek</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.proyek || ''}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">No. SPR</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${noSpr}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Harga Jual</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${formatNumber(row.hargaJual)}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Disc</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${formatNumber(row.disc)}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Harga Jual Net</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${formatNumber(row.hargaJualNet)}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Periode</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${formatMonthYear(row.periode) || row.periode || ''}</div>
+        </div>
+      </div>
+
+      <div class="meta-col">
+        <div class="meta-row">
+          <span class="meta-label">Type</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.type || ''}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Blok</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.blok || ''}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">No.</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.noUnit || ''}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">LT</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.lt || 0}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">LT+</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.ltPlus || 0}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Total LT</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${ltTotal}</div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">LB</span>
+          <span class="meta-colon">:</span>
+          <div class="meta-val">${row.lb || 0}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="sec-title">PEMBAYARAN UANG MUKA</div>
+    <table class="pay-table">
+      <tbody>
+        ${(row.dpPayments && row.dpPayments.length > 0) ? row.dpPayments.map((p, idx) => `
+          <tr>
+            <td style="width: 120px;">${formatDateSlash(p.tanggal)}</td>
+            <td style="width: 40px; font-weight: 600;">Rp.</td>
+            <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 600;">${formatNumber(p.jumlah)}</td>
+            <td>Pembayaran uang muka ${idx + 1}</td>
+          </tr>
+        `).join('') : `
+          <tr>
+            <td colspan="4" style="color: #64748b; font-style: italic;">Belum ada catatan pembayaran uang muka</td>
+          </tr>
+        `}
+      </tbody>
+    </table>
+
+    <table class="pay-table subtotal-bar" style="margin-top: 10px;">
+      <tr>
+        <td style="width: 120px; font-weight: 800;">Total uang muka</td>
+        <td style="width: 40px; font-weight: 800;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 800;">${formatNumber(row.totalDp)}</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <div class="sec-title" style="margin-top: 18px;">PEMBAYARAN ANGSURAN</div>
+    <table class="pay-table">
+      <tbody>
+        ${(row.angsuranPayments && row.angsuranPayments.length > 0) ? row.angsuranPayments.map((p, idx) => `
+          <tr>
+            <td style="width: 120px;">${formatDateSlash(p.tanggal)}</td>
+            <td style="width: 40px; font-weight: 600;">Rp.</td>
+            <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 600;">${formatNumber(p.jumlah)}</td>
+            <td>Pembayaran Angsuran ke ${idx + 1}</td>
+          </tr>
+        `).join('') : `
+          <tr>
+            <td colspan="4" style="color: #64748b; font-style: italic;">Belum ada catatan pembayaran angsuran</td>
+          </tr>
+        `}
+      </tbody>
+    </table>
+
+    <table class="pay-table subtotal-bar" style="margin-top: 10px;">
+      <tr>
+        <td style="width: 120px; font-weight: 800;">Total Angsuran</td>
+        <td style="width: 40px; font-weight: 800;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 800;">${formatNumber(row.totalAngsuran)}</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <table class="pay-table grand-bar" style="margin-top: 16px;">
+      <tr>
+        <td style="width: 120px; font-weight: 900;">Grand Total</td>
+        <td style="width: 40px; font-weight: 900;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 900;">${formatNumber(grandTotal)}</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <table class="pay-table grand-bar" style="margin-top: 10px;">
+      <tr>
+        <td style="width: 120px; font-weight: 900;">Sisa Pembayaran</td>
+        <td style="width: 40px; font-weight: 900;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 900;">${formatNumber(row.saldo)}</td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>`;
+  };
+
+  // Cetak Rekapitulasi Langsung (Isolated iframe Print)
+  const handlePrintRekapDirect = (row) => {
+    let iframe = document.getElementById('rekap-print-isolated-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'rekap-print-isolated-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '900px';
+      iframe.style.height = '1200px';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    const html = generateRekapPrintHtml(row);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }, 400);
+  };
+
+  // Download Rekapitulasi Format Excel (.xlsx)
+  const handleDownloadRekapExcel = (row) => {
+    try {
+      const grandTotal = (row.totalDp || 0) + (row.totalAngsuran || 0) + (row.booking || 0);
+      const noSpr = row.noSpr || `SPR/${row.proyek?.toLowerCase().includes('park') ? 'AP' : 'AV'}/${row.blok}-${row.noUnit}/${row.periode || '2026'}`;
+      const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
+
+      const wsData = [
+        ['REKAPITULASI PEMBAYARAN', '', '', '', ''],
+        [],
+        ['Nama Konsumen', ':', row.namaKonsumen || '', 'Type', ':', row.type || ''],
+        ['Proyek', ':', row.proyek || '', 'Blok', ':', row.blok || ''],
+        ['No. SPR', ':', noSpr, 'No.', ':', row.noUnit || ''],
+        ['Harga Jual', ':', row.hargaJual || 0, 'LT', ':', row.lt || 0],
+        ['Disc', ':', row.disc || 0, 'LT+', ':', row.ltPlus || 0],
+        ['Harga Jual Net', ':', row.hargaJualNet || 0, 'Total LT', ':', ltTotal],
+        ['Periode', ':', formatMonthYear(row.periode) || row.periode || '', 'LB', ':', row.lb || 0],
+        [],
+        ['====================================================================='],
+        ['PEMBAYARAN UANG MUKA'],
+        []
+      ];
+
+      (row.dpPayments || []).forEach((p, idx) => {
+        wsData.push([formatDateSlash(p.tanggal), 'Rp.', p.jumlah || 0, `Pembayaran uang muka ${idx + 1}`]);
+      });
+      if (!row.dpPayments || row.dpPayments.length === 0) {
+        wsData.push(['-', 'Rp.', 0, 'Belum ada pembayaran uang muka']);
+      }
+
+      wsData.push([]);
+      wsData.push(['Total uang muka', 'Rp', row.totalDp || 0]);
+      wsData.push([]);
+      wsData.push(['PEMBAYARAN ANGSURAN']);
+      wsData.push([]);
+
+      (row.angsuranPayments || []).forEach((p, idx) => {
+        wsData.push([formatDateSlash(p.tanggal), 'Rp.', p.jumlah || 0, `Pembayaran Angsuran ke ${idx + 1}`]);
+      });
+      if (!row.angsuranPayments || row.angsuranPayments.length === 0) {
+        wsData.push(['-', 'Rp.', 0, 'Belum ada pembayaran angsuran']);
+      }
+
+      wsData.push([]);
+      wsData.push(['Total Angsuran', 'Rp', row.totalAngsuran || 0]);
+      wsData.push([]);
+      wsData.push(['Grand Total', 'Rp', grandTotal]);
+      wsData.push(['Sisa Pembayaran', 'Rp', row.saldo || 0]);
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws['!cols'] = [
+        { wch: 18 },
+        { wch: 6 },
+        { wch: 22 },
+        { wch: 14 },
+        { wch: 4 },
+        { wch: 20 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi');
+      const safeName = (row.namaKonsumen || 'Konsumen').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safeUnit = `${row.blok || 'X'}-${row.noUnit || '0'}`;
+      const filename = `Rekapitulasi_${row.proyek || 'Properti'}_${safeUnit}_${safeName}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      showNotification(`Rekapitulasi pembayaran berhasil di-download: ${filename}`, 'success');
+    } catch (err) {
+      console.error('Download Rekap Excel error:', err);
+      showNotification('Gagal download Rekapitulasi: ' + err.message, 'error');
+    }
+  };
+
   return (
     <div style={{ padding: '0 0 2.5rem' }}>
       {/* ------------------------------------------------------------- */}
@@ -2148,14 +2543,14 @@ export const PiutangKonsumenModule = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenKwitansiModal(row)}
-                          title="Cetak Bukti Kwitansi (Booking / DP / Angsuran / Rekap)"
+                          title="Cetak Bukti Kwitansi (Booking / DP / Angsuran)"
                           style={{
                             background: 'linear-gradient(135deg, #0284c7, #0369a1)',
                             border: '1px solid #38bdf8',
                             color: '#ffffff',
                             fontWeight: 900,
                             fontSize: '0.74rem',
-                            padding: '4px 9px',
+                            padding: '4px 8px',
                             borderRadius: '5px',
                             cursor: 'pointer',
                             display: 'inline-flex',
@@ -2164,7 +2559,30 @@ export const PiutangKonsumenModule = () => {
                             boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
                           }}
                         >
-                          <Printer size={13} /> Kwitansi
+                          <Printer size={13} /> KWI
+                        </button>
+
+                        {/* TOMBOL REKAPITULASI PEMBAYARAN */}
+                        <button
+                          type="button"
+                          onClick={() => setRekapModalRow(getCalculatedRow(row))}
+                          title="Buka Lembar Rekapitulasi Pembayaran & Cetak"
+                          style={{
+                            background: 'linear-gradient(135deg, #ea580c, #c2410c)',
+                            border: '1px solid #fb923c',
+                            color: '#ffffff',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            padding: '4px 8px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(234, 88, 12, 0.3)'
+                          }}
+                        >
+                          <FileText size={13} /> Rekap
                         </button>
 
                         {/* Edit Baris */}
@@ -4033,6 +4451,478 @@ export const PiutangKonsumenModule = () => {
           </div>
         </div>
       )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL PREVIEW REKAPITULASI PEMBAYARAN (DESAIN FOTO ASLI USER)  */}
+      {/* ------------------------------------------------------------- */}
+      {rekapModalRow && (() => {
+        const row = rekapModalRow;
+        const grandTotal = (row.totalDp || 0) + (row.totalAngsuran || 0) + (row.booking || 0);
+        const noSpr = row.noSpr || `SPR/${row.proyek?.toLowerCase().includes('park') ? 'AP' : 'AV'}/${row.blok}-${row.noUnit}/${row.periode || '2026'}`;
+        const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
+
+        return (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.88)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 999999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '850px',
+                background: '#ffffff',
+                color: '#000000',
+                borderRadius: '10px',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+                border: '1px solid #475569',
+                maxHeight: '94vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                fontFamily: 'Arial, Helvetica, sans-serif'
+              }}
+            >
+              {/* Header Modal Bar */}
+              <div
+                style={{
+                  background: '#0f172a',
+                  color: '#f8fafc',
+                  padding: '12px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #334155'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={18} style={{ color: '#f97316' }} />
+                  <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                    Rekapitulasi Pembayaran — {row.namaKonsumen} ({row.proyek} Blok {row.blok} No. {row.noUnit})
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => handlePrintRekapDirect(row)}
+                    style={{
+                      background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                      border: '1px solid #f97316',
+                      color: '#ffffff',
+                      padding: '5px 12px',
+                      borderRadius: '5px',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Printer size={14} /> Cetak Rekap
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadRekapExcel(row)}
+                    style={{
+                      background: '#059669',
+                      border: '1px solid #10b981',
+                      color: '#ffffff',
+                      padding: '5px 12px',
+                      borderRadius: '5px',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <Download size={14} /> Unduh Excel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRekapModalRow(null)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Sheet Body (Exact recreation of user's media photo) */}
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '24px 28px',
+                  background: '#ffffff'
+                }}
+              >
+                {/* Banner Header */}
+                <div
+                  style={{
+                    backgroundColor: '#f5af81',
+                    padding: '9px 12px',
+                    textAlign: 'center',
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    letterSpacing: '0.5px',
+                    color: '#000000',
+                    marginBottom: '20px'
+                  }}
+                >
+                  REKAPITULASI PEMBAYARAN
+                </div>
+
+                {/* 2-Column Metadata Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '14px' }}>
+                  {/* Left Column */}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Nama Konsumen</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.namaKonsumen || ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Proyek</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.proyek || ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>No. SPR</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {noSpr}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Harga Jual</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {formatNumber(row.hargaJual)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Disc</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {formatNumber(row.disc)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Harga Jual Net</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {formatNumber(row.hargaJualNet)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '130px', fontWeight: 600, color: '#000000' }}>Periode</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {formatMonthYear(row.periode) || row.periode || ''}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>Type</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.type || ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>Blok</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.blok || ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>No.</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.noUnit || ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>LT</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.lt || 0}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>LT+</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.ltPlus || 0}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>Total LT</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {ltTotal}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '7px', fontSize: '13px' }}>
+                      <span style={{ width: '110px', fontWeight: 600, color: '#000000' }}>LB</span>
+                      <span style={{ width: '18px', textAlign: 'center', fontWeight: 700, color: '#000000' }}>:</span>
+                      <div style={{ flex: 1, borderBottom: '1px solid #000000', paddingLeft: '6px', paddingBottom: '2px', fontWeight: 700, color: '#000000', minHeight: '19px' }}>
+                        {row.lb || 0}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider Line */}
+                <div style={{ borderBottom: '2px solid #000000', margin: '14px 0 18px' }}></div>
+
+                {/* Section 1: PEMBAYARAN UANG MUKA */}
+                <div style={{ fontSize: '13.5px', fontWeight: 800, textDecoration: 'underline', color: '#000000', marginBottom: '10px' }}>
+                  PEMBAYARAN UANG MUKA
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '4px' }}>
+                  <tbody>
+                    {(row.dpPayments && row.dpPayments.length > 0) ? row.dpPayments.map((p, idx) => (
+                      <tr key={`rekap-dp-${p.id || idx}`}>
+                        <td style={{ width: '120px', padding: '4px 10px', fontSize: '13px', color: '#000000' }}>
+                          {formatDateSlash(p.tanggal)}
+                        </td>
+                        <td style={{ width: '40px', padding: '4px 10px', fontSize: '13px', fontWeight: 600, color: '#000000' }}>
+                          Rp.
+                        </td>
+                        <td style={{ width: '150px', padding: '4px 10px', fontSize: '13px', textAlign: 'right', paddingRight: '24px', fontWeight: 600, color: '#000000' }}>
+                          {formatNumber(p.jumlah)}
+                        </td>
+                        <td style={{ padding: '4px 10px', fontSize: '13px', color: '#000000' }}>
+                          Pembayaran uang muka {idx + 1}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '4px 10px', fontSize: '13px', color: '#64748b', fontStyle: 'italic' }}>
+                          Belum ada catatan pembayaran uang muka
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* Subtotal Total Uang Muka */}
+                <div
+                  style={{
+                    backgroundColor: '#fde8db',
+                    borderTop: '1px solid #000000',
+                    borderBottom: '1px solid #000000',
+                    padding: '6px 10px',
+                    fontSize: '13.5px',
+                    fontWeight: 800,
+                    color: '#000000',
+                    margin: '12px 0 18px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ width: '120px' }}>Total uang muka</span>
+                  <span style={{ width: '40px' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.totalDp)}</span>
+                  <span></span>
+                </div>
+
+                {/* Section 2: PEMBAYARAN ANGSURAN */}
+                <div style={{ fontSize: '13.5px', fontWeight: 800, textDecoration: 'underline', color: '#000000', marginBottom: '10px' }}>
+                  PEMBAYARAN ANGSURAN
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '4px' }}>
+                  <tbody>
+                    {(row.angsuranPayments && row.angsuranPayments.length > 0) ? row.angsuranPayments.map((p, idx) => (
+                      <tr key={`rekap-ang-${p.id || idx}`}>
+                        <td style={{ width: '120px', padding: '4px 10px', fontSize: '13px', color: '#000000' }}>
+                          {formatDateSlash(p.tanggal)}
+                        </td>
+                        <td style={{ width: '40px', padding: '4px 10px', fontSize: '13px', fontWeight: 600, color: '#000000' }}>
+                          Rp.
+                        </td>
+                        <td style={{ width: '150px', padding: '4px 10px', fontSize: '13px', textAlign: 'right', paddingRight: '24px', fontWeight: 600, color: '#000000' }}>
+                          {formatNumber(p.jumlah)}
+                        </td>
+                        <td style={{ padding: '4px 10px', fontSize: '13px', color: '#000000' }}>
+                          Pembayaran Angsuran ke {idx + 1}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '4px 10px', fontSize: '13px', color: '#64748b', fontStyle: 'italic' }}>
+                          Belum ada catatan pembayaran angsuran
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* Subtotal Total Angsuran */}
+                <div
+                  style={{
+                    backgroundColor: '#fde8db',
+                    borderTop: '1px solid #000000',
+                    borderBottom: '1px solid #000000',
+                    padding: '6px 10px',
+                    fontSize: '13.5px',
+                    fontWeight: 800,
+                    color: '#000000',
+                    margin: '12px 0 18px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ width: '120px' }}>Total Angsuran</span>
+                  <span style={{ width: '40px' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.totalAngsuran)}</span>
+                  <span></span>
+                </div>
+
+                {/* Grand Total */}
+                <div
+                  style={{
+                    backgroundColor: '#f5af81',
+                    borderTop: '1px solid #000000',
+                    borderBottom: '3px double #000000',
+                    padding: '7px 10px',
+                    fontSize: '14px',
+                    fontWeight: 900,
+                    color: '#000000',
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ width: '120px' }}>Grand Total</span>
+                  <span style={{ width: '40px' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(grandTotal)}</span>
+                  <span></span>
+                </div>
+
+                {/* Sisa Pembayaran */}
+                <div
+                  style={{
+                    backgroundColor: '#f5af81',
+                    borderTop: '1px solid #000000',
+                    borderBottom: '3px double #000000',
+                    padding: '7px 10px',
+                    fontSize: '14px',
+                    fontWeight: 900,
+                    color: '#000000',
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <span style={{ width: '120px' }}>Sisa Pembayaran</span>
+                  <span style={{ width: '40px' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.saldo)}</span>
+                  <span></span>
+                </div>
+              </div>
+
+              {/* Bottom Footer Actions */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                  padding: '12px 24px',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '10px'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handlePrintRekapDirect(row)}
+                  style={{
+                    background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                    border: '1px solid #f97316',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Printer size={15} /> Cetak Rekapitulasi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadRekapExcel(row)}
+                  style={{
+                    background: '#059669',
+                    border: '1px solid #10b981',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Download size={15} /> Unduh Excel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRekapModalRow(null)}
+                  style={{
+                    background: '#334155',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ------------------------------------------------------------- */}
       {/* MODAL PREVIEW KWITANSI PEMBAYARAN (DESAIN FOTO ASLI)          */}
