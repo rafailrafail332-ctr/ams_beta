@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import { Menu, Sun, Moon, Bell, Search, User, LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, User, LogOut, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const Header = ({ currentTab, setCurrentTab, activeTitle, onLogout, onOpenProfile }) => {
   const { theme, toggleTheme, currentUser, getAvatarUrl } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   const avatarUrl = getAvatarUrl(currentUser);
-
-  const navModules = [
-    { key: 'teknik', label: 'Teknik' },
-    { key: 'legal', label: 'legal' },
-    { key: 'marketing', label: 'Marketing' },
-    { key: 'hr-ga', label: 'HR & GA' },
-    { key: 'finance', label: 'Finance' },
-    { key: 'todo-attendance', label: 'TO -DO LIST' }
-  ];
 
   return (
     <header
@@ -33,236 +23,160 @@ export const Header = ({ currentTab, setCurrentTab, activeTitle, onLogout, onOpe
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1.25rem',
+        padding: '0 1.5rem',
+        boxSizing: 'border-box',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
     >
-      {/* Left side: Brand Logo + Top Navigation Hub */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', overflowX: 'auto', flex: 1, paddingRight: '1rem' }}>
-        <button
-          type="button"
-          onClick={() => setCurrentTab && setCurrentTab('dashboard')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: currentTab === 'dashboard' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.06)',
-            border: currentTab === 'dashboard' ? '1.5px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '10px',
-            padding: '5px 12px',
-            cursor: 'pointer',
-            flexShrink: 0,
-            transition: 'all 0.15s ease'
-          }}
-          title="Kembali ke Beranda Utama (Central Hub)"
-        >
-          <img src="/company-logo.png" alt="AMS Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-          <span style={{ fontWeight: 900, color: '#f59e0b', fontSize: '1rem', letterSpacing: '0.04em' }}>AMS</span>
-          <span style={{ fontSize: '0.72rem', color: currentTab === 'dashboard' ? '#fbbf24' : '#94a3b8', fontWeight: 800 }}>Hub</span>
-        </button>
-
-        {/* Top Module Navigation Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', flexShrink: 0 }}>
-          {navModules.map((m) => {
-            const isTabActive = currentTab === m.key || (m.key === 'teknik' && currentTab?.startsWith('teknik')) || (m.key === 'legal' && (currentTab === 'legal' || currentTab === 'hr')) || (m.key === 'hr-ga' && (currentTab === 'hr-ga' || currentTab === 'ga'));
-            return (
-              <button
-                key={m.key}
-                type="button"
-                onClick={() => setCurrentTab && setCurrentTab(m.key)}
-                style={{
-                  background: isTabActive ? '#ea580c' : 'rgba(30, 41, 59, 0.75)',
-                  color: isTabActive ? '#ffffff' : '#cbd5e1',
-                  border: isTabActive ? '1px solid #ea580c' : '1px solid rgba(255, 255, 255, 0.1)',
-                  padding: '6px 13px',
-                  borderRadius: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: isTabActive ? 900 : 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap',
-                  boxShadow: isTabActive ? '0 2px 8px rgba(234, 88, 12, 0.35)' : 'none'
-                }}
-                title={`Buka Modul ${m.label}`}
-              >
-                {m.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Center Search Bar */}
-      <div 
-        className="d-none d-md-flex"
-        style={{
-          position: 'relative',
-          width: '300px'
-        }}
-      >
-        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-        <input
-          type="text"
-          placeholder="Cari unit, blok, owner..."
-          className="form-control"
-          style={{
-            paddingLeft: '36px',
-            fontSize: '0.85rem',
-            borderRadius: '9999px',
-            background: 'var(--bg-card)'
-          }}
-        />
-      </div>
-
-      {/* Right Icons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-main)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.5rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s'
-          }}
-        >
-          {theme === 'dark' ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#6366f1" />}
-        </button>
-
-        {/* Notifications */}
-        <div style={{ position: 'relative' }}>
+      {/* ========================================================================= */}
+      {/* SEBELAH KIRI: TOMBOL BACK & PROFIL (AVATAR + NAMA)                        */}
+      {/* ========================================================================= */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* Tombol Back (Muncul saat sedang di dalam modul) */}
+        {currentTab !== 'dashboard' && (
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            type="button"
+            onClick={() => setCurrentTab && setCurrentTab('dashboard')}
             style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-main)',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.5rem',
-              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
+              gap: '6px',
+              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '7px 15px',
+              fontSize: '0.84rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(234, 88, 12, 0.4)',
+              transition: 'all 0.18s ease'
             }}
+            title="Kembali ke Beranda Utama (Central Hub)"
           >
-            <Bell size={18} />
-            <span style={{
-              position: 'absolute',
-              top: '4px',
-              right: '4px',
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--accent-primary)',
-              boxShadow: '0 0 6px var(--accent-primary)'
-            }} />
+            <ArrowLeft size={16} />
+            <span>Kembali</span>
           </button>
+        )}
 
-          {showNotifications && (
-            <div style={{
-              position: 'absolute',
-              top: '120%',
-              right: 0,
-              width: '300px',
-              backgroundColor: '#0f172a',
-              border: '1px solid var(--border-highlight)',
-              borderRadius: 'var(--radius-md)',
-              boxShadow: 'var(--shadow-lg)',
-              padding: '1rem',
-              zIndex: 100
-            }}>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                Notifikasi Terbaru
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.8rem' }}>
-                <div style={{ padding: '0.5rem', borderRadius: '6px', background: 'var(--bg-card-hover)' }}>
-                  <div style={{ fontWeight: 600 }}>Update Progress Unit B-05</div>
-                  <div style={{ color: 'var(--text-muted)' }}>Progress naik ke 40% (Struktur Dinding)</div>
-                </div>
-                <div style={{ padding: '0.5rem', borderRadius: '6px', background: 'var(--bg-card-hover)' }}>
-                  <div style={{ fontWeight: 600 }}>Pecah Sertifikat Ready</div>
-                  <div style={{ color: 'var(--text-muted)' }}>SHGB Unit A-01 resmi terbit dari BPN</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* User Profile Dropdown Button */}
+        {/* Profil Pengguna: Avatar + Yazid Hizbullah, S.E.,S.T */}
         <div style={{ position: 'relative' }}>
           <button
+            type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.6rem',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.35rem 0.6rem',
+              gap: '10px',
+              background: 'rgba(30, 41, 59, 0.75)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '10px',
+              padding: '5px 14px 5px 6px',
               cursor: 'pointer',
-              color: 'var(--text-main)'
+              color: 'var(--text-main)',
+              transition: 'all 0.2s'
             }}
+            title="Klik untuk melihat menu profil / ganti user"
           >
             <img
               src={avatarUrl}
               alt="Avatar"
-              style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #F59E0B' }}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1.5px solid #F59E0B'
+              }}
             />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }} className="d-none d-sm-inline">
-              {currentUser?.name || 'User'}
-            </span>
+            <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>
+                {currentUser?.name || 'Yazid Hizbullah, S.E.,S.T'}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 700 }}>
+                {currentUser?.role || 'Direktur Utama'}
+              </div>
+            </div>
           </button>
 
+          {/* Profile Dropdown Menu */}
           {showProfileMenu && (
-            <div style={{
-              position: 'absolute',
-              top: '120%',
-              right: 0,
-              width: '220px',
-              backgroundColor: '#0f172a',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)',
-              boxShadow: 'var(--shadow-lg)',
-              padding: '0.5rem',
-              zIndex: 100
-            }}>
-              <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.25rem' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{currentUser?.name}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{currentUser?.role}</div>
+            <div
+              style={{
+                position: 'absolute',
+                top: '125%',
+                left: 0,
+                width: '240px',
+                backgroundColor: '#0f172a',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.7)',
+                padding: '0.6rem',
+                zIndex: 100
+              }}
+            >
+              <div style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '0.4rem' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#ffffff' }}>{currentUser?.name}</div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--accent-primary)', fontWeight: 700 }}>{currentUser?.role}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{currentUser?.email}</div>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => {
                   setShowProfileMenu(false);
                   onOpenProfile();
                 }}
-                className="btn btn-secondary btn-sm" 
-                style={{ width: '100%', justifyContent: 'flex-start', border: 'none', marginBottom: '0.2rem' }}
+                className="btn btn-secondary btn-sm"
+                style={{ width: '100%', justifyContent: 'flex-start', border: 'none', marginBottom: '0.3rem', fontSize: '0.8rem' }}
               >
-                <User size={14} /> Profil Saya
+                <User size={14} /> Profil Lengkap Saya
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={() => {
                   setShowProfileMenu(false);
                   if (onLogout) onLogout();
                 }}
-                className="btn btn-outline-danger btn-sm" 
-                style={{ width: '100%', justifyContent: 'flex-start', marginTop: '0.25rem' }}
+                className="btn btn-outline-danger btn-sm"
+                style={{ width: '100%', justifyContent: 'flex-start', fontSize: '0.8rem' }}
               >
-                <LogOut size={14} /> Ganti User / Sign Out
+                <LogOut size={14} /> Ganti User / Keluar
               </button>
             </div>
           )}
         </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* SEBELAH KANAN: LOGO PALING KANAN & ASHOKA MANAGEMENT SYSTEM               */}
+      {/* ========================================================================= */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ textAlign: 'right' }}>
+          <div
+            style={{
+              fontSize: '1.05rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              letterSpacing: '0.02em',
+              lineHeight: 1.2
+            }}
+          >
+            Ashoka Management System
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 800, letterSpacing: '0.04em' }}>
+            Asset & Property Management System (AMS)
+          </div>
+        </div>
+
+        <img
+          src="/company-logo.png"
+          alt="Ashoka Logo"
+          style={{
+            width: '38px',
+            height: '38px',
+            objectFit: 'contain'
+          }}
+        />
       </div>
     </header>
   );
