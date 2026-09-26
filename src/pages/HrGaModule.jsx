@@ -868,17 +868,17 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     return ['ALL', ...cats];
   }, [currentDataset]);
 
-  // Configuration 9 Tabs sesuai gambar user
+  // Configuration 9 Tabs sesuai gambar user (tanpa angka/count)
   const HR_GA_SUBTABS = [
-    { id: 'database-karyawan', label: 'Data Base Karyawan', count: employees.length },
-    { id: 'recruitment', label: 'Recruitment', count: candidates.length },
-    { id: 'kontrak-kerja', label: 'Kontrak Kerja', count: contracts.length },
-    { id: 'fasilitas', label: 'Fasilitas', count: facilities.length },
-    { id: 'absensi', label: 'Absensi', count: attendances.length },
-    { id: 'kpi', label: 'KPI', count: kpis.length },
-    { id: 'management-asset', label: 'Management Asset', count: assets.length },
-    { id: 'maintanance', label: 'Maintanance', count: maintenanceTickets.length },
-    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan', count: securityOps.length }
+    { id: 'database-karyawan', label: 'Data Base Karyawan' },
+    { id: 'recruitment', label: 'Recruitment' },
+    { id: 'kontrak-kerja', label: 'Kontrak Kerja' },
+    { id: 'fasilitas', label: 'Fasilitas' },
+    { id: 'absensi', label: 'Absensi' },
+    { id: 'kpi', label: 'KPI' },
+    { id: 'management-asset', label: 'Management Asset' },
+    { id: 'maintanance', label: 'Maintanance' },
+    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' }
   ];
 
   // Title info per tab
@@ -1145,41 +1145,26 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               style={{
-                /* Tampilan kotak biru muda seperti di foto user */
                 background: isActive
-                  ? '#0284c7'
-                  : '#b9d5ec',
-                color: isActive ? '#ffffff' : '#0f172a',
-                border: isActive ? '2px solid #38bdf8' : '1px solid #93c5fd',
+                  ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
+                  : '#0f172a',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #38bdf8' : '1px solid #1e293b',
                 borderRadius: '8px',
-                padding: '9px 10px',
-                fontSize: '0.78rem',
-                fontWeight: 800,
+                padding: '10px 14px',
+                fontSize: '0.8rem',
+                fontWeight: isActive ? 900 : 700,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(2, 132, 199, 0.45)' : '0 2px 4px rgba(0,0,0,0.1)',
-                transition: 'all 0.15s ease',
+                boxShadow: isActive ? '0 4px 14px rgba(2, 132, 199, 0.45)' : 'none',
+                transition: 'all 0.18s ease',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '2px',
                 whiteSpace: 'nowrap'
               }}
             >
               <span>{tab.label}</span>
-              <span
-                style={{
-                  fontSize: '0.66rem',
-                  padding: '1px 6px',
-                  borderRadius: '10px',
-                  background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(15, 23, 42, 0.12)',
-                  color: isActive ? '#ffffff' : '#0369a1',
-                  fontWeight: 900
-                }}
-              >
-                {tab.count} Dok
-              </span>
             </button>
           );
         })}
