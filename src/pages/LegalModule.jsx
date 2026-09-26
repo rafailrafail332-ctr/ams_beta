@@ -37,17 +37,19 @@ import {
 export const LegalModule = () => {
   const { currentUser, showNotification, activeSubTab } = useApp();
 
-  // 4 Main Modules as specified in user reference:
+  // 5 Main Modules as specified in user reference:
   // 1. spk (SPK Vendor)
   // 2. legalitas (Legalitas Perusahaan & Legalitas Proyek)
   // 3. perizinan (PPKR, Siteplan, PBG)
-  // 4. litigasi
+  // 4. litigasi (Penanganan Sengketa & Advokasi)
+  // 5. history-tanah (Riwayat Kepemilikan & Perolehan Tanah)
   const [activeTab, setActiveTab] = useState(() => {
     if (activeSubTab) {
       if (['spk'].includes(activeSubTab)) return 'spk';
       if (['legalitas', 'legalitas-perusahaan', 'legalitas-proyek'].includes(activeSubTab)) return 'legalitas';
       if (['perizinan', 'ppkr', 'siteplan', 'pbg'].includes(activeSubTab)) return 'perizinan';
       if (['litigasi'].includes(activeSubTab)) return 'litigasi';
+      if (['history-tanah', 'history_tanah', 'histori-lahan'].includes(activeSubTab)) return 'history-tanah';
     }
     return 'spk';
   });
@@ -91,6 +93,8 @@ export const LegalModule = () => {
         setPerizinanSubTab(activeSubTab);
       } else if (activeSubTab === 'litigasi') {
         setActiveTab('litigasi');
+      } else if (activeSubTab === 'history-tanah' || activeSubTab === 'history_tanah' || activeSubTab === 'histori-lahan') {
+        setActiveTab('history-tanah');
       }
     }
   }, [activeSubTab]);
@@ -1349,6 +1353,279 @@ export const LegalModule = () => {
     }
   };
 
+  // =========================================================================
+  // 5. DATA STORE: HISTORY TANAH (RIWAYAT ALAS HAK & PEROLEHAN LAHAN PROYEK)
+  // =========================================================================
+  const defaultHistoryTanahList = [
+    {
+      id: 'HST-01',
+      noDok: 'HST/AMS-TNH/2026/01',
+      tanggalDok: '2026-01-14',
+      project: 'Ashoka Park',
+      nama: 'H. Somad (Pemilik Asal)',
+      kategori: 'AJB Asal',
+      judulDokumen: 'Akta Jual Beli No. 12/2026 PPAT Notaris Purna',
+      catatan: 'Luas 4.250 m² - Telah Masuk SHGB Induk',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'AJB_No12_H_Somad.pdf',
+      fileSize: '1.8 MB',
+      fileData: '',
+      files: [
+        { name: 'AJB_No12_H_Somad.pdf', size: '1.8 MB', data: '', type: 'application/pdf' },
+        { name: 'Kwitansi_Pelunasan_Lahan_Somad.pdf', size: '750 KB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'HST-02',
+      noDok: 'HST/AMS-TNH/2025/09',
+      tanggalDok: '2025-09-20',
+      project: 'Ashoka View',
+      nama: 'Bpk. Rahmat Sanusi & Ahli Waris',
+      kategori: 'Surat Pelepasan Hak (SPH)',
+      judulDokumen: 'Surat Pernyataan Pelepasan Hak & Ganti Rugi Lahan',
+      catatan: 'Luas 2.850 m² - Lunas & Bebas Sengketa',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'SPH_Lahan_Rahmat_Sanusi.pdf',
+      fileSize: '1.2 MB',
+      fileData: '',
+      files: [
+        { name: 'SPH_Lahan_Rahmat_Sanusi.pdf', size: '1.2 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'HST-03',
+      noDok: 'HST/AMS-TNH/2024/11',
+      tanggalDok: '2024-11-05',
+      project: 'Ashoka Park',
+      nama: 'Ibu Hj. Aminah (Letter C Desa)',
+      kategori: 'Girik / Letter C',
+      judulDokumen: 'Surat Keterangan Riwayat Tanah Desa No. 593/XI/2024',
+      catatan: 'Luas 1.950 m² - Kohir 244 Blok 03',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'Surat_Riwayat_Tanah_Desa_Aminah.pdf',
+      fileSize: '1.5 MB',
+      fileData: '',
+      files: [
+        { name: 'Surat_Riwayat_Tanah_Desa_Aminah.pdf', size: '1.5 MB', data: '', type: 'application/pdf' },
+        { name: 'Peta_Rik_Desa_Blok03.pdf', size: '2.4 MB', data: '', type: 'application/pdf' }
+      ]
+    }
+  ];
+
+  const [historyTanahList, setHistoryTanahList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_history_tanah_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultHistoryTanahList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_history_tanah_v1', JSON.stringify(historyTanahList));
+    } catch (e) {}
+  }, [historyTanahList]);
+
+  const [searchHistoryTanah, setSearchHistoryTanah] = useState('');
+  const [filterHistoryTanahKategori, setFilterHistoryTanahKategori] = useState('ALL');
+  const [filterHistoryTanahProject, setFilterHistoryTanahProject] = useState('ALL');
+  const [isHistoryTanahModalOpen, setIsHistoryTanahModalOpen] = useState(false);
+  const [editingHistoryTanahId, setEditingHistoryTanahId] = useState(null);
+  const [viewingHistoryTanah, setViewingHistoryTanah] = useState(null);
+  const [historyTanahFileSlide, setHistoryTanahFileSlide] = useState(0);
+  const [historyTanahPrintMode, setHistoryTanahPrintMode] = useState('all');
+  const historyTanahModalRef = useRef(null);
+
+  useEffect(() => {
+    if (viewingHistoryTanah) {
+      if (historyTanahModalRef.current) historyTanahModalRef.current.scrollTop = 0;
+    }
+  }, [viewingHistoryTanah]);
+
+  const [historyTanahForm, setHistoryTanahForm] = useState({
+    noDok: '',
+    tanggalDok: new Date().toISOString().split('T')[0],
+    project: 'Ashoka Park',
+    nama: '',
+    kategori: 'AJB Asal',
+    judulDokumen: '',
+    catatan: '',
+    pic: 'Wahyu Salma Septiani, S.H',
+    fileName: '',
+    fileSize: '',
+    fileData: '',
+    files: []
+  });
+
+  const handleOpenAddHistoryTanah = (defaultCat = 'AJB Asal') => {
+    setEditingHistoryTanahId(null);
+    const nextNo = `HST/AMS-TNH/2026/00${historyTanahList.length + 1}`;
+    setHistoryTanahForm({
+      noDok: nextNo,
+      tanggalDok: new Date().toISOString().split('T')[0],
+      project: 'Ashoka Park',
+      nama: '',
+      kategori: defaultCat,
+      judulDokumen: '',
+      catatan: '',
+      pic: currentUser?.name || 'Wahyu Salma Septiani, S.H',
+      fileName: '',
+      fileSize: '',
+      fileData: '',
+      files: []
+    });
+    setIsHistoryTanahModalOpen(true);
+  };
+
+  const handleOpenEditHistoryTanah = (item) => {
+    setEditingHistoryTanahId(item.id);
+    setHistoryTanahForm({
+      noDok: item.noDok || '',
+      tanggalDok: item.tanggalDok || new Date().toISOString().split('T')[0],
+      project: item.project || 'Ashoka Park',
+      nama: item.nama || '',
+      kategori: item.kategori || 'AJB Asal',
+      judulDokumen: item.judulDokumen || '',
+      catatan: item.catatan || '',
+      pic: item.pic || 'Wahyu Salma Septiani, S.H',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || '',
+      files: item.files || (item.fileName ? [{ name: item.fileName, size: item.fileSize, data: item.fileData }] : [])
+    });
+    setIsHistoryTanahModalOpen(true);
+  };
+
+  const handleHistoryTanahFileChange = (e) => {
+    const uploadedFiles = Array.from(e.target.files);
+    if (uploadedFiles.length === 0) return;
+
+    uploadedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setHistoryTanahForm(prev => {
+          const newFileObj = {
+            name: file.name,
+            size: formatFileSize(file.size),
+            data: uploadEvent.target.result,
+            type: file.type
+          };
+          const currentFiles = prev.files || [];
+          return {
+            ...prev,
+            fileName: currentFiles.length === 0 ? file.name : `${currentFiles.length + 1} Berkas Terlampir`,
+            fileSize: formatFileSize(file.size),
+            fileData: uploadEvent.target.result,
+            files: [...currentFiles, newFileObj]
+          };
+        });
+        showNotification(`Berkas "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveHistoryTanahFile = (indexToRemove) => {
+    setHistoryTanahForm(prev => {
+      const updated = (prev.files || []).filter((_, i) => i !== indexToRemove);
+      return {
+        ...prev,
+        fileName: updated.length > 0 ? updated[0].name : '',
+        fileSize: updated.length > 0 ? updated[0].size : '',
+        fileData: updated.length > 0 ? updated[0].data : '',
+        files: updated
+      };
+    });
+  };
+
+  const handleSaveHistoryTanah = (e) => {
+    e.preventDefault();
+    if (!historyTanahForm.nama || !historyTanahForm.judulDokumen) {
+      showNotification('Mohon lengkapi Nama Pemilik Asal dan Judul Dokumen History Tanah!', 'warning');
+      return;
+    }
+
+    if (editingHistoryTanahId) {
+      setHistoryTanahList(prev => prev.map(item => {
+        if (item.id === editingHistoryTanahId) {
+          return {
+            ...item,
+            ...historyTanahForm
+          };
+        }
+        return item;
+      }));
+      showNotification(`Dokumen History Tanah "${historyTanahForm.judulDokumen}" berhasil diperbarui!`, 'success');
+    } else {
+      const newDoc = {
+        id: `HST-${Date.now()}`,
+        ...historyTanahForm
+      };
+      setHistoryTanahList([newDoc, ...historyTanahList]);
+      showNotification(`Dokumen History Tanah "${newDoc.judulDokumen}" berhasil ditambahkan!`, 'success');
+    }
+    setIsHistoryTanahModalOpen(false);
+  };
+
+  const handleDeleteHistoryTanah = (id, title) => {
+    if (window.confirm(`Hapus dokumen history tanah "${title}"?`)) {
+      setHistoryTanahList(prev => prev.filter(l => l.id !== id));
+      showNotification(`Dokumen "${title}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // Filtered History Tanah List
+  const filteredHistoryTanahList = useMemo(() => {
+    return historyTanahList.filter(item => {
+      const q = searchHistoryTanah.toLowerCase();
+      const matchSearch = 
+        !q ||
+        (item.noDok || '').toLowerCase().includes(q) ||
+        (item.judulDokumen || '').toLowerCase().includes(q) ||
+        (item.nama || '').toLowerCase().includes(q) ||
+        (item.kategori || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+
+      const matchKategori = 
+        filterHistoryTanahKategori === 'ALL' ||
+        (item.kategori || '').toLowerCase() === filterHistoryTanahKategori.toLowerCase();
+
+      const matchProject = 
+        filterHistoryTanahProject === 'ALL' ||
+        item.project === filterHistoryTanahProject;
+
+      return matchSearch && matchKategori && matchProject;
+    });
+  }, [historyTanahList, searchHistoryTanah, filterHistoryTanahKategori, filterHistoryTanahProject]);
+
+  const exportHistoryTanahToExcel = () => {
+    try {
+      const exportData = filteredHistoryTanahList.map((item, idx) => ({
+        'No.': idx + 1,
+        'No. Dok': item.noDok || '-',
+        'Tanggal Dokumen': formatDisplayDate(item.tanggalDok),
+        'Proyek': item.project || '-',
+        'Nama Pemilik Asal': item.nama || '-',
+        'Kategori Alas Hak': item.kategori || '-',
+        'Judul Dokumen': item.judulDokumen || '-',
+        'Catatan / Luas Lahan': item.catatan || '-',
+        'Jumlah Berkas': item.files ? item.files.length : (item.fileName ? 1 : 0),
+        'PIC Legal': item.pic || '-'
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'History Tanah');
+      XLSX.writeFile(wb, `AMS_History_Tanah_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data History Tanah berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
   // Helper function to view / open uploaded file
   const handleViewFile = (fileData, fileName) => {
     if (!fileData) {
@@ -1468,11 +1745,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Modul Legal Corporate</span>
               <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '6px', background: 'rgba(192, 132, 252, 0.2)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.4)', fontWeight: 800 }}>
-                4 Modul & Fitur Upload
+                5 Modul & Fitur Upload
               </span>
             </div>
             <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
-              Sistem Pengarsipan & Unggah Dokumen Resmi (SPK Vendor, Legalitas Perusahaan, Legalitas Proyek, Perizinan, Litigasi)
+              Sistem Pengarsipan & Unggah Dokumen Resmi (SPK Vendor, Legalitas Perusahaan & Proyek, Perizinan, Litigasi, History Tanah)
             </div>
           </div>
         </div>
@@ -1490,8 +1767,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 4 TAB UTAMA (PERSIS 4 KOTAK PEACH PADA DIAGRAM USER):              */}
-      {/* 1. SPK | 2. LEGALITAS | 3. PERIZINAN | 4. LITIGASI                       */}
+      {/* BILAH 5 TAB UTAMA:                                                       */}
+      {/* 1. SPK | 2. LEGALITAS | 3. PERIZINAN | 4. LITIGASI | 5. HISTORY TANAH    */}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -1501,7 +1778,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           borderRadius: '14px',
           padding: '0.5rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           gap: '8px',
           marginBottom: '1.25rem'
         }}
@@ -1611,6 +1888,33 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <span>4. Litigasi</span>
           <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'litigasi' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'litigasi' ? '#fff' : '#fb923c' }}>
             {litigations.length}
+          </span>
+        </button>
+
+        {/* Tab 5: History Tanah */}
+        <button
+          onClick={() => setActiveTab('history-tanah')}
+          style={{
+            background: activeTab === 'history-tanah' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            color: activeTab === 'history-tanah' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'history-tanah' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'history-tanah' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+          }}
+        >
+          <MapPin size={18} />
+          <span>5. History Tanah</span>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'history-tanah' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'history-tanah' ? '#fff' : '#fb923c' }}>
+            {historyTanahList.length}
           </span>
         </button>
       </div>
@@ -2926,6 +3230,408 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           <button
                             type="button"
                             onClick={() => handleDeleteLitigasi(item.id, item.judulDokumen || item.noDok)}
+                            title="Hapus Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 5: HISTORY TANAH (RIWAYAT ALAS HAK & PEROLEHAN TANAH PROYEK)        */}
+      {/* ========================================================================= */}
+      {activeTab === 'history-tanah' && (
+        <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Action Buttons */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span
+                style={{
+                  background: '#fef3c7',
+                  border: '1.5px solid #f59e0b',
+                  color: '#b45309',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  padding: '4px 14px',
+                  borderRadius: '8px',
+                  letterSpacing: '0.3px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <MapPin size={16} />
+                <span>History Tanah</span>
+              </span>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                Pencatatan riwayat kepemilikan tanah, alas hak perolehan (Girik, Letter C, AJB Notaris, SPH), dan integrasi pembebasan lahan proyek.
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={exportHistoryTanahToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  color: '#34d399'
+                }}
+              >
+                <FileSpreadsheet size={14} />
+                <span>Unduh Excel</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenAddHistoryTanah(filterHistoryTanahKategori !== 'ALL' ? filterHistoryTanahKategori : 'AJB Asal')}
+                className="btn btn-primary btn-sm"
+                style={{
+                  background: '#d97706',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)'
+                }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Dokumen History Tanah</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Pills Kategori Dokumen History Tanah */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+            {[
+              { id: 'ALL', label: 'Semua Alas Hak' },
+              { id: 'AJB Asal', label: 'AJB Asal' },
+              { id: 'Girik / Letter C', label: 'Girik / Letter C' },
+              { id: 'Surat Pelepasan Hak (SPH)', label: 'Surat Pelepasan Hak (SPH)' },
+              { id: 'Riwayat Tanah Desa', label: 'Riwayat Tanah Desa' },
+              { id: 'Kwitansi Pembebasan', label: 'Kwitansi Pembebasan' }
+            ].map(cat => {
+              const isActive = filterHistoryTanahKategori === cat.id;
+              const count = cat.id === 'ALL'
+                ? historyTanahList.length
+                : historyTanahList.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilterHistoryTanahKategori(cat.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: isActive ? '1.5px solid #f59e0b' : '1px solid #334155',
+                    background: isActive ? 'rgba(245, 158, 11, 0.15)' : '#0f172a',
+                    color: isActive ? '#fbbf24' : '#94a3b8',
+                    fontSize: '0.76rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: isActive ? '#f59e0b' : '#1e293b',
+                      color: isActive ? '#ffffff' : '#94a3b8',
+                      fontWeight: 900
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              padding: '10px 14px',
+              background: '#090d16',
+              borderRadius: '8px',
+              border: '1px solid #1e293b',
+              marginBottom: '1rem'
+            }}
+          >
+            {/* Search Box */}
+            <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari no. dok, judul dokumen, nama pemilik asal, catatan..."
+                value={searchHistoryTanah}
+                onChange={(e) => setSearchHistoryTanah(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '7px 10px 7px 32px',
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontSize: '0.76rem'
+                }}
+              />
+            </div>
+
+            {/* Dropdown Filters */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Filter size={13} color="#94a3b8" />
+                <select
+                  value={filterHistoryTanahKategori}
+                  onChange={(e) => setFilterHistoryTanahKategori(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+                >
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="AJB Asal">AJB Asal</option>
+                  <option value="Girik / Letter C">Girik / Letter C</option>
+                  <option value="Surat Pelepasan Hak (SPH)">Surat Pelepasan Hak (SPH)</option>
+                  <option value="Riwayat Tanah Desa">Riwayat Tanah Desa</option>
+                  <option value="Kwitansi Pembebasan">Kwitansi Pembebasan</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+
+              <select
+                value={filterHistoryTanahProject}
+                onChange={(e) => setFilterHistoryTanahProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL UTAMA HISTORY TANAH: STRUKTUR PERSIS DENGAN SPK & LITIGASI */}
+          {filteredHistoryTanahList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <MapPin size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen History Tanah</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar arsip riwayat perolehan tanah dan alas hak belum tersedia. Klik tombol di bawah untuk menambah dokumen baru.
+              </div>
+              <button
+                onClick={() => handleOpenAddHistoryTanah()}
+                className="btn btn-primary btn-sm"
+                style={{ background: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Dokumen History Tanah Sekarang</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistoryTanahList.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      style={{
+                        borderBottom: '1px solid #1e293b',
+                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {idx + 1}
+                      </td>
+
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.noDok || 'HST/AMS-TNH/2026/xx'}
+                      </td>
+
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDisplayDate(item.tanggalDok)}
+                      </td>
+
+                      {/* 4. Proyek */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: item.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            color: item.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.project || 'Ashoka Park'}
+                        </span>
+                      </td>
+
+                      {/* 5. Nama */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {item.nama || '-'}
+                        </span>
+                      </td>
+
+                      {/* 6. Kategori */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background:
+                              (item.kategori || '').toLowerCase().includes('ajb') ? 'rgba(59, 130, 246, 0.15)' :
+                              (item.kategori || '').toLowerCase().includes('girik') ? 'rgba(245, 158, 11, 0.15)' :
+                              (item.kategori || '').toLowerCase().includes('sph') ? 'rgba(16, 185, 129, 0.15)' :
+                              'rgba(168, 85, 247, 0.15)',
+                            color:
+                              (item.kategori || '').toLowerCase().includes('ajb') ? '#60a5fa' :
+                              (item.kategori || '').toLowerCase().includes('girik') ? '#fbbf24' :
+                              (item.kategori || '').toLowerCase().includes('sph') ? '#34d399' :
+                              '#c084fc',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.kategori || 'AJB Asal'}
+                        </span>
+                      </td>
+
+                      {/* 7. Judul Dokumen */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {item.judulDokumen || '-'}
+                        </span>
+                      </td>
+
+                      {/* 8. Berkas - Tombol "View" Saja Bersih */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setViewingHistoryTanah(item);
+                            setHistoryTanahFileSlide(0);
+                            setHistoryTanahPrintMode('all');
+                          }}
+                          style={{
+                            background: '#38bdf8',
+                            color: '#090d16',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                            transition: 'transform 0.1s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title="Lihat Pratinjau Dokumen & Berkas"
+                        >
+                          <Eye size={12} />
+                          <span>View</span>
+                        </button>
+                      </td>
+
+                      {/* 9. Catatan */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.catatan ? (
+                          <span
+                            style={{
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                              color: item.catatan.toLowerCase().includes('shgb') || item.catatan.toLowerCase().includes('lunas') ? '#34d399' : '#fde047',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {item.catatan}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
+                        )}
+                      </td>
+
+                      {/* 10. Aksi */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setViewingHistoryTanah(item);
+                              setHistoryTanahFileSlide(0);
+                              setHistoryTanahPrintMode('all');
+                            }}
+                            title="Pratinjau & Cetak Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Printer size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditHistoryTanah(item)}
+                            title="Edit Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteHistoryTanah(item.id, item.judulDokumen || item.noDok)}
                             title="Hapus Dokumen"
                             style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           >
@@ -4496,6 +5202,663 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         {viewingLitigasi.pic || 'Wahyu Salma Septiani, S.H'}
                       </div>
                       <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Legal Corporate Specialist</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 6: FORM TAMBAH / EDIT DOKUMEN HISTORY TANAH                        */}
+      {/* ========================================================================= */}
+      {isHistoryTanahModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '1rem'
+          }}
+        >
+          <div
+            style={{
+              background: '#090d16',
+              border: '1.5px solid #f59e0b',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '620px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '1.8rem',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <MapPin size={18} color="#fbbf24" />
+                <span>{editingHistoryTanahId ? 'Edit Dokumen History Tanah' : 'Tambah Dokumen History Tanah Baru'}</span>
+              </div>
+              <button onClick={() => setIsHistoryTanahModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleSaveHistoryTanah} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen *</label>
+                  <input
+                    type="text"
+                    value={historyTanahForm.noDok}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, noDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                  <input
+                    type="date"
+                    value={historyTanahForm.tanggalDok}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, tanggalDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek Terkait</label>
+                  <select
+                    value={historyTanahForm.project}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, project: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  >
+                    <option value="Ashoka Park">Ashoka Park</option>
+                    <option value="Ashoka View">Ashoka View</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Alas Hak</label>
+                  <select
+                    value={historyTanahForm.kategori}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, kategori: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  >
+                    <option value="AJB Asal">AJB Asal</option>
+                    <option value="Girik / Letter C">Girik / Letter C</option>
+                    <option value="Surat Pelepasan Hak (SPH)">Surat Pelepasan Hak (SPH)</option>
+                    <option value="Riwayat Tanah Desa">Riwayat Tanah Desa</option>
+                    <option value="Kwitansi Pembebasan">Kwitansi Pembebasan</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Pemilik Asal / Ahli Waris / Penjual *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. H. Somad / Ibu Hj. Aminah (Letter C Desa)"
+                  value={historyTanahForm.nama}
+                  onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, nama: e.target.value })}
+                  required
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Dokumen / Akta Tanah *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Akta Jual Beli No. 12/2026 PPAT Notaris / Surat Keterangan Riwayat Tanah Desa"
+                  value={historyTanahForm.judulDokumen}
+                  onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, judulDokumen: e.target.value })}
+                  required
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Luas & Status Lahan</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Luas 4.250 m² - Telah Masuk SHGB Induk / Kohir 244 Blok 03"
+                    value={historyTanahForm.catatan}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, catatan: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>PIC Legal AMS</label>
+                  <input
+                    type="text"
+                    value={historyTanahForm.pic}
+                    onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, pic: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Upload Multi-File Lampiran Berkas */}
+              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <UploadCloud size={14} />
+                  <span>Upload Berkas / Lampiran Dokumen Tanah (Bisa Pilih Banyak Berkas)</span>
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={handleHistoryTanahFileChange}
+                  style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                />
+
+                {/* List Berkas Terunggah */}
+                {historyTanahForm.files && historyTanahForm.files.length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Daftar Berkas Terpilih ({historyTanahForm.files.length} berkas):
+                    </div>
+                    {historyTanahForm.files.map((f, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: '#090d16',
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #1e293b',
+                          fontSize: '0.72rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          <CheckCircle2 size={12} color="#34d399" />
+                          <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
+                          <span style={{ color: '#64748b' }}>({f.size})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveHistoryTanahFile(i)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px 4px' }}
+                          title="Hapus berkas ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsHistoryTanahModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#d97706' }}>
+                  {editingHistoryTanahId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PRATINJAU DOKUMEN & CETAK RESMI HISTORY TANAH                      */}
+      {/* ========================================================================= */}
+      {viewingHistoryTanah && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '2rem 1rem',
+            overflowY: 'auto'
+          }}
+        >
+          {/* Print CSS styling scoped for History Tanah */}
+          <style>
+            {`
+              @media print {
+                @page {
+                  size: A4 portrait;
+                  margin: 10mm 12mm 10mm 12mm;
+                }
+                html, body {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                }
+                body * {
+                  visibility: hidden !important;
+                }
+                .history-tanah-printable-container, .history-tanah-printable-container * {
+                  visibility: visible !important;
+                }
+                .history-tanah-printable-container {
+                  position: absolute !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}
+          </style>
+
+          <div
+            ref={historyTanahModalRef}
+            style={{
+              background: '#090d16',
+              border: '1.5px solid #f59e0b',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '840px',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+              margin: 'auto 0'
+            }}
+          >
+            {/* Top Header Controls (Hidden on Print) */}
+            <div
+              className="no-print"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.4rem',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', padding: '7px', borderRadius: '8px' }}>
+                  <MapPin size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
+                    Pratinjau Dokumen History Tanah ({viewingHistoryTanah.kategori})
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}</strong> &bull; {viewingHistoryTanah.judulDokumen}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons: Print Mode & Print & Close */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Print Choice Selector */}
+                {(() => {
+                  const activeFiles = (viewingHistoryTanah.files && viewingHistoryTanah.files.length > 0)
+                    ? viewingHistoryTanah.files
+                    : (viewingHistoryTanah.fileName ? [{ name: viewingHistoryTanah.fileName, size: viewingHistoryTanah.fileSize, data: viewingHistoryTanah.fileData }] : []);
+                  const hasFiles = activeFiles.length > 0;
+
+                  return (
+                    <div style={{ display: 'flex', background: '#090d16', border: '1px solid #334155', borderRadius: '6px', padding: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setHistoryTanahPrintMode('all')}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '4px',
+                          border: 'none',
+                          background: historyTanahPrintMode === 'all' ? '#d97706' : 'transparent',
+                          color: historyTanahPrintMode === 'all' ? '#ffffff' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Semua
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHistoryTanahPrintMode('surat')}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '4px',
+                          border: 'none',
+                          background: historyTanahPrintMode === 'surat' ? '#d97706' : 'transparent',
+                          color: historyTanahPrintMode === 'surat' ? '#ffffff' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Surat Saja
+                      </button>
+                      {hasFiles && (
+                        <button
+                          type="button"
+                          onClick={() => setHistoryTanahPrintMode('berkas')}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: historyTanahPrintMode === 'berkas' ? '#d97706' : 'transparent',
+                            color: historyTanahPrintMode === 'berkas' ? '#ffffff' : '#94a3b8',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Berkas Saja
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn btn-primary btn-sm"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.76rem',
+                    background: 'linear-gradient(135deg, #d97706, #b45309)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800
+                  }}
+                >
+                  <Printer size={14} />
+                  <span>Cetak</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewingHistoryTanah(null)}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    color: '#cbd5e1',
+                    borderRadius: '6px',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body Container */}
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* SECTION 1: LAMPIRAN BERKAS (If mode is 'all' or 'berkas') */}
+              {(() => {
+                const activeFiles = (viewingHistoryTanah.files && viewingHistoryTanah.files.length > 0)
+                  ? viewingHistoryTanah.files
+                  : (viewingHistoryTanah.fileName ? [{ name: viewingHistoryTanah.fileName, size: viewingHistoryTanah.fileSize, data: viewingHistoryTanah.fileData }] : []);
+                
+                if (activeFiles.length === 0 || historyTanahPrintMode === 'surat') return null;
+
+                const currentFile = activeFiles[historyTanahFileSlide] || activeFiles[0];
+
+                return (
+                  <div
+                    className={historyTanahPrintMode === 'berkas' ? 'history-tanah-printable-container' : ''}
+                    style={{
+                      background: '#0f172a',
+                      border: '1.5px solid #1e293b',
+                      borderRadius: '12px',
+                      padding: '1.2rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Paperclip size={16} color="#fbbf24" />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff' }}>
+                          Lampiran Berkas Alas Hak / Tanah ({activeFiles.length} Berkas)
+                        </span>
+                      </div>
+
+                      {/* Download Button for Current File */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (currentFile.data) {
+                            const a = document.createElement('a');
+                            a.href = currentFile.data;
+                            a.download = currentFile.name || 'berkas_history_tanah.pdf';
+                            a.click();
+                          } else {
+                            showNotification('Berkas fisik siap diunduh saat terhubung ke server/file asli.', 'info');
+                          }
+                        }}
+                        style={{
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '5px 12px',
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Download size={13} />
+                        <span>Unduh Berkas Ini</span>
+                      </button>
+                    </div>
+
+                    {/* File Carousel Slider (if multiple files) */}
+                    {activeFiles.length > 1 && (
+                      <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#090d16', padding: '6px 12px', borderRadius: '6px', marginBottom: '12px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setHistoryTanahFileSlide(prev => (prev > 0 ? prev - 1 : activeFiles.length - 1))}
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                        >
+                          <ChevronLeft size={14} /> Slide Sebelumnya
+                        </button>
+                        <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                          Berkas {historyTanahFileSlide + 1} dari {activeFiles.length}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setHistoryTanahFileSlide(prev => (prev < activeFiles.length - 1 ? prev + 1 : 0))}
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                        >
+                          Slide Berikutnya <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* File Visual Presentation */}
+                    <div style={{ background: '#090d16', borderRadius: '8px', padding: '1.2rem', textAlign: 'center', border: '1px solid #1e293b' }}>
+                      {currentFile.data && currentFile.data.startsWith('data:image') ? (
+                        <img
+                          src={currentFile.data}
+                          alt={currentFile.name}
+                          style={{ maxWidth: '100%', maxHeight: '450px', objectFit: 'contain', borderRadius: '6px' }}
+                        />
+                      ) : (
+                        <div style={{ padding: '2rem 1rem' }}>
+                          <FileText size={48} color="#fbbf24" style={{ margin: '0 auto 12px auto' }} />
+                          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff' }}>{currentFile.name}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Ukuran: {currentFile.size || '1.5 MB'}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '8px', fontWeight: 600 }}>
+                            ✓ Terverifikasi dalam brankas arsip legal tanah AMS
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* SECTION 2: SURAT RESMI REGISTER HISTORY TANAH (If mode is 'all' or 'surat') */}
+              {historyTanahPrintMode !== 'berkas' && (
+                <div
+                  className="history-tanah-printable-container"
+                  style={{
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    padding: '2.2rem 2.4rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    fontFamily: 'Times New Roman, serif',
+                    lineHeight: '1.4'
+                  }}
+                >
+                  {/* Kop Surat Resmi */}
+                  <div style={{ borderBottom: '2.5px solid #000000', paddingBottom: '12px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <img
+                      src="/company-logo.png"
+                      alt="Logo Ashoka"
+                      style={{ width: '65px', height: '65px', objectFit: 'contain' }}
+                    />
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {viewingHistoryTanah.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMILANG PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                        DEVELOPER PROPERTY & LAND ACQUISITION DIVISION
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
+                        Kantor Operasional: Ruko Ashoka Square, Jl. Raya Pemda No. 88, Cibinong - Bogor | Telp: (021) 8790-1234
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Judul Surat Resmi */}
+                  <div style={{ textAlign: 'center', margin: '14px 0 18px 0' }}>
+                    <div style={{ fontSize: '1.08rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
+                      REGISTER & KETERANGAN RIWAYAT ALAS HAK TANAH PROYEK
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, marginTop: '4px' }}>
+                      Nomor Dokumen: {viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: '#475569' }}>
+                      Tanggal Pencatatan: {formatDisplayDate(viewingHistoryTanah.tanggalDok)}
+                    </div>
+                  </div>
+
+                  {/* Isi Ringkasan Dokumen */}
+                  <div style={{ fontSize: '0.84rem', margin: '14px 0', lineHeight: '1.6' }}>
+                    <p style={{ margin: '0 0 10px 0' }}>
+                      Pada hari ini, <strong>{formatDisplayDate(viewingHistoryTanah.tanggalDok)}</strong>, telah diverifikasi dan dicatatkan dalam Brankas Arsip Digital Legal AMS dokumen riwayat alas hak perolehan tanah dengan identitas sebagai berikut:
+                    </p>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', margin: '10px 0' }}>
+                      <tbody>
+                        <tr>
+                          <td style={{ width: '170px', padding: '5px 8px', fontWeight: 700 }}>Proyek Terkait</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingHistoryTanah.project}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Pemilik Asal / Ahli Waris</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingHistoryTanah.nama || '-'}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Kategori Alas Hak</td>
+                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800, color: '#d97706' }}>{viewingHistoryTanah.kategori}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Judul Dokumen / Akta</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingHistoryTanah.judulDokumen}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Catatan & Luas Tanah</td>
+                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800 }}>{viewingHistoryTanah.catatan || '-'}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>PIC Legal Pengadaan Lahan</td>
+                          <td style={{ padding: '5px 8px' }}>: {viewingHistoryTanah.pic || 'Wahyu Salma Septiani, S.H'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <p style={{ margin: '12px 0 0 0' }}>
+                      Dokumen ini sah terdaftar sebagai arsip riwayat perolehan tanah proyek dalam sistem Ashoka Management System (AMS) guna keperluan pensertifikatan, izin siteplan kawasan, dan tertib administrasi pertanahan.
+                    </p>
+                  </div>
+
+                  {/* Tanda Tangan Resmi & Stempel */}
+                  <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pageBreakInside: 'avoid' }}>
+                    <div style={{ textAlign: 'center', width: '220px' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>Pemilik Asal / Ahli Waris</div>
+                      <div style={{ height: '70px' }} />
+                      <div style={{ fontWeight: 900, textDecoration: 'underline', fontSize: '0.85rem' }}>
+                        {viewingHistoryTanah.nama || 'Pemilik Asal'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Pihak Penjual / Pelepas Hak</div>
+                    </div>
+
+                    <div style={{ textAlign: 'center', width: '240px', position: 'relative' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>Bogor, {formatDisplayDate(viewingHistoryTanah.tanggalDok)}</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Divisi Legal Corporate AMS</div>
+                      <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Stempel Visual Cap Resmi */}
+                        <div
+                          style={{
+                            border: '2px solid #d97706',
+                            color: '#d97706',
+                            borderRadius: '50%',
+                            width: '68px',
+                            height: '68px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transform: 'rotate(-10deg)',
+                            fontWeight: 900,
+                            fontSize: '0.58rem',
+                            lineHeight: 1.1,
+                            opacity: 0.85
+                          }}
+                        >
+                          <div>AMS</div>
+                          <div>LEGAL</div>
+                          <div>TANAH</div>
+                        </div>
+                      </div>
+                      <div style={{ fontWeight: 900, textDecoration: 'underline', fontSize: '0.85rem' }}>
+                        {viewingHistoryTanah.pic || 'Wahyu Salma Septiani, S.H'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Land & Legal Corporate Specialist</div>
                     </div>
                   </div>
                 </div>
@@ -6488,7 +7851,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 2. <strong>Legalitas Perusahaan:</strong> Total {legalitasPerusahaanList.length} dokumen hukum perseroan.<br />
                 3. <strong>Legalitas Proyek:</strong> Total {legalitasProyekList.length} sertifikat dan berkas tanah proyek.<br />
                 4. <strong>Perizinan:</strong> Total {perizinanList.length} berkas izin resmi (PPKR, Siteplan, PBG).<br />
-                5. <strong>Litigasi:</strong> Total {litigations.length} catatan penanganan perkara advokasi hukum.
+                5. <strong>Litigasi:</strong> Total {litigations.length} catatan penanganan perkara advokasi hukum.<br />
+                6. <strong>History Tanah:</strong> Total {historyTanahList.length} arsip riwayat perolehan tanah & alas hak.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '3rem' }}>
