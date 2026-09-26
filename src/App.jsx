@@ -46,8 +46,14 @@ function AppContent() {
     setIsAuthenticated(true);
   };
 
+  const handleBackToLanding = () => {
+    setIsAuthenticated(false);
+    setCurrentTab('dashboard');
+  };
+
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentTab('dashboard');
     setIsProfileModalOpen(false);
   };
 
@@ -98,7 +104,7 @@ function AppContent() {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || currentTab === 'dashboard') {
     return <LandingLogin onLoginSuccess={handleLoginSuccess} />;
   }
 
@@ -109,6 +115,7 @@ function AppContent() {
       <Header 
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        onBackToLanding={handleBackToLanding}
         activeTitle={getActiveTitle()} 
         onLogout={handleLogout}
         onOpenProfile={() => setIsProfileModalOpen(true)}

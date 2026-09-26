@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, User, LogOut, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const Header = ({ currentTab, setCurrentTab, activeTitle, onLogout, onOpenProfile }) => {
+export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle, onLogout, onOpenProfile }) => {
   const { theme, toggleTheme, currentUser, getAvatarUrl } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -36,7 +36,13 @@ export const Header = ({ currentTab, setCurrentTab, activeTitle, onLogout, onOpe
         {currentTab !== 'dashboard' && (
           <button
             type="button"
-            onClick={() => setCurrentTab && setCurrentTab('dashboard')}
+            onClick={() => {
+              if (onBackToLanding) {
+                onBackToLanding();
+              } else if (setCurrentTab) {
+                setCurrentTab('dashboard');
+              }
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
