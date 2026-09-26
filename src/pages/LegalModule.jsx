@@ -114,61 +114,192 @@ export const LegalModule = () => {
   };
 
   // =========================================================================
-  // 1. DATA STORE: SPK (SPK VENDOR) - BERSIH KOSONG (EMPTY STATE BASELINE)
+  // 1. DATA STORE: SPK (MOU) & MASTER VENDOR DATABASE INTEGRATION
   // =========================================================================
+  const STORAGE_KEY_DB_VENDOR = 'ams_teknik_db_vendor_v1';
+  const defaultDatabaseVendor = [
+    { id: 'VND-01', nama: 'PT Bangun Jaya Perkasa', noHp: '0812-3456-7890', noKtp: '3201123456780001', status: 'Kontraktor' },
+    { id: 'VND-02', nama: 'CV Mitra Semen Abadi', noHp: '0813-9876-5432', noKtp: '3201123456780002', status: 'Suplier' },
+    { id: 'VND-03', nama: 'UD Cahaya Besi Baja', noHp: '0857-1122-3344', noKtp: '3201123456780003', status: 'Suplier' },
+    { id: 'VND-04', nama: 'PT Mandiri Konstruksi Tama', noHp: '0811-2233-4455', noKtp: '3201123456780004', status: 'Kontraktor' },
+    { id: 'VND-05', nama: 'PT. Yan', noHp: '0815-9988-7766', noKtp: '3201123456780005', status: 'Vendor' },
+    { id: 'VND-06', nama: 'Purna', noHp: '0816-4455-6677', noKtp: '3201123456780006', status: 'Notari' },
+    { id: 'VND-07', nama: 'Kopeasi ABC', noHp: '0818-2233-9900', noKtp: '3201123456780007', status: 'Klien' }
+  ];
+
+  const [vendorDbList, setVendorDbList] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DB_VENDOR);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultDatabaseVendor;
+  });
+
+  // Re-sync vendor database if updated elsewhere
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_DB_VENDOR);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) setVendorDbList(parsed);
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Format date helper: YYYY-MM-DD -> DD/MM/YYYY
+  const formatDisplayDate = (dStr) => {
+    if (!dStr) return '-';
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dStr)) return dStr;
+    try {
+      const parts = dStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    } catch (e) {}
+    return dStr;
+  };
+
+  // Exact 3 default rows as shown in user's reference image
+  const defaultSpkMouList = [
+    {
+      id: 'SPK-MOU-01',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-15',
+      nama: 'PT. Yan',
+      kategori: 'Vendor',
+      judulDokumen: 'SPK unit blok C1',
+      catatan: 'SPK dibatalkan',
+      scope: 'Pekerjaan Pembangunan Unit Rumah Blok C1 Kawasan Ashoka Park',
+      project: 'Ashoka Park',
+      contractVal: 185000000,
+      paymentTerms: 'Termin 1 (30%), Termin 2 (40%), Pelunasan (30%)',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'SPK_Unit_Blok_C1.pdf',
+      fileSize: '1.2 MB',
+      fileData: ''
+    },
+    {
+      id: 'SPK-MOU-02',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-16',
+      nama: 'Purna',
+      kategori: 'Notari',
+      judulDokumen: 'Tagihan biaya AJB',
+      catatan: '',
+      scope: 'Biaya Pengurusan Akta Jual Beli (AJB) & Balik Nama Sertifikat Konsumen',
+      project: 'Ashoka Park',
+      contractVal: 32500000,
+      paymentTerms: 'Pembayaran Lunas Saat Penandatanganan Akta',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'Tagihan_Biaya_AJB_Purna.pdf',
+      fileSize: '850 KB',
+      fileData: ''
+    },
+    {
+      id: 'SPK-MOU-03',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-17',
+      nama: 'Kopeasi ABC',
+      kategori: 'Klien',
+      judulDokumen: 'MoU Kerja sama penjualan',
+      catatan: 'Masa berlaku 31/12/2027',
+      scope: 'Nota Kesepahaman (MoU) Program Penjualan Rumah Kolektif Karyawan',
+      project: 'Ashoka View',
+      contractVal: 750000000,
+      paymentTerms: 'Fasilitas KPR Kolektif & Subsidi Biaya Administrasi',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'MoU_Kerjasama_Penjualan_Koperasi_ABC.pdf',
+      fileSize: '2.4 MB',
+      fileData: ''
+    }
+  ];
+
   const [spkList, setSpkList] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_legal_spk_v4_clean');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('ams_legal_spk_v5_mou');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {}
-    return []; // Clean empty baseline
+    return defaultSpkMouList;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_legal_spk_v4_clean', JSON.stringify(spkList));
+      localStorage.setItem('ams_legal_spk_v5_mou', JSON.stringify(spkList));
     } catch (e) {}
   }, [spkList]);
 
   const [searchSpk, setSearchSpk] = useState('');
+  const [filterSpkKategori, setFilterSpkKategori] = useState('ALL');
   const [filterSpkProject, setFilterSpkProject] = useState('ALL');
-  const [filterSpkStatus, setFilterSpkStatus] = useState('ALL');
   const [isSpkModalOpen, setIsSpkModalOpen] = useState(false);
-  const [selectedSpkPrint, setSelectedSpkPrint] = useState(null);
+  const [editingSpkId, setEditingSpkId] = useState(null);
+  const [viewingSpk, setViewingSpk] = useState(null);
   const [spkForm, setSpkForm] = useState({
-    spkNo: '',
-    vendorName: '',
+    noDok: '',
+    tanggalDok: new Date().toISOString().split('T')[0],
+    nama: '',
+    kategori: 'Vendor',
+    judulDokumen: '',
+    catatan: '',
     scope: '',
     project: 'Ashoka Park',
     contractVal: '',
-    paymentTerms: 'DP 20%, Termin Progres 50%, Pelunasan 30%',
-    issueDate: new Date().toISOString().split('T')[0],
-    dueDate: '',
-    status: 'SPK Terbit / Mulai',
+    paymentTerms: 'Termin Progres 50%, Pelunasan BAST 50%',
     pic: 'Wahyu Salma Septiani, S.H',
-    notes: '',
     fileName: '',
     fileSize: '',
     fileData: ''
   });
 
   const handleOpenAddSpk = () => {
+    setEditingSpkId(null);
     const nextNo = `SPK/AMS-VND/2026/0${spkList.length + 1}`;
     setSpkForm({
-      spkNo: nextNo,
-      vendorName: '',
+      noDok: nextNo,
+      tanggalDok: new Date().toISOString().split('T')[0],
+      nama: '',
+      kategori: 'Vendor',
+      judulDokumen: '',
+      catatan: '',
       scope: '',
       project: 'Ashoka Park',
       contractVal: '',
-      paymentTerms: 'DP 20%, Termin Progres 50%, Pelunasan 30%',
-      issueDate: new Date().toISOString().split('T')[0],
-      dueDate: '',
-      status: 'SPK Terbit / Mulai',
+      paymentTerms: 'Termin Progres 50%, Pelunasan BAST 50%',
       pic: currentUser?.name || 'Wahyu Salma Septiani, S.H',
-      notes: '',
       fileName: '',
       fileSize: '',
       fileData: ''
+    });
+    setIsSpkModalOpen(true);
+  };
+
+  const handleOpenEditSpk = (spk) => {
+    setEditingSpkId(spk.id);
+    setSpkForm({
+      noDok: spk.noDok || spk.spkNo || '',
+      tanggalDok: spk.tanggalDok || spk.issueDate || new Date().toISOString().split('T')[0],
+      nama: spk.nama || spk.vendorName || '',
+      kategori: spk.kategori || 'Vendor',
+      judulDokumen: spk.judulDokumen || spk.scope || '',
+      catatan: spk.catatan || spk.notes || '',
+      scope: spk.scope || '',
+      project: spk.project || 'Ashoka Park',
+      contractVal: spk.contractVal || '',
+      paymentTerms: spk.paymentTerms || '',
+      pic: spk.pic || 'Wahyu Salma Septiani, S.H',
+      fileName: spk.fileName || '',
+      fileSize: spk.fileSize || '',
+      fileData: spk.fileData || ''
     });
     setIsSpkModalOpen(true);
   };
@@ -190,65 +321,103 @@ export const LegalModule = () => {
     }
   };
 
-  const handleSaveSpk = (e) => {
-    e.preventDefault();
-    if (!spkForm.spkNo || !spkForm.vendorName || !spkForm.scope) {
-      showNotification('Mohon lengkapi Nomor SPK, Nama Vendor, dan Lingkup Pekerjaan!', 'warning');
+  const handleQuickAddVendorToDb = () => {
+    const vName = (spkForm.nama || '').trim();
+    if (!vName) {
+      showNotification('Nama vendor masih kosong!', 'warning');
       return;
     }
-    const newSpk = {
-      id: `SPK-${Date.now()}`,
-      ...spkForm,
-      contractVal: Number(spkForm.contractVal) || 0
+    const exists = vendorDbList.some(v => v.nama.toLowerCase() === vName.toLowerCase());
+    if (exists) {
+      showNotification(`Vendor "${vName}" sudah terdaftar di Database Vendor.`, 'info');
+      return;
+    }
+    const newVendor = {
+      id: `VND-${Date.now()}`,
+      nama: vName,
+      status: spkForm.kategori || 'Vendor',
+      noHp: '-',
+      noKtp: '-'
     };
-    setSpkList([newSpk, ...spkList]);
-    setIsSpkModalOpen(false);
-    showNotification(`Surat Perintah Kerja ${newSpk.spkNo} berhasil diterbitkan dan diunggah!`, 'success');
+    const updated = [...vendorDbList, newVendor];
+    setVendorDbList(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY_DB_VENDOR, JSON.stringify(updated));
+    } catch (e) {}
+    showNotification(`Vendor "${vName}" berhasil didaftarkan ke Database Master Vendor!`, 'success');
   };
 
-  const handleDeleteSpk = (id, spkNo) => {
-    if (window.confirm(`Hapus berkas SPK ${spkNo}?`)) {
+  const handleSaveSpk = (e) => {
+    e.preventDefault();
+    if (!spkForm.noDok || !spkForm.nama || !spkForm.judulDokumen) {
+      showNotification('Mohon lengkapi No. Dokumen, Nama Pihak, dan Judul Dokumen!', 'warning');
+      return;
+    }
+
+    if (editingSpkId) {
+      setSpkList(prev => prev.map(s => s.id === editingSpkId ? {
+        ...s,
+        ...spkForm,
+        contractVal: Number(spkForm.contractVal) || 0
+      } : s));
+      showNotification(`Dokumen SPK (MOU) ${spkForm.noDok} berhasil diperbarui!`, 'success');
+    } else {
+      const newSpk = {
+        id: `SPK-MOU-${Date.now()}`,
+        ...spkForm,
+        contractVal: Number(spkForm.contractVal) || 0
+      };
+      setSpkList([newSpk, ...spkList]);
+      showNotification(`Dokumen SPK (MOU) ${newSpk.noDok} berhasil ditambahkan!`, 'success');
+    }
+    setIsSpkModalOpen(false);
+    setEditingSpkId(null);
+  };
+
+  const handleDeleteSpk = (id, noDok) => {
+    if (window.confirm(`Hapus dokumen SPK (MOU) ${noDok}?`)) {
       setSpkList(prev => prev.filter(s => s.id !== id));
-      showNotification(`SPK ${spkNo} berhasil dihapus.`, 'warning');
+      showNotification(`Dokumen SPK (MOU) ${noDok} berhasil dihapus.`, 'warning');
     }
   };
 
   const filteredSpkList = useMemo(() => {
     return spkList.filter(s => {
-      const matchSearch = (s.spkNo || '').toLowerCase().includes(searchSpk.toLowerCase()) ||
-                          (s.vendorName || '').toLowerCase().includes(searchSpk.toLowerCase()) ||
-                          (s.scope || '').toLowerCase().includes(searchSpk.toLowerCase());
-      const matchProject = filterSpkProject === 'ALL' || s.project === filterSpkProject;
-      const matchStatus = filterSpkStatus === 'ALL' || s.status === filterSpkStatus;
-      return matchSearch && matchProject && matchStatus;
+      const docNo = (s.noDok || s.spkNo || '').toLowerCase();
+      const nama = (s.nama || s.vendorName || '').toLowerCase();
+      const judul = (s.judulDokumen || s.scope || '').toLowerCase();
+      const catatan = (s.catatan || s.notes || '').toLowerCase();
+      const q = searchSpk.toLowerCase();
+      const matchSearch = docNo.includes(q) || nama.includes(q) || judul.includes(q) || catatan.includes(q);
+      const matchKategori = filterSpkKategori === 'ALL' || (s.kategori || 'Vendor') === filterSpkKategori;
+      const matchProject = filterSpkProject === 'ALL' || (s.project || 'Ashoka Park') === filterSpkProject;
+      return matchSearch && matchKategori && matchProject;
     });
-  }, [spkList, searchSpk, filterSpkProject, filterSpkStatus]);
+  }, [spkList, searchSpk, filterSpkKategori, filterSpkProject]);
 
   const handleExportSpkExcel = () => {
     if (filteredSpkList.length === 0) {
-      showNotification('Tidak ada data SPK untuk diunduh.', 'warning');
+      showNotification('Tidak ada data SPK (MOU) untuk diunduh.', 'warning');
       return;
     }
     const data = filteredSpkList.map((s, idx) => ({
-      'No': idx + 1,
-      'No. SPK': s.spkNo,
-      'Vendor / Kontraktor': s.vendorName,
-      'Lingkup Pekerjaan': s.scope,
-      'Proyek': s.project,
-      'Nilai Kontrak (Rp)': s.contractVal,
-      'Sistem Pembayaran': s.paymentTerms,
-      'Tanggal Terbit': s.issueDate,
-      'Target Selesai': s.dueDate,
-      'Status Pelaksanaan': s.status,
-      'Nama File Berkas': s.fileName || 'Belum diunggah',
-      'PIC Legal': s.pic,
-      'Catatan': s.notes
+      'No.': idx + 1,
+      'No. Dok': s.noDok || s.spkNo || '-',
+      'Tanggal Dokumen': formatDisplayDate(s.tanggalDok || s.issueDate),
+      'Nama': s.nama || s.vendorName || '-',
+      'Kategori': s.kategori || 'Vendor',
+      'Judul Dokumen': s.judulDokumen || s.scope || '-',
+      'Berkas': s.fileName || 'Ada Berkas',
+      'Catatan': s.catatan || s.notes || '-',
+      'Lingkup Pekerjaan': s.scope || '-',
+      'Proyek': s.project || '-',
+      'Nilai Kontrak (Rp)': s.contractVal || 0
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Daftar SPK Vendor');
-    XLSX.writeFile(wb, `SPK_Vendor_AMS_${new Date().toISOString().split('T')[0]}.xlsx`);
-    showNotification('File Excel SPK Vendor berhasil diunduh!', 'success');
+    XLSX.utils.book_append_sheet(wb, ws, 'SPK (MOU)');
+    XLSX.writeFile(wb, `SPK_MOU_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showNotification('File Excel SPK (MOU) berhasil diunduh!', 'success');
   };
 
   // =========================================================================
@@ -725,7 +894,7 @@ export const LegalModule = () => {
           }}
         >
           <FileSignature size={18} />
-          <span>1. SPK</span>
+          <span>1. SPK (MOU)</span>
           <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'spk' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'spk' ? '#fff' : '#fb923c' }}>
             {spkList.length}
           </span>
@@ -816,19 +985,20 @@ export const LegalModule = () => {
       {/* ========================================================================= */}
       {/* MODUL 1: SPK (SUB-MODUL: SPK VENDOR)                                     */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* MODUL 1: SPK (MOU) - STRUKTUR TABEL & TAMPILAN PERSIS SESUAI GAMBAR        */}
+      {/* ========================================================================= */}
       {activeTab === 'spk' && (
         <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem' }}>
+          {/* Header Title Badge persis gambar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.2rem' }}>
             <div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileSignature size={20} color="#fb923c" />
-                <span>SPK Vendor (Surat Perintah Kerja Rekanan & Kontraktor)</span>
-                <span style={{ fontSize: '0.72rem', background: 'rgba(251, 146, 60, 0.15)', color: '#fb923c', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
-                  {filteredSpkList.length} SPK Terdaftar
-                </span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fed7aa', color: '#c2410c', border: '2px solid #fb923c', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(251, 146, 60, 0.25)', marginBottom: '6px' }}>
+                <FileSignature size={20} color="#ea580c" />
+                <span>SPK (MOU)</span>
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                Penerbitan kontrak kerja sama pelaksanaan proyek, nilai borongan, termin pembayaran & upload berkas fisik SPK resmi.
+              <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                Pengarsipan Perjanjian Kerja Sama, SPK Rekanan/Vendor, Tagihan AJB Notaris, dan Nota Kesepahaman (MoU) Klien/Mitra.
               </div>
             </div>
 
@@ -844,29 +1014,44 @@ export const LegalModule = () => {
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#ea580c' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#ea580c', fontWeight: 800 }}
               >
-                <UploadCloud size={14} />
-                <span>+ Upload / Terbitkan SPK Baru</span>
+                <Plus size={15} />
+                <span>+ Tambah Dokumen SPK (MOU)</span>
               </button>
             </div>
           </div>
 
-          {/* Filter Bar SPK */}
+          {/* Filter Bar SPK (MOU) */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#090d16', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.2rem' }}>
             <div style={{ flex: '1', minWidth: '220px', position: 'relative' }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
               <input
                 type="text"
-                placeholder="Cari nomor SPK, nama vendor, atau lingkup kerja..."
+                placeholder="Cari No. Dok, Nama pihak, judul dokumen, catatan..."
                 value={searchSpk}
                 onChange={(e) => setSearchSpk(e.target.value)}
                 style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Filter size={13} color="#94a3b8" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Filter size={13} color="#94a3b8" />
+                <select
+                  value={filterSpkKategori}
+                  onChange={(e) => setFilterSpkKategori(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+                >
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="Vendor">Vendor</option>
+                  <option value="Notari">Notari (Notaris)</option>
+                  <option value="Klien">Klien</option>
+                  <option value="Kontraktor">Kontraktor</option>
+                  <option value="Suplier">Suplier</option>
+                </select>
+              </div>
+
               <select
                 value={filterSpkProject}
                 onChange={(e) => setFilterSpkProject(e.target.value)}
@@ -876,115 +1061,181 @@ export const LegalModule = () => {
                 <option value="Ashoka Park">Ashoka Park</option>
                 <option value="Ashoka View">Ashoka View</option>
               </select>
-
-              <select
-                value={filterSpkStatus}
-                onChange={(e) => setFilterSpkStatus(e.target.value)}
-                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
-              >
-                <option value="ALL">Semua Status</option>
-                <option value="Sedang Berjalan">Sedang Berjalan</option>
-                <option value="SPK Terbit / Mulai">SPK Terbit / Mulai</option>
-                <option value="Selesai (BAST Terbit)">Selesai (BAST Terbit)</option>
-              </select>
             </div>
           </div>
 
-          {/* Tabel / Empty State SPK */}
+          {/* Tabel Utama SPK (MOU) Sesuai Kolom di Gambar */}
           {filteredSpkList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.1)', color: '#fb923c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <FileSignature size={28} />
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data SPK Vendor</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen SPK (MOU)</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                Data SPK Vendor masih kosong. Klik tombol di bawah untuk mengunggah berkas kontrak atau menerbitkan SPK vendor baru.
+                Daftar dokumen SPK (MOU) masih kosong. Klik tombol di bawah untuk menambah atau mengunggah dokumen baru.
               </div>
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
                 style={{ background: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
               >
-                <UploadCloud size={15} />
-                <span>+ Upload / Terbitkan SPK Vendor Sekarang</span>
+                <Plus size={15} />
+                <span>+ Tambah Dokumen SPK (MOU) Sekarang</span>
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
                 <thead>
-                  <tr style={{ background: '#0f172a', borderBottom: '1.5px solid #334155', color: '#94a3b8', textAlign: 'left' }}>
-                    <th style={{ padding: '10px 12px' }}>NO. SPK</th>
-                    <th style={{ padding: '10px 12px' }}>KONTRAKTOR / VENDOR</th>
-                    <th style={{ padding: '10px 12px' }}>LINGKUP PEKERJAAN & PROYEK</th>
-                    <th style={{ padding: '10px 12px' }}>NILAI KONTRAK (RP)</th>
-                    <th style={{ padding: '10px 12px' }}>BERKAS UPLOAD</th>
-                    <th style={{ padding: '10px 12px' }}>STATUS PELAKSANAAN</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'center' }}>AKSI</th>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c' }}>
+                    <th style={{ padding: '11px 8px', textAlign: 'center', width: '50px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 14px', width: '160px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Nama</th>
+                    <th style={{ padding: '11px 12px', width: '110px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', minWidth: '220px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '90px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', minWidth: '180px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '120px', fontWeight: 900 }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSpkList.map((spk, idx) => (
-                    <tr key={spk.id} style={{ borderBottom: '1px solid #1e293b', background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.015)' : 'transparent' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 800, color: '#fb923c' }}>
-                        {spk.spkNo}
-                        <div style={{ fontSize: '0.68rem', color: '#64748b' }}>PIC: {spk.pic}</div>
+                    <tr
+                      key={spk.id}
+                      style={{
+                        borderBottom: '1px solid #1e293b',
+                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ padding: '10px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b' }}>
+                        {idx + 1}
                       </td>
-                      <td style={{ padding: '10px 12px' }}>
-                        <div style={{ fontWeight: 800, color: '#ffffff' }}>{spk.vendorName}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{spk.paymentTerms}</div>
+
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
+                        {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
                       </td>
-                      <td style={{ padding: '10px 12px' }}>
-                        <div style={{ color: '#f1f5f9', fontWeight: 600 }}>{spk.scope}</div>
-                        <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '3px', background: spk.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)', color: spk.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24', fontWeight: 700 }}>
-                          {spk.project}
-                        </span>
+
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b' }}>
+                        {formatDisplayDate(spk.tanggalDok || spk.issueDate)}
                       </td>
-                      <td style={{ padding: '10px 12px', fontWeight: 800, color: '#34d399' }}>
-                        {formatRupiah(spk.contractVal)}
-                      </td>
-                      <td style={{ padding: '10px 12px' }}>
-                        {spk.fileName ? (
-                          <button
-                            onClick={() => handleViewFile(spk.fileData, spk.fileName)}
-                            style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#38bdf8', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                          >
-                            <Paperclip size={12} />
-                            <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{spk.fileName}</span>
-                          </button>
-                        ) : (
-                          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>- Belum ada file -</span>
+
+                      {/* 4. Nama (dari Database Vendor) */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                        <div style={{ fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>{spk.nama || spk.vendorName}</span>
+                        </div>
+                        {vendorDbList.some(v => v.nama.toLowerCase() === (spk.nama || spk.vendorName || '').toLowerCase()) && (
+                          <div style={{ fontSize: '0.66rem', color: '#38bdf8', marginTop: '1px' }}>
+                            ✓ Data Base Vendor
+                          </div>
                         )}
                       </td>
-                      <td style={{ padding: '10px 12px' }}>
+
+                      {/* 5. Kategori */}
+                      <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
                         <span
                           style={{
-                            fontSize: '0.7rem',
+                            fontSize: '0.72rem',
                             padding: '2px 8px',
                             borderRadius: '4px',
-                            background: spk.status.includes('Selesai') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(251, 146, 60, 0.2)',
-                            color: spk.status.includes('Selesai') ? '#34d399' : '#fb923c',
+                            background:
+                              (spk.kategori || '').toLowerCase().includes('notar') ? 'rgba(192, 132, 252, 0.15)' :
+                              (spk.kategori || '').toLowerCase().includes('klien') ? 'rgba(56, 189, 248, 0.15)' :
+                              'rgba(251, 146, 60, 0.15)',
+                            color:
+                              (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
+                              (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
+                              '#fb923c',
                             fontWeight: 800
                           }}
                         >
-                          {spk.status}
+                          {spk.kategori || 'Vendor'}
                         </span>
                       </td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            onClick={() => setSelectedSpkPrint(spk)}
-                            title="Cetak SPK"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem' }}
+
+                      {/* 6. Judul Dokumen */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                        <div style={{ color: '#f1f5f9', fontWeight: 700 }}>
+                          {spk.judulDokumen || spk.scope || '-'}
+                        </div>
+                        {spk.project && (
+                          <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                            {spk.project}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 7. Berkas (Tombol View persis di gambar) */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                        <button
+                          onClick={() => setViewingSpk(spk)}
+                          style={{
+                            background: '#38bdf8',
+                            color: '#090d16',
+                            border: 'none',
+                            padding: '4px 14px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                            transition: 'transform 0.1s'
+                          }}
+                          title="Lihat Data Dokumen SPK (MOU)"
+                        >
+                          <Eye size={12} />
+                          <span>View</span>
+                        </button>
+                      </td>
+
+                      {/* 8. Catatan */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                        {spk.catatan ? (
+                          <span
+                            style={{
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                              color: spk.catatan.toLowerCase().includes('batal') ? '#f87171' : '#fde047'
+                            }}
                           >
-                            <Printer size={13} />
+                            {spk.catatan}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#64748b' }}>-</span>
+                        )}
+                      </td>
+
+                      {/* 9. Aksi */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center' }}>
+                        <div style={{ display: 'inline-flex', gap: '5px' }}>
+                          <button
+                            onClick={() => setViewingSpk(spk)}
+                            title="Pratinjau & Cetak Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Printer size={12} />
                           </button>
                           <button
-                            onClick={() => handleDeleteSpk(spk.id, spk.spkNo)}
-                            title="Hapus SPK"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 8px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            onClick={() => handleOpenEditSpk(spk)}
+                            title="Edit Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           >
-                            <Trash2 size={13} />
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSpk(spk.id, spk.noDok || spk.spkNo)}
+                            title="Hapus Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Trash2 size={12} />
                           </button>
                         </div>
                       </td>
@@ -1592,7 +1843,7 @@ export const LegalModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 1: UPLOAD / TERBITKAN SPK VENDOR BARU                               */}
+      {/* MODAL 1: FORM TAMBAH / EDIT DOKUMEN SPK (MOU)                            */}
       {/* ========================================================================= */}
       {isSpkModalOpen && (
         <div
@@ -1614,7 +1865,7 @@ export const LegalModule = () => {
               border: '1.5px solid #ea580c',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '600px',
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '1.8rem',
@@ -1622,24 +1873,167 @@ export const LegalModule = () => {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>➕ Upload / Terbitkan SPK Vendor Baru</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileSignature size={20} color="#fb923c" />
+                <span>{editingSpkId ? '✏️ Edit Dokumen SPK (MOU)' : '➕ Tambah Dokumen SPK (MOU)'}</span>
+              </div>
               <button onClick={() => setIsSpkModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveSpk} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {/* BARIS 1: No. Dok & Tanggal Dokumen */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor SPK Resmi *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>No. Dokumen (No. Dok) *</label>
                   <input
                     type="text"
-                    value={spkForm.spkNo}
-                    onChange={(e) => setSpkForm({ ...spkForm, spkNo: e.target.value })}
+                    placeholder="e.g. xxx/xxx/xxx atau 001/SPK-YGP/X/2025"
+                    value={spkForm.noDok}
+                    onChange={(e) => setSpkForm({ ...spkForm, noDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                  <input
+                    type="date"
+                    value={spkForm.tanggalDok}
+                    onChange={(e) => setSpkForm({ ...spkForm, tanggalDok: e.target.value })}
                     required
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
+              </div>
+
+              {/* BARIS 2: NAMA (NGAMBIL DARI DATABASE VENDOR) & KATEGORI */}
+              <div style={{ background: 'rgba(251, 146, 60, 0.05)', border: '1px solid rgba(251, 146, 60, 0.25)', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800 }}>
+                    👤 Nama (Pihak Kedua / Rekanan) *
+                  </label>
+                  <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 700 }}>
+                    🔗 Terhubung ke Database Vendor
+                  </span>
+                </div>
+
+                {/* Dropdown Ambil dari Database Vendor */}
+                <select
+                  onChange={(e) => {
+                    const selName = e.target.value;
+                    if (!selName) return;
+                    const match = vendorDbList.find(v => v.nama === selName);
+                    setSpkForm(prev => ({
+                      ...prev,
+                      nama: selName,
+                      kategori: match ? (match.status || 'Vendor') : prev.kategori
+                    }));
+                  }}
+                  style={{ width: '100%', background: '#0f172a', border: '1.5px solid #38bdf8', borderRadius: '7px', padding: '7px 10px', color: '#38bdf8', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 700 }}
+                >
+                  <option value="">-- 🔍 Pilih dari Database Vendor ({vendorDbList.length} Rekanan Terdaftar) --</option>
+                  {vendorDbList.map(v => (
+                    <option key={v.id || v.nama} value={v.nama}>
+                      {v.nama} &bull; ({v.status || 'Vendor'})
+                    </option>
+                  ))}
+                </select>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '8px' }}>
+                  <div>
+                    <input
+                      type="text"
+                      list="vendor-mou-options"
+                      placeholder="Ketik atau pilih nama rekanan..."
+                      value={spkForm.nama}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const match = vendorDbList.find(v => v.nama.toLowerCase() === val.toLowerCase());
+                        setSpkForm(prev => ({
+                          ...prev,
+                          nama: val,
+                          kategori: match ? (match.status || 'Vendor') : prev.kategori
+                        }));
+                      }}
+                      required
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    />
+                    <datalist id="vendor-mou-options">
+                      {vendorDbList.map(v => (
+                        <option key={v.id || v.nama} value={v.nama}>
+                          {v.nama} ({v.status || 'Vendor'})
+                        </option>
+                      ))}
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <select
+                      value={spkForm.kategori}
+                      onChange={(e) => setSpkForm({ ...spkForm, kategori: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}
+                    >
+                      <option value="Vendor">Vendor</option>
+                      <option value="Notari">Notari (Notaris)</option>
+                      <option value="Klien">Klien</option>
+                      <option value="Kontraktor">Kontraktor</option>
+                      <option value="Suplier">Suplier</option>
+                      <option value="Bank">Bank</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Status Vendor di Database */}
+                {spkForm.nama && (
+                  <div style={{ marginTop: '6px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    {vendorDbList.some(v => v.nama.toLowerCase() === spkForm.nama.trim().toLowerCase()) ? (
+                      <span style={{ color: '#34d399', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle2 size={12} /> Terdaftar di Data Base Vendor
+                      </span>
+                    ) : (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ color: '#fbbf24' }}>ℹ️ Belum terdaftar di DB</span>
+                        <button
+                          type="button"
+                          onClick={handleQuickAddVendorToDb}
+                          style={{ background: 'rgba(56, 189, 248, 0.2)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700 }}
+                        >
+                          + Daftarkan ke DB Vendor
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* BARIS 3: Judul Dokumen */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Dokumen *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. SPK unit blok C1, Tagihan biaya AJB, MoU Kerja sama penjualan"
+                  value={spkForm.judulDokumen}
+                  onChange={(e) => setSpkForm({ ...spkForm, judulDokumen: e.target.value })}
+                  required
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                />
+              </div>
+
+              {/* BARIS 4: Catatan & Kawasan Proyek */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek Kawasan *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan Dokumen</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. SPK dibatalkan, Masa berlaku 31/12/2027"
+                    value={spkForm.catatan}
+                    onChange={(e) => setSpkForm({ ...spkForm, catatan: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek Kawasan</label>
                   <select
                     value={spkForm.project}
                     onChange={(e) => setSpkForm({ ...spkForm, project: e.target.value })}
@@ -1651,92 +2045,46 @@ export const LegalModule = () => {
                 </div>
               </div>
 
+              {/* BARIS 5: Lingkup Pekerjaan / Detail MoU */}
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Kontraktor / Vendor Pelaksana *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. CV. Bangun Mandiri / Mandor Sukadi"
-                  value={spkForm.vendorName}
-                  onChange={(e) => setSpkForm({ ...spkForm, vendorName: e.target.value })}
-                  required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Lingkup Pekerjaan *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Lingkup Pekerjaan / Ketentuan MoU</label>
                 <textarea
                   rows="2"
-                  placeholder="e.g. Pekerjaan Pemasangan Paving Block Jalan Boulevard ROW 8"
+                  placeholder="e.g. Pelaksanaan pekerjaan konstruksi rumah kavling atau klausul nota kesepahaman"
                   value={spkForm.scope}
                   onChange={(e) => setSpkForm({ ...spkForm, scope: e.target.value })}
-                  required
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
+              {/* BARIS 6: Nilai Kontrak (Rp) */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nilai Kontrak (Rp) *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nilai Kontrak / Biaya (Rp)</label>
                   <input
                     type="number"
-                    placeholder="e.g. 150000000"
+                    placeholder="e.g. 185000000"
                     value={spkForm.contractVal}
                     onChange={(e) => setSpkForm({ ...spkForm, contractVal: e.target.value })}
-                    required
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status Pelaksanaan</label>
-                  <select
-                    value={spkForm.status}
-                    onChange={(e) => setSpkForm({ ...spkForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="SPK Terbit / Mulai">SPK Terbit / Mulai</option>
-                    <option value="Sedang Berjalan">Sedang Berjalan</option>
-                    <option value="Selesai (BAST Terbit)">Selesai (BAST Terbit)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Sistem Pembayaran / Termin</label>
-                <input
-                  type="text"
-                  value={spkForm.paymentTerms}
-                  onChange={(e) => setSpkForm({ ...spkForm, paymentTerms: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Terbit SPK</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Sistem Pembayaran / Termin</label>
                   <input
-                    type="date"
-                    value={spkForm.issueDate}
-                    onChange={(e) => setSpkForm({ ...spkForm, issueDate: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Target Selesai (Deadline)</label>
-                  <input
-                    type="date"
-                    value={spkForm.dueDate}
-                    onChange={(e) => setSpkForm({ ...spkForm, dueDate: e.target.value })}
+                    type="text"
+                    value={spkForm.paymentTerms}
+                    onChange={(e) => setSpkForm({ ...spkForm, paymentTerms: e.target.value })}
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              {/* Upload File Attachment */}
+              {/* Upload Berkas Dokumen */}
               <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
                 <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
-                  <span>Unggah Berkas Fisik SPK (PDF / Scan Gambar)</span>
+                  <span>Unggah Berkas Fisik (PDF / Scan Gambar / DOC)</span>
                 </label>
                 <input
                   type="file"
@@ -1747,15 +2095,15 @@ export const LegalModule = () => {
                 {spkForm.fileName && (
                   <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <CheckCircle2 size={12} />
-                    <span>File siap: {spkForm.fileName} ({spkForm.fileSize})</span>
+                    <span>File terlampir: {spkForm.fileName} ({spkForm.fileSize})</span>
                   </div>
                 )}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
                 <button type="button" onClick={() => setIsSpkModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#ea580c' }}>
-                  Simpan & Terbitkan SPK
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#ea580c', fontWeight: 800 }}>
+                  {editingSpkId ? 'Simpan Perubahan' : 'Simpan & Daftarkan Dokumen'}
                 </button>
               </div>
             </form>
@@ -2421,14 +2769,14 @@ export const LegalModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL CETAK RESMI SPK PRINT VIEW                                          */}
+      {/* MODAL PRATINJAU DOKUMEN & CETAK RESMI SPK (MOU)                          */}
       {/* ========================================================================= */}
-      {selectedSpkPrint && (
+      {viewingSpk && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
+            background: 'rgba(0, 0, 0, 0.88)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
@@ -2437,112 +2785,270 @@ export const LegalModule = () => {
             padding: '1rem'
           }}
         >
+          {/* Print CSS styling scoped for SPK (MOU) */}
+          <style>
+            {`
+              @media print {
+                @page {
+                  size: A4 portrait;
+                  margin: 12mm 15mm 12mm 15mm;
+                }
+                body {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                }
+                body * {
+                  visibility: hidden !important;
+                }
+                #spk-print-area, #spk-print-area * {
+                  visibility: visible !important;
+                }
+                #spk-print-area {
+                  position: fixed !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}
+          </style>
+
           <div
             style={{
-              background: '#ffffff',
-              color: '#000000',
-              borderRadius: '12px',
+              background: '#090d16',
+              border: '1.5px solid #fb923c',
+              borderRadius: '16px',
               width: '100%',
-              maxWidth: '720px',
-              maxHeight: '90vh',
+              maxWidth: '820px',
+              maxHeight: '92vh',
               overflowY: 'auto',
-              padding: '2rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
-              position: 'relative'
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #000', paddingBottom: '10px', marginBottom: '18px' }}>
-              <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase' }}>
-                  {selectedSpkPrint.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+            {/* Top Header Controls (Hidden on Print) */}
+            <div
+              className="no-print"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.4rem',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(251, 146, 60, 0.15)', color: '#fb923c', padding: '7px', borderRadius: '8px' }}>
+                  <FileText size={20} />
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#333' }}>
-                  Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#666' }}>
-                  Pengembang Kawasan Perumahan Ashoka Park & Ashoka View
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
+                    Pratinjau Dokumen SPK (MOU)
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}</strong> &bull; {viewingSpk.judulDokumen || viewingSpk.scope}
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedSpkPrint(null)}
-                style={{ background: 'none', border: 'none', color: '#666', fontSize: '1.4rem', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
 
-            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, textDecoration: 'underline' }}>SURAT PERINTAH KERJA (SPK) VENDOR</div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, marginTop: '2px' }}>Nomor: {selectedSpkPrint.spkNo}</div>
-            </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {viewingSpk.fileData && (
+                  <button
+                    onClick={() => handleViewFile(viewingSpk.fileData, viewingSpk.fileName)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem' }}
+                  >
+                    <Paperclip size={13} />
+                    <span>Berkas Terlampir ({viewingSpk.fileSize || 'File'})</span>
+                  </button>
+                )}
 
-            <div style={{ fontSize: '0.82rem', lineHeight: '1.6', textAlign: 'justify' }}>
-              <p>Pada hari ini, <strong>{selectedSpkPrint.issueDate}</strong>, yang bertanda tangan di bawah ini:</p>
-              
-              <table style={{ width: '100%', marginBottom: '12px', fontSize: '0.82rem' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width: '130px', fontWeight: 700 }}>Pihak I (Pemberi Tugas)</td>
-                    <td>: {selectedSpkPrint.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Pihak II (Pelaksana)</td>
-                    <td>: <strong>{selectedSpkPrint.vendorName}</strong></td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Lingkup Pekerjaan</td>
-                    <td>: <strong>{selectedSpkPrint.scope}</strong></td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Lokasi Proyek</td>
-                    <td>: {selectedSpkPrint.project}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Nilai Kontrak</td>
-                    <td>: <strong style={{ fontSize: '0.9rem' }}>{formatRupiah(selectedSpkPrint.contractVal)}</strong> (Nett / Termasuk PPh)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Sistem Pembayaran</td>
-                    <td>: {selectedSpkPrint.paymentTerms}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ fontWeight: 700 }}>Jangka Waktu</td>
-                    <td>: {selectedSpkPrint.issueDate} s/d {selectedSpkPrint.dueDate}</td>
-                  </tr>
-                </tbody>
-              </table>
+                <button
+                  onClick={() => window.print()}
+                  className="btn btn-primary btn-sm"
+                  style={{
+                    background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    padding: '7px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
+                  }}
+                >
+                  <Printer size={15} />
+                  <span>🖨️ Cetak / Print Dokumen</span>
+                </button>
 
-              <p><strong>Pasal 1 (Kewajiban Pelaksana):</strong> Pihak II wajib melaksanakan pekerjaan sesuai spesifikasi teknis dan gambar kerja yang disetujui direksi teknik.</p>
-              <p><strong>Pasal 2 (Sanksi & Denda):</strong> Keterlambatan pekerjaan tanpa alasan force majeure dikenakan denda 1‰ (satu permil) per hari kalender.</p>
-              <p><strong>Pasal 3 (Serah Terima BAST):</strong> Pembayaran pelunasan dilakukan setelah diterbitkannya Berita Acara Serah Terima (BAST) 100% oleh tim pengawas.</p>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
-              <div style={{ width: '220px' }}>
-                <div>PIHAK PERTAMA,</div>
-                <div>{selectedSpkPrint.project === 'Ashoka Park' ? 'PT. Yazfi Setia Persada' : 'PT. Yazfi Gema Persada'}</div>
-                <div style={{ height: '55px' }} />
-                <div style={{ fontWeight: 800, textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div>
-                <div>Head of Legal Corporate</div>
-              </div>
-
-              <div style={{ width: '220px' }}>
-                <div>PIHAK KEDUA,</div>
-                <div>Kontraktor / Vendor Pelaksana</div>
-                <div style={{ height: '55px' }} />
-                <div style={{ fontWeight: 800, textDecoration: 'underline' }}>{selectedSpkPrint.vendorName}</div>
-                <div>Penanggung Jawab / Pimpinan</div>
+                <button
+                  onClick={() => setViewingSpk(null)}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    color: '#cbd5e1',
+                    borderRadius: '8px',
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button
-                onClick={() => window.print()}
-                className="btn btn-primary btn-sm"
-                style={{ background: '#ea580c', color: '#fff' }}
-              >
-                🖨️ Cetak Lembar SPK Resmi
-              </button>
+            {/* Dokumen Lembar Resmi Cetak / Print Area */}
+            <div
+              id="spk-print-area"
+              className="printable-spk-document"
+              style={{
+                background: '#ffffff',
+                color: '#000000',
+                padding: '2.5rem',
+                margin: '1.2rem',
+                borderRadius: '10px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+              }}
+            >
+              {/* KOP SURAT RESMI */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
+                    PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
+                  </div>
+                  <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                    Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                    LEGAL & PERIZINAN
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                    Dokumen Terverifikasi AMS
+                  </div>
+                </div>
+              </div>
+
+              {/* JUDUL DOKUMEN & NOMOR */}
+              <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
+                  SURAT PERINTAH KERJA (SPK) / MEMORANDUM OF UNDERSTANDING (MOU)
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b', marginTop: '4px' }}>
+                  Nomor Dokumen: {viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                  Tanggal Dokumen: {formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}
+                </div>
+              </div>
+
+              {/* KONTEN RINCIAN DOKUMEN LENGKAP */}
+              <div style={{ fontSize: '0.82rem', lineHeight: '1.65', color: '#0f172a' }}>
+                <p style={{ textAlign: 'justify', marginBottom: '10px' }}>
+                  Pada hari ini, <strong>{formatDisplayDate(viewingSpk.tanggalDok || viewingSpk.issueDate)}</strong>, telah dibuat dan disepakati dokumen resmi antara pihak-pihak sebagai berikut:
+                </p>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px', fontSize: '0.82rem' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, width: '180px', color: '#334155' }}>Pihak I (Pemberi Tugas)</td>
+                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMA PERSADA'}</strong> (Manajemen AMS Properti)</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Pihak II (Penerima Tugas)</td>
+                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.nama || viewingSpk.vendorName}</strong> ({viewingSpk.kategori || 'Vendor'})</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Dokumen</td>
+                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Vendor'}</span></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Judul Dokumen</td>
+                      <td style={{ padding: '6px 8px' }}>: <strong>{viewingSpk.judulDokumen || viewingSpk.scope}</strong></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Lingkup Pekerjaan / Hal</td>
+                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.scope || viewingSpk.judulDokumen || '-'}</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kawasan Proyek</td>
+                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.project || 'Ashoka Park'}</td>
+                    </tr>
+                    {Number(viewingSpk.contractVal) > 0 && (
+                      <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Nilai Kontrak / Biaya</td>
+                        <td style={{ padding: '6px 8px' }}>: <strong style={{ fontSize: '0.9rem', color: '#047857' }}>{formatRupiah(viewingSpk.contractVal)}</strong> (Nett / Termasuk Pajak)</td>
+                      </tr>
+                    )}
+                    {viewingSpk.paymentTerms && (
+                      <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                        <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Sistem Pembayaran</td>
+                        <td style={{ padding: '6px 8px' }}>: {viewingSpk.paymentTerms}</td>
+                      </tr>
+                    )}
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
+                      <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 700, color: viewingSpk.catatan?.toLowerCase().includes('batal') ? '#b91c1c' : '#1e293b' }}>{viewingSpk.catatan || '-'}</span></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Fisik</td>
+                      <td style={{ padding: '6px 8px' }}>: {viewingSpk.fileName ? `Terlampir (${viewingSpk.fileName} - ${viewingSpk.fileSize || 'File Digital'})` : 'Dokumen Fisik Tersimpan di Arsip Legal'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* KLAUSUL PASAL BAKU */}
+                <div style={{ marginTop: '10px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify' }}>
+                  <p style={{ marginBottom: '6px' }}><strong>Pasal 1 (Kewajiban Pelaksanaan):</strong> Pihak II sepakat untuk mematuhi dan melaksanakan seluruh lingkup pekerjaan atau kesepakatan sesuai dengan standar mutu, spesifikasi teknis, dan waktu yang telah disepakati bersama.</p>
+                  <p style={{ marginBottom: '6px' }}><strong>Pasal 2 (Hak Pembayaran & Legalitas):</strong> Pihak I berhak memeriksa hasil kerja fisik/dokumen sebelum melakukan pembayaran termin atau proses pengikatan notaris sesuai jadwal kesepakatan.</p>
+                  <p style={{ marginBottom: '6px' }}><strong>Pasal 3 (Ketentuan Sanksi & Masa Berlaku):</strong> Apabila terjadi pembatalan atau kelalaian kewajiban tanpa persetujuan tertulis dari kedua belah pihak, maka segala catatan dan ketentuan sanksi sebagaimana tertera pada Catatan Dokumen ini berlaku mengikat secara hukum.</p>
+                </div>
+
+                {/* KOLOM TANDA TANGAN */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
+                  <div style={{ width: '220px' }}>
+                    <div>PIHAK PERTAMA,</div>
+                    <div style={{ fontWeight: 700 }}>{viewingSpk.project === 'Ashoka Park' ? 'PT. Yazfi Setia Persada' : 'PT. Yazfi Gema Persada'}</div>
+                    <div style={{ height: '60px' }} />
+                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.pic || 'Wahyu Salma Septiani, S.H'}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                  </div>
+
+                  <div style={{ width: '220px' }}>
+                    <div>PIHAK KEDUA,</div>
+                    <div style={{ fontWeight: 700 }}>{viewingSpk.kategori || 'Penerima Tugas'} / Rekanan</div>
+                    <div style={{ height: '60px' }} />
+                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.nama || viewingSpk.vendorName}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Penanggung Jawab / Pimpinan</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
