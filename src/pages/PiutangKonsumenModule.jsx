@@ -1610,9 +1610,9 @@ export const PiutangKonsumenModule = () => {
 
     <table class="pay-table subtotal-bar" style="margin-top: 10px;">
       <tr>
-        <td style="width: 120px; font-weight: 800;">Total uang muka</td>
-        <td style="width: 40px; font-weight: 800;">Rp</td>
-        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 800;">${formatNumber(row.totalDp)}</td>
+        <td style="width: 175px; white-space: nowrap; font-weight: 800;">Total uang muka</td>
+        <td style="width: 40px; white-space: nowrap; font-weight: 800;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 20px; white-space: nowrap; font-weight: 800;">${formatNumber(row.totalDp)}</td>
         <td></td>
       </tr>
     </table>
@@ -1637,28 +1637,28 @@ export const PiutangKonsumenModule = () => {
 
     <table class="pay-table subtotal-bar" style="margin-top: 10px;">
       <tr>
-        <td style="width: 120px; font-weight: 800;">Total Angsuran</td>
-        <td style="width: 40px; font-weight: 800;">Rp</td>
-        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 800;">${formatNumber(row.totalAngsuran)}</td>
+        <td style="width: 175px; white-space: nowrap; font-weight: 800;">Total Angsuran</td>
+        <td style="width: 40px; white-space: nowrap; font-weight: 800;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 20px; white-space: nowrap; font-weight: 800;">${formatNumber(row.totalAngsuran)}</td>
         <td></td>
       </tr>
     </table>
 
     <table class="pay-table grand-bar" style="margin-top: 16px;">
       <tr>
-        <td style="width: 120px; font-weight: 900;">Grand Total</td>
-        <td style="width: 40px; font-weight: 900;">Rp</td>
-        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 900;">${formatNumber(grandTotal)}</td>
+        <td style="width: 175px; white-space: nowrap; font-weight: 900;">Total Uang Masuk</td>
+        <td style="width: 40px; white-space: nowrap; font-weight: 900;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 20px; white-space: nowrap; font-weight: 900;">${formatNumber(grandTotal)}</td>
         <td></td>
       </tr>
     </table>
 
     <table class="pay-table grand-bar" style="margin-top: 10px;">
       <tr>
-        <td style="width: 120px; font-weight: 900;">Sisa Pembayaran</td>
-        <td style="width: 40px; font-weight: 900;">Rp</td>
-        <td style="width: 150px; text-align: right; padding-right: 24px; font-weight: 900;">${formatNumber(row.saldo)}</td>
-        <td></td>
+        <td style="width: 175px; white-space: nowrap; font-weight: 900;">Sisa Pembayaran</td>
+        <td style="width: 40px; white-space: nowrap; font-weight: 900;">Rp</td>
+        <td style="width: 150px; text-align: right; padding-right: 20px; white-space: nowrap; font-weight: 900;">${formatNumber(row.saldo)}</td>
+        <td style="font-size: 11.5px; font-weight: 700; font-style: italic; color: #000000; padding-left: 10px;">( Terbilang: ${terbilang(row.saldo)} )</td>
       </tr>
     </table>
 
@@ -1747,8 +1747,8 @@ export const PiutangKonsumenModule = () => {
       wsData.push([]);
       wsData.push(['Total Angsuran', 'Rp', row.totalAngsuran || 0]);
       wsData.push([]);
-      wsData.push(['Grand Total', 'Rp', grandTotal]);
-      wsData.push(['Sisa Pembayaran', 'Rp', row.saldo || 0]);
+      wsData.push(['Total Uang Masuk', 'Rp', grandTotal]);
+      wsData.push(['Sisa Pembayaran', 'Rp', row.saldo || 0, `( Terbilang: ${terbilang(row.saldo)} )`]);
       wsData.push([]);
       wsData.push(['', '', 'Tanggal Cetak :', formatDateSlash(new Date().toISOString())]);
 
@@ -4780,9 +4780,9 @@ export const PiutangKonsumenModule = () => {
                     alignItems: 'center'
                   }}
                 >
-                  <span style={{ width: '120px' }}>Total uang muka</span>
-                  <span style={{ width: '40px' }}>Rp</span>
-                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.totalDp)}</span>
+                  <span style={{ width: '175px', minWidth: '175px', whiteSpace: 'nowrap' }}>Total uang muka</span>
+                  <span style={{ width: '40px', minWidth: '40px', whiteSpace: 'nowrap' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '20px', whiteSpace: 'nowrap' }}>{formatNumber(row.totalDp)}</span>
                   <span></span>
                 </div>
 
@@ -4832,13 +4832,13 @@ export const PiutangKonsumenModule = () => {
                     alignItems: 'center'
                   }}
                 >
-                  <span style={{ width: '120px' }}>Total Angsuran</span>
-                  <span style={{ width: '40px' }}>Rp</span>
-                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.totalAngsuran)}</span>
+                  <span style={{ width: '175px', minWidth: '175px', whiteSpace: 'nowrap' }}>Total Angsuran</span>
+                  <span style={{ width: '40px', minWidth: '40px', whiteSpace: 'nowrap' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '20px', whiteSpace: 'nowrap' }}>{formatNumber(row.totalAngsuran)}</span>
                   <span></span>
                 </div>
 
-                {/* Grand Total */}
+                {/* Total Uang Masuk */}
                 <div
                   style={{
                     backgroundColor: '#f5af81',
@@ -4853,9 +4853,9 @@ export const PiutangKonsumenModule = () => {
                     alignItems: 'center'
                   }}
                 >
-                  <span style={{ width: '120px' }}>Grand Total</span>
-                  <span style={{ width: '40px' }}>Rp</span>
-                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(grandTotal)}</span>
+                  <span style={{ width: '175px', minWidth: '175px', whiteSpace: 'nowrap' }}>Total Uang Masuk</span>
+                  <span style={{ width: '40px', minWidth: '40px', whiteSpace: 'nowrap' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '20px', whiteSpace: 'nowrap' }}>{formatNumber(grandTotal)}</span>
                   <span></span>
                 </div>
 
@@ -4871,13 +4871,17 @@ export const PiutangKonsumenModule = () => {
                     color: '#000000',
                     marginBottom: '10px',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '4px'
                   }}
                 >
-                  <span style={{ width: '120px' }}>Sisa Pembayaran</span>
-                  <span style={{ width: '40px' }}>Rp</span>
-                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.saldo)}</span>
-                  <span></span>
+                  <span style={{ width: '175px', minWidth: '175px', whiteSpace: 'nowrap' }}>Sisa Pembayaran</span>
+                  <span style={{ width: '40px', minWidth: '40px', whiteSpace: 'nowrap' }}>Rp</span>
+                  <span style={{ width: '150px', textAlign: 'right', paddingRight: '20px', whiteSpace: 'nowrap' }}>{formatNumber(row.saldo)}</span>
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, fontStyle: 'italic', color: '#000000', paddingLeft: '8px' }}>
+                    ( Terbilang: {terbilang(row.saldo)} )
+                  </span>
                 </div>
 
                 {/* Tanggal Cetak Footer */}
