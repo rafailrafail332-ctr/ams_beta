@@ -437,96 +437,288 @@ export const LegalModule = () => {
   };
 
   // =========================================================================
-  // 2. DATA STORE: LEGALITAS (A. PERUSAHAAN & B. PROYEK) - KOSONG
+  // =========================================================================
+  // 2. DATA STORE: LEGALITAS (FORMAT TABEL SESUAI GAMBAR REFERENSI PENGGUNA)
+  // Sub-kategori: Akta Perusahaan, NPWP, NIB, Domisili
+  // Kolom: No. | No. Dok | Tanggal Dokumen | Penerbit | Jenis Dokumen | Berkas | Catatan
   // =========================================================================
 
-  // A. LEGALITAS PERUSAHAAN (Akta Perusahaan, NPWP, NIB, Domisili)
-  const [legalitasPerusahaanList, setLegalitasPerusahaanList] = useState(() => {
+  const defaultLegalitasList = [
+    {
+      id: 'LEG-01',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-15',
+      penerbit: 'Notaris',
+      jenisDokumen: 'Akta Pendirian No. 20',
+      category: 'Akta Perusahaan',
+      catatan: '',
+      fileName: 'Akta_Pendirian_No_20.pdf',
+      fileSize: '2.5 MB',
+      fileData: '',
+      files: [
+        { name: 'Akta_Pendirian_No_20.pdf', size: '2.5 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LEG-02',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-16',
+      penerbit: 'Dirjen AHU',
+      jenisDokumen: 'Akta Pengesahan Pendirian No.',
+      category: 'Akta Perusahaan',
+      catatan: '',
+      fileName: 'Akta_Pengesahan_AHU.pdf',
+      fileSize: '1.4 MB',
+      fileData: '',
+      files: [
+        { name: 'Akta_Pengesahan_AHU.pdf', size: '1.4 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LEG-03',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-17',
+      penerbit: 'Kecamatan',
+      jenisDokumen: 'Izin Domisili Perusahaan',
+      category: 'Domisili',
+      catatan: '',
+      fileName: 'Izin_Domisili_Perusahaan.pdf',
+      fileSize: '950 KB',
+      fileData: '',
+      files: [
+        { name: 'Izin_Domisili_Perusahaan.pdf', size: '950 KB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LEG-04',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-18',
+      penerbit: 'KPP Pratama',
+      jenisDokumen: 'NPWP Badan Usaha & SKT',
+      category: 'NPWP',
+      catatan: '',
+      fileName: 'NPWP_Badan_Usaha.pdf',
+      fileSize: '820 KB',
+      fileData: '',
+      files: [
+        { name: 'NPWP_Badan_Usaha.pdf', size: '820 KB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LEG-05',
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: '2025-10-19',
+      penerbit: 'BKPM / Lembaga OSS',
+      jenisDokumen: 'Nomor Induk Berusaha (NIB OSS-RBA)',
+      category: 'NIB',
+      catatan: '',
+      fileName: 'NIB_OSS_RBA.pdf',
+      fileSize: '1.8 MB',
+      fileData: '',
+      files: [
+        { name: 'NIB_OSS_RBA.pdf', size: '1.8 MB', data: '', type: 'application/pdf' }
+      ]
+    }
+  ];
+
+  const [legalitasList, setLegalitasList] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_legal_perusahaan_v4_clean');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('ams_legalitas_corporate_v5');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {}
-    return []; // Clean empty baseline
+    return defaultLegalitasList;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_legal_perusahaan_v4_clean', JSON.stringify(legalitasPerusahaanList));
+      localStorage.setItem('ams_legalitas_corporate_v5', JSON.stringify(legalitasList));
     } catch (e) {}
-  }, [legalitasPerusahaanList]);
+  }, [legalitasList]);
 
-  const [isPerusahaanModalOpen, setIsPerusahaanModalOpen] = useState(false);
-  const [perusahaanForm, setPerusahaanForm] = useState({
+  // Backward compatibility alias
+  const legalitasPerusahaanList = legalitasList;
+
+  const [searchLegalitas, setSearchLegalitas] = useState('');
+  const [filterLegalitasCat, setFilterLegalitasCat] = useState('ALL');
+  const [isLegalitasModalOpen, setIsLegalitasModalOpen] = useState(false);
+  const [editingLegalitasId, setEditingLegalitasId] = useState(null);
+  const [viewingLegalitas, setViewingLegalitas] = useState(null);
+  const [currentLegalitasFileSlide, setCurrentLegalitasFileSlide] = useState(0);
+
+  const [legalitasForm, setLegalitasForm] = useState({
+    noDok: 'xxx/xxx/xxx',
+    tanggalDok: new Date().toISOString().split('T')[0],
+    penerbit: 'Notaris',
+    jenisDokumen: '',
     category: 'Akta Perusahaan',
-    docName: '',
-    docNo: '',
-    agency: '',
-    issueDate: new Date().toISOString().split('T')[0],
-    validity: 'Permanen',
-    status: 'Valid (Asli di Brankas)',
-    location: 'Brankas Legal HO',
-    notes: '',
+    catatan: '',
     fileName: '',
     fileSize: '',
-    fileData: ''
+    fileData: '',
+    files: []
   });
 
-  const handleOpenAddPerusahaan = (defaultCat = 'Akta Perusahaan') => {
-    setPerusahaanForm({
+  const handleOpenAddLegalitas = (defaultCat = 'Akta Perusahaan') => {
+    setEditingLegalitasId(null);
+    setLegalitasForm({
+      noDok: 'xxx/xxx/xxx',
+      tanggalDok: new Date().toISOString().split('T')[0],
+      penerbit: defaultCat === 'Akta Perusahaan' ? 'Notaris' : defaultCat === 'NPWP' ? 'KPP Pratama' : defaultCat === 'NIB' ? 'BKPM / Lembaga OSS' : defaultCat === 'Domisili' ? 'Kecamatan' : 'Notaris',
+      jenisDokumen: '',
       category: defaultCat !== 'ALL' ? defaultCat : 'Akta Perusahaan',
-      docName: '',
-      docNo: '',
-      agency: '',
-      issueDate: new Date().toISOString().split('T')[0],
-      validity: 'Permanen',
-      status: 'Valid (Asli di Brankas)',
-      location: 'Brankas Legal HO',
-      notes: '',
+      catatan: '',
       fileName: '',
       fileSize: '',
-      fileData: ''
+      fileData: '',
+      files: []
     });
-    setIsPerusahaanModalOpen(true);
+    setIsLegalitasModalOpen(true);
   };
 
-  const handlePerusahaanFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+  const handleOpenEditLegalitas = (doc) => {
+    setEditingLegalitasId(doc.id);
+    const existingFiles = (doc.files && doc.files.length > 0)
+      ? [...doc.files]
+      : (doc.fileName ? [{ name: doc.fileName, size: doc.fileSize, data: doc.fileData, type: 'file' }] : []);
+
+    setLegalitasForm({
+      noDok: doc.noDok || '',
+      tanggalDok: doc.tanggalDok || new Date().toISOString().split('T')[0],
+      penerbit: doc.penerbit || '',
+      jenisDokumen: doc.jenisDokumen || '',
+      category: doc.category || 'Akta Perusahaan',
+      catatan: doc.catatan || '',
+      fileName: doc.fileName || '',
+      fileSize: doc.fileSize || '',
+      fileData: doc.fileData || '',
+      files: existingFiles
+    });
+    setIsLegalitasModalOpen(true);
+  };
+
+  const handleLegalitasMultiFilesChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length === 0) return;
+
+    let loadedCount = 0;
+    const newFiles = [];
+
+    selectedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
-        setPerusahaanForm(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileSize: formatFileSize(file.size),
-          fileData: uploadEvent.target.result
-        }));
-        showNotification(`File berkas "${file.name}" siap diunggah!`, 'info');
+        newFiles.push({
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: file.type || 'application/octet-stream',
+          data: uploadEvent.target.result
+        });
+        loadedCount++;
+        if (loadedCount === selectedFiles.length) {
+          setLegalitasForm(prev => {
+            const merged = [...prev.files, ...newFiles];
+            return {
+              ...prev,
+              files: merged,
+              fileName: merged[0]?.name || '',
+              fileSize: merged[0]?.size || '',
+              fileData: merged[0]?.data || ''
+            };
+          });
+          showNotification(`${newFiles.length} berkas berhasil ditambahkan!`, 'info');
+        }
       };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
-  const handleSavePerusahaan = (e) => {
+  const handleRemoveLegalitasFormFile = (idx) => {
+    setLegalitasForm(prev => {
+      const updated = prev.files.filter((_, i) => i !== idx);
+      return {
+        ...prev,
+        files: updated,
+        fileName: updated[0]?.name || '',
+        fileSize: updated[0]?.size || '',
+        fileData: updated[0]?.data || ''
+      };
+    });
+  };
+
+  const handleSaveLegalitas = (e) => {
     e.preventDefault();
-    if (!perusahaanForm.docName || !perusahaanForm.docNo) {
-      showNotification('Mohon lengkapi Nama Dokumen dan Nomor Dokumen!', 'warning');
+    if (!legalitasForm.jenisDokumen) {
+      showNotification('Mohon lengkapi Jenis Dokumen!', 'warning');
       return;
     }
-    const newDoc = {
-      id: `LCP-${Date.now()}`,
-      ...perusahaanForm
-    };
-    setLegalitasPerusahaanList([newDoc, ...legalitasPerusahaanList]);
-    setIsPerusahaanModalOpen(false);
-    showNotification(`Dokumen "${newDoc.docName}" berhasil diunggah & disimpan!`, 'success');
+
+    if (editingLegalitasId) {
+      setLegalitasList(prev => prev.map(d => {
+        if (d.id === editingLegalitasId) {
+          return {
+            ...d,
+            ...legalitasForm
+          };
+        }
+        return d;
+      }));
+      showNotification(`Dokumen Legalitas "${legalitasForm.jenisDokumen}" berhasil diperbarui!`, 'success');
+    } else {
+      const newDoc = {
+        id: `LEG-${Date.now()}`,
+        ...legalitasForm
+      };
+      setLegalitasList(prev => [newDoc, ...prev]);
+      showNotification(`Dokumen Legalitas "${newDoc.jenisDokumen}" berhasil ditambahkan!`, 'success');
+    }
+    setIsLegalitasModalOpen(false);
+    setEditingLegalitasId(null);
   };
 
-  const handleDeletePerusahaan = (id, docName) => {
-    if (window.confirm(`Hapus dokumen ${docName}?`)) {
-      setLegalitasPerusahaanList(prev => prev.filter(d => d.id !== id));
-      showNotification(`Dokumen ${docName} berhasil dihapus.`, 'warning');
+  const handleDeleteLegalitas = (id, jenisDokumen) => {
+    if (window.confirm(`Hapus dokumen legalitas "${jenisDokumen}"?`)) {
+      setLegalitasList(prev => prev.filter(d => d.id !== id));
+      showNotification(`Dokumen "${jenisDokumen}" berhasil dihapus.`, 'warning');
     }
   };
+
+  const exportLegalitasToExcel = () => {
+    if (legalitasList.length === 0) {
+      showNotification('Tidak ada data Legalitas untuk diekspor.', 'warning');
+      return;
+    }
+    const data = legalitasList.map((doc, idx) => ({
+      'No.': idx + 1,
+      'No. Dok': doc.noDok || '-',
+      'Tanggal Dokumen': formatDisplayDate(doc.tanggalDok),
+      'Kategori': doc.category || '-',
+      'Penerbit': doc.penerbit || '-',
+      'Jenis Dokumen': doc.jenisDokumen || '-',
+      'Berkas': (doc.files && doc.files.length > 0) ? doc.files.map(f => f.name).join(', ') : (doc.fileName || 'Ada Berkas'),
+      'Catatan': doc.catatan || '-'
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Legalitas');
+    XLSX.writeFile(wb, `Legalitas_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showNotification('File Excel Legalitas berhasil diunduh!', 'success');
+  };
+
+  const filteredLegalitasList = useMemo(() => {
+    return legalitasList.filter(doc => {
+      const matchCat = filterLegalitasCat === 'ALL' || doc.category === filterLegalitasCat;
+      const q = searchLegalitas.toLowerCase();
+      const matchSearch = !searchLegalitas ||
+        (doc.noDok || '').toLowerCase().includes(q) ||
+        (doc.penerbit || '').toLowerCase().includes(q) ||
+        (doc.jenisDokumen || '').toLowerCase().includes(q) ||
+        (doc.category || '').toLowerCase().includes(q) ||
+        (doc.catatan || '').toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+  }, [legalitasList, filterLegalitasCat, searchLegalitas]);
 
   // B. LEGALITAS PROYEK (SHGB Induk, SHGB Pecahan, PBB, Peta Bidang Tanah, Histori Lahan)
   const [legalitasProyekList, setLegalitasProyekList] = useState(() => {
@@ -1352,323 +1544,276 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
-      {/* MODUL 2: LEGALITAS (DIBAGI 2 SUB: LEGALITAS PERUSAHAAN & LEGALITAS PROYEK)  */}
+      {/* MODUL 2: LEGALITAS (PERSIS FORMAT SESUAI GAMBAR REFERENSI PENGGUNA)       */}
+      {/* Filter: Semua Dokumen | Akta Perusahaan | NPWP | NIB | Domisili           */}
+      {/* Kolom: No. | No. Dok | Tanggal Dokumen | Penerbit | Jenis Dokumen | Berkas | Catatan | Aksi */}
       {/* ========================================================================= */}
       {activeTab === 'legalitas' && (
-        <div>
-          {/* Segmented Control: Legalitas Perusahaan vs Legalitas Proyek */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem' }}>
-            <button
-              onClick={() => setLegalitasSubTab('perusahaan')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: '10px',
-                border: legalitasSubTab === 'perusahaan' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
-                background: legalitasSubTab === 'perusahaan' ? 'rgba(56, 189, 248, 0.15)' : '#090d16',
-                color: legalitasSubTab === 'perusahaan' ? '#38bdf8' : '#94a3b8',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <Building2 size={16} />
-              <span>Legalitas Perusahaan (Akta, NPWP, NIB, Domisili)</span>
-              <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: '#0f172a' }}>
-                {legalitasPerusahaanList.length}
-              </span>
-            </button>
+        <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
+          {/* Header Card dengan Badge Legalitas (Persis Kotak Peach di Gambar Referensi) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'inline-block',
+                  background: '#ffedd5',
+                  border: '2px solid #f97316',
+                  color: '#ea580c',
+                  padding: '6px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 900,
+                  fontSize: '1.15rem',
+                  letterSpacing: '0.3px',
+                  boxShadow: '0 2px 8px rgba(234, 88, 12, 0.15)'
+                }}
+              >
+                Legalitas
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                Master Arsip Dokumen Legalitas Perusahaan (Akta, NPWP, NIB, Domisili)
+              </div>
+            </div>
 
-            <button
-              onClick={() => setLegalitasSubTab('proyek')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: '10px',
-                border: legalitasSubTab === 'proyek' ? '1.5px solid #a855f7' : '1px solid #1e293b',
-                background: legalitasSubTab === 'proyek' ? 'rgba(168, 85, 247, 0.15)' : '#090d16',
-                color: legalitasSubTab === 'proyek' ? '#c084fc' : '#94a3b8',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <Layers size={16} />
-              <span>Legalitas Proyek (SHGB Induk, SHGB Pecahan, PBB, Peta Bidang, Histori)</span>
-              <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: '#0f172a' }}>
-                {legalitasProyekList.length}
-              </span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={exportLegalitasToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#1e293b', border: '1px solid #334155', color: '#34d399' }}
+              >
+                <FileSpreadsheet size={14} />
+                <span>Unduh Excel</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenAddLegalitas(filterLegalitasCat)}
+                className="btn btn-primary btn-sm"
+                style={{ background: '#ea580c', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 800 }}
+              >
+                <Plus size={14} />
+                <span>+ Tambah Dokumen Legalitas</span>
+              </button>
+            </div>
           </div>
 
-          {/* ------------------------------------------------------------- */}
-          {/* SUB-MODUL 2A: LEGALITAS PERUSAHAAN                            */}
-          {/* Sub-item: Akta Perusahaan, NPWP, NIB, Domisili               */}
-          {/* ------------------------------------------------------------- */}
-          {legalitasSubTab === 'perusahaan' && (
-            <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem' }}>
-                <div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Building2 size={20} color="#38bdf8" />
-                    <span>Legalitas Perusahaan (Corporate Legal Documents)</span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                    Dokumen resmi Akta Perusahaan, NPWP Badan/PKP, NIB OSS-RBA, dan Domisili Kantor.
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {['ALL', 'Akta Perusahaan', 'NPWP', 'NIB', 'Domisili'].map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterPerusahaanCat(cat)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: filterPerusahaanCat === cat ? '1px solid #38bdf8' : '1px solid #334155',
-                          background: filterPerusahaanCat === cat ? 'rgba(56, 189, 248, 0.2)' : '#0f172a',
-                          color: filterPerusahaanCat === cat ? '#38bdf8' : '#94a3b8',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {cat === 'ALL' ? 'Semua Dokumen' : cat}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenAddPerusahaan(filterPerusahaanCat)}
-                    className="btn btn-primary btn-sm"
-                    style={{ background: '#0284c7', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
-                  >
-                    <UploadCloud size={14} />
-                    <span>+ Upload Dokumen Perusahaan</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Grid Dokumen Perusahaan / Empty State */}
-              {legalitasPerusahaanList.filter(doc => filterPerusahaanCat === 'ALL' || doc.category === filterPerusahaanCat).length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                    <Building2 size={28} />
-                  </div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Legalitas Perusahaan</div>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                    Data dokumen perusahaan masih kosong. Klik tombol di bawah untuk mengunggah berkas Akta Perusahaan, NPWP, NIB, atau Domisili.
-                  </div>
-                  <button
-                    onClick={() => handleOpenAddPerusahaan(filterPerusahaanCat)}
-                    className="btn btn-primary btn-sm"
-                    style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
-                  >
-                    <UploadCloud size={15} />
-                    <span>+ Upload Dokumen Perusahaan Sekarang</span>
-                  </button>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
-                  {legalitasPerusahaanList
-                    .filter(doc => filterPerusahaanCat === 'ALL' || doc.category === filterPerusahaanCat)
-                    .map(doc => (
-                      <div key={doc.id} style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '12px', padding: '1.2rem', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontWeight: 800 }}>
-                            {doc.category}
-                          </span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontWeight: 800 }}>
-                              {doc.status}
-                            </span>
-                            <button
-                              onClick={() => handleDeletePerusahaan(doc.id, doc.docName)}
-                              title="Hapus Dokumen"
-                              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#ffffff', marginTop: '8px' }}>
-                          {doc.docName}
-                        </div>
-                        <div style={{ fontSize: '0.76rem', color: '#fbbf24', fontWeight: 700, marginTop: '3px' }}>
-                          {doc.docNo}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
-                          Penerbit: <strong style={{ color: '#f1f5f9' }}>{doc.agency}</strong>
-                        </div>
-
-                        {doc.notes && (
-                          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #1e293b', fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                            {doc.notes}
-                          </div>
-                        )}
-
-                        <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }}>
-                          {doc.fileName ? (
-                            <button
-                              onClick={() => handleViewFile(doc.fileData, doc.fileName)}
-                              style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            >
-                              <Eye size={12} />
-                              <span>Lihat Berkas ({doc.fileSize})</span>
-                            </button>
-                          ) : (
-                            <span style={{ color: '#64748b' }}>Simpan: <strong style={{ color: '#fff' }}>{doc.location}</strong></span>
-                          )}
-                          <span style={{ color: '#34d399' }}>Masa: {doc.validity}</span>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
+          {/* Filter Pills Kategori (Semua Dokumen, Akta Perusahaan, NPWP, NIB, Domisili) & Search */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem', background: '#090d16', padding: '10px 14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, marginRight: '4px' }}>Kategori:</span>
+              {[
+                { id: 'ALL', label: 'Semua Dokumen' },
+                { id: 'Akta Perusahaan', label: 'Akta Perusahaan' },
+                { id: 'NPWP', label: 'NPWP' },
+                { id: 'NIB', label: 'NIB' },
+                { id: 'Domisili', label: 'Domisili' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilterLegalitasCat(cat.id)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    border: filterLegalitasCat === cat.id ? '1.5px solid #ea580c' : '1px solid #334155',
+                    background: filterLegalitasCat === cat.id ? '#ea580c' : '#1e293b',
+                    color: filterLegalitasCat === cat.id ? '#ffffff' : '#cbd5e1',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  {cat.label}
+                  <span style={{ marginLeft: '6px', fontSize: '0.68rem', padding: '1px 5px', borderRadius: '4px', background: filterLegalitasCat === cat.id ? 'rgba(0,0,0,0.25)' : '#0f172a' }}>
+                    {cat.id === 'ALL' ? legalitasList.length : legalitasList.filter(d => d.category === cat.id).length}
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
 
-          {/* ------------------------------------------------------------- */}
-          {/* SUB-MODUL 2B: LEGALITAS PROYEK                                */}
-          {/* Sub-item: SHGB Induk, SHGB Pecahan, PBB, Peta Bidang,         */}
-          {/* Histori Lahan                                                 */}
-          {/* ------------------------------------------------------------- */}
-          {legalitasSubTab === 'proyek' && (
-            <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem' }}>
-                <div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Layers size={20} color="#c084fc" />
-                    <span>Legalitas Proyek (Project Land & Title Legality)</span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                    SHGB Induk, SHGB Pecahan, PBB (Pajak Bumi & Bangunan), Peta Bidang Tanah & Histori Asal-usul Lahan.
-                  </div>
-                </div>
+            <div style={{ position: 'relative', width: '260px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari No. Dok / Penerbit / Jenis..."
+                value={searchLegalitas}
+                onChange={(e) => setSearchLegalitas(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '6px 10px 6px 30px',
+                  borderRadius: '6px',
+                  border: '1px solid #334155',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  fontSize: '0.76rem'
+                }}
+              />
+            </div>
+          </div>
 
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {['ALL', 'SHGB Induk', 'SHGB Pecahan', 'PBB', 'Peta Bidang Tanah', 'Histori Lahan'].map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterProyekCat(cat)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          border: filterProyekCat === cat ? '1px solid #c084fc' : '1px solid #334155',
-                          background: filterProyekCat === cat ? 'rgba(192, 132, 252, 0.2)' : '#0f172a',
-                          color: filterProyekCat === cat ? '#c084fc' : '#94a3b8',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {cat === 'ALL' ? 'Semua Proyek' : cat}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenAddProyek(filterProyekCat)}
-                    className="btn btn-primary btn-sm"
-                    style={{ background: '#7e22ce', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
-                  >
-                    <UploadCloud size={14} />
-                    <span>+ Upload Berkas Proyek</span>
-                  </button>
-                </div>
+          {/* Tabel Utama Legalitas Sesuai Gambar Referensi */}
+          {filteredLegalitasList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.1)', color: '#fb923c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <FileCheck size={28} />
               </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Legalitas</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar dokumen legalitas {filterLegalitasCat !== 'ALL' ? `kategori ${filterLegalitasCat}` : ''} masih kosong.
+              </div>
+              <button
+                onClick={() => handleOpenAddLegalitas(filterLegalitasCat)}
+                className="btn btn-primary btn-sm"
+                style={{ background: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Dokumen Sekarang</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Penerbit</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Jenis Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLegalitasList.map((doc, idx) => (
+                    <tr
+                      key={doc.id}
+                      style={{
+                        borderBottom: '1px solid #1e293b',
+                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {idx + 1}
+                      </td>
 
-              {/* Grid Dokumen Proyek / Empty State */}
-              {legalitasProyekList.filter(doc => filterProyekCat === 'ALL' || doc.category === filterProyekCat).length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(192, 132, 252, 0.1)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                    <Layers size={28} />
-                  </div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Berkas Legalitas Proyek</div>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                    Data sertifikat dan tanah proyek masih kosong. Klik tombol di bawah untuk mengunggah SHGB Induk, SHGB Pecahan, PBB, Peta Bidang, atau Histori Lahan.
-                  </div>
-                  <button
-                    onClick={() => handleOpenAddProyek(filterProyekCat)}
-                    className="btn btn-primary btn-sm"
-                    style={{ background: '#7e22ce', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
-                  >
-                    <UploadCloud size={15} />
-                    <span>+ Upload Berkas Proyek Sekarang</span>
-                  </button>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1rem' }}>
-                  {legalitasProyekList
-                    .filter(doc => filterProyekCat === 'ALL' || doc.category === filterProyekCat)
-                    .map(doc => (
-                      <div key={doc.id} style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '12px', padding: '1.2rem', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', fontWeight: 800 }}>
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {doc.noDok || 'xxx/xxx/xxx'}
+                      </td>
+
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDisplayDate(doc.tanggalDok)}
+                      </td>
+
+                      {/* 4. Penerbit */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {doc.penerbit || '-'}
+                        </span>
+                      </td>
+
+                      {/* 5. Jenis Dokumen */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            {doc.jenisDokumen || '-'}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.68rem',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              background:
+                                doc.category === 'Akta Perusahaan' ? 'rgba(251, 146, 60, 0.15)' :
+                                doc.category === 'NPWP' ? 'rgba(56, 189, 248, 0.15)' :
+                                doc.category === 'NIB' ? 'rgba(52, 211, 153, 0.15)' :
+                                'rgba(192, 132, 252, 0.15)',
+                              color:
+                                doc.category === 'Akta Perusahaan' ? '#fb923c' :
+                                doc.category === 'NPWP' ? '#38bdf8' :
+                                doc.category === 'NIB' ? '#34d399' :
+                                '#c084fc',
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
                             {doc.category}
                           </span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontWeight: 800 }}>
-                              {doc.status}
-                            </span>
-                            <button
-                              onClick={() => handleDeleteProyek(doc.id, doc.docName)}
-                              title="Hapus Berkas"
-                              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
                         </div>
+                      </td>
 
-                        <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#ffffff', marginTop: '8px' }}>
-                          {doc.docName}
-                        </div>
-                        <div style={{ fontSize: '0.76rem', color: '#38bdf8', fontWeight: 700, marginTop: '3px' }}>
-                          {doc.docNo}
-                        </div>
-                        
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '0.72rem', color: '#94a3b8' }}>
-                          <span>Proyek: <strong style={{ color: '#fbbf24' }}>{doc.project}</strong></span>
-                          {doc.luas && <span>Luas: <strong style={{ color: '#f1f5f9' }}>{doc.luas}</strong></span>}
-                        </div>
+                      {/* 6. Berkas */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <button
+                          onClick={() => { setViewingLegalitas(doc); setCurrentLegalitasFileSlide(0); }}
+                          style={{
+                            background: '#38bdf8',
+                            color: '#090d16',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                            transition: 'transform 0.1s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title="Lihat Dokumen Legalitas"
+                        >
+                          <Eye size={12} />
+                          <span>View</span>
+                        </button>
+                      </td>
 
-                        {doc.notes && (
-                          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #1e293b', fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                            {doc.notes}
-                          </div>
+                      {/* 7. Catatan */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {doc.catatan ? (
+                          <span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#fde047', whiteSpace: 'nowrap' }}>
+                            {doc.catatan}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
                         )}
+                      </td>
 
-                        <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }}>
-                          {doc.fileName ? (
-                            <button
-                              onClick={() => handleViewFile(doc.fileData, doc.fileName)}
-                              style={{ background: 'rgba(192, 132, 252, 0.15)', border: '1px solid #c084fc', color: '#c084fc', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            >
-                              <Eye size={12} />
-                              <span>Lihat Berkas ({doc.fileSize})</span>
-                            </button>
-                          ) : (
-                            <span style={{ color: '#64748b' }}>Instansi: <strong style={{ color: '#cbd5e1' }}>{doc.agency}</strong></span>
-                          )}
-                          <span style={{ color: '#a855f7' }}>{doc.validity}</span>
+                      {/* 8. Aksi */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                          <button
+                            onClick={() => { setViewingLegalitas(doc); setCurrentLegalitasFileSlide(0); }}
+                            title="Pratinjau & Cetak Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Printer size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleOpenEditLegalitas(doc)}
+                            title="Edit Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLegalitas(doc.id, doc.jenisDokumen)}
+                            title="Hapus Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                      </div>
-                    ))}
-                </div>
-              )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -2226,9 +2371,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: UPLOAD DOKUMEN LEGALITAS PERUSAHAAN                              */}
       {/* ========================================================================= */}
-      {isPerusahaanModalOpen && (
+      {/* MODAL 2: TAMBAH / EDIT DOKUMEN LEGALITAS CORPORATE                        */}
+      {/* ========================================================================= */}
+      {isLegalitasModalOpen && (
         <div
           style={{
             position: 'fixed',
@@ -2245,29 +2391,54 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #0284c7',
+              border: '1.5px solid #ea580c',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '580px',
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              boxShadow: '0 25px 50px -12px rgba(234, 88, 12, 0.4)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>➕ Upload Dokumen Legalitas Perusahaan</div>
-              <button onClick={() => setIsPerusahaanModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>
+                {editingLegalitasId ? '✏️ Edit Dokumen Legalitas' : '➕ Tambah Dokumen Legalitas'}
+              </div>
+              <button onClick={() => { setIsLegalitasModalOpen(false); setEditingLegalitasId(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSavePerusahaan} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveLegalitas} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen / SK</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. xxx/xxx/xxx atau AHU-00123..."
+                    value={legalitasForm.noDok}
+                    onChange={(e) => setLegalitasForm({ ...legalitasForm, noDok: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                  <input
+                    type="date"
+                    value={legalitasForm.tanggalDok}
+                    onChange={(e) => setLegalitasForm({ ...legalitasForm, tanggalDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Dokumen *</label>
                   <select
-                    value={perusahaanForm.category}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, category: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    value={legalitasForm.category}
+                    onChange={(e) => setLegalitasForm({ ...legalitasForm, category: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}
                   >
                     <option value="Akta Perusahaan">Akta Perusahaan</option>
                     <option value="NPWP">NPWP</option>
@@ -2276,123 +2447,129 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status Dokumen</label>
-                  <select
-                    value={perusahaanForm.status}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, status: e.target.value })}
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Penerbit / Instansi *</label>
+                  <input
+                    type="text"
+                    list="legalitas-penerbit-suggestions"
+                    placeholder="e.g. Notaris, Dirjen AHU, Kecamatan, KPP Pratama"
+                    value={legalitasForm.penerbit}
+                    onChange={(e) => setLegalitasForm({ ...legalitasForm, penerbit: e.target.value })}
+                    required
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="Valid (Asli di Brankas)">Valid (Asli di Brankas)</option>
-                    <option value="Valid Terdaftar">Valid Terdaftar</option>
-                    <option value="Proses Perpanjangan">Proses Perpanjangan</option>
-                  </select>
+                  />
+                  <datalist id="legalitas-penerbit-suggestions">
+                    <option value="Notaris" />
+                    <option value="Dirjen AHU" />
+                    <option value="Kecamatan" />
+                    <option value="KPP Pratama" />
+                    <option value="BKPM / Lembaga OSS" />
+                    <option value="Kantor Pertanahan ATR/BPN" />
+                  </datalist>
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Dokumen Resmi *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Jenis Dokumen *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Akta Pendirian PT. Yazfi Gema Persada"
-                  value={perusahaanForm.docName}
-                  onChange={(e) => setPerusahaanForm({ ...perusahaanForm, docName: e.target.value })}
+                  placeholder="e.g. Akta Pendirian No. 20, Akta Pengesahan Pendirian No., Izin Domisili Perusahaan"
+                  value={legalitasForm.jenisDokumen}
+                  onChange={(e) => setLegalitasForm({ ...legalitasForm, jenisDokumen: e.target.value })}
                   required
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen / SK *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Keterangan Khusus</label>
                 <input
                   type="text"
-                  placeholder="e.g. Akta No. 18 / Tanggal 14 Mei 2021"
-                  value={perusahaanForm.docNo}
-                  onChange={(e) => setPerusahaanForm({ ...perusahaanForm, docNo: e.target.value })}
-                  required
+                  placeholder="e.g. Asli tersimpan di brankas HO / Perpanjangan 2027"
+                  value={legalitasForm.catatan}
+                  onChange={(e) => setLegalitasForm({ ...legalitasForm, catatan: e.target.value })}
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Instansi Penerbit / Notaris</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Notaris Sri Rahayu, S.H / KPP Pratama"
-                    value={perusahaanForm.agency}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, agency: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Masa Berlaku</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Permanen / 5 Tahun"
-                    value={perusahaanForm.validity}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, validity: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Terbit</label>
-                  <input
-                    type="date"
-                    value={perusahaanForm.issueDate}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, issueDate: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Lokasi Arsip Fisik</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Brankas Legal HO Bizhub"
-                    value={perusahaanForm.location}
-                    onChange={(e) => setPerusahaanForm({ ...perusahaanForm, location: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Keterangan</label>
-                <textarea
-                  rows="2"
-                  placeholder="Keterangan SK Kemenkumham atau rincian lainnya..."
-                  value={perusahaanForm.notes}
-                  onChange={(e) => setPerusahaanForm({ ...perusahaanForm, notes: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
-
-              {/* Upload File Attachment */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                  <UploadCloud size={14} />
-                  <span>Upload Berkas Asli (PDF / Scan Akta / NPWP / NIB)</span>
+              {/* Upload Berkas Dokumen (Bisa pilih banyak / multi files) */}
+              <div style={{ background: '#0f172a', border: '1.5px dashed #ea580c', borderRadius: '8px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <UploadCloud size={15} />
+                    <span>Upload Berkas Dokumen Legalitas (Bisa Pilih Banyak / Multi-Files)</span>
+                  </div>
+                  {legalitasForm.files.length > 0 && (
+                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.25)', color: '#fed7aa', fontWeight: 800 }}>
+                      {legalitasForm.files.length} Berkas Dipilih
+                    </span>
+                  )}
                 </label>
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handlePerusahaanFileChange}
-                  style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                  multiple
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+                  onChange={handleLegalitasMultiFilesChange}
+                  style={{ fontSize: '0.76rem', color: '#cbd5e1', width: '100%', cursor: 'pointer' }}
                 />
-                {perusahaanForm.fileName && (
-                  <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={12} />
-                    <span>File siap: {perusahaanForm.fileName} ({perusahaanForm.fileSize})</span>
+
+                {/* List Berkas Terpilih */}
+                {legalitasForm.files && legalitasForm.files.length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Daftar Berkas yang Akan Diunggah:
+                    </div>
+                    {legalitasForm.files.map((fileItem, fIdx) => (
+                      <div
+                        key={fIdx}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: '#090d16',
+                          border: '1px solid #334155',
+                          borderRadius: '6px',
+                          padding: '6px 10px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                          <CheckCircle2 size={13} color="#34d399" />
+                          <span style={{ fontSize: '0.75rem', color: '#f1f5f9', fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '340px' }}>
+                            {fileItem.name}
+                          </span>
+                          <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>({fileItem.size})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLegalitasFormFile(fIdx)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ef4444',
+                            cursor: 'pointer',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            padding: '2px 6px'
+                          }}
+                          title="Hapus berkas ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsPerusahaanModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7' }}>
-                  Simpan & Unggah Dokumen
+                <button
+                  type="button"
+                  onClick={() => { setIsLegalitasModalOpen(false); setEditingLegalitasId(null); }}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Batal
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#ea580c', fontWeight: 800 }}>
+                  {editingLegalitasId ? 'Simpan Perubahan' : 'Simpan & Unggah Dokumen'}
                 </button>
               </div>
             </form>
@@ -3352,6 +3529,461 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     <div style={{ height: '60px' }} />
                     <div style={{ fontWeight: 900, textDecoration: 'underline' }}>{viewingSpk.nama || viewingSpk.vendorName}</div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Penanggung Jawab / Pimpinan</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PRATINJAU DOKUMEN & CETAK RESMI LEGALITAS CORPORATE                 */}
+      {/* ========================================================================= */}
+      {viewingLegalitas && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '1rem'
+          }}
+        >
+          {/* Print CSS styling scoped for Legalitas */}
+          <style>
+            {`
+              @media print {
+                body * {
+                  visibility: hidden;
+                }
+                #legalitas-print-area, #legalitas-print-area * {
+                  visibility: visible;
+                }
+                #legalitas-print-area {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                  margin: 0;
+                  padding: 20mm;
+                  background: white !important;
+                  color: black !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}
+          </style>
+
+          <div
+            style={{
+              background: '#0b1120',
+              border: '2px solid #ea580c',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '880px',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 60px -15px rgba(234, 88, 12, 0.3)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Top Header Controls (Hidden on Print) */}
+            <div
+              className="no-print"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.4rem',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(251, 146, 60, 0.15)', color: '#fb923c', padding: '7px', borderRadius: '8px' }}>
+                  <FileCheck size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
+                    Pratinjau Dokumen Legalitas ({viewingLegalitas.category})
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong> &bull; Penerbit: <strong style={{ color: '#ffffff' }}>{viewingLegalitas.penerbit || '-'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {(() => {
+                const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
+                  ? viewingLegalitas.files
+                  : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize, data: viewingLegalitas.fileData, type: 'file' }] : []);
+
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {activeFiles.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadFile(activeFiles[currentLegalitasFileSlide]?.data, activeFiles[currentLegalitasFileSlide]?.name)}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.76rem',
+                          fontWeight: 800,
+                          background: '#059669',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '7px 13px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(5, 150, 105, 0.35)'
+                        }}
+                        title={`Unduh ${activeFiles[currentLegalitasFileSlide]?.name || 'Berkas'}`}
+                      >
+                        <Download size={14} />
+                        <span>Unduh Berkas</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => window.print()}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
+                      }}
+                    >
+                      <Printer size={15} />
+                      <span>🖨️ Cetak / Print Dokumen</span>
+                    </button>
+
+                    <button
+                      onClick={() => setViewingLegalitas(null)}
+                      style={{
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        color: '#cbd5e1',
+                        borderRadius: '8px',
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* AREA CAROUSEL / SLIDER BERKAS (BISA DIGESER KIRI & KANAN) */}
+            {(() => {
+              const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
+                ? viewingLegalitas.files
+                : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize, data: viewingLegalitas.fileData, type: 'file' }] : []);
+
+              if (activeFiles.length === 0) return null;
+
+              return (
+                <div className="no-print" style={{ margin: '1.2rem 1.2rem 0 1.2rem', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Paperclip size={16} color="#fb923c" />
+                      <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff' }}>
+                        Berkas Terlampir
+                      </span>
+                      {activeFiles.length >= 2 && (
+                        <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontWeight: 800 }}>
+                          ⇄ Bisa digeser ke kiri dan kanan
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Tombol Geser Kiri & Kanan */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentLegalitasFileSlide(prev => prev > 0 ? prev - 1 : activeFiles.length - 1)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#fb923c',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas sebelumnya"
+                        >
+                          <ChevronLeft size={16} />
+                          <span>Geser Kiri</span>
+                        </button>
+
+                        <span style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 800, padding: '0 4px' }}>
+                          {currentLegalitasFileSlide + 1} / {activeFiles.length}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setCurrentLegalitasFileSlide(prev => prev < activeFiles.length - 1 ? prev + 1 : 0)}
+                          style={{
+                            background: '#1e293b',
+                            border: '1px solid #475569',
+                            color: '#fb923c',
+                            padding: '5px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s'
+                          }}
+                          title="Geser ke berkas selanjutnya"
+                        >
+                          <span>Geser Kanan</span>
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Berkas yang Aktif Saat Ini */}
+                  <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f1f5f9' }}>
+                            {activeFiles[currentLegalitasFileSlide]?.name || 'Berkas Dokumen Legalitas'}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                            Ukuran File: {activeFiles[currentLegalitasFileSlide]?.size || 'Digital'} &bull; Format Dokumen
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadFile(activeFiles[currentLegalitasFileSlide]?.data, activeFiles[currentLegalitasFileSlide]?.name)}
+                          className="btn btn-primary btn-sm"
+                          style={{
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            background: '#059669',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            border: 'none',
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
+                          }}
+                          title="Unduh Berkas ke Komputer"
+                        >
+                          <Download size={13} />
+                          <span>Unduh Berkas</span>
+                        </button>
+
+                        {activeFiles[currentLegalitasFileSlide]?.data ? (
+                          <button
+                            type="button"
+                            onClick={() => handleViewFile(activeFiles[currentLegalitasFileSlide].data, activeFiles[currentLegalitasFileSlide].name)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ fontSize: '0.74rem', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '5px', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                          >
+                            <Eye size={13} />
+                            <span>Buka Preview</span>
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {/* Pratinjau Gambar jika format Image */}
+                    {activeFiles[currentLegalitasFileSlide]?.data && activeFiles[currentLegalitasFileSlide].data.startsWith('data:image') && (
+                      <div style={{ marginTop: '10px', textAlign: 'center', maxHeight: '300px', overflow: 'hidden', borderRadius: '6px', background: '#000' }}>
+                        <img
+                          src={activeFiles[currentLegalitasFileSlide].data}
+                          alt={activeFiles[currentLegalitasFileSlide].name}
+                          style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Indikator Titik Carousel (Dots) */}
+                    {activeFiles.length >= 2 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '10px' }}>
+                        {activeFiles.map((f, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setCurrentLegalitasFileSlide(idx)}
+                            style={{
+                              width: idx === currentLegalitasFileSlide ? '22px' : '8px',
+                              height: '8px',
+                              borderRadius: '4px',
+                              background: idx === currentLegalitasFileSlide ? '#fb923c' : '#334155',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            title={`Geser ke ${f.name}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Dokumen Lembar Resmi Cetak / Print Area */}
+            <div
+              id="legalitas-print-area"
+              style={{
+                background: '#ffffff',
+                color: '#000000',
+                padding: '2.5rem',
+                margin: '1.2rem',
+                borderRadius: '10px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+              }}
+            >
+              {/* KOP SURAT RESMI */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px double #000000', paddingBottom: '12px', marginBottom: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
+                  </div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
+                    PENGEMBANG KAWASAN PERUMAHAN ASHOKA PARK & ASHOKA VIEW
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    Komplek Ruko Bizhub RA-3, Jl. Raya Serpong Puspitek, Gunung Sindur - Bogor
+                  </div>
+                  <div style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                    Website: www.amsproperti.online &bull; Email: legal@amsproperti.online &bull; Telp: (021) 7587-8899
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                    LEGALITAS RESMI
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                    Terdaftar di Brankas Legal HO
+                  </div>
+                </div>
+              </div>
+
+              {/* JUDUL DOKUMEN & NOMOR */}
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'underline' }}>
+                  LEMBAR ARSIP LEGALITAS CORPORATE
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
+                  Kategori: <strong>{viewingLegalitas.category}</strong> &bull; Nomor: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong>
+                </div>
+              </div>
+
+              {/* RINCIAN TABEL DOKUMEN RESMI */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ width: '220px', padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Nomor Dokumen / SK</td>
+                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Tanggal Dokumen</td>
+                      <td style={{ padding: '7px 8px' }}>: {formatDisplayDate(viewingLegalitas.tanggalDok)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Kategori Legalitas</td>
+                      <td style={{ padding: '7px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingLegalitas.category}</span></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Instansi / Penerbit</td>
+                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.penerbit || '-'}</strong></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Jenis Dokumen Resmi</td>
+                      <td style={{ padding: '7px 8px' }}>: <strong>{viewingLegalitas.jenisDokumen || '-'}</strong></td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Catatan / Keterangan Khusus</td>
+                      <td style={{ padding: '7px 8px' }}>: <span>{viewingLegalitas.catatan || '-'}</span></td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Status Berkas Terlampir</td>
+                      <td style={{ padding: '7px 8px' }}>
+                        {(() => {
+                          const activeFiles = (viewingLegalitas.files && viewingLegalitas.files.length > 0)
+                            ? viewingLegalitas.files
+                            : (viewingLegalitas.fileName ? [{ name: viewingLegalitas.fileName, size: viewingLegalitas.fileSize }] : []);
+                          if (activeFiles.length === 0) return 'Dokumen Fisik Tersimpan di Brankas Legal HO';
+                          return activeFiles.map(f => `${f.name} (${f.size || 'Digital'})`).join('; ');
+                        })()}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* KLAUSUL KEABSAHAN */}
+                <div style={{ marginTop: '14px', fontSize: '0.78rem', lineHeight: '1.55', textAlign: 'justify', color: '#334155' }}>
+                  <p style={{ marginBottom: '6px' }}><strong>Pernyataan Keabsahan:</strong> Dokumen ini merupakan salinan arsip legalitas resmi yang telah tercatat dan diverifikasi keasliannya dalam basis data Asset & Property Management System (AMS) PT. Yazfi Gema Persada / PT. Yazfi Setia Persada.</p>
+                </div>
+
+                {/* KOLOM TANDA TANGAN */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', textAlign: 'center', fontSize: '0.82rem' }}>
+                  <div style={{ width: '220px' }}>
+                    <div>DIVERIFIKASI OLEH,</div>
+                    <div style={{ fontWeight: 700 }}>Departemen Legal & Perizinan</div>
+                    <div style={{ height: '60px' }} />
+                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Head of Legal & Perizinan</div>
+                  </div>
+
+                  <div style={{ width: '220px' }}>
+                    <div>MENGETAHUI / DISETUJUI,</div>
+                    <div style={{ fontWeight: 700 }}>Direksi Perusahaan</div>
+                    <div style={{ height: '60px' }} />
+                    <div style={{ fontWeight: 900, textDecoration: 'underline' }}>Direktur Utama</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>PT. Yazfi Gema / Setia Persada</div>
                   </div>
                 </div>
               </div>
