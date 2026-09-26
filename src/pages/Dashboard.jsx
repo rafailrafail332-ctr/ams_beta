@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { SCurveForecasting } from '../components/SCurveForecasting';
 import { DocumentGeneratorModal } from '../components/DocumentGeneratorModal';
 import { COMPANY_DIVISIONS, MEDIA_CATEGORIES } from './TodoAttendanceModule';
+import { AmsCentralHub } from '../components/AmsCentralHub';
 import { 
   Building2, 
   CheckCircle2, 
@@ -55,6 +56,7 @@ export const Dashboard = ({ setCurrentTab }) => {
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docType, setDocType] = useState('BATP');
+  const [showLegacyDashboard, setShowLegacyDashboard] = useState(false);
 
   // -------------------------------------------------------------
   // 0. MEDIA INFORMASI & PENGUMUMAN WIDGET (UNIVERSAL FEED)
@@ -408,23 +410,55 @@ export const Dashboard = ({ setCurrentTab }) => {
   };
 
   return (
-    <div>
-      {/* Page Header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Dashboard Utama Ashoka AMS</h1>
-          <p className="page-subtitle">Pusat pemantauan S-Curve forecasting, jam kerja operasional, status unit rumah, instruksi memo direksi & keuangan real-time.</p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={handleOpenHoursModal}>
-            <Clock size={16} /> Edit Jam Kerja Operasional
-          </button>
-          <button className="btn btn-primary" onClick={() => handleOpenDocGen('BATP')}>
-            <Printer size={16} /> Cetak Dokumen PDF (BATP/QC)
-          </button>
-        </div>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '3rem' }}>
+      {/* 0. ASHOKA CENTRAL HUB (DIAGRAM RESMI TAMPILAN DEPAN AMS) */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <AmsCentralHub
+          onSelectModule={setCurrentTab}
+          isLanding={false}
+          currentUser={currentUser}
+        />
       </div>
+
+      {/* Toggle untuk melihat detail monitoring operasional & S-Curve jika diperlukan */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <button
+          type="button"
+          onClick={() => setShowLegacyDashboard(!showLegacyDashboard)}
+          className="btn btn-secondary btn-sm"
+          style={{
+            background: showLegacyDashboard ? '#1e293b' : 'rgba(30, 41, 59, 0.45)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            color: '#94a3b8',
+            fontSize: '0.78rem',
+            padding: '7px 18px',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          {showLegacyDashboard ? '▲ Sembunyikan Detail Monitoring Operasional' : '▼ Tampilkan Detail Monitoring Operasional & S-Curve (Arsip Dashboard)'}
+        </button>
+      </div>
+
+      {showLegacyDashboard && (
+        <div>
+          {/* Page Header */}
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Dashboard Utama Ashoka AMS</h1>
+              <p className="page-subtitle">Pusat pemantauan S-Curve forecasting, jam kerja operasional, status unit rumah, instruksi memo direksi & keuangan real-time.</p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" onClick={handleOpenHoursModal}>
+                <Clock size={16} /> Edit Jam Kerja Operasional
+              </button>
+              <button className="btn btn-primary" onClick={() => handleOpenDocGen('BATP')}>
+                <Printer size={16} /> Cetak Dokumen PDF (BATP/QC)
+              </button>
+            </div>
+          </div>
 
       {/* ========================================================================= */}
       {/* 1. OPERATIONAL WORKING HOURS CARD (WITH EDIT CRUD)                        */}
@@ -835,6 +869,8 @@ export const Dashboard = ({ setCurrentTab }) => {
           </table>
         </div>
       </div>
+    </div>
+  )}
 
       {/* ========================================================================= */}
       {/* MODAL: EDIT JAM KERJA OPERASIONAL                                         */}

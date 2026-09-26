@@ -14,6 +14,7 @@ import {
   Users as UsersIcon
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { AmsCentralHub } from '../components/AmsCentralHub';
 
 export const LandingLogin = ({ onLoginSuccess }) => {
   const { users, getAvatarUrl } = useApp();
@@ -27,6 +28,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [searchAccount, setSearchAccount] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [showSpecificLoginModal, setShowSpecificLoginModal] = useState(false);
 
   // Filtered list of 17 Official Accounts
   const filteredUsers = (users || []).filter((u) => {
@@ -72,72 +74,65 @@ export const LandingLogin = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#0f172a',
-      backgroundImage: 'radial-gradient(circle at 50% 15%, rgba(245, 158, 11, 0.15) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 50%)',
-      color: '#f8fafc',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
-      position: 'relative'
-    }}>
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-        pointerEvents: 'none',
-        opacity: 0.6
-      }} />
+    <div style={{ minHeight: '100vh', background: '#ffffff', width: '100vw', overflowX: 'hidden', position: 'relative' }}>
+      {/* 1. TAMPILAN UTAMA AWAL MASUK (DIAGRAM RESMI AMS) */}
+      <AmsCentralHub
+        isLanding={true}
+        onSelectModule={(tabKey) => {
+          onLoginSuccess(tabKey, identity);
+        }}
+        onOpenLoginModal={() => setShowSpecificLoginModal(true)}
+      />
 
-      <div style={{
-        width: '100%',
-        maxWidth: '780px',
-        position: 'relative',
-        zIndex: 10
-      }}>
-        {/* Logo & Company Branding Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-            <img 
-              src="/company-logo.png" 
-              alt="Ashoka Logo" 
-              style={{
-                width: '85px',
-                height: '85px',
-                objectFit: 'contain',
-                borderRadius: '20px',
-                background: '#ffffff',
-                padding: '8px',
-                boxShadow: '0 0 35px rgba(245, 158, 11, 0.45)',
-                border: '2px solid rgba(245, 158, 11, 0.6)',
-                transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            />
-          </div>
-
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff' }}>
-            ASHOKA
-          </h1>
-          <p style={{ fontSize: '0.85rem', color: '#F59E0B', fontWeight: 800, marginTop: '0.15rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Asset & Property Management System (AMS)
-          </p>
-        </div>
-
-        <div className="glass-card" style={{
-          background: '#1e293b',
-          backdropFilter: 'none',
-          WebkitBackdropFilter: 'none',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(245, 158, 11, 0.15)',
-          borderRadius: '20px',
-          padding: '1.75rem'
+      {/* 2. MODAL PILIH AKUN SPESIFIK / LOGIN KHUSUS (JIKA DIBUTUHKAN) */}
+      {showSpecificLoginModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '1.5rem'
         }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '780px',
+            position: 'relative',
+            maxHeight: '92vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setShowSpecificLoginModal(false)}
+                style={{
+                  background: '#1e293b',
+                  border: '1px solid #475569',
+                  color: '#ffffff',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  cursor: 'pointer',
+                  fontWeight: 900
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="glass-card" style={{
+              background: '#1e293b',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(245, 158, 11, 0.15)',
+              borderRadius: '20px',
+              padding: '1.75rem',
+              color: '#ffffff'
+            }}>
           {errorMsg && (
             <div style={{
               padding: '0.75rem 1rem',
@@ -360,5 +355,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
         </div>
       </div>
     </div>
+  )}
+</div>
   );
 };
