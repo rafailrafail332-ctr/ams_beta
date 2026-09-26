@@ -75,14 +75,18 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('hr') || roleLower.includes('dodi') || (roleLower.includes('ga') && !roleLower.includes('legal'))) {
       return [
         { id: 'todo-attendance', title: 'To-Do List & Presensi Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'hr-staff', title: '1. SDM & Karyawan Perusahaan', moduleKey: 'hr', subTabKey: 'staff', icon: Users, color: '#F87171' },
-        { id: 'hr-payroll', title: '2. Manajemen Penggajian (Payroll Gaji)', moduleKey: 'hr', subTabKey: 'payroll', icon: DollarSign, color: '#10B981' },
-        { id: 'ga-office', title: '3. Site Office & Fasilitas Lapangan', moduleKey: 'ga', subTabKey: 'site-office', icon: Building2, color: '#38BDF8' },
-        { id: 'ga-permits', title: '4. Perizinan Lingkungan & Warga', moduleKey: 'ga', subTabKey: 'permits', icon: FileCheck, color: '#34D399' },
-        { id: 'ga-fleet', title: '5. Fleet & Transportasi Lapangan', moduleKey: 'ga', subTabKey: 'fleet', icon: Truck, color: '#60A5FA' },
-        { id: 'ga-k3', title: '6. K3 & Tanggap Darurat Proyek', moduleKey: 'ga', subTabKey: 'k3', icon: ShieldCheck, color: '#EF4444' },
-        { id: 'proc-logistik', title: '7. Pengadaan & Logistik Kantor', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' },
-        { id: 'cr-helpdesk', title: '8. Customer Relation & Helpdesk', moduleKey: 'customer-relation', subTabKey: 'helpdesk', icon: Headphones, color: '#FB7185' }
+        { id: 'hrga-db', title: '1. Data Base Karyawan', moduleKey: 'hr-ga', subTabKey: 'database-karyawan', icon: Users, color: '#38BDF8' },
+        { id: 'hrga-recruitment', title: '2. Recruitment Karyawan', moduleKey: 'hr-ga', subTabKey: 'recruitment', icon: UserCheck, color: '#34D399' },
+        { id: 'hrga-kontrak', title: '3. Kontrak Kerja PKWT', moduleKey: 'hr-ga', subTabKey: 'kontrak-kerja', icon: FileText, color: '#F59E0B' },
+        { id: 'hrga-fasilitas', title: '4. Fasilitas Kantor & Mess', moduleKey: 'hr-ga', subTabKey: 'fasilitas', icon: Building2, color: '#38BDF8' },
+        { id: 'hrga-absensi', title: '5. Absensi & Presensi', moduleKey: 'hr-ga', subTabKey: 'absensi', icon: Clock, color: '#10B981' },
+        { id: 'hrga-kpi', title: '6. KPI Evaluasi Kinerja', moduleKey: 'hr-ga', subTabKey: 'kpi', icon: Award, color: '#FBBF24' },
+        { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
+        { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#F97316' },
+        { id: 'hrga-security', title: '9. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'hres-spk', title: '10. SPK Rekanan & Vendor', moduleKey: 'human-resource', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'hres-legalitas', title: '11. Legalitas Perusahaan', moduleKey: 'human-resource', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
+        { id: 'proc-logistik', title: '12. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
 
@@ -90,14 +94,15 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('legal') || roleLower.includes('salma')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'legal-shgb', title: '1. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
-        { id: 'legal-pbg', title: '2. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
-        { id: 'legal-split', title: '3. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
-        { id: 'legal-apht', title: '4. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
-        { id: 'legal-ppjb', title: '5. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
-        { id: 'legal-dispute', title: '6. Dispute Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' },
-        { id: 'mkt-spr', title: '7. Verifikasi & Cetak Dokumen SPR', moduleKey: 'marketing', subTabKey: 'spr', icon: Printer, color: '#FBBF24' },
-        { id: 'cr-docs', title: '8. Serah Terima Sertifikat SHM & PBG', moduleKey: 'customer-relation', subTabKey: 'documents', icon: KeyRound, color: '#FB7185' }
+        { id: 'hres-spk', title: '1. SPK Surat Perintah Kerja', moduleKey: 'human-resource', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'hres-legalitas', title: '2. Legalitas Dokumen PT', moduleKey: 'human-resource', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
+        { id: 'hres-perizinan', title: '3. Perizinan Kawasan (8 Tahap)', moduleKey: 'human-resource', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
+        { id: 'hres-litigasi', title: '4. Litigasi & Advokasi Hukum', moduleKey: 'human-resource', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' },
+        { id: 'legal-shgb', title: '5. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
+        { id: 'legal-pbg', title: '6. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
+        { id: 'legal-split', title: '7. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
+        { id: 'legal-apht', title: '8. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
+        { id: 'legal-ppjb', title: '9. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' }
       ];
     }
 
@@ -180,10 +185,10 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#F97316' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
+    { id: 'hr-ga', mainTitle: 'HR & GA (9 Fitur)', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
+    { id: 'human-resource', mainTitle: 'Human Resoure (4 Fitur)', tab: 'human-resource', icon: Scale, color: '#FB923C' },
     { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
-    { id: 'ga', mainTitle: 'General Affair', tab: 'ga', icon: ShieldCheck, color: '#38BDF8' },
-    { id: 'hr', mainTitle: 'Human Resources', tab: 'hr', icon: Users, color: '#F87171' },
     { id: 'cr', mainTitle: 'Customer Relation (STK)', tab: 'customer-relation', icon: HeartHandshake, color: '#FB7185' },
     { id: 'procurement', mainTitle: 'Procurement & Vendor', tab: 'procurement', icon: ShoppingCart, color: '#34D399' },
     // USER CONTROL ONLY VISIBLE TO SUPER ADMIN (AHMAD RAFAIL)

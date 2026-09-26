@@ -14,6 +14,8 @@ import { LegalModule } from './pages/LegalModule';
 import { FinanceModule } from './pages/FinanceModule';
 import { GeneralAffairModule } from './pages/GeneralAffairModule';
 import { HumanResourcesModule } from './pages/HumanResourcesModule';
+import { HrGaModule } from './pages/HrGaModule';
+import { HumanResourceModule } from './pages/HumanResourceModule';
 import { CustomerRelationModule } from './pages/CustomerRelationModule';
 import { ProcurementModule } from './pages/ProcurementModule';
 import { UserManagement } from './pages/UserManagement';
@@ -81,10 +83,12 @@ function AppContent() {
         return 'Legal & Perizinan';
       case 'finance':
         return 'Finance & Payment';
+      case 'hr-ga':
       case 'ga':
-        return 'General Affair & Operasional';
+        return 'HR & GA (Human Resources & General Affair)';
+      case 'human-resource':
       case 'hr':
-        return 'Human Resources & SDM Properti';
+        return 'Human Resoure (SPK, Legalitas, Perizinan & Litigasi)';
       case 'customer-relation':
         return 'Customer Relation & After-Sales Properti';
       case 'procurement':
@@ -159,8 +163,12 @@ function AppContent() {
               {currentTab === 'marketing' && <MarketingModule />}
               {currentTab === 'legal' && <LegalModule />}
               {currentTab === 'finance' && <FinanceModule />}
-              {currentTab === 'ga' && <GeneralAffairModule />}
-              {currentTab === 'hr' && <HumanResourcesModule />}
+              {(currentTab === 'hr-ga' || currentTab === 'ga') && (
+                <HrGaModule onSwitchToHumanResource={() => setCurrentTab('human-resource')} />
+              )}
+              {(currentTab === 'human-resource' || currentTab === 'hr') && (
+                <HumanResourceModule onSwitchToHrGa={() => setCurrentTab('hr-ga')} />
+              )}
               {currentTab === 'customer-relation' && <CustomerRelationModule />}
               {currentTab === 'procurement' && <ProcurementModule />}
               {currentTab === 'users' && <UserManagement />}
