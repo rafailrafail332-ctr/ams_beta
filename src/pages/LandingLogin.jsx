@@ -74,7 +74,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#ffffff', width: '100vw', overflowX: 'hidden', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: '#080c14', width: '100vw', overflowX: 'hidden', position: 'relative' }}>
       {/* 1. TAMPILAN UTAMA AWAL MASUK (DIAGRAM RESMI AMS) */}
       <AmsCentralHub
         isLanding={true}
