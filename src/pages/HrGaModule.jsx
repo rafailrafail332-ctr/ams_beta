@@ -37,7 +37,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export const HrGaModule = ({ onSwitchToHumanResource }) => {
+export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab, getAvatarUrl } = useApp();
 
   // Active Sub-tab State (default to 'database-karyawan')
@@ -774,15 +774,15 @@ export const HrGaModule = ({ onSwitchToHumanResource }) => {
           </div>
         </div>
 
-        {/* Shortcut Button to Human Resource Module */}
+        {/* Shortcut Button to Legal Corporate Module */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {onSwitchToHumanResource && (
+          {onSwitchToLegalCorporate && (
             <button
-              onClick={onSwitchToHumanResource}
+              onClick={onSwitchToLegalCorporate}
               style={{
-                background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
                 color: '#ffffff',
-                border: '1.5px solid rgba(254, 215, 170, 0.6)',
+                border: '1.5px solid rgba(196, 181, 253, 0.5)',
                 borderRadius: '10px',
                 padding: '8px 14px',
                 fontSize: '0.82rem',
@@ -791,10 +791,10 @@ export const HrGaModule = ({ onSwitchToHumanResource }) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 6px 16px rgba(234, 88, 12, 0.35)'
+                boxShadow: '0 6px 16px rgba(109, 40, 217, 0.35)'
               }}
             >
-              <span>🟧 Buka Modul Human Resoure (4 Fitur)</span>
+              <span>⚖️ Buka Modul Legal Corporate</span>
               <ArrowRight size={15} />
             </button>
           )}

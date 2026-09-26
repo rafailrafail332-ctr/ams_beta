@@ -15,7 +15,6 @@ import { FinanceModule } from './pages/FinanceModule';
 import { GeneralAffairModule } from './pages/GeneralAffairModule';
 import { HumanResourcesModule } from './pages/HumanResourcesModule';
 import { HrGaModule } from './pages/HrGaModule';
-import { HumanResourceModule } from './pages/HumanResourceModule';
 import { CustomerRelationModule } from './pages/CustomerRelationModule';
 import { ProcurementModule } from './pages/ProcurementModule';
 import { UserManagement } from './pages/UserManagement';
@@ -80,15 +79,14 @@ function AppContent() {
       case 'marketing':
         return 'Marketing & Sales Penjualan Unit';
       case 'legal':
-        return 'Legal & Perizinan';
+      case 'human-resource':
+      case 'hr':
+        return 'Legal Corporate';
       case 'finance':
         return 'Finance & Payment';
       case 'hr-ga':
       case 'ga':
         return 'HR & GA (Human Resources & General Affair)';
-      case 'human-resource':
-      case 'hr':
-        return 'Human Resoure (SPK, Legalitas, Perizinan & Litigasi)';
       case 'customer-relation':
         return 'Customer Relation & After-Sales Properti';
       case 'procurement':
@@ -161,13 +159,10 @@ function AppContent() {
               {currentTab === 'manager' && <ManagerModule />}
               {(currentTab === 'teknik' || currentTab === 'teknik-rumah' || currentTab === 'teknik-fasilitas' || currentTab === 'teknik-batp') && <TeknikModule />}
               {currentTab === 'marketing' && <MarketingModule />}
-              {currentTab === 'legal' && <LegalModule />}
+              {(currentTab === 'legal' || currentTab === 'human-resource' || currentTab === 'hr') && <LegalModule />}
               {currentTab === 'finance' && <FinanceModule />}
               {(currentTab === 'hr-ga' || currentTab === 'ga') && (
-                <HrGaModule onSwitchToHumanResource={() => setCurrentTab('human-resource')} />
-              )}
-              {(currentTab === 'human-resource' || currentTab === 'hr') && (
-                <HumanResourceModule onSwitchToHrGa={() => setCurrentTab('hr-ga')} />
+                <HrGaModule onSwitchToLegalCorporate={() => setCurrentTab('legal')} />
               )}
               {currentTab === 'customer-relation' && <CustomerRelationModule />}
               {currentTab === 'procurement' && <ProcurementModule />}

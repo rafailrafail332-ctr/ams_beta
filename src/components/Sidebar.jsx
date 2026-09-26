@@ -84,8 +84,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
         { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#F97316' },
         { id: 'hrga-security', title: '9. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'hres-spk', title: '10. SPK Rekanan & Vendor', moduleKey: 'human-resource', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
-        { id: 'hres-legalitas', title: '11. Legalitas Perusahaan', moduleKey: 'human-resource', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
+        { id: 'hres-spk', title: '10. SPK Rekanan & Vendor', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'hres-legalitas', title: '11. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
         { id: 'proc-logistik', title: '12. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
@@ -94,15 +94,16 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('legal') || roleLower.includes('salma')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'hres-spk', title: '1. SPK Surat Perintah Kerja', moduleKey: 'human-resource', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
-        { id: 'hres-legalitas', title: '2. Legalitas Dokumen PT', moduleKey: 'human-resource', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
-        { id: 'hres-perizinan', title: '3. Perizinan Kawasan (8 Tahap)', moduleKey: 'human-resource', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
-        { id: 'hres-litigasi', title: '4. Litigasi & Advokasi Hukum', moduleKey: 'human-resource', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' },
+        { id: 'hres-spk', title: '1. SPK Surat Perintah Kerja', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'hres-legalitas', title: '2. Legalitas Dokumen PT', moduleKey: 'legal', subTabKey: 'legalitas', icon: FileCheck, color: '#FB923C' },
+        { id: 'hres-perizinan', title: '3. Perizinan Kawasan (8 Tahap)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
+        { id: 'hres-litigasi', title: '4. Litigasi & Advokasi Hukum', moduleKey: 'legal', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' },
         { id: 'legal-shgb', title: '5. SHGB Master Titling (30-Thn)', moduleKey: 'legal', subTabKey: 'shgb', icon: Scale, color: '#C084FC' },
         { id: 'legal-pbg', title: '6. PBG / IMB Induk & Per-Kavling', moduleKey: 'legal', subTabKey: 'pbg', icon: FileSignature, color: '#C084FC' },
         { id: 'legal-split', title: '7. Splitzing SHM BPN Per-Kavling', moduleKey: 'legal', subTabKey: 'split', icon: FileCheck, color: '#C084FC' },
         { id: 'legal-apht', title: '8. APHT Notaris & PKS Bank Mitra', moduleKey: 'legal', subTabKey: 'apht', icon: Award, color: '#C084FC' },
-        { id: 'legal-ppjb', title: '9. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' }
+        { id: 'legal-ppjb', title: '9. Pengikatan Akta PPJB Konsumen', moduleKey: 'legal', subTabKey: 'ppjb', icon: BookOpen, color: '#C084FC' },
+        { id: 'legal-dispute', title: '10. Audit Sengketa Lahan', moduleKey: 'legal', subTabKey: 'dispute', icon: ShieldCheck, color: '#C084FC' }
       ];
     }
 
@@ -186,8 +187,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
     { id: 'hr-ga', mainTitle: 'HR & GA (9 Fitur)', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
-    { id: 'human-resource', mainTitle: 'Human Resoure (4 Fitur)', tab: 'human-resource', icon: Scale, color: '#FB923C' },
-    { id: 'legal', mainTitle: 'Legal & Perizinan', tab: 'legal', icon: Scale, color: '#C084FC' },
+    { id: 'legal', mainTitle: 'Legal Corporate', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
     { id: 'cr', mainTitle: 'Customer Relation (STK)', tab: 'customer-relation', icon: HeartHandshake, color: '#FB7185' },
     { id: 'procurement', mainTitle: 'Procurement & Vendor', tab: 'procurement', icon: ShoppingCart, color: '#34D399' },
