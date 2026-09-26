@@ -73,11 +73,15 @@ export const LandingLogin = ({ onLoginSuccess }) => {
     }, 200);
   };
 
+  const [landingTheme, setLandingTheme] = useState('dark');
+
   return (
-    <div style={{ minHeight: '100vh', background: '#080c14', width: '100vw', overflowX: 'hidden', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: landingTheme === 'dark' ? '#080c14' : '#f8fafc', width: '100vw', overflowX: 'hidden', position: 'relative', transition: 'background 0.3s ease' }}>
       {/* 1. TAMPILAN UTAMA AWAL MASUK (DIAGRAM RESMI AMS) */}
       <AmsCentralHub
         isLanding={true}
+        theme={landingTheme}
+        onToggleTheme={() => setLandingTheme(prev => prev === 'dark' ? 'light' : 'dark')}
         onSelectModule={(tabKey) => {
           onLoginSuccess(tabKey, identity);
         }}

@@ -10,17 +10,24 @@ import {
   Wallet, 
   CheckSquare,
   Sun,
-  Moon,
-  Shield,
-  Layers,
-  Zap
+  Moon
 } from 'lucide-react';
 import { GeminiCursorCanvas } from './GeminiCursorCanvas';
 
-export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, isLanding = false }) => {
+export const AmsCentralHub = ({ 
+  onSelectModule, 
+  onOpenLoginModal, 
+  currentUser, 
+  isLanding = false,
+  theme: externalTheme,
+  onToggleTheme: externalToggleTheme
+}) => {
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [themeMode, setThemeMode] = useState('dark'); // 'dark' (Gemini Cosmic) or 'light' (Bright Aura)
+  const [internalTheme, setInternalTheme] = useState('dark');
 
+  // Support controlled or uncontrolled theme
+  const themeMode = externalTheme || internalTheme;
+  const toggleTheme = externalToggleTheme || (() => setInternalTheme(prev => prev === 'dark' ? 'light' : 'dark'));
   const isDark = themeMode === 'dark';
 
   const modules = [
@@ -30,8 +37,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'Konstruksi & Lapangan', 
       desc: 'Absen Tenaga Kerja, Proyek & Fasilitas', 
       color: '#f97316', 
-      icon: Wrench,
-      glowRgba: 'rgba(249, 115, 22, 0.45)'
+      lightColor: '#ea580c',
+      icon: Wrench
     },
     { 
       key: 'legal', 
@@ -39,8 +46,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'SPK, Izin & Legalitas', 
       desc: 'Legal Corporate, Perizinan & Dokumen', 
       color: '#10b981', 
-      icon: Scale,
-      glowRgba: 'rgba(16, 185, 129, 0.45)'
+      lightColor: '#059669',
+      icon: Scale
     },
     { 
       key: 'marketing', 
@@ -48,8 +55,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'Penjualan & Konsumen', 
       desc: 'Unit Properti, Akad & Leads Marketing', 
       color: '#38bdf8', 
-      icon: TrendingUp,
-      glowRgba: 'rgba(56, 189, 248, 0.45)'
+      lightColor: '#0284c7',
+      icon: TrendingUp
     },
     { 
       key: 'hr-ga', 
@@ -57,8 +64,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'SDM, Aset & Operasional', 
       desc: 'Kepegawaian, Fasilitas & Kendaraan', 
       color: '#a855f7', 
-      icon: Users,
-      glowRgba: 'rgba(168, 85, 247, 0.45)'
+      lightColor: '#9333ea',
+      icon: Users
     },
     { 
       key: 'finance', 
@@ -66,8 +73,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'Keuangan & Kas Bank', 
       desc: 'Arus Kas, Tagihan Vendor & Payment', 
       color: '#f59e0b', 
-      icon: Wallet,
-      glowRgba: 'rgba(245, 158, 11, 0.45)'
+      lightColor: '#d97706',
+      icon: Wallet
     },
     { 
       key: 'todo-attendance', 
@@ -75,12 +82,10 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
       sub: 'Agenda Kerja & Presensi', 
       desc: 'Target Harian & Kehadiran Staf', 
       color: '#ec4899', 
-      icon: CheckSquare,
-      glowRgba: 'rgba(236, 72, 153, 0.45)'
+      lightColor: '#db2777',
+      icon: CheckSquare
     }
   ];
-
-  const getModule = (key) => modules.find(m => m.key === key);
 
   return (
     <div
@@ -96,7 +101,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
         padding: '2.5rem 1rem',
         position: 'relative',
         overflow: 'hidden',
-        transition: 'background 0.4s ease, color 0.4s ease'
+        transition: 'background 0.3s ease, color 0.3s ease'
       }}
     >
       <style>
@@ -105,17 +110,13 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
           }
-          @keyframes spinReverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
-          }
           @keyframes pulseRing {
             0%, 100% { transform: scale(1); opacity: 0.35; }
             50% { transform: scale(1.04); opacity: 0.8; }
           }
           @keyframes geminiGlow {
-            0%, 100% { filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.4)) drop-shadow(0 0 25px rgba(168, 85, 247, 0.3)); }
-            50% { filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.45)) drop-shadow(0 0 35px rgba(56, 189, 248, 0.5)); }
+            0%, 100% { filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.3)); }
+            50% { filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.45)) drop-shadow(0 0 25px rgba(56, 189, 248, 0.5)); }
           }
           @keyframes streamDash {
             to { stroke-dashoffset: -40; }
@@ -125,7 +126,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
           }
           .ams-hub-node-btn {
             position: relative;
-            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
             outline: none;
           }
@@ -177,25 +178,25 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
         {/* Theme Toggle (Dark Gemini / Bright Aura) */}
         <button
           type="button"
-          onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-          title={isDark ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gemini Gelap'}
+          onClick={toggleTheme}
+          title={isDark ? 'Ganti ke Mode Terang (Putih)' : 'Ganti ke Mode Gemini Gelap'}
           style={{
-            background: isDark ? 'rgba(30, 41, 59, 0.75)' : 'rgba(255, 255, 255, 0.85)',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.12)',
+            background: isDark ? 'rgba(30, 41, 59, 0.85)' : '#ffffff',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1.5px solid #cbd5e1',
             color: isDark ? '#fbbf24' : '#0284c7',
             borderRadius: '50%',
-            width: '38px',
-            height: '38px',
+            width: '40px',
+            height: '40px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             backdropFilter: 'blur(10px)',
-            boxShadow: isDark ? '0 4px 15px rgba(0,0,0,0.4)' : '0 4px 15px rgba(0,0,0,0.06)',
+            boxShadow: isDark ? '0 4px 15px rgba(0,0,0,0.5)' : '0 4px 15px rgba(0,0,0,0.08)',
             transition: 'all 0.2s ease'
           }}
         >
-          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
         {/* Modal Login Staf Khusus (Optional) */}
@@ -204,19 +205,19 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             type="button"
             onClick={onOpenLoginModal}
             style={{
-              background: isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.85)',
-              border: isDark ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(245, 158, 11, 0.5)',
+              background: isDark ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
+              border: isDark ? '1.5px solid rgba(245, 158, 11, 0.45)' : '1.5px solid #f59e0b',
               borderRadius: '24px',
-              padding: '7px 16px',
-              fontSize: '0.78rem',
+              padding: '8px 18px',
+              fontSize: '0.8rem',
               fontWeight: 800,
-              color: isDark ? '#f8fafc' : '#1e293b',
+              color: isDark ? '#f8fafc' : '#0f172a',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
               backdropFilter: 'blur(10px)',
-              boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.4)' : '0 4px 15px rgba(0, 0, 0, 0.08)',
+              boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.4)' : '0 4px 15px rgba(245, 158, 11, 0.15)',
               transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
@@ -224,11 +225,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
               e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = isDark ? 'rgba(245, 158, 11, 0.4)' : 'rgba(245, 158, 11, 0.5)';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(245, 158, 11, 0.45)' : '#f59e0b';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <UserCheck size={14} color="#f59e0b" />
+            <UserCheck size={15} color="#f59e0b" />
             <span>Pilih Akun Staf / Login Khusus</span>
           </button>
         )}
@@ -254,7 +255,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '28px',
+            marginBottom: '26px',
             userSelect: 'none',
             position: 'relative'
           }}
@@ -268,7 +269,9 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
               transform: 'translate(-50%, -50%)',
               width: '160px',
               height: '160px',
-              background: 'radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(168, 85, 247, 0.1) 50%, transparent 70%)',
+              background: isDark 
+                ? 'radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, rgba(245, 158, 11, 0.1) 50%, transparent 70%)',
               filter: 'blur(16px)',
               pointerEvents: 'none'
             }}
@@ -277,18 +280,18 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
           {/* Logo with Frosted Glass Badge */}
           <div
             style={{
-              width: '88px',
-              height: '88px',
+              width: '90px',
+              height: '90px',
               borderRadius: '24px',
-              background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.85)',
-              border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid rgba(0, 0, 0, 0.08)',
+              background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
+              border: isDark ? '1.5px solid rgba(255, 255, 255, 0.18)' : '1.5px solid #e2e8f0',
               backdropFilter: 'blur(12px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: isDark 
                 ? '0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25)' 
-                : '0 12px 30px rgba(0, 0, 0, 0.08), 0 0 20px rgba(245, 158, 11, 0.2)',
+                : '0 12px 30px rgba(0, 0, 0, 0.08), 0 0 20px rgba(245, 158, 11, 0.15)',
               transition: 'transform 0.3s ease'
             }}
           >
@@ -296,49 +299,47 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
               src="/company-logo-transparent.png"
               alt="Ashoka Logo"
               onError={(e) => {
-                // Fallback to normal company logo if transparent is not cached
                 e.currentTarget.src = '/company-logo.png';
               }}
               style={{
-                width: '64px',
-                height: '64px',
+                width: '66px',
+                height: '66px',
                 objectFit: 'contain',
                 filter: isDark ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' : 'none'
               }}
             />
           </div>
 
+          {/* AMS TEXT: ALWAYS 100% VISIBLE IN BOTH DARK AND LIGHT MODES */}
           <div
             style={{
-              fontSize: '1.65rem',
+              fontSize: '1.85rem',
               fontWeight: 900,
               letterSpacing: '0.06em',
-              marginTop: '10px',
-              background: isDark 
-                ? 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%)' 
-                : 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              marginTop: '12px',
+              color: isDark ? '#ffffff' : '#0f172a',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              justifyContent: 'center',
+              gap: '8px',
+              textShadow: isDark ? '0 2px 10px rgba(0,0,0,0.5)' : 'none'
             }}
           >
             <span>AMS</span>
-            <Sparkles size={16} color="#f59e0b" className="gemini-sparkle-icon" />
+            <Sparkles size={18} color="#f59e0b" className="gemini-sparkle-icon" />
           </div>
 
           <div
             style={{
-              fontSize: '0.72rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
-              color: isDark ? '#94a3b8' : '#64748b',
-              letterSpacing: '0.12em',
+              color: isDark ? '#94a3b8' : '#475569',
+              letterSpacing: '0.14em',
               textTransform: 'uppercase',
               marginTop: '2px'
             }}
           >
-            Enterprise Property Ecosystem
+            Ashoka Management System
           </div>
         </div>
 
@@ -370,19 +371,19 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             <defs>
               <linearGradient id="streamGradTeknik" x1="100%" y1="50%" x2="0%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#f97316" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#f97316" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradLegal" x1="100%" y1="50%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradMarketing" x1="0%" y1="50%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradHr" x1="0%" y1="50%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.95" />
               </linearGradient>
             </defs>
 
@@ -390,8 +391,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             <path
               d="M 330 140 C 270 120, 220 80, 160 70"
               fill="none"
-              stroke={hoveredNode === 'teknik' ? 'url(#streamGradTeknik)' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}
-              strokeWidth={hoveredNode === 'teknik' ? '2.5' : '1.2'}
+              stroke={hoveredNode === 'teknik' ? 'url(#streamGradTeknik)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15, 23, 42, 0.15)')}
+              strokeWidth={hoveredNode === 'teknik' ? '2.5' : '1.5'}
               strokeDasharray={hoveredNode === 'teknik' ? '6 4' : 'none'}
               style={{
                 animation: hoveredNode === 'teknik' ? 'streamDash 1.2s linear infinite' : 'none',
@@ -403,8 +404,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             <path
               d="M 330 180 C 270 200, 220 240, 160 250"
               fill="none"
-              stroke={hoveredNode === 'legal' ? 'url(#streamGradLegal)' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}
-              strokeWidth={hoveredNode === 'legal' ? '2.5' : '1.2'}
+              stroke={hoveredNode === 'legal' ? 'url(#streamGradLegal)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15, 23, 42, 0.15)')}
+              strokeWidth={hoveredNode === 'legal' ? '2.5' : '1.5'}
               strokeDasharray={hoveredNode === 'legal' ? '6 4' : 'none'}
               style={{
                 animation: hoveredNode === 'legal' ? 'streamDash 1.2s linear infinite' : 'none',
@@ -416,8 +417,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             <path
               d="M 490 140 C 550 120, 600 80, 660 70"
               fill="none"
-              stroke={hoveredNode === 'marketing' ? 'url(#streamGradMarketing)' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}
-              strokeWidth={hoveredNode === 'marketing' ? '2.5' : '1.2'}
+              stroke={hoveredNode === 'marketing' ? 'url(#streamGradMarketing)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15, 23, 42, 0.15)')}
+              strokeWidth={hoveredNode === 'marketing' ? '2.5' : '1.5'}
               strokeDasharray={hoveredNode === 'marketing' ? '6 4' : 'none'}
               style={{
                 animation: hoveredNode === 'marketing' ? 'streamDash 1.2s linear infinite' : 'none',
@@ -429,8 +430,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             <path
               d="M 490 180 C 550 200, 600 240, 660 250"
               fill="none"
-              stroke={hoveredNode === 'hr-ga' ? 'url(#streamGradHr)' : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')}
-              strokeWidth={hoveredNode === 'hr-ga' ? '2.5' : '1.2'}
+              stroke={hoveredNode === 'hr-ga' ? 'url(#streamGradHr)' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15, 23, 42, 0.15)')}
+              strokeWidth={hoveredNode === 'hr-ga' ? '2.5' : '1.5'}
               strokeDasharray={hoveredNode === 'hr-ga' ? '6 4' : 'none'}
               style={{
                 animation: hoveredNode === 'hr-ga' ? 'streamDash 1.2s linear infinite' : 'none',
@@ -473,17 +474,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'teknik' ? 'rgba(249, 115, 22, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                    : (hoveredNode === 'teknik' ? 'rgba(254, 215, 170, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                    ? (hoveredNode === 'teknik' ? 'rgba(249, 115, 22, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'teknik' ? '#fff7ed' : '#ffffff'),
                   border: hoveredNode === 'teknik' 
-                    ? '1.5px solid #f97316' 
-                    : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                    ? '2px solid #f97316' 
+                    : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'teknik'
                     ? '0 12px 30px rgba(249, 115, 22, 0.35), 0 0 15px rgba(249, 115, 22, 0.2)'
-                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'right',
                   display: 'flex',
@@ -492,10 +493,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 900, color: hoveredNode === 'teknik' ? '#f97316' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+                  <div style={{ 
+                    fontSize: '1.45rem', 
+                    fontWeight: 900, 
+                    color: hoveredNode === 'teknik' ? '#f97316' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    lineHeight: 1.1 
+                  }}>
                     Teknik
                   </div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: hoveredNode === 'teknik' ? '#f97316' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '4px' }}>
+                  <div style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 700, 
+                    color: hoveredNode === 'teknik' ? '#ea580c' : (isDark ? '#94a3b8' : '#64748b'), 
+                    marginTop: '4px' 
+                  }}>
                     Konstruksi & Proyek
                   </div>
                 </div>
@@ -504,11 +515,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'teknik' ? '#f97316' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                    background: hoveredNode === 'teknik' ? '#f97316' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffedd5'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'teknik' ? '#ffffff' : '#f97316',
+                    color: hoveredNode === 'teknik' ? '#ffffff' : '#ea580c',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -526,17 +537,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'legal' ? 'rgba(16, 185, 129, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                    : (hoveredNode === 'legal' ? 'rgba(167, 243, 208, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                    ? (hoveredNode === 'legal' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'legal' ? '#f0fdf4' : '#ffffff'),
                   border: hoveredNode === 'legal' 
-                    ? '1.5px solid #10b981' 
-                    : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                    ? '2px solid #10b981' 
+                    : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'legal'
                     ? '0 12px 30px rgba(16, 185, 129, 0.35), 0 0 15px rgba(16, 185, 129, 0.2)'
-                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'right',
                   display: 'flex',
@@ -545,10 +556,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 900, color: hoveredNode === 'legal' ? '#10b981' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+                  <div style={{ 
+                    fontSize: '1.45rem', 
+                    fontWeight: 900, 
+                    color: hoveredNode === 'legal' ? '#10b981' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    lineHeight: 1.1 
+                  }}>
                     legal
                   </div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: hoveredNode === 'legal' ? '#10b981' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '4px' }}>
+                  <div style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 700, 
+                    color: hoveredNode === 'legal' ? '#059669' : (isDark ? '#94a3b8' : '#64748b'), 
+                    marginTop: '4px' 
+                  }}>
                     SPK, Izin & Legal
                   </div>
                 </div>
@@ -557,11 +578,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'legal' ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                    background: hoveredNode === 'legal' ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#dcfce7'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'legal' ? '#ffffff' : '#10b981',
+                    color: hoveredNode === 'legal' ? '#ffffff' : '#059669',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -592,7 +613,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                   position: 'absolute',
                   inset: '-14px',
                   borderRadius: '50%',
-                  border: isDark ? '1.5px dashed rgba(56, 189, 248, 0.35)' : '1.5px dashed rgba(2, 132, 199, 0.35)',
+                  border: isDark ? '1.5px dashed rgba(56, 189, 248, 0.35)' : '1.5px dashed rgba(2, 132, 199, 0.45)',
                   animation: 'spinSlow 28s linear infinite',
                   pointerEvents: 'none'
                 }}
@@ -607,8 +628,8 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     width: '8px',
                     height: '8px',
                     borderRadius: '50%',
-                    background: '#38bdf8',
-                    boxShadow: '0 0 10px #38bdf8, 0 0 20px #38bdf8'
+                    background: isDark ? '#38bdf8' : '#0284c7',
+                    boxShadow: isDark ? '0 0 10px #38bdf8, 0 0 20px #38bdf8' : '0 0 8px rgba(2, 132, 199, 0.6)'
                   }}
                 />
               </div>
@@ -619,7 +640,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                   position: 'absolute',
                   inset: '-28px',
                   borderRadius: '50%',
-                  border: isDark ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid rgba(168, 85, 247, 0.2)',
+                  border: isDark ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid rgba(147, 51, 234, 0.25)',
                   animation: 'pulseRing 4s ease-in-out infinite',
                   pointerEvents: 'none'
                 }}
@@ -632,17 +653,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                   height: '100%',
                   borderRadius: '50%',
                   background: isDark 
-                    ? 'radial-gradient(circle at 35% 35%, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)' 
-                    : 'radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 100%)',
-                  border: isDark ? '2.5px solid rgba(255, 255, 255, 0.18)' : '2.5px solid rgba(0, 0, 0, 0.15)',
+                    ? 'radial-gradient(circle at 35% 35%, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%)' 
+                    : '#ffffff',
+                  border: isDark ? '2.5px solid rgba(255, 255, 255, 0.2)' : '2.5px solid #0f172a',
                   backdropFilter: 'blur(20px)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: isDark
-                    ? '0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(56, 189, 248, 0.08), 0 0 40px rgba(99, 102, 241, 0.2)'
-                    : '0 20px 40px rgba(0, 0, 0, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(245, 158, 11, 0.15)',
+                    ? '0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(56, 189, 248, 0.08), 0 0 40px rgba(99, 102, 241, 0.25)'
+                    : '0 15px 40px rgba(0, 0, 0, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.9), 0 0 25px rgba(2, 132, 199, 0.12)',
                   transition: 'all 0.35s ease',
                   padding: '1.5rem',
                   textAlign: 'center'
@@ -655,18 +676,18 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     alignItems: 'center',
                     gap: '4px',
                     marginBottom: '8px',
-                    color: '#38bdf8',
+                    color: isDark ? '#38bdf8' : '#0284c7',
                     fontWeight: 800,
                     fontSize: '0.72rem',
                     letterSpacing: '0.12em',
                     textTransform: 'uppercase'
                   }}
                 >
-                  <Sparkles size={14} className="gemini-sparkle-icon" color="#38bdf8" />
+                  <Sparkles size={14} className="gemini-sparkle-icon" color={isDark ? '#38bdf8' : '#0284c7'} />
                   <span>Central Hub</span>
                 </div>
 
-                {/* Main Hub Title */}
+                {/* Main Hub Title: Crisp & Bold in Both Themes */}
                 <div
                   style={{
                     fontSize: '1.5rem',
@@ -676,16 +697,14 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     color: isDark ? '#ffffff' : '#0f172a'
                   }}
                 >
-                  <div style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>Ashoka</div>
+                  <div>Ashoka</div>
                   <div style={{ 
-                    background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    filter: isDark ? 'drop-shadow(0 0 12px rgba(99, 102, 241, 0.4))' : 'none'
+                    color: isDark ? '#38bdf8' : '#0284c7',
+                    filter: isDark ? 'drop-shadow(0 0 10px rgba(56, 189, 248, 0.4))' : 'none'
                   }}>
                     Management
                   </div>
-                  <div style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>System</div>
+                  <div>System</div>
                 </div>
 
                 <div
@@ -694,7 +713,7 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     fontWeight: 700,
                     color: isDark ? '#94a3b8' : '#64748b',
                     marginTop: '8px',
-                    letterSpacing: '0.06em'
+                    letterSpacing: '0.08em'
                   }}
                 >
                   CORE ARCHITECTURE
@@ -723,17 +742,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'marketing' ? 'rgba(56, 189, 248, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                    : (hoveredNode === 'marketing' ? 'rgba(186, 230, 253, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                    ? (hoveredNode === 'marketing' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'marketing' ? '#f0f9ff' : '#ffffff'),
                   border: hoveredNode === 'marketing' 
-                    ? '1.5px solid #38bdf8' 
-                    : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                    ? '2px solid #38bdf8' 
+                    : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'marketing'
                     ? '0 12px 30px rgba(56, 189, 248, 0.35), 0 0 15px rgba(56, 189, 248, 0.2)'
-                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'left',
                   display: 'flex',
@@ -746,11 +765,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                    background: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'marketing' ? '#ffffff' : '#38bdf8',
+                    color: hoveredNode === 'marketing' ? '#ffffff' : '#0284c7',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -758,10 +777,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                   <TrendingUp size={18} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 900, color: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+                  <div style={{ 
+                    fontSize: '1.45rem', 
+                    fontWeight: 900, 
+                    color: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    lineHeight: 1.1 
+                  }}>
                     Marketing
                   </div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '4px' }}>
+                  <div style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 700, 
+                    color: hoveredNode === 'marketing' ? '#0284c7' : (isDark ? '#94a3b8' : '#64748b'), 
+                    marginTop: '4px' 
+                  }}>
                     Penjualan Unit
                   </div>
                 </div>
@@ -776,17 +805,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'hr-ga' ? 'rgba(168, 85, 247, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                    : (hoveredNode === 'hr-ga' ? 'rgba(233, 213, 255, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                    ? (hoveredNode === 'hr-ga' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'hr-ga' ? '#faf5ff' : '#ffffff'),
                   border: hoveredNode === 'hr-ga' 
-                    ? '1.5px solid #a855f7' 
-                    : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                    ? '2px solid #a855f7' 
+                    : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'hr-ga'
                     ? '0 12px 30px rgba(168, 85, 247, 0.35), 0 0 15px rgba(168, 85, 247, 0.2)'
-                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                    : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'left',
                   display: 'flex',
@@ -799,11 +828,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                    background: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3e8ff'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'hr-ga' ? '#ffffff' : '#a855f7',
+                    color: hoveredNode === 'hr-ga' ? '#ffffff' : '#9333ea',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -811,10 +840,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                   <Users size={18} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '1.45rem', fontWeight: 900, color: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+                  <div style={{ 
+                    fontSize: '1.45rem', 
+                    fontWeight: 900, 
+                    color: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    lineHeight: 1.1 
+                  }}>
                     HR & GA
                   </div>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '4px' }}>
+                  <div style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 700, 
+                    color: hoveredNode === 'hr-ga' ? '#9333ea' : (isDark ? '#94a3b8' : '#64748b'), 
+                    marginTop: '4px' 
+                  }}>
                     SDM & Aset Kantor
                   </div>
                 </div>
@@ -845,17 +884,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             onMouseLeave={() => setHoveredNode(null)}
             style={{
               background: isDark 
-                ? (hoveredNode === 'finance' ? 'rgba(245, 158, 11, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                : (hoveredNode === 'finance' ? 'rgba(254, 240, 138, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                ? (hoveredNode === 'finance' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                : (hoveredNode === 'finance' ? '#fefce8' : '#ffffff'),
               border: hoveredNode === 'finance' 
-                ? '1.5px solid #f59e0b' 
-                : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                ? '2px solid #f59e0b' 
+                : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
               borderRadius: '16px',
               padding: '10px 28px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'finance'
                 ? '0 12px 30px rgba(245, 158, 11, 0.35), 0 0 15px rgba(245, 158, 11, 0.2)'
-                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -867,11 +906,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 width: '34px',
                 height: '34px',
                 borderRadius: '10px',
-                background: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                background: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fef3c7'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: hoveredNode === 'finance' ? '#000000' : '#f59e0b',
+                color: hoveredNode === 'finance' ? '#000000' : '#d97706',
                 flexShrink: 0,
                 transition: 'all 0.2s ease'
               }}
@@ -879,10 +918,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
               <Wallet size={17} />
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+              <div style={{ 
+                fontSize: '1.4rem', 
+                fontWeight: 900, 
+                color: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? '#f8fafc' : '#0f172a'), 
+                lineHeight: 1.1 
+              }}>
                 Finance
               </div>
-              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '2px' }}>
+              <div style={{ 
+                fontSize: '0.66rem', 
+                fontWeight: 700, 
+                color: hoveredNode === 'finance' ? '#d97706' : (isDark ? '#94a3b8' : '#64748b'), 
+                marginTop: '2px' 
+              }}>
                 Keuangan & Kas Bank
               </div>
             </div>
@@ -897,17 +946,17 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             onMouseLeave={() => setHoveredNode(null)}
             style={{
               background: isDark 
-                ? (hoveredNode === 'todo-attendance' ? 'rgba(236, 72, 153, 0.18)' : 'rgba(15, 23, 42, 0.7)')
-                : (hoveredNode === 'todo-attendance' ? 'rgba(251, 207, 232, 0.45)' : 'rgba(255, 255, 255, 0.85)'),
+                ? (hoveredNode === 'todo-attendance' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                : (hoveredNode === 'todo-attendance' ? '#fdf2f8' : '#ffffff'),
               border: hoveredNode === 'todo-attendance' 
-                ? '1.5px solid #ec4899' 
-                : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)'),
+                ? '2px solid #ec4899' 
+                : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
               borderRadius: '16px',
               padding: '10px 28px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'todo-attendance'
                 ? '0 12px 30px rgba(236, 72, 153, 0.35), 0 0 15px rgba(236, 72, 153, 0.2)'
-                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.04)'),
+                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -919,11 +968,11 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
                 width: '34px',
                 height: '34px',
                 borderRadius: '10px',
-                background: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                background: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fce7f3'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: hoveredNode === 'todo-attendance' ? '#ffffff' : '#ec4899',
+                color: hoveredNode === 'todo-attendance' ? '#ffffff' : '#db2777',
                 flexShrink: 0,
                 transition: 'all 0.2s ease'
               }}
@@ -931,10 +980,20 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
               <CheckSquare size={17} />
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? '#f8fafc' : '#0f172a'), lineHeight: 1.1 }}>
+              <div style={{ 
+                fontSize: '1.4rem', 
+                fontWeight: 900, 
+                color: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? '#f8fafc' : '#0f172a'), 
+                lineHeight: 1.1 
+              }}>
                 TO -DO LIST
               </div>
-              <div style={{ fontSize: '0.66rem', fontWeight: 700, color: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? '#94a3b8' : '#64748b'), marginTop: '2px' }}>
+              <div style={{ 
+                fontSize: '0.66rem', 
+                fontWeight: 700, 
+                color: hoveredNode === 'todo-attendance' ? '#db2777' : (isDark ? '#94a3b8' : '#64748b'), 
+                marginTop: '2px' 
+              }}>
                 Agenda Kerja Harian
               </div>
             </div>
@@ -948,14 +1007,14 @@ export const AmsCentralHub = ({ onSelectModule, onOpenLoginModal, currentUser, i
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            fontSize: '0.75rem',
-            color: isDark ? '#94a3b8' : '#64748b',
-            fontWeight: 600,
+            fontSize: '0.76rem',
+            color: isDark ? '#94a3b8' : '#475569',
+            fontWeight: 700,
             userSelect: 'none',
             zIndex: 10
           }}
         >
-          <Sparkles size={14} color="#f59e0b" />
+          <Sparkles size={15} color="#f59e0b" />
           <span>Gerakkan kursor untuk efek interaktif Gemini • Klik departemen untuk membuka modul</span>
         </div>
       </div>
