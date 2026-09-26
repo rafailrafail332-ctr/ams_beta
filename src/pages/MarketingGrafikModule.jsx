@@ -66,7 +66,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
   const [selectedYear, setSelectedYear] = useState('2026');
   const [selectedMonth, setSelectedMonth] = useState('ALL'); // 'ALL' atau '01' - '12'
   const [filterProject, setFilterProject] = useState('ALL'); // 'ALL', 'Ashoka View', 'Ashoka Park'
-  const [metricType, setMetricType] = useState('omzet'); // 'omzet' | 'unit'
+  const [metricType, setMetricType] = useState('both'); // 'both' | 'omzet' | 'unit'
   const [hoveredMonthIndex, setHoveredMonthIndex] = useState(null);
 
   // =============================================================
@@ -247,89 +247,130 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
   }, [allClosingRecords, selectedYear, filterProject]);
 
   // -------------------------------------------------------------
-  // SVG CHART GEOMETRY & CURVES (MODERN HIGH-END DESIGN)
   // -------------------------------------------------------------
-  const chartWidth = 920;
-  const chartHeight = 290;
-  const padLeft = 65;
-  const padRight = 30;
-  const padTop = 40;
+  // SVG CHART GEOMETRY & CURVES (DUAL GRAPHIC: OMZET + UNIT CLOSING)
+  // -------------------------------------------------------------
+  const chartWidth = 980;
+  const chartHeight = 310;
+  const padLeft = 75;
+  const padRight = 65;
+  const padTop = 45;
   const padBottom = 35;
 
   const innerW = chartWidth - padLeft - padRight;
   const innerH = chartHeight - padTop - padBottom;
 
-  // Tentukan nilai maksimum untuk skala Y
-  const maxVal = useMemo(() => {
+  // Nilai maksimum untuk skala Omzet (Y-Kiri)
+  const maxOmzet = useMemo(() => {
     let max = 0;
     monthlyChartData.forEach(d => {
-      const val = metricType === 'unit' ? d.unit : d.omzet;
-      if (val > max) max = val;
+      if (d.omzet > max) max = d.omzet;
     });
-    if (metricType === 'unit') return Math.max(max + 1, 3);
     return Math.max(max * 1.25, 1200000000);
-  }, [monthlyChartData, metricType]);
+  }, [monthlyChartData]);
 
-  const getYCoord = (val) => {
-    if (maxVal === 0) return padTop + innerH;
-    const ratio = Math.min(val / maxVal, 1);
+  // Nilai maksimum untuk skala Unit (Y-Kanan)
+  const maxUnit = useMemo(() => {
+    let max = 0;
+    monthlyChartData.forEach(d => {
+      if (d.unit > max) max = d.unit;
+    });
+    return Math.max(max + 1, 4);
+  }, [monthlyChartData]);
+
+  const getYCoordOmzet = (val) => {
+    if (maxOmzet === 0) return padTop + innerH;
+    const ratio = Math.min(val / maxOmzet, 1);
     return padTop + innerH - (ratio * innerH);
   };
 
-  // Garis Grid Horizontal
+  const getYCoordUnit = (val) => {
+    if (maxUnit === 0) return padTop + innerH;
+    const ratio = Math.min(val / maxUnit, 1);
+    return padTop + innerH - (ratio * innerH);
+  };
+
+  // Garis Grid Horizontal dengan Skala Ganda (Kiri: Rp, Kanan: Unit)
   const gridLines = useMemo(() => {
     const steps = 4;
     return Array.from({ length: steps + 1 }, (_, i) => {
-      const val = (maxVal / steps) * (steps - i);
+      const omzetVal = (maxOmzet / steps) * (steps - i);
+      const unitVal = (maxUnit / steps) * (steps - i);
       const y = padTop + (innerH / steps) * i;
-      const label = metricType === 'unit' ? `${Math.round(val)} Unit` : formatCompactRupiah(val);
-      return { val, y, label };
+      const labelOmzet = formatCompactRupiah(omzetVal);
+      const labelUnit = `${Math.round(unitVal)} Unit`;
+      return { y, labelOmzet, labelUnit };
     });
-  }, [maxVal, innerH, padTop, metricType]);
+  }, [maxOmzet, maxUnit, innerH, padTop]);
 
-  // Batang & Titik Kurva Area
+  // Batang & Titik Kurva Area Ganda (Omzet & Unit)
   const chartBars = useMemo(() => {
     const colW = innerW / 12;
-    const barW = 38; // Lebar pilar yang proporsional dan gagah
 
-    const pts = [];
+    const ptsOmzet = [];
+    const ptsUnit = [];
+
     const bars = monthlyChartData.map((d, i) => {
-      const xCenter = padLeft + (i * colW) + (colW / 2);
-      const xLeft = xCenter - (barW / 2);
+      const xColCenter = padLeft + (i * colW) + (colW / 2);
 
-      const val = metricType === 'unit' ? d.unit : d.omzet;
-      const yTop = getYCoord(val);
-      const barH = Math.max((padTop + innerH) - yTop, 0);
+      let barWOmzet = 20;
+      let barWUnit = 20;
+      let xOmzetLeft = xColCenter - 22;
+      let xUnitLeft = xColCenter + 2;
 
-      // Titik untuk kurva spline
-      pts.push({ x: xCenter, y: yTop });
+      if (metricType === 'omzet') {
+        barWOmzet = 36;
+        xOmzetLeft = xColCenter - (barWOmzet / 2);
+      } else if (metricType === 'unit') {
+        barWUnit = 36;
+        xUnitLeft = xColCenter - (barWUnit / 2);
+      }
+
+      const yTopOmzet = getYCoordOmzet(d.omzet);
+      const barHOmzet = Math.max((padTop + innerH) - yTopOmzet, 0);
+
+      const yTopUnit = getYCoordUnit(d.unit);
+      const barHUnit = Math.max((padTop + innerH) - yTopUnit, 0);
+
+      const xCenterOmzet = xOmzetLeft + barWOmzet / 2;
+      const xCenterUnit = xUnitLeft + barWUnit / 2;
+
+      ptsOmzet.push({ x: metricType === 'both' ? xCenterOmzet : xColCenter, y: yTopOmzet });
+      ptsUnit.push({ x: metricType === 'both' ? xCenterUnit : xColCenter, y: yTopUnit });
 
       return {
         ...d,
-        val,
-        xCenter,
-        xLeft,
-        barW,
-        yTop,
-        barH
+        xColCenter,
+        colW,
+        xOmzetLeft,
+        barWOmzet,
+        xCenterOmzet,
+        yTopOmzet,
+        barHOmzet,
+        xUnitLeft,
+        barWUnit,
+        xCenterUnit,
+        yTopUnit,
+        barHUnit
       };
     });
 
-    // Buat path area halus
-    const curveD = getSmoothCurvedPath(pts);
-    const firstPt = pts[0] || { x: padLeft, y: padTop + innerH };
-    const lastPt = pts[pts.length - 1] || { x: padLeft + innerW, y: padTop + innerH };
-    const areaD = `${curveD} L ${lastPt.x} ${padTop + innerH} L ${firstPt.x} ${padTop + innerH} Z`;
+    const curveDOmzet = getSmoothCurvedPath(ptsOmzet);
+    const firstPtOmzet = ptsOmzet[0] || { x: padLeft, y: padTop + innerH };
+    const lastPtOmzet = ptsOmzet[ptsOmzet.length - 1] || { x: padLeft + innerW, y: padTop + innerH };
+    const areaDOmzet = `${curveDOmzet} L ${lastPtOmzet.x} ${padTop + innerH} L ${firstPtOmzet.x} ${padTop + innerH} Z`;
 
-    return { bars, curveD, areaD, pts };
-  }, [monthlyChartData, innerW, innerH, padLeft, padTop, metricType, maxVal]);
+    const curveDUnit = getSmoothCurvedPath(ptsUnit);
+
+    return { bars, curveDOmzet, areaDOmzet, curveDUnit, ptsOmzet, ptsUnit };
+  }, [monthlyChartData, innerW, innerH, padLeft, padTop, metricType, maxOmzet, maxUnit]);
 
   // Reset filter ke default
   const handleResetFilters = () => {
     setSelectedYear('2026');
     setSelectedMonth('ALL');
     setFilterProject('ALL');
-    setMetricType('omzet');
+    setMetricType('both');
   };
 
   // Export Excel
@@ -481,6 +522,23 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           <div style={{ display: 'inline-flex', background: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #334155' }}>
             <button
               type="button"
+              onClick={() => setMetricType('both')}
+              style={{
+                padding: '4px 11px',
+                borderRadius: '6px',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                background: metricType === 'both' ? 'linear-gradient(135deg, #10b981 0%, #0284c7 100%)' : 'transparent',
+                color: metricType === 'both' ? '#ffffff' : '#94a3b8',
+                transition: 'all 0.15s'
+              }}
+            >
+              📊 Dua Grafik (Omzet & Unit)
+            </button>
+            <button
+              type="button"
               onClick={() => setMetricType('omzet')}
               style={{
                 padding: '4px 10px',
@@ -494,7 +552,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                 transition: 'all 0.15s'
               }}
             >
-              💰 Nilai Omzet (Rp)
+              💰 Omzet Saja
             </button>
             <button
               type="button"
@@ -511,7 +569,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                 transition: 'all 0.15s'
               }}
             >
-              🏠 Jumlah Unit
+              🏠 Unit Saja
             </button>
           </div>
 
@@ -652,9 +710,9 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.25rem' }}>
           <div>
             <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Grafik Penjualan Bulanan (12 Bulan {selectedYear === 'ALL' ? '2026' : selectedYear})</span>
-              <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontWeight: 800 }}>
-                {metricType === 'omzet' ? 'Satuan: Nilai Rupiah' : 'Satuan: Unit Rumah'}
+              <span>Grafik Penjualan & Unit Closing Bulanan (12 Bulan {selectedYear === 'ALL' ? '2026' : selectedYear})</span>
+              <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: metricType === 'both' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(16, 185, 129, 0.2)', color: metricType === 'both' ? '#38bdf8' : '#34d399', fontWeight: 800 }}>
+                {metricType === 'both' ? 'Dua Grafik: Omzet (Rp) & Unit Closing' : (metricType === 'omzet' ? 'Satuan: Nilai Rupiah' : 'Satuan: Unit Rumah')}
               </span>
             </div>
             <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
@@ -663,18 +721,18 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
           </div>
 
           {/* Indikator Legenda */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.74rem', color: '#cbd5e1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.74rem', color: '#cbd5e1', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: 'linear-gradient(135deg, #10b981, #059669)' }} />
-              <span>Bulan Ada Closing</span>
+              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'linear-gradient(135deg, #10b981, #059669)' }} />
+              <span style={{ fontWeight: 700, color: '#34d399' }}>Grafik 1: Omzet Closing (Rp)</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'linear-gradient(135deg, #38bdf8, #0284c7)' }} />
+              <span style={{ fontWeight: 700, color: '#38bdf8' }}>Grafik 2: Unit Closing (Unit)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: '#1e293b' }} />
               <span>Bulan Kosong (0)</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '14px', height: '2.5px', background: '#34d399' }} />
-              <span>Kurva Tren</span>
             </div>
           </div>
         </div>
@@ -687,17 +745,24 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
               style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
             >
               <defs>
-                {/* Gradient Batang Aktif (Modern Emerald) */}
-                <linearGradient id="barGlowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                {/* Gradient Batang Omzet (Modern Emerald) */}
+                <linearGradient id="barGlowGradOmzet" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#34d399" />
                   <stop offset="60%" stopColor="#10b981" />
                   <stop offset="100%" stopColor="#047857" />
                 </linearGradient>
 
-                {/* Gradient Area Bawah Kurva */}
-                <linearGradient id="areaCurveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
-                  <stop offset="65%" stopColor="#10b981" stopOpacity="0.08" />
+                {/* Gradient Batang Unit (Sky Blue Cyan) */}
+                <linearGradient id="barGlowGradUnit" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#67e8f9" />
+                  <stop offset="60%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#0284c7" />
+                </linearGradient>
+
+                {/* Gradient Area Bawah Kurva Omzet */}
+                <linearGradient id="areaCurveGradOmzet" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+                  <stop offset="65%" stopColor="#10b981" stopOpacity="0.06" />
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                 </linearGradient>
 
@@ -708,7 +773,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                 </filter>
               </defs>
 
-              {/* 1. Horizontal Background Grid Lines */}
+              {/* 1. Horizontal Background Grid Lines & Dual Axes */}
               {gridLines.map((gl, i) => (
                 <g key={`grid-${i}`}>
                   <line
@@ -720,44 +785,84 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                     strokeWidth="1"
                     strokeDasharray={i === gridLines.length - 1 ? 'none' : '4 4'}
                   />
-                  <text
-                    x={padLeft - 10}
-                    y={gl.y + 4}
-                    fill="#64748b"
-                    fontSize="10"
-                    textAnchor="end"
-                    fontWeight="600"
-                  >
-                    {gl.label}
-                  </text>
+                  {/* Left Label: Omzet (Rp) */}
+                  {(metricType === 'both' || metricType === 'omzet') && (
+                    <text
+                      x={padLeft - 10}
+                      y={gl.y + 4}
+                      fill="#34d399"
+                      fontSize="10"
+                      textAnchor="end"
+                      fontWeight="700"
+                    >
+                      {gl.labelOmzet}
+                    </text>
+                  )}
+                  {/* Right Label: Unit Closing */}
+                  {(metricType === 'both' || metricType === 'unit') && (
+                    <text
+                      x={padLeft + innerW + 10}
+                      y={gl.y + 4}
+                      fill="#38bdf8"
+                      fontSize="10"
+                      textAnchor="start"
+                      fontWeight="700"
+                    >
+                      {gl.labelUnit}
+                    </text>
+                  )}
                 </g>
               ))}
 
-              {/* 2. Smooth Area Gradient Fill Under Curve */}
-              {chartBars.areaD && (
+              {/* Axis Column Headers */}
+              {(metricType === 'both' || metricType === 'omzet') && (
+                <text x={padLeft} y={padTop - 12} fill="#34d399" fontSize="10.5" fontWeight="800" textAnchor="start">
+                  💰 Omzet (Rp)
+                </text>
+              )}
+              {(metricType === 'both' || metricType === 'unit') && (
+                <text x={padLeft + innerW} y={padTop - 12} fill="#38bdf8" fontSize="10.5" fontWeight="800" textAnchor="end">
+                  🏠 Unit Closing
+                </text>
+              )}
+
+              {/* 2. Smooth Area Gradient Fill Under Omzet Curve */}
+              {chartBars.areaDOmzet && (metricType === 'both' || metricType === 'omzet') && (
                 <path
-                  d={chartBars.areaD}
-                  fill="url(#areaCurveGrad)"
+                  d={chartBars.areaDOmzet}
+                  fill="url(#areaCurveGradOmzet)"
                 />
               )}
 
-              {/* 3. Smooth Bezier Curve Line */}
-              {chartBars.curveD && (
+              {/* 3. Smooth Bezier Curve Line for Omzet */}
+              {chartBars.curveDOmzet && (metricType === 'both' || metricType === 'omzet') && (
                 <path
-                  d={chartBars.curveD}
+                  d={chartBars.curveDOmzet}
                   fill="none"
-                  stroke="#34d399"
-                  strokeWidth="3"
+                  stroke="#10b981"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   filter="url(#neonGlow)"
                 />
               )}
 
-              {/* 4. Pillars / Bar Columns */}
+              {/* 4. Smooth Bezier Curve Line for Unit */}
+              {chartBars.curveDUnit && (metricType === 'both' || metricType === 'unit') && (
+                <path
+                  d={chartBars.curveDUnit}
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="2.5"
+                  strokeDasharray="4 3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
+
+              {/* 5. Pillars / Dual Bar Columns per Month */}
               {chartBars.bars.map((bar, i) => {
                 const isHovered = hoveredMonthIndex === i;
-                const hasValue = bar.val > 0;
                 const isSelected = selectedMonth === bar.monthStr;
 
                 return (
@@ -771,117 +876,219 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
                     {/* Hover Column Spotlight Background */}
                     {isHovered && (
                       <rect
-                        x={bar.xCenter - (innerW / 12) / 2}
+                        x={bar.xColCenter - (bar.colW / 2)}
                         y={padTop}
-                        width={innerW / 12}
+                        width={bar.colW}
                         height={innerH}
-                        fill="rgba(16, 185, 129, 0.08)"
+                        fill="rgba(255, 255, 255, 0.04)"
                         rx="6"
                       />
                     )}
 
-                    {/* Pilar Kosong jika 0 */}
-                    {!hasValue ? (
+                    {/* DUAL BARS DISPLAY (GABUNGAN: OMZET & UNIT) */}
+                    {metricType === 'both' ? (
                       <g>
-                        {/* Slot pillar transparan tipis */}
-                        <rect
-                          x={bar.xLeft}
-                          y={padTop + 30}
-                          width={bar.barW}
-                          height={innerH - 30}
-                          fill="rgba(255, 255, 255, 0.015)"
-                          stroke="rgba(255, 255, 255, 0.04)"
-                          strokeWidth="1"
-                          strokeDasharray="2 3"
-                          rx="6"
-                        />
-                        {/* Garis nol di dasar */}
-                        <line
-                          x1={bar.xLeft}
-                          y1={padTop + innerH}
-                          x2={bar.xLeft + bar.barW}
-                          y2={padTop + innerH}
-                          stroke="#334155"
-                          strokeWidth="2"
-                        />
-                        <text
-                          x={bar.xCenter}
-                          y={padTop + innerH - 8}
-                          fill="#475569"
-                          fontSize="9"
-                          fontWeight="700"
-                          textAnchor="middle"
-                        >
-                          -
-                        </text>
+                        {/* 1. OMZET BAR (EMERALD) */}
+                        {bar.omzet > 0 ? (
+                          <g>
+                            <rect
+                              x={bar.xOmzetLeft}
+                              y={bar.yTopOmzet}
+                              width={bar.barWOmzet}
+                              height={bar.barHOmzet}
+                              fill="url(#barGlowGradOmzet)"
+                              rx="5"
+                              filter={isHovered ? 'url(#neonGlow)' : undefined}
+                            />
+                            <rect
+                              x={bar.xOmzetLeft}
+                              y={bar.yTopOmzet}
+                              width={bar.barWOmzet}
+                              height={bar.barHOmzet}
+                              fill="none"
+                              stroke={isHovered || isSelected ? '#ffffff' : '#6ee7b7'}
+                              strokeWidth={isHovered || isSelected ? '1.5' : '1'}
+                              rx="5"
+                            />
+                            <text
+                              x={bar.xCenterOmzet}
+                              y={bar.yTopOmzet - 8}
+                              fill={isHovered ? '#ffffff' : '#34d399'}
+                              fontSize="9"
+                              fontWeight="800"
+                              textAnchor="middle"
+                            >
+                              {formatCompactRupiah(bar.omzet)}
+                            </text>
+                          </g>
+                        ) : (
+                          <rect
+                            x={bar.xOmzetLeft}
+                            y={padTop + innerH - 10}
+                            width={bar.barWOmzet}
+                            height={10}
+                            fill="rgba(255, 255, 255, 0.02)"
+                            stroke="rgba(255, 255, 255, 0.04)"
+                            rx="3"
+                          />
+                        )}
+
+                        {/* 2. UNIT CLOSING BAR (SKY BLUE) */}
+                        {bar.unit > 0 ? (
+                          <g>
+                            <rect
+                              x={bar.xUnitLeft}
+                              y={bar.yTopUnit}
+                              width={bar.barWUnit}
+                              height={bar.barHUnit}
+                              fill="url(#barGlowGradUnit)"
+                              rx="5"
+                              filter={isHovered ? 'url(#neonGlow)' : undefined}
+                            />
+                            <rect
+                              x={bar.xUnitLeft}
+                              y={bar.yTopUnit}
+                              width={bar.barWUnit}
+                              height={bar.barHUnit}
+                              fill="none"
+                              stroke={isHovered || isSelected ? '#ffffff' : '#7dd3fc'}
+                              strokeWidth={isHovered || isSelected ? '1.5' : '1'}
+                              rx="5"
+                            />
+                            <text
+                              x={bar.xCenterUnit}
+                              y={bar.yTopUnit - 8}
+                              fill={isHovered ? '#ffffff' : '#38bdf8'}
+                              fontSize="9.5"
+                              fontWeight="900"
+                              textAnchor="middle"
+                            >
+                              {bar.unit} U
+                            </text>
+                          </g>
+                        ) : (
+                          <rect
+                            x={bar.xUnitLeft}
+                            y={padTop + innerH - 10}
+                            width={bar.barWUnit}
+                            height={10}
+                            fill="rgba(255, 255, 255, 0.02)"
+                            stroke="rgba(255, 255, 255, 0.04)"
+                            rx="3"
+                          />
+                        )}
+
+                        {/* Dots */}
+                        {bar.omzet > 0 && (
+                          <circle
+                            cx={bar.xCenterOmzet}
+                            cy={bar.yTopOmzet}
+                            r={isHovered ? 5.5 : 4}
+                            fill="#34d399"
+                            stroke="#0f172a"
+                            strokeWidth="1.5"
+                          />
+                        )}
+                        {bar.unit > 0 && (
+                          <circle
+                            cx={bar.xCenterUnit}
+                            cy={bar.yTopUnit}
+                            r={isHovered ? 5.5 : 4}
+                            fill="#38bdf8"
+                            stroke="#0f172a"
+                            strokeWidth="1.5"
+                          />
+                        )}
                       </g>
+                    ) : metricType === 'omzet' ? (
+                      /* SINGLE OMZET BAR */
+                      bar.omzet > 0 ? (
+                        <g>
+                          <rect
+                            x={bar.xOmzetLeft}
+                            y={bar.yTopOmzet}
+                            width={bar.barWOmzet}
+                            height={bar.barHOmzet}
+                            fill="url(#barGlowGradOmzet)"
+                            rx="8"
+                            filter={isHovered ? 'url(#neonGlow)' : undefined}
+                          />
+                          <text
+                            x={bar.xCenterOmzet}
+                            y={bar.yTopOmzet - 9}
+                            fill={isHovered ? '#ffffff' : '#34d399'}
+                            fontSize="10"
+                            fontWeight="900"
+                            textAnchor="middle"
+                          >
+                            {formatCompactRupiah(bar.omzet)}
+                          </text>
+                          <circle
+                            cx={bar.xCenterOmzet}
+                            cy={bar.yTopOmzet}
+                            r={isHovered ? 6.5 : 4.5}
+                            fill="#ffffff"
+                            stroke="#10b981"
+                            strokeWidth="2"
+                          />
+                        </g>
+                      ) : (
+                        <text x={bar.xColCenter} y={padTop + innerH - 8} fill="#475569" fontSize="9" fontWeight="700" textAnchor="middle">-</text>
+                      )
                     ) : (
-                      /* Pilar Berisi Closing */
-                      <g>
-                        {/* Shadow / Aura */}
-                        <rect
-                          x={bar.xLeft}
-                          y={bar.yTop}
-                          width={bar.barW}
-                          height={bar.barH}
-                          fill="url(#barGlowGrad)"
-                          rx="8"
-                          filter={isHovered ? 'url(#neonGlow)' : undefined}
-                        />
-
-                        {/* Highlight Stroke */}
-                        <rect
-                          x={bar.xLeft}
-                          y={bar.yTop}
-                          width={bar.barW}
-                          height={bar.barH}
-                          fill="none"
-                          stroke={isHovered || isSelected ? '#ffffff' : '#6ee7b7'}
-                          strokeWidth={isHovered || isSelected ? '2' : '1'}
-                          rx="8"
-                        />
-
-                        {/* Value Badge on top */}
-                        <text
-                          x={bar.xCenter}
-                          y={bar.yTop - 9}
-                          fill={isHovered ? '#ffffff' : '#34d399'}
-                          fontSize="10"
-                          fontWeight="900"
-                          textAnchor="middle"
-                        >
-                          {metricType === 'unit' ? `${bar.val} Unit` : formatCompactRupiah(bar.val)}
-                        </text>
-                      </g>
+                      /* SINGLE UNIT BAR */
+                      bar.unit > 0 ? (
+                        <g>
+                          <rect
+                            x={bar.xUnitLeft}
+                            y={bar.yTopUnit}
+                            width={bar.barWUnit}
+                            height={bar.barHUnit}
+                            fill="url(#barGlowGradUnit)"
+                            rx="8"
+                            filter={isHovered ? 'url(#neonGlow)' : undefined}
+                          />
+                          <text
+                            x={bar.xCenterUnit}
+                            y={bar.yTopUnit - 9}
+                            fill={isHovered ? '#ffffff' : '#38bdf8'}
+                            fontSize="10"
+                            fontWeight="900"
+                            textAnchor="middle"
+                          >
+                            {bar.unit} Unit
+                          </text>
+                          <circle
+                            cx={bar.xCenterUnit}
+                            cy={bar.yTopUnit}
+                            r={isHovered ? 6.5 : 4.5}
+                            fill="#ffffff"
+                            stroke="#0284c7"
+                            strokeWidth="2"
+                          />
+                        </g>
+                      ) : (
+                        <text x={bar.xColCenter} y={padTop + innerH - 8} fill="#475569" fontSize="9" fontWeight="700" textAnchor="middle">-</text>
+                      )
                     )}
-
-                    {/* Dot on Line */}
-                    <circle
-                      cx={bar.xCenter}
-                      cy={bar.yTop}
-                      r={hasValue ? (isHovered ? 6.5 : 4.5) : 3}
-                      fill={hasValue ? '#ffffff' : '#475569'}
-                      stroke={hasValue ? '#10b981' : '#0f172a'}
-                      strokeWidth="2"
-                    />
 
                     {/* X-Axis Month Label */}
                     <text
-                      x={bar.xCenter}
+                      x={bar.xColCenter}
                       y={padTop + innerH + 18}
-                      fill={hasValue ? (isHovered || isSelected ? '#ffffff' : '#34d399') : (isHovered ? '#cbd5e1' : '#64748b')}
-                      fontSize="10"
-                      fontWeight={hasValue || isSelected ? '800' : '600'}
+                      fill={bar.unit > 0 ? (isHovered || isSelected ? '#ffffff' : '#38bdf8') : (isHovered ? '#cbd5e1' : '#64748b')}
+                      fontSize="10.5"
+                      fontWeight={bar.unit > 0 || isSelected ? '800' : '600'}
                       textAnchor="middle"
                     >
                       {bar.monthShort}
                     </text>
-                    {hasValue && (
+                    {bar.unit > 0 && (
                       <circle
-                        cx={bar.xCenter}
+                        cx={bar.xColCenter}
                         cy={padTop + innerH + 26}
                         r="2.5"
-                        fill="#10b981"
+                        fill="#38bdf8"
                       />
                     )}
                   </g>
@@ -890,55 +1097,70 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
             </svg>
 
             {/* Hover Tooltip Widget */}
-            {hoveredMonthIndex !== null && chartBars.bars[hoveredMonthIndex] && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: `${Math.max(chartBars.bars[hoveredMonthIndex].yTop - 110, 10)}px`,
-                  left: `${Math.min(Math.max(chartBars.bars[hoveredMonthIndex].xCenter - 110, 15), chartWidth - 240)}px`,
-                  background: 'rgba(15, 23, 42, 0.94)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1.5px solid #10b981',
-                  borderRadius: '10px',
-                  padding: '9px 12px',
-                  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(16, 185, 129, 0.3)',
-                  zIndex: 30,
-                  pointerEvents: 'none',
-                  minWidth: '210px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '4px', marginBottom: '5px' }}>
-                  <strong style={{ color: '#ffffff', fontSize: '0.84rem' }}>
-                    {chartBars.bars[hoveredMonthIndex].monthName} {selectedYear === 'ALL' ? '2026' : selectedYear}
-                  </strong>
-                  <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: chartBars.bars[hoveredMonthIndex].unit > 0 ? '#10b981' : '#334155', color: '#ffffff', fontWeight: 800 }}>
-                    {chartBars.bars[hoveredMonthIndex].unit} Closing
-                  </span>
-                </div>
+            {hoveredMonthIndex !== null && chartBars.bars[hoveredMonthIndex] && (() => {
+              const hb = chartBars.bars[hoveredMonthIndex];
+              const targetY = metricType === 'unit' ? hb.yTopUnit : (metricType === 'omzet' ? hb.yTopOmzet : Math.min(hb.yTopOmzet, hb.yTopUnit));
+              const targetX = hb.xColCenter;
+              return (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: `${Math.max(targetY - 120, 10)}px`,
+                    left: `${Math.min(Math.max(targetX - 115, 15), chartWidth - 260)}px`,
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1.5px solid #38bdf8',
+                    borderRadius: '10px',
+                    padding: '9px 12px',
+                    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(56, 189, 248, 0.25)',
+                    zIndex: 30,
+                    pointerEvents: 'none',
+                    minWidth: '230px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '5px', marginBottom: '6px' }}>
+                    <strong style={{ color: '#ffffff', fontSize: '0.84rem' }}>
+                      {hb.monthName} {selectedYear === 'ALL' ? '2026' : selectedYear}
+                    </strong>
+                    <span style={{ fontSize: '0.7rem', padding: '1px 7px', borderRadius: '4px', background: hb.unit > 0 ? '#0284c7' : '#334155', color: '#ffffff', fontWeight: 800 }}>
+                      {hb.unit} Unit Closing
+                    </span>
+                  </div>
 
-                <div style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <div>Total Omzet: <strong style={{ color: '#34d399' }}>{formatRupiah(chartBars.bars[hoveredMonthIndex].omzet)}</strong></div>
-                  <div>Uang Masuk: <strong style={{ color: '#fbbf24' }}>{formatRupiah(chartBars.bars[hoveredMonthIndex].cashIn)}</strong></div>
+                  <div style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#94a3b8' }}>Grafik 1 (Omzet):</span>
+                      <strong style={{ color: '#34d399' }}>{formatRupiah(hb.omzet)}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#94a3b8' }}>Grafik 2 (Unit):</span>
+                      <strong style={{ color: '#38bdf8' }}>{hb.unit} Unit</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#94a3b8' }}>Uang Masuk:</span>
+                      <strong style={{ color: '#fbbf24' }}>{formatRupiah(hb.cashIn)}</strong>
+                    </div>
 
-                  {/* List Nama Pembeli */}
-                  {(chartBars.bars[hoveredMonthIndex].sales || []).length > 0 ? (
-                    <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #334155' }}>
-                      <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, marginBottom: '2px' }}>Konsumen:</div>
-                      {(chartBars.bars[hoveredMonthIndex].sales || []).map(cs => (
-                        <div key={cs.id} style={{ fontSize: '0.7rem', color: '#f1f5f9', display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
-                          <span>• {cs.customerName} ({cs.unit})</span>
-                          <span style={{ color: '#38bdf8', fontWeight: 700 }}>{formatCompactRupiah(cs.netPrice)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic', marginTop: '3px' }}>
-                      Tidak ada transaksi closing di bulan ini.
-                    </div>
-                  )}
+                    {/* List Nama Pembeli */}
+                    {(hb.sales || []).length > 0 ? (
+                      <div style={{ marginTop: '5px', paddingTop: '5px', borderTop: '1px dashed #334155' }}>
+                        <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, marginBottom: '2px' }}>Daftar Konsumen:</div>
+                        {(hb.sales || []).map(cs => (
+                          <div key={cs.id} style={{ fontSize: '0.7rem', color: '#f1f5f9', display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
+                            <span>• {cs.customerName} ({cs.unit})</span>
+                            <span style={{ color: '#38bdf8', fontWeight: 700 }}>{formatCompactRupiah(cs.netPrice)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', fontStyle: 'italic', marginTop: '4px' }}>
+                        Tidak ada transaksi closing di bulan ini.
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>
