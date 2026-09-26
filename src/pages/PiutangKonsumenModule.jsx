@@ -25,7 +25,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { fetchCloudStore, saveCloudStore } from '../supabase';
 import * as XLSX from 'xlsx';
-import { ASHOKA_PARK_SIGNATURE_BASE64, PERSADA_FOUR_LAND_LOGO_BASE64 } from './ashokaParkSignatureBase64';
+import { ASHOKA_PARK_SIGNATURE_BASE64, PERSADA_FOUR_LAND_LOGO_BASE64, ASHOKA_LOGO_ICON_BASE64 } from './ashokaParkSignatureBase64';
 
 const STORAGE_KEY_PIUTANG = 'ams_piutang_konsumen_v1';
 
@@ -1502,6 +1502,12 @@ export const PiutangKonsumenModule = () => {
 </head>
 <body>
   <div class="rekap-container">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+      <img src="${ASHOKA_LOGO_ICON_BASE64}" alt="Logo" style="height: 38px; width: 38px; object-fit: contain;" />
+      <span style="font-size: 17px; font-weight: 900; color: #0f2a4a; letter-spacing: 0.5px; text-transform: uppercase;">
+        ${row.proyek || 'ASHOKA PARK'}
+      </span>
+    </div>
     <div class="rekap-banner">REKAPITULASI PEMBAYARAN</div>
 
     <div class="meta-grid">
@@ -1655,6 +1661,13 @@ export const PiutangKonsumenModule = () => {
         <td></td>
       </tr>
     </table>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 36px; padding-right: 15px; font-size: 13.5px; font-weight: 700; color: #000000;">
+      <span>Tanggal Cetak &nbsp; : &nbsp; </span>
+      <span style="border-bottom: 1px solid #000000; min-width: 170px; display: inline-block; text-align: center; padding-bottom: 2px;">
+        ${formatDateSlash(new Date().toISOString())}
+      </span>
+    </div>
   </div>
 </body>
 </html>`;
@@ -1695,6 +1708,7 @@ export const PiutangKonsumenModule = () => {
       const ltTotal = row.ltTotal || (Number(row.lt || 0) + Number(row.ltPlus || 0));
 
       const wsData = [
+        [(row.proyek || 'ASHOKA PARK').toUpperCase(), '', '', '', ''],
         ['REKAPITULASI PEMBAYARAN', '', '', '', ''],
         [],
         ['Nama Konsumen', ':', row.namaKonsumen || '', 'Type', ':', row.type || ''],
@@ -1735,6 +1749,8 @@ export const PiutangKonsumenModule = () => {
       wsData.push([]);
       wsData.push(['Grand Total', 'Rp', grandTotal]);
       wsData.push(['Sisa Pembayaran', 'Rp', row.saldo || 0]);
+      wsData.push([]);
+      wsData.push(['', '', 'Tanggal Cetak :', formatDateSlash(new Date().toISOString())]);
 
       const ws = XLSX.utils.aoa_to_sheet(wsData);
       ws['!cols'] = [
@@ -4578,6 +4594,18 @@ export const PiutangKonsumenModule = () => {
                   background: '#ffffff'
                 }}
               >
+                {/* Brand Header with Logo from reference image */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                  <img
+                    src={ASHOKA_LOGO_ICON_BASE64}
+                    alt="Logo"
+                    style={{ height: '38px', width: '38px', objectFit: 'contain' }}
+                  />
+                  <span style={{ fontSize: '17px', fontWeight: 900, color: '#0f2a4a', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                    {row.proyek || 'ASHOKA PARK'}
+                  </span>
+                </div>
+
                 {/* Banner Header */}
                 <div
                   style={{
@@ -4850,6 +4878,14 @@ export const PiutangKonsumenModule = () => {
                   <span style={{ width: '40px' }}>Rp</span>
                   <span style={{ width: '150px', textAlign: 'right', paddingRight: '24px' }}>{formatNumber(row.saldo)}</span>
                   <span></span>
+                </div>
+
+                {/* Tanggal Cetak Footer */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px', paddingRight: '15px', fontSize: '13.5px', fontWeight: 700, color: '#000000' }}>
+                  <span>Tanggal Cetak &nbsp; : &nbsp; </span>
+                  <span style={{ borderBottom: '1px solid #000000', minWidth: '170px', display: 'inline-block', textAlign: 'center', paddingBottom: '2px' }}>
+                    {formatDateSlash(new Date().toISOString())}
+                  </span>
                 </div>
               </div>
 
