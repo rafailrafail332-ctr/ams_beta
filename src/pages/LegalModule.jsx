@@ -1077,98 +1077,275 @@ export const LegalModule = () => {
   };
 
   // =========================================================================
-  // 4. DATA STORE: LITIGASI (PENANGANAN SENGKETA & ADVOKASI HUKUM) - KOSONG
+  // 4. DATA STORE: LITIGASI (PENANGANAN SENGKETA & ADVOKASI HUKUM)
   // =========================================================================
+  const defaultLitigasiList = [
+    {
+      id: 'LIT-01',
+      noDok: 'LIT/AMS-LEG/2026/01',
+      tanggalDok: '2026-09-26',
+      project: 'Ashoka Park',
+      nama: 'Bpk. Hendra Gunawan & BPN',
+      kategori: 'Klarifikasi Lahan',
+      judulDokumen: 'Berita Acara Klarifikasi Pengukuran Batas Lahan',
+      catatan: 'Sedang Proses Mediasi BPN',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'BAP_Pengukuran_Batas_Lahan.pdf',
+      fileSize: '1.4 MB',
+      fileData: '',
+      files: [
+        { name: 'BAP_Pengukuran_Batas_Lahan.pdf', size: '1.4 MB', data: '', type: 'application/pdf' },
+        { name: 'Lampiran_Peta_Ukur_BPN.pdf', size: '2.1 MB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LIT-02',
+      noDok: 'LIT/AMS-LEG/2025/11',
+      tanggalDok: '2025-11-15',
+      project: 'Ashoka View',
+      nama: 'PT Mandiri Logam Perkasa',
+      kategori: 'Somasi Wanprestasi',
+      judulDokumen: 'Surat Somasi I Keterlambatan Pengiriman Material',
+      catatan: 'Selesai Damai & Restrukturisasi Jadwal',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'Surat_Somasi_I_Wanprestasi.pdf',
+      fileSize: '950 KB',
+      fileData: '',
+      files: [
+        { name: 'Surat_Somasi_I_Wanprestasi.pdf', size: '950 KB', data: '', type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 'LIT-03',
+      noDok: 'LIT/AMS-LEG/2025/08',
+      tanggalDok: '2025-08-10',
+      project: 'Ashoka Park',
+      nama: 'Warga Sekitar Saluran Irigasi',
+      kategori: 'Mediasi Warga',
+      judulDokumen: 'Kesepakatan Musyawarah Normalisasi Saluran Air',
+      catatan: 'Masa berlaku s/d 2027',
+      pic: 'Wahyu Salma Septiani, S.H',
+      fileName: 'Surat_Kesepakatan_Musyawarah.pdf',
+      fileSize: '1.6 MB',
+      fileData: '',
+      files: [
+        { name: 'Surat_Kesepakatan_Musyawarah.pdf', size: '1.6 MB', data: '', type: 'application/pdf' },
+        { name: 'Lampiran_Dokumentasi_Lapangan.pdf', size: '3.2 MB', data: '', type: 'application/pdf' }
+      ]
+    }
+  ];
+
   const [litigations, setLitigations] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_legal_litigasi_v4_clean');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('ams_legal_litigasi_v5_table');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {}
-    return []; // Clean empty baseline
+    return defaultLitigasiList;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_legal_litigasi_v4_clean', JSON.stringify(litigations));
+      localStorage.setItem('ams_legal_litigasi_v5_table', JSON.stringify(litigations));
     } catch (e) {}
   }, [litigations]);
 
+  const [searchLitigasi, setSearchLitigasi] = useState('');
+  const [filterLitigasiKategori, setFilterLitigasiKategori] = useState('ALL');
+  const [filterLitigasiProject, setFilterLitigasiProject] = useState('ALL');
   const [isLitigasiModalOpen, setIsLitigasiModalOpen] = useState(false);
+  const [editingLitigasiId, setEditingLitigasiId] = useState(null);
+  const [viewingLitigasi, setViewingLitigasi] = useState(null);
+  const [litigasiFileSlide, setLitigasiFileSlide] = useState(0);
+  const [litigasiPrintMode, setLitigasiPrintMode] = useState('all');
+  const litigasiModalRef = useRef(null);
+
+  useEffect(() => {
+    if (viewingLitigasi) {
+      if (litigasiModalRef.current) litigasiModalRef.current.scrollTop = 0;
+    }
+  }, [viewingLitigasi]);
+
   const [litigasiForm, setLitigasiForm] = useState({
-    caseNo: '',
-    caseTitle: '',
-    parties: '',
-    disputeType: 'Klarifikasi Batas Tanah (BPN)',
+    noDok: '',
+    tanggalDok: new Date().toISOString().split('T')[0],
     project: 'Ashoka Park',
-    claimValue: 0,
-    lawyer: 'Wahyu Salma Septiani, S.H',
-    status: 'Sedang Proses Mediasi',
-    dateFiled: new Date().toISOString().split('T')[0],
-    dateResolved: '',
-    summary: '',
+    nama: '',
+    kategori: 'Klarifikasi Lahan',
+    judulDokumen: '',
+    catatan: '',
+    pic: 'Wahyu Salma Septiani, S.H',
     fileName: '',
     fileSize: '',
-    fileData: ''
+    fileData: '',
+    files: []
   });
 
-  const handleOpenAddLitigasi = () => {
+  const handleOpenAddLitigasi = (defaultCat = 'Klarifikasi Lahan') => {
+    setEditingLitigasiId(null);
     const nextNo = `LIT/AMS-LEG/2026/00${litigations.length + 1}`;
     setLitigasiForm({
-      caseNo: nextNo,
-      caseTitle: '',
-      parties: '',
-      disputeType: 'Klarifikasi Batas Tanah (BPN)',
+      noDok: nextNo,
+      tanggalDok: new Date().toISOString().split('T')[0],
       project: 'Ashoka Park',
-      claimValue: 0,
-      lawyer: currentUser?.name || 'Wahyu Salma Septiani, S.H',
-      status: 'Sedang Proses Mediasi',
-      dateFiled: new Date().toISOString().split('T')[0],
-      dateResolved: '',
-      summary: '',
+      nama: '',
+      kategori: defaultCat,
+      judulDokumen: '',
+      catatan: '',
+      pic: currentUser?.name || 'Wahyu Salma Septiani, S.H',
       fileName: '',
       fileSize: '',
-      fileData: ''
+      fileData: '',
+      files: []
+    });
+    setIsLitigasiModalOpen(true);
+  };
+
+  const handleOpenEditLitigasi = (item) => {
+    setEditingLitigasiId(item.id);
+    setLitigasiForm({
+      noDok: item.noDok || item.caseNo || '',
+      tanggalDok: item.tanggalDok || item.dateFiled || new Date().toISOString().split('T')[0],
+      project: item.project || 'Ashoka Park',
+      nama: item.nama || item.parties || '',
+      kategori: item.kategori || item.disputeType || 'Klarifikasi Lahan',
+      judulDokumen: item.judulDokumen || item.caseTitle || '',
+      catatan: item.catatan || item.status || '',
+      pic: item.pic || item.lawyer || 'Wahyu Salma Septiani, S.H',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || '',
+      files: item.files || (item.fileName ? [{ name: item.fileName, size: item.fileSize, data: item.fileData }] : [])
     });
     setIsLitigasiModalOpen(true);
   };
 
   const handleLitigasiFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const uploadedFiles = Array.from(e.target.files);
+    if (uploadedFiles.length === 0) return;
+
+    uploadedFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
-        setLitigasiForm(prev => ({
-          ...prev,
-          fileName: file.name,
-          fileSize: formatFileSize(file.size),
-          fileData: uploadEvent.target.result
-        }));
-        showNotification(`File berkas litigasi "${file.name}" siap diunggah!`, 'info');
+        setLitigasiForm(prev => {
+          const newFileObj = {
+            name: file.name,
+            size: formatFileSize(file.size),
+            data: uploadEvent.target.result,
+            type: file.type
+          };
+          const currentFiles = prev.files || [];
+          return {
+            ...prev,
+            fileName: currentFiles.length === 0 ? file.name : `${currentFiles.length + 1} Berkas Terlampir`,
+            fileSize: formatFileSize(file.size),
+            fileData: uploadEvent.target.result,
+            files: [...currentFiles, newFileObj]
+          };
+        });
+        showNotification(`File "${file.name}" siap diunggah!`, 'info');
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const handleRemoveLitigasiFile = (indexToRemove) => {
+    setLitigasiForm(prev => {
+      const updated = (prev.files || []).filter((_, i) => i !== indexToRemove);
+      return {
+        ...prev,
+        fileName: updated.length > 0 ? updated[0].name : '',
+        fileSize: updated.length > 0 ? updated[0].size : '',
+        fileData: updated.length > 0 ? updated[0].data : '',
+        files: updated
+      };
+    });
   };
 
   const handleSaveLitigasi = (e) => {
     e.preventDefault();
-    if (!litigasiForm.caseTitle || !litigasiForm.parties) {
-      showNotification('Mohon lengkapi Judul Kasus dan Pihak yang Terlibat!', 'warning');
+    if (!litigasiForm.nama || !litigasiForm.judulDokumen) {
+      showNotification('Mohon lengkapi Nama Pihak dan Judul Dokumen Perkara!', 'warning');
       return;
     }
-    const newLit = {
-      id: `LIT-${Date.now()}`,
-      ...litigasiForm,
-      claimValue: Number(litigasiForm.claimValue) || 0
-    };
-    setLitigations([newLit, ...litigations]);
+
+    if (editingLitigasiId) {
+      setLitigations(prev => prev.map(item => {
+        if (item.id === editingLitigasiId) {
+          return {
+            ...item,
+            ...litigasiForm
+          };
+        }
+        return item;
+      }));
+      showNotification(`Dokumen Litigasi "${litigasiForm.judulDokumen}" berhasil diperbarui!`, 'success');
+    } else {
+      const newLit = {
+        id: `LIT-${Date.now()}`,
+        ...litigasiForm
+      };
+      setLitigations([newLit, ...litigations]);
+      showNotification(`Dokumen Litigasi "${newLit.judulDokumen}" berhasil ditambahkan!`, 'success');
+    }
     setIsLitigasiModalOpen(false);
-    showNotification(`Perkara "${newLit.caseTitle}" berhasil diunggah & dicatat!`, 'success');
   };
 
-  const handleDeleteLitigasi = (id, caseTitle) => {
-    if (window.confirm(`Hapus berkas perkara ${caseTitle}?`)) {
+  const handleDeleteLitigasi = (id, title) => {
+    if (window.confirm(`Hapus dokumen perkara "${title}"?`)) {
       setLitigations(prev => prev.filter(l => l.id !== id));
-      showNotification(`Berkas perkara ${caseTitle} berhasil dihapus.`, 'warning');
+      showNotification(`Dokumen perkara "${title}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  // Filtered Litigasi List
+  const filteredLitigasiList = useMemo(() => {
+    return litigations.filter(item => {
+      const q = searchLitigasi.toLowerCase();
+      const matchSearch = 
+        !q ||
+        (item.noDok || '').toLowerCase().includes(q) ||
+        (item.judulDokumen || '').toLowerCase().includes(q) ||
+        (item.nama || '').toLowerCase().includes(q) ||
+        (item.kategori || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+
+      const matchKategori = 
+        filterLitigasiKategori === 'ALL' ||
+        (item.kategori || '').toLowerCase() === filterLitigasiKategori.toLowerCase();
+
+      const matchProject = 
+        filterLitigasiProject === 'ALL' ||
+        item.project === filterLitigasiProject;
+
+      return matchSearch && matchKategori && matchProject;
+    });
+  }, [litigations, searchLitigasi, filterLitigasiKategori, filterLitigasiProject]);
+
+  const exportLitigasiToExcel = () => {
+    try {
+      const exportData = filteredLitigasiList.map((item, idx) => ({
+        'No.': idx + 1,
+        'No. Dok': item.noDok || '-',
+        'Tanggal Dokumen': formatDisplayDate(item.tanggalDok),
+        'Proyek': item.project || '-',
+        'Nama': item.nama || '-',
+        'Kategori': item.kategori || '-',
+        'Judul Dokumen': item.judulDokumen || '-',
+        'Catatan': item.catatan || '-',
+        'Jumlah Berkas': item.files ? item.files.length : (item.fileName ? 1 : 0),
+        'PIC Legal': item.pic || '-'
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Litigasi Perkara');
+      XLSX.writeFile(wb, `AMS_Litigasi_Perkara_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data Litigasi berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
     }
   };
 
@@ -2370,115 +2547,396 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {activeTab === 'litigasi' && (
         <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem' }}>
-            <div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Scale size={20} color="#fb7185" />
-                <span>Litigasi & Penanganan Sengketa Hukum</span>
-                <span style={{ fontSize: '0.72rem', background: 'rgba(251, 113, 133, 0.15)', color: '#fb7185', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
-                  {litigations.length} Perkara Ditangani
-                </span>
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                Register advokasi hukum, mitigasi sengketa batas lahan, klarifikasi hak konsumen & somasi wanprestasi rekanan secara mediatif.
+          {/* Header Title & Action Buttons */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span
+                style={{
+                  background: '#ffe4e6',
+                  border: '1.5px solid #f43f5e',
+                  color: '#e11d48',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  padding: '4px 14px',
+                  borderRadius: '8px',
+                  letterSpacing: '0.3px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Scale size={16} />
+                <span>Litigasi</span>
+              </span>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                Pelacakan & arsip berkas perkara hukum, somasi wanprestasi rekanan, klarifikasi batas lahan BPN, dan advokasi mediatif.
               </div>
             </div>
 
-            <button
-              onClick={handleOpenAddLitigasi}
-              className="btn btn-primary btn-sm"
-              style={{ background: '#e11d48', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}
-            >
-              <UploadCloud size={14} />
-              <span>+ Upload / Catat Perkara Litigasi</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={exportLitigasiToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  color: '#34d399'
+                }}
+              >
+                <FileSpreadsheet size={14} />
+                <span>Unduh Excel</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenAddLitigasi(filterLitigasiKategori !== 'ALL' ? filterLitigasiKategori : 'Klarifikasi Lahan')}
+                className="btn btn-primary btn-sm"
+                style={{
+                  background: '#e11d48',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(225, 29, 72, 0.35)'
+                }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Dokumen Litigasi</span>
+              </button>
+            </div>
           </div>
 
-          {/* Cards Perkara Litigasi / Empty State */}
-          {litigations.length === 0 ? (
+          {/* Filter Pills Kategori Dokumen Litigasi */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
+            {[
+              { id: 'ALL', label: 'Semua Perkara' },
+              { id: 'Klarifikasi Lahan', label: 'Klarifikasi Lahan' },
+              { id: 'Somasi Wanprestasi', label: 'Somasi Wanprestasi' },
+              { id: 'Mediasi Warga', label: 'Mediasi Warga' },
+              { id: 'Sengketa Konsumen', label: 'Sengketa Konsumen' }
+            ].map(cat => {
+              const isActive = filterLitigasiKategori === cat.id;
+              const count = cat.id === 'ALL'
+                ? litigations.length
+                : litigations.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setFilterLitigasiKategori(cat.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: isActive ? '1.5px solid #f43f5e' : '1px solid #334155',
+                    background: isActive ? 'rgba(244, 63, 94, 0.15)' : '#0f172a',
+                    color: isActive ? '#fb7185' : '#94a3b8',
+                    fontSize: '0.76rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: isActive ? '#f43f5e' : '#1e293b',
+                      color: isActive ? '#ffffff' : '#94a3b8',
+                      fontWeight: 900
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              padding: '10px 14px',
+              background: '#090d16',
+              borderRadius: '8px',
+              border: '1px solid #1e293b',
+              marginBottom: '1rem'
+            }}
+          >
+            {/* Search Box */}
+            <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari no. dok, judul perkara, nama pihak, catatan..."
+                value={searchLitigasi}
+                onChange={(e) => setSearchLitigasi(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '7px 10px 7px 32px',
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontSize: '0.76rem'
+                }}
+              />
+            </div>
+
+            {/* Dropdown Filters */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Filter size={13} color="#94a3b8" />
+                <select
+                  value={filterLitigasiKategori}
+                  onChange={(e) => setFilterLitigasiKategori(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+                >
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="Klarifikasi Lahan">Klarifikasi Lahan</option>
+                  <option value="Somasi Wanprestasi">Somasi Wanprestasi</option>
+                  <option value="Mediasi Warga">Mediasi Warga</option>
+                  <option value="Sengketa Konsumen">Sengketa Konsumen</option>
+                  <option value="Gugatan Perdata">Gugatan Perdata</option>
+                </select>
+              </div>
+
+              <select
+                value={filterLitigasiProject}
+                onChange={(e) => setFilterLitigasiProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL UTAMA LITIGASI: STRUKTUR SAMA DENGAN SPK */}
+          {filteredLitigasiList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(251, 113, 133, 0.1)', color: '#fb7185', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.1)', color: '#fb7185', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <Scale size={28} />
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Perkara Litigasi / Sengketa</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Litigasi</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                Seluruh proyek saat ini dalam status aman & bebas sengketa. Klik tombol di bawah jika ingin mencatat atau mengunggah berkas penanganan perkara baru.
+                Daftar dokumen litigasi dan penanganan perkara masih kosong. Klik tombol di bawah untuk menambah atau mengunggah dokumen baru.
               </div>
               <button
-                onClick={handleOpenAddLitigasi}
+                onClick={() => handleOpenAddLitigasi()}
                 className="btn btn-primary btn-sm"
                 style={{ background: '#e11d48', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
               >
-                <UploadCloud size={15} />
-                <span>+ Upload / Catat Perkara Litigasi Sekarang</span>
+                <Plus size={15} />
+                <span>+ Tambah Dokumen Litigasi Sekarang</span>
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {litigations.map(item => (
-                <div key={item.id} style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '12px', padding: '1.3rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                    <div>
-                      <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(251, 113, 133, 0.2)', color: '#fb7185', fontWeight: 800 }}>
-                        {item.disputeType}
-                      </span>
-                      <span style={{ marginLeft: '6px', fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: '#1e293b', color: '#94a3b8', fontWeight: 700 }}>
-                        No: {item.caseNo}
-                      </span>
-                      <div style={{ fontSize: '1.02rem', fontWeight: 900, color: '#ffffff', marginTop: '6px' }}>
-                        {item.caseTitle}
-                      </div>
-                    </div>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLitigasiList.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      style={{
+                        borderBottom: '1px solid #1e293b',
+                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {idx + 1}
+                      </td>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '0.72rem', padding: '4px 10px', borderRadius: '6px', background: item.status.includes('Selesai') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(251, 146, 60, 0.2)', color: item.status.includes('Selesai') ? '#34d399' : '#fb923c', fontWeight: 800 }}>
-                        {item.status}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteLitigasi(item.id, item.caseTitle)}
-                        title="Hapus Perkara"
-                        style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.noDok || item.caseNo || 'xxx/xxx/xxx'}
+                      </td>
 
-                  <div style={{ marginTop: '10px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px', fontSize: '0.74rem', color: '#cbd5e1', background: '#090d16', padding: '10px', borderRadius: '8px', border: '1px solid #1e293b' }}>
-                    <div>
-                      <span style={{ color: '#64748b' }}>Para Pihak:</span>
-                      <div style={{ fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{item.parties}</div>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>Proyek & PIC Advokat:</span>
-                      <div style={{ fontWeight: 700, color: '#38bdf8', marginTop: '2px' }}>{item.project} &bull; {item.lawyer}</div>
-                    </div>
-                    <div>
-                      <span style={{ color: '#64748b' }}>Tanggal Mulai / Selesai:</span>
-                      <div style={{ fontWeight: 700, color: '#fbbf24', marginTop: '2px' }}>{item.dateFiled} {item.dateResolved ? `s/d ${item.dateResolved}` : ''}</div>
-                    </div>
-                  </div>
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDisplayDate(item.tanggalDok || item.dateFiled)}
+                      </td>
 
-                  {item.summary && (
-                    <div style={{ marginTop: '10px', fontSize: '0.74rem', color: '#cbd5e1', lineHeight: '1.5' }}>
-                      <strong>Kronologi & Hasil Resolusi Hukum:</strong><br />
-                      {item.summary}
-                    </div>
-                  )}
+                      {/* 4. Proyek */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: item.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            color: item.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.project || 'Ashoka Park'}
+                        </span>
+                      </td>
 
-                  {item.fileName && (
-                    <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #1e293b' }}>
-                      <button
-                        onClick={() => handleViewFile(item.fileData, item.fileName)}
-                        style={{ background: 'rgba(251, 113, 133, 0.15)', border: '1px solid #fb7185', color: '#fb7185', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        <Eye size={12} />
-                        <span>Lihat Berkas Perkara ({item.fileName} - {item.fileSize})</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                      {/* 5. Nama */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {item.nama || item.parties || '-'}
+                        </span>
+                      </td>
+
+                      {/* 6. Kategori */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background:
+                              (item.kategori || '').toLowerCase().includes('somasi') ? 'rgba(239, 68, 68, 0.15)' :
+                              (item.kategori || '').toLowerCase().includes('lahan') ? 'rgba(251, 146, 60, 0.15)' :
+                              (item.kategori || '').toLowerCase().includes('warga') ? 'rgba(168, 85, 247, 0.15)' :
+                              'rgba(56, 189, 248, 0.15)',
+                            color:
+                              (item.kategori || '').toLowerCase().includes('somasi') ? '#f87171' :
+                              (item.kategori || '').toLowerCase().includes('lahan') ? '#fb923c' :
+                              (item.kategori || '').toLowerCase().includes('warga') ? '#c084fc' :
+                              '#38bdf8',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.kategori || item.disputeType || 'Klarifikasi Lahan'}
+                        </span>
+                      </td>
+
+                      {/* 7. Judul Dokumen */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {item.judulDokumen || item.caseTitle || '-'}
+                        </span>
+                      </td>
+
+                      {/* 8. Berkas - Tombol "View" Saja Bersih */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setViewingLitigasi(item);
+                            setLitigasiFileSlide(0);
+                            setLitigasiPrintMode('all');
+                          }}
+                          style={{
+                            background: '#38bdf8',
+                            color: '#090d16',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                            transition: 'transform 0.1s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title="Lihat Pratinjau Dokumen & Berkas"
+                        >
+                          <Eye size={12} />
+                          <span>View</span>
+                        </button>
+                      </td>
+
+                      {/* 9. Catatan */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.catatan ? (
+                          <span
+                            style={{
+                              fontSize: '0.73rem',
+                              fontWeight: 700,
+                              color: item.catatan.toLowerCase().includes('selesai') ? '#34d399' : '#fde047',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {item.catatan}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
+                        )}
+                      </td>
+
+                      {/* 10. Aksi */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setViewingLitigasi(item);
+                              setLitigasiFileSlide(0);
+                              setLitigasiPrintMode('all');
+                            }}
+                            title="Pratinjau & Cetak Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Printer size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditLitigasi(item)}
+                            title="Edit Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteLitigasi(item.id, item.judulDokumen || item.noDok)}
+                            title="Hapus Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -3392,7 +3850,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 5: UPLOAD / CATAT PERKARA LITIGASI                                  */}
+      {/* MODAL 5: FORM TAMBAH / EDIT DOKUMEN PERKARA LITIGASI                      */}
       {/* ========================================================================= */}
       {isLitigasiModalOpen && (
         <div
@@ -3411,10 +3869,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #e11d48',
+              border: '1.5px solid #f43f5e',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '620px',
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '1.8rem',
@@ -3422,22 +3880,38 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>➕ Upload / Catat Perkara Litigasi Baru</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Scale size={18} color="#fb7185" />
+                <span>{editingLitigasiId ? 'Edit Dokumen Litigasi' : 'Tambah Dokumen Litigasi Baru'}</span>
+              </div>
               <button onClick={() => setIsLitigasiModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveLitigasi} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Perkara *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen *</label>
                   <input
                     type="text"
-                    value={litigasiForm.caseNo}
-                    onChange={(e) => setLitigasiForm({ ...litigasiForm, caseNo: e.target.value })}
+                    value={litigasiForm.noDok}
+                    onChange={(e) => setLitigasiForm({ ...litigasiForm, noDok: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                  <input
+                    type="date"
+                    value={litigasiForm.tanggalDok}
+                    onChange={(e) => setLitigasiForm({ ...litigasiForm, tanggalDok: e.target.value })}
                     required
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek Terkait</label>
                   <select
@@ -3449,27 +3923,41 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     <option value="Ashoka View">Ashoka View</option>
                   </select>
                 </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Perkara</label>
+                  <select
+                    value={litigasiForm.kategori}
+                    onChange={(e) => setLitigasiForm({ ...litigasiForm, kategori: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  >
+                    <option value="Klarifikasi Lahan">Klarifikasi Lahan</option>
+                    <option value="Somasi Wanprestasi">Somasi Wanprestasi</option>
+                    <option value="Mediasi Warga">Mediasi Warga</option>
+                    <option value="Sengketa Konsumen">Sengketa Konsumen</option>
+                    <option value="Gugatan Perdata">Gugatan Perdata</option>
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Kasus / Pokok Sengketa *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Pihak / Lawan / Rekanan *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Klarifikasi & Mediasi Batas Kavling Sudut Barat"
-                  value={litigasiForm.caseTitle}
-                  onChange={(e) => setLitigasiForm({ ...litigasiForm, caseTitle: e.target.value })}
+                  placeholder="e.g. Bpk. Hendra Gunawan & Kantor BPN Bogor"
+                  value={litigasiForm.nama}
+                  onChange={(e) => setLitigasiForm({ ...litigasiForm, nama: e.target.value })}
                   required
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Para Pihak (Penggugat / Tergugat) *</label>
+                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Dokumen / Pokok Perkara *</label>
                 <input
                   type="text"
-                  placeholder="e.g. PT. Yazfi VS Ahli Waris Bpk. Kasman"
-                  value={litigasiForm.parties}
-                  onChange={(e) => setLitigasiForm({ ...litigasiForm, parties: e.target.value })}
+                  placeholder="e.g. Berita Acara Klarifikasi Pengukuran Batas Lahan"
+                  value={litigasiForm.judulDokumen}
+                  onChange={(e) => setLitigasiForm({ ...litigasiForm, judulDokumen: e.target.value })}
                   required
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
@@ -3477,59 +3965,75 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Jenis Sengketa</label>
-                  <select
-                    value={litigasiForm.disputeType}
-                    onChange={(e) => setLitigasiForm({ ...litigasiForm, disputeType: e.target.value })}
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Status Mediasi</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Sedang Proses Mediasi BPN / Selesai Damai"
+                    value={litigasiForm.catatan}
+                    onChange={(e) => setLitigasiForm({ ...litigasiForm, catatan: e.target.value })}
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="Klarifikasi Batas Tanah (BPN)">Klarifikasi Batas Tanah (BPN)</option>
-                    <option value="Wanprestasi Waktu Pasokan Vendor">Wanprestasi Waktu Pasokan Vendor</option>
-                    <option value="Administrasi AJB / SHM Konsumen">Administrasi AJB / SHM Konsumen</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
+                  />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status Penyelesaian</label>
-                  <select
-                    value={litigasiForm.status}
-                    onChange={(e) => setLitigasiForm({ ...litigasiForm, status: e.target.value })}
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>PIC Legal AMS</label>
+                  <input
+                    type="text"
+                    value={litigasiForm.pic}
+                    onChange={(e) => setLitigasiForm({ ...litigasiForm, pic: e.target.value })}
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="Sedang Proses Mediasi">Sedang Proses Mediasi</option>
-                    <option value="Selesai (Damai Melalui Mediasi)">Selesai (Damai Melalui Mediasi)</option>
-                    <option value="Klarifikasi Somasi">Klarifikasi Somasi</option>
-                  </select>
+                  />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kronologi & Hasil Resolusi</label>
-                <textarea
-                  rows="2"
-                  placeholder="Catatan kronologi advokasi, hasil mediasi atau kesepakatan damai..."
-                  value={litigasiForm.summary}
-                  onChange={(e) => setLitigasiForm({ ...litigasiForm, summary: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
-
-              {/* Upload File Attachment */}
+              {/* Upload Multi-File Lampiran Berkas */}
               <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
                 <label style={{ fontSize: '0.74rem', color: '#fb7185', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
-                  <span>Upload Berita Acara / Surat Kesepakatan / Somasi (PDF / Scan)</span>
+                  <span>Upload Berkas / Lampiran Dokumen (Bisa Pilih Banyak Berkas)</span>
                 </label>
                 <input
                   type="file"
+                  multiple
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   onChange={handleLitigasiFileChange}
                   style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
                 />
-                {litigasiForm.fileName && (
-                  <div style={{ marginTop: '6px', fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={12} />
-                    <span>File siap: {litigasiForm.fileName} ({litigasiForm.fileSize})</span>
+
+                {/* List Berkas Terunggah */}
+                {litigasiForm.files && litigasiForm.files.length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
+                      Daftar Berkas Terpilih ({litigasiForm.files.length} berkas):
+                    </div>
+                    {litigasiForm.files.map((f, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: '#090d16',
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #1e293b',
+                          fontSize: '0.72rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          <CheckCircle2 size={12} color="#34d399" />
+                          <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
+                          <span style={{ color: '#64748b' }}>({f.size})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLitigasiFile(i)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px 4px' }}
+                          title="Hapus berkas ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -3537,10 +4041,466 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
                 <button type="button" onClick={() => setIsLitigasiModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
                 <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#e11d48' }}>
-                  Simpan & Unggah Perkara
+                  {editingLitigasiId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL PRATINJAU DOKUMEN & CETAK RESMI LITIGASI                           */}
+      {/* ========================================================================= */}
+      {viewingLitigasi && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '2rem 1rem',
+            overflowY: 'auto'
+          }}
+        >
+          {/* Print CSS styling scoped for Litigasi */}
+          <style>
+            {`
+              @media print {
+                @page {
+                  size: A4 portrait;
+                  margin: 10mm 12mm 10mm 12mm;
+                }
+                html, body {
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                  height: auto !important;
+                  overflow: visible !important;
+                }
+                body * {
+                  visibility: hidden !important;
+                }
+                .litigasi-printable-container, .litigasi-printable-container * {
+                  visibility: visible !important;
+                }
+                .litigasi-printable-container {
+                  position: absolute !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  box-shadow: none !important;
+                  background: #ffffff !important;
+                  color: #000000 !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}
+          </style>
+
+          <div
+            ref={litigasiModalRef}
+            style={{
+              background: '#090d16',
+              border: '1.5px solid #fb7185',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '840px',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
+              margin: 'auto 0'
+            }}
+          >
+            {/* Top Header Controls (Hidden on Print) */}
+            <div
+              className="no-print"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem 1.4rem',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#fb7185', padding: '7px', borderRadius: '8px' }}>
+                  <Scale size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
+                    Pratinjau Dokumen Litigasi ({viewingLitigasi.kategori})
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingLitigasi.noDok || 'xxx/xxx/xxx'}</strong> &bull; {viewingLitigasi.judulDokumen}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons: Print Mode & Print & Close */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Print Choice Selector */}
+                {(() => {
+                  const activeFiles = (viewingLitigasi.files && viewingLitigasi.files.length > 0)
+                    ? viewingLitigasi.files
+                    : (viewingLitigasi.fileName ? [{ name: viewingLitigasi.fileName, size: viewingLitigasi.fileSize, data: viewingLitigasi.fileData }] : []);
+                  const hasFiles = activeFiles.length > 0;
+
+                  return (
+                    <div style={{ display: 'flex', background: '#090d16', border: '1px solid #334155', borderRadius: '6px', padding: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setLitigasiPrintMode('all')}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '4px',
+                          border: 'none',
+                          background: litigasiPrintMode === 'all' ? '#e11d48' : 'transparent',
+                          color: litigasiPrintMode === 'all' ? '#ffffff' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Semua
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLitigasiPrintMode('surat')}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '4px',
+                          border: 'none',
+                          background: litigasiPrintMode === 'surat' ? '#e11d48' : 'transparent',
+                          color: litigasiPrintMode === 'surat' ? '#ffffff' : '#94a3b8',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Surat Saja
+                      </button>
+                      {hasFiles && (
+                        <button
+                          type="button"
+                          onClick={() => setLitigasiPrintMode('berkas')}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: litigasiPrintMode === 'berkas' ? '#e11d48' : 'transparent',
+                            color: litigasiPrintMode === 'berkas' ? '#ffffff' : '#94a3b8',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Berkas Saja
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn btn-primary btn-sm"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.76rem',
+                    background: 'linear-gradient(135deg, #e11d48, #be123c)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800
+                  }}
+                >
+                  <Printer size={14} />
+                  <span>Cetak</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewingLitigasi(null)}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    color: '#cbd5e1',
+                    borderRadius: '6px',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body Container */}
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* SECTION 1: LAMPIRAN BERKAS (If mode is 'all' or 'berkas') */}
+              {(() => {
+                const activeFiles = (viewingLitigasi.files && viewingLitigasi.files.length > 0)
+                  ? viewingLitigasi.files
+                  : (viewingLitigasi.fileName ? [{ name: viewingLitigasi.fileName, size: viewingLitigasi.fileSize, data: viewingLitigasi.fileData }] : []);
+                
+                if (activeFiles.length === 0 || litigasiPrintMode === 'surat') return null;
+
+                const currentFile = activeFiles[litigasiFileSlide] || activeFiles[0];
+
+                return (
+                  <div
+                    className={litigasiPrintMode === 'berkas' ? 'litigasi-printable-container' : ''}
+                    style={{
+                      background: '#0f172a',
+                      border: '1.5px solid #1e293b',
+                      borderRadius: '12px',
+                      padding: '1.2rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Paperclip size={16} color="#fb7185" />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff' }}>
+                          Lampiran Berkas Perkara ({activeFiles.length} Berkas)
+                        </span>
+                      </div>
+
+                      {/* Download Button for Current File */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (currentFile.data) {
+                            const a = document.createElement('a');
+                            a.href = currentFile.data;
+                            a.download = currentFile.name || 'berkas_litigasi.pdf';
+                            a.click();
+                          } else {
+                            showNotification('Berkas fisik siap diunduh saat terhubung ke server/file asli.', 'info');
+                          }
+                        }}
+                        style={{
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '5px 12px',
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Download size={13} />
+                        <span>Unduh Berkas Ini</span>
+                      </button>
+                    </div>
+
+                    {/* File Carousel Slider (if multiple files) */}
+                    {activeFiles.length > 1 && (
+                      <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#090d16', padding: '6px 12px', borderRadius: '6px', marginBottom: '12px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setLitigasiFileSlide(prev => (prev > 0 ? prev - 1 : activeFiles.length - 1))}
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                        >
+                          <ChevronLeft size={14} /> Slide Sebelumnya
+                        </button>
+                        <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>
+                          Berkas {litigasiFileSlide + 1} dari {activeFiles.length}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setLitigasiFileSlide(prev => (prev < activeFiles.length - 1 ? prev + 1 : 0))}
+                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                        >
+                          Slide Berikutnya <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* File Visual Presentation */}
+                    <div style={{ background: '#090d16', borderRadius: '8px', padding: '1.2rem', textAlign: 'center', border: '1px solid #1e293b' }}>
+                      {currentFile.data && currentFile.data.startsWith('data:image') ? (
+                        <img
+                          src={currentFile.data}
+                          alt={currentFile.name}
+                          style={{ maxWidth: '100%', maxHeight: '450px', objectFit: 'contain', borderRadius: '6px' }}
+                        />
+                      ) : (
+                        <div style={{ padding: '2rem 1rem' }}>
+                          <FileText size={48} color="#fb7185" style={{ margin: '0 auto 12px auto' }} />
+                          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff' }}>{currentFile.name}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Ukuran: {currentFile.size || '1.4 MB'}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '8px', fontWeight: 600 }}>
+                            ✓ Terverifikasi dalam sistem arsip legal
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* SECTION 2: SURAT RESMI PERKARA LITIGASI (If mode is 'all' or 'surat') */}
+              {litigasiPrintMode !== 'berkas' && (
+                <div
+                  className="litigasi-printable-container"
+                  style={{
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    padding: '2.2rem 2.4rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    fontFamily: 'Times New Roman, serif',
+                    lineHeight: '1.4'
+                  }}
+                >
+                  {/* Kop Surat Resmi */}
+                  <div style={{ borderBottom: '2.5px solid #000000', paddingBottom: '12px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <img
+                      src="/company-logo.png"
+                      alt="Logo Ashoka"
+                      style={{ width: '65px', height: '65px', objectFit: 'contain' }}
+                    />
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {viewingLitigasi.project === 'Ashoka Park' ? 'PT. YAZFI SETIA PERSADA' : 'PT. YAZFI GEMILANG PERSADA'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                        DEVELOPER PROPERTY & REAL ESTATE MANAGEMENT
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '2px' }}>
+                        Kantor Operasional: Ruko Ashoka Square, Jl. Raya Pemda No. 88, Cibinong - Bogor | Telp: (021) 8790-1234
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Judul Surat Resmi */}
+                  <div style={{ textAlign: 'center', margin: '14px 0 18px 0' }}>
+                    <div style={{ fontSize: '1.08rem', fontWeight: 900, textDecoration: 'underline', textTransform: 'uppercase' }}>
+                      BERITA ACARA & REGISTER PENANGANAN PERKARA LITIGASI
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, marginTop: '4px' }}>
+                      Nomor Dokumen: {viewingLitigasi.noDok || 'xxx/xxx/xxx'}
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: '#475569' }}>
+                      Tanggal Registrasi: {formatDisplayDate(viewingLitigasi.tanggalDok)}
+                    </div>
+                  </div>
+
+                  {/* Isi Ringkasan Perkara */}
+                  <div style={{ fontSize: '0.84rem', margin: '14px 0', lineHeight: '1.6' }}>
+                    <p style={{ margin: '0 0 10px 0' }}>
+                      Pada hari ini, <strong>{formatDisplayDate(viewingLitigasi.tanggalDok)}</strong>, telah dicatat dan diverifikasi data perkara hukum advokasi dengan rincian identitas sebagai berikut:
+                    </p>
+
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', margin: '10px 0' }}>
+                      <tbody>
+                        <tr>
+                          <td style={{ width: '160px', padding: '5px 8px', fontWeight: 700 }}>Proyek Terkait</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingLitigasi.project}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Pihak yang Terlibat</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingLitigasi.nama || '-'}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Kategori Perkara</td>
+                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800, color: '#e11d48' }}>{viewingLitigasi.kategori}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Pokok Dokumen / Kasus</td>
+                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingLitigasi.judulDokumen}</strong></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Catatan & Status Mediasi</td>
+                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800 }}>{viewingLitigasi.catatan || '-'}</span></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>PIC Advokat Legal</td>
+                          <td style={{ padding: '5px 8px' }}>: {viewingLitigasi.pic || 'Wahyu Salma Septiani, S.H'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <p style={{ margin: '12px 0 0 0' }}>
+                      Dokumen ini menjadi pegangan sah bagian Legal Corporate Ashoka Management System dalam penanganan advokasi hukum secara profesional, mediatif, dan akuntabel.
+                    </p>
+                  </div>
+
+                  {/* Tanda Tangan Resmi & Stempel */}
+                  <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pageBreakInside: 'avoid' }}>
+                    <div style={{ textAlign: 'center', width: '220px' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>Pihak Terkait / Rekanan</div>
+                      <div style={{ height: '70px' }} />
+                      <div style={{ fontWeight: 900, textDecoration: 'underline', fontSize: '0.85rem' }}>
+                        {viewingLitigasi.nama || 'Pihak Terkait'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Perwakilan / Kuasa Hukum</div>
+                    </div>
+
+                    <div style={{ textAlign: 'center', width: '240px', position: 'relative' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>Bogor, {formatDisplayDate(viewingLitigasi.tanggalDok)}</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>Divisi Legal Corporate</div>
+                      <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Stempel Visual Cap Resmi */}
+                        <div
+                          style={{
+                            border: '2px solid #e11d48',
+                            color: '#e11d48',
+                            borderRadius: '50%',
+                            width: '68px',
+                            height: '68px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transform: 'rotate(-12deg)',
+                            fontWeight: 900,
+                            fontSize: '0.58rem',
+                            lineHeight: 1.1,
+                            opacity: 0.85
+                          }}
+                        >
+                          <div>AMS</div>
+                          <div>LEGAL</div>
+                          <div>RESMI</div>
+                        </div>
+                      </div>
+                      <div style={{ fontWeight: 900, textDecoration: 'underline', fontSize: '0.85rem' }}>
+                        {viewingLitigasi.pic || 'Wahyu Salma Septiani, S.H'}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Legal Corporate Specialist</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
