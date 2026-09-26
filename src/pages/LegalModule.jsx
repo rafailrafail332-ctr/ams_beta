@@ -1174,50 +1174,50 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             </div>
           ) : (
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c' }}>
-                    <th style={{ padding: '11px 8px', textAlign: 'center', width: '50px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', width: '130px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 12px', width: '120px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', width: '160px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Nama</th>
-                    <th style={{ padding: '11px 12px', width: '110px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Kategori</th>
-                    <th style={{ padding: '11px 14px', minWidth: '220px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '110px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', minWidth: '180px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900 }}>Catatan</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', width: '120px', fontWeight: 900 }}>Aksi</th>
+                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSpkList.map((spk, idx) => {
-                    const fileCount = spk.files && spk.files.length > 0 ? spk.files.length : (spk.fileName ? 1 : 0);
                     return (
                       <tr
                         key={spk.id}
                         style={{
                           borderBottom: '1px solid #1e293b',
                           background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                          whiteSpace: 'nowrap',
                           transition: 'background 0.15s'
                         }}
                       >
                         {/* 1. No. */}
-                        <td style={{ padding: '10px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b' }}>
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {idx + 1}
                         </td>
 
                         {/* 2. No. Dok */}
-                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
                         </td>
 
                         {/* 3. Tanggal Dokumen */}
-                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b' }}>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {formatDisplayDate(spk.tanggalDok || spk.issueDate)}
                         </td>
 
-                        {/* 4. Proyek (Tambahan Setelah Tanggal Dokumen) */}
-                        <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
+                        {/* 4. Proyek */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           <span
                             style={{
                               fontSize: '0.72rem',
@@ -1233,20 +1233,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           </span>
                         </td>
 
-                        {/* 5. Nama (dari Database Vendor) */}
-                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
-                          <div style={{ fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span>{spk.nama || spk.vendorName}</span>
-                          </div>
-                          {vendorDbList.some(v => v.nama.toLowerCase() === (spk.nama || spk.vendorName || '').toLowerCase()) && (
-                            <div style={{ fontSize: '0.66rem', color: '#38bdf8', marginTop: '1px' }}>
-                              ✓ Data Base Vendor
-                            </div>
-                          )}
+                        {/* 5. Nama */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                          <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                            {spk.nama || spk.vendorName}
+                          </span>
                         </td>
 
                         {/* 6. Kategori */}
-                        <td style={{ padding: '10px 12px', borderRight: '1px solid #1e293b' }}>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           <span
                             style={{
                               fontSize: '0.72rem',
@@ -1260,7 +1255,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                                 (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
                                 (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
                                 '#fb923c',
-                              fontWeight: 800
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             {spk.kategori || 'Vendor'}
@@ -1268,21 +1264,21 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </td>
 
                         {/* 7. Judul Dokumen */}
-                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
-                          <div style={{ color: '#f1f5f9', fontWeight: 700 }}>
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                          <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
                             {spk.judulDokumen || spk.scope || '-'}
-                          </div>
+                          </span>
                         </td>
 
-                        {/* 8. Berkas (Tombol View dengan indikator jumlah berkas & geser) */}
-                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                        {/* 8. Berkas */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           <button
                             onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
                             style={{
                               background: '#38bdf8',
                               color: '#090d16',
                               border: 'none',
-                              padding: '4px 10px',
+                              padding: '4px 12px',
                               borderRadius: '5px',
                               fontWeight: 900,
                               fontSize: '0.74rem',
@@ -1291,7 +1287,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               alignItems: 'center',
                               gap: '4px',
                               boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
-                              transition: 'transform 0.1s'
+                              transition: 'transform 0.1s',
+                              whiteSpace: 'nowrap'
                             }}
                             title="Lihat Data Dokumen SPK (MOU)"
                           >
@@ -1301,25 +1298,26 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </td>
 
                         {/* 9. Catatan */}
-                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b' }}>
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {spk.catatan ? (
                             <span
                               style={{
                                 fontSize: '0.73rem',
                                 fontWeight: 700,
-                                color: spk.catatan.toLowerCase().includes('batal') ? '#f87171' : '#fde047'
+                                color: spk.catatan.toLowerCase().includes('batal') ? '#f87171' : '#fde047',
+                                whiteSpace: 'nowrap'
                               }}
                             >
                               {spk.catatan}
                             </span>
                           ) : (
-                            <span style={{ color: '#64748b' }}>-</span>
+                            <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
                           )}
                         </td>
 
                         {/* 10. Aksi */}
-                        <td style={{ padding: '10px 10px', textAlign: 'center' }}>
-                          <div style={{ display: 'inline-flex', gap: '5px' }}>
+                        <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
                             <button
                               onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
                               title="Pratinjau & Cetak Dokumen"
