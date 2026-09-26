@@ -1068,58 +1068,34 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '3rem', color: '#f1f5f9' }}>
       
       {/* ========================================================================= */}
-      {/* BANNER HEADER UTAMA HR & GA                                               */}
+      {/* HEADER UTAMA HR & GA                                                      */}
       {/* ========================================================================= */}
       <div
-        className="glass-card"
         style={{
-          padding: '1.25rem 1.6rem',
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
+          gap: '12px',
+          marginBottom: '0.2rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 8px 20px rgba(2, 132, 199, 0.35)'
-            }}
-          >
-            <Users size={26} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Modul HR & GA</span>
-              <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '6px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)', fontWeight: 800 }}>
-                9 Sub-Modul Terintegrasi
-              </span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
-              Human Resources, Fasilitas Kantor, Inventaris Aset, Log Servis & Operasional Lapangan
-            </div>
-          </div>
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)'
+          }}
+        >
+          <Users size={22} />
         </div>
-
-        {onSwitchToLegalCorporate && (
-          <button
-            onClick={onSwitchToLegalCorporate}
-            className="btn btn-secondary btn-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem' }}
-          >
-            <span>⚖️ Buka Modul Legal Corporate</span>
-            <ArrowRight size={14} />
-          </button>
-        )}
+        <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
+          HR & GA
+        </div>
       </div>
 
       {/* ========================================================================= */}
