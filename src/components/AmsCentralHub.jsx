@@ -175,11 +175,11 @@ export const AmsCentralHub = ({
           gap: '12px' 
         }}
       >
-        {/* Theme Toggle (Dark Gemini / Bright Aura) */}
+        {/* Theme Toggle (Mode Gelap / Terang) */}
         <button
           type="button"
           onClick={toggleTheme}
-          title={isDark ? 'Ganti ke Mode Terang (Putih)' : 'Ganti ke Mode Gemini Gelap'}
+          title={isDark ? 'Ganti ke Mode Terang (Putih)' : 'Ganti ke Mode Gelap'}
           style={{
             background: isDark ? 'rgba(30, 41, 59, 0.85)' : '#ffffff',
             border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1.5px solid #cbd5e1',
@@ -1015,7 +1015,7 @@ export const AmsCentralHub = ({
           }}
         >
           <Sparkles size={15} color="#f59e0b" />
-          <span>Gerakkan kursor untuk efek interaktif Gemini • Klik departemen untuk membuka modul</span>
+          <span>Gerakkan kursor untuk efek interaktif • Klik departemen untuk membuka modul</span>
         </div>
       </div>
     </div>
