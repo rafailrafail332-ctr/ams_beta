@@ -1544,7 +1544,7 @@ export const LegalModule = () => {
   const handleSaveHistoryTanah = (e) => {
     e.preventDefault();
     if (!historyTanahForm.nama || !historyTanahForm.judulDokumen) {
-      showNotification('Mohon lengkapi Nama Pemilik Asal dan Judul Dokumen History Tanah!', 'warning');
+      showNotification('Mohon lengkapi Nama Pemilik Asal dan Judul Dokumen Data Tanah!', 'warning');
       return;
     }
 
@@ -1558,20 +1558,20 @@ export const LegalModule = () => {
         }
         return item;
       }));
-      showNotification(`Dokumen History Tanah "${historyTanahForm.judulDokumen}" berhasil diperbarui!`, 'success');
+      showNotification(`Dokumen Data Tanah "${historyTanahForm.judulDokumen}" berhasil diperbarui!`, 'success');
     } else {
       const newDoc = {
         id: `HST-${Date.now()}`,
         ...historyTanahForm
       };
       setHistoryTanahList([newDoc, ...historyTanahList]);
-      showNotification(`Dokumen History Tanah "${newDoc.judulDokumen}" berhasil ditambahkan!`, 'success');
+      showNotification(`Dokumen Data Tanah "${newDoc.judulDokumen}" berhasil ditambahkan!`, 'success');
     }
     setIsHistoryTanahModalOpen(false);
   };
 
   const handleDeleteHistoryTanah = (id, title) => {
-    if (window.confirm(`Hapus dokumen history tanah "${title}"?`)) {
+    if (window.confirm(`Hapus dokumen data tanah "${title}"?`)) {
       setHistoryTanahList(prev => prev.filter(l => l.id !== id));
       showNotification(`Dokumen "${title}" berhasil dihapus.`, 'warning');
     }
@@ -1749,7 +1749,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </span>
             </div>
             <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
-              Sistem Pengarsipan & Unggah Dokumen Resmi (SPK Vendor, Legalitas Perusahaan & Proyek, Perizinan, Litigasi, History Tanah)
+              Sistem Pengarsipan & Unggah Dokumen Resmi (SPK Vendor, Legalitas Perusahaan & Proyek, Perizinan, Litigasi, Data Tanah)
             </div>
           </div>
         </div>
@@ -1891,7 +1891,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           }}
         >
           <MapPin size={18} />
-          <span>5. History Tanah</span>
+          <span>5. Data Tanah</span>
         </button>
       </div>
 
@@ -3226,7 +3226,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 }}
               >
                 <MapPin size={16} />
-                <span>History Tanah</span>
+                <span>Data Tanah</span>
               </span>
               <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
                 Pencatatan riwayat kepemilikan tanah, alas hak perolehan (Girik, Letter C, AJB Notaris, SPH), dan integrasi pembebasan lahan proyek.
@@ -3271,61 +3271,82 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 }}
               >
                 <Plus size={15} />
-                <span>+ Tambah Dokumen History Tanah</span>
+                <span>+ Tambah Data Tanah</span>
               </button>
             </div>
           </div>
 
-          {/* Filter Pills Kategori Dokumen History Tanah */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-            {[
-              { id: 'ALL', label: 'Semua Alas Hak' },
-              { id: 'AJB Asal', label: 'AJB Asal' },
-              { id: 'Girik / Letter C', label: 'Girik / Letter C' },
-              { id: 'Surat Pelepasan Hak (SPH)', label: 'Surat Pelepasan Hak (SPH)' },
-              { id: 'Riwayat Tanah Desa', label: 'Riwayat Tanah Desa' },
-              { id: 'Kwitansi Pembebasan', label: 'Kwitansi Pembebasan' }
-            ].map(cat => {
-              const isActive = filterHistoryTanahKategori === cat.id;
-              const count = cat.id === 'ALL'
-                ? historyTanahList.length
-                : historyTanahList.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
+          {/* Filter Pills Kategori Dokumen Data Tanah */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setFilterHistoryTanahKategori('ALL')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '8px',
+                border: filterHistoryTanahKategori === 'ALL' ? '1.5px solid #c084fc' : '1px solid #334155',
+                background: filterHistoryTanahKategori === 'ALL' ? 'rgba(192, 132, 252, 0.15)' : '#0f172a',
+                color: filterHistoryTanahKategori === 'ALL' ? '#c084fc' : '#94a3b8',
+                fontSize: '0.76rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.15s'
+              }}
+              title="Tampilkan semua data tanah"
+            >
+              <span>Semua Data Tanah</span>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  background: filterHistoryTanahKategori === 'ALL' ? '#9333ea' : '#1e293b',
+                  color: filterHistoryTanahKategori === 'ALL' ? '#ffffff' : '#94a3b8',
+                  fontWeight: 900
+                }}
+              >
+                {historyTanahList.length}
+              </span>
+            </button>
 
-              return (
+            {filterHistoryTanahKategori !== 'ALL' && (
+              <span
+                style={{
+                  fontSize: '0.74rem',
+                  color: '#c084fc',
+                  background: 'rgba(147, 51, 234, 0.12)',
+                  border: '1px solid rgba(192, 132, 252, 0.35)',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontWeight: 800,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                Kategori: <strong>{filterHistoryTanahKategori}</strong>
                 <button
-                  key={cat.id}
-                  onClick={() => setFilterHistoryTanahKategori(cat.id)}
+                  type="button"
+                  onClick={() => setFilterHistoryTanahKategori('ALL')}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: '8px',
-                    border: isActive ? '1.5px solid #c084fc' : '1px solid #334155',
-                    background: isActive ? 'rgba(192, 132, 252, 0.15)' : '#0f172a',
-                    color: isActive ? '#c084fc' : '#94a3b8',
-                    fontSize: '0.76rem',
-                    fontWeight: 800,
+                    background: 'none',
+                    border: 'none',
+                    color: '#c084fc',
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
+                    padding: 0,
+                    marginLeft: '4px',
+                    fontSize: '0.9rem',
+                    fontWeight: 900
                   }}
+                  title="Hapus filter kategori"
                 >
-                  <span>{cat.label}</span>
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      background: isActive ? '#9333ea' : '#1e293b',
-                      color: isActive ? '#ffffff' : '#94a3b8',
-                      fontWeight: 900
-                    }}
-                  >
-                    {count}
-                  </span>
+                  ✕
                 </button>
-              );
-            })}
+              </span>
+            )}
           </div>
 
           {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
@@ -3400,7 +3421,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <MapPin size={28} />
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen History Tanah</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data Tanah</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
                 Daftar arsip riwayat perolehan tanah dan alas hak belum tersedia. Klik tombol di bawah untuk menambah dokumen baru.
               </div>
@@ -3410,7 +3431,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
               >
                 <Plus size={15} />
-                <span>+ Tambah Dokumen History Tanah Sekarang</span>
+                <span>+ Tambah Data Tanah Sekarang</span>
               </button>
             </div>
           ) : (
@@ -5187,7 +5208,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #f59e0b',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '620px',
@@ -5199,8 +5220,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={18} color="#fbbf24" />
-                <span>{editingHistoryTanahId ? 'Edit Dokumen History Tanah' : 'Tambah Dokumen History Tanah Baru'}</span>
+                <MapPin size={18} color="#c084fc" />
+                <span>{editingHistoryTanahId ? 'Edit Data Tanah' : 'Tambah Data Tanah Baru'}</span>
               </div>
               <button onClick={() => setIsHistoryTanahModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
@@ -5459,15 +5480,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', padding: '7px', borderRadius: '8px' }}>
+                <div style={{ background: 'rgba(147, 51, 234, 0.15)', color: '#c084fc', padding: '7px', borderRadius: '8px' }}>
                   <MapPin size={20} />
                 </div>
                 <div>
                   <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff' }}>
-                    Pratinjau Dokumen History Tanah ({viewingHistoryTanah.kategori})
+                    Pratinjau Dokumen Data Tanah ({viewingHistoryTanah.kategori})
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}</strong> &bull; {viewingHistoryTanah.judulDokumen}
+                    No. Dok: <strong style={{ color: '#c084fc' }}>{viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}</strong> &bull; {viewingHistoryTanah.judulDokumen}
                   </div>
                 </div>
               </div>
