@@ -898,8 +898,8 @@ export const AmsCentralHub = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '20px',
-            gap: '10px',
+            marginTop: '36px',
+            gap: '12px',
             position: 'relative',
             zIndex: 10
           }}
