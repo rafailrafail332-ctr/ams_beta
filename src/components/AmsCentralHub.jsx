@@ -898,7 +898,7 @@ export const AmsCentralHub = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '14px',
+            marginTop: '20px',
             gap: '10px',
             position: 'relative',
             zIndex: 10
@@ -1031,23 +1031,6 @@ export const AmsCentralHub = ({
               </div>
             </div>
           </button>
-        </div>
-
-        {/* BOTTOM STATUS & HELPFUL HINT */}
-        <div
-          style={{
-            marginTop: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.74rem',
-            color: isDark ? '#94a3b8' : '#475569',
-            fontWeight: 700,
-            userSelect: 'none',
-            zIndex: 10
-          }}
-        >
-          <span>Gerakkan kursor untuk efek interaktif • Klik departemen untuk membuka modul</span>
         </div>
       </div>
     </div>
