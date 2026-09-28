@@ -111,22 +111,28 @@ function AppContent() {
 
   const isAllowed = currentTab === 'hub' || currentTab === 'dashboard' || canAccessModule(currentTab);
 
+  const isHubView = currentTab === 'hub' || currentTab === 'dashboard';
+
   return (
     <div className="app-container" style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header 
-        currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
-        onBackToLanding={handleBackToLanding}
-        activeTitle={getActiveTitle()} 
-        onLogout={handleLogout}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
-      />
+      {!isHubView && (
+        <Header 
+          currentTab={currentTab}
+          setCurrentTab={setCurrentTab}
+          onBackToLanding={handleBackToLanding}
+          activeTitle={getActiveTitle()} 
+          onLogout={handleLogout}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
+        />
+      )}
 
       <main className="main-content" style={{ 
         marginLeft: 0, 
         width: '100%', 
         maxWidth: '100%', 
-        padding: (currentTab === 'hub' || currentTab === 'dashboard') ? '0' : '1.5rem', 
+        marginTop: isHubView ? 0 : undefined,
+        padding: isHubView ? 0 : '1.5rem', 
+        minHeight: isHubView ? '100vh' : undefined,
         boxSizing: 'border-box' 
       }}>
         {!isAllowed ? (
@@ -157,11 +163,12 @@ function AppContent() {
         ) : (
           <ErrorBoundary key={currentTab} moduleName={getActiveTitle()}>
             <div className="module-animated-view">
-              {(currentTab === 'hub' || currentTab === 'dashboard') && (
+              {isHubView && (
                 <AmsCentralHub
                   isLanding={false}
                   currentUser={currentUser}
                   onSelectModule={(tabKey) => setCurrentTab(tabKey)}
+                  onLogout={handleLogout}
                 />
               )}
               {currentTab === 'todo-attendance' && <TodoAttendanceModule />}

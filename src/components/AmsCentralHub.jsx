@@ -10,7 +10,8 @@ import {
   Wallet, 
   CheckSquare,
   Sun,
-  Moon
+  Moon,
+  LogOut
 } from 'lucide-react';
 import { GeminiCursorCanvas } from './GeminiCursorCanvas';
 
@@ -20,7 +21,8 @@ export const AmsCentralHub = ({
   currentUser, 
   isLanding = false,
   theme: externalTheme,
-  onToggleTheme: externalToggleTheme
+  onToggleTheme: externalToggleTheme,
+  onLogout
 }) => {
   const [hoveredNode, setHoveredNode] = useState(null);
   const [internalTheme, setInternalTheme] = useState('dark');
@@ -91,7 +93,7 @@ export const AmsCentralHub = ({
     <div
       style={{
         width: '100%',
-        minHeight: isLanding ? '100vh' : 'calc(100vh - var(--header-height))',
+        minHeight: '100vh',
         background: isDark ? '#080c14' : '#f8fafc',
         color: isDark ? '#ffffff' : '#0f172a',
         display: 'flex',
@@ -231,6 +233,34 @@ export const AmsCentralHub = ({
           >
             <UserCheck size={15} color="#f59e0b" />
             <span>Pilih Akun Staf / Login Khusus</span>
+          </button>
+        )}
+
+        {/* Tombol Keluar / Ganti Akun */}
+        {onLogout && (
+          <button
+            type="button"
+            onClick={onLogout}
+            style={{
+              background: isDark ? 'rgba(30, 41, 59, 0.85)' : '#ffffff',
+              border: isDark ? '1px solid rgba(239, 68, 68, 0.35)' : '1.5px solid #fca5a5',
+              color: isDark ? '#f87171' : '#dc2626',
+              borderRadius: '24px',
+              padding: '8px 16px',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backdropFilter: 'blur(10px)',
+              boxShadow: isDark ? '0 4px 15px rgba(0,0,0,0.5)' : '0 4px 15px rgba(220, 38, 38, 0.08)',
+              transition: 'all 0.2s ease'
+            }}
+            title="Keluar ke Layar Login / Ganti Akun"
+          >
+            <LogOut size={15} />
+            <span>Keluar / Ganti Akun</span>
           </button>
         )}
       </div>
