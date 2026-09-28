@@ -94,7 +94,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('legal') || roleLower.includes('salma')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'leg-spk', title: '1. SPK (SPK Vendor)', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#38BDF8' },
+        { id: 'leg-spk', title: '1. SPK / MOU', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#38BDF8' },
         { id: 'leg-perusahaan', title: '2. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas-perusahaan', icon: FileCheck, color: '#38BDF8' },
         { id: 'leg-proyek', title: '3. Legalitas Proyek', moduleKey: 'legal', subTabKey: 'legalitas-proyek', icon: Building2, color: '#C084FC' },
         { id: 'leg-perizinan', title: '4. Perizinan (PPKR, Siteplan, PBG)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },

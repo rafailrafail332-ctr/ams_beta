@@ -2892,7 +2892,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           marginBottom: '1.25rem'
         }}
       >
-        {/* Tab 1: SPK */}
+        {/* Tab 1: SPK / MOU */}
         <button
           onClick={() => setActiveTab('spk')}
           style={{
@@ -2913,7 +2913,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           }}
         >
           <FileSignature size={18} />
-          <span>1. SPK</span>
+          <span>1. SPK / MOU</span>
         </button>
 
         {/* Tab 2: Legalitas */}
@@ -3122,7 +3122,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1.5px solid #9333ea', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.25)', marginBottom: '6px' }}>
                 <FileSignature size={20} color="#c084fc" />
-                <span>SPK</span>
+                <span>SPK / MOU</span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
                 Pengarsipan Perjanjian Kerja Sama, SPK Rekanan/Vendor, Tagihan AJB Notaris, dan Nota Kesepahaman (MoU) Klien/Mitra.
@@ -3435,41 +3435,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             </div>
           </div>
 
-          {/* Filter Pills Kategori (Semua Dokumen, Akta Perusahaan, NPWP, NIB, Domisili) & Search */}
+          {/* Toolbar Pencarian & Filter Dropdown (Persis Format Data Lahan) */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '1.2rem', background: '#090d16', padding: '10px 14px', borderRadius: '10px', border: '1px solid #1e293b' }}>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, marginRight: '4px' }}>Kategori:</span>
-              {[
-                { id: 'ALL', label: 'Semua Dokumen' },
-                { id: 'Akta Perusahaan', label: 'Akta Perusahaan' },
-                { id: 'NPWP', label: 'NPWP' },
-                { id: 'NIB', label: 'NIB' },
-                { id: 'Domisili', label: 'Domisili' }
-              ].map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setFilterLegalitasCat(cat.id)}
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    border: filterLegalitasCat === cat.id ? '1.5px solid #c084fc' : '1px solid #334155',
-                    background: filterLegalitasCat === cat.id ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#1e293b',
-                    color: filterLegalitasCat === cat.id ? '#ffffff' : '#cbd5e1',
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  {cat.label}
-                  <span style={{ marginLeft: '6px', fontSize: '0.68rem', padding: '1px 5px', borderRadius: '4px', background: filterLegalitasCat === cat.id ? 'rgba(0,0,0,0.25)' : '#0f172a' }}>
-                    {cat.id === 'ALL' ? legalitasList.length : legalitasList.filter(d => d.category === cat.id).length}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div style={{ position: 'relative', width: '260px' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
               <input
                 type="text"
@@ -3478,7 +3446,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 onChange={(e) => setSearchLegalitas(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '6px 10px 6px 30px',
+                  padding: '7px 10px 7px 32px',
                   borderRadius: '6px',
                   border: '1px solid #334155',
                   background: '#0f172a',
@@ -3486,6 +3454,24 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   fontSize: '0.76rem'
                 }}
               />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Filter size={13} color="#94a3b8" />
+                <select
+                  value={filterLegalitasCat}
+                  onChange={(e) => setFilterLegalitasCat(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+                >
+                  <option value="ALL">Semua Jenis Dokumen</option>
+                  <option value="Akta Perusahaan">Akta Perusahaan</option>
+                  <option value="NPWP">NPWP</option>
+                  <option value="NIB">NIB</option>
+                  <option value="Domisili">Domisili</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -3722,56 +3708,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 <span>+ Tambah Dokumen Perizinan</span>
               </button>
             </div>
-          </div>
-
-          {/* Filter Pills Kategori Dokumen Perizinan */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-            {[
-              { id: 'ALL', label: 'Semua Perizinan' },
-              { id: 'PPKR', label: 'PPKR' },
-              { id: 'Siteplan', label: 'Siteplan' },
-              { id: 'PBG', label: 'PBG' }
-            ].map(cat => {
-              const isActive = filterPerizinanKategori === cat.id;
-              const count = cat.id === 'ALL'
-                ? perizinanList.length
-                : perizinanList.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setFilterPerizinanKategori(cat.id)}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '8px',
-                    border: isActive ? '1.5px solid #c084fc' : '1px solid #334155',
-                    background: isActive ? 'rgba(192, 132, 252, 0.15)' : '#0f172a',
-                    color: isActive ? '#c084fc' : '#94a3b8',
-                    fontSize: '0.76rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  <span>{cat.label}</span>
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      background: isActive ? '#9333ea' : '#1e293b',
-                      color: isActive ? '#ffffff' : '#94a3b8',
-                      fontWeight: 900
-                    }}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
           </div>
 
           {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
@@ -4088,57 +4024,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 <span>+ Tambah Dokumen Litigasi</span>
               </button>
             </div>
-          </div>
-
-          {/* Filter Pills Kategori Dokumen Litigasi */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-            {[
-              { id: 'ALL', label: 'Semua Perkara' },
-              { id: 'Klarifikasi Lahan', label: 'Klarifikasi Lahan' },
-              { id: 'Somasi Wanprestasi', label: 'Somasi Wanprestasi' },
-              { id: 'Mediasi Warga', label: 'Mediasi Warga' },
-              { id: 'Sengketa Konsumen', label: 'Sengketa Konsumen' }
-            ].map(cat => {
-              const isActive = filterLitigasiKategori === cat.id;
-              const count = cat.id === 'ALL'
-                ? litigations.length
-                : litigations.filter(d => (d.kategori || '').toLowerCase() === cat.id.toLowerCase()).length;
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setFilterLitigasiKategori(cat.id)}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '8px',
-                    border: isActive ? '1.5px solid #c084fc' : '1px solid #334155',
-                    background: isActive ? 'rgba(192, 132, 252, 0.15)' : '#0f172a',
-                    color: isActive ? '#c084fc' : '#94a3b8',
-                    fontSize: '0.76rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  <span>{cat.label}</span>
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      background: isActive ? '#9333ea' : '#1e293b',
-                      color: isActive ? '#ffffff' : '#94a3b8',
-                      fontWeight: 900
-                    }}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
           </div>
 
           {/* Toolbar Pencarian & Filter Dropdown: Semua Kategori & Semua Proyek */}
@@ -4746,15 +4631,44 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           {formatRupiah(jumlahVal)}
                         </td>
 
-                        {/* 9. Pembayaran (dengan badge kali bayar) */}
+                        {/* 9. Pembayaran (dengan badge kali bayar yang bisa diklik ke history) */}
                         <td style={{ padding: '10px 12px', textAlign: 'right', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
                             <span style={{ color: '#34d399', fontWeight: 800 }}>
                               {formatRupiah(bayarVal)}
                             </span>
-                            <span style={{ fontSize: '0.66rem', color: '#94a3b8', background: '#090d16', padding: '1px 5px', borderRadius: '4px', border: '1px solid #334155' }}>
-                              {countBayar > 0 ? `${countBayar}x bayar` : 'Belum ada'}
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenPaymentModal(item)}
+                              title="Klik untuk melihat riwayat cicilan & pembayaran lahan"
+                              style={{
+                                fontSize: '0.68rem',
+                                color: '#ffffff',
+                                background: '#1e293b',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid #475569',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontWeight: 800,
+                                transition: 'all 0.15s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#7c3aed';
+                                e.currentTarget.style.borderColor = '#c084fc';
+                                e.currentTarget.style.color = '#ffffff';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#1e293b';
+                                e.currentTarget.style.borderColor = '#475569';
+                                e.currentTarget.style.color = '#ffffff';
+                              }}
+                            >
+                              <CreditCard size={11} color="#c084fc" />
+                              <span>{countBayar > 0 ? `${countBayar}x bayar` : '0x bayar'}</span>
+                            </button>
                           </div>
                         </td>
 
