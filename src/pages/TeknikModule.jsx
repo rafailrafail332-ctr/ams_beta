@@ -116,6 +116,31 @@ const getTodayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
+const formatTanggalIndoShort = (dateStr) => {
+  if (!dateStr) return '-';
+  try {
+    const cleanStr = String(dateStr).split('T')[0];
+    const parts = cleanStr.split(/[-/]/);
+    if (parts.length === 3) {
+      let y, m, d;
+      if (parts[0].length === 4) {
+        y = parts[0];
+        m = parseInt(parts[1], 10);
+        d = parseInt(parts[2], 10);
+      } else {
+        d = parseInt(parts[0], 10);
+        m = parseInt(parts[1], 10);
+        y = parts[2];
+      }
+      const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return `${d} ${bulan[m - 1] || m} ${y}`;
+    }
+    return dateStr;
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 const formatToInputDate = (val) => {
   if (!val) return '';
   const str = String(val).trim();
@@ -793,7 +818,8 @@ export const TeknikModule = () => {
   // SUB-MODUL 6: UPLOAD FOTO DOKUMENTASI PROGRESS UNIT LAPANGAN
   // Kolom: No | Proyek | Type | Blok | No | View (Bisa digeser) | Catatan | Aksi (WA, Upload, Edit, Hapus)
   // =========================================================================
-  const createConstructionSvg = (stageName, unitText, accentColor = '#0284c7') => {
+  const createConstructionSvg = (stageName, unitText, accentColor = '#0284c7', tanggal = '') => {
+    const formattedDate = tanggal ? formatTanggalIndo(tanggal) : '10 Agu 2025';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
       <defs>
         <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -816,8 +842,10 @@ export const TeknikModule = () => {
       <rect x="360" y="290" width="80" height="110" fill="#0f172a" stroke="#94a3b8" stroke-width="2" rx="4" />
       <rect x="240" y="270" width="70" height="70" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="4" />
       <rect x="490" y="270" width="70" height="70" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="4" />
-      <rect x="520" y="30" width="240" height="42" rx="8" fill="#090d16" stroke="${accentColor}" stroke-width="1.5" />
-      <text x="640" y="56" fill="#38bdf8" font-family="Arial, sans-serif" font-weight="bold" font-size="14" text-anchor="middle">AMS PROPERTI DOKUMENTASI</text>
+      <rect x="520" y="30" width="240" height="38" rx="8" fill="#090d16" stroke="${accentColor}" stroke-width="1.5" />
+      <text x="640" y="54" fill="#38bdf8" font-family="Arial, sans-serif" font-weight="bold" font-size="13" text-anchor="middle">AMS PROPERTI DOKUMENTASI</text>
+      <rect x="520" y="74" width="240" height="30" rx="6" fill="#090d16" stroke="#334155" stroke-width="1.2" />
+      <text x="640" y="94" fill="#fbbf24" font-family="Arial, sans-serif" font-weight="bold" font-size="11" text-anchor="middle">📅 TGL UPLOAD: ${formattedDate}</text>
       <rect x="40" y="30" width="230" height="65" rx="8" fill="#090d16" stroke="#475569" stroke-width="1" />
       <text x="55" y="55" fill="#f8fafc" font-family="Arial, sans-serif" font-weight="900" font-size="15">${unitText}</text>
       <text x="55" y="78" fill="#94a3b8" font-family="Arial, sans-serif" font-weight="bold" font-size="12">STATUS: FISIK TERVERIFIKASI</text>
@@ -827,7 +855,7 @@ export const TeknikModule = () => {
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   };
 
-  const STORAGE_KEY_UPLOAD_FOTO = 'ams_teknik_upload_foto_v2';
+  const STORAGE_KEY_UPLOAD_FOTO = 'ams_teknik_upload_foto_v3';
   const defaultUploadFoto = [
     {
       id: 'UF-01',
@@ -1022,6 +1050,7 @@ export const TeknikModule = () => {
     konsumen: '',
     phone: '',
     catatan: '',
+    tanggal: getTodayDateString(),
     newPhotos: []
   });
 
@@ -1030,6 +1059,7 @@ export const TeknikModule = () => {
   const [quickUploadTarget, setQuickUploadTarget] = useState(null);
   const [quickUploadFiles, setQuickUploadFiles] = useState([]);
   const [quickUploadKeterangan, setQuickUploadKeterangan] = useState('');
+  const [quickUploadTanggal, setQuickUploadTanggal] = useState(getTodayDateString());
 
   // WhatsApp Modal State
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
@@ -1082,6 +1112,7 @@ export const TeknikModule = () => {
       konsumen: '',
       phone: '',
       catatan: '',
+      tanggal: getTodayDateString(),
       newPhotos: []
     });
     setIsFotoModalOpen(true);
@@ -1089,6 +1120,7 @@ export const TeknikModule = () => {
 
   const handleOpenEditFoto = (item) => {
     setEditingFotoId(item.id);
+    const itemTanggal = (item.photos && item.photos[0]?.tanggal) || getTodayDateString();
     setFotoForm({
       unitId: item.unitId || '',
       proyek: item.proyek || 'Ashoka View',
@@ -1098,6 +1130,7 @@ export const TeknikModule = () => {
       konsumen: item.konsumen || '',
       phone: item.phone || '',
       catatan: item.catatan || '',
+      tanggal: itemTanggal,
       newPhotos: []
     });
     setIsFotoModalOpen(true);
@@ -1138,7 +1171,7 @@ export const TeknikModule = () => {
               id: `ph-new-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
               url: ev.target.result,
               name: file.name,
-              tanggal: new Date().toISOString().split('T')[0],
+              tanggal: prev.tanggal || getTodayDateString(),
               keterangan: `Dokumentasi Fisik ${file.name}`
             }
           ]
@@ -1188,9 +1221,9 @@ export const TeknikModule = () => {
         photos: fotoForm.newPhotos.length > 0 ? fotoForm.newPhotos : [
           {
             id: `ph-default-${Date.now()}`,
-            url: createConstructionSvg('Dokumentasi Awal Unit', `${fotoForm.proyek} - Blok ${fotoForm.blok} No. ${fotoForm.no}`, '#0284c7'),
+            url: createConstructionSvg('Dokumentasi Awal Unit', `${fotoForm.proyek} - Blok ${fotoForm.blok} No. ${fotoForm.no}`, '#0284c7', fotoForm.tanggal || getTodayDateString()),
             name: 'Dokumentasi_Awal.jpg',
-            tanggal: new Date().toISOString().split('T')[0],
+            tanggal: fotoForm.tanggal || getTodayDateString(),
             keterangan: 'Pencatatan awal unit dokumentasi lapangan'
           }
         ]
@@ -1215,6 +1248,7 @@ export const TeknikModule = () => {
     setQuickUploadTarget(item);
     setQuickUploadFiles([]);
     setQuickUploadKeterangan('');
+    setQuickUploadTanggal(getTodayDateString());
     setIsQuickUploadModalOpen(true);
   };
 
@@ -1248,7 +1282,7 @@ export const TeknikModule = () => {
       id: `ph-user-${Date.now()}-${idx}`,
       url: fileObj.dataUrl,
       name: fileObj.name,
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: quickUploadTanggal || getTodayDateString(),
       keterangan: quickUploadKeterangan.trim() || `Foto Lapangan ${fileObj.name}`
     }));
 
@@ -1297,7 +1331,8 @@ export const TeknikModule = () => {
     const phoneFormatted = cleanNo.startsWith('0') ? '62' + cleanNo.slice(1) : (cleanNo.startsWith('62') ? cleanNo : (cleanNo ? '62' + cleanNo : ''));
     setWaPhone(phoneFormatted || item.phone || '');
     
-    const msg = `Halo Bapak/Ibu ${item.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${item.proyek}\n🏠 Kavling: Blok ${item.blok} No. ${item.no} (${item.type})\n📝 Catatan Progres: ${item.catatan || 'Pekerjaan konstruksi berjalan sesuai jadwal.'}\n📸 Jumlah Dokumentasi: ${(item.photos || []).length} Foto Lapangan\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
+    const latestTgl = (item.photos && item.photos[0]?.tanggal) ? formatTanggalIndo(item.photos[0].tanggal) : formatTanggalIndo(getTodayDateString());
+    const msg = `Halo Bapak/Ibu ${item.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${item.proyek}\n🏠 Kavling: Blok ${item.blok} No. ${item.no} (${item.type})\n📅 Tanggal Update: ${latestTgl}\n📝 Catatan Progres: ${item.catatan || 'Pekerjaan konstruksi berjalan sesuai jadwal.'}\n📸 Jumlah Dokumentasi: ${(item.photos || []).length} Foto Lapangan\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
     setWaMessage(msg);
     setIsWaModalOpen(true);
   };
@@ -12230,10 +12265,10 @@ export const TeknikModule = () => {
                                     setActiveCarouselItem(row);
                                     setCarouselIndex(0);
                                   }}
-                                  title="Klik untuk melihat foto lebih besar & geser"
+                                  title={`Klik untuk melihat foto lebih besar & geser (Upload: ${formatTanggalIndo(firstPhoto.tanggal)})`}
                                   style={{
-                                    width: '58px',
-                                    height: '44px',
+                                    width: '64px',
+                                    height: '46px',
                                     borderRadius: '6px',
                                     overflow: 'hidden',
                                     border: '1.5px solid #0284c7',
@@ -12257,7 +12292,7 @@ export const TeknikModule = () => {
                                       position: 'absolute',
                                       bottom: '2px',
                                       right: '2px',
-                                      background: 'rgba(0,0,0,0.75)',
+                                      background: 'rgba(0,0,0,0.8)',
                                       color: '#ffffff',
                                       fontSize: '0.62rem',
                                       fontWeight: 900,
@@ -12270,32 +12305,41 @@ export const TeknikModule = () => {
                                   )}
                                 </div>
 
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveCarouselItem(row);
-                                    setCarouselIndex(0);
-                                  }}
-                                  style={{
-                                    background: 'rgba(2, 132, 199, 0.15)',
-                                    color: '#38bdf8',
-                                    border: '1px solid rgba(2, 132, 199, 0.4)',
-                                    padding: '5px 10px',
-                                    borderRadius: '6px',
-                                    fontSize: '0.76rem',
-                                    fontWeight: 800,
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#ffffff'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2, 132, 199, 0.15)'; e.currentTarget.style.color = '#38bdf8'; }}
-                                >
-                                  <Eye size={13} />
-                                  View ({totalPhotos} Foto)
-                                </button>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveCarouselItem(row);
+                                      setCarouselIndex(0);
+                                    }}
+                                    style={{
+                                      background: 'rgba(2, 132, 199, 0.15)',
+                                      color: '#38bdf8',
+                                      border: '1px solid rgba(2, 132, 199, 0.4)',
+                                      padding: '5px 10px',
+                                      borderRadius: '6px',
+                                      fontSize: '0.76rem',
+                                      fontWeight: 800,
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#ffffff'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2, 132, 199, 0.15)'; e.currentTarget.style.color = '#38bdf8'; }}
+                                  >
+                                    <Eye size={13} />
+                                    View ({totalPhotos} Foto)
+                                  </button>
+
+                                  {firstPhoto?.tanggal && (
+                                    <div style={{ fontSize: '0.72rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 800 }}>
+                                      <Calendar size={11} color="#38bdf8" />
+                                      <span>Tgl Upload: {formatTanggalIndo(firstPhoto.tanggal)}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             ) : (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -16300,6 +16344,51 @@ export const TeknikModule = () => {
                     }}
                   />
 
+                  {/* Stempel / Watermark Tanggal Upload Di Atas Foto */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '16px',
+                    left: '16px',
+                    background: 'rgba(15, 23, 42, 0.88)',
+                    border: '1.5px solid #38bdf8',
+                    borderRadius: '8px',
+                    padding: '6px 14px',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.7)',
+                    zIndex: 10
+                  }}>
+                    <Calendar size={16} color="#38bdf8" />
+                    <div>
+                      <div style={{ fontSize: '0.64rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.06em' }}>
+                        Tanggal Upload Foto
+                      </div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 900, color: '#f8fafc' }}>
+                        {formatTanggalIndo(activeCarouselItem.photos[carouselIndex]?.tanggal)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info Unit di pojok kanan bawah foto */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '16px',
+                    right: '16px',
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    backdropFilter: 'blur(6px)',
+                    fontSize: '0.74rem',
+                    color: '#f8fafc',
+                    fontWeight: 800,
+                    zIndex: 10
+                  }}>
+                    📍 {activeCarouselItem.proyek} • Blok {activeCarouselItem.blok} No. {activeCarouselItem.no}
+                  </div>
+
                   {/* Tombol Geser Kiri < */}
                   {activeCarouselItem.photos.length > 1 && (
                     <button
@@ -16386,12 +16475,26 @@ export const TeknikModule = () => {
                 gap: '10px'
               }}>
                 <div>
-                  <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.88rem' }}>
-                    {activeCarouselItem.photos[carouselIndex]?.name || `Foto ${carouselIndex + 1}`}
+                  <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span>{activeCarouselItem.photos[carouselIndex]?.name || `Foto ${carouselIndex + 1}`}</span>
+                    <span style={{
+                      background: 'rgba(56, 189, 248, 0.15)',
+                      border: '1px solid #38bdf8',
+                      color: '#38bdf8',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <Calendar size={12} />
+                      Tgl Upload: {formatTanggalIndo(activeCarouselItem.photos[carouselIndex]?.tanggal)}
+                    </span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-                    {activeCarouselItem.photos[carouselIndex]?.keterangan || activeCarouselItem.catatan || 'Dokumentasi visual unit'} 
-                    {activeCarouselItem.photos[carouselIndex]?.tanggal ? ` • Diambil: ${activeCarouselItem.photos[carouselIndex]?.tanggal}` : ''}
+                  <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: '3px' }}>
+                    {activeCarouselItem.photos[carouselIndex]?.keterangan || activeCarouselItem.catatan || 'Dokumentasi visual unit'}
                   </div>
                 </div>
 
@@ -16483,13 +16586,15 @@ export const TeknikModule = () => {
                   <div
                     key={ph.id || idx}
                     onClick={() => setCarouselIndex(idx)}
+                    title={`Foto ${idx + 1} - Upload: ${formatTanggalIndo(ph.tanggal)}`}
                     style={{
-                      width: '56px',
-                      height: '42px',
+                      width: '64px',
+                      height: '46px',
                       borderRadius: '6px',
                       overflow: 'hidden',
                       cursor: 'pointer',
                       flexShrink: 0,
+                      position: 'relative',
                       border: idx === carouselIndex ? '2.5px solid #38bdf8' : '1.5px solid #334155',
                       opacity: idx === carouselIndex ? 1 : 0.6,
                       transform: idx === carouselIndex ? 'scale(1.05)' : 'scale(1)',
@@ -16498,6 +16603,21 @@ export const TeknikModule = () => {
                     }}
                   >
                     <img src={ph.url} alt={ph.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'rgba(2, 6, 23, 0.88)',
+                      color: '#38bdf8',
+                      fontSize: '0.55rem',
+                      fontWeight: 900,
+                      textAlign: 'center',
+                      padding: '1px 0',
+                      lineHeight: '1.1'
+                    }}>
+                      {formatTanggalIndoShort(ph.tanggal)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -16743,6 +16863,31 @@ export const TeknikModule = () => {
                 </div>
               )}
 
+              {/* Tanggal Upload */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+                  📅 Tanggal Upload Foto:
+                </label>
+                <input
+                  type="date"
+                  value={quickUploadTanggal}
+                  onChange={(e) => setQuickUploadTanggal(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '38px',
+                    background: '#0f172a',
+                    border: '1.5px solid #334155',
+                    borderRadius: '6px',
+                    color: '#38bdf8',
+                    fontWeight: 800,
+                    padding: '0 12px',
+                    fontSize: '0.86rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
               {/* Keterangan */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
@@ -16932,6 +17077,19 @@ export const TeknikModule = () => {
                       style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#4ade80', fontWeight: 800, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
                     />
                   </div>
+                </div>
+
+                {/* Tanggal Upload */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    📅 Tanggal Upload / Dokumentasi Foto:
+                  </label>
+                  <input
+                    type="date"
+                    value={fotoForm.tanggal}
+                    onChange={(e) => setFotoForm({ ...fotoForm, tanggal: e.target.value })}
+                    style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                  />
                 </div>
 
                 {/* Catatan Progres */}
