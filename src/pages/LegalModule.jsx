@@ -34,25 +34,36 @@ import {
   Paperclip,
   CreditCard,
   Receipt,
-  Wallet
+  Wallet,
+  Mail,
+  Inbox,
+  Send
 } from 'lucide-react';
 
 export const LegalModule = () => {
   const { currentUser, showNotification, activeSubTab } = useApp();
 
-  // 5 Main Modules as specified in user reference:
-  // 1. spk (SPK Vendor)
+  // 9 Main Modules:
+  // 1. spk (SPK Vendor / MOU)
   // 2. legalitas (Legalitas Perusahaan & Legalitas Proyek)
   // 3. perizinan (PPKR, Siteplan, PBG)
   // 4. litigasi (Penanganan Sengketa & Advokasi)
-  // 5. history-tanah (Riwayat Kepemilikan & Perolehan Tanah)
+  // 5. history-tanah (Data Lahan)
+  // 6. shgb (SHGB Induk & Pecahan)
+  // 7. imb (IMB / PBG Induk & Pecahan)
+  // 8. pbb (SPPT - PBB Induk & Pecahan)
+  // 9. surat (Surat Masuk & Surat Keluar)
   const [activeTab, setActiveTab] = useState(() => {
     if (activeSubTab) {
       if (['spk'].includes(activeSubTab)) return 'spk';
       if (['legalitas', 'legalitas-perusahaan', 'legalitas-proyek'].includes(activeSubTab)) return 'legalitas';
       if (['perizinan', 'ppkr', 'siteplan', 'pbg'].includes(activeSubTab)) return 'perizinan';
       if (['litigasi'].includes(activeSubTab)) return 'litigasi';
-      if (['history-tanah', 'history_tanah', 'histori-lahan'].includes(activeSubTab)) return 'history-tanah';
+      if (['history-tanah', 'history_tanah', 'histori-lahan', 'data-lahan'].includes(activeSubTab)) return 'history-tanah';
+      if (['shgb'].includes(activeSubTab)) return 'shgb';
+      if (['imb', 'pbg', 'imb-pbg'].includes(activeSubTab)) return 'imb';
+      if (['pbb', 'sppt', 'sppt-pbb'].includes(activeSubTab)) return 'pbb';
+      if (['surat', 'persuratan'].includes(activeSubTab)) return 'surat';
     }
     return 'spk';
   });
@@ -96,8 +107,16 @@ export const LegalModule = () => {
         setPerizinanSubTab(activeSubTab);
       } else if (activeSubTab === 'litigasi') {
         setActiveTab('litigasi');
-      } else if (activeSubTab === 'history-tanah' || activeSubTab === 'history_tanah' || activeSubTab === 'histori-lahan') {
+      } else if (['history-tanah', 'history_tanah', 'histori-lahan', 'data-lahan'].includes(activeSubTab)) {
         setActiveTab('history-tanah');
+      } else if (activeSubTab === 'shgb') {
+        setActiveTab('shgb');
+      } else if (['imb', 'pbg', 'imb-pbg'].includes(activeSubTab)) {
+        setActiveTab('imb');
+      } else if (['pbb', 'sppt', 'sppt-pbb'].includes(activeSubTab)) {
+        setActiveTab('pbb');
+      } else if (['surat', 'persuratan'].includes(activeSubTab)) {
+        setActiveTab('surat');
       }
     }
   }, [activeSubTab]);
@@ -1863,6 +1882,867 @@ export const LegalModule = () => {
     }
   };
 
+  // =========================================================================
+  // SUB-MODUL 6: SHGB (SERTIFIKAT HAK GUNA BANGUNAN)
+  // Aturan Khusus: Status HANYA 2 PILIHAN -> 'Induk' atau 'Pecahan'
+  // =========================================================================
+  const defaultShgbList = [
+    {
+      id: 'SHGB-001',
+      noShgb: '0124/Serpong/2025',
+      tanggalRelease: '2025-10-15',
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: 25000,
+      blok: 'Induk',
+      noUnit: '-',
+      catatan: 'SHGB Induk Kawasan Ashoka Park Serpong dari Kantor Pertanahan Tangerang Selatan',
+      fileName: 'SHGB_Induk_Ashoka_Park_0124.pdf',
+      fileSize: '4.8 MB',
+      fileData: ''
+    },
+    {
+      id: 'SHGB-002',
+      noShgb: '0125/Serpong/2025',
+      tanggalRelease: '2025-10-16',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 120,
+      blok: 'A',
+      noUnit: '01',
+      catatan: 'Pecahan unit sudut Blok A No. 01 type 72/120',
+      fileName: 'SHGB_Pecahan_A01_Ashoka.pdf',
+      fileSize: '2.3 MB',
+      fileData: ''
+    },
+    {
+      id: 'SHGB-003',
+      noShgb: '0126/Serpong/2025',
+      tanggalRelease: '2025-10-17',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 90,
+      blok: 'A',
+      noUnit: '02',
+      catatan: 'Pecahan unit standard Blok A No. 02 type 45/90',
+      fileName: 'SHGB_Pecahan_A02_Ashoka.pdf',
+      fileSize: '1.9 MB',
+      fileData: ''
+    },
+    {
+      id: 'SHGB-004',
+      noShgb: '0210/Sawangan/2026',
+      tanggalRelease: '2026-01-20',
+      project: 'Ashoka View',
+      status: 'Induk',
+      luas: 18000,
+      blok: 'Induk',
+      noUnit: '-',
+      catatan: 'SHGB Induk Kawasan Ashoka View Sawangan Depok',
+      fileName: 'SHGB_Induk_Ashoka_View.pdf',
+      fileSize: '5.2 MB',
+      fileData: ''
+    }
+  ];
+
+  const [shgbList, setShgbList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_shgb_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultShgbList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_shgb_v1', JSON.stringify(shgbList));
+    } catch (e) {}
+  }, [shgbList]);
+
+  const [searchShgb, setSearchShgb] = useState('');
+  const [filterShgbStatus, setFilterShgbStatus] = useState('ALL');
+  const [filterShgbProject, setFilterShgbProject] = useState('ALL');
+  const [isShgbModalOpen, setIsShgbModalOpen] = useState(false);
+  const [editingShgbId, setEditingShgbId] = useState(null);
+  const [viewingShgb, setViewingShgb] = useState(null);
+  const [shgbForm, setShgbForm] = useState({
+    noShgb: '',
+    tanggalRelease: new Date().toISOString().split('T')[0],
+    project: 'Ashoka Park',
+    status: 'Induk', // ONLY 'Induk' or 'Pecahan'
+    luas: '',
+    blok: '',
+    noUnit: '',
+    catatan: '',
+    fileName: '',
+    fileSize: '',
+    fileData: ''
+  });
+
+  const handleOpenAddShgb = () => {
+    setEditingShgbId(null);
+    setShgbForm({
+      noShgb: '',
+      tanggalRelease: new Date().toISOString().split('T')[0],
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: '',
+      blok: '',
+      noUnit: '',
+      catatan: '',
+      fileName: '',
+      fileSize: '',
+      fileData: ''
+    });
+    setIsShgbModalOpen(true);
+  };
+
+  const handleOpenEditShgb = (item) => {
+    setEditingShgbId(item.id);
+    setShgbForm({
+      noShgb: item.noShgb || '',
+      tanggalRelease: item.tanggalRelease || new Date().toISOString().split('T')[0],
+      project: item.project || 'Ashoka Park',
+      status: item.status === 'Pecahan' ? 'Pecahan' : 'Induk',
+      luas: item.luas || '',
+      blok: item.blok || '',
+      noUnit: item.noUnit || '',
+      catatan: item.catatan || '',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || ''
+    });
+    setIsShgbModalOpen(true);
+  };
+
+  const handleShgbFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setShgbForm(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: formatFileSize(file.size),
+          fileData: uploadEvent.target.result
+        }));
+        showNotification(`Berkas SHGB "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveShgb = (e) => {
+    e.preventDefault();
+    if (!shgbForm.noShgb) {
+      showNotification('Mohon lengkapi Nomor SHGB!', 'warning');
+      return;
+    }
+    const payload = {
+      ...shgbForm,
+      noShgb: shgbForm.noShgb.trim(),
+      luas: Number(shgbForm.luas) || 0,
+      status: shgbForm.status === 'Pecahan' ? 'Pecahan' : 'Induk'
+    };
+
+    if (editingShgbId) {
+      setShgbList(prev => prev.map(item => item.id === editingShgbId ? { ...item, ...payload } : item));
+      showNotification(`Data SHGB "${payload.noShgb}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `SHGB-${Date.now()}`,
+        ...payload
+      };
+      setShgbList([newItem, ...shgbList]);
+      showNotification(`Data SHGB "${newItem.noShgb}" berhasil ditambahkan!`, 'success');
+    }
+    setIsShgbModalOpen(false);
+  };
+
+  const handleDeleteShgb = (id, noShgb) => {
+    if (window.confirm(`Hapus data SHGB "${noShgb}"?`)) {
+      setShgbList(prev => prev.filter(item => item.id !== id));
+      showNotification(`Data SHGB "${noShgb}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredShgbList = useMemo(() => {
+    return shgbList.filter(item => {
+      const q = searchShgb.toLowerCase();
+      const matchSearch = !q ||
+        (item.noShgb || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.noUnit || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchStatus = filterShgbStatus === 'ALL' || item.status === filterShgbStatus;
+      const matchProject = filterShgbProject === 'ALL' || item.project === filterShgbProject;
+      return matchSearch && matchStatus && matchProject;
+    });
+  }, [shgbList, searchShgb, filterShgbStatus, filterShgbProject]);
+
+  const exportShgbToExcel = () => {
+    try {
+      const exportData = filteredShgbList.map((item, idx) => ({
+        'No': idx + 1,
+        'No. SHGB': item.noShgb || '-',
+        'Tanggal Release': item.tanggalRelease ? formatDisplayDate(item.tanggalRelease) : '-',
+        'Status': item.status || 'Induk',
+        'Luas (m2)': item.luas || 0,
+        'Blok': item.blok || '-',
+        'No. Unit': item.noUnit || '-',
+        'Proyek': item.project || '-',
+        'Berkas': item.fileName ? item.fileName : 'Tidak Ada',
+        'Catatan': item.catatan || '-'
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'SHGB');
+      XLSX.writeFile(wb, `AMS_SHGB_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data SHGB berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
+  // =========================================================================
+  // SUB-MODUL 7: IMB / PBG (IZIN MENDIRIKAN BANGUNAN / PBG)
+  // Aturan Khusus: Status HANYA 2 PILIHAN -> 'Induk' atau 'Pecahan'
+  // =========================================================================
+  const defaultImbList = [
+    {
+      id: 'IMB-001',
+      noImb: '648.1/045/DPMPTSP/2025',
+      tanggalRelease: '2025-10-15',
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: 25000,
+      blok: 'Induk',
+      noUnit: '-',
+      catatan: 'PBG / IMB Induk Kawasan Ashoka Park Serpong',
+      fileName: 'PBG_Induk_Ashoka_Park.pdf',
+      fileSize: '3.6 MB',
+      fileData: ''
+    },
+    {
+      id: 'IMB-002',
+      noImb: '648.1/046-A01/DPMPTSP/2025',
+      tanggalRelease: '2025-10-16',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 72,
+      blok: 'A',
+      noUnit: '01',
+      catatan: 'PBG Unit Rumah Tinggal Type 72 Blok A No. 01',
+      fileName: 'PBG_Unit_A01.pdf',
+      fileSize: '1.8 MB',
+      fileData: ''
+    },
+    {
+      id: 'IMB-003',
+      noImb: '648.1/047-A02/DPMPTSP/2025',
+      tanggalRelease: '2025-10-17',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 45,
+      blok: 'A',
+      noUnit: '02',
+      catatan: 'PBG Unit Rumah Tinggal Type 45 Blok A No. 02',
+      fileName: 'PBG_Unit_A02.pdf',
+      fileSize: '1.7 MB',
+      fileData: ''
+    }
+  ];
+
+  const [imbList, setImbList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_imb_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultImbList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_imb_v1', JSON.stringify(imbList));
+    } catch (e) {}
+  }, [imbList]);
+
+  const [searchImb, setSearchImb] = useState('');
+  const [filterImbStatus, setFilterImbStatus] = useState('ALL');
+  const [filterImbProject, setFilterImbProject] = useState('ALL');
+  const [isImbModalOpen, setIsImbModalOpen] = useState(false);
+  const [editingImbId, setEditingImbId] = useState(null);
+  const [viewingImb, setViewingImb] = useState(null);
+  const [imbForm, setImbForm] = useState({
+    noImb: '',
+    tanggalRelease: new Date().toISOString().split('T')[0],
+    project: 'Ashoka Park',
+    status: 'Induk', // ONLY 'Induk' or 'Pecahan'
+    luas: '',
+    blok: '',
+    noUnit: '',
+    catatan: '',
+    fileName: '',
+    fileSize: '',
+    fileData: ''
+  });
+
+  const handleOpenAddImb = () => {
+    setEditingImbId(null);
+    setImbForm({
+      noImb: '',
+      tanggalRelease: new Date().toISOString().split('T')[0],
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: '',
+      blok: '',
+      noUnit: '',
+      catatan: '',
+      fileName: '',
+      fileSize: '',
+      fileData: ''
+    });
+    setIsImbModalOpen(true);
+  };
+
+  const handleOpenEditImb = (item) => {
+    setEditingImbId(item.id);
+    setImbForm({
+      noImb: item.noImb || '',
+      tanggalRelease: item.tanggalRelease || new Date().toISOString().split('T')[0],
+      project: item.project || 'Ashoka Park',
+      status: item.status === 'Pecahan' ? 'Pecahan' : 'Induk',
+      luas: item.luas || '',
+      blok: item.blok || '',
+      noUnit: item.noUnit || '',
+      catatan: item.catatan || '',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || ''
+    });
+    setIsImbModalOpen(true);
+  };
+
+  const handleImbFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setImbForm(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: formatFileSize(file.size),
+          fileData: uploadEvent.target.result
+        }));
+        showNotification(`Berkas IMB/PBG "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveImb = (e) => {
+    e.preventDefault();
+    if (!imbForm.noImb) {
+      showNotification('Mohon lengkapi Nomor IMB / PBG!', 'warning');
+      return;
+    }
+    const payload = {
+      ...imbForm,
+      noImb: imbForm.noImb.trim(),
+      luas: Number(imbForm.luas) || 0,
+      status: imbForm.status === 'Pecahan' ? 'Pecahan' : 'Induk'
+    };
+
+    if (editingImbId) {
+      setImbList(prev => prev.map(item => item.id === editingImbId ? { ...item, ...payload } : item));
+      showNotification(`Data IMB/PBG "${payload.noImb}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `IMB-${Date.now()}`,
+        ...payload
+      };
+      setImbList([newItem, ...imbList]);
+      showNotification(`Data IMB/PBG "${newItem.noImb}" berhasil ditambahkan!`, 'success');
+    }
+    setIsImbModalOpen(false);
+  };
+
+  const handleDeleteImb = (id, noImb) => {
+    if (window.confirm(`Hapus data IMB/PBG "${noImb}"?`)) {
+      setImbList(prev => prev.filter(item => item.id !== id));
+      showNotification(`Data IMB/PBG "${noImb}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredImbList = useMemo(() => {
+    return imbList.filter(item => {
+      const q = searchImb.toLowerCase();
+      const matchSearch = !q ||
+        (item.noImb || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.noUnit || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchStatus = filterImbStatus === 'ALL' || item.status === filterImbStatus;
+      const matchProject = filterImbProject === 'ALL' || item.project === filterImbProject;
+      return matchSearch && matchStatus && matchProject;
+    });
+  }, [imbList, searchImb, filterImbStatus, filterImbProject]);
+
+  const exportImbToExcel = () => {
+    try {
+      const exportData = filteredImbList.map((item, idx) => ({
+        'No': idx + 1,
+        'No. IMB/pbg': item.noImb || '-',
+        'Tanggal Release': item.tanggalRelease ? formatDisplayDate(item.tanggalRelease) : '-',
+        'Status': item.status || 'Induk',
+        'Luas (m2)': item.luas || 0,
+        'Blok': item.blok || '-',
+        'No. Unit': item.noUnit || '-',
+        'Proyek': item.project || '-',
+        'Berkas': item.fileName ? item.fileName : 'Tidak Ada',
+        'Catatan': item.catatan || '-'
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'IMB-PBG');
+      XLSX.writeFile(wb, `AMS_IMB_PBG_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data IMB / PBG berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
+  // =========================================================================
+  // SUB-MODUL 8: SPPT - PBB (PAJAK BUMI DAN BANGUNAN)
+  // Aturan Khusus: Status HANYA 2 PILIHAN -> 'Induk' atau 'Pecahan'
+  // =========================================================================
+  const defaultPbbList = [
+    {
+      id: 'PBB-001',
+      nop: '36.74.020.005.012-0001.0',
+      tahun: '2025',
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: 25000,
+      blok: 'Induk',
+      noUnit: '-',
+      njop: 3500000,
+      catatan: 'SPPT PBB Induk Kawasan Ashoka Park Serpong Tahun Pajak 2025',
+      fileName: 'SPPT_PBB_Induk_2025.pdf',
+      fileSize: '1.5 MB',
+      fileData: ''
+    },
+    {
+      id: 'PBB-002',
+      nop: '36.74.020.005.012-0045.0',
+      tahun: '2026',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 120,
+      blok: 'A',
+      noUnit: '01',
+      njop: 4200000,
+      catatan: 'SPPT PBB Pecahan Blok A No. 01 Tahun Pajak 2026',
+      fileName: 'SPPT_PBB_A01_2026.pdf',
+      fileSize: '1.2 MB',
+      fileData: ''
+    },
+    {
+      id: 'PBB-003',
+      nop: '36.74.020.005.012-0046.0',
+      tahun: '2026',
+      project: 'Ashoka Park',
+      status: 'Pecahan',
+      luas: 90,
+      blok: 'A',
+      noUnit: '02',
+      njop: 4200000,
+      catatan: 'SPPT PBB Pecahan Blok A No. 02 Tahun Pajak 2026',
+      fileName: 'SPPT_PBB_A02_2026.pdf',
+      fileSize: '1.2 MB',
+      fileData: ''
+    }
+  ];
+
+  const [pbbList, setPbbList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_pbb_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultPbbList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_pbb_v1', JSON.stringify(pbbList));
+    } catch (e) {}
+  }, [pbbList]);
+
+  const [searchPbb, setSearchPbb] = useState('');
+  const [filterPbbStatus, setFilterPbbStatus] = useState('ALL');
+  const [filterPbbProject, setFilterPbbProject] = useState('ALL');
+  const [filterPbbTahun, setFilterPbbTahun] = useState('ALL');
+  const [isPbbModalOpen, setIsPbbModalOpen] = useState(false);
+  const [editingPbbId, setEditingPbbId] = useState(null);
+  const [viewingPbb, setViewingPbb] = useState(null);
+  const [pbbForm, setPbbForm] = useState({
+    nop: '',
+    tahun: new Date().getFullYear().toString(),
+    project: 'Ashoka Park',
+    status: 'Induk', // ONLY 'Induk' or 'Pecahan'
+    luas: '',
+    blok: '',
+    noUnit: '',
+    njop: '',
+    catatan: '',
+    fileName: '',
+    fileSize: '',
+    fileData: ''
+  });
+
+  const handleOpenAddPbb = () => {
+    setEditingPbbId(null);
+    setPbbForm({
+      nop: '',
+      tahun: new Date().getFullYear().toString(),
+      project: 'Ashoka Park',
+      status: 'Induk',
+      luas: '',
+      blok: '',
+      noUnit: '',
+      njop: '',
+      catatan: '',
+      fileName: '',
+      fileSize: '',
+      fileData: ''
+    });
+    setIsPbbModalOpen(true);
+  };
+
+  const handleOpenEditPbb = (item) => {
+    setEditingPbbId(item.id);
+    setPbbForm({
+      nop: item.nop || '',
+      tahun: item.tahun || new Date().getFullYear().toString(),
+      project: item.project || 'Ashoka Park',
+      status: item.status === 'Pecahan' ? 'Pecahan' : 'Induk',
+      luas: item.luas || '',
+      blok: item.blok || '',
+      noUnit: item.noUnit || '',
+      njop: item.njop || '',
+      catatan: item.catatan || '',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || ''
+    });
+    setIsPbbModalOpen(true);
+  };
+
+  const handlePbbFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setPbbForm(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: formatFileSize(file.size),
+          fileData: uploadEvent.target.result
+        }));
+        showNotification(`Berkas SPPT-PBB "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSavePbb = (e) => {
+    e.preventDefault();
+    if (!pbbForm.nop) {
+      showNotification('Mohon lengkapi NOP (Nomor Objek Pajak)!', 'warning');
+      return;
+    }
+    const payload = {
+      ...pbbForm,
+      nop: pbbForm.nop.trim(),
+      tahun: pbbForm.tahun || new Date().getFullYear().toString(),
+      luas: Number(pbbForm.luas) || 0,
+      njop: Number(pbbForm.njop) || 0,
+      status: pbbForm.status === 'Pecahan' ? 'Pecahan' : 'Induk'
+    };
+
+    if (editingPbbId) {
+      setPbbList(prev => prev.map(item => item.id === editingPbbId ? { ...item, ...payload } : item));
+      showNotification(`Data SPPT-PBB "${payload.nop}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `PBB-${Date.now()}`,
+        ...payload
+      };
+      setPbbList([newItem, ...pbbList]);
+      showNotification(`Data SPPT-PBB "${newItem.nop}" berhasil ditambahkan!`, 'success');
+    }
+    setIsPbbModalOpen(false);
+  };
+
+  const handleDeletePbb = (id, nop) => {
+    if (window.confirm(`Hapus data SPPT-PBB "${nop}"?`)) {
+      setPbbList(prev => prev.filter(item => item.id !== id));
+      showNotification(`Data SPPT-PBB "${nop}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredPbbList = useMemo(() => {
+    return pbbList.filter(item => {
+      const q = searchPbb.toLowerCase();
+      const matchSearch = !q ||
+        (item.nop || '').toLowerCase().includes(q) ||
+        (String(item.tahun) || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.noUnit || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchStatus = filterPbbStatus === 'ALL' || item.status === filterPbbStatus;
+      const matchProject = filterPbbProject === 'ALL' || item.project === filterPbbProject;
+      const matchTahun = filterPbbTahun === 'ALL' || String(item.tahun) === String(filterPbbTahun);
+      return matchSearch && matchStatus && matchProject && matchTahun;
+    });
+  }, [pbbList, searchPbb, filterPbbStatus, filterPbbProject, filterPbbTahun]);
+
+  const exportPbbToExcel = () => {
+    try {
+      const exportData = filteredPbbList.map((item, idx) => ({
+        'No': idx + 1,
+        'NOP': item.nop || '-',
+        'Tahun': item.tahun || '-',
+        'Status': item.status || 'Induk',
+        'Luas (m2)': item.luas || 0,
+        'Blok': item.blok || '-',
+        'No. Unit': item.noUnit || '-',
+        'NJOP (Rp)': item.njop || 0,
+        'Proyek': item.project || '-',
+        'Berkas': item.fileName ? item.fileName : 'Tidak Ada',
+        'Catatan': item.catatan || '-'
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'SPPT-PBB');
+      XLSX.writeFile(wb, `AMS_SPPT_PBB_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data SPPT-PBB berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
+  // =========================================================================
+  // SUB-MODUL 9: SURAT (ADMINISTRASI SURAT MASUK & KELUAR)
+  // Aturan Khusus: Status HANYA 2 PILIHAN -> 'Surat Keluar' atau 'Surat Masuk'
+  // =========================================================================
+  const defaultSuratList = [
+    {
+      id: 'SRT-001',
+      noSurat: '012/LEG-EXT/AMS/X/2025',
+      tanggal: '2025-10-14',
+      dari: 'PT Ashoka Enterprise Development',
+      kepada: 'Kantor Pertanahan (BPN) Kota Tangerang Selatan',
+      status: 'Surat Keluar',
+      perihal: 'Permohonan Penerbitan Sertifikat HGB Pecahan Blok A & B',
+      project: 'Ashoka Park',
+      catatan: 'Diserahkan langsung ke loket perizinan & pertanahan BPN Tangsel',
+      fileName: 'Surat_Keluar_BPN_012.pdf',
+      fileSize: '1.4 MB',
+      fileData: ''
+    },
+    {
+      id: 'SRT-002',
+      noSurat: '503/482/DPMPTSP/2025',
+      tanggal: '2025-10-18',
+      dari: 'Dinas Penanaman Modal & PTSP Kota Tangerang Selatan',
+      kepada: 'Direktur PT Ashoka Enterprise Development',
+      status: 'Surat Masuk',
+      perihal: 'Pemberitahuan Persetujuan Teknis PBG Kawasan Perumahan Ashoka Park',
+      project: 'Ashoka Park',
+      catatan: 'Surat rekomendasi teknis siteplan dan persetujuan PBG induk',
+      fileName: 'Surat_Masuk_PTSP_503.pdf',
+      fileSize: '2.1 MB',
+      fileData: ''
+    },
+    {
+      id: 'SRT-003',
+      noSurat: '025/LEG-NOT/AMS/XI/2025',
+      tanggal: '2025-11-05',
+      dari: 'Kantor Notaris & PPAT Hj. Sri Rahayu, S.H., M.Kn',
+      kepada: 'Head of Legal PT Ashoka Enterprise Development',
+      status: 'Surat Masuk',
+      perihal: 'Undangan Penandatanganan Akta Jual Beli (AJB) dan Pengikatan APHT',
+      project: 'Ashoka Park',
+      catatan: 'Jadwal akad massal konsumen KPR Bank BTN Serpong',
+      fileName: 'Undangan_Akad_Notaris.pdf',
+      fileSize: '1.1 MB',
+      fileData: ''
+    }
+  ];
+
+  const [suratList, setSuratList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_surat_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultSuratList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_surat_v1', JSON.stringify(suratList));
+    } catch (e) {}
+  }, [suratList]);
+
+  const [searchSurat, setSearchSurat] = useState('');
+  const [filterSuratStatus, setFilterSuratStatus] = useState('ALL');
+  const [filterSuratProject, setFilterSuratProject] = useState('ALL');
+  const [isSuratModalOpen, setIsSuratModalOpen] = useState(false);
+  const [editingSuratId, setEditingSuratId] = useState(null);
+  const [viewingSurat, setViewingSurat] = useState(null);
+  const [suratForm, setSuratForm] = useState({
+    noSurat: '',
+    tanggal: new Date().toISOString().split('T')[0],
+    dari: '',
+    kepada: '',
+    status: 'Surat Keluar', // ONLY 'Surat Keluar' or 'Surat Masuk'
+    perihal: '',
+    project: 'Ashoka Park',
+    catatan: '',
+    fileName: '',
+    fileSize: '',
+    fileData: ''
+  });
+
+  const handleOpenAddSurat = () => {
+    setEditingSuratId(null);
+    setSuratForm({
+      noSurat: '',
+      tanggal: new Date().toISOString().split('T')[0],
+      dari: 'PT Ashoka Enterprise Development',
+      kepada: '',
+      status: 'Surat Keluar',
+      perihal: '',
+      project: 'Ashoka Park',
+      catatan: '',
+      fileName: '',
+      fileSize: '',
+      fileData: ''
+    });
+    setIsSuratModalOpen(true);
+  };
+
+  const handleOpenEditSurat = (item) => {
+    setEditingSuratId(item.id);
+    setSuratForm({
+      noSurat: item.noSurat || '',
+      tanggal: item.tanggal || new Date().toISOString().split('T')[0],
+      dari: item.dari || '',
+      kepada: item.kepada || '',
+      status: item.status === 'Surat Masuk' ? 'Surat Masuk' : 'Surat Keluar',
+      perihal: item.perihal || '',
+      project: item.project || 'Ashoka Park',
+      catatan: item.catatan || '',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || ''
+    });
+    setIsSuratModalOpen(true);
+  };
+
+  const handleSuratFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setSuratForm(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: formatFileSize(file.size),
+          fileData: uploadEvent.target.result
+        }));
+        showNotification(`Berkas surat "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveSurat = (e) => {
+    e.preventDefault();
+    if (!suratForm.noSurat || !suratForm.perihal) {
+      showNotification('Mohon lengkapi Nomor Surat dan Perihal!', 'warning');
+      return;
+    }
+    const payload = {
+      ...suratForm,
+      noSurat: suratForm.noSurat.trim(),
+      dari: suratForm.dari.trim(),
+      kepada: suratForm.kepada.trim(),
+      perihal: suratForm.perihal.trim(),
+      status: suratForm.status === 'Surat Masuk' ? 'Surat Masuk' : 'Surat Keluar'
+    };
+
+    if (editingSuratId) {
+      setSuratList(prev => prev.map(item => item.id === editingSuratId ? { ...item, ...payload } : item));
+      showNotification(`Data Surat "${payload.noSurat}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `SRT-${Date.now()}`,
+        ...payload
+      };
+      setSuratList([newItem, ...suratList]);
+      showNotification(`Data Surat "${newItem.noSurat}" berhasil ditambahkan!`, 'success');
+    }
+    setIsSuratModalOpen(false);
+  };
+
+  const handleDeleteSurat = (id, noSurat) => {
+    if (window.confirm(`Hapus data Surat "${noSurat}"?`)) {
+      setSuratList(prev => prev.filter(item => item.id !== id));
+      showNotification(`Data Surat "${noSurat}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredSuratList = useMemo(() => {
+    return suratList.filter(item => {
+      const q = searchSurat.toLowerCase();
+      const matchSearch = !q ||
+        (item.noSurat || '').toLowerCase().includes(q) ||
+        (item.dari || '').toLowerCase().includes(q) ||
+        (item.kepada || '').toLowerCase().includes(q) ||
+        (item.perihal || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchStatus = filterSuratStatus === 'ALL' || item.status === filterSuratStatus;
+      const matchProject = filterSuratProject === 'ALL' || item.project === filterSuratProject;
+      return matchSearch && matchStatus && matchProject;
+    });
+  }, [suratList, searchSurat, filterSuratStatus, filterSuratProject]);
+
+  const exportSuratToExcel = () => {
+    try {
+      const exportData = filteredSuratList.map((item, idx) => ({
+        'No.': idx + 1,
+        'No. Surat': item.noSurat || '-',
+        'Tanggal': item.tanggal ? formatDisplayDate(item.tanggal) : '-',
+        'Dari': item.dari || '-',
+        'Kepada': item.kepada || '-',
+        'Status': item.status || 'Surat Keluar',
+        'Perihal': item.perihal || '-',
+        'Proyek': item.project || '-',
+        'Berkas': item.fileName ? item.fileName : 'Tidak Ada',
+        'Catatan': item.catatan || '-'
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Persuratan');
+      XLSX.writeFile(wb, `AMS_Surat_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data Surat berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
   // Helper function to view / open uploaded file
   const handleViewFile = (fileData, fileName) => {
     if (!fileData) {
@@ -1995,8 +2875,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 5 TAB UTAMA:                                                       */}
-      {/* 1. SPK | 2. LEGALITAS | 3. PERIZINAN | 4. LITIGASI | 5. HISTORY TANAH    */}
+      {/* BILAH 9 TAB UTAMA:                                                       */}
+      {/* 1. SPK | 2. LEGALITAS | 3. PERIZINAN | 4. LITIGASI | 5. DATA LAHAN        */}
+      {/* 6. SHGB | 7. IMB/PBG | 8. SPPT-PBB | 9. SURAT                             */}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -2006,7 +2887,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           borderRadius: '14px',
           padding: '0.5rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))',
           gap: '8px',
           marginBottom: '1.25rem'
         }}
@@ -2129,6 +3010,102 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         >
           <MapPin size={18} />
           <span>5. Data Lahan</span>
+        </button>
+
+        {/* Tab 6: SHGB */}
+        <button
+          onClick={() => setActiveTab('shgb')}
+          style={{
+            background: activeTab === 'shgb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
+            color: activeTab === 'shgb' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'shgb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'shgb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
+          }}
+        >
+          <FileText size={18} />
+          <span>6. SHGB</span>
+        </button>
+
+        {/* Tab 7: IMB / PBG */}
+        <button
+          onClick={() => setActiveTab('imb')}
+          style={{
+            background: activeTab === 'imb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
+            color: activeTab === 'imb' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'imb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'imb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
+          }}
+        >
+          <Building2 size={18} />
+          <span>7. IMB / PBG</span>
+        </button>
+
+        {/* Tab 8: SPPT - PBB */}
+        <button
+          onClick={() => setActiveTab('pbb')}
+          style={{
+            background: activeTab === 'pbb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
+            color: activeTab === 'pbb' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'pbb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'pbb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
+          }}
+        >
+          <Receipt size={18} />
+          <span>8. SPPT - PBB</span>
+        </button>
+
+        {/* Tab 9: Surat */}
+        <button
+          onClick={() => setActiveTab('surat')}
+          style={{
+            background: activeTab === 'surat' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
+            color: activeTab === 'surat' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'surat' ? '1.5px solid #c084fc' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'surat' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
+          }}
+        >
+          <Mail size={18} />
+          <span>9. Surat</span>
         </button>
       </div>
 
@@ -3934,6 +4911,1064 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               type="button"
                               onClick={() => handleDeleteHistoryTanah(item.id, item.namaPenjual || item.noDok)}
                               title="Hapus Data Lahan"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 6: SHGB (SERTIFIKAT HAK GUNA BANGUNAN)                             */}
+      {/* Kolom Persis Sesuai Gambar:                                               */}
+      {/* No. | No. SHGB | Tanggal Release | Status | Luas (m2) | Blok | No. |      */}
+      {/* Berkas | Catatan | Aksi                                                   */}
+      {/* ========================================================================= */}
+      {activeTab === 'shgb' && (
+        <div className="glass-card" style={{ background: '#090d16', border: '1.5px solid #1e293b', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Badge persis gambar referensi */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                background: '#f8cbad',
+                color: '#7f3f10',
+                fontWeight: 900,
+                fontSize: '1.15rem',
+                padding: '6px 18px',
+                borderRadius: '6px',
+                border: '1.5px solid #ea580c',
+                letterSpacing: '0.5px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+              }}>
+                SHGB
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Data Sertifikat Hak Guna Bangunan (SHGB)
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                  Register SHGB Induk Kawasan & SHGB Pecahan Tiap Unit Properti
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={exportShgbToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#0f172a', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700 }}
+              >
+                <Download size={14} />
+                <span>Export Excel</span>
+              </button>
+              <button
+                onClick={handleOpenAddShgb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data SHGB</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari No. SHGB, Blok, No. Unit, Catatan..."
+                value={searchShgb}
+                onChange={(e) => setSearchShgb(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={filterShgbStatus}
+                onChange={(e) => setFilterShgbStatus(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Induk">Induk</option>
+                <option value="Pecahan">Pecahan</option>
+              </select>
+
+              <select
+                value={filterShgbProject}
+                onChange={(e) => setFilterShgbProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL SHGB: PERSIS SESUAI GAMBAR REFERENSI */}
+          {filteredShgbList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <FileText size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data SHGB</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar sertifikat SHGB belum tersedia. Klik tombol di bawah untuk menambah data baru.
+              </div>
+              <button
+                onClick={handleOpenAddShgb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data SHGB</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. SHGB</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredShgbList.map((item, idx) => {
+                    const isInduk = item.status === 'Induk';
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.25)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. No. SHGB */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#f8cbad', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.noShgb || '-'}
+                        </td>
+
+                        {/* 3. Tanggal Release */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.tanggalRelease ? formatDisplayDate(item.tanggalRelease) : '-'}
+                        </td>
+
+                        {/* 4. Status (HANYA INDUK / PECAHAN) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 900,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              background: isInduk ? 'rgba(147, 51, 234, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                              color: isInduk ? '#c084fc' : '#34d399',
+                              border: isInduk ? '1px solid #7c3aed' : '1px solid #059669'
+                            }}
+                          >
+                            {isInduk ? 'Induk' : 'Pecahan'}
+                          </span>
+                        </td>
+
+                        {/* 5. Luas (m2) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#ffffff', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {Number(item.luas || 0).toLocaleString('id-ID')}
+                        </td>
+
+                        {/* 6. Blok */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.blok || '-'}
+                        </td>
+
+                        {/* 7. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.noUnit || '-'}
+                        </td>
+
+                        {/* 8. Berkas (View) */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.fileData || item.fileName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewFile(item.fileData, item.fileName)}
+                              title={`Lihat Berkas: ${item.fileName}`}
+                              style={{
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                border: '1px solid #0284c7',
+                                color: '#38bdf8',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>View</span>
+                          )}
+                        </td>
+
+                        {/* 9. Catatan */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.catatan || '-'}
+                        </td>
+
+                        {/* 10. Aksi */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => setViewingShgb(item)}
+                              title="Pratinjau & Cetak SHGB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditShgb(item)}
+                              title="Edit Data SHGB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteShgb(item.id, item.noShgb)}
+                              title="Hapus Data SHGB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 7: IMB / PBG                                                        */}
+      {/* Kolom Persis Sesuai Gambar:                                               */}
+      {/* No. | No. IMB/pbg | Tanggal Release | Status | Luas (m2) | Blok | No. |   */}
+      {/* Berkas | Catatan | Aksi                                                   */}
+      {/* ========================================================================= */}
+      {activeTab === 'imb' && (
+        <div className="glass-card" style={{ background: '#090d16', border: '1.5px solid #1e293b', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Badge persis gambar referensi */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                background: '#f8cbad',
+                color: '#7f3f10',
+                fontWeight: 900,
+                fontSize: '1.15rem',
+                padding: '6px 18px',
+                borderRadius: '6px',
+                border: '1.5px solid #ea580c',
+                letterSpacing: '0.5px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+              }}>
+                IMB / PBG
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Data Izin Mendirikan Bangunan (IMB) & PBG
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                  Register IMB / PBG Induk Kawasan & IMB / PBG Pecahan Per Kavling Unit
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={exportImbToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#0f172a', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700 }}
+              >
+                <Download size={14} />
+                <span>Export Excel</span>
+              </button>
+              <button
+                onClick={handleOpenAddImb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data IMB / PBG</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari No. IMB/PBG, Blok, No. Unit, Catatan..."
+                value={searchImb}
+                onChange={(e) => setSearchImb(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={filterImbStatus}
+                onChange={(e) => setFilterImbStatus(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Induk">Induk</option>
+                <option value="Pecahan">Pecahan</option>
+              </select>
+
+              <select
+                value={filterImbProject}
+                onChange={(e) => setFilterImbProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL IMB/PBG: PERSIS SESUAI GAMBAR REFERENSI */}
+          {filteredImbList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <Building2 size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data IMB / PBG</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar perizinan bangunan belum tersedia. Klik tombol di bawah untuk menambah data baru.
+              </div>
+              <button
+                onClick={handleOpenAddImb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data IMB / PBG</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. IMB/pbg</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredImbList.map((item, idx) => {
+                    const isInduk = item.status === 'Induk';
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.25)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. No. IMB/pbg */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#f8cbad', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.noImb || '-'}
+                        </td>
+
+                        {/* 3. Tanggal Release */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.tanggalRelease ? formatDisplayDate(item.tanggalRelease) : '-'}
+                        </td>
+
+                        {/* 4. Status (HANYA INDUK / PECAHAN) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 900,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              background: isInduk ? 'rgba(147, 51, 234, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                              color: isInduk ? '#c084fc' : '#34d399',
+                              border: isInduk ? '1px solid #7c3aed' : '1px solid #059669'
+                            }}
+                          >
+                            {isInduk ? 'Induk' : 'Pecahan'}
+                          </span>
+                        </td>
+
+                        {/* 5. Luas (m2) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#ffffff', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {Number(item.luas || 0).toLocaleString('id-ID')}
+                        </td>
+
+                        {/* 6. Blok */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.blok || '-'}
+                        </td>
+
+                        {/* 7. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.noUnit || '-'}
+                        </td>
+
+                        {/* 8. Berkas (View) */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.fileData || item.fileName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewFile(item.fileData, item.fileName)}
+                              title={`Lihat Berkas: ${item.fileName}`}
+                              style={{
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                border: '1px solid #0284c7',
+                                color: '#38bdf8',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>View</span>
+                          )}
+                        </td>
+
+                        {/* 9. Catatan */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.catatan || '-'}
+                        </td>
+
+                        {/* 10. Aksi */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => setViewingImb(item)}
+                              title="Pratinjau & Cetak IMB/PBG"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditImb(item)}
+                              title="Edit Data IMB/PBG"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteImb(item.id, item.noImb)}
+                              title="Hapus Data IMB/PBG"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 8: SPPT - PBB (PAJAK BUMI DAN BANGUNAN)                             */}
+      {/* Kolom Persis Sesuai Gambar:                                               */}
+      {/* No. | NOP | Tahun | Status | Luas (m2) | Blok | No. | NJOP | Berkas |     */}
+      {/* Catatan | Aksi                                                            */}
+      {/* ========================================================================= */}
+      {activeTab === 'pbb' && (
+        <div className="glass-card" style={{ background: '#090d16', border: '1.5px solid #1e293b', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Badge persis gambar referensi */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                background: '#f8cbad',
+                color: '#7f3f10',
+                fontWeight: 900,
+                fontSize: '1.15rem',
+                padding: '6px 18px',
+                borderRadius: '6px',
+                border: '1.5px solid #ea580c',
+                letterSpacing: '0.5px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+              }}>
+                SPPT - PBB
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Data SPPT - PBB (Pajak Bumi dan Bangunan)
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                  Register NOP Induk Proyek & NOP Pecahan Tiap Unit Kavling Bangunan
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={exportPbbToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#0f172a', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700 }}
+              >
+                <Download size={14} />
+                <span>Export Excel</span>
+              </button>
+              <button
+                onClick={handleOpenAddPbb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data SPPT-PBB</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari NOP, Tahun, Blok, No. Unit, Catatan..."
+                value={searchPbb}
+                onChange={(e) => setSearchPbb(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={filterPbbStatus}
+                onChange={(e) => setFilterPbbStatus(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Induk">Induk</option>
+                <option value="Pecahan">Pecahan</option>
+              </select>
+
+              <select
+                value={filterPbbTahun}
+                onChange={(e) => setFilterPbbTahun(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Tahun</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+              </select>
+
+              <select
+                value={filterPbbProject}
+                onChange={(e) => setFilterPbbProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL SPPT-PBB: PERSIS SESUAI GAMBAR REFERENSI */}
+          {filteredPbbList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <Receipt size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data SPPT - PBB</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar pajak PBB belum tersedia. Klik tombol di bawah untuk menambah data baru.
+              </div>
+              <button
+                onClick={handleOpenAddPbb}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Data SPPT-PBB</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>NOP</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tahun</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>NJOP</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPbbList.map((item, idx) => {
+                    const isInduk = item.status === 'Induk';
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.25)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. NOP */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#f8cbad', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.nop || '-'}
+                        </td>
+
+                        {/* 3. Tahun */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.tahun || '-'}
+                        </td>
+
+                        {/* 4. Status (HANYA INDUK / PECAHAN) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 900,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              background: isInduk ? 'rgba(147, 51, 234, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                              color: isInduk ? '#c084fc' : '#34d399',
+                              border: isInduk ? '1px solid #7c3aed' : '1px solid #059669'
+                            }}
+                          >
+                            {isInduk ? 'Induk' : 'Pecahan'}
+                          </span>
+                        </td>
+
+                        {/* 5. Luas (m2) */}
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#ffffff', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {Number(item.luas || 0).toLocaleString('id-ID')}
+                        </td>
+
+                        {/* 6. Blok */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.blok || '-'}
+                        </td>
+
+                        {/* 7. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', fontWeight: 700, color: '#cbd5e1', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.noUnit || '-'}
+                        </td>
+
+                        {/* 8. NJOP */}
+                        <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 800, color: '#34d399', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {formatRupiah(item.njop)}
+                        </td>
+
+                        {/* 9. Berkas (View) */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.fileData || item.fileName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewFile(item.fileData, item.fileName)}
+                              title={`Lihat Berkas: ${item.fileName}`}
+                              style={{
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                border: '1px solid #0284c7',
+                                color: '#38bdf8',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>View</span>
+                          )}
+                        </td>
+
+                        {/* 10. Catatan */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.catatan || '-'}
+                        </td>
+
+                        {/* 11. Aksi */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => setViewingPbb(item)}
+                              title="Pratinjau & Cetak SPPT-PBB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditPbb(item)}
+                              title="Edit Data SPPT-PBB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePbb(item.id, item.nop)}
+                              title="Hapus Data SPPT-PBB"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 9: SURAT (ADMINISTRASI PERSURATAN LEGAL)                           */}
+      {/* Kolom Persis Sesuai Gambar:                                               */}
+      {/* No. | No. Surat | Tanggal | Dari | Kepada | Status | Perihal |            */}
+      {/* Berkas | Catatan | Aksi                                                   */}
+      {/* Aturan Khusus: Status HANYA 'Surat Keluar' atau 'Surat Masuk'            */}
+      {/* ========================================================================= */}
+      {activeTab === 'surat' && (
+        <div className="glass-card" style={{ background: '#090d16', border: '1.5px solid #1e293b', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Badge persis gambar referensi */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                background: '#f8cbad',
+                color: '#7f3f10',
+                fontWeight: 900,
+                fontSize: '1.15rem',
+                padding: '6px 18px',
+                borderRadius: '6px',
+                border: '1.5px solid #ea580c',
+                letterSpacing: '0.5px',
+                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+              }}>
+                SURAT
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Administrasi Surat Masuk & Surat Keluar
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                  Register Korespondensi Legal Corporate, Instansi ATR/BPN, Notaris, & Perizinan
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={exportSuratToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#0f172a', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700 }}
+              >
+                <Download size={14} />
+                <span>Export Excel</span>
+              </button>
+              <button
+                onClick={handleOpenAddSurat}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Surat Masuk / Keluar</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari No. Surat, Pengirim, Penerima, Perihal, Catatan..."
+                value={searchSurat}
+                onChange={(e) => setSearchSurat(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={filterSuratStatus}
+                onChange={(e) => setFilterSuratStatus(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Surat Masuk">Surat Masuk</option>
+                <option value="Surat Keluar">Surat Keluar</option>
+              </select>
+
+              <select
+                value={filterSuratProject}
+                onChange={(e) => setFilterSuratProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL SURAT: PERSIS SESUAI GAMBAR REFERENSI */}
+          {filteredSuratList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <Mail size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data Surat</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar persuratan legal belum tersedia. Klik tombol di bawah untuk menambah surat masuk atau keluar baru.
+              </div>
+              <button
+                onClick={handleOpenAddSurat}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Surat Masuk / Keluar</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Surat</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Dari</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Kepada</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 18px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Perihal</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSuratList.map((item, idx) => {
+                    const isMasuk = item.status === 'Surat Masuk';
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.25)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. No. Surat */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#f8cbad', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.noSurat || '-'}
+                        </td>
+
+                        {/* 3. Tanggal */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.tanggal ? formatDisplayDate(item.tanggal) : '-'}
+                        </td>
+
+                        {/* 4. Dari */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: '#ffffff', borderRight: '1px solid #1e293b', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.dari || '-'}
+                        </td>
+
+                        {/* 5. Kepada */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: '#ffffff', borderRight: '1px solid #1e293b', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.kepada || '-'}
+                        </td>
+
+                        {/* 6. Status (HANYA SURAT MASUK / SURAT KELUAR) */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 900,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: isMasuk ? 'rgba(56, 189, 248, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                              color: isMasuk ? '#38bdf8' : '#fbbf24',
+                              border: isMasuk ? '1px solid #0284c7' : '1px solid #d97706'
+                            }}
+                          >
+                            {isMasuk ? <Inbox size={11} /> : <Send size={11} />}
+                            {isMasuk ? 'Surat Masuk' : 'Surat Keluar'}
+                          </span>
+                        </td>
+
+                        {/* 7. Perihal */}
+                        <td style={{ padding: '10px 18px', textAlign: 'left', fontWeight: 600, color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.perihal || '-'}
+                        </td>
+
+                        {/* 8. Berkas (View) */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.fileData || item.fileName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewFile(item.fileData, item.fileName)}
+                              title={`Lihat Berkas: ${item.fileName}`}
+                              style={{
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                border: '1px solid #0284c7',
+                                color: '#38bdf8',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>View</span>
+                          )}
+                        </td>
+
+                        {/* 9. Catatan */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.catatan || '-'}
+                        </td>
+
+                        {/* 10. Aksi */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => setViewingSurat(item)}
+                              title="Pratinjau & Cetak Surat"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditSurat(item)}
+                              title="Edit Data Surat"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSurat(item.id, item.noSurat)}
+                              title="Hapus Data Surat"
                               style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                             >
                               <Trash2 size={12} />
@@ -8641,6 +10676,840 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
+      {/* MODAL 6A: FORM TAMBAH / EDIT DATA SHGB                                   */}
+      {/* ========================================================================= */}
+      {isShgbModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #ea580c', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SHGB</div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  {editingShgbId ? 'Edit Data Sertifikat SHGB' : 'Tambah Data Sertifikat SHGB'}
+                </h3>
+              </div>
+              <button onClick={() => setIsShgbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleSaveShgb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. SHGB *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: 0124/Serpong/2025"
+                  value={shgbForm.noShgb}
+                  onChange={(e) => setShgbForm({ ...shgbForm, noShgb: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Release</label>
+                  <input
+                    type="date"
+                    value={shgbForm.tanggalRelease}
+                    onChange={(e) => setShgbForm({ ...shgbForm, tanggalRelease: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <select
+                    value={shgbForm.status}
+                    onChange={(e) => setShgbForm({ ...shgbForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #ea580c', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    required
+                  >
+                    <option value="Induk">Induk</option>
+                    <option value="Pecahan">Pecahan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <input
+                    type="number"
+                    placeholder="25000"
+                    value={shgbForm.luas}
+                    onChange={(e) => setShgbForm({ ...shgbForm, luas: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: A / Induk"
+                    value={shgbForm.blok}
+                    onChange={(e) => setShgbForm({ ...shgbForm, blok: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit/Kav</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 01 / -"
+                    value={shgbForm.noUnit}
+                    onChange={(e) => setShgbForm({ ...shgbForm, noUnit: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                <select
+                  value={shgbForm.project}
+                  onChange={(e) => setShgbForm({ ...shgbForm, project: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                >
+                  <option value="Ashoka Park">Ashoka Park</option>
+                  <option value="Ashoka View">Ashoka View</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas Sertifikat (PDF / JPG)</label>
+                <input
+                  type="file"
+                  onChange={handleShgbFileChange}
+                  accept=".pdf,image/*"
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+                {shgbForm.fileName && (
+                  <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={12} />
+                    <span>File siap: {shgbForm.fileName} ({shgbForm.fileSize})</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Legal</label>
+                <textarea
+                  rows={3}
+                  placeholder="Catatan pendaftaran, tanggal release dari BPN, keterangan status..."
+                  value={shgbForm.catatan}
+                  onChange={(e) => setShgbForm({ ...shgbForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsShgbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800 }}>Simpan Data SHGB</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 6B: PRATINJAU & CETAK DATA SHGB                                     */}
+      {/* ========================================================================= */}
+      {viewingShgb && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%', color: '#0f172a' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem' }}>SHGB</div>
+                <h3 className="modal-title" style={{ color: '#0f172a', margin: 0 }}>
+                  Dokumen Resmi - Sertifikat Hak Guna Bangunan (SHGB)
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button className="btn btn-primary btn-sm" onClick={() => window.print()} style={{ background: 'linear-gradient(135deg, #9333ea, #7c3aed)', color: '#ffffff', fontWeight: 800, border: 'none' }}>
+                  <Printer size={16} /> Cetak / Export PDF
+                </button>
+                <button onClick={() => setViewingShgb(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', padding: '2.5rem', borderRadius: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1e293b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src="/company-logo.png" alt="Ashoka Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>PT ASHOKA ENTERPRISE DEVELOPMENT</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Departemen Legal & Pertanahan &bull; Komplek Ruko Bizhub RA-3 Serpong</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#9333ea' }}>LEMBAR REGISTER SHGB</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>NO: {viewingShgb.noShgb}</div>
+                </div>
+              </div>
+
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', width: '35%', color: '#64748b' }}>Nomor SHGB</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingShgb.noShgb}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Tanggal Release</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {formatDisplayDate(viewingShgb.tanggalRelease)}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Status Dokumen</td><td style={{ padding: '8px 0', fontWeight: 800, color: viewingShgb.status === 'Induk' ? '#7c3aed' : '#059669' }}>: SHGB {viewingShgb.status}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Luas Tanah</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {Number(viewingShgb.luas || 0).toLocaleString('id-ID')} m²</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Blok / Nomor Kavling</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: Blok {viewingShgb.blok || '-'} No. {viewingShgb.noUnit || '-'}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Proyek Kawasan</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingShgb.project}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Berkas Fisik</td><td style={{ padding: '8px 0' }}>: {viewingShgb.fileName || 'Belum Terlampir'}</td></tr>
+                  <tr><td style={{ padding: '8px 0', color: '#64748b' }}>Catatan Tambahan</td><td style={{ padding: '8px 0' }}>: {viewingShgb.catatan || '-'}</td></tr>
+                </tbody>
+              </table>
+
+              {viewingShgb.fileData && (
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  <button onClick={() => handleViewFile(viewingShgb.fileData, viewingShgb.fileName)} className="btn btn-secondary btn-sm" style={{ border: '1px solid #0284c7', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Eye size={14} /> Buka Berkas Digital Asli ({viewingShgb.fileName})
+                  </button>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '2.5rem' }}>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Diverifikasi Oleh:<br /><strong>Head of Legal Corporate</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Staf Legal & Perizinan</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Mengetahui & Mengesahkan:<br /><strong>Direktur Utama</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Yazid Hizbullah, S.E.,S.T</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Direktur Utama</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 7A: FORM TAMBAH / EDIT DATA IMB / PBG                               */}
+      {/* ========================================================================= */}
+      {isImbModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #0284c7', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>IMB / PBG</div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  {editingImbId ? 'Edit Data IMB / PBG' : 'Tambah Data IMB / PBG'}
+                </h3>
+              </div>
+              <button onClick={() => setIsImbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleSaveImb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. IMB / PBG *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: 648.1/045/DPMPTSP/2025"
+                  value={imbForm.noImb}
+                  onChange={(e) => setImbForm({ ...imbForm, noImb: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Release</label>
+                  <input
+                    type="date"
+                    value={imbForm.tanggalRelease}
+                    onChange={(e) => setImbForm({ ...imbForm, tanggalRelease: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <select
+                    value={imbForm.status}
+                    onChange={(e) => setImbForm({ ...imbForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #0284c7', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    required
+                  >
+                    <option value="Induk">Induk</option>
+                    <option value="Pecahan">Pecahan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <input
+                    type="number"
+                    placeholder="72"
+                    value={imbForm.luas}
+                    onChange={(e) => setImbForm({ ...imbForm, luas: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <input
+                    type="text"
+                    placeholder="A"
+                    value={imbForm.blok}
+                    onChange={(e) => setImbForm({ ...imbForm, blok: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit</label>
+                  <input
+                    type="text"
+                    placeholder="01"
+                    value={imbForm.noUnit}
+                    onChange={(e) => setImbForm({ ...imbForm, noUnit: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                <select
+                  value={imbForm.project}
+                  onChange={(e) => setImbForm({ ...imbForm, project: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                >
+                  <option value="Ashoka Park">Ashoka Park</option>
+                  <option value="Ashoka View">Ashoka View</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas IMB / PBG (PDF / JPG)</label>
+                <input
+                  type="file"
+                  onChange={handleImbFileChange}
+                  accept=".pdf,image/*"
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+                {imbForm.fileName && (
+                  <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={12} />
+                    <span>File siap: {imbForm.fileName} ({imbForm.fileSize})</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Perizinan</label>
+                <textarea
+                  rows={3}
+                  placeholder="Catatan persetujuan teknis, dinas penerbit, keterangan spesifikasi..."
+                  value={imbForm.catatan}
+                  onChange={(e) => setImbForm({ ...imbForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsImbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none', fontWeight: 800 }}>Simpan IMB / PBG</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 7B: PRATINJAU & CETAK DATA IMB / PBG                                */}
+      {/* ========================================================================= */}
+      {viewingImb && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%', color: '#0f172a' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem' }}>IMB / PBG</div>
+                <h3 className="modal-title" style={{ color: '#0f172a', margin: 0 }}>
+                  Dokumen Resmi - Persetujuan Bangunan Gedung (IMB / PBG)
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button className="btn btn-primary btn-sm" onClick={() => window.print()} style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', fontWeight: 800, border: 'none' }}>
+                  <Printer size={16} /> Cetak / Export PDF
+                </button>
+                <button onClick={() => setViewingImb(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', padding: '2.5rem', borderRadius: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1e293b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src="/company-logo.png" alt="Ashoka Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>PT ASHOKA ENTERPRISE DEVELOPMENT</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Departemen Perizinan & Legalitas Proyek &bull; Komplek Ruko Bizhub RA-3 Serpong</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0284c7' }}>LEMBAR REGISTER IMB/PBG</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>NO: {viewingImb.noImb}</div>
+                </div>
+              </div>
+
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', width: '35%', color: '#64748b' }}>Nomor IMB / PBG</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingImb.noImb}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Tanggal Release</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {formatDisplayDate(viewingImb.tanggalRelease)}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Status Dokumen</td><td style={{ padding: '8px 0', fontWeight: 800, color: viewingImb.status === 'Induk' ? '#0284c7' : '#059669' }}>: IMB / PBG {viewingImb.status}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Luas Bangunan</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {Number(viewingImb.luas || 0).toLocaleString('id-ID')} m²</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Blok / Nomor Unit</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: Blok {viewingImb.blok || '-'} No. {viewingImb.noUnit || '-'}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Proyek Terkait</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingImb.project}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Berkas Fisik</td><td style={{ padding: '8px 0' }}>: {viewingImb.fileName || 'Belum Terlampir'}</td></tr>
+                  <tr><td style={{ padding: '8px 0', color: '#64748b' }}>Catatan Perizinan</td><td style={{ padding: '8px 0' }}>: {viewingImb.catatan || '-'}</td></tr>
+                </tbody>
+              </table>
+
+              {viewingImb.fileData && (
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  <button onClick={() => handleViewFile(viewingImb.fileData, viewingImb.fileName)} className="btn btn-secondary btn-sm" style={{ border: '1px solid #0284c7', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Eye size={14} /> Buka Berkas Digital Asli ({viewingImb.fileName})
+                  </button>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '2.5rem' }}>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Diverifikasi Oleh:<br /><strong>Head of Legal & Perizinan</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Staf Legal & Perizinan</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Mengetahui & Mengesahkan:<br /><strong>Direktur Utama</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Yazid Hizbullah, S.E.,S.T</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Direktur Utama</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 8A: FORM TAMBAH / EDIT DATA SPPT - PBB                              */}
+      {/* ========================================================================= */}
+      {isPbbModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #f59e0b', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SPPT - PBB</div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  {editingPbbId ? 'Edit Data SPPT - PBB' : 'Tambah Data SPPT - PBB'}
+                </h3>
+              </div>
+              <button onClick={() => setIsPbbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleSavePbb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>NOP (Nomor Objek Pajak) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: 36.74.020.005.012-0001.0"
+                  value={pbbForm.nop}
+                  onChange={(e) => setPbbForm({ ...pbbForm, nop: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tahun Pajak</label>
+                  <input
+                    type="number"
+                    value={pbbForm.tahun}
+                    onChange={(e) => setPbbForm({ ...pbbForm, tahun: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <select
+                    value={pbbForm.status}
+                    onChange={(e) => setPbbForm({ ...pbbForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #f59e0b', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    required
+                  >
+                    <option value="Induk">Induk</option>
+                    <option value="Pecahan">Pecahan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <input
+                    type="number"
+                    placeholder="120"
+                    value={pbbForm.luas}
+                    onChange={(e) => setPbbForm({ ...pbbForm, luas: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <input
+                    type="text"
+                    placeholder="A"
+                    value={pbbForm.blok}
+                    onChange={(e) => setPbbForm({ ...pbbForm, blok: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit</label>
+                  <input
+                    type="text"
+                    placeholder="01"
+                    value={pbbForm.noUnit}
+                    onChange={(e) => setPbbForm({ ...pbbForm, noUnit: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>NJOP (Rp)</label>
+                  <input
+                    type="number"
+                    placeholder="Contoh: 4200000"
+                    value={pbbForm.njop}
+                    onChange={(e) => setPbbForm({ ...pbbForm, njop: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                  {pbbForm.njop && (
+                    <div style={{ fontSize: '0.74rem', color: '#34d399', marginTop: '2px', fontWeight: 700 }}>
+                      = {formatRupiah(pbbForm.njop)}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek</label>
+                  <select
+                    value={pbbForm.project}
+                    onChange={(e) => setPbbForm({ ...pbbForm, project: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  >
+                    <option value="Ashoka Park">Ashoka Park</option>
+                    <option value="Ashoka View">Ashoka View</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas SPPT - PBB (PDF / JPG)</label>
+                <input
+                  type="file"
+                  onChange={handlePbbFileChange}
+                  accept=".pdf,image/*"
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+                {pbbForm.fileName && (
+                  <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={12} />
+                    <span>File siap: {pbbForm.fileName} ({pbbForm.fileSize})</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan</label>
+                <textarea
+                  rows={3}
+                  placeholder="Keterangan ketetapan pajak, tanggal pembayaran, riwayat lunas..."
+                  value={pbbForm.catatan}
+                  onChange={(e) => setPbbForm({ ...pbbForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsPbbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#000', border: 'none', fontWeight: 800 }}>Simpan SPPT-PBB</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 8B: PRATINJAU & CETAK DATA SPPT - PBB                               */}
+      {/* ========================================================================= */}
+      {viewingPbb && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%', color: '#0f172a' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem' }}>SPPT - PBB</div>
+                <h3 className="modal-title" style={{ color: '#0f172a', margin: 0 }}>
+                  Dokumen Resmi - Surat Pemberitahuan Pajak Terhutang (SPPT - PBB)
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button className="btn btn-primary btn-sm" onClick={() => window.print()} style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#000', fontWeight: 800, border: 'none' }}>
+                  <Printer size={16} /> Cetak / Export PDF
+                </button>
+                <button onClick={() => setViewingPbb(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', padding: '2.5rem', borderRadius: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1e293b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src="/company-logo.png" alt="Ashoka Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>PT ASHOKA ENTERPRISE DEVELOPMENT</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Departemen Pajak & Legal Corporate &bull; Komplek Ruko Bizhub RA-3 Serpong</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#d97706' }}>REGISTER SPPT-PBB</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>NOP: {viewingPbb.nop}</div>
+                </div>
+              </div>
+
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', width: '35%', color: '#64748b' }}>Nomor Objek Pajak (NOP)</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingPbb.nop}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Tahun Pajak</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingPbb.tahun}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Status Dokumen</td><td style={{ padding: '8px 0', fontWeight: 800, color: viewingPbb.status === 'Induk' ? '#7c3aed' : '#059669' }}>: PBB {viewingPbb.status}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Luas Tanah / Objek</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {Number(viewingPbb.luas || 0).toLocaleString('id-ID')} m²</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Blok / Nomor Unit</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: Blok {viewingPbb.blok || '-'} No. {viewingPbb.noUnit || '-'}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Nilai Jual Objek Pajak (NJOP)</td><td style={{ padding: '8px 0', fontWeight: 800, color: '#059669' }}>: {formatRupiah(viewingPbb.njop)}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Proyek Terkait</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingPbb.project}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Berkas Fisik</td><td style={{ padding: '8px 0' }}>: {viewingPbb.fileName || 'Belum Terlampir'}</td></tr>
+                  <tr><td style={{ padding: '8px 0', color: '#64748b' }}>Catatan</td><td style={{ padding: '8px 0' }}>: {viewingPbb.catatan || '-'}</td></tr>
+                </tbody>
+              </table>
+
+              {viewingPbb.fileData && (
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  <button onClick={() => handleViewFile(viewingPbb.fileData, viewingPbb.fileName)} className="btn btn-secondary btn-sm" style={{ border: '1px solid #0284c7', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Eye size={14} /> Buka Berkas Digital Asli ({viewingPbb.fileName})
+                  </button>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '2.5rem' }}>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Diverifikasi Oleh:<br /><strong>Head of Tax & Legal</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Staf Legal & Perizinan</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Mengetahui & Mengesahkan:<br /><strong>Direktur Utama</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Yazid Hizbullah, S.E.,S.T</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Direktur Utama</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 9A: FORM TAMBAH / EDIT DATA SURAT                                   */}
+      {/* ========================================================================= */}
+      {isSuratModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SURAT</div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  {editingSuratId ? 'Edit Data Surat' : 'Tambah Surat Masuk / Keluar'}
+                </h3>
+              </div>
+              <button onClick={() => setIsSuratModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleSaveSurat} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Surat *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: 012/LEG-EXT/AMS/X/2025"
+                    value={suratForm.noSurat}
+                    onChange={(e) => setSuratForm({ ...suratForm, noSurat: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Surat</label>
+                  <input
+                    type="date"
+                    value={suratForm.tanggal}
+                    onChange={(e) => setSuratForm({ ...suratForm, tanggal: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Dari (Pengirim) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: PT Ashoka Enterprise Development"
+                    value={suratForm.dari}
+                    onChange={(e) => setSuratForm({ ...suratForm, dari: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Kepada (Penerima) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Kantor Pertanahan (BPN) Kota Tangsel"
+                    value={suratForm.kepada}
+                    onChange={(e) => setSuratForm({ ...suratForm, kepada: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan: Surat Keluar / Masuk) *</label>
+                  <select
+                    value={suratForm.status}
+                    onChange={(e) => setSuratForm({ ...suratForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    required
+                  >
+                    <option value="Surat Keluar">Surat Keluar</option>
+                    <option value="Surat Masuk">Surat Masuk</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                  <select
+                    value={suratForm.project}
+                    onChange={(e) => setSuratForm({ ...suratForm, project: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  >
+                    <option value="Ashoka Park">Ashoka Park</option>
+                    <option value="Ashoka View">Ashoka View</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Perihal Surat *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Permohonan Penerbitan Sertifikat HGB Pecahan Blok A"
+                  value={suratForm.perihal}
+                  onChange={(e) => setSuratForm({ ...suratForm, perihal: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas Surat (PDF / JPG)</label>
+                <input
+                  type="file"
+                  onChange={handleSuratFileChange}
+                  accept=".pdf,image/*"
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+                {suratForm.fileName && (
+                  <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={12} />
+                    <span>File siap: {suratForm.fileName} ({suratForm.fileSize})</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Persuratan</label>
+                <textarea
+                  rows={3}
+                  placeholder="Catatan disposisi, nomor resi kurir/tanda terima, follow up..."
+                  value={suratForm.catatan}
+                  onChange={(e) => setSuratForm({ ...suratForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsSuratModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', border: 'none', fontWeight: 800 }}>Simpan Data Surat</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 9B: PRATINJAU & CETAK DATA SURAT                                    */}
+      {/* ========================================================================= */}
+      {viewingSurat && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%', color: '#0f172a' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#f8cbad', color: '#7f3f10', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem' }}>SURAT</div>
+                <h3 className="modal-title" style={{ color: '#0f172a', margin: 0 }}>
+                  Dokumen Resmi - Lembar Disposisi & Arsip Persuratan Legal
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button className="btn btn-primary btn-sm" onClick={() => window.print()} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', fontWeight: 800, border: 'none' }}>
+                  <Printer size={16} /> Cetak / Export PDF
+                </button>
+                <button onClick={() => setViewingSurat(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', padding: '2.5rem', borderRadius: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1e293b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src="/company-logo.png" alt="Ashoka Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>PT ASHOKA ENTERPRISE DEVELOPMENT</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Sekretariat & Administrasi Legal Corporate &bull; Komplek Ruko Bizhub RA-3 Serpong</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: viewingSurat.status === 'Surat Masuk' ? '#0284c7' : '#d97706' }}>
+                    REGISTER {viewingSurat.status.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>NO: {viewingSurat.noSurat}</div>
+                </div>
+              </div>
+
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', width: '35%', color: '#64748b' }}>Nomor Surat</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingSurat.noSurat}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Tanggal Surat</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {formatDisplayDate(viewingSurat.tanggal)}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Status Dokumen</td><td style={{ padding: '8px 0', fontWeight: 800, color: viewingSurat.status === 'Surat Masuk' ? '#0284c7' : '#d97706' }}>: {viewingSurat.status}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Pengirim (Dari)</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingSurat.dari}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Tujuan (Kepada)</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingSurat.kepada}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Perihal Surat</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingSurat.perihal}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Proyek Terkait</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingSurat.project}</td></tr>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b' }}>Berkas Fisik</td><td style={{ padding: '8px 0' }}>: {viewingSurat.fileName || 'Belum Terlampir'}</td></tr>
+                  <tr><td style={{ padding: '8px 0', color: '#64748b' }}>Catatan Persuratan</td><td style={{ padding: '8px 0' }}>: {viewingSurat.catatan || '-'}</td></tr>
+                </tbody>
+              </table>
+
+              {viewingSurat.fileData && (
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                  <button onClick={() => handleViewFile(viewingSurat.fileData, viewingSurat.fileName)} className="btn btn-secondary btn-sm" style={{ border: '1px solid #0284c7', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Eye size={14} /> Buka Berkas Digital Asli ({viewingSurat.fileName})
+                  </button>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '2.5rem' }}>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Petugas Administrasi:<br /><strong>Legal Corporate</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Staf Legal & Perizinan</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Mengetahui & Mengesahkan:<br /><strong>Direktur Utama</strong></div><div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Yazid Hizbullah, S.E.,S.T</div><div style={{ fontSize: '0.75rem', color: '#64748b' }}>Direktur Utama</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* MODAL CETAK LEGAL AUDIT REPORT                                            */}
       {/* ========================================================================= */}
       {isReportModalOpen && (
@@ -8703,7 +11572,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 3. <strong>Legalitas Proyek:</strong> Total {legalitasProyekList.length} sertifikat dan berkas tanah proyek.<br />
                 4. <strong>Perizinan:</strong> Total {perizinanList.length} berkas izin resmi (PPKR, Siteplan, PBG).<br />
                 5. <strong>Litigasi:</strong> Total {litigations.length} catatan penanganan perkara advokasi hukum.<br />
-                6. <strong>History Tanah:</strong> Total {historyTanahList.length} arsip riwayat perolehan tanah & alas hak.
+                6. <strong>Data Lahan:</strong> Total {historyTanahList.length} arsip riwayat perolehan tanah & alas hak.<br />
+                7. <strong>SHGB:</strong> Total {shgbList.length} sertifikat Hak Guna Bangunan (Induk & Pecahan).<br />
+                8. <strong>IMB / PBG:</strong> Total {imbList.length} izin mendirikan bangunan & PBG.<br />
+                9. <strong>SPPT - PBB:</strong> Total {pbbList.length} ketetapan pajak PBB terdaftar.<br />
+                10. <strong>Persuratan:</strong> Total {suratList.length} arsip surat masuk & keluar resmi.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '3rem' }}>

@@ -37,7 +37,9 @@ import {
   TrendingUp,
   PieChart,
   BarChart3,
-  LogOut
+  LogOut,
+  MapPin,
+  Mail
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -96,7 +98,12 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'leg-perusahaan', title: '2. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas-perusahaan', icon: FileCheck, color: '#38BDF8' },
         { id: 'leg-proyek', title: '3. Legalitas Proyek', moduleKey: 'legal', subTabKey: 'legalitas-proyek', icon: Building2, color: '#C084FC' },
         { id: 'leg-perizinan', title: '4. Perizinan (PPKR, Siteplan, PBG)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
-        { id: 'leg-litigasi', title: '5. Litigasi & Advokasi Hukum', moduleKey: 'legal', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' }
+        { id: 'leg-litigasi', title: '5. Litigasi & Advokasi Hukum', moduleKey: 'legal', subTabKey: 'litigasi', icon: Scale, color: '#FB7185' },
+        { id: 'leg-lahan', title: '6. Data Lahan', moduleKey: 'legal', subTabKey: 'data-lahan', icon: MapPin, color: '#C084FC' },
+        { id: 'leg-shgb', title: '7. SHGB Induk & Pecahan', moduleKey: 'legal', subTabKey: 'shgb', icon: FileText, color: '#F8CBAD' },
+        { id: 'leg-imb', title: '8. IMB / PBG', moduleKey: 'legal', subTabKey: 'imb', icon: Building2, color: '#38BDF8' },
+        { id: 'leg-pbb', title: '9. SPPT - PBB', moduleKey: 'legal', subTabKey: 'pbb', icon: Receipt, color: '#F59E0B' },
+        { id: 'leg-surat', title: '10. Surat Masuk & Keluar', moduleKey: 'legal', subTabKey: 'surat', icon: Mail, color: '#34D399' }
       ];
     }
 
