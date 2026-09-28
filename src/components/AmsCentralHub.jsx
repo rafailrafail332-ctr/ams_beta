@@ -73,8 +73,8 @@ export const AmsCentralHub = ({
       label: 'Finance', 
       sub: 'Keuangan & Kas Bank', 
       desc: 'Arus Kas, Tagihan Vendor & Payment', 
-      color: '#f59e0b', 
-      lightColor: '#d97706',
+      color: '#0284c7', 
+      lightColor: '#0369a1',
       icon: Wallet
     },
     { 
@@ -209,7 +209,7 @@ export const AmsCentralHub = ({
             onClick={onOpenLoginModal}
             style={{
               background: isDark ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
-              border: isDark ? '1.5px solid rgba(245, 158, 11, 0.45)' : '1.5px solid #f59e0b',
+              border: isDark ? '1.5px solid rgba(2, 132, 199, 0.45)' : '1.5px solid #0284c7',
               borderRadius: '24px',
               padding: '8px 18px',
               fontSize: '0.8rem',
@@ -220,19 +220,19 @@ export const AmsCentralHub = ({
               alignItems: 'center',
               gap: '7px',
               backdropFilter: 'blur(10px)',
-              boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.4)' : '0 4px 15px rgba(245, 158, 11, 0.15)',
+              boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.4)' : '0 4px 15px rgba(2, 132, 199, 0.15)',
               transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#f59e0b';
+              e.currentTarget.style.borderColor = '#0284c7';
               e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = isDark ? 'rgba(245, 158, 11, 0.45)' : '#f59e0b';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(2, 132, 199, 0.45)' : '#0284c7';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <UserCheck size={15} color="#f59e0b" />
+            <UserCheck size={15} color="#0284c7" />
             <span>Pilih Akun Staf / Login Khusus</span>
           </button>
         )}
@@ -895,17 +895,16 @@ export const AmsCentralHub = ({
         <div
           style={{
             display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '16px',
-            gap: '16px',
+            marginTop: '14px',
+            gap: '10px',
             position: 'relative',
             zIndex: 10
           }}
         >
-          {/* Node: Finance */}
+          {/* Node: Finance (Berwarna Biru, Di Atas TO -DO LIST) */}
           <button
             type="button"
             className="ams-hub-node-btn"
@@ -914,20 +913,22 @@ export const AmsCentralHub = ({
             onMouseLeave={() => setHoveredNode(null)}
             style={{
               background: isDark 
-                ? (hoveredNode === 'finance' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(15, 23, 42, 0.75)')
-                : (hoveredNode === 'finance' ? '#fefce8' : '#ffffff'),
+                ? (hoveredNode === 'finance' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                : (hoveredNode === 'finance' ? '#f0f9ff' : '#ffffff'),
               border: hoveredNode === 'finance' 
-                ? '2px solid #f59e0b' 
+                ? '2px solid #0284c7' 
                 : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
               borderRadius: '14px',
-              padding: '8px 22px',
+              padding: '7px 22px',
+              minWidth: '220px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'finance'
-                ? '0 10px 25px rgba(245, 158, 11, 0.35), 0 0 15px rgba(245, 158, 11, 0.2)'
+                ? '0 10px 25px rgba(2, 132, 199, 0.35), 0 0 15px rgba(2, 132, 199, 0.2)'
                 : (isDark ? '0 4px 16px rgba(0, 0, 0, 0.4)' : '0 4px 16px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '10px'
             }}
           >
@@ -936,11 +937,11 @@ export const AmsCentralHub = ({
                 width: '32px',
                 height: '32px',
                 borderRadius: '10px',
-                background: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fef3c7'),
+                background: hoveredNode === 'finance' ? '#0284c7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: hoveredNode === 'finance' ? '#ffffff' : '#d97706',
+                color: hoveredNode === 'finance' ? '#ffffff' : '#0284c7',
                 flexShrink: 0,
                 transition: 'all 0.2s ease'
               }}
@@ -951,7 +952,7 @@ export const AmsCentralHub = ({
               <div style={{ 
                 fontSize: '1.25rem', 
                 fontWeight: 900, 
-                color: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? '#f8fafc' : '#0f172a'), 
+                color: hoveredNode === 'finance' ? '#38bdf8' : (isDark ? '#f8fafc' : '#0f172a'), 
                 lineHeight: 1.1 
               }}>
                 Finance
@@ -959,7 +960,7 @@ export const AmsCentralHub = ({
               <div style={{ 
                 fontSize: '0.64rem', 
                 fontWeight: 700, 
-                color: hoveredNode === 'finance' ? '#d97706' : (isDark ? '#94a3b8' : '#64748b'), 
+                color: hoveredNode === 'finance' ? '#0284c7' : (isDark ? '#94a3b8' : '#64748b'), 
                 marginTop: '2px' 
               }}>
                 Keuangan & Kas Bank
@@ -982,7 +983,8 @@ export const AmsCentralHub = ({
                 ? '2px solid #ec4899' 
                 : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
               borderRadius: '14px',
-              padding: '8px 22px',
+              padding: '7px 22px',
+              minWidth: '220px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'todo-attendance'
                 ? '0 10px 25px rgba(236, 72, 153, 0.35), 0 0 15px rgba(236, 72, 153, 0.2)'
@@ -990,6 +992,7 @@ export const AmsCentralHub = ({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '10px'
             }}
           >
@@ -1033,7 +1036,7 @@ export const AmsCentralHub = ({
         {/* BOTTOM STATUS & HELPFUL HINT */}
         <div
           style={{
-            marginTop: '1.25rem',
+            marginTop: '12px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
