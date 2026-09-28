@@ -99,9 +99,11 @@ export const AmsCentralHub = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '2.5rem 1rem',
+        padding: '1.25rem 1rem',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        boxSizing: 'border-box',
         transition: 'background 0.3s ease, color 0.3s ease'
       }}
     >
@@ -274,6 +276,7 @@ export const AmsCentralHub = ({
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
+          margin: 'auto 0',
           zIndex: 10
         }}
       >
@@ -284,7 +287,7 @@ export const AmsCentralHub = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '26px',
+            marginBottom: '14px',
             userSelect: 'none',
             position: 'relative'
           }}
@@ -296,8 +299,8 @@ export const AmsCentralHub = ({
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '160px',
-              height: '160px',
+              width: '130px',
+              height: '130px',
               background: isDark 
                 ? 'radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%)'
                 : 'radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, rgba(245, 158, 11, 0.1) 50%, transparent 70%)',
@@ -309,9 +312,9 @@ export const AmsCentralHub = ({
           {/* Logo with Frosted Glass Badge */}
           <div
             style={{
-              width: '90px',
-              height: '90px',
-              borderRadius: '24px',
+              width: '74px',
+              height: '74px',
+              borderRadius: '20px',
               background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
               border: isDark ? '1.5px solid rgba(255, 255, 255, 0.18)' : '1.5px solid #e2e8f0',
               backdropFilter: 'blur(12px)',
@@ -319,8 +322,8 @@ export const AmsCentralHub = ({
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: isDark 
-                ? '0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25)' 
-                : '0 12px 30px rgba(0, 0, 0, 0.08), 0 0 20px rgba(245, 158, 11, 0.15)',
+                ? '0 10px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25)' 
+                : '0 8px 20px rgba(0, 0, 0, 0.08), 0 0 15px rgba(245, 158, 11, 0.15)',
               transition: 'transform 0.3s ease'
             }}
           >
@@ -331,10 +334,10 @@ export const AmsCentralHub = ({
                 e.currentTarget.src = '/company-logo.png';
               }}
               style={{
-                width: '66px',
-                height: '66px',
+                width: '50px',
+                height: '50px',
                 objectFit: 'contain',
-                filter: isDark ? 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' : 'none'
+                filter: isDark ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' : 'none'
               }}
             />
           </div>
@@ -342,10 +345,10 @@ export const AmsCentralHub = ({
           {/* AMS TEXT: ALWAYS 100% VISIBLE IN BOTH DARK AND LIGHT MODES */}
           <div
             style={{
-              fontSize: '1.85rem',
+              fontSize: '1.55rem',
               fontWeight: 900,
               letterSpacing: '0.08em',
-              marginTop: '12px',
+              marginTop: '8px',
               color: isDark ? '#ffffff' : '#0f172a',
               display: 'flex',
               alignItems: 'center',
@@ -358,10 +361,10 @@ export const AmsCentralHub = ({
 
           <div
             style={{
-              fontSize: '0.74rem',
+              fontSize: '0.72rem',
               fontWeight: 700,
               color: isDark ? '#94a3b8' : '#475569',
-              letterSpacing: '0.14em',
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
               marginTop: '2px'
             }}
@@ -892,11 +895,12 @@ export const AmsCentralHub = ({
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: '28px',
-            gap: '14px',
+            marginTop: '16px',
+            gap: '16px',
             position: 'relative',
             zIndex: 10
           }}
@@ -915,37 +919,37 @@ export const AmsCentralHub = ({
               border: hoveredNode === 'finance' 
                 ? '2px solid #f59e0b' 
                 : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
-              borderRadius: '16px',
-              padding: '10px 28px',
+              borderRadius: '14px',
+              padding: '8px 22px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'finance'
-                ? '0 12px 30px rgba(245, 158, 11, 0.35), 0 0 15px rgba(245, 158, 11, 0.2)'
-                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
+                ? '0 10px 25px rgba(245, 158, 11, 0.35), 0 0 15px rgba(245, 158, 11, 0.2)'
+                : (isDark ? '0 4px 16px rgba(0, 0, 0, 0.4)' : '0 4px 16px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '10px'
             }}
           >
             <div
               style={{
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '10px',
                 background: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fef3c7'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: hoveredNode === 'finance' ? '#000000' : '#d97706',
+                color: hoveredNode === 'finance' ? '#ffffff' : '#d97706',
                 flexShrink: 0,
                 transition: 'all 0.2s ease'
               }}
             >
-              <Wallet size={17} />
+              <Wallet size={16} />
             </div>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'left' }}>
               <div style={{ 
-                fontSize: '1.4rem', 
+                fontSize: '1.25rem', 
                 fontWeight: 900, 
                 color: hoveredNode === 'finance' ? '#f59e0b' : (isDark ? '#f8fafc' : '#0f172a'), 
                 lineHeight: 1.1 
@@ -953,7 +957,7 @@ export const AmsCentralHub = ({
                 Finance
               </div>
               <div style={{ 
-                fontSize: '0.66rem', 
+                fontSize: '0.64rem', 
                 fontWeight: 700, 
                 color: hoveredNode === 'finance' ? '#d97706' : (isDark ? '#94a3b8' : '#64748b'), 
                 marginTop: '2px' 
@@ -977,22 +981,22 @@ export const AmsCentralHub = ({
               border: hoveredNode === 'todo-attendance' 
                 ? '2px solid #ec4899' 
                 : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
-              borderRadius: '16px',
-              padding: '10px 28px',
+              borderRadius: '14px',
+              padding: '8px 22px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'todo-attendance'
-                ? '0 12px 30px rgba(236, 72, 153, 0.35), 0 0 15px rgba(236, 72, 153, 0.2)'
-                : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
+                ? '0 10px 25px rgba(236, 72, 153, 0.35), 0 0 15px rgba(236, 72, 153, 0.2)'
+                : (isDark ? '0 4px 16px rgba(0, 0, 0, 0.4)' : '0 4px 16px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '10px'
             }}
           >
             <div
               style={{
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '10px',
                 background: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fce7f3'),
                 display: 'flex',
@@ -1003,11 +1007,11 @@ export const AmsCentralHub = ({
                 transition: 'all 0.2s ease'
               }}
             >
-              <CheckSquare size={17} />
+              <CheckSquare size={16} />
             </div>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'left' }}>
               <div style={{ 
-                fontSize: '1.4rem', 
+                fontSize: '1.25rem', 
                 fontWeight: 900, 
                 color: hoveredNode === 'todo-attendance' ? '#ec4899' : (isDark ? '#f8fafc' : '#0f172a'), 
                 lineHeight: 1.1 
@@ -1015,7 +1019,7 @@ export const AmsCentralHub = ({
                 TO -DO LIST
               </div>
               <div style={{ 
-                fontSize: '0.66rem', 
+                fontSize: '0.64rem', 
                 fontWeight: 700, 
                 color: hoveredNode === 'todo-attendance' ? '#db2777' : (isDark ? '#94a3b8' : '#64748b'), 
                 marginTop: '2px' 
@@ -1029,11 +1033,11 @@ export const AmsCentralHub = ({
         {/* BOTTOM STATUS & HELPFUL HINT */}
         <div
           style={{
-            marginTop: '2.5rem',
+            marginTop: '1.25rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.76rem',
+            fontSize: '0.74rem',
             color: isDark ? '#94a3b8' : '#475569',
             fontWeight: 700,
             userSelect: 'none',

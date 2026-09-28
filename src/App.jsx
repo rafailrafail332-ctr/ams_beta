@@ -126,69 +126,70 @@ function AppContent() {
         />
       )}
 
-      <main className="main-content" style={{ 
-        marginLeft: 0, 
-        width: '100%', 
-        maxWidth: '100%', 
-        marginTop: isHubView ? 0 : undefined,
-        padding: isHubView ? 0 : '1.5rem', 
-        minHeight: isHubView ? '100vh' : undefined,
-        boxSizing: 'border-box' 
-      }}>
-        {!isAllowed ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '2rem auto' }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: 'var(--danger-bg)',
-              color: 'var(--danger)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem'
-            }}>
-              <Lock size={32} />
+      {isHubView ? (
+        <ErrorBoundary key="hub" moduleName="AMS Central Hub">
+          <AmsCentralHub
+            isLanding={false}
+            currentUser={currentUser}
+            onSelectModule={(tabKey) => setCurrentTab(tabKey)}
+            onLogout={handleLogout}
+          />
+        </ErrorBoundary>
+      ) : (
+        <main className="main-content" style={{ 
+          marginLeft: 0, 
+          width: '100%', 
+          maxWidth: '100%', 
+          padding: '1.5rem', 
+          boxSizing: 'border-box' 
+        }}>
+          {!isAllowed ? (
+            <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '2rem auto' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'var(--danger-bg)',
+                color: 'var(--danger)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <Lock size={32} />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                Restriksi Hak Akses Role ({currentUser?.role})
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Maaf, akun Anda ({currentUser?.name} - {currentUser?.role}) hanya diizinkan membuka Modul Khusus milik Anda atau Modul To-Do List & Absen.
+              </p>
+              <button className="btn btn-primary" onClick={() => setCurrentTab('hub')}>
+                <ArrowLeft size={16} /> Kembali ke Central Hub
+              </button>
             </div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-              Restriksi Hak Akses Role ({currentUser?.role})
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-              Maaf, akun Anda ({currentUser?.name} - {currentUser?.role}) hanya diizinkan membuka Modul Khusus milik Anda atau Modul To-Do List & Absen.
-            </p>
-            <button className="btn btn-primary" onClick={() => setCurrentTab('hub')}>
-              <ArrowLeft size={16} /> Kembali ke Central Hub
-            </button>
-          </div>
-        ) : (
-          <ErrorBoundary key={currentTab} moduleName={getActiveTitle()}>
-            <div className="module-animated-view">
-              {isHubView && (
-                <AmsCentralHub
-                  isLanding={false}
-                  currentUser={currentUser}
-                  onSelectModule={(tabKey) => setCurrentTab(tabKey)}
-                  onLogout={handleLogout}
-                />
-              )}
-              {currentTab === 'todo-attendance' && <TodoAttendanceModule />}
-              {currentTab === 'executive' && <ExecutiveModule />}
-              {currentTab === 'manager' && <ManagerModule />}
-              {(currentTab === 'teknik' || currentTab === 'teknik-rumah' || currentTab === 'teknik-fasilitas' || currentTab === 'teknik-batp') && <TeknikModule />}
-              {currentTab === 'marketing' && <MarketingModule />}
-              {(currentTab === 'legal' || currentTab === 'human-resource' || currentTab === 'hr') && <LegalModule />}
-              {currentTab === 'finance' && <FinanceModule />}
-              {(currentTab === 'hr-ga' || currentTab === 'ga') && (
-                <HrGaModule onSwitchToLegalCorporate={() => setCurrentTab('legal')} />
-              )}
-              {currentTab === 'customer-relation' && <CustomerRelationModule />}
-              {currentTab === 'procurement' && <ProcurementModule />}
-              {currentTab === 'users' && <UserManagement />}
-              {currentTab === 'piutang-konsumen' && <PiutangKonsumenModule />}
-            </div>
-          </ErrorBoundary>
-        )}
-      </main>
+          ) : (
+            <ErrorBoundary key={currentTab} moduleName={getActiveTitle()}>
+              <div className="module-animated-view">
+                {currentTab === 'todo-attendance' && <TodoAttendanceModule />}
+                {currentTab === 'executive' && <ExecutiveModule />}
+                {currentTab === 'manager' && <ManagerModule />}
+                {(currentTab === 'teknik' || currentTab === 'teknik-rumah' || currentTab === 'teknik-fasilitas' || currentTab === 'teknik-batp') && <TeknikModule />}
+                {currentTab === 'marketing' && <MarketingModule />}
+                {(currentTab === 'legal' || currentTab === 'human-resource' || currentTab === 'hr') && <LegalModule />}
+                {currentTab === 'finance' && <FinanceModule />}
+                {(currentTab === 'hr-ga' || currentTab === 'ga') && (
+                  <HrGaModule onSwitchToLegalCorporate={() => setCurrentTab('legal')} />
+                )}
+                {currentTab === 'customer-relation' && <CustomerRelationModule />}
+                {currentTab === 'procurement' && <ProcurementModule />}
+                {currentTab === 'users' && <UserManagement />}
+                {currentTab === 'piutang-konsumen' && <PiutangKonsumenModule />}
+              </div>
+            </ErrorBoundary>
+          )}
+        </main>
+      )}
 
       {/* USER PROFILE MODAL */}
       <UserProfileModal
