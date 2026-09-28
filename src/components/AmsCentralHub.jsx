@@ -55,8 +55,8 @@ export const AmsCentralHub = ({
       label: 'Marketing', 
       sub: 'Penjualan & Konsumen', 
       desc: 'Unit Properti, Akad & Leads Marketing', 
-      color: '#38bdf8', 
-      lightColor: '#0284c7',
+      color: '#47c9af', 
+      lightColor: '#168a74',
       icon: TrendingUp
     },
     { 
@@ -409,7 +409,7 @@ export const AmsCentralHub = ({
               </linearGradient>
               <linearGradient id="streamGradMarketing" x1="0%" y1="50%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#47c9af" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradHr" x1="0%" y1="50%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />

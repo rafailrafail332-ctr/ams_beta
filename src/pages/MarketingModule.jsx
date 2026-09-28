@@ -2519,7 +2519,7 @@ export const MarketingModule = () => {
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {currentSubView === 'leads' && (
-            <button className="btn btn-primary" onClick={handleOpenAddLead}>
+            <button className="btn btn-primary" onClick={handleOpenAddLead} style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }}>
               <Plus size={16} /> Tambah Lead Prospek Baru
             </button>
           )}
@@ -2527,7 +2527,7 @@ export const MarketingModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className="btn btn-primary"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }}
                 onClick={handleCreateNewOfficialSpr}
                 title="Buka Formulir Input SPR Resmi (MKT-FR-00 & MKT-FR-01)"
               >
@@ -2566,9 +2566,9 @@ export const MarketingModule = () => {
               <button
                 className="btn btn-secondary"
                 style={{
-                  background: sprViewMode === 'preview' ? 'rgba(56, 189, 248, 0.2)' : '#1e293b',
-                  color: sprViewMode === 'preview' ? '#38bdf8' : '#cbd5e1',
-                  borderColor: '#38bdf8',
+                  background: sprViewMode === 'preview' ? 'rgba(71, 201, 175, 0.2)' : '#1e293b',
+                  color: sprViewMode === 'preview' ? '#47c9af' : '#cbd5e1',
+                  borderColor: '#47c9af',
                   fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
@@ -2589,7 +2589,7 @@ export const MarketingModule = () => {
               </button>
               <button
                 className="btn btn-primary"
-                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }}
                 onClick={handleSaveOfficialSpr}
                 title="Simpan Transaksi SPR ini ke Database Penjualan"
               >
@@ -2598,12 +2598,12 @@ export const MarketingModule = () => {
             </div>
           )}
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddCalonKonsumen}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', border: 'none', color: '#ffffff', fontWeight: 900, boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }} onClick={handleOpenAddCalonKonsumen}>
               <Plus size={16} /> + Tambah Calon Konsumen
             </button>
           )}
           {currentSubView === 'db_unit' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', color: '#ffffff', fontWeight: 900 }} onClick={handleOpenAddUnit}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', border: 'none', color: '#ffffff', fontWeight: 900, boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }} onClick={handleOpenAddUnit}>
               <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
@@ -2615,16 +2615,30 @@ export const MarketingModule = () => {
         <button
           className={`tab-item ${currentSubView === 'leads' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('leads')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'leads' ? '#47c9af' : undefined,
+            color: currentSubView === 'leads' ? '#47c9af' : undefined
+          }}
         >
-          <Users size={16} /> 1. Pipeline CRM Leads & Komisi Sales Tracker
+          <Users size={16} color={currentSubView === 'leads' ? '#47c9af' : undefined} /> 1. Pipeline CRM Leads & Komisi Sales Tracker
         </button>
         <button
           className={`tab-item ${currentSubView === 'spr' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('spr')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 800,
+            borderColor: currentSubView === 'spr' ? '#47c9af' : undefined,
+            color: currentSubView === 'spr' ? '#47c9af' : undefined
+          }}
         >
-          <FileText size={16} /> 2. Transaksi Penjualan & Upload Dokumen SPR
+          <FileText size={16} color={currentSubView === 'spr' ? '#47c9af' : undefined} /> 2. Transaksi Penjualan & Upload Dokumen SPR
         </button>
         <button
           className={`tab-item ${currentSubView === 'input_spr' ? 'active' : ''}`}
@@ -2634,11 +2648,11 @@ export const MarketingModule = () => {
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'input_spr' ? '#f59e0b' : undefined,
-            color: currentSubView === 'input_spr' ? '#fbbf24' : undefined
+            borderColor: currentSubView === 'input_spr' ? '#47c9af' : undefined,
+            color: currentSubView === 'input_spr' ? '#47c9af' : undefined
           }}
         >
-          <FileCheck2 size={16} color="#fbbf24" /> 3. Formulir Input SPR Resmi (MKT-FR)
+          <FileCheck2 size={16} color={currentSubView === 'input_spr' ? '#47c9af' : undefined} /> 3. Formulir Input SPR Resmi (MKT-FR)
         </button>
         <button
           className={`tab-item ${currentSubView === 'db_konsumen' ? 'active' : ''}`}
@@ -2648,11 +2662,11 @@ export const MarketingModule = () => {
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'db_konsumen' ? '#10b981' : undefined,
-            color: currentSubView === 'db_konsumen' ? '#34d399' : undefined
+            borderColor: currentSubView === 'db_konsumen' ? '#47c9af' : undefined,
+            color: currentSubView === 'db_konsumen' ? '#47c9af' : undefined
           }}
         >
-          <Users size={16} color="#34d399" /> 4. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
+          <Users size={16} color={currentSubView === 'db_konsumen' ? '#47c9af' : undefined} /> 4. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
         </button>
         <button
           className={`tab-item ${currentSubView === 'db_unit' ? 'active' : ''}`}
@@ -2662,11 +2676,11 @@ export const MarketingModule = () => {
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'db_unit' ? '#3b82f6' : undefined,
-            color: currentSubView === 'db_unit' ? '#60a5fa' : undefined
+            borderColor: currentSubView === 'db_unit' ? '#47c9af' : undefined,
+            color: currentSubView === 'db_unit' ? '#47c9af' : undefined
           }}
         >
-          <Home size={16} color="#60a5fa" /> 5. Data Base Unit Properti ({databaseUnitRows.length})
+          <Home size={16} color={currentSubView === 'db_unit' ? '#47c9af' : undefined} /> 5. Data Base Unit Properti ({databaseUnitRows.length})
         </button>
         <button
           className={`tab-item ${currentSubView === 'piutang_konsumen' ? 'active' : ''}`}
@@ -2676,11 +2690,11 @@ export const MarketingModule = () => {
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'piutang_konsumen' ? '#d97706' : undefined,
-            color: currentSubView === 'piutang_konsumen' ? '#f59e0b' : undefined
+            borderColor: currentSubView === 'piutang_konsumen' ? '#47c9af' : undefined,
+            color: currentSubView === 'piutang_konsumen' ? '#47c9af' : undefined
           }}
         >
-          <CreditCard size={16} color="#f59e0b" /> 6. Piutang Konsumen (DP & Angsuran)
+          <CreditCard size={16} color={currentSubView === 'piutang_konsumen' ? '#47c9af' : undefined} /> 6. Piutang Konsumen (DP & Angsuran)
         </button>
         <button
           className={`tab-item ${currentSubView === 'grafik' ? 'active' : ''}`}
@@ -2690,11 +2704,11 @@ export const MarketingModule = () => {
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 800,
-            borderColor: currentSubView === 'grafik' ? '#8b5cf6' : undefined,
-            color: currentSubView === 'grafik' ? '#c084fc' : undefined
+            borderColor: currentSubView === 'grafik' ? '#47c9af' : undefined,
+            color: currentSubView === 'grafik' ? '#47c9af' : undefined
           }}
         >
-          <BarChart3 size={16} color="#c084fc" /> 7. Grafik Penjualan (Bulan & Tahun)
+          <BarChart3 size={16} color={currentSubView === 'grafik' ? '#47c9af' : undefined} /> 7. Grafik Penjualan (Bulan & Tahun)
         </button>
       </div>
 
@@ -2781,20 +2795,20 @@ export const MarketingModule = () => {
           </div>
 
           {/* LEADS & COMMISSION TABLE */}
-          <div className="glass-card" style={{ padding: '0.5rem' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid rgba(71, 201, 175, 0.35)' }}>
             <div className="table-container">
               <table className="custom-table">
                 <thead>
-                  <tr>
-                    <th>ID & Tanggal</th>
-                    <th>Nama Konsumen & No WA</th>
-                    <th>Target Unit & Budget</th>
-                    <th>Sumber Lead</th>
-                    <th>Sales Agent</th>
-                    <th>Potensi Komisi (2.5%)</th>
-                    <th>Tahap Pipeline</th>
-                    <th>Status Pencairan Komisi</th>
-                    <th>Aksi Sales</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>ID & Tanggal</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Konsumen & No WA</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Target Unit & Budget</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Sumber Lead</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Sales Agent</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Potensi Komisi (2.5%)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tahap Pipeline</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status Pencairan Komisi</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi Sales</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2804,7 +2818,7 @@ export const MarketingModule = () => {
                     return (
                       <tr key={l.id}>
                         <td>
-                          <div style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>{l.id}</div>
+                          <div style={{ fontWeight: 800, color: '#47c9af' }}>{l.id}</div>
                           <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{l.createdDate}</div>
                         </td>
                         <td>
@@ -3000,18 +3014,18 @@ export const MarketingModule = () => {
           </div>
 
           {/* Main Sales Table */}
-          <div className="glass-card" style={{ padding: '0.5rem' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid rgba(71, 201, 175, 0.35)' }}>
             <div className="table-container">
               <table className="custom-table">
                 <thead>
-                  <tr>
-                    <th>ID & Unit</th>
-                    <th>Nama Konsumen</th>
-                    <th>Harga Jual (Rp)</th>
-                    <th>Status Berkas SPR (Staf Upload)</th>
-                    <th>Sales Agent</th>
-                    <th>Status Penjualan</th>
-                    <th>Aksi Dokumen SPR</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>ID & Unit</th>
+                    <th style={{ padding: '11px 14px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Konsumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Harga Jual (Rp)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status Berkas SPR (Staf Upload)</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Sales Agent</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status Penjualan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi Dokumen SPR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -3019,7 +3033,7 @@ export const MarketingModule = () => {
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(71, 201, 175, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#47c9af' }}>
                             <FileText size={28} />
                           </div>
                           <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
@@ -5114,12 +5128,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #ec4899, #db2777)' : 'transparent',
+                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #47c9af, #168a74)' : 'transparent',
                   color: subTabKonsumen === 'calon' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(236, 72, 153, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(71, 201, 175, 0.4)' : 'none'
                 }}
               >
                 <UserPlus size={14} /> 1. Calon Konsumen ({databaseCalonKonsumenRows.length})
@@ -5135,12 +5149,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #f97316, #ea580c)' : 'transparent',
+                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #47c9af, #168a74)' : 'transparent',
                   color: subTabKonsumen === 'hot' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(249, 115, 22, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(71, 201, 175, 0.4)' : 'none'
                 }}
               >
                 <Flame size={14} /> 2. Hot Prospek ({databaseHotProspekRows.length})
@@ -5156,12 +5170,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'transparent',
-                  color: subTabKonsumen === 'konsumen' ? '#000000' : '#94a3b8',
+                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #47c9af, #168a74)' : 'transparent',
+                  color: subTabKonsumen === 'konsumen' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(71, 201, 175, 0.4)' : 'none'
                 }}
               >
                 <CheckCircle2 size={14} /> 3. Closing ({databaseKonsumenRows.length})
@@ -5176,7 +5190,7 @@ export const MarketingModule = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: '1px solid #ec4899', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
+                  <span style={{ background: 'rgba(71, 201, 175, 0.15)', color: '#47c9af', border: '1px solid #47c9af', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
                     Tahap Awal &bull; Data Calon Konsumen
                   </span>
                 </div>
@@ -5218,7 +5232,7 @@ export const MarketingModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddCalonKonsumen}
-                    style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(236, 72, 153, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Calon Konsumen
                   </button>
@@ -5226,19 +5240,19 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Calon Konsumen */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #ec4899' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #47c9af' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
-                    <tr style={{ background: '#ec4899', color: '#ffffff' }}>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ width: '135px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '130px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
-                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '120px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '110px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ minWidth: '150px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #db2777', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
-                      <th style={{ width: '170px', textAlign: 'center', border: '1px solid #db2777', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ width: '135px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '130px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '120px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '110px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '150px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Referensi</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ width: '170px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -5421,19 +5435,19 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Hot Prospek */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #f97316' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #47c9af' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
-                    <tr style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', color: '#ffffff' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ width: '150px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
-                      <th style={{ width: '135px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
-                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '130px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
-                      <th style={{ width: '120px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ minWidth: '170px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Minat Unit / Tipe</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #c2410c', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
-                      <th style={{ width: '180px', textAlign: 'center', border: '1px solid #c2410c', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ width: '150px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama</th>
+                      <th style={{ width: '135px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Proyek</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '130px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Domisili</th>
+                      <th style={{ width: '120px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ minWidth: '170px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Minat Unit / Tipe</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Catatan</th>
+                      <th style={{ width: '180px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -5575,20 +5589,20 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Closing */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #d97706' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #47c9af' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
-                    <tr style={{ background: '#f59e0b', color: '#000000' }}>
-                      <th style={{ width: '40px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '150px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Unit & Kavling</th>
-                      <th style={{ minWidth: '130px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Harga Jual</th>
-                      <th style={{ minWidth: '120px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Booking / DP</th>
-                      <th style={{ width: '135px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ minWidth: '140px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                      <th style={{ width: '100px', border: '1px solid #b45309', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
-                      <th style={{ width: '130px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Dokumen</th>
-                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #b45309', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e' }}>
+                      <th style={{ width: '40px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '150px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Konsumen</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Unit & Kavling</th>
+                      <th style={{ minWidth: '130px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Harga Jual</th>
+                      <th style={{ minWidth: '120px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Booking / DP</th>
+                      <th style={{ width: '135px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ minWidth: '140px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                      <th style={{ width: '100px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Marketing</th>
+                      <th style={{ width: '130px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Dokumen</th>
+                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -5599,7 +5613,7 @@ export const MarketingModule = () => {
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f59e0b', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #47c9af, #168a74)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'K'}
                               </div>
                               <div>
@@ -5746,7 +5760,7 @@ export const MarketingModule = () => {
               <button
                 type="button"
                 onClick={handleOpenAddUnit}
-                style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(59, 130, 246, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #47c9af, #168a74)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)' }}
               >
                 <Plus size={16} /> Tambah Unit Properti
               </button>
@@ -5754,18 +5768,18 @@ export const MarketingModule = () => {
           </div>
 
           {/* Table Unit Properti */}
-          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #3b82f6' }}>
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #47c9af' }}>
             <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
               <thead>
-                <tr style={{ background: '#3b82f6', color: '#ffffff' }}>
-                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                  <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Proyek</th>
-                  <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Blok</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nomor Unit</th>
-                  <th style={{ minWidth: '160px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Tipe Rumah</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LB (m²)</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LT (m²)</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)', color: '#ffffff', borderBottom: '2px solid #0f766e' }}>
+                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                  <th style={{ minWidth: '180px', border: '1px solid #168a74', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Proyek</th>
+                  <th style={{ width: '90px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Blok</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Nomor Unit</th>
+                  <th style={{ minWidth: '160px', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Tipe Rumah</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LB (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>LT (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #168a74', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -5780,7 +5794,7 @@ export const MarketingModule = () => {
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
                       <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <Home size={14} color="#60a5fa" /> {row.proyek}
+                          <Home size={14} color="#47c9af" /> {row.proyek}
                         </span>
                       </td>
                       <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#38bdf8' }}>

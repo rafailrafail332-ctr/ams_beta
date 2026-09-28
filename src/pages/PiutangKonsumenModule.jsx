@@ -1852,8 +1852,8 @@ export const PiutangKonsumenModule = () => {
               className="btn btn-primary btn-sm"
               onClick={handleOpenAddRow}
               style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                border: '1px solid #38bdf8',
+                background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)',
+                border: '1px solid #47c9af',
                 color: '#ffffff',
                 fontWeight: 900,
                 display: 'inline-flex',
@@ -1861,7 +1861,7 @@ export const PiutangKonsumenModule = () => {
                 gap: '0.4rem',
                 padding: '0.45rem 1rem',
                 borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(217, 119, 6, 0.4)'
+                boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)'
               }}
             >
               <Plus size={16} /> + Tambah Piutang Konsumen
@@ -2259,15 +2259,15 @@ export const PiutangKonsumenModule = () => {
               textAlign: 'left'
             }}
           >
-            {/* ORANGE / AMBER HEADER ROW FROM SCREENSHOT */}
+            {/* MARKETING TURQUOISE HEADER ROW */}
             <thead>
               <tr
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  background: 'linear-gradient(135deg, #47c9af, #168a74)',
                   color: '#ffffff',
                   textAlign: 'center',
                   fontWeight: 900,
-                  borderBottom: '2px solid #0369a1'
+                  borderBottom: '2px solid #0f766e'
                 }}
               >
                 <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '35px' }}>No.</th>
