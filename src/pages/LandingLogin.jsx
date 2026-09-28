@@ -481,23 +481,25 @@ export const LandingLogin = ({ onLoginSuccess }) => {
               />
             </div>
 
-            {/* AMS Text Under Logo */}
+            {/* Ashoka Management System Text Under Logo */}
             <div
               style={{
-                fontSize: '1.95rem',
+                fontSize: '1.35rem',
                 fontWeight: 900,
-                letterSpacing: '0.12em',
-                marginTop: '14px',
+                letterSpacing: '0.04em',
+                marginTop: '15px',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
                 textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.6)',
                 position: 'relative',
                 zIndex: 2
               }}
             >
-              <span>AMS</span>
+              <span>Ashoka Management System</span>
             </div>
           </div>
         </div>
