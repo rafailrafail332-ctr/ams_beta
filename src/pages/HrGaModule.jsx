@@ -126,7 +126,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       catatan: 'Karyawan Tetap (PKWTT) • Grade Executive',
       files: [{ name: 'KTP_Yazid_Hizbullah.pdf', size: '1.4 MB' }, { name: 'NPWP_Yazid.pdf', size: '600 KB' }],
       phone: '0813-1122-3344',
-      email: 'yazid@ams.co.id'
+      email: 'ams@gmail.com'
     },
     {
       id: 'EMP-003',

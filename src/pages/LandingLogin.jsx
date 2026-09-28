@@ -3,68 +3,72 @@ import {
   Lock, 
   User, 
   ArrowRight, 
-  Building2, 
   ShieldCheck, 
   Eye, 
   EyeOff, 
-  Sparkles, 
-  AlertCircle, 
-  Zap,
-  Search,
-  CheckCircle2
+  AlertCircle,
+  Mail,
+  KeyRound
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { GeminiCursorCanvas } from '../components/GeminiCursorCanvas';
 
 export const LandingLogin = ({ onLoginSuccess }) => {
-  const { users, getAvatarUrl } = useApp();
-  const yazidUser = users.find(u => u.email.toLowerCase() === 'yazid@ams.co.id') || users[1] || users[0];
+  const { users } = useApp();
   
-  const [identity, setIdentity] = useState(yazidUser?.email || 'yazid@ams.co.id');
-  const [activeName, setActiveName] = useState(yazidUser?.name || 'Yazid Hizbullah, S.E.,S.T');
-  const [activeRole, setActiveRole] = useState(yazidUser?.role || 'Direktur Utama & Finance Director');
-  const [password, setPassword] = useState('password123');
+  const [identity, setIdentity] = useState('ams@gmail.com');
+  const [password, setPassword] = useState('123');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [searchAccount, setSearchAccount] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
-
-  // Filtered list of 17 Official Accounts
-  const filteredUsers = (users || []).filter((u) => {
-    const matchesSearch = (u.name || '').toLowerCase().includes(searchAccount.toLowerCase()) || 
-                          (u.role || '').toLowerCase().includes(searchAccount.toLowerCase()) ||
-                          (u.email || '').toLowerCase().includes(searchAccount.toLowerCase());
-    
-    if (!matchesSearch) return false;
-    if (filterCategory === 'all') return true;
-    if (filterCategory === 'pimpinan') {
-      const r = (u.role || '').toLowerCase();
-      return r.includes('direktur') || r.includes('admin') || r.includes('manager') || r.includes('head');
-    }
-    if (filterCategory === 'staf') {
-      const r = (u.role || '').toLowerCase();
-      return !r.includes('direktur') && !r.includes('admin') && !r.includes('manager') && !r.includes('head');
-    }
-    return true;
-  });
-
-  // Select account from grid
-  const handleSelectAccount = (u) => {
-    setErrorMsg('');
-    setIdentity(u.email);
-    setActiveName(u.name);
-    setActiveRole(u.role);
-  };
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
     setErrorMsg('');
     setLoading(true);
 
+    const emailTrimmed = (identity || '').trim().toLowerCase();
+    const passTrimmed = (password || '').trim();
+
+    // Akun Yazid Hizbullah (Direktur Utama): email ams@gmail.com, sandi 123
+    if (emailTrimmed === 'ams@gmail.com' || emailTrimmed === 'yazid@ams.co.id') {
+      if (passTrimmed === '123' || passTrimmed === 'password123') {
+        setTimeout(() => {
+          setLoading(false);
+          onLoginSuccess('hub', 'ams@gmail.com');
+        }, 200);
+        return;
+      } else {
+        setTimeout(() => {
+          setLoading(false);
+          setErrorMsg('Kata sandi salah! Masukkan sandi yang sesuai (Sandi: 123).');
+        }, 200);
+        return;
+      }
+    }
+
+    // Akun resmi lainnya dalam sistem jika dimasukkan
+    const matchedUser = (users || []).find((u) => u.email.toLowerCase() === emailTrimmed);
+    if (matchedUser) {
+      if (passTrimmed === '123' || passTrimmed === 'password123') {
+        setTimeout(() => {
+          setLoading(false);
+          onLoginSuccess('hub', matchedUser.email);
+        }, 200);
+        return;
+      } else {
+        setTimeout(() => {
+          setLoading(false);
+          setErrorMsg('Kata sandi salah! Masukkan kata sandi yang sesuai.');
+        }, 200);
+        return;
+      }
+    }
+
+    // Email tidak terdaftar
     setTimeout(() => {
       setLoading(false);
-      onLoginSuccess('hub', identity);
+      setErrorMsg('Email tidak terdaftar dalam sistem AMS! Gunakan akun: ams@gmail.com (sandi: 123).');
     }, 200);
   };
 
@@ -94,8 +98,8 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           transform: 'translate(-50%, -50%)',
           width: '500px',
           height: '500px',
-          background: 'radial-gradient(circle, rgba(2, 132, 199, 0.15) 0%, rgba(56, 189, 248, 0.05) 50%, transparent 70%)',
-          filter: 'blur(40px)',
+          background: 'radial-gradient(circle, rgba(2, 132, 199, 0.18) 0%, rgba(56, 189, 248, 0.06) 50%, transparent 70%)',
+          filter: 'blur(45px)',
           pointerEvents: 'none',
           zIndex: 1
         }}
@@ -104,34 +108,34 @@ export const LandingLogin = ({ onLoginSuccess }) => {
       {/* 3. MAIN LOGIN CONTAINER */}
       <div style={{
         width: '100%',
-        maxWidth: '820px',
+        maxWidth: '440px',
         position: 'relative',
         zIndex: 10
       }}>
         {/* HEADER BRANDING & LOGO */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div style={{
-            width: '80px',
-            height: '80px',
-            margin: '0 auto 12px auto',
-            borderRadius: '20px',
+            width: '84px',
+            height: '84px',
+            margin: '0 auto 14px auto',
+            borderRadius: '22px',
             background: 'rgba(255, 255, 255, 0.06)',
-            border: '1.5px solid rgba(56, 189, 248, 0.3)',
+            border: '1.5px solid rgba(56, 189, 248, 0.35)',
             backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(2, 132, 199, 0.35)'
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.6), 0 0 25px rgba(2, 132, 199, 0.4)'
           }}>
             <img
               src="/company-logo-transparent.png"
               alt="Ashoka Logo"
-              style={{ width: '56px', height: '56px', objectFit: 'contain' }}
+              style={{ width: '60px', height: '60px', objectFit: 'contain' }}
             />
           </div>
 
           <h1 style={{
-            fontSize: '1.35rem',
+            fontSize: '1.25rem',
             fontWeight: 900,
             color: '#ffffff',
             letterSpacing: '0.04em',
@@ -141,7 +145,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
             PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
           </h1>
           <div style={{
-            fontSize: '0.85rem',
+            fontSize: '0.84rem',
             fontWeight: 800,
             color: '#38bdf8',
             letterSpacing: '0.05em'
@@ -151,7 +155,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           <p style={{
             fontSize: '0.78rem',
             color: '#94a3b8',
-            marginTop: '4px',
+            marginTop: '5px',
             marginBottom: 0
           }}>
             Pusat Operasional Digital Terpadu Seluruh Divisi Properti & Konstruksi
@@ -163,20 +167,39 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           className="glass-card"
           style={{
             background: '#0f172a',
-            border: '1.5px solid rgba(56, 189, 248, 0.25)',
-            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(2, 132, 199, 0.2)',
+            border: '1.5px solid rgba(56, 189, 248, 0.28)',
+            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(2, 132, 199, 0.22)',
             borderRadius: '20px',
-            padding: '1.75rem',
+            padding: '2rem 1.75rem',
             color: '#ffffff'
           }}
         >
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{
+              fontSize: '1.2rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              letterSpacing: '0.02em',
+              margin: '0 0 4px 0'
+            }}>
+              MASUK KE SISTEM AMS
+            </h2>
+            <p style={{
+              fontSize: '0.78rem',
+              color: '#94a3b8',
+              margin: 0
+            }}>
+              Silakan masukkan email akun dan kata sandi Anda
+            </p>
+          </div>
+
           {errorMsg && (
             <div style={{
               padding: '0.75rem 1rem',
               borderRadius: '10px',
-              backgroundColor: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              color: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.18)',
+              border: '1px solid rgba(239, 68, 68, 0.45)',
+              color: '#f87171',
               fontSize: '0.825rem',
               fontWeight: 600,
               marginBottom: '1.25rem',
@@ -184,267 +207,83 @@ export const LandingLogin = ({ onLoginSuccess }) => {
               alignItems: 'flex-start',
               gap: '0.6rem'
             }}>
-              <AlertCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>{errorMsg}</div>
             </div>
           )}
 
-          {/* SECTION 1: PILIH AKUN 17 KARYAWAN */}
-          <div style={{ marginBottom: '1.35rem' }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.75rem',
-              flexWrap: 'wrap',
-              gap: '0.5rem'
-            }}>
-              <div style={{
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                color: '#38bdf8',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.45rem'
-              }}>
-                <Zap size={16} color="#38bdf8" />
-                <span>Pilih Akun (Total {users.length} Akun Resmi Aktif):</span>
-              </div>
-
-              {/* Filter Category Tabs */}
-              <div style={{ display: 'flex', gap: '0.35rem' }}>
-                <button 
-                  type="button"
-                  onClick={() => setFilterCategory('all')} 
+          {/* FORM LOGIN */}
+          <form onSubmit={handleSubmit}>
+            {/* Field 1: Email */}
+            <div className="form-group" style={{ marginBottom: '1.15rem' }}>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 800, marginBottom: '6px' }}>
+                Email Akun:
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8' }} />
+                <input
+                  type="email"
+                  className="form-control"
                   style={{
-                    padding: '0.3rem 0.75rem',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    borderRadius: '6px',
-                    border: filterCategory === 'all' ? '1px solid #38bdf8' : '1px solid #334155',
-                    background: filterCategory === 'all' ? '#0284c7' : '#1e293b',
-                    color: filterCategory === 'all' ? '#ffffff' : '#94a3b8',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    paddingLeft: '38px',
+                    background: '#090d16',
+                    borderColor: '#334155',
+                    color: '#ffffff',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    borderRadius: '9px',
+                    height: '44px'
                   }}
-                >
-                  Semua ({users.length})
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setFilterCategory('pimpinan')} 
-                  style={{
-                    padding: '0.3rem 0.75rem',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    borderRadius: '6px',
-                    border: filterCategory === 'pimpinan' ? '1px solid #38bdf8' : '1px solid #334155',
-                    background: filterCategory === 'pimpinan' ? '#0284c7' : '#1e293b',
-                    color: filterCategory === 'pimpinan' ? '#ffffff' : '#94a3b8',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  Direksi & Pimpinan
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setFilterCategory('staf')} 
-                  style={{
-                    padding: '0.3rem 0.75rem',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    borderRadius: '6px',
-                    border: filterCategory === 'staf' ? '1px solid #38bdf8' : '1px solid #334155',
-                    background: filterCategory === 'staf' ? '#0284c7' : '#1e293b',
-                    color: filterCategory === 'staf' ? '#ffffff' : '#94a3b8',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  Staf Operasional
-                </button>
+                  value={identity}
+                  onChange={(e) => setIdentity(e.target.value)}
+                  placeholder="ams@gmail.com"
+                  required
+                />
               </div>
             </div>
 
-            {/* Search Account Box */}
-            <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-              <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-              <input
-                type="text"
-                placeholder="Cari nama karyawan atau jabatan (misal: Yazid, Rafail, Adhi, Salma, Kholidin)..."
-                value={searchAccount}
-                onChange={(e) => setSearchAccount(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.55rem 0.85rem 0.55rem 34px',
-                  borderRadius: '8px',
-                  border: '1px solid #334155',
-                  background: '#090d16',
-                  color: '#ffffff',
-                  fontSize: '0.8rem',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            {/* SCROLLABLE GRID OF ALL 17 ACCOUNTS */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(235px, 1fr))',
-              gap: '0.55rem',
-              maxHeight: '260px',
-              overflowY: 'auto',
-              padding: '6px',
-              borderRadius: '10px',
-              background: '#090d16',
-              border: '1px solid #1e293b'
-            }}>
-              {filteredUsers.map((acc) => {
-                const isSelected = identity.toLowerCase() === acc.email.toLowerCase();
-                const avatarSrc = getAvatarUrl(acc);
-
-                return (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleSelectAccount(acc)}
-                    style={{
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '10px',
-                      border: isSelected ? '2px solid #0284c7' : '1px solid #1e293b',
-                      background: isSelected ? 'rgba(2, 132, 199, 0.25)' : '#1e293b',
-                      color: isSelected ? '#ffffff' : '#94a3b8',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.18s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.65rem',
-                      boxShadow: isSelected ? '0 0 14px rgba(2, 132, 199, 0.35)' : 'none'
-                    }}
-                  >
-                    <img 
-                      src={avatarSrc} 
-                      alt={acc.name} 
-                      style={{
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        border: isSelected ? '2px solid #38bdf8' : '1.5px solid #475569',
-                        flexShrink: 0
-                      }} 
-                    />
-                    <div style={{ overflow: 'hidden', flex: 1 }}>
-                      <div style={{
-                        fontWeight: 800,
-                        color: isSelected ? '#ffffff' : '#f1f5f9',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        fontSize: '0.8rem'
-                      }}>
-                        {acc.name}
-                      </div>
-                      <div style={{
-                        fontSize: '0.68rem',
-                        color: isSelected ? '#38bdf8' : '#94a3b8',
-                        fontWeight: 700,
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden'
-                      }}>
-                        {acc.role}
-                      </div>
-                    </div>
-                    {isSelected ? (
-                      <CheckCircle2 size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
-                    ) : (
-                      <ArrowRight size={13} color="#475569" style={{ flexShrink: 0 }} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* SECTION 2: FORM LOGIN */}
-          <form onSubmit={handleSubmit} style={{ borderTop: '1px solid #1e293b', paddingTop: '1.25rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-              {/* Field 1: Email / Akun Terpilih */}
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 800, marginBottom: '6px' }}>
-                  Email / Akun Terpilih:
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8' }} />
-                  <input
-                    type="email"
-                    className="form-control"
-                    style={{
-                      paddingLeft: '38px',
-                      background: '#090d16',
-                      borderColor: '#334155',
-                      color: '#ffffff',
-                      fontSize: '0.85rem',
-                      fontWeight: 800,
-                      borderRadius: '8px'
-                    }}
-                    value={identity}
-                    onChange={(e) => setIdentity(e.target.value)}
-                    placeholder="masukkan email..."
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Field 2: Kata Sandi */}
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 800, marginBottom: '6px' }}>
-                  Kata Sandi (Password):
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8' }} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    className="form-control"
-                    style={{
-                      paddingLeft: '38px',
-                      paddingRight: '38px',
-                      background: '#090d16',
-                      borderColor: '#334155',
-                      color: '#ffffff',
-                      fontSize: '0.85rem',
-                      borderRadius: '8px'
-                    }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '12px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      color: '#64748b',
-                      cursor: 'pointer'
-                    }}
-                    title={showPassword ? 'Sembunyikan password' : 'Lihat password'}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+            {/* Field 2: Kata Sandi */}
+            <div className="form-group" style={{ marginBottom: '1.35rem' }}>
+              <label className="form-label" style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 800, marginBottom: '6px' }}>
+                Kata Sandi (Password):
+              </label>
+              <div style={{ position: 'relative' }}>
+                <KeyRound size={16} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8' }} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-control"
+                  style={{
+                    paddingLeft: '38px',
+                    paddingRight: '38px',
+                    background: '#090d16',
+                    borderColor: '#334155',
+                    color: '#ffffff',
+                    fontSize: '0.88rem',
+                    borderRadius: '9px',
+                    height: '44px'
+                  }}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="123"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer'
+                  }}
+                  title={showPassword ? 'Sembunyikan password' : 'Lihat password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -468,25 +307,43 @@ export const LandingLogin = ({ onLoginSuccess }) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                height: '46px'
               }}
             >
               {loading ? (
                 <span>Memverifikasi Akses...</span>
               ) : (
                 <>
-                  <span>MASUK KE SISTEM AMS (SEBAGAI {activeRole.toUpperCase()})</span>
+                  <span>MASUK KE SISTEM AMS</span>
                   <ArrowRight size={18} />
                 </>
               )}
             </button>
           </form>
+
+          {/* Quick Helper Badge */}
+          <div style={{
+            marginTop: '1.25rem',
+            padding: '0.65rem 0.85rem',
+            borderRadius: '9px',
+            background: 'rgba(2, 132, 199, 0.1)',
+            border: '1px dashed rgba(56, 189, 248, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.74rem',
+            color: '#94a3b8'
+          }}>
+            <span>Akun Resmi Utama:</span>
+            <span style={{ color: '#38bdf8', fontWeight: 800 }}>ams@gmail.com (sandi: 123)</span>
+          </div>
         </div>
 
         {/* FOOTER COPYRIGHT */}
         <div style={{
           textAlign: 'center',
-          marginTop: '1.25rem',
+          marginTop: '1.5rem',
           fontSize: '0.74rem',
           color: '#64748b'
         }}>

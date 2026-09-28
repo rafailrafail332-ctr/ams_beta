@@ -41,7 +41,7 @@ export const AppProvider = ({ children }) => {
     { 
       id: 'USR-002', 
       name: 'Yazid Hizbullah, S.E.,S.T', 
-      email: 'yazid@ams.co.id', 
+      email: 'ams@gmail.com', 
       role: 'Direktur Utama & Finance Director', 
       status: 'Aktif', 
       avatar: '', 
@@ -203,10 +203,12 @@ export const AppProvider = ({ children }) => {
   // 1. PERSISTENT USERS STORE FROM LOCALSTORAGE (KEEPS ALL OFFICIAL ACCOUNTS)
   const getSavedUsers = () => {
     try {
-      const saved = localStorage.getItem('ams_users_clean_v22');
+      const saved = localStorage.getItem('ams_users_clean_v23');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 17) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 17) {
+          return parsed.map(u => u.id === 'USR-002' ? { ...u, email: 'ams@gmail.com' } : u);
+        }
       }
     } catch (e) {
       console.error('Error loading users:', e);
@@ -219,14 +221,14 @@ export const AppProvider = ({ children }) => {
   // 2. PERSISTENT CURRENT LOGGED-IN USER
   const getSavedCurrentUser = (userList) => {
     try {
-      const saved = localStorage.getItem('ams_current_user_clean_v22');
+      const saved = localStorage.getItem('ams_current_user_clean_v23');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const matched = userList.find(u => u.email.toLowerCase() === parsed.email.toLowerCase() || u.id === parsed.id);
-        if (matched) return { ...matched, ...parsed, allowedModules: matched.allowedModules, role: matched.role };
+        const matched = userList.find(u => u.email.toLowerCase() === parsed.email.toLowerCase() || u.id === parsed.id || (parsed.id === 'USR-002' && u.id === 'USR-002'));
+        if (matched) return { ...matched, ...parsed, email: matched.email, allowedModules: matched.allowedModules, role: matched.role };
       }
     } catch (e) {}
-    const yazidDefault = userList.find(u => u.email.toLowerCase() === 'yazid@ams.co.id');
+    const yazidDefault = userList.find(u => u.email.toLowerCase() === 'ams@gmail.com' || u.email.toLowerCase() === 'yazid@ams.co.id');
     return yazidDefault || userList[0] || officialCompanyUsers[0];
   };
 
@@ -235,7 +237,7 @@ export const AppProvider = ({ children }) => {
   // Sync users to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('ams_users_clean_v22', JSON.stringify(users));
+      localStorage.setItem('ams_users_clean_v23', JSON.stringify(users));
     } catch (e) {}
   }, [users]);
 
@@ -243,7 +245,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     try {
       if (currentUser) {
-        localStorage.setItem('ams_current_user_clean_v22', JSON.stringify(currentUser));
+        localStorage.setItem('ams_current_user_clean_v23', JSON.stringify(currentUser));
       }
     } catch (e) {}
   }, [currentUser]);

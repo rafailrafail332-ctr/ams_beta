@@ -28,13 +28,13 @@ function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  const handleLoginSuccess = (targetTab = 'hub', selectedEmail = 'yazid@ams.co.id') => {
+  const handleLoginSuccess = (targetTab = 'hub', selectedEmail = 'ams@gmail.com') => {
     let foundUser;
     if (selectedEmail) {
       foundUser = users.find((u) => u.email.toLowerCase() === selectedEmail.toLowerCase());
     }
     if (!foundUser) {
-      foundUser = users.find((u) => u.email.toLowerCase() === 'yazid@ams.co.id') || users[0];
+      foundUser = users.find((u) => u.email.toLowerCase() === 'ams@gmail.com' || u.email.toLowerCase() === 'yazid@ams.co.id') || users[0];
     }
     setCurrentUser(foundUser);
 
