@@ -12154,7 +12154,7 @@ export const TeknikModule = () => {
                     <th style={{ padding: '12px 14px' }}>Type</th>
                     <th style={{ padding: '12px 14px', textAlign: 'center', width: '70px' }}>Blok</th>
                     <th style={{ padding: '12px 14px', textAlign: 'center', width: '70px' }}>No.</th>
-                    <th style={{ padding: '12px 14px', minWidth: '180px' }}>View</th>
+                    <th style={{ padding: '12px 14px', minWidth: '240px' }}>View</th>
                     <th style={{ padding: '12px 14px', minWidth: '220px' }}>Catatan</th>
                     <th style={{ padding: '12px 14px', textAlign: 'center', minWidth: '240px' }}>Aksi</th>
                   </tr>
@@ -12179,8 +12179,9 @@ export const TeknikModule = () => {
                   ) : (
                     filteredUploadFotoRows.map((row, idx) => {
                       const photoList = row.photos || [];
-                      const firstPhoto = photoList[0];
                       const totalPhotos = photoList.length;
+                      const lastIndex = totalPhotos > 0 ? totalPhotos - 1 : 0;
+                      const lastPhoto = totalPhotos > 0 ? photoList[lastIndex] : null;
 
                       return (
                         <tr 
@@ -12256,87 +12257,106 @@ export const TeknikModule = () => {
                             </span>
                           </td>
 
-                          {/* View (Thumbnail & Carousel Opener) */}
+                          {/* View (Thumbnail Foto Terakhir & Carousel Opener) */}
                           <td style={{ padding: '12px 14px' }}>
-                            {totalPhotos > 0 ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {totalPhotos > 0 && lastPhoto ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                {/* Foto Thumbnail Terakhir (Ukuran Lebih Besar & Jelas) */}
                                 <div 
                                   onClick={() => {
                                     setActiveCarouselItem(row);
-                                    setCarouselIndex(0);
+                                    setCarouselIndex(lastIndex);
                                   }}
-                                  title={`Klik untuk melihat foto lebih besar & geser (Upload: ${formatTanggalIndo(firstPhoto.tanggal)})`}
+                                  title={`Klik untuk melihat foto lebih besar & geser (Foto Terakhir - Upload: ${formatTanggalIndo(lastPhoto.tanggal)})`}
                                   style={{
-                                    width: '64px',
-                                    height: '46px',
-                                    borderRadius: '6px',
+                                    width: '92px',
+                                    height: '66px',
+                                    borderRadius: '8px',
                                     overflow: 'hidden',
-                                    border: '1.5px solid #0284c7',
+                                    border: '2px solid #0284c7',
                                     cursor: 'pointer',
                                     flexShrink: 0,
                                     position: 'relative',
                                     background: '#020617',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                                    boxShadow: '0 3px 12px rgba(0,0,0,0.5)',
                                     transition: 'transform 0.2s ease, border-color 0.2s ease'
                                   }}
-                                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
-                                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.06)'; e.currentTarget.style.borderColor = '#38bdf8'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.borderColor = '#0284c7'; }}
                                 >
                                   <img 
-                                    src={firstPhoto.url} 
-                                    alt={firstPhoto.name || 'Dokumentasi Unit'} 
+                                    src={lastPhoto.url} 
+                                    alt={lastPhoto.name || 'Dokumentasi Terakhir Unit'} 
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                   />
-                                  {totalPhotos > 1 && (
-                                    <div style={{
-                                      position: 'absolute',
-                                      bottom: '2px',
-                                      right: '2px',
-                                      background: 'rgba(0,0,0,0.8)',
-                                      color: '#ffffff',
-                                      fontSize: '0.62rem',
-                                      fontWeight: 900,
-                                      padding: '1px 4px',
-                                      borderRadius: '3px',
-                                      border: '0.5px solid rgba(255,255,255,0.4)'
-                                    }}>
-                                      +{totalPhotos - 1}
-                                    </div>
-                                  )}
+                                  {/* Badge "Terakhir" di pojok kiri atas thumbnail */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '3px',
+                                    left: '3px',
+                                    background: '#0284c7',
+                                    color: '#ffffff',
+                                    fontSize: '0.55rem',
+                                    fontWeight: 900,
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.6)'
+                                  }}>
+                                    Terakhir
+                                  </div>
+
+                                  {/* Counter jumlah foto di pojok kanan bawah */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '3px',
+                                    right: '3px',
+                                    background: 'rgba(15, 23, 42, 0.88)',
+                                    color: '#ffffff',
+                                    fontSize: '0.62rem',
+                                    fontWeight: 900,
+                                    padding: '2px 5px',
+                                    borderRadius: '4px',
+                                    border: '0.5px solid rgba(255,255,255,0.4)',
+                                    lineHeight: '1'
+                                  }}>
+                                    {totalPhotos} Foto
+                                  </div>
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                                   <button
                                     type="button"
                                     onClick={() => {
                                       setActiveCarouselItem(row);
-                                      setCarouselIndex(0);
+                                      setCarouselIndex(lastIndex);
                                     }}
                                     style={{
-                                      background: 'rgba(2, 132, 199, 0.15)',
+                                      background: 'rgba(2, 132, 199, 0.18)',
                                       color: '#38bdf8',
-                                      border: '1px solid rgba(2, 132, 199, 0.4)',
-                                      padding: '5px 10px',
+                                      border: '1.5px solid rgba(2, 132, 199, 0.5)',
+                                      padding: '6px 12px',
                                       borderRadius: '6px',
-                                      fontSize: '0.76rem',
+                                      fontSize: '0.78rem',
                                       fontWeight: 800,
                                       cursor: 'pointer',
                                       display: 'inline-flex',
                                       alignItems: 'center',
-                                      gap: '5px',
+                                      gap: '6px',
                                       transition: 'all 0.15s ease'
                                     }}
                                     onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#ffffff'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2, 132, 199, 0.15)'; e.currentTarget.style.color = '#38bdf8'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2, 132, 199, 0.18)'; e.currentTarget.style.color = '#38bdf8'; }}
                                   >
-                                    <Eye size={13} />
+                                    <Eye size={14} />
                                     View ({totalPhotos} Foto)
                                   </button>
 
-                                  {firstPhoto?.tanggal && (
+                                  {lastPhoto?.tanggal && (
                                     <div style={{ fontSize: '0.72rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 800 }}>
                                       <Calendar size={11} color="#38bdf8" />
-                                      <span>Tgl Upload: {formatTanggalIndo(firstPhoto.tanggal)}</span>
+                                      <span>Tgl Upload: {formatTanggalIndo(lastPhoto.tanggal)}</span>
                                     </div>
                                   )}
                                 </div>
@@ -12375,9 +12395,9 @@ export const TeknikModule = () => {
                             }}>
                               {row.catatan || 'Belum ada catatan progres'}
                             </div>
-                            {firstPhoto?.tanggal && (
+                            {lastPhoto?.tanggal && (
                               <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
-                                Update: {firstPhoto.tanggal}
+                                Update: {lastPhoto.tanggal}
                               </div>
                             )}
                           </td>
