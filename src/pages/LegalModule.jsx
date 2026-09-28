@@ -1754,16 +1754,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <button
-            onClick={() => setIsReportModalOpen(true)}
-            className="btn btn-secondary btn-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '8px 14px' }}
-          >
-            <Printer size={15} />
-            <span>Cetak Legal Audit Report</span>
-          </button>
-        </div>
+        {/* Kanan Header Modul (Tombol Cetak Audit dihapus sesuai instruksi) */}
       </div>
 
       {/* ========================================================================= */}
@@ -1787,9 +1778,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('spk')}
           style={{
-            background: activeTab === 'spk' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
+            background: activeTab === 'spk' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
             color: activeTab === 'spk' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'spk' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
+            border: activeTab === 'spk' ? '1.5px solid #c084fc' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1800,7 +1791,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'spk' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
+            boxShadow: activeTab === 'spk' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
           }}
         >
           <FileSignature size={18} />
@@ -1915,9 +1906,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* Header Title Badge persis gambar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.2rem' }}>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1.5px solid #0284c7', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)', marginBottom: '6px' }}>
-                <FileSignature size={20} color="#38bdf8" />
-                <span>SPK (MOU)</span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1.5px solid #9333ea', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.25)', marginBottom: '6px' }}>
+                <FileSignature size={20} color="#c084fc" />
+                <span>SPK</span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
                 Pengarsipan Perjanjian Kerja Sama, SPK Rekanan/Vendor, Tagihan AJB Notaris, dan Nota Kesepahaman (MoU) Klien/Mitra.
@@ -1936,10 +1927,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#0284c7', fontWeight: 800 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
               >
                 <Plus size={15} />
-                <span>+ Tambah Dokumen SPK (MOU)</span>
+                <span>+ Tambah Dokumen SPK</span>
               </button>
             </div>
           </div>
@@ -1989,27 +1980,27 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* Tabel Utama SPK (MOU) Sesuai Kolom di Gambar */}
           {filteredSpkList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <FileSignature size={28} />
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen SPK (MOU)</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen SPK</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-                Daftar dokumen SPK (MOU) masih kosong. Klik tombol di bawah untuk menambah atau mengunggah dokumen baru.
+                Daftar dokumen SPK masih kosong. Klik tombol di bawah untuk menambah atau mengunggah dokumen baru.
               </div>
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)' }}
               >
                 <Plus size={15} />
-                <span>+ Tambah Dokumen SPK (MOU) Sekarang</span>
+                <span>+ Tambah Dokumen SPK Sekarang</span>
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
                     <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
@@ -2040,7 +2031,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </td>
 
                         {/* 2. No. Dok */}
-                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#c084fc', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
                         </td>
 
@@ -2056,8 +2047,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               fontSize: '0.72rem',
                               padding: '2px 8px',
                               borderRadius: '4px',
-                              background: spk.project === 'Ashoka Park' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                              color: spk.project === 'Ashoka Park' ? '#38bdf8' : '#fbbf24',
+                              background: spk.project === 'Ashoka Park' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                              color: spk.project === 'Ashoka Park' ? '#c084fc' : '#fbbf24',
                               fontWeight: 800,
                               whiteSpace: 'nowrap'
                             }}
@@ -2080,14 +2071,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               fontSize: '0.72rem',
                               padding: '2px 8px',
                               borderRadius: '4px',
-                              background:
-                                (spk.kategori || '').toLowerCase().includes('notar') ? 'rgba(192, 132, 252, 0.15)' :
-                                (spk.kategori || '').toLowerCase().includes('klien') ? 'rgba(56, 189, 248, 0.15)' :
-                                'rgba(56, 189, 248, 0.15)',
-                              color:
-                                (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
-                                (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
-                                '#38bdf8',
+                              background: 'rgba(192, 132, 252, 0.15)',
+                              color: '#c084fc',
                               fontWeight: 800,
                               whiteSpace: 'nowrap'
                             }}
@@ -2108,8 +2093,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           <button
                             onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
                             style={{
-                              background: '#38bdf8',
-                              color: '#090d16',
+                              background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)',
+                              color: '#ffffff',
                               border: 'none',
                               padding: '4px 12px',
                               borderRadius: '5px',
@@ -2119,11 +2104,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px',
-                              boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                              boxShadow: '0 2px 8px rgba(147, 51, 234, 0.35)',
                               transition: 'transform 0.1s',
                               whiteSpace: 'nowrap'
                             }}
-                            title="Lihat Data Dokumen SPK (MOU)"
+                            title="Lihat Data Dokumen SPK"
                           >
                             <Eye size={12} />
                             <span>View</span>
@@ -2154,14 +2139,14 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                             <button
                               onClick={() => { setViewingSpk(spk); setCurrentFileSlide(0); }}
                               title="Pratinjau & Cetak Dokumen"
-                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                             >
                               <Printer size={12} />
                             </button>
                             <button
                               onClick={() => handleOpenEditSpk(spk)}
                               title="Edit Dokumen"
-                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                             >
                               <Edit3 size={12} />
                             </button>

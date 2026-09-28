@@ -46,8 +46,8 @@ export const AmsCentralHub = ({
       label: 'legal', 
       sub: 'SPK, Izin & Legalitas', 
       desc: 'Legal Corporate, Perizinan & Dokumen', 
-      color: '#10b981', 
-      lightColor: '#059669',
+      color: '#c084fc', 
+      lightColor: '#9333ea',
       icon: Scale
     },
     { 
@@ -405,7 +405,7 @@ export const AmsCentralHub = ({
               </linearGradient>
               <linearGradient id="streamGradLegal" x1="100%" y1="50%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#c084fc" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradMarketing" x1="0%" y1="50%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
@@ -567,16 +567,16 @@ export const AmsCentralHub = ({
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'legal' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.75)')
-                    : (hoveredNode === 'legal' ? '#f0fdf4' : '#ffffff'),
+                    ? (hoveredNode === 'legal' ? 'rgba(192, 132, 252, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'legal' ? '#faf5ff' : '#ffffff'),
                   border: hoveredNode === 'legal' 
-                    ? '2px solid #10b981' 
+                    ? '2px solid #c084fc' 
                     : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'legal'
-                    ? '0 12px 30px rgba(16, 185, 129, 0.35), 0 0 15px rgba(16, 185, 129, 0.2)'
+                    ? '0 12px 30px rgba(192, 132, 252, 0.35), 0 0 15px rgba(192, 132, 252, 0.2)'
                     : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'right',
@@ -589,7 +589,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '1.45rem', 
                     fontWeight: 900, 
-                    color: hoveredNode === 'legal' ? '#10b981' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    color: hoveredNode === 'legal' ? '#c084fc' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
                     legal
@@ -597,7 +597,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '0.68rem', 
                     fontWeight: 700, 
-                    color: hoveredNode === 'legal' ? '#059669' : (isDark ? '#94a3b8' : '#64748b'), 
+                    color: hoveredNode === 'legal' ? '#a855f7' : (isDark ? '#94a3b8' : '#64748b'), 
                     marginTop: '4px' 
                   }}>
                     SPK, Izin & Legal
@@ -608,11 +608,11 @@ export const AmsCentralHub = ({
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'legal' ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#dcfce7'),
+                    background: hoveredNode === 'legal' ? '#9333ea' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3e8ff'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'legal' ? '#ffffff' : '#059669',
+                    color: hoveredNode === 'legal' ? '#ffffff' : '#9333ea',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
