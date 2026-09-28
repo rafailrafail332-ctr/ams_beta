@@ -3935,7 +3935,7 @@ export const TeknikModule = () => {
       <div className="page-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <HardHat size={28} color="#f97316" /> Teknik & Konstruksi
+            <HardHat size={28} color="#0284c7" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
             Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja, spreadsheet RAB, & laporan rekapitulasi progres.
@@ -3971,7 +3971,7 @@ export const TeknikModule = () => {
 
       {/* ========================================================================= */}
       {/* LEVEL 1: TIGA KATEGORI UTAMA                                              */}
-      {/* 1. PEKERJAAN HARIAN (Warna Peach #f6b26b)                                 */}
+      {/* 1. PEKERJAAN HARIAN (Warna Biru HR & GA #0284c7)                          */}
       {/* 2. PEKERJAAN BORONGAN (Warna Biru Langit #00a2ed)                         */}
       {/* 3. DATA BASE TERPADU PROYEK (Warna Emerald #10b981)                       */}
       {/* ========================================================================= */}
@@ -3987,9 +3987,9 @@ export const TeknikModule = () => {
           style={{
             padding: '1rem 1.25rem',
             borderRadius: '10px',
-            border: mainCategory === 'harian' ? '3px solid #ea580c' : '1.5px solid #78350f',
-            background: mainCategory === 'harian' ? '#f6b26b' : '#1e293b',
-            color: mainCategory === 'harian' ? '#000000' : '#f6b26b',
+            border: mainCategory === 'harian' ? '3px solid #0284c7' : '1.5px solid #0369a1',
+            background: mainCategory === 'harian' ? '#0284c7' : '#1e293b',
+            color: mainCategory === 'harian' ? '#ffffff' : '#38bdf8',
             fontWeight: 900,
             fontSize: '1.1rem',
             display: 'flex',
@@ -3997,11 +3997,11 @@ export const TeknikModule = () => {
             justifyContent: 'center',
             gap: '0.6rem',
             cursor: 'pointer',
-            boxShadow: mainCategory === 'harian' ? '0 4px 16px rgba(246, 178, 107, 0.45)' : 'none',
+            boxShadow: mainCategory === 'harian' ? '0 4px 16px rgba(2, 132, 199, 0.45)' : 'none',
             transition: 'all 0.2s ease'
           }}
         >
-          <Users size={22} color={mainCategory === 'harian' ? '#000000' : '#f6b26b'} /> Pekerjaan Harian
+          <Users size={22} color={mainCategory === 'harian' ? '#ffffff' : '#38bdf8'} /> Pekerjaan Harian
         </button>
 
         {/* Tombol 2: Pekerjaan Borongan */}
@@ -4616,8 +4616,8 @@ export const TeknikModule = () => {
                       fontSize: '0.8rem',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      border: statusFilter === 'ALL' ? '2px solid #ea580c' : '1px solid #475569',
-                      background: statusFilter === 'ALL' ? '#ea580c' : '#0f172a',
+                      border: statusFilter === 'ALL' ? '2px solid #0284c7' : '1px solid #475569',
+                      background: statusFilter === 'ALL' ? '#0284c7' : '#0f172a',
                       color: '#ffffff',
                       transition: 'all 0.2s ease'
                     }}
@@ -4986,12 +4986,12 @@ export const TeknikModule = () => {
           {/* 2. SUB-VIEW: INPUT ABSEN HARIAN (FORM LANGSUNG LENGKAP & CEPAT)       */}
           {/* ===================================================================== */}
           {subTabHarian === 'input_absen' && (
-            <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #ea580c', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #0284c7', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Plus size={22} color="#ea580c" /> Form Input Absen Harian Tenaga Kerja
+                  <Plus size={22} color="#0284c7" /> Form Input Absen Harian Tenaga Kerja
                 </h3>
-                <span style={{ fontSize: '0.8rem', color: '#f6b26b', fontWeight: 900, background: 'rgba(246, 178, 107, 0.15)', padding: '3px 8px', borderRadius: '6px' }}>
+                <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 900, background: 'rgba(56, 189, 248, 0.15)', padding: '3px 8px', borderRadius: '6px' }}>
                   👷 Pekerjaan Harian
                 </span>
               </div>
@@ -5008,7 +5008,7 @@ export const TeknikModule = () => {
                       value={absenFormData.proyek}
                       onChange={(e) => setAbsenFormData({ ...absenFormData, proyek: e.target.value })}
                       required
-                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#ea580c' }}
+                      style={{ fontWeight: 800, background: '#0f172a', color: '#ffffff', borderColor: '#0284c7' }}
                     >
                       <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
                       <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
@@ -5294,7 +5294,7 @@ export const TeknikModule = () => {
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 24px' }}
+                    style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 24px' }}
                   >
                     💾 Simpan Absen Tenaga Kerja
                   </button>
@@ -5327,8 +5327,8 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: projectFilter === 'ALL' ? '2px solid #ea580c' : '1px solid #475569',
-                    background: projectFilter === 'ALL' ? '#ea580c' : '#0f172a',
+                    border: projectFilter === 'ALL' ? '2px solid #0284c7' : '1px solid #475569',
+                    background: projectFilter === 'ALL' ? '#0284c7' : '#0f172a',
                     color: '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
@@ -5460,9 +5460,9 @@ export const TeknikModule = () => {
                     fontSize: '0.78rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: lemburFilter === 'LEMBUR' ? '2px solid #f97316' : '1px solid rgba(249, 115, 22, 0.4)',
-                    background: lemburFilter === 'LEMBUR' ? '#ea580c' : 'rgba(249, 115, 22, 0.15)',
-                    color: lemburFilter === 'LEMBUR' ? '#ffffff' : '#fbbf24'
+                    border: lemburFilter === 'LEMBUR' ? '2px solid #0284c7' : '1px solid rgba(56, 189, 248, 0.4)',
+                    background: lemburFilter === 'LEMBUR' ? '#0284c7' : 'rgba(56, 189, 248, 0.15)',
+                    color: lemburFilter === 'LEMBUR' ? '#ffffff' : '#38bdf8'
                   }}
                 >
                   ⚡ Hanya Lembur ({attendanceList.filter(a => Number(a.lembur) > 0).length})
@@ -5488,7 +5488,7 @@ export const TeknikModule = () => {
 
               {/* Text Search Bar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '220px', position: 'relative' }}>
-                <Search size={16} color="#ea580c" />
+                <Search size={16} color="#0284c7" />
                 <input
                   type="text"
                   className="form-control"
@@ -5559,7 +5559,7 @@ export const TeknikModule = () => {
                         </td>
                         <td style={{ fontWeight: 900, color: '#ffffff', border: '1px solid #334155', fontSize: '0.86rem', padding: '8px 8px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#ea580c', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900 }}>
                               {row.nama ? row.nama.charAt(0).toUpperCase() : 'T'}
                             </div>
                             <span>{row.nama}</span>
@@ -5579,7 +5579,7 @@ export const TeknikModule = () => {
                         {/* KOLOM LEMBUR */}
                         <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px' }}>
                           {Number(row.lembur) > 0 ? (
-                            <span style={{ background: 'rgba(234, 88, 12, 0.25)', color: '#fb923c', border: '1.5px solid #ea580c', padding: '2px 7px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-block' }}>
+                            <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#38bdf8', border: '1.5px solid #0284c7', padding: '2px 7px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem', display: 'inline-block' }}>
                               ⚡ {row.lembur} Jam
                             </span>
                           ) : (
@@ -5674,9 +5674,9 @@ export const TeknikModule = () => {
                     style={{
                       width: '100%',
                       background: '#0f172a',
-                      border: '1.5px solid #ea580c',
+                      border: '1.5px solid #0284c7',
                       borderRadius: '6px',
-                      color: '#fb923c',
+                      color: '#38bdf8',
                       fontWeight: 900,
                       fontSize: '0.9rem',
                       padding: '8px 12px',
@@ -6308,19 +6308,19 @@ export const TeknikModule = () => {
             </div>
 
             {/* Table Container */}
-            <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #b45309' }}>
+            <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #0284c7' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px', fontSize: '0.82rem' }}>
                 <thead>
-                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                    <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 4px' }}>No.</th>
-                    <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
-                    <th style={{ width: '160px', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
-                    <th style={{ width: '160px', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
-                    <th style={{ border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Pekerjaan</th>
-                    <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Jumlah (Rp)</th>
-                    <th style={{ width: '175px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Pembayaran Sblmnya</th>
-                    <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
-                    <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                    <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 4px' }}>No.</th>
+                    <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
+                    <th style={{ width: '160px', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
+                    <th style={{ width: '160px', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
+                    <th style={{ border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Pekerjaan</th>
+                    <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Jumlah (Rp)</th>
+                    <th style={{ width: '175px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Pembayaran Sblmnya</th>
+                    <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
+                    <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -6390,7 +6390,7 @@ export const TeknikModule = () => {
                               {item.pekerjaan || item.items?.[0]?.itemPekerjaan || '-'}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
-                              <span style={{ fontSize: '0.72rem', color: '#fb923c', fontWeight: 800 }}>
+                              <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 800 }}>
                                 SPK: {item.noSpk || item.sheetNumber || '-'}
                               </span>
                               <span style={{
@@ -6809,56 +6809,56 @@ export const TeknikModule = () => {
               </span>
             </div>
 
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.5rem' }}>
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '0.5rem' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                    <th style={{ width: '80px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
+                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                    <th style={{ width: '80px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
                       No. SPK
                     </th>
-                    <th style={{ width: '120px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 6px' }}>
+                    <th style={{ width: '120px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
                       Tgl Opname<br/><span style={{ fontSize: '0.72rem', fontWeight: 700 }}>(History)</span>
                     </th>
-                    <th style={{ minWidth: '120px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '120px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Proyek
                     </th>
-                    <th style={{ minWidth: '110px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '110px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nama Vendor
                     </th>
-                    <th style={{ width: '60px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Blok
                     </th>
-                    <th style={{ width: '50px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       No.
                     </th>
-                    <th style={{ minWidth: '100px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '100px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Lain - Lain
                     </th>
-                    <th style={{ minWidth: '170px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '170px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pekerjaan
                     </th>
-                    <th style={{ width: '130px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Harga RAB
                     </th>
-                    <th style={{ width: '85px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 4px' }}>
+                    <th style={{ width: '85px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Progress
                     </th>
-                    <th style={{ width: '110px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nilai Opname
                     </th>
-                    <th style={{ width: '95px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '95px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Retensi 5%
                     </th>
-                    <th style={{ width: '110px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nilai Progress
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pembayaran sebelumnya
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pembyaran saat ini
                     </th>
-                    <th style={{ width: '110px', textAlign: 'center', background: '#10b981', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '110px', textAlign: 'center', background: '#10b981', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Aksi
                     </th>
                   </tr>
@@ -7133,39 +7133,38 @@ export const TeknikModule = () => {
             </div>
 
             {/* TABEL HASIL OPNAME PERSIS SEPERTI FOTO EXCEL */}
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '1.25rem' }}>
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '1.25rem' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px', textAlign: 'left' }}>
                 <thead>
-                  {/* Peach / Orange Header (Same as photo) */}
-                  <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                    <th style={{ width: '50px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 4px' }}>
+                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                       No.
                     </th>
-                    <th style={{ minWidth: '220px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 12px' }}>
+                    <th style={{ minWidth: '220px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
                       Item Pekerjaan
                     </th>
-                    <th style={{ width: '150px', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '150px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Spesifikasi
                     </th>
-                    <th style={{ width: '75px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '75px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Vol
                     </th>
-                    <th style={{ width: '60px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 4px' }}>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                       Sat
                     </th>
-                    <th style={{ width: '130px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Harga Satuan
                     </th>
-                    <th style={{ width: '140px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '140px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Jumlah
                     </th>
-                    <th style={{ width: '80px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '80px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Bobot
                     </th>
-                    <th style={{ width: '130px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Progress
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.88rem', color: '#000000', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Bobot Progress
                     </th>
                   </tr>
@@ -7248,21 +7247,21 @@ export const TeknikModule = () => {
                     </tr>
                   ))}
 
-                  {/* BARIS TOTAL (PERSIS FOTO media_1787936577245.png) */}
-                  <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                  {/* BARIS TOTAL */}
+                  <tr style={{ background: '#0284c7', color: '#ffffff', fontWeight: 900 }}>
+                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #0369a1', fontSize: '0.92rem', color: '#ffffff' }}>
                       Total
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.92rem', color: '#ffffff' }}>
                       {formatRupiahDesimal(activeSheetCalc.totalHargaRab)}
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.88rem', color: '#000000' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.88rem', color: '#ffffff' }}>
                       
                     </td>
-                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.85rem', color: '#ffffff' }}>
                       
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #78350f', fontSize: '0.95rem', color: '#000000' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.95rem', color: '#ffffff' }}>
                       {formatDecimal(activeSheetCalc.progresPersen)}%
                     </td>
                   </tr>
@@ -7703,7 +7702,7 @@ export const TeknikModule = () => {
                     {filteredLaporanSheets.map((row, idx) => (
                       <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
                         {/* 1. No. Input */}
-                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ea580c', padding: '8px 4px', fontSize: '0.85rem' }}>
+                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#38bdf8', padding: '8px 4px', fontSize: '0.85rem' }}>
                           {row.noInput}
                         </td>
 
@@ -11368,7 +11367,7 @@ export const TeknikModule = () => {
                     <span>Tenaga kerja ini otomatis tersimpan di <strong>Data Base Terpadu</strong> dan langsung terpilih pada formulir absensi.</span>
                   </div>
                 )}
-                <div style={{ background: 'rgba(234, 88, 12, 0.15)', border: '1px solid #ea580c', padding: '0.6rem 0.85rem', borderRadius: '6px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#fb923c', fontWeight: 800 }}>
+                <div style={{ background: 'rgba(56, 189, 248, 0.15)', border: '1px solid #0284c7', padding: '0.6rem 0.85rem', borderRadius: '6px', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>
                   <AlertCircle size={16} /> Aturan: Nama tidak boleh sama / duplikat
                 </div>
 
@@ -11481,10 +11480,10 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isAbsenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '2px solid #ea580c', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <HardHat size={22} color="#ea580c" /> 
+                <HardHat size={22} color="#0284c7" /> 
                 {editingAbsenItem ? `Edit Absen: ${editingAbsenItem.nama}` : 'Input Absen & Lembur Tenaga Kerja'}
               </h3>
               <button onClick={() => setIsAbsenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -11502,7 +11501,7 @@ export const TeknikModule = () => {
                       value={absenFormData.proyek}
                       onChange={(e) => setAbsenFormData({ ...absenFormData, proyek: e.target.value })}
                       required
-                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#ea580c' }}
+                      style={{ fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#0284c7' }}
                     >
                       <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
                       <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
@@ -11827,7 +11826,7 @@ export const TeknikModule = () => {
                 <button 
                   type="submit" 
                   className="btn btn-primary"
-                  style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', border: 'none', fontWeight: 800, color: '#ffffff' }}
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 800, color: '#ffffff' }}
                 >
                   {editingAbsenItem ? '💾 Simpan Perubahan Absen' : '🚀 Simpan Absen Tenaga Kerja'}
                 </button>
@@ -12580,7 +12579,7 @@ export const TeknikModule = () => {
                     <Clock size={24} color="#38bdf8" /> Riwayat Pembayaran: <span style={{ color: '#fbbf24' }}>{paymentHistoryTargetSheet.pekerjaan || paymentHistoryTargetSheet.items?.[0]?.itemPekerjaan || 'Pekerjaan Borongan'}</span>
                   </h3>
                   <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#cbd5e1' }}>
-                    No. SPK: <strong style={{ color: '#fb923c' }}>{paymentHistoryTargetSheet.noInput || paymentHistoryTargetSheet.noSpk || '-'}</strong> &bull; Vendor: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.namaVendor || paymentHistoryTargetSheet.vendor || '-'}</strong> &bull; Proyek: <strong style={{ color: '#34d399' }}>{paymentHistoryTargetSheet.proyek}</strong> {paymentHistoryTargetSheet.blok ? `(Blok ${paymentHistoryTargetSheet.blok} No ${paymentHistoryTargetSheet.noUnit})` : (paymentHistoryTargetSheet.fasum && paymentHistoryTargetSheet.fasum !== '-' ? `(${paymentHistoryTargetSheet.fasum})` : '')}
+                    No. SPK: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.noInput || paymentHistoryTargetSheet.noSpk || '-'}</strong> &bull; Vendor: <strong style={{ color: '#38bdf8' }}>{paymentHistoryTargetSheet.namaVendor || paymentHistoryTargetSheet.vendor || '-'}</strong> &bull; Proyek: <strong style={{ color: '#34d399' }}>{paymentHistoryTargetSheet.proyek}</strong> {paymentHistoryTargetSheet.blok ? `(Blok ${paymentHistoryTargetSheet.blok} No ${paymentHistoryTargetSheet.noUnit})` : (paymentHistoryTargetSheet.fasum && paymentHistoryTargetSheet.fasum !== '-' ? `(${paymentHistoryTargetSheet.fasum})` : '')}
                   </p>
                 </div>
                 <button

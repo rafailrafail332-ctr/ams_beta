@@ -1787,9 +1787,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('spk')}
           style={{
-            background: activeTab === 'spk' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            background: activeTab === 'spk' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
             color: activeTab === 'spk' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'spk' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            border: activeTab === 'spk' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1800,12 +1800,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'spk' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+            boxShadow: activeTab === 'spk' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
           <FileSignature size={18} />
           <span>1. SPK (MOU)</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'spk' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'spk' ? '#fff' : '#fb923c' }}>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'spk' ? '#0284c7' : '#1e293b', color: activeTab === 'spk' ? '#fff' : '#38bdf8' }}>
             {spkList.length}
           </span>
         </button>
@@ -1814,9 +1814,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('legalitas')}
           style={{
-            background: activeTab === 'legalitas' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            background: activeTab === 'legalitas' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
             color: activeTab === 'legalitas' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'legalitas' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            border: activeTab === 'legalitas' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1827,12 +1827,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'legalitas' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+            boxShadow: activeTab === 'legalitas' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
           <FileCheck size={18} />
           <span>2. Legalitas</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'legalitas' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'legalitas' ? '#fff' : '#fb923c' }}>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'legalitas' ? '#0284c7' : '#1e293b', color: activeTab === 'legalitas' ? '#fff' : '#38bdf8' }}>
             {legalitasPerusahaanList.length + legalitasProyekList.length}
           </span>
         </button>
@@ -1841,9 +1841,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('perizinan')}
           style={{
-            background: activeTab === 'perizinan' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            background: activeTab === 'perizinan' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
             color: activeTab === 'perizinan' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'perizinan' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            border: activeTab === 'perizinan' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1854,12 +1854,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'perizinan' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+            boxShadow: activeTab === 'perizinan' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
           <ShieldCheck size={18} />
           <span>3. Perizinan</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'perizinan' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'perizinan' ? '#fff' : '#fb923c' }}>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'perizinan' ? '#0284c7' : '#1e293b', color: activeTab === 'perizinan' ? '#fff' : '#38bdf8' }}>
             {perizinanList.length}
           </span>
         </button>
@@ -1868,9 +1868,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('litigasi')}
           style={{
-            background: activeTab === 'litigasi' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            background: activeTab === 'litigasi' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
             color: activeTab === 'litigasi' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'litigasi' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            border: activeTab === 'litigasi' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1881,12 +1881,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'litigasi' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+            boxShadow: activeTab === 'litigasi' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
           <Scale size={18} />
           <span>4. Litigasi</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'litigasi' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'litigasi' ? '#fff' : '#fb923c' }}>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'litigasi' ? '#0284c7' : '#1e293b', color: activeTab === 'litigasi' ? '#fff' : '#38bdf8' }}>
             {litigations.length}
           </span>
         </button>
@@ -1895,9 +1895,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         <button
           onClick={() => setActiveTab('history-tanah')}
           style={{
-            background: activeTab === 'history-tanah' ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' : 'transparent',
+            background: activeTab === 'history-tanah' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
             color: activeTab === 'history-tanah' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'history-tanah' ? '1.5px solid rgba(254, 215, 170, 0.6)' : '1px solid transparent',
+            border: activeTab === 'history-tanah' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.88rem',
@@ -1908,12 +1908,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.2s',
-            boxShadow: activeTab === 'history-tanah' ? '0 6px 16px rgba(234, 88, 12, 0.35)' : 'none'
+            boxShadow: activeTab === 'history-tanah' ? '0 6px 16px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
           <MapPin size={18} />
           <span>5. History Tanah</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'history-tanah' ? 'rgba(0,0,0,0.25)' : '#1e293b', color: activeTab === 'history-tanah' ? '#fff' : '#fb923c' }}>
+          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'history-tanah' ? '#0284c7' : '#1e293b', color: activeTab === 'history-tanah' ? '#fff' : '#38bdf8' }}>
             {historyTanahList.length}
           </span>
         </button>
@@ -1930,8 +1930,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* Header Title Badge persis gambar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.2rem' }}>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fed7aa', color: '#c2410c', border: '2px solid #fb923c', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(251, 146, 60, 0.25)', marginBottom: '6px' }}>
-                <FileSignature size={20} color="#ea580c" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1.5px solid #0284c7', padding: '6px 18px', borderRadius: '12px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '0.02em', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)', marginBottom: '6px' }}>
+                <FileSignature size={20} color="#38bdf8" />
                 <span>SPK (MOU)</span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
@@ -1951,7 +1951,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#ea580c', fontWeight: 800 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', background: '#0284c7', fontWeight: 800 }}
               >
                 <Plus size={15} />
                 <span>+ Tambah Dokumen SPK (MOU)</span>
@@ -2004,7 +2004,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* Tabel Utama SPK (MOU) Sesuai Kolom di Gambar */}
           {filteredSpkList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.1)', color: '#fb923c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <FileSignature size={28} />
               </div>
               <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen SPK (MOU)</div>
@@ -2014,7 +2014,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={handleOpenAddSpk}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+                style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
               >
                 <Plus size={15} />
                 <span>+ Tambah Dokumen SPK (MOU) Sekarang</span>
@@ -2024,16 +2024,16 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -2055,7 +2055,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </td>
 
                         {/* 2. No. Dok */}
-                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                           {spk.noDok || spk.spkNo || 'xxx/xxx/xxx'}
                         </td>
 
@@ -2098,11 +2098,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               background:
                                 (spk.kategori || '').toLowerCase().includes('notar') ? 'rgba(192, 132, 252, 0.15)' :
                                 (spk.kategori || '').toLowerCase().includes('klien') ? 'rgba(56, 189, 248, 0.15)' :
-                                'rgba(251, 146, 60, 0.15)',
+                                'rgba(56, 189, 248, 0.15)',
                               color:
                                 (spk.kategori || '').toLowerCase().includes('notar') ? '#c084fc' :
                                 (spk.kategori || '').toLowerCase().includes('klien') ? '#38bdf8' :
-                                '#fb923c',
+                                '#38bdf8',
                               fontWeight: 800,
                               whiteSpace: 'nowrap'
                             }}
@@ -2176,7 +2176,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                             <button
                               onClick={() => handleOpenEditSpk(spk)}
                               title="Edit Dokumen"
-                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                             >
                               <Edit3 size={12} />
                             </button>
@@ -2212,15 +2212,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <div
                 style={{
                   display: 'inline-block',
-                  background: '#ffedd5',
-                  border: '2px solid #f97316',
-                  color: '#ea580c',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1.5px solid #0284c7',
+                  color: '#38bdf8',
                   padding: '6px 20px',
                   borderRadius: '8px',
                   fontWeight: 900,
                   fontSize: '1.15rem',
                   letterSpacing: '0.3px',
-                  boxShadow: '0 2px 8px rgba(234, 88, 12, 0.15)'
+                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.15)'
                 }}
               >
                 Legalitas
@@ -2243,7 +2243,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={() => handleOpenAddLegalitas(filterLegalitasCat)}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#ea580c', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 800 }}
+                style={{ background: '#0284c7', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: 800 }}
               >
                 <Plus size={14} />
                 <span>+ Tambah Dokumen Legalitas</span>
@@ -2268,8 +2268,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   style={{
                     padding: '5px 12px',
                     borderRadius: '6px',
-                    border: filterLegalitasCat === cat.id ? '1.5px solid #ea580c' : '1px solid #334155',
-                    background: filterLegalitasCat === cat.id ? '#ea580c' : '#1e293b',
+                    border: filterLegalitasCat === cat.id ? '1.5px solid #38bdf8' : '1px solid #334155',
+                    background: filterLegalitasCat === cat.id ? '#0284c7' : '#1e293b',
                     color: filterLegalitasCat === cat.id ? '#ffffff' : '#cbd5e1',
                     fontSize: '0.75rem',
                     fontWeight: 800,
@@ -2308,7 +2308,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* Tabel Utama Legalitas Sesuai Gambar Referensi */}
           {filteredLegalitasList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(251, 146, 60, 0.1)', color: '#fb923c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <FileCheck size={28} />
               </div>
               <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen Legalitas</div>
@@ -2318,7 +2318,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={() => handleOpenAddLegalitas(filterLegalitasCat)}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#ea580c', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+                style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
               >
                 <Plus size={15} />
                 <span>+ Tambah Dokumen Sekarang</span>
@@ -2328,14 +2328,14 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Penerbit</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Jenis Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Penerbit</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Jenis Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -2356,7 +2356,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       </td>
 
                       {/* 2. No. Dok */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {doc.noDok || 'xxx/xxx/xxx'}
                       </td>
 
@@ -2384,12 +2384,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               padding: '1px 6px',
                               borderRadius: '4px',
                               background:
-                                doc.category === 'Akta Perusahaan' ? 'rgba(251, 146, 60, 0.15)' :
+                                doc.category === 'Akta Perusahaan' ? 'rgba(56, 189, 248, 0.15)' :
                                 doc.category === 'NPWP' ? 'rgba(56, 189, 248, 0.15)' :
                                 doc.category === 'NIB' ? 'rgba(52, 211, 153, 0.15)' :
                                 'rgba(192, 132, 252, 0.15)',
                               color:
-                                doc.category === 'Akta Perusahaan' ? '#fb923c' :
+                                doc.category === 'Akta Perusahaan' ? '#38bdf8' :
                                 doc.category === 'NPWP' ? '#38bdf8' :
                                 doc.category === 'NIB' ? '#34d399' :
                                 '#c084fc',
@@ -2453,7 +2453,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           <button
                             onClick={() => handleOpenEditLegalitas(doc)}
                             title="Edit Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           >
                             <Edit3 size={12} />
                           </button>
@@ -2485,9 +2485,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span
                 style={{
-                  background: '#ffedd5',
-                  border: '1.5px solid #f97316',
-                  color: '#ea580c',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1.5px solid #0284c7',
+                  color: '#38bdf8',
                   fontSize: '0.85rem',
                   fontWeight: 900,
                   padding: '4px 14px',
@@ -2673,16 +2673,16 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', textAlign: 'left', fontWeight: 900, whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '10px 14px', width: '50px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>No.</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>No. Dok</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Proyek</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Nama</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Kategori</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Judul Dokumen</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Berkas</th>
-                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Catatan</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', textAlign: 'left', fontWeight: 900, whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '10px 14px', width: '50px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>No.</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>No. Dok</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Proyek</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Nama</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Kategori</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Judul Dokumen</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Berkas</th>
+                    <th style={{ padding: '10px 14px', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Catatan</th>
                     <th style={{ padding: '10px 14px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -3059,16 +3059,16 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -3089,7 +3089,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       </td>
 
                       {/* 2. No. Dok */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {item.noDok || item.caseNo || 'xxx/xxx/xxx'}
                       </td>
 
@@ -3131,12 +3131,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                             borderRadius: '4px',
                             background:
                               (item.kategori || '').toLowerCase().includes('somasi') ? 'rgba(239, 68, 68, 0.15)' :
-                              (item.kategori || '').toLowerCase().includes('lahan') ? 'rgba(251, 146, 60, 0.15)' :
+                              (item.kategori || '').toLowerCase().includes('lahan') ? 'rgba(56, 189, 248, 0.15)' :
                               (item.kategori || '').toLowerCase().includes('warga') ? 'rgba(168, 85, 247, 0.15)' :
                               'rgba(56, 189, 248, 0.15)',
                             color:
                               (item.kategori || '').toLowerCase().includes('somasi') ? '#f87171' :
-                              (item.kategori || '').toLowerCase().includes('lahan') ? '#fb923c' :
+                              (item.kategori || '').toLowerCase().includes('lahan') ? '#38bdf8' :
                               (item.kategori || '').toLowerCase().includes('warga') ? '#c084fc' :
                               '#38bdf8',
                             fontWeight: 800,
@@ -3223,7 +3223,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                             type="button"
                             onClick={() => handleOpenEditLitigasi(item)}
                             title="Edit Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           >
                             <Edit3 size={12} />
                           </button>
@@ -3461,16 +3461,16 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f6ad7b', color: '#0f172a', borderBottom: '2px solid #c2410c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -3491,7 +3491,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       </td>
 
                       {/* 2. No. Dok */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#fb923c', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {item.noDok || 'HST/AMS-TNH/2026/xx'}
                       </td>
 
@@ -3625,7 +3625,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                             type="button"
                             onClick={() => handleOpenEditHistoryTanah(item)}
                             title="Edit Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#fb923c', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           >
                             <Edit3 size={12} />
                           </button>
@@ -3668,7 +3668,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #ea580c',
+              border: '1.5px solid #0284c7',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '600px',
@@ -3680,7 +3680,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileSignature size={20} color="#fb923c" />
+                <FileSignature size={20} color="#38bdf8" />
                 <span>{editingSpkId ? '✏️ Edit Dokumen SPK (MOU)' : '➕ Tambah Dokumen SPK (MOU)'}</span>
               </div>
               <button onClick={() => setIsSpkModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
@@ -3713,9 +3713,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               {/* BARIS 2: NAMA (NGAMBIL DARI DATABASE VENDOR) & KATEGORI */}
-              <div style={{ background: 'rgba(251, 146, 60, 0.05)', border: '1px solid rgba(251, 146, 60, 0.25)', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800 }}>
+                  <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800 }}>
                     👤 Nama (Pihak Kedua / Rekanan) *
                   </label>
                   <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 700 }}>
@@ -3854,7 +3854,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               {/* Upload Berkas Dokumen (Mendukung upload 2 berkas atau lebih & bisa digeser) */}
               <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '10px', padding: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '0.76rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label style={{ fontSize: '0.76rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <UploadCloud size={16} />
                     <span>Unggah Berkas Fisik (Bisa upload 2 atau lebih berkas)</span>
                   </label>
@@ -3893,7 +3893,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          <span style={{ background: 'rgba(251, 146, 60, 0.2)', color: '#fb923c', padding: '1px 6px', borderRadius: '3px', fontWeight: 800, fontSize: '0.66rem' }}>
+                          <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '1px 6px', borderRadius: '3px', fontWeight: 800, fontSize: '0.66rem' }}>
                             #{idx + 1}
                           </span>
                           <FileText size={13} color="#38bdf8" />
@@ -3919,7 +3919,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
                 <button type="button" onClick={() => setIsSpkModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#ea580c', fontWeight: 800 }}>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7', fontWeight: 800 }}>
                   {editingSpkId ? 'Simpan Perubahan' : 'Simpan & Daftarkan Dokumen'}
                 </button>
               </div>
@@ -3949,14 +3949,14 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #ea580c',
+              border: '1.5px solid #0284c7',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '580px',
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(234, 88, 12, 0.4)'
+              boxShadow: '0 25px 50px -12px rgba(2, 132, 199, 0.4)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
@@ -4050,14 +4050,14 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               {/* Upload Berkas Dokumen (Bisa pilih banyak / multi files) */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #ea580c', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#fb923c', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed #0284c7', borderRadius: '8px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <UploadCloud size={15} />
                     <span>Upload Berkas Dokumen Legalitas (Bisa Pilih Banyak / Multi-Files)</span>
                   </div>
                   {legalitasForm.files.length > 0 && (
-                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(234, 88, 12, 0.25)', color: '#fed7aa', fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.25)', color: '#bae6fd', fontWeight: 800 }}>
                       {legalitasForm.files.length} Berkas Dipilih
                     </span>
                   )}
@@ -4126,7 +4126,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 >
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#ea580c', fontWeight: 800 }}>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7', fontWeight: 800 }}>
                   {editingLegalitasId ? 'Simpan Perubahan' : 'Simpan & Unggah Dokumen'}
                 </button>
               </div>
@@ -4854,7 +4854,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     Pratinjau Dokumen Litigasi ({viewingLitigasi.kategori})
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingLitigasi.noDok || 'xxx/xxx/xxx'}</strong> &bull; {viewingLitigasi.judulDokumen}
+                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingLitigasi.noDok || 'xxx/xxx/xxx'}</strong> &bull; {viewingLitigasi.judulDokumen}
                   </div>
                 </div>
               </div>
@@ -5511,7 +5511,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     Pratinjau Dokumen History Tanah ({viewingHistoryTanah.kategori})
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}</strong> &bull; {viewingHistoryTanah.judulDokumen}
+                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingHistoryTanah.noDok || 'HST/AMS-TNH/2026/xx'}</strong> &bull; {viewingHistoryTanah.judulDokumen}
                   </div>
                 </div>
               </div>
@@ -5929,7 +5929,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             ref={spkModalRef}
             style={{
               background: '#090d16',
-              border: '1.5px solid #fb923c',
+              border: '1.5px solid #0284c7',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '840px',
@@ -5959,7 +5959,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(251, 146, 60, 0.15)', color: '#fb923c', padding: '7px', borderRadius: '8px' }}>
+                <div style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '7px', borderRadius: '8px' }}>
                   <FileText size={20} />
                 </div>
                 <div>
@@ -5967,7 +5967,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     Pratinjau Dokumen SPK (MOU)
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}</strong> &bull; {viewingSpk.judulDokumen || viewingSpk.scope}
+                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingSpk.noDok || viewingSpk.spkNo || 'xxx/xxx/xxx'}</strong> &bull; {viewingSpk.judulDokumen || viewingSpk.scope}
                   </div>
                 </div>
               </div>
@@ -5992,7 +5992,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: spkPrintChoice === 'surat' ? '#ea580c' : 'transparent',
+                          background: spkPrintChoice === 'surat' ? '#0284c7' : 'transparent',
                           color: spkPrintChoice === 'surat' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -6009,7 +6009,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: spkPrintChoice === 'berkas' ? '#ea580c' : 'transparent',
+                          background: spkPrintChoice === 'berkas' ? '#0284c7' : 'transparent',
                           color: spkPrintChoice === 'berkas' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -6026,7 +6026,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: spkPrintChoice === 'all' ? '#ea580c' : 'transparent',
+                          background: spkPrintChoice === 'all' ? '#0284c7' : 'transparent',
                           color: spkPrintChoice === 'all' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -6065,7 +6065,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       onClick={() => window.print()}
                       className="btn btn-primary btn-sm"
                       style={{
-                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                         color: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
@@ -6076,7 +6076,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         borderRadius: '8px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
+                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
                       }}
                     >
                       <Printer size={15} />
@@ -6114,7 +6114,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 <div className="no-print" style={{ margin: '1.2rem 1.2rem 0 1.2rem', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '12px', padding: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Paperclip size={16} color="#fb923c" />
+                      <Paperclip size={16} color="#38bdf8" />
                       <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff' }}>
                         Berkas Terlampir
                       </span>
@@ -6134,7 +6134,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           style={{
                             background: '#1e293b',
                             border: '1px solid #475569',
-                            color: '#fb923c',
+                            color: '#38bdf8',
                             padding: '5px 12px',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -6161,7 +6161,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           style={{
                             background: '#1e293b',
                             border: '1px solid #475569',
-                            color: '#fb923c',
+                            color: '#38bdf8',
                             padding: '5px 12px',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -6260,7 +6260,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               width: idx === currentFileSlide ? '22px' : '8px',
                               height: '8px',
                               borderRadius: '4px',
-                              background: idx === currentFileSlide ? '#fb923c' : '#334155',
+                              background: idx === currentFileSlide ? '#38bdf8' : '#334155',
                               border: 'none',
                               cursor: 'pointer',
                               transition: 'all 0.2s'
@@ -6308,7 +6308,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                      <div style={{ display: 'inline-block', border: '2px solid #0284c7', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#0284c7' }}>
                         LEGAL & PERIZINAN
                       </div>
                       <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
@@ -6352,7 +6352,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                           <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Proyek Kawasan</td>
-                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingSpk.project || 'Ashoka Park'}</span></td>
+                          <td style={{ padding: '6px 8px' }}>: <span style={{ fontWeight: 800, color: '#0284c7' }}>{viewingSpk.project || 'Ashoka Park'}</span></td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                           <td style={{ padding: '6px 8px', fontWeight: 800, color: '#334155' }}>Kategori Dokumen</td>
@@ -6478,7 +6478,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           </div>
                         ) : (
                           <div style={{ border: '2px dashed #94a3b8', borderRadius: '10px', padding: '3rem 1.5rem', textAlign: 'center', background: '#f8fafc' }}>
-                            <FileText size={54} color="#ea580c" style={{ margin: '0 auto 12px auto' }} />
+                            <FileText size={54} color="#0284c7" style={{ margin: '0 auto 12px auto' }} />
                             <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
                               {currentFile?.name || 'Berkas Dokumen SPK'}
                             </div>
@@ -7217,13 +7217,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             ref={legalitasModalRef}
             style={{
               background: '#0b1120',
-              border: '2px solid #ea580c',
+              border: '2px solid #0284c7',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '880px',
               maxHeight: '90vh',
               overflowY: 'auto',
-              boxShadow: '0 25px 60px -15px rgba(234, 88, 12, 0.3)',
+              boxShadow: '0 25px 60px -15px rgba(2, 132, 199, 0.3)',
               position: 'relative',
               display: 'flex',
               flexDirection: 'column',
@@ -7248,7 +7248,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(251, 146, 60, 0.15)', color: '#fb923c', padding: '7px', borderRadius: '8px' }}>
+                <div style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '7px', borderRadius: '8px' }}>
                   <FileCheck size={20} />
                 </div>
                 <div>
@@ -7256,7 +7256,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     Pratinjau Dokumen Legalitas ({viewingLegalitas.category})
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#fb923c' }}>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong> &bull; Penerbit: <strong style={{ color: '#ffffff' }}>{viewingLegalitas.penerbit || '-'}</strong>
+                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingLegalitas.noDok || 'xxx/xxx/xxx'}</strong> &bull; Penerbit: <strong style={{ color: '#ffffff' }}>{viewingLegalitas.penerbit || '-'}</strong>
                   </div>
                 </div>
               </div>
@@ -7281,7 +7281,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: legalitasPrintChoice === 'surat' ? '#ea580c' : 'transparent',
+                          background: legalitasPrintChoice === 'surat' ? '#0284c7' : 'transparent',
                           color: legalitasPrintChoice === 'surat' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -7298,7 +7298,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: legalitasPrintChoice === 'berkas' ? '#ea580c' : 'transparent',
+                          background: legalitasPrintChoice === 'berkas' ? '#0284c7' : 'transparent',
                           color: legalitasPrintChoice === 'berkas' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -7315,7 +7315,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           fontWeight: 800,
                           cursor: 'pointer',
                           border: 'none',
-                          background: legalitasPrintChoice === 'all' ? '#ea580c' : 'transparent',
+                          background: legalitasPrintChoice === 'all' ? '#0284c7' : 'transparent',
                           color: legalitasPrintChoice === 'all' ? '#ffffff' : '#94a3b8',
                           transition: 'all 0.15s'
                         }}
@@ -7354,7 +7354,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       onClick={() => window.print()}
                       className="btn btn-primary btn-sm"
                       style={{
-                        background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                         color: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
@@ -7365,7 +7365,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         borderRadius: '8px',
                         border: 'none',
                         cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)'
+                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
                       }}
                     >
                       <Printer size={15} />
@@ -7403,7 +7403,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 <div className="no-print" style={{ margin: '1.2rem 1.2rem 0 1.2rem', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '12px', padding: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Paperclip size={16} color="#fb923c" />
+                      <Paperclip size={16} color="#38bdf8" />
                       <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff' }}>
                         Berkas Terlampir
                       </span>
@@ -7423,7 +7423,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           style={{
                             background: '#1e293b',
                             border: '1px solid #475569',
-                            color: '#fb923c',
+                            color: '#38bdf8',
                             padding: '5px 12px',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -7450,7 +7450,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           style={{
                             background: '#1e293b',
                             border: '1px solid #475569',
-                            color: '#fb923c',
+                            color: '#38bdf8',
                             padding: '5px 12px',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -7549,7 +7549,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               width: idx === currentLegalitasFileSlide ? '22px' : '8px',
                               height: '8px',
                               borderRadius: '4px',
-                              background: idx === currentLegalitasFileSlide ? '#fb923c' : '#334155',
+                              background: idx === currentLegalitasFileSlide ? '#38bdf8' : '#334155',
                               border: 'none',
                               cursor: 'pointer',
                               transition: 'all 0.2s'
@@ -7598,7 +7598,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-block', border: '2px solid #ea580c', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#ea580c' }}>
+                      <div style={{ display: 'inline-block', border: '2px solid #0284c7', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 900, color: '#0284c7' }}>
                         LEGALITAS RESMI
                       </div>
                       <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
@@ -7631,7 +7631,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                           <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Kategori Legalitas</td>
-                          <td style={{ padding: '7px 8px' }}>: <span style={{ fontWeight: 800, color: '#ea580c' }}>{viewingLegalitas.category}</span></td>
+                          <td style={{ padding: '7px 8px' }}>: <span style={{ fontWeight: 800, color: '#0284c7' }}>{viewingLegalitas.category}</span></td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                           <td style={{ padding: '7px 8px', fontWeight: 800, color: '#334155' }}>Instansi / Penerbit</td>
@@ -7755,7 +7755,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                           </div>
                         ) : (
                           <div style={{ border: '2px dashed #94a3b8', borderRadius: '10px', padding: '3rem 1.5rem', textAlign: 'center', background: '#f8fafc' }}>
-                            <FileCheck size={54} color="#ea580c" style={{ margin: '0 auto 12px auto' }} />
+                            <FileCheck size={54} color="#0284c7" style={{ margin: '0 auto 12px auto' }} />
                             <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a' }}>
                               {currentFile?.name || 'Berkas Dokumen Legalitas'}
                             </div>

@@ -47,7 +47,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -55,7 +55,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
               fontSize: '0.84rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(234, 88, 12, 0.4)',
+              boxShadow: '0 2px 10px rgba(2, 132, 199, 0.4)',
               transition: 'all 0.18s ease'
             }}
             title="Kembali ke Beranda Utama (Central Hub)"

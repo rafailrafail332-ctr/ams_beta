@@ -36,8 +36,8 @@ export const AmsCentralHub = ({
       label: 'Teknik', 
       sub: 'Konstruksi & Lapangan', 
       desc: 'Absen Tenaga Kerja, Proyek & Fasilitas', 
-      color: '#f97316', 
-      lightColor: '#ea580c',
+      color: '#0284c7', 
+      lightColor: '#0369a1',
       icon: Wrench
     },
     { 
@@ -371,7 +371,7 @@ export const AmsCentralHub = ({
             <defs>
               <linearGradient id="streamGradTeknik" x1="100%" y1="50%" x2="0%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#f97316" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#0284c7" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradLegal" x1="100%" y1="50%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
@@ -474,16 +474,16 @@ export const AmsCentralHub = ({
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'teknik' ? 'rgba(249, 115, 22, 0.2)' : 'rgba(15, 23, 42, 0.75)')
-                    : (hoveredNode === 'teknik' ? '#fff7ed' : '#ffffff'),
+                    ? (hoveredNode === 'teknik' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'teknik' ? '#f0f9ff' : '#ffffff'),
                   border: hoveredNode === 'teknik' 
-                    ? '2px solid #f97316' 
+                    ? '2px solid #0284c7' 
                     : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'teknik'
-                    ? '0 12px 30px rgba(249, 115, 22, 0.35), 0 0 15px rgba(249, 115, 22, 0.2)'
+                    ? '0 12px 30px rgba(2, 132, 199, 0.35), 0 0 15px rgba(2, 132, 199, 0.2)'
                     : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'right',
@@ -496,7 +496,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '1.45rem', 
                     fontWeight: 900, 
-                    color: hoveredNode === 'teknik' ? '#f97316' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    color: hoveredNode === 'teknik' ? '#0284c7' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
                     Teknik
@@ -504,7 +504,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '0.68rem', 
                     fontWeight: 700, 
-                    color: hoveredNode === 'teknik' ? '#ea580c' : (isDark ? '#94a3b8' : '#64748b'), 
+                    color: hoveredNode === 'teknik' ? '#0369a1' : (isDark ? '#94a3b8' : '#64748b'), 
                     marginTop: '4px' 
                   }}>
                     Konstruksi & Proyek
@@ -515,11 +515,11 @@ export const AmsCentralHub = ({
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'teknik' ? '#f97316' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffedd5'),
+                    background: hoveredNode === 'teknik' ? '#0284c7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'teknik' ? '#ffffff' : '#ea580c',
+                    color: hoveredNode === 'teknik' ? '#ffffff' : '#0284c7',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}

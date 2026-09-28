@@ -82,7 +82,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-absensi', title: '5. Absensi & Presensi', moduleKey: 'hr-ga', subTabKey: 'absensi', icon: Clock, color: '#10B981' },
         { id: 'hrga-kpi', title: '6. KPI Evaluasi Kinerja', moduleKey: 'hr-ga', subTabKey: 'kpi', icon: Award, color: '#FBBF24' },
         { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
-        { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#F97316' },
+        { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
         { id: 'hrga-security', title: '9. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
         { id: 'proc-logistik', title: '10. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
@@ -92,7 +92,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('legal') || roleLower.includes('salma')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'leg-spk', title: '1. SPK (SPK Vendor)', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#FB923C' },
+        { id: 'leg-spk', title: '1. SPK (SPK Vendor)', moduleKey: 'legal', subTabKey: 'spk', icon: FileSignature, color: '#38BDF8' },
         { id: 'leg-perusahaan', title: '2. Legalitas Perusahaan', moduleKey: 'legal', subTabKey: 'legalitas-perusahaan', icon: FileCheck, color: '#38BDF8' },
         { id: 'leg-proyek', title: '3. Legalitas Proyek', moduleKey: 'legal', subTabKey: 'legalitas-proyek', icon: Building2, color: '#C084FC' },
         { id: 'leg-perizinan', title: '4. Perizinan (PPKR, Siteplan, PBG)', moduleKey: 'legal', subTabKey: 'perizinan', icon: ShieldCheck, color: '#34D399' },
@@ -146,7 +146,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('teknik') || roleLower.includes('site') || roleLower.includes('hapip')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'teknik-absen', title: '1. Absen Tenaga Kerja', moduleKey: 'teknik', subTabKey: 'absen', icon: HardHat, color: '#F97316' },
+        { id: 'teknik-absen', title: '1. Absen Tenaga Kerja', moduleKey: 'teknik', subTabKey: 'absen', icon: HardHat, color: '#38BDF8' },
         { id: 'teknik-rab', title: '2. Input RAB & Monitoring Progress', moduleKey: 'teknik', subTabKey: 'rab', icon: Calculator, color: '#F59E0B' },
         { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
@@ -176,7 +176,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'todo-attendance', mainTitle: 'To-Do List Harian', tab: 'todo-attendance', icon: CheckSquare, color: '#F59E0B' },
     { id: 'executive', mainTitle: 'Eksekutif & Direksi', tab: 'executive', icon: Award, color: '#F59E0B' },
     { id: 'manager', mainTitle: 'Manajer Operasional', tab: 'manager', icon: Briefcase, color: '#38BDF8' },
-    { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#F97316' },
+    { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#38BDF8' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
     { id: 'hr-ga', mainTitle: 'HR & GA', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
