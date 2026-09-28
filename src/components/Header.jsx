@@ -7,6 +7,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const isDark = theme !== 'light';
+  const isLegalTab = currentTab === 'legal';
   const avatarUrl = getAvatarUrl(currentUser);
 
   return (
@@ -48,7 +49,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              background: isLegalTab ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -56,7 +57,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
               fontSize: '0.84rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(2, 132, 199, 0.4)',
+              boxShadow: isLegalTab ? '0 2px 10px rgba(147, 51, 234, 0.45)' : '0 2px 10px rgba(2, 132, 199, 0.4)',
               transition: 'all 0.18s ease'
             }}
             title="Kembali ke Beranda Utama (Central Hub)"
@@ -93,14 +94,14 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 height: '32px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: '1.5px solid #0284c7'
+                border: isLegalTab ? '1.5px solid #c084fc' : '1.5px solid #0284c7'
               }}
             />
             <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>
                 {currentUser?.name || 'Yazid Hizbullah, S.E.,S.T'}
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: isLegalTab ? '#c084fc' : '#38bdf8', fontWeight: 700 }}>
                 {currentUser?.role || 'Direktur Utama'}
               </div>
             </div>
@@ -170,7 +171,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
           >
             Ashoka Management System
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '0.68rem', color: isLegalTab ? '#c084fc' : '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
             Asset & Property Management System (AMS)
           </div>
         </div>
@@ -182,14 +183,16 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
             height: '42px',
             borderRadius: '12px',
             background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
-            border: isDark ? '1.5px solid rgba(255, 255, 255, 0.18)' : '1.5px solid #e2e8f0',
+            border: isDark 
+              ? (isLegalTab ? '1.5px solid rgba(192, 132, 252, 0.35)' : '1.5px solid rgba(255, 255, 255, 0.18)') 
+              : (isLegalTab ? '1.5px solid #e9d5ff' : '1.5px solid #e2e8f0'),
             backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: isDark 
-              ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)' 
-              : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)',
+              ? (isLegalTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(192, 132, 252, 0.35)' : '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)') 
+              : (isLegalTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(168, 85, 247, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)'),
             flexShrink: 0
           }}
         >
