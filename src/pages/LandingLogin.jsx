@@ -486,20 +486,18 @@ export const LandingLogin = ({ onLoginSuccess }) => {
               style={{
                 fontSize: '1.95rem',
                 fontWeight: 900,
-                letterSpacing: '0.08em',
+                letterSpacing: '0.12em',
                 marginTop: '14px',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
                 textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.6)',
                 position: 'relative',
                 zIndex: 2
               }}
             >
               <span>AMS</span>
-              <Sparkles size={20} color="#f59e0b" />
             </div>
           </div>
         </div>
