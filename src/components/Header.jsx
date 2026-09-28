@@ -6,6 +6,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
   const { theme, toggleTheme, currentUser, getAvatarUrl } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
+  const isDark = theme !== 'light';
   const avatarUrl = getAvatarUrl(currentUser);
 
   return (
@@ -156,7 +157,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
       {/* ========================================================================= */}
       {/* SEBELAH KANAN: LOGO PALING KANAN & ASHOKA MANAGEMENT SYSTEM               */}
       {/* ========================================================================= */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div style={{ textAlign: 'right' }}>
           <div
             style={{
@@ -174,15 +175,38 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
           </div>
         </div>
 
-        <img
-          src="/company-logo.png"
-          alt="Ashoka Logo"
+        {/* Frosted Glass Logo Badge persis seperti di Central Hub */}
+        <div
           style={{
-            width: '38px',
-            height: '38px',
-            objectFit: 'contain'
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
+            background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
+            border: isDark ? '1.5px solid rgba(255, 255, 255, 0.18)' : '1.5px solid #e2e8f0',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isDark 
+              ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)' 
+              : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)',
+            flexShrink: 0
           }}
-        />
+        >
+          <img
+            src="/company-logo-transparent.png"
+            alt="Ashoka Logo"
+            onError={(e) => {
+              e.currentTarget.src = '/company-logo.png';
+            }}
+            style={{
+              width: '28px',
+              height: '28px',
+              objectFit: 'contain',
+              filter: isDark ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' : 'none'
+            }}
+          />
+        </div>
       </div>
     </header>
   );
