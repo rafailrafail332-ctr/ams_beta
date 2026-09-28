@@ -56,7 +56,11 @@ import {
   Package,
   Boxes,
   ArrowDownLeft,
-  ArrowUpRight
+  ArrowUpRight,
+  ChevronLeft,
+  Camera,
+  MessageCircle,
+  Share2
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -418,6 +422,9 @@ export const TeknikModule = () => {
     if (activeSubTab === 'database' || activeSubTab === 'vendor' || activeSubTab === 'karyawan' || activeSubTab === 'unit' || activeSubTab === 'konsumen') {
       return 'database';
     }
+    if (activeSubTab === 'upload_foto' || activeSubTab === 'upload-foto' || activeSubTab === 'foto' || activeSubTab === 'upload') {
+      return 'upload_foto';
+    }
     return 'harian';
   });
 
@@ -449,6 +456,8 @@ export const TeknikModule = () => {
       setMainCategory('harian');
     } else if (activeSubTab === 'database') {
       setMainCategory('database');
+    } else if (['upload_foto', 'upload-foto', 'foto', 'upload'].includes(activeSubTab)) {
+      setMainCategory('upload_foto');
     }
   }, [activeSubTab]);
 
@@ -779,6 +788,532 @@ export const TeknikModule = () => {
   useEffect(() => {
     saveCloudStore(STORAGE_KEY_DB_CALON_KONSUMEN, databaseCalonKonsumenRows);
   }, [databaseCalonKonsumenRows]);
+
+  // =========================================================================
+  // SUB-MODUL 6: UPLOAD FOTO DOKUMENTASI PROGRESS UNIT LAPANGAN
+  // Kolom: No | Proyek | Type | Blok | No | View (Bisa digeser) | Catatan | Aksi (WA, Upload, Edit, Hapus)
+  // =========================================================================
+  const createConstructionSvg = (stageName, unitText, accentColor = '#0284c7') => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0f172a" />
+          <stop offset="100%" stop-color="#1e293b" />
+        </linearGradient>
+        <linearGradient id="wall" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="${accentColor}" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="${accentColor}" stop-opacity="0.6" />
+        </linearGradient>
+      </defs>
+      <rect width="800" height="500" fill="url(#bg)" />
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" stroke-width="0.7" stroke-opacity="0.4" />
+      </pattern>
+      <rect width="800" height="500" fill="url(#grid)" />
+      <line x1="80" y1="400" x2="720" y2="400" stroke="#64748b" stroke-width="4" stroke-linecap="round" />
+      <polygon points="400,140 640,240 160,240" fill="${accentColor}" fill-opacity="0.25" stroke="${accentColor}" stroke-width="3" />
+      <rect x="200" y="240" width="400" height="160" fill="url(#wall)" stroke="${accentColor}" stroke-width="3" />
+      <rect x="360" y="290" width="80" height="110" fill="#0f172a" stroke="#94a3b8" stroke-width="2" rx="4" />
+      <rect x="240" y="270" width="70" height="70" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="4" />
+      <rect x="490" y="270" width="70" height="70" fill="#0f172a" stroke="#38bdf8" stroke-width="2" rx="4" />
+      <rect x="520" y="30" width="240" height="42" rx="8" fill="#090d16" stroke="${accentColor}" stroke-width="1.5" />
+      <text x="640" y="56" fill="#38bdf8" font-family="Arial, sans-serif" font-weight="bold" font-size="14" text-anchor="middle">AMS PROPERTI DOKUMENTASI</text>
+      <rect x="40" y="30" width="230" height="65" rx="8" fill="#090d16" stroke="#475569" stroke-width="1" />
+      <text x="55" y="55" fill="#f8fafc" font-family="Arial, sans-serif" font-weight="900" font-size="15">${unitText}</text>
+      <text x="55" y="78" fill="#94a3b8" font-family="Arial, sans-serif" font-weight="bold" font-size="12">STATUS: FISIK TERVERIFIKASI</text>
+      <rect x="150" y="420" width="500" height="48" rx="8" fill="#090d16" stroke="${accentColor}" stroke-width="1.5" />
+      <text x="400" y="450" fill="#ffffff" font-family="Arial, sans-serif" font-weight="900" font-size="16" text-anchor="middle">📸 ${stageName}</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  };
+
+  const STORAGE_KEY_UPLOAD_FOTO = 'ams_teknik_upload_foto_v2';
+  const defaultUploadFoto = [
+    {
+      id: 'UF-01',
+      unitId: 'UNT-01',
+      proyek: 'Ashoka View',
+      type: 'Type 36/60',
+      blok: 'A',
+      no: '01',
+      konsumen: 'Budi Santoso',
+      phone: '0812-9988-7766',
+      catatan: 'Pemasangan atap baja ringan dan dinding plester 100% selesai. Siap lanjut pemasangan keramik lantai.',
+      photos: [
+        {
+          id: 'ph-101',
+          url: createConstructionSvg('Tampak Depan Bangunan & Carport', 'Ashoka View - Blok A No. 01', '#0284c7'),
+          name: 'Progres_Tampak_Depan_A01.jpg',
+          tanggal: '2025-08-10',
+          keterangan: 'Tampak depan unit fisik, carport dan dinding luar plester aci rapi'
+        },
+        {
+          id: 'ph-102',
+          url: createConstructionSvg('Struktur Rangka Atap Baja Ringan', 'Ashoka View - Blok A No. 01', '#38bdf8'),
+          name: 'Rangka_Atap_KudaKuda_A01.jpg',
+          tanggal: '2025-08-15',
+          keterangan: 'Pemasangan rangka atap baja ringan dan reng genteng'
+        },
+        {
+          id: 'ph-103',
+          url: createConstructionSvg('Pekerjaan Interior & Dinding', 'Ashoka View - Blok A No. 01', '#10b981'),
+          name: 'Interior_Kamar_RuangTamu_A01.jpg',
+          tanggal: '2025-08-20',
+          keterangan: 'Plester dinding interior ruang tamu dan kamar tidur'
+        }
+      ]
+    },
+    {
+      id: 'UF-02',
+      unitId: 'UNT-02',
+      proyek: 'Ashoka View',
+      type: 'Type 36/60',
+      blok: 'A',
+      no: '02',
+      konsumen: 'Siti Rahmawati',
+      phone: '0812-3344-5566',
+      catatan: 'Struktur pondasi batu kali dan sloof beton bertulang telah selesai cor 100%. Mulai naik bata ringan dinding.',
+      photos: [
+        {
+          id: 'ph-201',
+          url: createConstructionSvg('Pengecoran Sloof & Pondasi', 'Ashoka View - Blok A No. 02', '#f59e0b'),
+          name: 'Pondasi_Sloof_A02.jpg',
+          tanggal: '2025-08-05',
+          keterangan: 'Pondasi batu kali dan pembesian sloof beton bertulang'
+        },
+        {
+          id: 'ph-202',
+          url: createConstructionSvg('Pemasangan Dinding Bata Ringan', 'Ashoka View - Blok A No. 02', '#0284c7'),
+          name: 'Dinding_BataRingan_A02.jpg',
+          tanggal: '2025-08-18',
+          keterangan: 'Progres dinding bata ringan hebel mencapai ketinggian ringbalk'
+        }
+      ]
+    },
+    {
+      id: 'UF-03',
+      unitId: 'UNT-03',
+      proyek: 'Ashoka View',
+      type: 'Type 45/84',
+      blok: 'B',
+      no: '05',
+      konsumen: 'Hendra Gunawan',
+      phone: '0811-2233-4455',
+      catatan: 'Pekerjaan finishing cat dasar dinding interior dan eksterior. Pintu utama solid wood dan jendela terpasang rapi.',
+      photos: [
+        {
+          id: 'ph-301',
+          url: createConstructionSvg('Finishing Cat Dinding & Fasad', 'Ashoka View - Blok B No. 05', '#10b981'),
+          name: 'Fasad_Finishing_B05.jpg',
+          tanggal: '2025-08-25',
+          keterangan: 'Pengecatan cat dasar weathershield fasad depan'
+        },
+        {
+          id: 'ph-302',
+          url: createConstructionSvg('Pemasangan Kusen & Daun Pintu', 'Ashoka View - Blok B No. 05', '#c084fc'),
+          name: 'Kusen_Aluminium_B05.jpg',
+          tanggal: '2025-08-28',
+          keterangan: 'Kusen aluminium powder coating dan pintu solid wood'
+        },
+        {
+          id: 'ph-303',
+          url: createConstructionSvg('Pemasangan Keramik Lantai 60x60', 'Ashoka View - Blok B No. 05', '#38bdf8'),
+          name: 'Granit_Lantai_B05.jpg',
+          tanggal: '2025-09-02',
+          keterangan: 'Keramik granit 60x60 terpasang flat rata waterpass'
+        }
+      ]
+    },
+    {
+      id: 'UF-04',
+      unitId: 'UNT-04',
+      proyek: 'Ashoka Park',
+      type: 'Type 54/90',
+      blok: 'A',
+      no: '01',
+      konsumen: 'Rian Perdana',
+      phone: '0813-9876-5432',
+      catatan: 'Pengecoran plat lantai 2 dan tangga beton bertulang telah kering sempurna. Mulai pasang dinding lt 2.',
+      photos: [
+        {
+          id: 'ph-401',
+          url: createConstructionSvg('Pengecoran Plat Lantai 2', 'Ashoka Park - Blok A No. 01', '#f59e0b'),
+          name: 'Cor_Dak_Lantai2_A01.jpg',
+          tanggal: '2025-08-12',
+          keterangan: 'Pengecoran plat lantai 2 menggunakan ready mix K-250'
+        },
+        {
+          id: 'ph-402',
+          url: createConstructionSvg('Struktur Tangga Beton', 'Ashoka Park - Blok A No. 01', '#0284c7'),
+          name: 'Tangga_Beton_A01.jpg',
+          tanggal: '2025-08-22',
+          keterangan: 'Pembesian dan bekisting tangga beton bertulang'
+        }
+      ]
+    },
+    {
+      id: 'UF-05',
+      unitId: 'UNT-05',
+      proyek: 'Ashoka Park',
+      type: 'Type 60/100',
+      blok: 'B',
+      no: '03',
+      konsumen: 'Dewi Lestari',
+      phone: '0815-6789-0123',
+      catatan: 'Pembersihan akhir fisik unit, perapihan carport koral sikat, dan meteran PLN/PDAM aktif. Siap serah terima kunci.',
+      photos: [
+        {
+          id: 'ph-501',
+          url: createConstructionSvg('Unit Rumah 100% Siap Huni', 'Ashoka Park - Blok B No. 03', '#10b981'),
+          name: 'Final_SiapHuni_B03.jpg',
+          tanggal: '2025-09-01',
+          keterangan: 'Tampak keseluruhan unit rumah 100% tuntas siap serah terima'
+        },
+        {
+          id: 'ph-502',
+          url: createConstructionSvg('Carport Koral Sikat & Taman', 'Ashoka Park - Blok B No. 03', '#38bdf8'),
+          name: 'Carport_Taman_B03.jpg',
+          tanggal: '2025-09-05',
+          keterangan: 'Perapihan taman depan dan carport koral sikat motif minimalis'
+        },
+        {
+          id: 'ph-503',
+          url: createConstructionSvg('KWH Meter PLN & PDAM Aktif', 'Ashoka Park - Blok B No. 03', '#f59e0b'),
+          name: 'Meteran_Listrik_Air_B03.jpg',
+          tanggal: '2025-09-08',
+          keterangan: 'Instalasi meteran listrik 2200W dan air bersih telah menyala normal'
+        }
+      ]
+    }
+  ];
+
+  const [uploadFotoRows, setUploadFotoRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_UPLOAD_FOTO);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultUploadFoto;
+  });
+
+  useEffect(() => {
+    saveCloudStore(STORAGE_KEY_UPLOAD_FOTO, uploadFotoRows);
+  }, [uploadFotoRows]);
+
+  const [searchFoto, setSearchFoto] = useState('');
+  const [filterFotoProyek, setFilterFotoProyek] = useState('ALL');
+  const [filterFotoBlok, setFilterFotoBlok] = useState('ALL');
+
+  // Carousel Lightbox Modal State
+  const [activeCarouselItem, setActiveCarouselItem] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Form Add / Edit Unit Modal State
+  const [isFotoModalOpen, setIsFotoModalOpen] = useState(false);
+  const [editingFotoId, setEditingFotoId] = useState(null);
+  const [fotoForm, setFotoForm] = useState({
+    unitId: '',
+    proyek: 'Ashoka View',
+    type: 'Type 36/60',
+    blok: 'A',
+    no: '01',
+    konsumen: '',
+    phone: '',
+    catatan: '',
+    newPhotos: []
+  });
+
+  // Quick Upload Modal State
+  const [isQuickUploadModalOpen, setIsQuickUploadModalOpen] = useState(false);
+  const [quickUploadTarget, setQuickUploadTarget] = useState(null);
+  const [quickUploadFiles, setQuickUploadFiles] = useState([]);
+  const [quickUploadKeterangan, setQuickUploadKeterangan] = useState('');
+
+  // WhatsApp Modal State
+  const [isWaModalOpen, setIsWaModalOpen] = useState(false);
+  const [targetWaItem, setTargetWaItem] = useState(null);
+  const [waPhone, setWaPhone] = useState('');
+  const [waMessage, setWaMessage] = useState('');
+
+  // Keyboard Navigation for Carousel (ArrowLeft & ArrowRight to slide)
+  useEffect(() => {
+    if (!activeCarouselItem || !activeCarouselItem.photos || activeCarouselItem.photos.length === 0) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        setCarouselIndex(prev => (prev === 0 ? activeCarouselItem.photos.length - 1 : prev - 1));
+      } else if (e.key === 'ArrowRight') {
+        setCarouselIndex(prev => (prev === activeCarouselItem.photos.length - 1 ? 0 : prev + 1));
+      } else if (e.key === 'Escape') {
+        setActiveCarouselItem(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeCarouselItem]);
+
+  const filteredUploadFotoRows = useMemo(() => {
+    return uploadFotoRows.filter(item => {
+      const q = searchFoto.toLowerCase();
+      const matchSearch = !q ||
+        (item.proyek || '').toLowerCase().includes(q) ||
+        (item.type || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.no || '').toLowerCase().includes(q) ||
+        (item.konsumen || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchProyek = filterFotoProyek === 'ALL' || item.proyek === filterFotoProyek;
+      const matchBlok = filterFotoBlok === 'ALL' || item.blok === filterFotoBlok;
+      return matchSearch && matchProyek && matchBlok;
+    });
+  }, [uploadFotoRows, searchFoto, filterFotoProyek, filterFotoBlok]);
+
+  const handleOpenAddFoto = () => {
+    setEditingFotoId(null);
+    setFotoForm({
+      unitId: '',
+      proyek: 'Ashoka View',
+      type: 'Type 36/60',
+      blok: 'A',
+      no: '',
+      konsumen: '',
+      phone: '',
+      catatan: '',
+      newPhotos: []
+    });
+    setIsFotoModalOpen(true);
+  };
+
+  const handleOpenEditFoto = (item) => {
+    setEditingFotoId(item.id);
+    setFotoForm({
+      unitId: item.unitId || '',
+      proyek: item.proyek || 'Ashoka View',
+      type: item.type || 'Type 36/60',
+      blok: item.blok || 'A',
+      no: item.no || '',
+      konsumen: item.konsumen || '',
+      phone: item.phone || '',
+      catatan: item.catatan || '',
+      newPhotos: []
+    });
+    setIsFotoModalOpen(true);
+  };
+
+  const handleSelectUnitFromDb = (unitId) => {
+    const selected = databaseUnitRows.find(u => u.id === unitId || `${u.proyek}-${u.blok}-${u.nomor}` === unitId);
+    if (selected) {
+      const matchedCustomer = databaseKonsumenRows.find(k => 
+        (k.referensi || '').toLowerCase().includes((selected.nomor || '').toLowerCase()) || 
+        (k.alamat || '').toLowerCase().includes((selected.blok || '').toLowerCase())
+      );
+      setFotoForm(prev => ({
+        ...prev,
+        unitId: selected.id,
+        proyek: selected.proyek,
+        type: selected.type,
+        blok: selected.blok,
+        no: selected.nomor,
+        konsumen: matchedCustomer ? matchedCustomer.nama : prev.konsumen,
+        phone: matchedCustomer ? matchedCustomer.noHp : prev.phone
+      }));
+    }
+  };
+
+  const handlePhotoFilesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setFotoForm(prev => ({
+          ...prev,
+          newPhotos: [
+            ...prev.newPhotos,
+            {
+              id: `ph-new-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+              url: ev.target.result,
+              name: file.name,
+              tanggal: new Date().toISOString().split('T')[0],
+              keterangan: `Dokumentasi Fisik ${file.name}`
+            }
+          ]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+    showNotification(`${files.length} file foto siap diunggah!`, 'info');
+  };
+
+  const handleSaveFotoRecord = (e) => {
+    e.preventDefault();
+    if (!fotoForm.proyek || !fotoForm.blok || !fotoForm.no) {
+      showNotification('Mohon lengkapi Proyek, Blok, dan Nomor Unit!', 'warning');
+      return;
+    }
+
+    if (editingFotoId) {
+      setUploadFotoRows(prev => prev.map(row => {
+        if (row.id === editingFotoId) {
+          return {
+            ...row,
+            proyek: fotoForm.proyek,
+            type: fotoForm.type,
+            blok: fotoForm.blok.trim().toUpperCase(),
+            no: fotoForm.no.trim(),
+            konsumen: fotoForm.konsumen.trim(),
+            phone: fotoForm.phone.trim(),
+            catatan: fotoForm.catatan.trim(),
+            photos: [...(row.photos || []), ...fotoForm.newPhotos]
+          };
+        }
+        return row;
+      }));
+      showNotification(`Data Foto Blok ${fotoForm.blok} No. ${fotoForm.no} berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `UF-${Date.now()}`,
+        unitId: fotoForm.unitId || `UNT-CUSTOM-${Date.now()}`,
+        proyek: fotoForm.proyek,
+        type: fotoForm.type,
+        blok: fotoForm.blok.trim().toUpperCase(),
+        no: fotoForm.no.trim(),
+        konsumen: fotoForm.konsumen.trim(),
+        phone: fotoForm.phone.trim(),
+        catatan: fotoForm.catatan.trim(),
+        photos: fotoForm.newPhotos.length > 0 ? fotoForm.newPhotos : [
+          {
+            id: `ph-default-${Date.now()}`,
+            url: createConstructionSvg('Dokumentasi Awal Unit', `${fotoForm.proyek} - Blok ${fotoForm.blok} No. ${fotoForm.no}`, '#0284c7'),
+            name: 'Dokumentasi_Awal.jpg',
+            tanggal: new Date().toISOString().split('T')[0],
+            keterangan: 'Pencatatan awal unit dokumentasi lapangan'
+          }
+        ]
+      };
+      setUploadFotoRows([newItem, ...uploadFotoRows]);
+      showNotification(`Unit Blok ${newItem.blok} No. ${newItem.no} berhasil ditambahkan ke Upload Foto!`, 'success');
+    }
+    setIsFotoModalOpen(false);
+  };
+
+  const handleDeleteFotoRecord = (id, label) => {
+    if (window.confirm(`Hapus catatan dokumentasi foto unit "${label}"?`)) {
+      setUploadFotoRows(prev => prev.filter(row => row.id !== id));
+      showNotification(`Catatan foto unit "${label}" berhasil dihapus.`, 'warning');
+      if (activeCarouselItem?.id === id) {
+        setActiveCarouselItem(null);
+      }
+    }
+  };
+
+  const handleOpenQuickUpload = (item) => {
+    setQuickUploadTarget(item);
+    setQuickUploadFiles([]);
+    setQuickUploadKeterangan('');
+    setIsQuickUploadModalOpen(true);
+  };
+
+  const handleQuickUploadFileSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setQuickUploadFiles(prev => [
+          ...prev,
+          {
+            name: file.name,
+            dataUrl: ev.target.result
+          }
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSaveQuickUpload = () => {
+    if (!quickUploadTarget) return;
+    if (quickUploadFiles.length === 0) {
+      showNotification('Pilih minimal 1 file foto untuk diunggah!', 'warning');
+      return;
+    }
+
+    const newPhotoObjs = quickUploadFiles.map((fileObj, idx) => ({
+      id: `ph-user-${Date.now()}-${idx}`,
+      url: fileObj.dataUrl,
+      name: fileObj.name,
+      tanggal: new Date().toISOString().split('T')[0],
+      keterangan: quickUploadKeterangan.trim() || `Foto Lapangan ${fileObj.name}`
+    }));
+
+    setUploadFotoRows(prev => prev.map(row => {
+      if (row.id === quickUploadTarget.id) {
+        const updatedPhotos = [...(row.photos || []), ...newPhotoObjs];
+        if (activeCarouselItem?.id === row.id) {
+          setActiveCarouselItem({ ...row, photos: updatedPhotos });
+        }
+        return {
+          ...row,
+          photos: updatedPhotos
+        };
+      }
+      return row;
+    }));
+
+    showNotification(`${newPhotoObjs.length} foto berhasil diunggah ke Blok ${quickUploadTarget.blok} No. ${quickUploadTarget.no}!`, 'success');
+    setIsQuickUploadModalOpen(false);
+    setQuickUploadFiles([]);
+    setQuickUploadKeterangan('');
+    setQuickUploadTarget(null);
+  };
+
+  const handleDeletePhotoFromCarousel = (photoId) => {
+    if (!activeCarouselItem) return;
+    if (window.confirm('Hapus foto ini dari galeri unit?')) {
+      const updatedPhotos = (activeCarouselItem.photos || []).filter(p => p.id !== photoId);
+      setUploadFotoRows(prev => prev.map(row => {
+        if (row.id === activeCarouselItem.id) {
+          return { ...row, photos: updatedPhotos };
+        }
+        return row;
+      }));
+      setActiveCarouselItem(prev => ({ ...prev, photos: updatedPhotos }));
+      if (carouselIndex >= updatedPhotos.length && updatedPhotos.length > 0) {
+        setCarouselIndex(updatedPhotos.length - 1);
+      }
+      showNotification('Foto berhasil dihapus.', 'warning');
+    }
+  };
+
+  const handleOpenWaModal = (item) => {
+    setTargetWaItem(item);
+    const cleanNo = (item.phone || '').replace(/[^0-9]/g, '');
+    const phoneFormatted = cleanNo.startsWith('0') ? '62' + cleanNo.slice(1) : (cleanNo.startsWith('62') ? cleanNo : (cleanNo ? '62' + cleanNo : ''));
+    setWaPhone(phoneFormatted || item.phone || '');
+    
+    const msg = `Halo Bapak/Ibu ${item.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${item.proyek}\n🏠 Kavling: Blok ${item.blok} No. ${item.no} (${item.type})\n📝 Catatan Progres: ${item.catatan || 'Pekerjaan konstruksi berjalan sesuai jadwal.'}\n📸 Jumlah Dokumentasi: ${(item.photos || []).length} Foto Lapangan\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
+    setWaMessage(msg);
+    setIsWaModalOpen(true);
+  };
+
+  const handleSendWaDirect = () => {
+    if (!waPhone) {
+      showNotification('Mohon masukkan nomor WhatsApp tujuan!', 'warning');
+      return;
+    }
+    const clean = waPhone.replace(/[^0-9]/g, '');
+    const validPhone = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+    const url = `https://wa.me/${validPhone}?text=${encodeURIComponent(waMessage)}`;
+    window.open(url, '_blank');
+    setIsWaModalOpen(false);
+    showNotification(`Laporan WhatsApp untuk Blok ${targetWaItem?.blok} No. ${targetWaItem?.no} berhasil dibuka!`, 'success');
+  };
 
   // =========================================================================
   // SUB-MODUL: TUKAR FAKTUR STORE (NO. TT, TANPA OPNAME, PEMBAYARAN KONTRAK)
@@ -3975,8 +4510,18 @@ export const TeknikModule = () => {
       {/* 2. PEKERJAAN BORONGAN (Warna Biru Langit #00a2ed)                         */}
       {/* 3. DATA BASE TERPADU PROYEK (Warna Emerald #10b981)                       */}
       {/* ========================================================================= */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-        
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: '8px',
+          marginBottom: '1.25rem',
+          background: '#090d16',
+          padding: '8px',
+          borderRadius: '12px',
+          border: '1px solid #1e293b'
+        }}
+      >
         {/* Tombol 1: Pekerjaan Harian */}
         <button
           type="button"
@@ -3985,23 +4530,24 @@ export const TeknikModule = () => {
             if (setActiveSubTab) setActiveSubTab('harian');
           }}
           style={{
-            padding: '1rem 1.25rem',
+            background: mainCategory === 'harian' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
+            color: mainCategory === 'harian' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'harian' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
-            border: mainCategory === 'harian' ? '3px solid #0284c7' : '1.5px solid #0369a1',
-            background: mainCategory === 'harian' ? '#0284c7' : '#1e293b',
-            color: mainCategory === 'harian' ? '#ffffff' : '#38bdf8',
-            fontWeight: 900,
-            fontSize: '1.1rem',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
-            cursor: 'pointer',
-            boxShadow: mainCategory === 'harian' ? '0 4px 16px rgba(2, 132, 199, 0.45)' : 'none',
-            transition: 'all 0.2s ease'
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'harian' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
-          <Users size={22} color={mainCategory === 'harian' ? '#ffffff' : '#38bdf8'} /> Pekerjaan Harian
+          <Users size={16} />
+          <span>1. Pekerjaan Harian</span>
         </button>
 
         {/* Tombol 2: Pekerjaan Borongan */}
@@ -4012,26 +4558,27 @@ export const TeknikModule = () => {
             if (setActiveSubTab) setActiveSubTab('borongan');
           }}
           style={{
-            padding: '1rem 1.25rem',
+            background: mainCategory === 'borongan' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
+            color: mainCategory === 'borongan' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'borongan' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
             borderRadius: '10px',
-            border: mainCategory === 'borongan' ? '3px solid #0284c7' : '1.5px solid #0369a1',
-            background: mainCategory === 'borongan' ? '#00a2ed' : '#1e293b',
-            color: mainCategory === 'borongan' ? '#ffffff' : '#38bdf8',
-            fontWeight: 900,
-            fontSize: '1.1rem',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
-            cursor: 'pointer',
-            boxShadow: mainCategory === 'borongan' ? '0 4px 16px rgba(0, 162, 237, 0.45)' : 'none',
-            transition: 'all 0.2s ease'
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'borongan' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
           }}
         >
-          <Building2 size={22} color={mainCategory === 'borongan' ? '#ffffff' : '#38bdf8'} /> Pekerjaan Borongan
+          <Building2 size={16} />
+          <span>2. Pekerjaan Borongan</span>
         </button>
 
-        {/* Tombol 3: Tukar Faktur (Di Samping Borongan) */}
+        {/* Tombol 3: Tukar Faktur */}
         <button
           type="button"
           onClick={() => {
@@ -4039,26 +4586,27 @@ export const TeknikModule = () => {
             if (setActiveSubTab) setActiveSubTab('tukar_faktur');
           }}
           style={{
-            padding: '1rem 1.25rem',
+            background: mainCategory === 'tukar_faktur' ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' : '#0f172a',
+            color: mainCategory === 'tukar_faktur' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'tukar_faktur' ? '1.5px solid #a855f7' : '1px solid #1e293b',
             borderRadius: '10px',
-            border: mainCategory === 'tukar_faktur' ? '3px solid #7c3aed' : '1.5px solid #5b21b6',
-            background: mainCategory === 'tukar_faktur' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : '#1e293b',
-            color: mainCategory === 'tukar_faktur' ? '#ffffff' : '#c084fc',
-            fontWeight: 900,
-            fontSize: '1.1rem',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
-            cursor: 'pointer',
-            boxShadow: mainCategory === 'tukar_faktur' ? '0 4px 16px rgba(124, 58, 237, 0.45)' : 'none',
-            transition: 'all 0.2s ease'
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'tukar_faktur' ? '0 4px 12px rgba(124, 58, 237, 0.35)' : 'none'
           }}
         >
-          <FileText size={22} color={mainCategory === 'tukar_faktur' ? '#ffffff' : '#c084fc'} /> Tukar Faktur
+          <FileText size={16} />
+          <span>3. Tukar Faktur</span>
         </button>
 
-        {/* Tombol 4: Persediaan (Di Pinggir Tukar Faktur Sesuai Permintaan) */}
+        {/* Tombol 4: Persediaan */}
         <button
           type="button"
           onClick={() => {
@@ -4066,26 +4614,27 @@ export const TeknikModule = () => {
             if (setActiveSubTab) setActiveSubTab('persediaan');
           }}
           style={{
-            padding: '1rem 1.25rem',
+            background: mainCategory === 'persediaan' ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)' : '#0f172a',
+            color: mainCategory === 'persediaan' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'persediaan' ? '1.5px solid #f59e0b' : '1px solid #1e293b',
             borderRadius: '10px',
-            border: mainCategory === 'persediaan' ? '3px solid #f59e0b' : '1.5px solid #b45309',
-            background: mainCategory === 'persediaan' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#1e293b',
-            color: mainCategory === 'persediaan' ? '#ffffff' : '#fbbf24',
-            fontWeight: 900,
-            fontSize: '1.1rem',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
-            cursor: 'pointer',
-            boxShadow: mainCategory === 'persediaan' ? '0 4px 16px rgba(245, 158, 11, 0.45)' : 'none',
-            transition: 'all 0.2s ease'
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'persediaan' ? '0 4px 12px rgba(245, 158, 11, 0.35)' : 'none'
           }}
         >
-          <Boxes size={22} color={mainCategory === 'persediaan' ? '#ffffff' : '#fbbf24'} /> Persediaan
+          <Boxes size={16} />
+          <span>4. Persediaan</span>
         </button>
 
-        {/* Tombol 5: Data Base Terpadu Proyek */}
+        {/* Tombol 5: Data Base Terpadu */}
         <button
           type="button"
           onClick={() => {
@@ -4093,23 +4642,52 @@ export const TeknikModule = () => {
             if (setActiveSubTab) setActiveSubTab('database');
           }}
           style={{
-            padding: '1rem 1.25rem',
+            background: mainCategory === 'database' ? 'linear-gradient(135deg, #059669 0%, #047857 100%)' : '#0f172a',
+            color: mainCategory === 'database' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'database' ? '1.5px solid #10b981' : '1px solid #1e293b',
             borderRadius: '10px',
-            border: mainCategory === 'database' ? '3px solid #10b981' : '1.5px solid #065f46',
-            background: mainCategory === 'database' ? '#10b981' : '#1e293b',
-            color: mainCategory === 'database' ? '#ffffff' : '#34d399',
-            fontWeight: 900,
-            fontSize: '1.1rem',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.6rem',
-            cursor: 'pointer',
-            boxShadow: mainCategory === 'database' ? '0 4px 16px rgba(16, 185, 129, 0.45)' : 'none',
-            transition: 'all 0.2s ease'
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'database' ? '0 4px 12px rgba(16, 185, 129, 0.35)' : 'none'
           }}
         >
-          <Database size={22} color={mainCategory === 'database' ? '#ffffff' : '#34d399'} /> Data Base Terpadu
+          <Database size={16} />
+          <span>5. Data Base Terpadu</span>
+        </button>
+
+        {/* Tombol 6: Upload Foto */}
+        <button
+          type="button"
+          onClick={() => {
+            setMainCategory('upload_foto');
+            if (setActiveSubTab) setActiveSubTab('upload_foto');
+          }}
+          style={{
+            background: mainCategory === 'upload_foto' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
+            color: mainCategory === 'upload_foto' ? '#ffffff' : '#94a3b8',
+            border: mainCategory === 'upload_foto' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '9px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.2s',
+            boxShadow: mainCategory === 'upload_foto' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
+          }}
+        >
+          <Camera size={16} />
+          <span>6. Upload Foto</span>
         </button>
       </div>
 
@@ -11332,6 +11910,551 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* KATEGORI UTAMA 6: UPLOAD FOTO (DOKUMENTASI FOTO UNIT & PROGRESS LAPANGAN)   */}
+      {/* Kolom Sesuai Gambar: No. | Proyek | Type | Blok | No. | View | Catatan     */}
+      {/* Kolom Tambahan: Aksi (Kirim WA, Upload Foto, Edit, Hapus)                  */}
+      {/* ========================================================================= */}
+      {mainCategory === 'upload_foto' && (
+        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+          {/* Card Container */}
+          <div className="card" style={{ background: '#0b1120', border: '1px solid #1e293b', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
+            
+            {/* Header with UPLOAD FOTO Badge */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid #1e293b' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ 
+                  background: '#b9d5f9', 
+                  color: '#1e3a8a', 
+                  fontWeight: 900, 
+                  fontSize: '0.82rem', 
+                  letterSpacing: '0.06em', 
+                  padding: '6px 14px', 
+                  borderRadius: '20px', 
+                  textTransform: 'uppercase',
+                  boxShadow: '0 2px 8px rgba(185, 213, 249, 0.35)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <Camera size={15} color="#1e3a8a" />
+                  UPLOAD FOTO
+                </span>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Dokumentasi & Galeri Foto Lapangan Unit
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                    Monitoring visual pembangunan unit fisik, galeri carousel interaktif, dan pelaporan WhatsApp ke konsumen.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenAddFoto}
+                  className="btn btn-primary"
+                  style={{
+                    background: 'linear-gradient(135deg, #0284c7, #2563eb)',
+                    border: 'none',
+                    fontWeight: 900,
+                    fontSize: '0.84rem',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
+                  }}
+                >
+                  <Plus size={16} />
+                  + Tambah Dokumentasi Unit
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Stats Banner */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '1.25rem' }}>
+              <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
+                  <Building2 size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Unit Terdokumentasi</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc' }}>{uploadFotoRows.length} Kavling</div>
+                </div>
+              </div>
+
+              <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4ade80' }}>
+                  <Camera size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Foto Tersimpan</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#4ade80' }}>
+                    {uploadFotoRows.reduce((acc, row) => acc + ((row.photos && row.photos.length) || 0), 0)} Foto
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fbbf24' }}>
+                  <Users size={20} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Database Unit Sinkron</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>{databaseUnitRows.length} Terdaftar</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Toolbar */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '1rem', background: '#0f172a', padding: '10px 14px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+              {/* Search input */}
+              <div style={{ position: 'relative', flex: '1 1 240px' }}>
+                <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                <input
+                  type="text"
+                  placeholder="Cari Proyek, Blok, No. Unit, Konsumen, atau Catatan..."
+                  value={searchFoto}
+                  onChange={(e) => setSearchFoto(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    padding: '0 12px 0 34px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Filter Proyek */}
+              <div style={{ minWidth: '160px' }}>
+                <select
+                  value={filterFotoProyek}
+                  onChange={(e) => setFilterFotoProyek(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">🏢 Semua Proyek</option>
+                  {[...new Set(uploadFotoRows.map(u => u.proyek).filter(Boolean))].map(pr => (
+                    <option key={pr} value={pr}>{pr}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filter Blok */}
+              <div style={{ minWidth: '120px' }}>
+                <select
+                  value={filterFotoBlok}
+                  onChange={(e) => setFilterFotoBlok(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">📍 Semua Blok</option>
+                  {[...new Set(uploadFotoRows.map(u => u.blok).filter(Boolean))].sort().map(bl => (
+                    <option key={bl} value={bl}>Blok {bl}</option>
+                  ))}
+                </select>
+              </div>
+
+              {(searchFoto || filterFotoProyek !== 'ALL' || filterFotoBlok !== 'ALL') && (
+                <button
+                  type="button"
+                  onClick={() => { setSearchFoto(''); setFilterFotoProyek('ALL'); setFilterFotoBlok('ALL'); }}
+                  style={{
+                    height: '36px',
+                    padding: '0 12px',
+                    background: '#334155',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#f87171',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <X size={14} /> Reset
+                </button>
+              )}
+            </div>
+
+            {/* Table */}
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #1e293b', background: '#0a0f1d' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+                <thead>
+                  <tr style={{ background: '#0f172a', borderBottom: '2px solid #334155', color: '#94a3b8', textTransform: 'uppercase', fontSize: '0.74rem', letterSpacing: '0.05em' }}>
+                    <th style={{ padding: '12px 14px', width: '45px', textAlign: 'center' }}>No.</th>
+                    <th style={{ padding: '12px 14px' }}>Proyek</th>
+                    <th style={{ padding: '12px 14px' }}>Type</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '70px' }}>Blok</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '70px' }}>No.</th>
+                    <th style={{ padding: '12px 14px', minWidth: '180px' }}>View</th>
+                    <th style={{ padding: '12px 14px', minWidth: '220px' }}>Catatan</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', minWidth: '240px' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUploadFotoRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <Camera size={42} style={{ margin: '0 auto 12px auto', opacity: 0.4, display: 'block' }} />
+                        <div style={{ fontWeight: 800, fontSize: '0.96rem', color: '#cbd5e1' }}>Belum ada data dokumentasi foto unit</div>
+                        <p style={{ margin: '6px 0 16px 0', fontSize: '0.82rem' }}>Silakan tambahkan data dokumentasi unit baru dari database yang tersedia.</p>
+                        <button
+                          type="button"
+                          onClick={handleOpenAddFoto}
+                          className="btn btn-primary"
+                          style={{ background: '#0284c7', border: 'none', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 800 }}
+                        >
+                          + Tambah Dokumentasi Unit Sekarang
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredUploadFotoRows.map((row, idx) => {
+                      const photoList = row.photos || [];
+                      const firstPhoto = photoList[0];
+                      const totalPhotos = photoList.length;
+
+                      return (
+                        <tr 
+                          key={row.id || idx}
+                          style={{ 
+                            borderBottom: '1px solid #1e293b', 
+                            background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)',
+                            transition: 'background 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(30, 41, 59, 0.4)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)'}
+                        >
+                          {/* No. */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#64748b' }}>
+                            {idx + 1}
+                          </td>
+
+                          {/* Proyek */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Building2 size={14} color="#38bdf8" />
+                              {row.proyek}
+                            </div>
+                            {row.konsumen && (
+                              <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Users size={11} color="#a855f7" /> {row.konsumen}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Type */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ 
+                              background: 'rgba(56, 189, 248, 0.12)', 
+                              color: '#38bdf8', 
+                              border: '1px solid rgba(56, 189, 248, 0.3)', 
+                              padding: '3px 8px', 
+                              borderRadius: '4px', 
+                              fontSize: '0.76rem', 
+                              fontWeight: 800 
+                            }}>
+                              {row.type || 'Standard'}
+                            </span>
+                          </td>
+
+                          {/* Blok */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                            <span style={{ 
+                              background: '#fef3c7', 
+                              color: '#92400e', 
+                              padding: '3px 10px', 
+                              borderRadius: '6px', 
+                              fontWeight: 900, 
+                              fontSize: '0.85rem',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                            }}>
+                              {row.blok}
+                            </span>
+                          </td>
+
+                          {/* No. */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                            <span style={{ 
+                              background: '#1e293b', 
+                              color: '#f8fafc', 
+                              padding: '3px 10px', 
+                              borderRadius: '6px', 
+                              fontWeight: 900, 
+                              fontSize: '0.85rem',
+                              border: '1px solid #334155'
+                            }}>
+                              {row.no}
+                            </span>
+                          </td>
+
+                          {/* View (Thumbnail & Carousel Opener) */}
+                          <td style={{ padding: '12px 14px' }}>
+                            {totalPhotos > 0 ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div 
+                                  onClick={() => {
+                                    setActiveCarouselItem(row);
+                                    setCarouselIndex(0);
+                                  }}
+                                  title="Klik untuk melihat foto lebih besar & geser"
+                                  style={{
+                                    width: '58px',
+                                    height: '44px',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    border: '1.5px solid #0284c7',
+                                    cursor: 'pointer',
+                                    flexShrink: 0,
+                                    position: 'relative',
+                                    background: '#020617',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                                    transition: 'transform 0.2s ease, border-color 0.2s ease'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                >
+                                  <img 
+                                    src={firstPhoto.url} 
+                                    alt={firstPhoto.name || 'Dokumentasi Unit'} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  />
+                                  {totalPhotos > 1 && (
+                                    <div style={{
+                                      position: 'absolute',
+                                      bottom: '2px',
+                                      right: '2px',
+                                      background: 'rgba(0,0,0,0.75)',
+                                      color: '#ffffff',
+                                      fontSize: '0.62rem',
+                                      fontWeight: 900,
+                                      padding: '1px 4px',
+                                      borderRadius: '3px',
+                                      border: '0.5px solid rgba(255,255,255,0.4)'
+                                    }}>
+                                      +{totalPhotos - 1}
+                                    </div>
+                                  )}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveCarouselItem(row);
+                                    setCarouselIndex(0);
+                                  }}
+                                  style={{
+                                    background: 'rgba(2, 132, 199, 0.15)',
+                                    color: '#38bdf8',
+                                    border: '1px solid rgba(2, 132, 199, 0.4)',
+                                    padding: '5px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.76rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#ffffff'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2, 132, 199, 0.15)'; e.currentTarget.style.color = '#38bdf8'; }}
+                                >
+                                  <Eye size={13} />
+                                  View ({totalPhotos} Foto)
+                                </button>
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '0.76rem', color: '#64748b', fontStyle: 'italic' }}>Belum ada foto</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenQuickUpload(row)}
+                                  style={{
+                                    background: 'none',
+                                    border: '1px dashed #38bdf8',
+                                    color: '#38bdf8',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  + Upload
+                                </button>
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Catatan */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ 
+                              color: row.catatan ? '#cbd5e1' : '#64748b', 
+                              fontSize: '0.82rem', 
+                              lineHeight: '1.4', 
+                              maxWidth: '320px',
+                              fontStyle: row.catatan ? 'normal' : 'italic'
+                            }}>
+                              {row.catatan || 'Belum ada catatan progres'}
+                            </div>
+                            {firstPhoto?.tanggal && (
+                              <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
+                                Update: {firstPhoto.tanggal}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Aksi (WhatsApp, Upload, Edit, Hapus) */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              
+                              {/* 1. Kirim ke WhatsApp Pengguna */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenWaModal(row)}
+                                title="Kirim Laporan Progres Unit ke WhatsApp Konsumen"
+                                style={{
+                                  background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '5px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  boxShadow: '0 2px 6px rgba(22, 163, 74, 0.3)'
+                                }}
+                              >
+                                <MessageCircle size={13} />
+                                Kirim WA
+                              </button>
+
+                              {/* 2. Upload Foto Tambahan */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenQuickUpload(row)}
+                                title="Upload Tambahan Foto Lapangan Unit"
+                                style={{
+                                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  padding: '5px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                                }}
+                              >
+                                <Upload size={13} />
+                                Upload
+                              </button>
+
+                              {/* 3. Edit Data Unit */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditFoto(row)}
+                                title="Edit Data Kavling / Catatan Progres"
+                                style={{
+                                  background: '#1e293b',
+                                  color: '#93c5fd',
+                                  border: '1px solid #3b82f6',
+                                  padding: '5px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Edit3 size={13} />
+                              </button>
+
+                              {/* 4. Hapus */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFotoRecord(row.id, `${row.proyek} Blok ${row.blok} No ${row.no}`)}
+                                title="Hapus Dokumentasi Unit Ini"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  color: '#f87171',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  padding: '5px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer Summary Info */}
+            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+              <div>Menampilkan {filteredUploadFotoRows.length} dari {uploadFotoRows.length} unit terdokumentasi</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckCircle2 size={13} color="#22c55e" /> Data tersinkron otomatis ke MySQL Cloud & LocalStorage
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* MODAL 1: DATABASE TENAGA KERJA (ADD & EDIT WORKER POPUP)                  */}
       {/* Pop up form: Nama :, Status :, Upah : (Validasi: Nama Tidak Boleh Sama)   */}
       {/* ========================================================================= */}
@@ -15041,6 +16164,826 @@ export const TeknikModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsBarangKeluarModalOpen(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px' }}>
                   💾 Simpan Catatan Barang Keluar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL LIGHTBOX / CAROUSEL VIEW FOTO (BISA DIGESER DENGAN PANAH & KEYBOARD) */}
+      {/* ========================================================================= */}
+      {activeCarouselItem && (
+        <div 
+          className="modal-backdrop" 
+          style={{ 
+            zIndex: 1200, 
+            background: 'rgba(3, 7, 18, 0.94)', 
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveCarouselItem(null);
+          }}
+        >
+          <div 
+            style={{ 
+              width: '100%', 
+              maxWidth: '960px', 
+              background: '#090d16', 
+              border: '1.5px solid #1e3a8a', 
+              borderRadius: '16px', 
+              boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(30, 58, 138, 0.3)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '94vh',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+          >
+            {/* Modal Top Header */}
+            <div style={{ 
+              padding: '12px 20px', 
+              background: '#0d1527', 
+              borderBottom: '1px solid #1e293b', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ 
+                  background: '#b9d5f9', 
+                  color: '#1e3a8a', 
+                  fontWeight: 900, 
+                  fontSize: '0.72rem', 
+                  padding: '4px 10px', 
+                  borderRadius: '14px', 
+                  textTransform: 'uppercase' 
+                }}>
+                  UPLOAD FOTO VIEW
+                </span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc' }}>
+                    {activeCarouselItem.proyek} - Blok {activeCarouselItem.blok} No. {activeCarouselItem.no}
+                  </h3>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
+                    Tipe: <span style={{ color: '#38bdf8', fontWeight: 700 }}>{activeCarouselItem.type}</span> 
+                    {activeCarouselItem.konsumen ? ` • Konsumen: ${activeCarouselItem.konsumen}` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {activeCarouselItem.photos && activeCarouselItem.photos.length > 0 && (
+                  <span style={{ 
+                    background: '#1e293b', 
+                    color: '#38bdf8', 
+                    fontSize: '0.78rem', 
+                    fontWeight: 800, 
+                    padding: '4px 12px', 
+                    borderRadius: '20px',
+                    border: '1px solid #334155'
+                  }}>
+                    Foto {carouselIndex + 1} / {activeCarouselItem.photos.length}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveCarouselItem(null)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#f87171',
+                    borderRadius: '8px',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Carousel Viewport with Arrows */}
+            <div style={{ 
+              position: 'relative', 
+              background: '#020617', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              minHeight: '360px',
+              maxHeight: '58vh',
+              overflow: 'hidden'
+            }}>
+              {activeCarouselItem.photos && activeCarouselItem.photos.length > 0 ? (
+                <>
+                  {/* Current Active Image */}
+                  <img
+                    src={activeCarouselItem.photos[carouselIndex]?.url}
+                    alt={activeCarouselItem.photos[carouselIndex]?.name || 'Foto Lapangan'}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '56vh',
+                      objectFit: 'contain',
+                      borderRadius: '4px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                      transition: 'opacity 0.2s ease-in-out'
+                    }}
+                  />
+
+                  {/* Tombol Geser Kiri < */}
+                  {activeCarouselItem.photos.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setCarouselIndex(prev => (prev === 0 ? activeCarouselItem.photos.length - 1 : prev - 1))}
+                      title="Geser Foto Sebelumnya (Keyboard: Panah Kiri)"
+                      style={{
+                        position: 'absolute',
+                        left: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        border: '1.5px solid rgba(56, 189, 248, 0.6)',
+                        color: '#ffffff',
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
+                    >
+                      <ChevronLeft size={26} />
+                    </button>
+                  )}
+
+                  {/* Tombol Geser Kanan > */}
+                  {activeCarouselItem.photos.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setCarouselIndex(prev => (prev === activeCarouselItem.photos.length - 1 ? 0 : prev + 1))}
+                      title="Geser Foto Selanjutnya (Keyboard: Panah Kanan)"
+                      style={{
+                        position: 'absolute',
+                        right: '16px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        border: '1.5px solid rgba(56, 189, 248, 0.6)',
+                        color: '#ffffff',
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
+                    >
+                      <ChevronRight size={26} />
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                  <Camera size={48} style={{ opacity: 0.3, margin: '0 auto 10px auto' }} />
+                  <div>Tidak ada foto untuk unit ini.</div>
+                </div>
+              )}
+            </div>
+
+            {/* Photo Info & Action Toolbar */}
+            {activeCarouselItem.photos && activeCarouselItem.photos.length > 0 && (
+              <div style={{ 
+                padding: '10px 18px', 
+                background: '#0b1120', 
+                borderTop: '1px solid #1e293b', 
+                borderBottom: '1px solid #1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.88rem' }}>
+                    {activeCarouselItem.photos[carouselIndex]?.name || `Foto ${carouselIndex + 1}`}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                    {activeCarouselItem.photos[carouselIndex]?.keterangan || activeCarouselItem.catatan || 'Dokumentasi visual unit'} 
+                    {activeCarouselItem.photos[carouselIndex]?.tanggal ? ` • Diambil: ${activeCarouselItem.photos[carouselIndex]?.tanggal}` : ''}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {/* Unduh Foto */}
+                  {activeCarouselItem.photos[carouselIndex]?.url && (
+                    <a
+                      href={activeCarouselItem.photos[carouselIndex]?.url}
+                      download={activeCarouselItem.photos[carouselIndex]?.name || `Foto_Blok_${activeCarouselItem.blok}_No_${activeCarouselItem.no}.jpg`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        background: '#1e293b',
+                        color: '#38bdf8',
+                        border: '1px solid #334155',
+                        padding: '5px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <Download size={13} />
+                      Unduh Foto
+                    </a>
+                  )}
+
+                  {/* Tambah Foto Tambahan */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpenQuickUpload(activeCarouselItem)}
+                    style={{
+                      background: 'rgba(2, 132, 199, 0.2)',
+                      color: '#38bdf8',
+                      border: '1px solid #0284c7',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Plus size={13} />
+                    + Tambah Foto
+                  </button>
+
+                  {/* Hapus Foto Ini */}
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePhotoFromCarousel(activeCarouselItem.photos[carouselIndex]?.id)}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      color: '#f87171',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Trash2 size={13} />
+                    Hapus Foto
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Thumbnail Strip for Direct Clicking */}
+            {activeCarouselItem.photos && activeCarouselItem.photos.length > 1 && (
+              <div style={{ 
+                padding: '10px 18px', 
+                background: '#080d19', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                overflowX: 'auto'
+              }}>
+                {activeCarouselItem.photos.map((ph, idx) => (
+                  <div
+                    key={ph.id || idx}
+                    onClick={() => setCarouselIndex(idx)}
+                    style={{
+                      width: '56px',
+                      height: '42px',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      border: idx === carouselIndex ? '2.5px solid #38bdf8' : '1.5px solid #334155',
+                      opacity: idx === carouselIndex ? 1 : 0.6,
+                      transform: idx === carouselIndex ? 'scale(1.05)' : 'scale(1)',
+                      transition: 'all 0.15s ease',
+                      boxShadow: idx === carouselIndex ? '0 0 10px rgba(56, 189, 248, 0.5)' : 'none'
+                    }}
+                  >
+                    <img src={ph.url} alt={ph.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Footer with Keyboard Tip */}
+            <div style={{ 
+              padding: '8px 18px', 
+              background: '#060a12', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              fontSize: '0.72rem',
+              color: '#64748b'
+            }}>
+              <div>
+                ⌨️ Gunakan tombol keyboard <strong style={{ color: '#94a3b8' }}>◄ Kiri</strong> dan <strong style={{ color: '#94a3b8' }}>Kanan ►</strong> untuk menggeser foto, atau <strong style={{ color: '#94a3b8' }}>Esc</strong> untuk keluar.
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveCarouselItem(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Tutup Galeri
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL KIRIM PROGRES KE WHATSAPP KONSUMEN / PENGGUNA                        */}
+      {/* ========================================================================= */}
+      {isWaModalOpen && targetWaItem && (
+        <div className="modal-backdrop" style={{ zIndex: 1200, background: 'rgba(0,0,0,0.85)' }}>
+          <div className="modal-content" style={{ maxWidth: '560px', background: '#091512', border: '1.5px solid #22c55e', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #14532d', background: '#052e16' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#4ade80', fontWeight: 900 }}>
+                <MessageCircle size={22} color="#4ade80" />
+                Kirim Laporan Progres ke WhatsApp Konsumen
+              </h3>
+              <button onClick={() => setIsWaModalOpen(false)} style={{ background: 'none', border: 'none', color: '#86efac', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem' }}>
+              {/* Unit Info Card */}
+              <div style={{ background: '#064e3b', border: '1px solid #059669', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ecfdf5' }}>
+                    {targetWaItem.proyek} - Blok {targetWaItem.blok} No. {targetWaItem.no}
+                  </div>
+                  <span style={{ background: '#10b981', color: '#064e3b', fontWeight: 900, fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px' }}>
+                    {targetWaItem.type}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#a7f3d0' }}>
+                  Konsumen: <strong>{targetWaItem.konsumen || 'Belum diisi'}</strong> • Total Foto: <strong>{(targetWaItem.photos || []).length} Foto</strong>
+                </div>
+              </div>
+
+              {/* Form Phone Number */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+                  Nomor WhatsApp Tujuan (Awali dengan 62 atau 08...):
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#4ade80' }} />
+                  <input
+                    type="text"
+                    placeholder="Contoh: 628123456789 atau 08123456789"
+                    value={waPhone}
+                    onChange={(e) => setWaPhone(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '40px',
+                      background: '#022c22',
+                      border: '1.5px solid #059669',
+                      borderRadius: '6px',
+                      color: '#ecfdf5',
+                      fontWeight: 800,
+                      padding: '0 12px 0 38px',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#6ee7b7', marginTop: '4px' }}>
+                  Sistem otomatis mengonversi nomor awalan 08 menjadi format internasional 62.
+                </div>
+              </div>
+
+              {/* Textarea Message */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+                  Isi Pesan WhatsApp:
+                </label>
+                <textarea
+                  rows={8}
+                  value={waMessage}
+                  onChange={(e) => setWaMessage(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#022c22',
+                    border: '1.5px solid #059669',
+                    borderRadius: '6px',
+                    color: '#f0fdf4',
+                    fontSize: '0.84rem',
+                    lineHeight: '1.5',
+                    padding: '10px 12px',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1px solid #14532d', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setIsWaModalOpen(false)}
+                style={{ background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1' }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSendWaDirect}
+                style={{
+                  background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                  border: 'none',
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  padding: '9px 18px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.85rem',
+                  boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+                }}
+              >
+                <MessageCircle size={16} />
+                Buka WhatsApp & Kirim Pesan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL QUICK UPLOAD FOTO TAMBAHAN                                          */}
+      {/* ========================================================================= */}
+      {isQuickUploadModalOpen && quickUploadTarget && (
+        <div className="modal-backdrop" style={{ zIndex: 1200, background: 'rgba(0,0,0,0.85)' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0b1120', border: '1.5px solid #0284c7', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #1e293b' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8', fontWeight: 900 }}>
+                <Camera size={20} color="#38bdf8" />
+                Upload Foto Tambahan: Blok {quickUploadTarget.blok} No. {quickUploadTarget.no}
+              </h3>
+              <button onClick={() => setIsQuickUploadModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem' }}>
+              <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.25rem' }}>
+                <div style={{ fontWeight: 800, color: '#f8fafc' }}>
+                  {quickUploadTarget.proyek} - Blok {quickUploadTarget.blok} No. {quickUploadTarget.no}
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: '2px' }}>
+                  Tipe: {quickUploadTarget.type} • Foto saat ini: {(quickUploadTarget.photos || []).length} Foto
+                </div>
+              </div>
+
+              {/* Upload Input Area */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, color: '#f8fafc', marginBottom: '8px' }}>
+                  Pilih File Foto Lapangan (Bisa lebih dari 1):
+                </label>
+                <div style={{
+                  border: '2px dashed #0284c7',
+                  borderRadius: '8px',
+                  padding: '24px 16px',
+                  textAlign: 'center',
+                  background: 'rgba(2, 132, 199, 0.05)',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}>
+                  <Upload size={32} color="#38bdf8" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                  <div style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.86rem' }}>
+                    Klik atau Seret Foto ke Sini
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>
+                    Mendukung format JPG, PNG, WEBP
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleQuickUploadFileSelect}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      opacity: 0,
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* File Preview Grid */}
+              {quickUploadFiles.length > 0 && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#94a3b8', marginBottom: '6px' }}>
+                    {quickUploadFiles.length} Foto Terpilih Siap Diunggah:
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxHeight: '140px', overflowY: 'auto' }}>
+                    {quickUploadFiles.map((f, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '100%', paddingTop: '75%', borderRadius: '6px', overflow: 'hidden', border: '1px solid #334155' }}>
+                        <img src={f.dataUrl} alt={f.name} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Keterangan */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
+                  Keterangan Foto (Opsional):
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Pemasangan keramik lantai, plesteran dinding, dll."
+                  value={quickUploadKeterangan}
+                  onChange={(e) => setQuickUploadKeterangan(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '38px',
+                    background: '#0f172a',
+                    border: '1.5px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    padding: '0 12px',
+                    fontSize: '0.86rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ borderTop: '1px solid #1e293b', padding: '1rem 1.25rem' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setIsQuickUploadModalOpen(false)}>
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveQuickUpload}
+                disabled={quickUploadFiles.length === 0}
+                className="btn btn-primary"
+                style={{
+                  background: quickUploadFiles.length > 0 ? 'linear-gradient(135deg, #0284c7, #2563eb)' : '#334155',
+                  border: 'none',
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  padding: '8px 18px',
+                  cursor: quickUploadFiles.length > 0 ? 'pointer' : 'not-allowed'
+                }}
+              >
+                💾 Simpan & Unggah {quickUploadFiles.length > 0 ? `(${quickUploadFiles.length} Foto)` : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL FORM TAMBAH / EDIT DOKUMENTASI UNIT FOTO                            */}
+      {/* ========================================================================= */}
+      {isFotoModalOpen && (
+        <div className="modal-backdrop" style={{ zIndex: 1200, background: 'rgba(0,0,0,0.85)' }}>
+          <div className="modal-content" style={{ maxWidth: '580px', background: '#0b1120', border: '1.5px solid #0284c7', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #1e293b' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8', fontWeight: 900 }}>
+                <Camera size={20} color="#38bdf8" />
+                {editingFotoId ? 'Edit Dokumentasi Unit Foto' : 'Tambah Dokumentasi Unit Baru'}
+              </h3>
+              <button onClick={() => setIsFotoModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveFotoRecord}>
+              <div className="modal-body" style={{ padding: '1.25rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                
+                {/* Opsi Ambil Dari Database Unit Terpadu */}
+                {!editingFotoId && databaseUnitRows.length > 0 && (
+                  <div style={{ background: 'rgba(2, 132, 199, 0.1)', border: '1px solid #0284c7', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.25rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 900, color: '#38bdf8', marginBottom: '6px' }}>
+                      ⚡ Pilih Cepat Dari Database Unit yang Tersedia:
+                    </label>
+                    <select
+                      value={fotoForm.unitId}
+                      onChange={(e) => handleSelectUnitFromDb(e.target.value)}
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#0f172a',
+                        border: '1.5px solid #0284c7',
+                        borderRadius: '6px',
+                        color: '#f8fafc',
+                        padding: '0 10px',
+                        fontSize: '0.86rem',
+                        fontWeight: 800,
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="">-- Pilih Unit dari Database Terpadu --</option>
+                      {databaseUnitRows.map(u => (
+                        <option key={u.id} value={u.id}>
+                          {u.proyek} - Blok {u.blok} No. {u.nomor} ({u.type})
+                        </option>
+                      ))}
+                    </select>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                      Memilih unit akan otomatis mengisi proyek, blok, tipe, serta mencocokkan data konsumen.
+                    </div>
+                  </div>
+                )}
+
+                {/* Form Fields: Proyek & Tipe */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Nama Proyek:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={fotoForm.proyek}
+                      onChange={(e) => setFotoForm({ ...fotoForm, proyek: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f8fafc', padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Tipe Unit:
+                    </label>
+                    <input
+                      type="text"
+                      value={fotoForm.type}
+                      onChange={(e) => setFotoForm({ ...fotoForm, type: e.target.value })}
+                      placeholder="Type 36/60"
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#38bdf8', fontWeight: 800, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Form Fields: Blok & No. Unit */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Blok:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: A / B / C"
+                      value={fotoForm.blok}
+                      onChange={(e) => setFotoForm({ ...fotoForm, blok: e.target.value.toUpperCase() })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#fbbf24', fontWeight: 900, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Nomor Unit:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: 01 / 02 / 12"
+                      value={fotoForm.no}
+                      onChange={(e) => setFotoForm({ ...fotoForm, no: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f8fafc', fontWeight: 900, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Form Fields: Konsumen & No HP (untuk kirim WA) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Nama Konsumen:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nama pemilik unit..."
+                      value={fotoForm.konsumen}
+                      onChange={(e) => setFotoForm({ ...fotoForm, konsumen: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#f8fafc', padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      No. WhatsApp Konsumen:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="0812xxxx atau 62812xxxx"
+                      value={fotoForm.phone}
+                      onChange={(e) => setFotoForm({ ...fotoForm, phone: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#4ade80', fontWeight: 800, padding: '0 12px', fontSize: '0.86rem', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Catatan Progres */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Catatan Progres Lapangan:
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Contoh: Pondasi selesai 100%, dinding bata terpasang 80%, atap sedang proses..."
+                    value={fotoForm.catatan}
+                    onChange={(e) => setFotoForm({ ...fotoForm, catatan: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', padding: '8px 12px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Upload File Foto */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Pilih File Foto Lapangan ({fotoForm.newPhotos.length} dipilih):
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handlePhotoFilesChange}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1.5px solid #334155',
+                      borderRadius: '6px',
+                      color: '#94a3b8',
+                      padding: '8px 10px',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #1e293b', padding: '1rem 1.25rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsFotoModalOpen(false)}>
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px' }}
+                >
+                  💾 {editingFotoId ? 'Simpan Perubahan' : 'Simpan Dokumentasi Unit'}
                 </button>
               </div>
             </form>

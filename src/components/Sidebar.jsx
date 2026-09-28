@@ -39,7 +39,8 @@ import {
   BarChart3,
   LogOut,
   MapPin,
-  Mail
+  Mail,
+  Camera
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -156,6 +157,10 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
         { id: 'teknik-absen', title: '1. Absen Tenaga Kerja', moduleKey: 'teknik', subTabKey: 'absen', icon: HardHat, color: '#38BDF8' },
         { id: 'teknik-rab', title: '2. Input RAB & Monitoring Progress', moduleKey: 'teknik', subTabKey: 'rab', icon: Calculator, color: '#F59E0B' },
+        { id: 'teknik-tf', title: '3. Tukar Faktur', moduleKey: 'teknik', subTabKey: 'tukar_faktur', icon: FileText, color: '#C084FC' },
+        { id: 'teknik-persediaan', title: '4. Persediaan Logistik', moduleKey: 'teknik', subTabKey: 'persediaan', icon: Package, color: '#F59E0B' },
+        { id: 'teknik-database', title: '5. Data Base Terpadu', moduleKey: 'teknik', subTabKey: 'database', icon: Building2, color: '#10B981' },
+        { id: 'teknik-upload-foto', title: '6. Upload Foto Lapangan', moduleKey: 'teknik', subTabKey: 'upload_foto', icon: Camera, color: '#38BDF8' },
         { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
     }
