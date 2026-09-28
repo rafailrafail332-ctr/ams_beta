@@ -1804,10 +1804,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           }}
         >
           <FileSignature size={18} />
-          <span>1. SPK (MOU)</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'spk' ? '#0284c7' : '#1e293b', color: activeTab === 'spk' ? '#fff' : '#38bdf8' }}>
-            {spkList.length}
-          </span>
+          <span>1. SPK</span>
         </button>
 
         {/* Tab 2: Legalitas */}
@@ -1832,9 +1829,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         >
           <FileCheck size={18} />
           <span>2. Legalitas</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'legalitas' ? '#0284c7' : '#1e293b', color: activeTab === 'legalitas' ? '#fff' : '#38bdf8' }}>
-            {legalitasPerusahaanList.length + legalitasProyekList.length}
-          </span>
         </button>
 
         {/* Tab 3: Perizinan */}
@@ -1859,9 +1853,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         >
           <ShieldCheck size={18} />
           <span>3. Perizinan</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'perizinan' ? '#0284c7' : '#1e293b', color: activeTab === 'perizinan' ? '#fff' : '#38bdf8' }}>
-            {perizinanList.length}
-          </span>
         </button>
 
         {/* Tab 4: Litigasi */}
@@ -1886,9 +1877,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         >
           <Scale size={18} />
           <span>4. Litigasi</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'litigasi' ? '#0284c7' : '#1e293b', color: activeTab === 'litigasi' ? '#fff' : '#38bdf8' }}>
-            {litigations.length}
-          </span>
         </button>
 
         {/* Tab 5: History Tanah */}
@@ -1913,9 +1901,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         >
           <MapPin size={18} />
           <span>5. History Tanah</span>
-          <span style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: '4px', background: activeTab === 'history-tanah' ? '#0284c7' : '#1e293b', color: activeTab === 'history-tanah' ? '#fff' : '#38bdf8' }}>
-            {historyTanahList.length}
-          </span>
         </button>
       </div>
 
