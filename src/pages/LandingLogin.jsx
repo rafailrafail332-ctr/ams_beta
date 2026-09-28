@@ -28,11 +28,11 @@ export const LandingLogin = ({ onLoginSuccess }) => {
   const runEnterTransition = (targetEmail) => {
     setIsTransitioning(true);
 
-    // Animasi logo timbul lalu tenggelam selama 1.9 detik sebelum membuka Central Hub
+    // Animasi logo timbul lalu tenggelam dibuat lebih tenang dan lambat (3.2 detik)
     setTimeout(() => {
       setIsTransitioning(false);
       onLoginSuccess('hub', targetEmail);
-    }, 1950);
+    }, 3250);
   };
 
   const handleSubmit = (e) => {
@@ -104,23 +104,23 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           @keyframes logoTimbulTenggelam {
             0% {
               opacity: 0;
-              transform: scale(0.6) translateY(55px);
+              transform: scale(0.65) translateY(55px);
               filter: blur(12px) drop-shadow(0 0 0px rgba(56, 189, 248, 0));
             }
             30% {
               opacity: 1;
-              transform: scale(1.08) translateY(-8px);
-              filter: blur(0px) drop-shadow(0 20px 40px rgba(56, 189, 248, 0.6));
+              transform: scale(1.05) translateY(-5px);
+              filter: blur(0px) drop-shadow(0 20px 40px rgba(56, 189, 248, 0.55));
             }
-            50% {
+            45%, 65% {
               opacity: 1;
               transform: scale(1) translateY(0);
               filter: blur(0px) drop-shadow(0 15px 35px rgba(56, 189, 248, 0.45));
             }
-            70% {
-              opacity: 0.95;
-              transform: scale(0.96) translateY(10px);
-              filter: blur(1px) drop-shadow(0 10px 25px rgba(56, 189, 248, 0.3));
+            80% {
+              opacity: 0.9;
+              transform: scale(0.97) translateY(10px);
+              filter: blur(2px) drop-shadow(0 10px 25px rgba(56, 189, 248, 0.3));
             }
             100% {
               opacity: 0;
@@ -134,7 +134,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
               transform: scale(0.85);
               opacity: 0.3;
             }
-            45%, 55% {
+            45%, 65% {
               transform: scale(1.25);
               opacity: 0.85;
             }
@@ -432,7 +432,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              animation: 'logoTimbulTenggelam 1.9s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+              animation: 'logoTimbulTenggelam 3.2s cubic-bezier(0.35, 0, 0.25, 1) forwards'
             }}
           >
             {/* Ambient Radial Halo */}
@@ -448,7 +448,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
                 background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%)',
                 filter: 'blur(22px)',
                 pointerEvents: 'none',
-                animation: 'haloPulse 1.9s ease-in-out forwards'
+                animation: 'haloPulse 3.2s ease-in-out forwards'
               }}
             />
 
