@@ -7,7 +7,8 @@ import {
   EyeOff, 
   AlertCircle,
   Mail,
-  KeyRound
+  KeyRound,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { GeminiCursorCanvas } from '../components/GeminiCursorCanvas';
@@ -423,11 +424,12 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           {/* Animated Background Canvas */}
           <GeminiCursorCanvas theme="dark" />
 
-          {/* Central Logo Container (Timbul Lalu Tenggelam) */}
+          {/* Central Logo & AMS Container (Timbul Lalu Tenggelam) */}
           <div
             style={{
               position: 'relative',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               animation: 'logoTimbulTenggelam 1.9s cubic-bezier(0.4, 0, 0.2, 1) forwards'
@@ -437,28 +439,32 @@ export const LandingLogin = ({ onLoginSuccess }) => {
             <div
               style={{
                 position: 'absolute',
-                width: '260px',
-                height: '260px',
+                top: '50px',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '200px',
+                height: '200px',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(2, 132, 199, 0.15) 50%, transparent 70%)',
-                filter: 'blur(30px)',
+                background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 70%)',
+                filter: 'blur(22px)',
                 pointerEvents: 'none',
                 animation: 'haloPulse 1.9s ease-in-out forwards'
               }}
             />
 
-            {/* Logo Badge */}
+            {/* Logo Badge (Matching Central Hub) */}
             <div
               style={{
-                width: '135px',
-                height: '135px',
-                borderRadius: '36px',
-                background: 'rgba(255, 255, 255, 0.95)',
-                border: '2.5px solid rgba(56, 189, 248, 0.45)',
+                width: '100px',
+                height: '100px',
+                borderRadius: '26px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1.5px solid rgba(255, 255, 255, 0.18)',
+                backdropFilter: 'blur(12px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 45px rgba(56, 189, 248, 0.45)',
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.28)',
                 position: 'relative',
                 zIndex: 2
               }}
@@ -467,11 +473,33 @@ export const LandingLogin = ({ onLoginSuccess }) => {
                 src="/company-logo-transparent.png"
                 alt="Ashoka Logo"
                 style={{
-                  width: '98px',
-                  height: '98px',
-                  objectFit: 'contain'
+                  width: '74px',
+                  height: '74px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))'
                 }}
               />
+            </div>
+
+            {/* AMS Text Under Logo */}
+            <div
+              style={{
+                fontSize: '1.95rem',
+                fontWeight: 900,
+                letterSpacing: '0.08em',
+                marginTop: '14px',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.6)',
+                position: 'relative',
+                zIndex: 2
+              }}
+            >
+              <span>AMS</span>
+              <Sparkles size={20} color="#f59e0b" />
             </div>
           </div>
         </div>
