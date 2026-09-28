@@ -33,14 +33,14 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
       {/* ========================================================================= */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
         {/* Tombol Back (Muncul saat sedang di dalam modul) */}
-        {currentTab !== 'dashboard' && (
+        {currentTab !== 'dashboard' && currentTab !== 'hub' && (
           <button
             type="button"
             onClick={() => {
               if (onBackToLanding) {
                 onBackToLanding();
               } else if (setCurrentTab) {
-                setCurrentTab('dashboard');
+                setCurrentTab('hub');
               }
             }}
             style={{
@@ -92,14 +92,14 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 height: '32px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: '1.5px solid #F59E0B'
+                border: '1.5px solid #0284c7'
               }}
             />
             <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>
                 {currentUser?.name || 'Yazid Hizbullah, S.E.,S.T'}
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700 }}>
                 {currentUser?.role || 'Direktur Utama'}
               </div>
             </div>
@@ -169,7 +169,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
           >
             Ashoka Management System
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#f59e0b', fontWeight: 800, letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
             Asset & Property Management System (AMS)
           </div>
         </div>

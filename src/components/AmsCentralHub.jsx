@@ -91,7 +91,7 @@ export const AmsCentralHub = ({
     <div
       style={{
         width: '100%',
-        minHeight: isLanding ? '100vh' : 'auto',
+        minHeight: isLanding ? '100vh' : 'calc(100vh - var(--header-height))',
         background: isDark ? '#080c14' : '#f8fafc',
         color: isDark ? '#ffffff' : '#0f172a',
         display: 'flex',

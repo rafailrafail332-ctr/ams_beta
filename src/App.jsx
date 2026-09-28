@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { UserProfileModal } from './components/UserProfileModal';
 import { LandingLogin } from './pages/LandingLogin';
+import { AmsCentralHub } from './components/AmsCentralHub';
 import { Dashboard } from './pages/Dashboard';
 import { TodoAttendanceModule } from './pages/TodoAttendanceModule';
 import { ExecutiveModule } from './pages/ExecutiveModule';
@@ -23,11 +24,11 @@ import { Lock, ArrowLeft } from 'lucide-react';
 function AppContent() {
   const { currentUser, setCurrentUser, users, canAccessModule } = useApp();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [currentTab, setCurrentTab] = useState('hub');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  const handleLoginSuccess = (targetTab = 'dashboard', selectedEmail = 'yazid@ams.co.id') => {
+  const handleLoginSuccess = (targetTab = 'hub', selectedEmail = 'yazid@ams.co.id') => {
     let foundUser;
     if (selectedEmail) {
       foundUser = users.find((u) => u.email.toLowerCase() === selectedEmail.toLowerCase());
@@ -37,23 +38,22 @@ function AppContent() {
     }
     setCurrentUser(foundUser);
 
-    if (canAccessModule(targetTab, foundUser)) {
+    if (targetTab === 'hub' || canAccessModule(targetTab, foundUser)) {
       setCurrentTab(targetTab);
     } else {
-      setCurrentTab('todo-attendance');
+      setCurrentTab('hub');
     }
 
     setIsAuthenticated(true);
   };
 
   const handleBackToLanding = () => {
-    setIsAuthenticated(false);
-    setCurrentTab('dashboard');
+    setCurrentTab('hub');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setCurrentTab('dashboard');
+    setCurrentTab('hub');
     setIsProfileModalOpen(false);
   };
 
@@ -67,8 +67,9 @@ function AppContent() {
 
   const getActiveTitle = () => {
     switch (currentTab) {
+      case 'hub':
       case 'dashboard':
-        return 'Dashboard Overview';
+        return 'AMS Central Hub';
       case 'todo-attendance':
         return 'To-Do List Harian Karyawan';
       case 'executive':
@@ -100,15 +101,15 @@ function AppContent() {
       case 'piutang-konsumen':
         return 'Piutang Konsumen (DP & Angsuran)';
       default:
-        return 'Dashboard Overview';
+        return 'AMS Central Hub';
     }
   };
 
-  if (!isAuthenticated || currentTab === 'dashboard') {
+  if (!isAuthenticated) {
     return <LandingLogin onLoginSuccess={handleLoginSuccess} />;
   }
 
-  const isAllowed = canAccessModule(currentTab);
+  const isAllowed = currentTab === 'hub' || currentTab === 'dashboard' || canAccessModule(currentTab);
 
   return (
     <div className="app-container" style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -121,7 +122,13 @@ function AppContent() {
         onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
-      <main className="main-content" style={{ marginLeft: 0, width: '100%', maxWidth: '100%', padding: '1.5rem', boxSizing: 'border-box' }}>
+      <main className="main-content" style={{ 
+        marginLeft: 0, 
+        width: '100%', 
+        maxWidth: '100%', 
+        padding: (currentTab === 'hub' || currentTab === 'dashboard') ? '0' : '1.5rem', 
+        boxSizing: 'border-box' 
+      }}>
         {!isAllowed ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '2rem auto' }}>
             <div style={{
@@ -143,14 +150,20 @@ function AppContent() {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
               Maaf, akun Anda ({currentUser?.name} - {currentUser?.role}) hanya diizinkan membuka Modul Khusus milik Anda atau Modul To-Do List & Absen.
             </p>
-            <button className="btn btn-primary" onClick={() => setCurrentTab('todo-attendance')}>
-              <ArrowLeft size={16} /> Buka Modul To-Do List & Absen Universal
+            <button className="btn btn-primary" onClick={() => setCurrentTab('hub')}>
+              <ArrowLeft size={16} /> Kembali ke Central Hub
             </button>
           </div>
         ) : (
           <ErrorBoundary key={currentTab} moduleName={getActiveTitle()}>
             <div className="module-animated-view">
-              {currentTab === 'dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
+              {(currentTab === 'hub' || currentTab === 'dashboard') && (
+                <AmsCentralHub
+                  isLanding={false}
+                  currentUser={currentUser}
+                  onSelectModule={(tabKey) => setCurrentTab(tabKey)}
+                />
+              )}
               {currentTab === 'todo-attendance' && <TodoAttendanceModule />}
               {currentTab === 'executive' && <ExecutiveModule />}
               {currentTab === 'manager' && <ManagerModule />}
