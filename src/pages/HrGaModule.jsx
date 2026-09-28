@@ -1083,12 +1083,12 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)'
+            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
           }}
         >
           <Users size={22} />
@@ -1099,7 +1099,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 9 SUB-TAB PERSIS SEPERTI GAMBAR USER: KOTAK-KOTAK BIRU MUDA ELEGAN   */}
+      {/* BILAH 9 SUB-TAB: KOTAK-KOTAK EMERALD GREEN ELEGAN                        */}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -1122,17 +1122,17 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               onClick={() => handleTabChange(tab.id)}
               style={{
                 background: isActive
-                  ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                   : '#0f172a',
                 color: isActive ? '#ffffff' : '#94a3b8',
-                border: isActive ? '1.5px solid #38bdf8' : '1px solid #1e293b',
+                border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '10px 14px',
                 fontSize: '0.8rem',
                 fontWeight: isActive ? 900 : 700,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(2, 132, 199, 0.45)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -1157,9 +1157,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span
               style={{
-                background: '#e0f2fe',
-                border: '1.5px solid #38bdf8',
-                color: '#0369a1',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1.5px solid #10b981',
+                color: '#34d399',
                 fontSize: '0.85rem',
                 fontWeight: 900,
                 padding: '5px 14px',
@@ -1167,7 +1167,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                 letterSpacing: '0.3px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)'
               }}
             >
               <Users size={16} />
@@ -1202,7 +1203,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               onClick={handleOpenAdd}
               className="btn btn-primary btn-sm"
               style={{
-                background: '#0284c7',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
@@ -1212,7 +1213,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                 padding: '7px 14px',
                 borderRadius: '8px',
                 border: 'none',
-                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
               }}
             >
               <Plus size={15} />
@@ -1236,9 +1237,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                 style={{
                   padding: '6px 14px',
                   borderRadius: '8px',
-                  border: isActive ? '1.5px solid #38bdf8' : '1px solid #334155',
-                  background: isActive ? 'rgba(56, 189, 248, 0.15)' : '#0f172a',
-                  color: isActive ? '#38bdf8' : '#94a3b8',
+                  border: isActive ? '1.5px solid #34d399' : '1px solid #334155',
+                  background: isActive ? 'rgba(16, 185, 129, 0.15)' : '#0f172a',
+                  color: isActive ? '#34d399' : '#94a3b8',
                   fontSize: '0.76rem',
                   fontWeight: 800,
                   cursor: 'pointer',
@@ -1254,7 +1255,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                     fontSize: '0.68rem',
                     padding: '1px 6px',
                     borderRadius: '4px',
-                    background: isActive ? '#0284c7' : '#1e293b',
+                    background: isActive ? '#10b981' : '#1e293b',
                     color: isActive ? '#ffffff' : '#94a3b8',
                     fontWeight: 900
                   }}
@@ -1332,7 +1333,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         {/* TABEL UTAMA 10 KOLOM PERSIS SPK & LITIGASI */}
         {filteredDataset.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
               <Users size={28} />
             </div>
             <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen {getTabTitle().title}</div>
@@ -1342,17 +1343,17 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             <button
               onClick={handleOpenAdd}
               className="btn btn-primary btn-sm"
-              style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+              style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}
             >
               <Plus size={15} />
               <span>+ Tambah Dokumen Sekarang</span>
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: '#0284c7', color: '#ffffff', borderBottom: '2px solid #0369a1', whiteSpace: 'nowrap' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
                   <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
                   <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
                   <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
@@ -1382,7 +1383,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                     </td>
 
                     {/* 2. No. Dok */}
-                    <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#38bdf8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                    <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#34d399', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                       {item.noDok || item.nik || item.code || item.id}
                     </td>
 
@@ -1398,8 +1399,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           fontSize: '0.72rem',
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          background: (item.project || item.location || '').toLowerCase().includes('park') ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                          color: (item.project || item.location || '').toLowerCase().includes('park') ? '#38bdf8' : '#fbbf24',
+                          background: (item.project || item.location || '').toLowerCase().includes('park') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                          color: (item.project || item.location || '').toLowerCase().includes('park') ? '#34d399' : '#fbbf24',
                           fontWeight: 800,
                           whiteSpace: 'nowrap'
                         }}
@@ -1422,8 +1423,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           fontSize: '0.72rem',
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          background: 'rgba(56, 189, 248, 0.15)',
-                          color: '#38bdf8',
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          color: '#34d399',
                           fontWeight: 800,
                           whiteSpace: 'nowrap'
                         }}
@@ -1449,8 +1450,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           setDocPrintMode('all');
                         }}
                         style={{
-                          background: '#38bdf8',
-                          color: '#090d16',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: '#ffffff',
                           border: 'none',
                           padding: '4px 12px',
                           borderRadius: '5px',
@@ -1460,7 +1461,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '4px',
-                          boxShadow: '0 2px 6px rgba(56, 189, 248, 0.3)',
+                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
                           transition: 'transform 0.1s',
                           whiteSpace: 'nowrap'
                         }}
@@ -1493,7 +1494,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                             setDocPrintMode('all');
                           }}
                           title="Pratinjau & Cetak Dokumen"
-                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                         >
                           <Printer size={12} />
                         </button>
@@ -1501,7 +1502,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           type="button"
                           onClick={() => handleOpenEdit(item)}
                           title="Edit Dokumen"
-                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#38bdf8', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                         >
                           <Edit3 size={12} />
                         </button>
@@ -1543,7 +1544,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #0284c7',
+              border: '1.5px solid #10b981',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '620px',
@@ -1555,7 +1556,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users size={18} color="#38bdf8" />
+                <Users size={18} color="#34d399" />
                 <span>{editingItemId ? `Edit Dokumen ${getTabTitle().title}` : `Tambah Dokumen ${getTabTitle().title}`}</span>
               </div>
               <button onClick={() => setIsFormModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
@@ -1649,7 +1650,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
               {/* Upload Multi-File Lampiran Berkas */}
               <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
                   <span>Upload Berkas / Lampiran Fisik (Bisa Pilih Banyak Berkas)</span>
                 </label>
@@ -1702,7 +1703,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
                 <button type="button" onClick={() => setIsFormModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7' }}>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
                   {editingItemId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
                 </button>
               </div>
@@ -1772,7 +1773,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             ref={modalScrollRef}
             style={{
               background: '#090d16',
-              border: '1.5px solid #38bdf8',
+              border: '1.5px solid #10b981',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '840px',
@@ -1802,7 +1803,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '7px', borderRadius: '8px' }}>
+                <div style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '7px', borderRadius: '8px' }}>
                   <Users size={20} />
                 </div>
                 <div>
@@ -1810,7 +1811,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                     Pratinjau Dokumen {getTabTitle().title} ({viewingDoc.kategori})
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    No. Dok: <strong style={{ color: '#38bdf8' }}>{viewingDoc.noDok || viewingDoc.id}</strong> &bull; {viewingDoc.judulDokumen}
+                    No. Dok: <strong style={{ color: '#34d399' }}>{viewingDoc.noDok || viewingDoc.id}</strong> &bull; {viewingDoc.judulDokumen}
                   </div>
                 </div>
               </div>
@@ -1833,7 +1834,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           fontWeight: 700,
                           borderRadius: '4px',
                           border: 'none',
-                          background: docPrintMode === 'all' ? '#0284c7' : 'transparent',
+                          background: docPrintMode === 'all' ? '#059669' : 'transparent',
                           color: docPrintMode === 'all' ? '#ffffff' : '#94a3b8',
                           cursor: 'pointer'
                         }}
@@ -1849,7 +1850,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           fontWeight: 700,
                           borderRadius: '4px',
                           border: 'none',
-                          background: docPrintMode === 'surat' ? '#0284c7' : 'transparent',
+                          background: docPrintMode === 'surat' ? '#059669' : 'transparent',
                           color: docPrintMode === 'surat' ? '#ffffff' : '#94a3b8',
                           cursor: 'pointer'
                         }}
@@ -1866,7 +1867,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                             fontWeight: 700,
                             borderRadius: '4px',
                             border: 'none',
-                            background: docPrintMode === 'berkas' ? '#0284c7' : 'transparent',
+                            background: docPrintMode === 'berkas' ? '#059669' : 'transparent',
                             color: docPrintMode === 'berkas' ? '#ffffff' : '#94a3b8',
                             cursor: 'pointer'
                           }}
@@ -1887,10 +1888,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                     alignItems: 'center',
                     gap: '6px',
                     fontSize: '0.76rem',
-                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
                     color: '#ffffff',
                     border: 'none',
-                    fontWeight: 800
+                    fontWeight: 800,
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
                   }}
                 >
                   <Printer size={14} />
@@ -1938,9 +1940,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                       padding: '1.2rem'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'gap', gap: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Paperclip size={16} color="#38bdf8" />
+                        <Paperclip size={16} color="#34d399" />
                         <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff' }}>
                           Lampiran Berkas Digital ({activeFiles.length} Berkas)
                         </span>
@@ -1951,7 +1953,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                         type="button"
                         onClick={() => handleDownloadFile(currentFile.data, currentFile.name)}
                         style={{
-                          background: '#0284c7',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                           color: '#ffffff',
                           border: 'none',
                           borderRadius: '6px',
@@ -1961,7 +1963,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)'
                         }}
                       >
                         <Download size={13} />
@@ -1975,7 +1978,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                         <button
                           type="button"
                           onClick={() => setCurrentFileSlide(prev => (prev > 0 ? prev - 1 : activeFiles.length - 1))}
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                          style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
                         >
                           <ChevronLeft size={14} /> Slide Sebelumnya
                         </button>
@@ -1985,7 +1988,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                         <button
                           type="button"
                           onClick={() => setCurrentFileSlide(prev => (prev < activeFiles.length - 1 ? prev + 1 : 0))}
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
+                          style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}
                         >
                           Slide Berikutnya <ChevronRight size={14} />
                         </button>
@@ -2002,7 +2005,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                         />
                       ) : (
                         <div style={{ padding: '2rem 1rem' }}>
-                          <FileText size={48} color="#38bdf8" style={{ margin: '0 auto 12px auto' }} />
+                          <FileText size={48} color="#34d399" style={{ margin: '0 auto 12px auto' }} />
                           <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff' }}>{currentFile.name}</div>
                           <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '4px' }}>Ukuran: {currentFile.size || '1.2 MB'}</div>
                           <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '8px', fontWeight: 600 }}>

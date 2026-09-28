@@ -64,8 +64,8 @@ export const AmsCentralHub = ({
       label: 'HR & GA', 
       sub: 'SDM, Aset & Operasional', 
       desc: 'Kepegawaian, Fasilitas & Kendaraan', 
-      color: '#a855f7', 
-      lightColor: '#9333ea',
+      color: '#10b981', 
+      lightColor: '#059669',
       icon: Users
     },
     { 
@@ -413,7 +413,7 @@ export const AmsCentralHub = ({
               </linearGradient>
               <linearGradient id="streamGradHr" x1="0%" y1="50%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#a855f7" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.95" />
               </linearGradient>
             </defs>
 
@@ -834,16 +834,16 @@ export const AmsCentralHub = ({
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'hr-ga' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(15, 23, 42, 0.75)')
-                    : (hoveredNode === 'hr-ga' ? '#faf5ff' : '#ffffff'),
+                    ? (hoveredNode === 'hr-ga' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    : (hoveredNode === 'hr-ga' ? '#ecfdf5' : '#ffffff'),
                   border: hoveredNode === 'hr-ga' 
-                    ? '2px solid #a855f7' 
+                    ? '2px solid #10b981' 
                     : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'hr-ga'
-                    ? '0 12px 30px rgba(168, 85, 247, 0.35), 0 0 15px rgba(168, 85, 247, 0.2)'
+                    ? '0 12px 30px rgba(16, 185, 129, 0.35), 0 0 15px rgba(16, 185, 129, 0.2)'
                     : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -857,11 +857,11 @@ export const AmsCentralHub = ({
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#f3e8ff'),
+                    background: hoveredNode === 'hr-ga' ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#d1fae5'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'hr-ga' ? '#ffffff' : '#9333ea',
+                    color: hoveredNode === 'hr-ga' ? '#ffffff' : '#059669',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -872,7 +872,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '1.45rem', 
                     fontWeight: 900, 
-                    color: hoveredNode === 'hr-ga' ? '#a855f7' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    color: hoveredNode === 'hr-ga' ? '#10b981' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
                     HR & GA
@@ -880,7 +880,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '0.68rem', 
                     fontWeight: 700, 
-                    color: hoveredNode === 'hr-ga' ? '#9333ea' : (isDark ? '#94a3b8' : '#64748b'), 
+                    color: hoveredNode === 'hr-ga' ? '#059669' : (isDark ? '#94a3b8' : '#64748b'), 
                     marginTop: '4px' 
                   }}>
                     SDM & Aset Kantor
