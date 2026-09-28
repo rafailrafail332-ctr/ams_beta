@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
   ArrowRight, 
   UserCheck, 
   Wrench, 
@@ -345,18 +344,16 @@ export const AmsCentralHub = ({
             style={{
               fontSize: '1.85rem',
               fontWeight: 900,
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
               marginTop: '12px',
               color: isDark ? '#ffffff' : '#0f172a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
               textShadow: isDark ? '0 2px 10px rgba(0,0,0,0.5)' : 'none'
             }}
           >
             <span>AMS</span>
-            <Sparkles size={18} color="#f59e0b" className="gemini-sparkle-icon" />
           </div>
 
           <div
@@ -704,7 +701,7 @@ export const AmsCentralHub = ({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    justifyContent: 'center',
                     marginBottom: '8px',
                     color: isDark ? '#38bdf8' : '#0284c7',
                     fontWeight: 800,
@@ -713,7 +710,6 @@ export const AmsCentralHub = ({
                     textTransform: 'uppercase'
                   }}
                 >
-                  <Sparkles size={14} className="gemini-sparkle-icon" color={isDark ? '#38bdf8' : '#0284c7'} />
                   <span>Central Hub</span>
                 </div>
 
@@ -1036,7 +1032,7 @@ export const AmsCentralHub = ({
             marginTop: '2.5rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            justifyContent: 'center',
             fontSize: '0.76rem',
             color: isDark ? '#94a3b8' : '#475569',
             fontWeight: 700,
@@ -1044,7 +1040,6 @@ export const AmsCentralHub = ({
             zIndex: 10
           }}
         >
-          <Sparkles size={15} color="#f59e0b" />
           <span>Gerakkan kursor untuk efek interaktif • Klik departemen untuk membuka modul</span>
         </div>
       </div>
