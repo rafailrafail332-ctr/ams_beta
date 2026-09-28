@@ -103,7 +103,8 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'leg-shgb', title: '7. SHGB Induk & Pecahan', moduleKey: 'legal', subTabKey: 'shgb', icon: FileText, color: '#F8CBAD' },
         { id: 'leg-imb', title: '8. IMB / PBG', moduleKey: 'legal', subTabKey: 'imb', icon: Building2, color: '#38BDF8' },
         { id: 'leg-pbb', title: '9. SPPT - PBB', moduleKey: 'legal', subTabKey: 'pbb', icon: Receipt, color: '#F59E0B' },
-        { id: 'leg-surat', title: '10. Surat Masuk & Keluar', moduleKey: 'legal', subTabKey: 'surat', icon: Mail, color: '#34D399' }
+        { id: 'leg-surat', title: '10. Surat Masuk & Keluar', moduleKey: 'legal', subTabKey: 'surat', icon: Mail, color: '#34D399' },
+        { id: 'leg-stk', title: '11. STK (Surat Serah Terima Kunci)', moduleKey: 'legal', subTabKey: 'stk', icon: KeyRound, color: '#FB7185' }
       ];
     }
 

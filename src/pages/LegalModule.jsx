@@ -37,7 +37,8 @@ import {
   Wallet,
   Mail,
   Inbox,
-  Send
+  Send,
+  KeyRound
 } from 'lucide-react';
 
 export const LegalModule = () => {
@@ -117,6 +118,8 @@ export const LegalModule = () => {
         setActiveTab('pbb');
       } else if (['surat', 'persuratan'].includes(activeSubTab)) {
         setActiveTab('surat');
+      } else if (['stk', 'serah-terima-kunci', 'bast', 'bast-kunci', 'stk-bast'].includes(activeSubTab)) {
+        setActiveTab('stk');
       }
     }
   }, [activeSubTab]);
@@ -2743,6 +2746,256 @@ export const LegalModule = () => {
     }
   };
 
+  // =========================================================================
+  // SUB-MODUL 11: STK (SURAT SERAH TERIMA KUNCI & BAST KONSUMEN)
+  // Kolom: No, No. STK/BAST, Tanggal, Proyek, Blok & Unit, Nama Konsumen,
+  // Status (Lengkap / Pending Retensi / Siap Serah Terima), Dokumen BAST, Catatan, Aksi
+  // =========================================================================
+  const defaultStkList = [
+    {
+      id: 'STK-001',
+      noStk: '045/BAST-STK/AMS-PRK/VIII/2025',
+      tanggal: '2025-08-15',
+      project: 'Ashoka Park',
+      blok: 'A',
+      unitNo: 'A-01',
+      konsumen: 'Budi Santoso',
+      phone: '0812-3456-7890',
+      tipe: '45/90',
+      status: 'BAST Lengkap',
+      fileName: 'BAST_Resmi_A01_BudiSantoso.pdf',
+      fileSize: '1.4 MB',
+      fileData: '',
+      catatan: 'Kunci rumah (2 set), kunci gerbang, dan meteran PLN 1300W/PDAM telah diserahkan lengkap.',
+      legalStatus: 'SHGB Induk No. 2045/Tangsel (Proses Pecahan SHM)'
+    },
+    {
+      id: 'STK-002',
+      noStk: '046/BAST-STK/AMS-PRK/VIII/2025',
+      tanggal: '2025-08-20',
+      project: 'Ashoka Park',
+      blok: 'A',
+      unitNo: 'A-06',
+      konsumen: 'Rian Perdana',
+      phone: '0813-9876-5432',
+      tipe: '45/90',
+      status: 'BAST Lengkap',
+      fileName: 'BAST_STK_A06_Rian.pdf',
+      fileSize: '1.2 MB',
+      fileData: '',
+      catatan: 'Konsumen telah menandatangani BAST fisik dan menerima kunci unit rumah.',
+      legalStatus: 'SHGB Siap AJB Notaris'
+    },
+    {
+      id: 'STK-003',
+      noStk: '047/BAST-STK/AMS-VIW/IX/2025',
+      tanggal: '2025-09-05',
+      project: 'Ashoka View',
+      blok: 'B',
+      unitNo: 'B-03',
+      konsumen: 'Hendro Wijaya',
+      phone: '0819-8765-4321',
+      tipe: '36/72',
+      status: 'Pending Retensi',
+      fileName: 'Checklist_Retensi_B03.pdf',
+      fileSize: '850 KB',
+      fileData: '',
+      catatan: 'Cat dinding kamar utama perlu touch up ulang oleh kontraktor sebelum serah kunci final.',
+      legalStatus: 'SHGB Induk No. 1092/Bogor'
+    },
+    {
+      id: 'STK-004',
+      noStk: '048/BAST-STK/AMS-PRK/IX/2025',
+      tanggal: '2025-09-18',
+      project: 'Ashoka Park',
+      blok: 'C',
+      unitNo: 'C-02',
+      konsumen: 'Siti Nurhaliza',
+      phone: '0811-2233-4455',
+      tipe: '45/90',
+      status: 'Siap Serah Terima',
+      fileName: '',
+      fileSize: '',
+      fileData: '',
+      catatan: 'Fisik bangunan 100% selesai lolos QC. Undangan jadwal STK resmi telah dikirim via CS.',
+      legalStatus: 'SHGB Pecahan Siap Serah Terima'
+    }
+  ];
+
+  const [stkList, setStkList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ams_legal_stk_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return defaultStkList;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_legal_stk_v1', JSON.stringify(stkList));
+    } catch (e) {}
+  }, [stkList]);
+
+  const [searchStk, setSearchStk] = useState('');
+  const [filterStkStatus, setFilterStkStatus] = useState('ALL');
+  const [filterStkProject, setFilterStkProject] = useState('ALL');
+  const [isStkModalOpen, setIsStkModalOpen] = useState(false);
+  const [editingStkId, setEditingStkId] = useState(null);
+  const [viewingStk, setViewingStk] = useState(null);
+  const [stkForm, setStkForm] = useState({
+    noStk: '',
+    tanggal: new Date().toISOString().split('T')[0],
+    project: 'Ashoka Park',
+    blok: 'A',
+    unitNo: '',
+    konsumen: '',
+    phone: '',
+    tipe: '45/90',
+    status: 'BAST Lengkap',
+    legalStatus: 'SHGB Induk / Pecahan Siap AJB',
+    catatan: '',
+    fileName: '',
+    fileSize: '',
+    fileData: ''
+  });
+
+  const handleOpenAddStk = () => {
+    setEditingStkId(null);
+    setStkForm({
+      noStk: '',
+      tanggal: new Date().toISOString().split('T')[0],
+      project: 'Ashoka Park',
+      blok: 'A',
+      unitNo: '',
+      konsumen: '',
+      phone: '',
+      tipe: '45/90',
+      status: 'BAST Lengkap',
+      legalStatus: 'SHGB Induk / Pecahan Siap AJB',
+      catatan: '',
+      fileName: '',
+      fileSize: '',
+      fileData: ''
+    });
+    setIsStkModalOpen(true);
+  };
+
+  const handleOpenEditStk = (item) => {
+    setEditingStkId(item.id);
+    setStkForm({
+      noStk: item.noStk || '',
+      tanggal: item.tanggal || new Date().toISOString().split('T')[0],
+      project: item.project || 'Ashoka Park',
+      blok: item.blok || '',
+      unitNo: item.unitNo || '',
+      konsumen: item.konsumen || '',
+      phone: item.phone || '',
+      tipe: item.tipe || '45/90',
+      status: item.status || 'BAST Lengkap',
+      legalStatus: item.legalStatus || 'SHGB Induk / Pecahan Siap AJB',
+      catatan: item.catatan || '',
+      fileName: item.fileName || '',
+      fileSize: item.fileSize || '',
+      fileData: item.fileData || ''
+    });
+    setIsStkModalOpen(true);
+  };
+
+  const handleStkFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setStkForm(prev => ({
+          ...prev,
+          fileName: file.name,
+          fileSize: formatFileSize(file.size),
+          fileData: uploadEvent.target.result
+        }));
+        showNotification(`Berkas BAST/STK "${file.name}" siap diunggah!`, 'info');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveStk = (e) => {
+    e.preventDefault();
+    if (!stkForm.noStk || !stkForm.konsumen || !stkForm.unitNo) {
+      showNotification('Mohon lengkapi No. STK/BAST, Nama Konsumen, dan Nomor Unit!', 'warning');
+      return;
+    }
+    const payload = {
+      ...stkForm,
+      noStk: stkForm.noStk.trim(),
+      konsumen: stkForm.konsumen.trim(),
+      unitNo: stkForm.unitNo.trim().toUpperCase(),
+      blok: (stkForm.blok || '').trim().toUpperCase(),
+      catatan: (stkForm.catatan || '').trim()
+    };
+
+    if (editingStkId) {
+      setStkList(prev => prev.map(item => item.id === editingStkId ? { ...item, ...payload } : item));
+      showNotification(`Catatan STK "${payload.unitNo} - ${payload.konsumen}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `STK-${Date.now()}`,
+        ...payload
+      };
+      setStkList([newItem, ...stkList]);
+      showNotification(`Data STK "${newItem.unitNo} - ${newItem.konsumen}" berhasil ditambahkan!`, 'success');
+    }
+    setIsStkModalOpen(false);
+  };
+
+  const handleDeleteStk = (id, label) => {
+    if (window.confirm(`Hapus catatan STK "${label}"?`)) {
+      setStkList(prev => prev.filter(item => item.id !== id));
+      showNotification(`Data STK "${label}" berhasil dihapus.`, 'warning');
+    }
+  };
+
+  const filteredStkList = useMemo(() => {
+    return stkList.filter(item => {
+      const q = searchStk.toLowerCase();
+      const matchSearch = !q ||
+        (item.noStk || '').toLowerCase().includes(q) ||
+        (item.konsumen || '').toLowerCase().includes(q) ||
+        (item.unitNo || '').toLowerCase().includes(q) ||
+        (item.blok || '').toLowerCase().includes(q) ||
+        (item.catatan || '').toLowerCase().includes(q);
+      const matchStatus = filterStkStatus === 'ALL' || item.status === filterStkStatus;
+      const matchProject = filterStkProject === 'ALL' || item.project === filterStkProject;
+      return matchSearch && matchStatus && matchProject;
+    });
+  }, [stkList, searchStk, filterStkStatus, filterStkProject]);
+
+  const exportStkToExcel = () => {
+    try {
+      const exportData = filteredStkList.map((item, idx) => ({
+        'No.': idx + 1,
+        'No. STK / BAST': item.noStk || '-',
+        'Tanggal STK': item.tanggal ? formatDisplayDate(item.tanggal) : '-',
+        'Proyek': item.project || '-',
+        'Blok': item.blok || '-',
+        'No. Unit': item.unitNo || '-',
+        'Nama Konsumen': item.konsumen || '-',
+        'No. HP': item.phone || '-',
+        'Tipe Unit': item.tipe || '-',
+        'Status STK': item.status || '-',
+        'Legalitas': item.legalStatus || '-',
+        'Berkas BAST': item.fileName ? item.fileName : 'Belum Ada',
+        'Catatan': item.catatan || '-'
+      }));
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'STK_BAST');
+      XLSX.writeFile(wb, `AMS_STK_BAST_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showNotification('Data STK / BAST berhasil diexport ke Excel!', 'success');
+    } catch (e) {
+      showNotification('Gagal export Excel: ' + e.message, 'error');
+    }
+  };
+
   // Helper function to view / open uploaded file
   const handleViewFile = (fileData, fileName) => {
     if (!fileData) {
@@ -3084,7 +3337,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <span>8. SPPT - PBB</span>
         </button>
 
-        {/* Tab 9: Surat */}
+        {/* Tab 10: Surat Masuk & Keluar */}
         <button
           onClick={() => setActiveTab('surat')}
           style={{
@@ -3105,7 +3358,31 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           }}
         >
           <Mail size={18} />
-          <span>9. Surat</span>
+          <span>10. Surat Masuk & Keluar</span>
+        </button>
+
+        {/* Tab 11: STK (Surat Serah Terima Kunci) */}
+        <button
+          onClick={() => setActiveTab('stk')}
+          style={{
+            background: activeTab === 'stk' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
+            color: activeTab === 'stk' ? '#ffffff' : '#94a3b8',
+            border: activeTab === 'stk' ? '1.5px solid #c084fc' : '1px solid #1e293b',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '0.88rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'stk' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
+          }}
+        >
+          <KeyRound size={18} />
+          <span>11. STK (Serah Terima Kunci)</span>
         </button>
       </div>
 
@@ -5883,6 +6160,319 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                               type="button"
                               onClick={() => handleDeleteSurat(item.id, item.noSurat)}
                               title="Hapus Data Surat"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODUL 11: STK (SURAT SERAH TERIMA KUNCI & BAST KONSUMEN)                  */}
+      {/* Format Lengkap: No, No. STK/BAST, Tanggal, Proyek, Blok & Unit,          */}
+      {/* Nama Konsumen, Status (Lengkap / Pending Retensi), Dokumen BAST,          */}
+      {/* Catatan, dan Aksi (Cetak BAST Resmi, Edit, Hapus)                         */}
+      {/* ========================================================================= */}
+      {activeTab === 'stk' && (
+        <div className="glass-card" style={{ background: '#090d16', border: '1.5px solid #1e293b', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+          {/* Header Title & Badge */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                background: '#fbcfe8',
+                color: '#831843',
+                fontWeight: 900,
+                fontSize: '1.15rem',
+                padding: '6px 18px',
+                borderRadius: '6px',
+                border: '1.5px solid #f43f5e',
+                letterSpacing: '0.5px',
+                boxShadow: '0 2px 8px rgba(244, 63, 94, 0.2)'
+              }}>
+                STK / BAST
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  11. STK (Surat Serah Terima Kunci)
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+                  Register Berita Acara Serah Terima Kunci (BAST), Administrasi Kunci Unit & Berkas Legal Konsumen
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={exportStkToExcel}
+                className="btn btn-secondary btn-sm"
+                style={{ background: '#0f172a', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700 }}
+              >
+                <Download size={14} />
+                <span>Export Excel</span>
+              </button>
+              <button
+                onClick={handleOpenAddStk}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(244, 63, 94, 0.35)', color: '#fff' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Catatan STK</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Stats Summary Pills */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '6px 14px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Total Register STK:</span>
+              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#1e293b', padding: '1px 8px', borderRadius: '4px' }}>{stkList.length}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #059669', borderRadius: '8px', padding: '6px 14px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700 }}>BAST Lengkap:</span>
+              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#059669', padding: '1px 8px', borderRadius: '4px' }}>
+                {stkList.filter(s => s.status === 'BAST Lengkap').length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #d97706', borderRadius: '8px', padding: '6px 14px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 700 }}>Pending Retensi:</span>
+              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#d97706', padding: '1px 8px', borderRadius: '4px' }}>
+                {stkList.filter(s => s.status === 'Pending Retensi').length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid #0284c7', borderRadius: '8px', padding: '6px 14px' }}>
+              <span style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700 }}>Siap Serah Terima:</span>
+              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#0284c7', padding: '1px 8px', borderRadius: '4px' }}>
+                {stkList.filter(s => s.status === 'Siap Serah Terima').length}
+              </span>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <input
+                type="text"
+                placeholder="Cari No. STK, Konsumen, Blok, No. Unit, Catatan..."
+                value={searchStk}
+                onChange={(e) => setSearchStk(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px 7px 32px', color: '#fff', fontSize: '0.76rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={filterStkStatus}
+                onChange={(e) => setFilterStkStatus(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="BAST Lengkap">BAST Lengkap</option>
+                <option value="Pending Retensi">Pending Retensi</option>
+                <option value="Siap Serah Terima">Siap Serah Terima</option>
+              </select>
+
+              <select
+                value={filterStkProject}
+                onChange={(e) => setFilterStkProject(e.target.value)}
+                style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
+              >
+                <option value="ALL">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park</option>
+                <option value="Ashoka View">Ashoka View</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABEL STK: PERSIS SESUAI SPESIFIKASI LENGKAP */}
+          {filteredStkList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.15)', color: '#f43f5e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                <KeyRound size={28} />
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data STK</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
+                Daftar Serah Terima Kunci (STK/BAST) belum tersedia untuk filter ini. Klik tombol di bawah untuk menambah data baru.
+              </div>
+              <button
+                onClick={handleOpenAddStk}
+                className="btn btn-primary btn-sm"
+                style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.35)', color: '#fff' }}
+              >
+                <Plus size={15} />
+                <span>+ Tambah Catatan STK</span>
+              </button>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f43f5e', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: '#fbcfe8', color: '#831843', borderBottom: '2px solid #f43f5e', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>No. STK / BAST</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal STK</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok & Unit</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Konsumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Dokumen BAST</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStkList.map((item, idx) => {
+                    const isLengkap = item.status === 'BAST Lengkap';
+                    const isPending = item.status === 'Pending Retensi';
+
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.25)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
+                        }}
+                      >
+                        {/* 1. No. */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. No. STK / BAST */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#fbcfe8', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.noStk || '-'}
+                        </td>
+
+                        {/* 3. Tanggal STK */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.tanggal ? formatDisplayDate(item.tanggal) : '-'}
+                        </td>
+
+                        {/* 4. Proyek */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: '#ffffff', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.project || '-'}
+                        </td>
+
+                        {/* 5. Blok & Unit */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span style={{
+                            background: '#1e293b',
+                            border: '1px solid #38bdf8',
+                            color: '#38bdf8',
+                            padding: '3px 9px',
+                            borderRadius: '5px',
+                            fontSize: '0.74rem',
+                            fontWeight: 800
+                          }}>
+                            {item.blok ? `Blok ${item.blok} - Unit ${item.unitNo}` : `Unit ${item.unitNo}`}
+                          </span>
+                        </td>
+
+                        {/* 6. Nama Konsumen */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <div style={{ fontWeight: 800, color: '#ffffff' }}>{item.konsumen || '-'}</div>
+                          {item.phone && (
+                            <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>{item.phone}</div>
+                          )}
+                        </td>
+
+                        {/* 7. Status STK */}
+                        <td style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 900,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: isLengkap
+                                ? 'rgba(16, 185, 129, 0.2)'
+                                : isPending
+                                ? 'rgba(245, 158, 11, 0.2)'
+                                : 'rgba(56, 189, 248, 0.2)',
+                              color: isLengkap ? '#34d399' : isPending ? '#fbbf24' : '#38bdf8',
+                              border: isLengkap
+                                ? '1px solid #059669'
+                                : isPending
+                                ? '1px solid #d97706'
+                                : '1px solid #0284c7'
+                            }}
+                          >
+                            {isLengkap ? <CheckCircle2 size={11} /> : isPending ? <Clock size={11} /> : <Award size={11} />}
+                            {item.status || 'BAST Lengkap'}
+                          </span>
+                        </td>
+
+                        {/* 8. Dokumen BAST */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {item.fileData || item.fileName ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewFile(item.fileData, item.fileName)}
+                              title={`Lihat Berkas BAST: ${item.fileName}`}
+                              style={{
+                                background: 'rgba(244, 63, 94, 0.15)',
+                                border: '1px solid #f43f5e',
+                                color: '#f43f5e',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>Belum Ada</span>
+                          )}
+                        </td>
+
+                        {/* 9. Catatan */}
+                        <td style={{ padding: '10px 16px', textAlign: 'left', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'middle' }}>
+                          {item.catatan || '-'}
+                        </td>
+
+                        {/* 10. Aksi */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => setViewingStk(item)}
+                              title="Cetak Berita Acara Serah Terima Kunci (BAST) Resmi"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#f43f5e', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Printer size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditStk(item)}
+                              title="Edit Catatan STK"
+                              style={{ background: '#1e293b', border: '1px solid #334155', color: '#c084fc', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                            >
+                              <Edit3 size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteStk(item.id, `${item.unitNo} - ${item.konsumen}`)}
+                              title="Hapus Data STK"
                               style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                             >
                               <Trash2 size={12} />
@@ -11424,6 +12014,275 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       )}
 
       {/* ========================================================================= */}
+      {/* MODAL 11A: FORM TAMBAH / EDIT DATA STK (SERAH TERIMA KUNCI / BAST)        */}
+      {/* ========================================================================= */}
+      {isStkModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #f43f5e', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ background: '#fbcfe8', color: '#831843', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>STK / BAST</div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                  {editingStkId ? 'Edit Catatan STK / BAST' : 'Tambah Catatan Serah Terima Kunci'}
+                </h3>
+              </div>
+              <button onClick={() => setIsStkModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleSaveStk} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. STK / BAST *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: 049/BAST-STK/AMS-PRK/X/2025"
+                    value={stkForm.noStk}
+                    onChange={(e) => setStkForm({ ...stkForm, noStk: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal STK</label>
+                  <input
+                    type="date"
+                    value={stkForm.tanggal}
+                    onChange={(e) => setStkForm({ ...stkForm, tanggal: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                  <select
+                    value={stkForm.project}
+                    onChange={(e) => setStkForm({ ...stkForm, project: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  >
+                    <option value="Ashoka Park">Ashoka Park</option>
+                    <option value="Ashoka View">Ashoka View</option>
+                  </select>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: A"
+                      value={stkForm.blok}
+                      onChange={(e) => setStkForm({ ...stkForm, blok: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: A-01"
+                      value={stkForm.unitNo}
+                      onChange={(e) => setStkForm({ ...stkForm, unitNo: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Nama Konsumen *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nama Lengkap Pemilik Unit"
+                    value={stkForm.konsumen}
+                    onChange={(e) => setStkForm({ ...stkForm, konsumen: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. HP / WhatsApp</label>
+                  <input
+                    type="text"
+                    placeholder="08xxxxxxxxxx"
+                    value={stkForm.phone}
+                    onChange={(e) => setStkForm({ ...stkForm, phone: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status Serah Terima *</label>
+                  <select
+                    value={stkForm.status}
+                    onChange={(e) => setStkForm({ ...stkForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #f43f5e', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    required
+                  >
+                    <option value="BAST Lengkap">BAST Lengkap</option>
+                    <option value="Pending Retensi">Pending Retensi</option>
+                    <option value="Siap Serah Terima">Siap Serah Terima</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tipe Bangunan Rumah</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: 36/72 atau 45/90"
+                    value={stkForm.tipe}
+                    onChange={(e) => setStkForm({ ...stkForm, tipe: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status Legalitas Sertifikat</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: SHGB Induk No. 2045/Tangsel (Proses Pecahan SHM)"
+                  value={stkForm.legalStatus}
+                  onChange={(e) => setStkForm({ ...stkForm, legalStatus: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Dokumen BAST Fisik (PDF / Scan)</label>
+                <input
+                  type="file"
+                  onChange={handleStkFileChange}
+                  accept=".pdf,image/*"
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+                {stkForm.fileName && (
+                  <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={12} />
+                    <span>File siap: {stkForm.fileName} ({stkForm.fileSize})</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan / Detail Penyerahan Fisik</label>
+                <textarea
+                  rows={3}
+                  placeholder="Catatan penyerahan kunci, nomor meteran PLN/PDAM, daftar checklist retensi..."
+                  value={stkForm.catatan}
+                  onChange={(e) => setStkForm({ ...stkForm, catatan: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                <button type="button" onClick={() => setIsStkModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', color: '#fff', border: 'none', fontWeight: 800 }}>Simpan Catatan STK</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 11B: PRATINJAU & CETAK RESMI BERITA ACARA SERAH TERIMA KUNCI (BAST) */}
+      {/* ========================================================================= */}
+      {viewingStk && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '850px', width: '95%', color: '#0f172a' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#fbcfe8', color: '#831843', padding: '4px 10px', borderRadius: '4px', fontWeight: 900, fontSize: '0.8rem' }}>BAST / STK</div>
+                <h3 className="modal-title" style={{ color: '#0f172a', margin: 0 }}>
+                  Dokumen Resmi - Berita Acara Serah Terima Kunci & Unit Rumah
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button className="btn btn-primary btn-sm" onClick={() => window.print()} style={{ background: 'linear-gradient(135deg, #f43f5e, #e11d48)', color: '#ffffff', fontWeight: 800, border: 'none' }}>
+                  <Printer size={16} /> Cetak / Export PDF Dokumen
+                </button>
+                <button onClick={() => setViewingStk(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', padding: '2.5rem', borderRadius: '8px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1e293b' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px double #0f172a', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src="/company-logo.png" alt="Ashoka Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+                  <div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>PT ASHOKA ENTERPRISE REALTY</h2>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Departemen Legal Corporate &bull; Perumahan {viewingStk.project}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e11d48' }}>
+                    BERITA ACARA SERAH TERIMA (BAST)
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>NO: {viewingStk.noStk}</div>
+                </div>
+              </div>
+
+              <div style={{ fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                <p style={{ margin: '0 0 10px 0' }}>
+                  Pada hari ini, tanggal <strong>{formatDisplayDate(viewingStk.tanggal)}</strong>, telah dilaksanakan penyerahan fisik dan Serah Terima Kunci (STK) unit rumah secara sah antara Pihak Pengembang (Developer) dan Pihak Pembeli (Konsumen):
+                </p>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', width: '35%', color: '#64748b', fontWeight: 700 }}>Nama Konsumen / Pemilik Unit</td><td style={{ padding: '8px 0', fontWeight: 800 }}>: {viewingStk.konsumen}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Nomor Telepon / WhatsApp</td><td style={{ padding: '8px 0', fontWeight: 600 }}>: {viewingStk.phone || '-'}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Cluster & Proyek</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingStk.project}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Kavling / Nomor Unit</td><td style={{ padding: '8px 0', fontWeight: 800, color: '#0284c7' }}>: {viewingStk.blok ? `Blok ${viewingStk.blok} - Unit ${viewingStk.unitNo}` : `Unit ${viewingStk.unitNo}`}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Tipe Bangunan</td><td style={{ padding: '8px 0', fontWeight: 600 }}>: Tipe {viewingStk.tipe}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Status Dokumen Sertifikat</td><td style={{ padding: '8px 0', fontWeight: 700 }}>: {viewingStk.legalStatus || 'SHGB / SHM Siap AJB'}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Item Fisik yang Diserahkan</td><td style={{ padding: '8px 0', fontWeight: 700, color: '#10b981' }}>: 2 Set Kunci Utama + Kunci Gerbang + Kwh Listrik PLN + Meteran PDAM</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Status Serah Terima</td><td style={{ padding: '8px 0', fontWeight: 800, color: viewingStk.status === 'BAST Lengkap' ? '#10b981' : viewingStk.status === 'Pending Retensi' ? '#d97706' : '#0284c7' }}>: {viewingStk.status}</td></tr>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Berkas Fisik Terlampir</td><td style={{ padding: '8px 0' }}>: {viewingStk.fileName || 'Belum Terlampir'}</td></tr>
+                    <tr><td style={{ padding: '8px 0', color: '#64748b', fontWeight: 700 }}>Catatan Tambahan</td><td style={{ padding: '8px 0' }}>: {viewingStk.catatan || '-'}</td></tr>
+                  </tbody>
+                </table>
+
+                <p style={{ fontSize: '0.82rem', color: '#64748b', fontStyle: 'italic', margin: '0 0 1.5rem 0' }}>
+                  * Dengan ditandatanganinya Berita Acara ini, maka hak pemanfaatan unit rumah secara resmi beralih kepada Pembeli, dan masa pemeliharaan retensi garansi 100 hari kalender mulai berlaku secara sah.
+                </p>
+
+                {viewingStk.fileData && (
+                  <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <button onClick={() => handleViewFile(viewingStk.fileData, viewingStk.fileName)} className="btn btn-secondary btn-sm" style={{ border: '1px solid #f43f5e', color: '#f43f5e', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Eye size={14} /> Buka Berkas Digital Asli ({viewingStk.fileName})
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '2.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Pihak Kedua / Konsumen:<br /><strong>Pemilik Unit Rumah</strong></div>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>{viewingStk.konsumen}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Pembeli Unit {viewingStk.unitNo}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Pihak Pertama / Developer:<br /><strong>Departemen Legal Corporate</strong></div>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Wahyu Salma Septiani, S.H</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Staf Legal & Perizinan</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '3.5rem' }}>Mengetahui & Menyetujui:<br /><strong>Direktur Utama</strong></div>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', textDecoration: 'underline' }}>Yazid Hizbullah, S.E.,S.T</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Direktur Utama</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* MODAL CETAK LEGAL AUDIT REPORT                                            */}
       {/* ========================================================================= */}
       {isReportModalOpen && (
@@ -11433,7 +12292,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Scale size={20} color="#C084FC" />
                 <h3 className="modal-title" style={{ color: '#0f172a' }}>
-                  Dokumen Resmi - Laporan Audit Legal Corporate (4 Modul)
+                  Dokumen Resmi - Laporan Audit Legal Corporate (11 Modul Lengkap)
                 </h3>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -11490,7 +12349,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 7. <strong>SHGB:</strong> Total {shgbList.length} sertifikat Hak Guna Bangunan (Induk & Pecahan).<br />
                 8. <strong>IMB / PBG:</strong> Total {imbList.length} izin mendirikan bangunan & PBG.<br />
                 9. <strong>SPPT - PBB:</strong> Total {pbbList.length} ketetapan pajak PBB terdaftar.<br />
-                10. <strong>Persuratan:</strong> Total {suratList.length} arsip surat masuk & keluar resmi.
+                10. <strong>Persuratan:</strong> Total {suratList.length} arsip surat masuk & keluar resmi.<br />
+                11. <strong>Serah Terima Kunci (STK):</strong> Total {stkList.length} berkas Berita Acara Serah Terima (BAST).
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center', marginTop: '3rem' }}>
