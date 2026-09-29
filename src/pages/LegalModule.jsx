@@ -6036,32 +6036,6 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             </div>
           </div>
 
-          {/* Quick Stats Summary Pills */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '6px 14px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Total Register STK:</span>
-              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#1e293b', padding: '1px 8px', borderRadius: '4px' }}>{stkList.length}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #059669', borderRadius: '8px', padding: '6px 14px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700 }}>BAST Lengkap:</span>
-              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#059669', padding: '1px 8px', borderRadius: '4px' }}>
-                {stkList.filter(s => s.status === 'BAST Lengkap').length}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #d97706', borderRadius: '8px', padding: '6px 14px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 700 }}>Pending Retensi:</span>
-              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#d97706', padding: '1px 8px', borderRadius: '4px' }}>
-                {stkList.filter(s => s.status === 'Pending Retensi').length}
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid #0284c7', borderRadius: '8px', padding: '6px 14px' }}>
-              <span style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700 }}>Siap Serah Terima:</span>
-              <span style={{ fontSize: '0.82rem', color: '#ffffff', fontWeight: 900, background: '#0284c7', padding: '1px 8px', borderRadius: '4px' }}>
-                {stkList.filter(s => s.status === 'Siap Serah Terima').length}
-              </span>
-            </div>
-          </div>
-
           {/* Filter Bar */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', background: '#0d131f', padding: '0.75rem', borderRadius: '10px', border: '1px solid #1e293b', marginBottom: '1.25rem' }}>
             <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
