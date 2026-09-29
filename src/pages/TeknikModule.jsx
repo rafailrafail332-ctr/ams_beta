@@ -9971,16 +9971,16 @@ export const TeknikModule = () => {
                     <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '650px', fontSize: '0.78rem' }}>
                       <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
                         <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
-                          <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
-                          <th style={{ width: '80px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
-                          <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
-                          <th style={{ minWidth: '120px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
-                          <th style={{ width: '45px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
-                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
-                          <th style={{ width: '85px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Harga Satuan</th>
-                          <th style={{ minWidth: '100px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Vendor</th>
-                          <th style={{ minWidth: '90px', border: '1px solid #0369a1', padding: '6px 6px', fontWeight: 900 }}>Keterangan</th>
-                          <th style={{ width: '40px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
+                          <th style={{ width: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
+                          <th style={{ minWidth: '100px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                          <th style={{ width: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '120px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '45px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
+                          <th style={{ width: '85px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Harga Satuan</th>
+                          <th style={{ minWidth: '100px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900 }}>Vendor</th>
+                          <th style={{ minWidth: '90px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900 }}>Keterangan</th>
+                          <th style={{ width: '40px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -9992,7 +9992,7 @@ export const TeknikModule = () => {
                           filteredBarangMasuk.map((m, idx) => (
                             <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff' }}>{m.tanggal}</td>
-                              <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{m.proyek}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>{m.proyek}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{m.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#10b981', fontWeight: 900 }}>{m.qty}</td>
@@ -10082,17 +10082,17 @@ export const TeknikModule = () => {
                     <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '680px', fontSize: '0.78rem' }}>
                       <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
                         <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
-                          <th style={{ width: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
-                          <th style={{ width: '80px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
-                          <th style={{ width: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
-                          <th style={{ minWidth: '120px', border: '1.5px solid #034efc', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
-                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
-                          <th style={{ width: '70px', minWidth: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
-                          <th style={{ width: '85px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
-                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
-                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
-                          <th style={{ minWidth: '85px', border: '1.5px solid #034efc', padding: '6px 6px', fontWeight: 900 }}>Lain-lain</th>
-                          <th style={{ width: '40px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
+                          <th style={{ width: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
+                          <th style={{ minWidth: '100px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                          <th style={{ width: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '120px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '45px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
+                          <th style={{ width: '85px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
+                          <th style={{ width: '45px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
+                          <th style={{ width: '45px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
+                          <th style={{ minWidth: '85px', border: '1px solid #1d4ed8', padding: '6px 6px', fontWeight: 900 }}>Lain-lain</th>
+                          <th style={{ width: '40px', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -10104,7 +10104,7 @@ export const TeknikModule = () => {
                           filteredBarangKeluar.map((k, idx) => (
                             <tr key={k.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff' }}>{k.tanggal}</td>
-                              <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#f472b6', fontWeight: 800 }}>{k.proyek}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#f472b6', fontWeight: 800, whiteSpace: 'nowrap' }}>{k.proyek}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{k.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#f43f5e', fontWeight: 900 }}>{k.qty}</td>
@@ -10202,11 +10202,11 @@ export const TeknikModule = () => {
 
                 {/* Tabel Daftar Persediaan */}
                 <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
-                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px' }}>
+                  <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1280px' }}>
                     <thead>
                       <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                         <th style={{ width: '40px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>No.</th>
-                        <th style={{ width: '110px', border: '1px solid #1d4ed8', padding: '8px 8px', fontWeight: 900, fontSize: '0.84rem' }}>Proyek</th>
+                        <th style={{ minWidth: '160px', border: '1px solid #1d4ed8', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem', whiteSpace: 'nowrap' }}>Proyek</th>
                         <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Kode</th>
                         <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Nama Barang</th>
                         <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Masuk</th>
@@ -10234,9 +10234,9 @@ export const TeknikModule = () => {
                           return (
                             <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
-                              <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8' }}>
-                                <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
-                                  {item.proyek}
+                              <td style={{ border: '1px solid #334155', padding: '7px 10px', fontWeight: 900, minWidth: '160px', whiteSpace: 'nowrap' }}>
+                                <span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '3px 10px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 900, color: (item.proyek || '').includes('Park') ? '#34d399' : '#38bdf8', background: (item.proyek || '').includes('Park') ? 'rgba(52, 211, 153, 0.18)' : 'rgba(56, 189, 248, 0.18)', border: `1px solid ${(item.proyek || '').includes('Park') ? '#10b981' : '#0284c7'}` }}>
+                                  {(item.proyek || '').includes('Park') ? '🌳 ' : '🏔️ '}{item.proyek}
                                 </span>
                               </td>
                               <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
@@ -10472,11 +10472,11 @@ export const TeknikModule = () => {
 
               {/* Table */}
               <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
-                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px' }}>
+                <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1280px' }}>
                   <thead>
                     <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>No.</th>
-                      <th style={{ width: '120px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ minWidth: '160px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
                       <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
                       <th style={{ minWidth: '200px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
                       <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
@@ -10504,9 +10504,9 @@ export const TeknikModule = () => {
                         return (
                           <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
-                            <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8', whiteSpace: 'nowrap' }}>
-                              <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
-                                {item.proyek}
+                            <td style={{ border: '1px solid #334155', padding: '7px 10px', fontWeight: 900, minWidth: '160px', whiteSpace: 'nowrap' }}>
+                              <span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '3px 10px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 900, color: (item.proyek || '').includes('Park') ? '#34d399' : '#38bdf8', background: (item.proyek || '').includes('Park') ? 'rgba(52, 211, 153, 0.18)' : 'rgba(56, 189, 248, 0.18)', border: `1px solid ${(item.proyek || '').includes('Park') ? '#10b981' : '#0284c7'}` }}>
+                                {(item.proyek || '').includes('Park') ? '🌳 ' : '🏔️ '}{item.proyek}
                               </span>
                             </td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
