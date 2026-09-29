@@ -10236,7 +10236,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
                               <td style={{ border: '1px solid #334155', padding: '7px 10px', fontWeight: 900, minWidth: '160px', whiteSpace: 'nowrap' }}>
                                 <span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '3px 10px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 900, color: (item.proyek || '').includes('Park') ? '#34d399' : '#38bdf8', background: (item.proyek || '').includes('Park') ? 'rgba(52, 211, 153, 0.18)' : 'rgba(56, 189, 248, 0.18)', border: `1px solid ${(item.proyek || '').includes('Park') ? '#10b981' : '#0284c7'}` }}>
-                                  {(item.proyek || '').includes('Park') ? '🌳 ' : '🏔️ '}{item.proyek}
+                                  {item.proyek}
                                 </span>
                               </td>
                               <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
@@ -10506,7 +10506,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', fontWeight: 900, minWidth: '160px', whiteSpace: 'nowrap' }}>
                               <span style={{ display: 'inline-block', whiteSpace: 'nowrap', padding: '3px 10px', borderRadius: '6px', fontSize: '0.84rem', fontWeight: 900, color: (item.proyek || '').includes('Park') ? '#34d399' : '#38bdf8', background: (item.proyek || '').includes('Park') ? 'rgba(52, 211, 153, 0.18)' : 'rgba(56, 189, 248, 0.18)', border: `1px solid ${(item.proyek || '').includes('Park') ? '#10b981' : '#0284c7'}` }}>
-                                {(item.proyek || '').includes('Park') ? '🌳 ' : '🏔️ '}{item.proyek}
+                                {item.proyek}
                               </span>
                             </td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 6px' }}>{item.kode}</td>
