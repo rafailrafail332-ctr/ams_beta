@@ -4936,15 +4936,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                background: '#f8cbad',
-                color: '#7f3f10',
+                background: 'rgba(192, 132, 252, 0.15)',
+                color: '#c084fc',
                 fontWeight: 900,
                 fontSize: '1.15rem',
                 padding: '6px 18px',
                 borderRadius: '6px',
-                border: '1.5px solid #ea580c',
+                border: '1.5px solid #9333ea',
                 letterSpacing: '0.5px',
-                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+                boxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)'
               }}>
                 SHGB
               </div>
@@ -5034,19 +5034,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. SHGB</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. SHGB</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -5195,15 +5195,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                background: '#f8cbad',
-                color: '#7f3f10',
+                background: 'rgba(192, 132, 252, 0.15)',
+                color: '#c084fc',
                 fontWeight: 900,
                 fontSize: '1.15rem',
                 padding: '6px 18px',
                 borderRadius: '6px',
-                border: '1.5px solid #ea580c',
+                border: '1.5px solid #9333ea',
                 letterSpacing: '0.5px',
-                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+                boxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)'
               }}>
                 IMB / PBG
               </div>
@@ -5293,19 +5293,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. IMB/pbg</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. IMB/pbg</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Release</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -5454,15 +5454,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                background: '#f8cbad',
-                color: '#7f3f10',
+                background: 'rgba(192, 132, 252, 0.15)',
+                color: '#c084fc',
                 fontWeight: 900,
                 fontSize: '1.15rem',
                 padding: '6px 18px',
                 borderRadius: '6px',
-                border: '1.5px solid #ea580c',
+                border: '1.5px solid #9333ea',
                 letterSpacing: '0.5px',
-                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+                boxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)'
               }}>
                 SPPT - PBB
               </div>
@@ -5563,20 +5563,20 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>NOP</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tahun</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>NJOP</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NOP</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tahun</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Luas (m2)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NJOP</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -5731,15 +5731,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                background: '#f8cbad',
-                color: '#7f3f10',
+                background: 'rgba(192, 132, 252, 0.15)',
+                color: '#c084fc',
                 fontWeight: 900,
                 fontSize: '1.15rem',
                 padding: '6px 18px',
                 borderRadius: '6px',
-                border: '1.5px solid #ea580c',
+                border: '1.5px solid #9333ea',
                 letterSpacing: '0.5px',
-                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.2)'
+                boxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)'
               }}>
                 SURAT
               </div>
@@ -5829,19 +5829,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f8cbad', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f8cbad', color: '#431407', borderBottom: '2px solid #ea580c', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Surat</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Dari</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Kepada</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '11px 18px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Perihal</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fed7aa', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Surat</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Dari</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kepada</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 18px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Perihal</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
@@ -5994,15 +5994,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                background: '#fbcfe8',
-                color: '#831843',
+                background: 'rgba(192, 132, 252, 0.15)',
+                color: '#c084fc',
                 fontWeight: 900,
                 fontSize: '1.15rem',
                 padding: '6px 18px',
                 borderRadius: '6px',
-                border: '1.5px solid #f43f5e',
+                border: '1.5px solid #9333ea',
                 letterSpacing: '0.5px',
-                boxShadow: '0 2px 8px rgba(244, 63, 94, 0.2)'
+                boxShadow: '0 2px 8px rgba(147, 51, 234, 0.25)'
               }}>
                 STK / BAST
               </div>
@@ -6028,7 +6028,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={handleOpenAddStk}
                 className="btn btn-primary btn-sm"
-                style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(244, 63, 94, 0.35)', color: '#fff' }}
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)', color: '#fff' }}
               >
                 <Plus size={15} />
                 <span>+ Tambah Catatan STK</span>
@@ -6076,7 +6076,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           {/* TABEL STK: PERSIS SESUAI SPESIFIKASI LENGKAP */}
           {filteredStkList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(244, 63, 94, 0.15)', color: '#f43f5e', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(147, 51, 234, 0.15)', color: '#c084fc', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                 <KeyRound size={28} />
               </div>
               <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data STK</div>
@@ -6086,26 +6086,26 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               <button
                 onClick={handleOpenAddStk}
                 className="btn btn-primary btn-sm"
-                style={{ background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.35)', color: '#fff' }}
+                style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)', color: '#fff' }}
               >
                 <Plus size={15} />
                 <span>+ Tambah Catatan STK</span>
               </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #f43f5e', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #4c1d95', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#fbcfe8', color: '#831843', borderBottom: '2px solid #f43f5e', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>No. STK / BAST</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal STK</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok & Unit</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Konsumen</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Dokumen BAST</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid #fecdd3', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#ffffff', borderBottom: '2px solid #5b21b6', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. STK / BAST</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal STK</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Blok & Unit</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Konsumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Dokumen BAST</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
                   </tr>
                 </thead>
