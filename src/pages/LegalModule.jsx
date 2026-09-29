@@ -5406,7 +5406,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   Data Izin Mendirikan Bangunan (IMB) & PBG
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
-                  Register IMB / PBG Induk Kawasan & IMB / PBG Pecahan Per Kavling Unit
+                  Register IMB / PBG Induk dan pecahan
                 </p>
               </div>
             </div>
@@ -5665,7 +5665,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   Data SPPT - PBB (Pajak Bumi dan Bangunan)
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
-                  Register NOP Induk Proyek & NOP Pecahan Tiap Unit Kavling Bangunan
+                  Register NOP Induk dan pecahan
                 </p>
               </div>
             </div>
@@ -5942,7 +5942,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   Administrasi Surat Masuk & Surat Keluar
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
-                  Register Korespondensi Legal Corporate, Instansi ATR/BPN, Notaris, & Perizinan
+                  Register Korespondensi Legal Corporate
                 </p>
               </div>
             </div>
