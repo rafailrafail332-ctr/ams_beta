@@ -5102,8 +5102,8 @@ export const TeknikModule = () => {
                       fontSize: '0.8rem',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      border: statusFilter === 'ALL' ? '2px solid #0284c7' : '1px solid #475569',
-                      background: statusFilter === 'ALL' ? '#0284c7' : '#0f172a',
+                      border: statusFilter === 'ALL' ? '2px solid #034efc' : '1px solid rgba(255,255,255,0.2)',
+                      background: statusFilter === 'ALL' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#0f172a',
                       color: '#ffffff',
                       transition: 'all 0.2s ease'
                     }}
@@ -5121,9 +5121,9 @@ export const TeknikModule = () => {
                       fontSize: '0.8rem',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      border: statusFilter === 'Mandor' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
-                      background: statusFilter === 'Mandor' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                      color: statusFilter === 'Mandor' ? '#ffffff' : '#fbbf24',
+                      border: statusFilter === 'Mandor' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                      background: statusFilter === 'Mandor' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
+                      color: statusFilter === 'Mandor' ? '#ffffff' : '#93c5fd',
                       transition: 'all 0.2s ease'
                     }}
                   >
@@ -5140,8 +5140,8 @@ export const TeknikModule = () => {
                       fontSize: '0.8rem',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      border: statusFilter === 'Tukang' ? '2px solid #38BDF8' : '1px solid rgba(56, 189, 248, 0.4)',
-                      background: statusFilter === 'Tukang' ? '#0284c7' : 'rgba(56, 189, 248, 0.15)',
+                      border: statusFilter === 'Tukang' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                      background: statusFilter === 'Tukang' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
                       color: '#ffffff',
                       transition: 'all 0.2s ease'
                     }}
@@ -5159,8 +5159,8 @@ export const TeknikModule = () => {
                       fontSize: '0.8rem',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      border: statusFilter === 'Kenek' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                      background: statusFilter === 'Kenek' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
+                      border: statusFilter === 'Kenek' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                      background: statusFilter === 'Kenek' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
                       color: '#ffffff',
                       transition: 'all 0.2s ease'
                     }}
@@ -5813,8 +5813,8 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: projectFilter === 'ALL' ? '2px solid #0284c7' : '1px solid #475569',
-                    background: projectFilter === 'ALL' ? '#0284c7' : '#0f172a',
+                    border: projectFilter === 'ALL' ? '2px solid #034efc' : '1px solid rgba(255,255,255,0.2)',
+                    background: projectFilter === 'ALL' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#0f172a',
                     color: '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
@@ -5831,9 +5831,9 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: projectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                    background: projectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
-                    color: projectFilter === 'Ashoka Park' ? '#ffffff' : '#34d399',
+                    border: projectFilter === 'Ashoka Park' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                    background: projectFilter === 'Ashoka Park' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
+                    color: projectFilter === 'Ashoka Park' ? '#ffffff' : '#93c5fd',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -5849,9 +5849,9 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: projectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
-                    background: projectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                    color: projectFilter === 'Ashoka View' ? '#ffffff' : '#fbbf24',
+                    border: projectFilter === 'Ashoka View' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                    background: projectFilter === 'Ashoka View' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
+                    color: projectFilter === 'Ashoka View' ? '#ffffff' : '#93c5fd',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -5993,10 +5993,10 @@ export const TeknikModule = () => {
           </div>
 
           {/* ABSEN TABLE (WITH LEMBUR COLUMN IN JAM KERJA) */}
-          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #0284c7', overflow: 'hidden' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #034efc', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#fff', padding: '3px 10px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900, border: '1px solid #38bdf8' }}>Log Harian</span>
+                <span style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#fff', padding: '3px 10px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 900, border: '1px solid #1d4ed8' }}>Log Harian</span>
                 Detail Absen Tenaga Kerja & Jam Lembur {dateFilter ? `(Tanggal: ${dateFilter.split('-').reverse().join('/')})` : ''}
               </div>
               <div style={{ fontSize: '0.82rem', color: '#38bdf8', fontWeight: 800 }}>
@@ -6128,16 +6128,16 @@ export const TeknikModule = () => {
         <div className="module-animated-view">
           
           {/* 1. KARTU FORM INPUT PEKERJAAN */}
-          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #f59e0b', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
+          <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #034efc', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(3, 78, 252, 0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Briefcase size={22} color="#f59e0b" /> {pekerjaanFormData.id ? 'Edit Data Pekerjaan' : 'Form Input Pekerjaan Borongan'}
+                  <Briefcase size={22} color="#034efc" /> {pekerjaanFormData.id ? 'Edit Data Pekerjaan' : 'Form Input Pekerjaan Borongan'}
                 </h3>
                 
               </div>
               {pekerjaanFormData.id && (
-                <span style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid #f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
+                <span style={{ background: 'rgba(3, 78, 252, 0.2)', color: '#93c5fd', border: '1px solid #034efc', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
                   ✏️ Mode Edit: {pekerjaanFormData.noSpk}
                 </span>
               )}
@@ -6573,12 +6573,12 @@ export const TeknikModule = () => {
           <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             
             {/* Header & Filter Bar Tabel */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #f59e0b' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #034efc' }}>
               
               {/* Row 1: Judul Tabel & Ringkasan Filter */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.65rem' }}>
                 <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
+                  <span style={{ background: '#034efc', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
                   Daftar Pekerjaan Borongan & Rekapitulasi
                 </h4>
                 
@@ -7146,7 +7146,7 @@ export const TeknikModule = () => {
         <div className="module-animated-view">
           
           {/* SHEET SEARCH & SELECTOR TOOLBAR (DUAL SEARCH + DROPDOWN SELECT) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1.5px solid #10b981' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '10px', border: '1.5px solid #034efc' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: 1 }}>
               
               {/* FILTER PROYEK TOMBOL */}
@@ -7163,8 +7163,8 @@ export const TeknikModule = () => {
                     fontSize: '0.78rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: hasilOpnameProjectFilter === 'ALL' ? '2px solid #10b981' : '1px solid #475569',
-                    background: hasilOpnameProjectFilter === 'ALL' ? '#10b981' : '#1e293b',
+                    border: hasilOpnameProjectFilter === 'ALL' ? '2px solid #034efc' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'ALL' ? '#034efc' : '#1e293b',
                     color: '#ffffff',
                     transition: 'all 0.15s ease'
                   }}
@@ -7180,9 +7180,9 @@ export const TeknikModule = () => {
                     fontSize: '0.78rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: hasilOpnameProjectFilter === 'Ashoka View' ? '2px solid #f59e0b' : '1px solid #475569',
-                    background: hasilOpnameProjectFilter === 'Ashoka View' ? '#f59e0b' : '#1e293b',
-                    color: hasilOpnameProjectFilter === 'Ashoka View' ? '#000000' : '#cbd5e1',
+                    border: hasilOpnameProjectFilter === 'Ashoka View' ? '2px solid #034efc' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'Ashoka View' ? '#034efc' : '#1e293b',
+                    color: '#ffffff',
                     transition: 'all 0.15s ease'
                   }}
                 >
@@ -7197,9 +7197,9 @@ export const TeknikModule = () => {
                     fontSize: '0.78rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: hasilOpnameProjectFilter === 'Ashoka Park' ? '2px solid #38bdf8' : '1px solid #475569',
-                    background: hasilOpnameProjectFilter === 'Ashoka Park' ? '#38bdf8' : '#1e293b',
-                    color: hasilOpnameProjectFilter === 'Ashoka Park' ? '#000000' : '#cbd5e1',
+                    border: hasilOpnameProjectFilter === 'Ashoka Park' ? '2px solid #034efc' : '1px solid #475569',
+                    background: hasilOpnameProjectFilter === 'Ashoka Park' ? '#034efc' : '#1e293b',
+                    color: '#ffffff',
                     transition: 'all 0.15s ease'
                   }}
                 >
@@ -7285,10 +7285,10 @@ export const TeknikModule = () => {
           {/* ========================================================================= */}
           {/* 1. TABEL UTAMA ATAS: REKAPITULASI OPNAME (PERSIS FOTO media_1787938735917.jpg) */}
           {/* ========================================================================= */}
-          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.5rem', maxWidth: '100%' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem', maxWidth: '100%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <BarChart3 size={20} color="#f59e0b" /> Rekapitulasi Opname
+                <BarChart3 size={20} color="#034efc" /> Rekapitulasi Opname
               </h3>
               <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 800 }}>
                 💡 Klik baris pada tabel untuk membuka rincian lembar Hasil Opname di bawah
@@ -7597,20 +7597,20 @@ export const TeknikModule = () => {
           {/* 2. TABEL RINCIAN HASIL OPNAME & PEMBAYARAN                                */}
           {/* ========================================================================= */}
           {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '') || (sheet.items && sheet.items.length > 0) || ((sheet.noInput || '').trim() !== '')).length > 0 && (
-          <div className="glass-card printable-sheet-area printable-opname-sheet" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #10b981', maxWidth: '100%' }}>
+          <div className="glass-card printable-sheet-area printable-opname-sheet" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #034efc', maxWidth: '100%' }}>
             
             {/* Header Title & Info */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ClipboardCheck size={22} color="#10b981" /> Hasil Opname Pekerjaan: {activeSheet.noInput}
+                  <ClipboardCheck size={22} color="#034efc" /> Hasil Opname Pekerjaan: {activeSheet.noInput}
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: '0.84rem', color: '#94a3b8', fontWeight: 700 }}>
                   🏢 {activeSheet.proyek} {activeSheet.blok ? `(Blok ${activeSheet.blok} No ${activeSheet.noUnit})` : ''} | 📅 Tanggal: <strong style={{ color: '#34d399' }}>{activeSheet.tanggalOpname || activeSheet.tanggal || '-'}</strong> | 👤 Vendor: <strong style={{ color: '#38bdf8' }}>{activeSheet.namaVendor || '-'}</strong> | 🔨 {activeSheet.pekerjaan || 'RAB'}
                 </p>
               </div>
 
-              <div style={{ background: '#0f172a', padding: '6px 14px', borderRadius: '8px', border: '1px solid #10b981', textAlign: 'right' }}>
+              <div style={{ background: '#0f172a', padding: '6px 14px', borderRadius: '8px', border: '1px solid #034efc', textAlign: 'right' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>Total Bobot Progres Opname:</div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#34d399' }}>
                   {formatDecimal(activeSheetCalc.progresPersen)}%
@@ -7844,7 +7844,7 @@ export const TeknikModule = () => {
             </div>
 
             {/* TERBILANG PEMBAYARAN SAAT INI BOX */}
-            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1.5px solid #10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div style={{ background: '#0f172a', padding: '0.85rem 1.1rem', borderRadius: '6px', border: '1.5px solid #034efc', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <span style={{ fontWeight: 900, color: '#10b981', fontSize: '0.9rem' }}>Terbilang Pembayaran Saat Ini :</span>
               <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem', fontStyle: 'italic' }}>
                 {angkaTerbilang(activeSheetCalc.pembayaranSaatIni)}
@@ -7980,30 +7980,30 @@ export const TeknikModule = () => {
           
           {/* KPI Summary Cards */}
           <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #f59e0b', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Total Kontrak / No. SPK</div>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Kontrak / No. SPK</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanSheets.length} SPK</div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Daftar Kontrak Kerja Terdaftar</div>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #34d399', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Harga RAB</div>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Harga RAB</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
                 Rp {formatRupiahDesimal(grandTotalHargaRab)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Seluruh Nilai Kontrak</div>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #c084fc', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Retensi (5%)</div>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Retensi (5%)</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#c084fc', marginTop: '2px' }}>
                 Rp {formatRupiahDesimal(grandTotalRetensi)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Jaminan Masa Pemeliharaan</div>
             </div>
 
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #60a5fa', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#60a5fa', fontWeight: 800 }}>Total Nilai Progress</div>
+            <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Nilai Progress</div>
               <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#60a5fa', marginTop: '2px' }}>
                 Rp {formatRupiahDesimal(grandTotalNilaiProgress)}
               </div>
@@ -8028,9 +8028,9 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: laporanProjectFilter === 'ALL' ? '2px solid #f59e0b' : '1px solid #475569',
-                    background: laporanProjectFilter === 'ALL' ? '#f59e0b' : '#0f172a',
-                    color: '#000000',
+                    border: laporanProjectFilter === 'ALL' ? '2px solid #034efc' : '1px solid rgba(255,255,255,0.2)',
+                    background: laporanProjectFilter === 'ALL' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#0f172a',
+                    color: '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -8046,9 +8046,9 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: laporanProjectFilter === 'Ashoka View' ? '2px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.4)',
-                    background: laporanProjectFilter === 'Ashoka View' ? '#F59E0B' : 'rgba(245, 158, 11, 0.15)',
-                    color: '#ffffff',
+                    border: laporanProjectFilter === 'Ashoka View' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                    background: laporanProjectFilter === 'Ashoka View' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
+                    color: laporanProjectFilter === 'Ashoka View' ? '#ffffff' : '#93c5fd',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -8064,9 +8064,9 @@ export const TeknikModule = () => {
                     fontSize: '0.8rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    border: laporanProjectFilter === 'Ashoka Park' ? '2px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                    background: laporanProjectFilter === 'Ashoka Park' ? '#10B981' : 'rgba(16, 185, 129, 0.15)',
-                    color: '#ffffff',
+                    border: laporanProjectFilter === 'Ashoka Park' ? '2px solid #034efc' : '1px solid rgba(3, 78, 252, 0.35)',
+                    background: laporanProjectFilter === 'Ashoka Park' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'rgba(3, 78, 252, 0.12)',
+                    color: laporanProjectFilter === 'Ashoka Park' ? '#ffffff' : '#93c5fd',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -8373,18 +8373,18 @@ export const TeknikModule = () => {
           {subTabTukarFaktur === 'input_tf' && (
             <>
               {/* 1. KARTU FORM INPUT TUKAR FAKTUR */}
-              <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #7c3aed', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(124, 58, 237, 0.25)' }}>
+              <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #034efc', borderRadius: '12px', marginBottom: '1.5rem', boxShadow: '0 4px 20px rgba(3, 78, 252, 0.25)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <FileText size={22} color="#c084fc" /> {tukarFakturFormData.id ? 'Edit Dokumen Tukar Faktur' : 'Form Input Tukar Faktur'}
+                      <FileText size={22} color="#034efc" /> {tukarFakturFormData.id ? 'Edit Dokumen Tukar Faktur' : 'Form Input Tukar Faktur'}
                     </h3>
                     <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
                       Mencatat dokumen faktur tagihan supplier/kontraktor dengan No. TT & kontrol status pembayaran
                     </p>
                   </div>
                   {tukarFakturFormData.id && (
-                    <span style={{ background: 'rgba(124, 58, 237, 0.25)', color: '#c084fc', border: '1px solid #7c3aed', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
+                    <span style={{ background: 'rgba(3, 78, 252, 0.25)', color: '#93c5fd', border: '1px solid #034efc', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
                       ✏️ Mode Edit: {tukarFakturFormData.noTt}
                     </span>
                   )}
@@ -8897,32 +8897,32 @@ export const TeknikModule = () => {
                 
                 {/* 4 KARTU KPI RINGKASAN TUKAR FAKTUR */}
                 <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
-                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #7c3aed', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>📋 Jumlah Dokumen TT</div>
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>📋 Jumlah Dokumen TT</div>
                     <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredTukarFakturList.length} TT</div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                       {filteredTukarFakturList.filter(i => i.isLunas).length} Lunas &bull; {filteredTukarFakturList.filter(i => !i.isLunas).length} Belum Lunas
                     </div>
                   </div>
 
-                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>💰 Total Nilai Faktur</div>
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>💰 Total Nilai Faktur</div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
                       Rp {formatRupiahDesimal(grandSummaryTf.totFaktur)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Nilai Seluruh Faktur</div>
                   </div>
 
-                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>💳 Total Terbayar</div>
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>💳 Total Terbayar</div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
                       Rp {formatRupiahDesimal(grandSummaryTf.totBayar)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Realisasi Pembayaran yang Keluar</div>
                   </div>
 
-                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #ef4444', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>⚡ Sisa Tagihan Faktur</div>
+                  <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>⚡ Sisa Tagihan Faktur</div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f87171', marginTop: '2px' }}>
                       Rp {formatRupiahDesimal(grandSummaryTf.totSisa)}
                     </div>
@@ -8931,12 +8931,12 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* Header & Filter Bar Tabel */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #7c3aed' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.25rem', background: '#0f172a', padding: '1rem', borderRadius: '10px', border: '1.5px solid #034efc' }}>
                   
                   {/* Row 1: Judul Tabel & Ringkasan Filter */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.65rem' }}>
                     <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ background: '#7c3aed', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
+                      <span style={{ background: '#034efc', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 900 }}>Tabel</span>
                       Daftar Rekapitulasi Tukar Faktur
                     </h4>
                     
@@ -9462,30 +9462,30 @@ export const TeknikModule = () => {
               
               {/* 4 KPI CARDS */}
               <div className="grid-4" style={{ marginBottom: '1.25rem' }}>
-                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #7c3aed', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>Total Faktur Terdaftar</div>
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Faktur Terdaftar</div>
                   <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>{filteredLaporanTfList.length} TT</div>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Dokumen Tagihan Tukar Faktur</div>
                 </div>
 
-                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #10b981', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Total Nilai Faktur</div>
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Nilai Faktur</div>
                   <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>
                     Rp {formatRupiahDesimal(grandSummaryLaporanTf.totFaktur)}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Kewajiban Faktur</div>
                 </div>
 
-                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #38bdf8', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Total Sudah Terbayar</div>
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Total Sudah Terbayar</div>
                   <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8', marginTop: '2px' }}>
                     Rp {formatRupiahDesimal(grandSummaryLaporanTf.totBayar)}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Dana Keluar Pelunasan Faktur</div>
                 </div>
 
-                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #ef4444', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>Sisa Tagihan Faktur</div>
+                <div style={{ padding: '1rem', borderRadius: '12px', background: '#1e293b', border: '2px solid #034efc', boxShadow: '0 4px 12px rgba(3, 78, 252, 0.2)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#93c5fd', fontWeight: 800 }}>Sisa Tagihan Faktur</div>
                   <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f87171', marginTop: '2px' }}>
                     Rp {formatRupiahDesimal(grandSummaryLaporanTf.totSisa)}
                   </div>
@@ -9765,11 +9765,11 @@ export const TeknikModule = () => {
           {subTabPersediaan === 'terpadu' && (
             <div>
               {/* Header Tampilan Terpadu */}
-              <div className="glass-card" style={{ padding: '1rem 1.25rem', background: '#1e293b', border: '2px solid #f59e0b', marginBottom: '1.25rem' }}>
+              <div className="glass-card" style={{ padding: '1rem 1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                   <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <Boxes size={24} color="#f59e0b" /> Sub-Modul Persediaan (Format Excel Terpadu)
+                      <Boxes size={24} color="#034efc" /> Sub-Modul Persediaan (Format Excel Terpadu)
                     </h3>
                     <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
                       Tampilan komprehensif: Data Base Master Barang, Barang Masuk, Barang Keluar, dan Rekapitulasi Daftar Persediaan Otomatis.
@@ -9805,30 +9805,30 @@ export const TeknikModule = () => {
 
                 {/* KPI Summary Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginTop: '1rem' }}>
-                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #a855f7' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#c084fc', textTransform: 'uppercase' }}>Total Jenis Material</div>
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Total Jenis Material</div>
                     <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
                       {persediaanMasterBarang.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Item Barang</span>
                     </div>
                   </div>
 
-                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #10b981' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', textTransform: 'uppercase' }}>Total Sisa Stok Fisik</div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10b981', marginTop: '3px' }}>
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Total Sisa Stok Fisik</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
                       {persediaanSummaryList.reduce((acc, it) => acc + (it.sisaQty || 0), 0)} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Qty</span>
                     </div>
                   </div>
 
-                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase' }}>Nilai Aset Persediaan</div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fbbf24', marginTop: '3px' }}>
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Nilai Aset Persediaan</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
                       Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiSisa || 0), 0))}
                     </div>
                   </div>
 
-                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #ec4899' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f472b6', textTransform: 'uppercase' }}>Total Pemakaian (Keluar)</div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f472b6', marginTop: '3px' }}>
+                  <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Total Pemakaian (Keluar)</div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginTop: '3px' }}>
                       Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiKeluar || 0), 0))}
                     </div>
                   </div>
@@ -9839,15 +9839,15 @@ export const TeknikModule = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 
                 {/* 1. KOTAK KIRI ATAS: DATA BASE (KODE, NAMA BARANG, SATUAN) */}
-                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #a855f7', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #034efc', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Package size={18} color="#a855f7" /> Data Base ({persediaanMasterBarang.length})
+                      <Package size={18} color="#034efc" /> Data Base ({persediaanMasterBarang.length})
                     </h4>
                     <button
                       type="button"
                       onClick={handleOpenAddMasterBarang}
-                      style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                      style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                     >
                       <Plus size={13} /> + Tambah
                     </button>
@@ -9915,15 +9915,15 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* 2. KOTAK TENGAH ATAS: BARANG MASUK (TGL, PROYEK, KODE, NAMA BARANG, QTY, SAT, HARGA SATUAN, VENDOR, KETERANGAN) */}
-                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #0284c7', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #034efc', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ArrowDownLeft size={18} color="#38bdf8" /> Barang Masuk ({persediaanBarangMasuk.length})
+                      <ArrowDownLeft size={18} color="#034efc" /> Barang Masuk ({persediaanBarangMasuk.length})
                     </h4>
                     <button
                       type="button"
                       onClick={handleOpenAddBarangMasuk}
-                      style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                      style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                     >
                       <Plus size={13} /> + Masuk
                     </button>
@@ -10026,15 +10026,15 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* 3. KOTAK KANAN ATAS: BARANG KELUAR (TGL, PROYEK, KODE, NAMA BARANG, QTY, SAT, AVG, BLOK, NO., LAIN-LAIN) */}
-                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #db2777', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
+                <div className="glass-card" style={{ padding: '1rem', background: '#1e293b', border: '1.5px solid #034efc', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ArrowUpRight size={18} color="#f472b6" /> Barang Keluar ({persediaanBarangKeluar.length})
+                      <ArrowUpRight size={18} color="#034efc" /> Barang Keluar ({persediaanBarangKeluar.length})
                     </h4>
                     <button
                       type="button"
                       onClick={handleOpenAddBarangKeluar}
-                      style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                      style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '5px 10px', borderRadius: '6px', fontWeight: 900, fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                     >
                       <Plus size={13} /> + Keluar
                     </button>
@@ -10141,11 +10141,11 @@ export const TeknikModule = () => {
               </div>
 
               {/* 4. KOTAK BAWAH: DAFTAR PERSEDIAAN (PERSIS TABEL BAWAH DI GAMBAR EXCEL) */}
-              <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', borderRadius: '10px' }}>
+              <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', borderRadius: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <BarChart3 size={20} color="#10b981" /> Daftar Persediaan (Sisa Stok Real-Time per Proyek)
+                      <BarChart3 size={20} color="#034efc" /> Daftar Persediaan (Sisa Stok Real-Time per Proyek)
                     </h4>
                     <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                       Kalkulasi otomatis per proyek: Sisa Qty = (Masuk + Mutasi Masuk - Mutasi Keluar - Keluar) | Hanya proyek & barang yang sudah di-input.
@@ -10363,11 +10363,11 @@ export const TeknikModule = () => {
           {/* VIEW 2: DAFTAR PERSEDIAAN (TAMPILAN RINCI / FULL VIEW)                 */}
           {/* --------------------------------------------------------------------- */}
           {subTabPersediaan === 'daftar' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <BarChart3 size={22} color="#10b981" /> Laporan Rekapitulasi Stok & Persediaan Proyek
+                    <BarChart3 size={22} color="#034efc" /> Laporan Rekapitulasi Stok & Persediaan Proyek
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Sisa stok fisik, valuasi harga rata-rata (Weighted Average Cost), dan total nilai aset material
@@ -10447,20 +10447,20 @@ export const TeknikModule = () => {
                     {persediaanSummaryList.length} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Item Proyek</span>
                   </div>
                 </div>
-                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #0284c7' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase' }}>Total Pembelian Masuk</div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Total Pembelian Masuk</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8', marginTop: '3px' }}>
                     Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiMasuk || 0), 0))}
                   </div>
                 </div>
-                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1px solid #db2777' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#f472b6', textTransform: 'uppercase' }}>Total Pemakaian Keluar</div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Total Pemakaian Keluar</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#f472b6', marginTop: '3px' }}>
                     Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiKeluar || 0), 0))}
                   </div>
                 </div>
-                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #10b981' }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#34d399', textTransform: 'uppercase' }}>Nilai Aset Stok Saat Ini</div>
+                <div style={{ background: '#0f172a', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase' }}>Nilai Aset Stok Saat Ini</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#10b981', marginTop: '3px' }}>
                     Rp {formatRupiah(persediaanSummaryList.reduce((acc, it) => acc + (it.totalNilaiSisa || 0), 0))}
                   </div>
@@ -10711,7 +10711,7 @@ export const TeknikModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddBarangMasuk}
-                    style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> + Catat Barang Masuk
                   </button>
@@ -10807,11 +10807,11 @@ export const TeknikModule = () => {
           {/* VIEW 4: BARANG KELUAR (TAMPILAN RINCI / FULL VIEW)                    */}
           {/* --------------------------------------------------------------------- */}
           {subTabPersediaan === 'keluar' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #db2777', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <ArrowUpRight size={22} color="#f472b6" /> Riwayat Pengeluaran Material (Barang Keluar)
+                    <ArrowUpRight size={22} color="#034efc" /> Riwayat Pengeluaran Material (Barang Keluar)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Log pemakaian material untuk pembangunan unit (Blok & Nomor), fasilitas umum, atau keperluan lainnya
@@ -10887,7 +10887,7 @@ export const TeknikModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddBarangKeluar}
-                    style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(219, 39, 119, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> + Catat Barang Keluar
                   </button>
@@ -10985,11 +10985,11 @@ export const TeknikModule = () => {
           {/* VIEW 5: DATA BASE MASTER BARANG (TAMPILAN RINCI / FULL VIEW)          */}
           {/* --------------------------------------------------------------------- */}
           {subTabPersediaan === 'database' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #a855f7', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Package size={22} color="#a855f7" /> Data Base Barang Persediaan ({persediaanMasterBarang.length} Item)
+                    <Package size={22} color="#034efc" /> Data Base Barang Persediaan ({persediaanMasterBarang.length} Item)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Master daftar kode, nama material bahan bangunan, satuan standar, dan ringkasan perputaran stok
@@ -11016,7 +11016,7 @@ export const TeknikModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddMasterBarang}
-                    style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(168, 85, 247, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> + Tambah Master Barang
                   </button>
@@ -11097,11 +11097,11 @@ export const TeknikModule = () => {
           {/* VIEW 6: PEMINDAHAN BARANG / MUTASI ANTAR PROYEK (FULL VIEW)           */}
           {/* --------------------------------------------------------------------- */}
           {subTabPersediaan === 'mutasi' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #2563eb', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <RefreshCw size={22} color="#60a5fa" /> Riwayat Pemindahan Material (Mutasi Antar Proyek)
+                    <RefreshCw size={22} color="#034efc" /> Riwayat Pemindahan Material (Mutasi Antar Proyek)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Pencatatan transfer stok material antar lokasi proyek (mengurangi stok proyek asal & menambah stok proyek tujuan)
@@ -11285,11 +11285,11 @@ export const TeknikModule = () => {
           {/* 1. TABEL DATA BASE VENDOR (Nama | No. HP | No. KTP | Status)          */}
           {/* --------------------------------------------------------------------- */}
           {subTabDatabase === 'vendor' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #10b981', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Briefcase size={22} color="#10b981" /> Data Base Vendor ({databaseVendorRows.length} Rekanan)
+                    <Briefcase size={22} color="#034efc" /> Data Base Vendor ({databaseVendorRows.length} Rekanan)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Daftar mitra Kontraktor & Supplier material untuk operasional proyek
@@ -11323,7 +11323,7 @@ export const TeknikModule = () => {
                       setIsVendorModalOpen(true);
                     }}
                     style={{
-                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
                       color: '#ffffff',
                       border: 'none',
                       padding: '7px 14px',
@@ -11334,7 +11334,7 @@ export const TeknikModule = () => {
                       alignItems: 'center',
                       gap: '5px',
                       cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                      boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)'
                     }}
                   >
                     <Plus size={16} /> Tambah Vendor
@@ -11454,7 +11454,7 @@ export const TeknikModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenMasterWorkerModal}
-                    style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Tenaga Kerja
                   </button>
@@ -11537,11 +11537,11 @@ export const TeknikModule = () => {
           {/* 3. TABEL DATA BASE KARYAWAN (Nama | No HP | NIK | T/t/l | Alamat ...)  */}
           {/* --------------------------------------------------------------------- */}
           {subTabDatabase === 'karyawan' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #8b5cf6', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <UserCheck size={22} color="#c084fc" /> Data Base Karyawan ({databaseKaryawanRows.length} Pegawai)
+                    <UserCheck size={22} color="#034efc" /> Data Base Karyawan ({databaseKaryawanRows.length} Pegawai)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Data lengkap staf kantor & pengawas teknis, NIK, alamat, jabatan & berkas identitas
@@ -11574,7 +11574,7 @@ export const TeknikModule = () => {
                       });
                       setIsKaryawanModalOpen(true);
                     }}
-                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Karyawan
                   </button>
@@ -11691,11 +11691,11 @@ export const TeknikModule = () => {
           {/* 4. TABEL DATA BASE UNIT (Proyek | Blok | Nomor | Type | LB | LT)       */}
           {/* --------------------------------------------------------------------- */}
           {subTabDatabase === 'unit' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #3b82f6', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Home size={22} color="#60a5fa" /> Data Base Unit ({databaseUnitRows.length} Kavling / Rumah)
+                    <Home size={22} color="#034efc" /> Data Base Unit ({databaseUnitRows.length} Kavling / Rumah)
                   </h3>
                   <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>
                     Master data kavling perumahan, nomor unit, type bangunan, LB (Luas Bangunan) dan LT (Luas Tanah)
@@ -11726,7 +11726,7 @@ export const TeknikModule = () => {
                       setUnitFormData({ proyek: 'Ashoka View', blok: 'A', nomor: '', type: 'Type 36/60', lb: 36, lt: 60 });
                       setIsUnitModalOpen(true);
                     }}
-                    style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(59, 130, 246, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Unit
                   </button>
@@ -12918,7 +12918,7 @@ export const TeknikModule = () => {
 
         return (
           <div className="modal-backdrop">
-            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
               <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
                 <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                   <ClipboardCheck size={24} color="#10b981" /> 
@@ -13313,7 +13313,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isVendorModalOpen && (
         <div className="modal-backdrop" style={{ zIndex: 1050 }}>
-          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #10b981', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Briefcase size={20} color="#10b981" />
@@ -13440,7 +13440,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isKaryawanModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #8b5cf6', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '580px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <UserCheck size={20} color="#c084fc" />
@@ -13630,7 +13630,7 @@ export const TeknikModule = () => {
 
         return (
           <div className="modal-backdrop">
-            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #f59e0b', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.6)' }}>
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(3, 78, 252, 0.4)' }}>
               
               {/* Modal Header */}
               <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
@@ -13668,9 +13668,9 @@ export const TeknikModule = () => {
                   </div>
 
                   {/* Kartu 2: Sisa Opname (Kuning) */}
-                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #f59e0b' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 800 }}>🏗️ SISA OPNAME ({formatDecimal(sheetSummary.progresPersen || 0)}%)</div>
-                    <div style={{ fontSize: '1.15rem', color: '#fbbf24', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 800 }}>🏗️ SISA OPNAME ({formatDecimal(sheetSummary.progresPersen || 0)}%)</div>
+                    <div style={{ fontSize: '1.15rem', color: '#ffffff', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
                       Rp {formatRupiahDesimal(sisaOpname)}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '2px' }}>
@@ -14105,7 +14105,7 @@ export const TeknikModule = () => {
 
         return (
           <div className="modal-backdrop">
-            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #7c3aed', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4)' }}>
+            <div className="modal-content" style={{ maxWidth: '820px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff', borderRadius: '12px', boxShadow: '0 10px 40px rgba(3, 78, 252, 0.4)' }}>
               
               {/* Modal Header */}
               <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1e293b', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
@@ -14143,8 +14143,8 @@ export const TeknikModule = () => {
                   </div>
 
                   {/* Kartu 2: Total Sudah Dibayar */}
-                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #7c3aed' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
+                  <div style={{ background: '#1e293b', padding: '0.85rem 1rem', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 800 }}>💳 TOTAL SUDAH DIBAYAR</div>
                     <div style={{ fontSize: '1.15rem', color: '#38bdf8', fontWeight: 900, marginTop: '2px', whiteSpace: 'nowrap' }}>
                       Rp {formatRupiahDesimal(totalBayar)}
                     </div>
@@ -14529,7 +14529,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isUnitModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #3b82f6', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <Home size={20} color="#60a5fa" />
@@ -14652,7 +14652,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isMutasiModalOpen && (
         <div className="modal-backdrop" style={{ zIndex: 1100 }}>
-          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #2563eb', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '560px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <RefreshCw size={20} color="#60a5fa" />
@@ -14667,7 +14667,7 @@ export const TeknikModule = () => {
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
                 <div style={{ background: '#1e293b', padding: '1.25rem', borderRadius: '8px', border: '1px solid #334155' }}>
                   
-                  <div style={{ marginBottom: '1rem', padding: '8px 12px', borderRadius: '6px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid #2563eb', fontSize: '0.78rem', color: '#93c5fd', lineHeight: 1.4 }}>
+                  <div style={{ marginBottom: '1rem', padding: '8px 12px', borderRadius: '6px', background: 'rgba(3, 78, 252, 0.15)', border: '1px solid #034efc', fontSize: '0.78rem', color: '#93c5fd', lineHeight: 1.4 }}>
                     ℹ️ <strong>Mutasi Stok Antar Proyek:</strong> Qty barang akan otomatis dipotong dari proyek asal dan ditambahkan ke stok proyek tujuan secara real-time.
                   </div>
 
@@ -14850,10 +14850,10 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isMasterBarangModalOpen && (
         <div className="modal-backdrop" style={{ zIndex: 1050 }}>
-          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #a855f7', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '480px', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Package size={20} color="#a855f7" />
+                <Package size={20} color="#034efc" />
                 {editingBarangId ? 'Edit Master Barang / Material' : (masterBarangModalOrigin ? 'Tambah Barang Baru (Database Master)' : 'Data Base Barang (Tambah Baru)')}
               </h3>
               <button onClick={() => { setIsMasterBarangModalOpen(false); setMasterBarangModalOrigin(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -14868,15 +14868,15 @@ export const TeknikModule = () => {
                     marginBottom: '1rem',
                     padding: '8px 12px',
                     borderRadius: '6px',
-                    background: 'rgba(168, 85, 247, 0.15)',
-                    border: '1px solid #a855f7',
+                    background: 'rgba(3, 78, 252, 0.15)',
+                    border: '1px solid #034efc',
                     fontSize: '0.8rem',
-                    color: '#e9d5ff',
+                    color: '#93c5fd',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <Sparkles size={16} color="#c084fc" />
+                    <Sparkles size={16} color="#034efc" />
                     <span>Barang ini otomatis tersimpan di <strong>Data Base Master</strong> dan langsung terpilih pada formulir <strong>{masterBarangModalOrigin === 'persediaan_masuk' ? 'Barang Masuk' : 'Barang Keluar'}</strong>.</span>
                   </div>
                 )}
@@ -15561,10 +15561,10 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isBarangKeluarModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '2px solid #db2777', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
+          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '2px solid #034efc', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900, margin: 0 }}>
-                <ArrowUpRight size={20} color="#f472b6" />
+                <ArrowUpRight size={20} color="#034efc" />
                 {editingKeluarId ? 'Edit Catatan Barang Keluar' : 'Catat Barang Keluar (Pengeluaran Material)'}
               </h3>
               <button onClick={() => setIsBarangKeluarModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}>
@@ -15583,7 +15583,7 @@ export const TeknikModule = () => {
                         label="Tanggal Pengeluaran"
                         value={barangKeluarFormData.tanggal}
                         onChange={(d) => setBarangKeluarFormData({ ...barangKeluarFormData, tanggal: d })}
-                        accentColor="#f472b6"
+                        accentColor="#034efc"
                       />
                     </div>
                     <div>
@@ -15595,7 +15595,7 @@ export const TeknikModule = () => {
                       <select
                         value={barangKeluarFormData.proyek}
                         onChange={(e) => setBarangKeluarFormData({ ...barangKeluarFormData, proyek: e.target.value })}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#f472b6', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #034efc', borderRadius: '6px', color: '#38bdf8', fontWeight: 900, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       >
                         <option value="Ashoka View">Ashoka View</option>
                         <option value="Ashoka Park">Ashoka Park</option>
@@ -15791,7 +15791,7 @@ export const TeknikModule = () => {
                             }));
                           }
                         }}
-                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #db2777', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                        style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #034efc', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '0 12px', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
                       />
                       <datalist id="keluar-master-nama-barang-datalist">
                         {persediaanMasterBarang.map(b => {
@@ -16029,8 +16029,8 @@ export const TeknikModule = () => {
                       </div>
                       <div style={{
                         height: '38px',
-                        background: 'rgba(219, 39, 119, 0.12)',
-                        border: '1.5px solid #db2777',
+                        background: 'rgba(3, 78, 252, 0.12)',
+                        border: '1.5px solid #034efc',
                         borderRadius: '6px',
                         padding: '0 12px',
                         display: 'flex',
@@ -16039,7 +16039,7 @@ export const TeknikModule = () => {
                         boxSizing: 'border-box'
                       }}>
                         <span style={{ fontSize: '0.84rem', color: '#cbd5e1', fontWeight: 800 }}>Total (Qty × Avg):</span>
-                        <span style={{ fontSize: '1rem', color: '#f472b6', fontWeight: 900 }}>
+                        <span style={{ fontSize: '1rem', color: '#93c5fd', fontWeight: 900 }}>
                           {(() => {
                             const q = parseFloat(String(barangKeluarFormData.qty).replace(',', '.')) || 0;
                             const h = Number(String(barangKeluarFormData.avgHarga).replace(/\D/g, '')) || 0;
@@ -16099,7 +16099,7 @@ export const TeknikModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '1rem 1.25rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsBarangKeluarModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #db2777, #be185d)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}>
                   💾 Simpan Catatan Barang Keluar
                 </button>
               </div>

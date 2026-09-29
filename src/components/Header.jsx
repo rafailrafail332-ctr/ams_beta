@@ -10,6 +10,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
   const isLegalTab = currentTab === 'legal';
   const isHrGaTab = currentTab === 'hr-ga' || currentTab === 'ga';
   const isMarketingTab = currentTab === 'marketing';
+  const isTeknikTab = currentTab === 'teknik';
   const avatarUrl = getAvatarUrl(currentUser);
 
   return (
@@ -57,6 +58,8 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                 : isMarketingTab
                 ? 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)'
+                : isTeknikTab
+                ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
                 : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
               color: '#ffffff',
               border: 'none',
@@ -71,6 +74,8 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 ? '0 2px 10px rgba(16, 185, 129, 0.45)'
                 : isMarketingTab
                 ? '0 2px 10px rgba(71, 201, 175, 0.45)'
+                : isTeknikTab
+                ? '0 2px 10px rgba(3, 78, 252, 0.45)'
                 : '0 2px 10px rgba(2, 132, 199, 0.4)',
               transition: 'all 0.18s ease'
             }}
