@@ -3089,6 +3089,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
     showNotification(`Berkas "${link.download}" berhasil diunduh!`, 'success');
   };
 
+  const LEGAL_SUBTABS = [
+    { id: 'spk', label: 'SPK / MOU', icon: FileSignature },
+    { id: 'legalitas', label: 'Legalitas', icon: FileCheck },
+    { id: 'perizinan', label: 'Perizinan', icon: ShieldCheck },
+    { id: 'litigasi', label: 'Litigasi', icon: Scale },
+    { id: 'history-tanah', label: 'Data Lahan', icon: MapPin },
+    { id: 'shgb', label: 'SHGB', icon: FileText },
+    { id: 'imb', label: 'IMB / PBG', icon: Building2 },
+    { id: 'pbb', label: 'SPPT - PBB', icon: Receipt },
+    { id: 'surat', label: 'Surat Masuk & Keluar', icon: Mail },
+    { id: 'stk', label: 'STK (Serah Terima Kunci)', icon: KeyRound }
+  ];
+
   return (
     <div style={{ color: '#f1f5f9' }}>
       {/* ========================================================================= */}
@@ -3128,9 +3141,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 9 TAB UTAMA:                                                       */}
-      {/* 1. SPK | 2. LEGALITAS | 3. PERIZINAN | 4. LITIGASI | 5. DATA LAHAN        */}
-      {/* 6. SHGB | 7. IMB/PBG | 8. SPPT-PBB | 9. SURAT                             */}
+      {/* BILAH 10 SUB-MODUL LEGAL UTAMA (TANPA NOMOR & UKURAN COMPACT SEPERTI HR&GA)*/}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -3138,252 +3149,47 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           background: '#090d16',
           border: '1.5px solid #1e293b',
           borderRadius: '14px',
-          padding: '0.5rem',
+          padding: '0.65rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))',
           gap: '8px',
-          marginBottom: '1.25rem'
+          marginBottom: '1.25rem',
+          alignItems: 'center'
         }}
       >
-        {/* Tab 1: SPK / MOU */}
-        <button
-          onClick={() => setActiveTab('spk')}
-          style={{
-            background: activeTab === 'spk' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'spk' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'spk' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'spk' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <FileSignature size={18} />
-          <span>1. SPK / MOU</span>
-        </button>
-
-        {/* Tab 2: Legalitas */}
-        <button
-          onClick={() => setActiveTab('legalitas')}
-          style={{
-            background: activeTab === 'legalitas' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'legalitas' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'legalitas' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'legalitas' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <FileCheck size={18} />
-          <span>2. Legalitas</span>
-        </button>
-
-        {/* Tab 3: Perizinan */}
-        <button
-          onClick={() => setActiveTab('perizinan')}
-          style={{
-            background: activeTab === 'perizinan' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'perizinan' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'perizinan' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'perizinan' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <ShieldCheck size={18} />
-          <span>3. Perizinan</span>
-        </button>
-
-        {/* Tab 4: Litigasi */}
-        <button
-          onClick={() => setActiveTab('litigasi')}
-          style={{
-            background: activeTab === 'litigasi' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'litigasi' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'litigasi' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'litigasi' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <Scale size={18} />
-          <span>4. Litigasi</span>
-        </button>
-
-        {/* Tab 5: Data Lahan */}
-        <button
-          onClick={() => setActiveTab('history-tanah')}
-          style={{
-            background: activeTab === 'history-tanah' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'history-tanah' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'history-tanah' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'history-tanah' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <MapPin size={18} />
-          <span>5. Data Lahan</span>
-        </button>
-
-        {/* Tab 6: SHGB */}
-        <button
-          onClick={() => setActiveTab('shgb')}
-          style={{
-            background: activeTab === 'shgb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'shgb' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'shgb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'shgb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <FileText size={18} />
-          <span>6. SHGB</span>
-        </button>
-
-        {/* Tab 7: IMB / PBG */}
-        <button
-          onClick={() => setActiveTab('imb')}
-          style={{
-            background: activeTab === 'imb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'imb' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'imb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'imb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <Building2 size={18} />
-          <span>7. IMB / PBG</span>
-        </button>
-
-        {/* Tab 8: SPPT - PBB */}
-        <button
-          onClick={() => setActiveTab('pbb')}
-          style={{
-            background: activeTab === 'pbb' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'pbb' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'pbb' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'pbb' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <Receipt size={18} />
-          <span>8. SPPT - PBB</span>
-        </button>
-
-        {/* Tab 10: Surat Masuk & Keluar */}
-        <button
-          onClick={() => setActiveTab('surat')}
-          style={{
-            background: activeTab === 'surat' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'surat' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'surat' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'surat' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <Mail size={18} />
-          <span>10. Surat Masuk & Keluar</span>
-        </button>
-
-        {/* Tab 11: STK (Surat Serah Terima Kunci) */}
-        <button
-          onClick={() => setActiveTab('stk')}
-          style={{
-            background: activeTab === 'stk' ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)' : '#0f172a',
-            color: activeTab === 'stk' ? '#ffffff' : '#94a3b8',
-            border: activeTab === 'stk' ? '1.5px solid #c084fc' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '0.88rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'stk' ? '0 6px 16px rgba(147, 51, 234, 0.35)' : 'none'
-          }}
-        >
-          <KeyRound size={18} />
-          <span>11. STK (Serah Terima Kunci)</span>
-        </button>
+        {LEGAL_SUBTABS.map(tab => {
+          const isActive = activeTab === tab.id;
+          const IconComponent = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                background: isActive
+                  ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)'
+                  : '#0f172a',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #c084fc' : '1px solid #1e293b',
+                borderRadius: '8px',
+                padding: '8px 10px',
+                fontSize: '0.8rem',
+                fontWeight: isActive ? 900 : 700,
+                cursor: 'pointer',
+                textAlign: 'center',
+                boxShadow: isActive ? '0 4px 14px rgba(147, 51, 234, 0.35)' : 'none',
+                transition: 'all 0.18s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <IconComponent size={15} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ========================================================================= */}
