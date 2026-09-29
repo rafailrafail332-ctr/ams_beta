@@ -2056,7 +2056,7 @@ export const LegalModule = () => {
         id: `SHGB-${Date.now()}`,
         ...payload
       };
-      setShgbList([newItem, ...shgbList]);
+      setShgbList(prev => [newItem, ...prev]);
       showNotification(`Data SHGB "${newItem.noShgb}" berhasil ditambahkan!`, 'success');
     }
     setIsShgbModalOpen(false);
@@ -2264,7 +2264,7 @@ export const LegalModule = () => {
         id: `IMB-${Date.now()}`,
         ...payload
       };
-      setImbList([newItem, ...imbList]);
+      setImbList(prev => [newItem, ...prev]);
       showNotification(`Data IMB/PBG "${newItem.noImb}" berhasil ditambahkan!`, 'success');
     }
     setIsImbModalOpen(false);
@@ -2481,7 +2481,7 @@ export const LegalModule = () => {
         id: `PBB-${Date.now()}`,
         ...payload
       };
-      setPbbList([newItem, ...pbbList]);
+      setPbbList(prev => [newItem, ...prev]);
       showNotification(`Data SPPT-PBB "${newItem.nop}" berhasil ditambahkan!`, 'success');
     }
     setIsPbbModalOpen(false);
@@ -2694,7 +2694,7 @@ export const LegalModule = () => {
         id: `SRT-${Date.now()}`,
         ...payload
       };
-      setSuratList([newItem, ...suratList]);
+      setSuratList(prev => [newItem, ...prev]);
       showNotification(`Data Surat "${newItem.noSurat}" berhasil ditambahkan!`, 'success');
     }
     setIsSuratModalOpen(false);
@@ -2941,7 +2941,7 @@ export const LegalModule = () => {
         id: `STK-${Date.now()}`,
         ...payload
       };
-      setStkList([newItem, ...stkList]);
+      setStkList(prev => [newItem, ...prev]);
       showNotification(`Data STK "${newItem.unitNo} - ${newItem.konsumen}" berhasil ditambahkan!`, 'success');
     }
     setIsStkModalOpen(false);
@@ -6451,25 +6451,25 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #0284c7',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '600px',
-              maxHeight: '90vh',
+              maxWidth: '520px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileSignature size={20} color="#38bdf8" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileSignature size={18} color="#c084fc" />
                 <span>{editingSpkId ? '✏️ Edit Dokumen SPK (MOU)' : '➕ Tambah Dokumen SPK (MOU)'}</span>
               </div>
               <button onClick={() => setIsSpkModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveSpk} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveSpk} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {/* BARIS 1: No. Dok & Tanggal Dokumen */}
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
                 <div>
@@ -6480,7 +6480,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={spkForm.noDok}
                     onChange={(e) => setSpkForm({ ...spkForm, noDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
                   />
                 </div>
                 <div>
@@ -6490,18 +6490,18 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={spkForm.tanggalDok}
                     onChange={(e) => setSpkForm({ ...spkForm, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               {/* BARIS 2: NAMA (NGAMBIL DARI DATABASE VENDOR) & KATEGORI */}
-              <div style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ background: 'rgba(147, 51, 234, 0.08)', border: '1px solid rgba(192, 132, 252, 0.3)', borderRadius: '10px', padding: '10px 12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800 }}>
+                  <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800 }}>
                     👤 Nama (Pihak Kedua / Rekanan) *
                   </label>
-                  <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.68rem', color: '#c084fc', fontWeight: 700 }}>
                     🔗 Terhubung ke Database Vendor
                   </span>
                 </div>
@@ -6518,11 +6518,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       kategori: match ? (match.status || 'Vendor') : prev.kategori
                     }));
                   }}
-                  style={{ width: '100%', background: '#0f172a', border: '1.5px solid #38bdf8', borderRadius: '7px', padding: '7px 10px', color: '#38bdf8', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 700 }}
+                  style={{ width: '100%', background: '#0f172a', border: '1.5px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.78rem', marginBottom: '8px', fontWeight: 700 }}
                 >
-                  <option value="">-- 🔍 Pilih dari Database Vendor ({vendorDbList.length} Rekanan Terdaftar) --</option>
+                  <option value="" style={{ background: '#0f172a', color: '#ffffff' }}>-- 🔍 Pilih dari Database Vendor ({vendorDbList.length} Rekanan Terdaftar) --</option>
                   {vendorDbList.map(v => (
-                    <option key={v.id || v.nama} value={v.nama}>
+                    <option key={v.id || v.nama} value={v.nama} style={{ background: '#0f172a', color: '#ffffff' }}>
                       {v.nama} &bull; ({v.status || 'Vendor'})
                     </option>
                   ))}
@@ -6562,13 +6562,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       onChange={(e) => setSpkForm({ ...spkForm, kategori: e.target.value })}
                       style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}
                     >
-                      <option value="Vendor">Vendor</option>
-                      <option value="Notari">Notari (Notaris)</option>
-                      <option value="Klien">Klien</option>
-                      <option value="Kontraktor">Kontraktor</option>
-                      <option value="Suplier">Suplier</option>
-                      <option value="Bank">Bank</option>
-                      <option value="Lainnya">Lainnya</option>
+                      <option value="Vendor" style={{ background: '#0f172a', color: '#ffffff' }}>Vendor</option>
+                      <option value="Notari" style={{ background: '#0f172a', color: '#ffffff' }}>Notari (Notaris)</option>
+                      <option value="Klien" style={{ background: '#0f172a', color: '#ffffff' }}>Klien</option>
+                      <option value="Kontraktor" style={{ background: '#0f172a', color: '#ffffff' }}>Kontraktor</option>
+                      <option value="Suplier" style={{ background: '#0f172a', color: '#ffffff' }}>Suplier</option>
+                      <option value="Bank" style={{ background: '#0f172a', color: '#ffffff' }}>Bank</option>
+                      <option value="Lainnya" style={{ background: '#0f172a', color: '#ffffff' }}>Lainnya</option>
                     </select>
                   </div>
                 </div>
@@ -6586,7 +6586,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         <button
                           type="button"
                           onClick={handleQuickAddVendorToDb}
-                          style={{ background: 'rgba(56, 189, 248, 0.2)', border: '1px solid #38bdf8', color: '#38bdf8', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700 }}
+                          style={{ background: 'rgba(147, 51, 234, 0.2)', border: '1px solid #9333ea', color: '#c084fc', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700 }}
                         >
                           + Daftarkan ke DB Vendor
                         </button>
@@ -6605,7 +6605,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={spkForm.judulDokumen}
                   onChange={(e) => setSpkForm({ ...spkForm, judulDokumen: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -6618,7 +6618,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. SPK dibatalkan, Masa berlaku 31/12/2027"
                     value={spkForm.catatan}
                     onChange={(e) => setSpkForm({ ...spkForm, catatan: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -6626,22 +6626,22 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={spkForm.project}
                     onChange={(e) => setSpkForm({ ...spkForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
                   </select>
                 </div>
               </div>
 
               {/* Upload Berkas Dokumen (Mendukung upload 2 berkas atau lebih & bisa digeser) */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '10px', padding: '14px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '10px', padding: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '0.76rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label style={{ fontSize: '0.76rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <UploadCloud size={16} />
                     <span>Unggah Berkas Fisik (Bisa upload 2 atau lebih berkas)</span>
                   </label>
-                  <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.7rem', color: '#c084fc', fontWeight: 700 }}>
                     {spkForm.files?.length || 0} Berkas Terpilih
                   </span>
                 </div>
@@ -6676,10 +6676,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '1px 6px', borderRadius: '3px', fontWeight: 800, fontSize: '0.66rem' }}>
+                          <span style={{ background: 'rgba(147, 51, 234, 0.2)', color: '#c084fc', padding: '1px 6px', borderRadius: '3px', fontWeight: 800, fontSize: '0.66rem' }}>
                             #{idx + 1}
                           </span>
-                          <FileText size={13} color="#38bdf8" />
+                          <FileText size={13} color="#c084fc" />
                           <span style={{ color: '#f1f5f9', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {f.name}
                           </span>
@@ -6700,9 +6700,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsSpkModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7', fontWeight: 800 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+                <button type="button" onClick={() => setIsSpkModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   {editingSpkId ? 'Simpan Perubahan' : 'Simpan & Daftarkan Dokumen'}
                 </button>
               </div>
@@ -6732,24 +6732,25 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #0284c7',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '580px',
-              maxHeight: '90vh',
+              maxWidth: '520px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(2, 132, 199, 0.4)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>
-                {editingLegalitasId ? '✏️ Edit Dokumen Legalitas' : '➕ Tambah Dokumen Legalitas'}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={18} color="#c084fc" />
+                <span>{editingLegalitasId ? '✏️ Edit Dokumen Legalitas' : '➕ Tambah Dokumen Legalitas'}</span>
               </div>
               <button onClick={() => { setIsLegalitasModalOpen(false); setEditingLegalitasId(null); }} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveLegalitas} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveLegalitas} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen / SK</label>
@@ -6758,7 +6759,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. xxx/xxx/xxx atau AHU-00123..."
                     value={legalitasForm.noDok}
                     onChange={(e) => setLegalitasForm({ ...legalitasForm, noDok: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -6768,7 +6769,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={legalitasForm.tanggalDok}
                     onChange={(e) => setLegalitasForm({ ...legalitasForm, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -6779,12 +6780,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={legalitasForm.category}
                     onChange={(e) => setLegalitasForm({ ...legalitasForm, category: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontWeight: 700 }}
                   >
-                    <option value="Akta Perusahaan">Akta Perusahaan</option>
-                    <option value="NPWP">NPWP</option>
-                    <option value="NIB">NIB</option>
-                    <option value="Domisili">Domisili</option>
+                    <option value="Akta Perusahaan" style={{ background: '#0f172a', color: '#ffffff' }}>Akta Perusahaan</option>
+                    <option value="NPWP" style={{ background: '#0f172a', color: '#ffffff' }}>NPWP</option>
+                    <option value="NIB" style={{ background: '#0f172a', color: '#ffffff' }}>NIB</option>
+                    <option value="Domisili" style={{ background: '#0f172a', color: '#ffffff' }}>Domisili</option>
                   </select>
                 </div>
                 <div>
@@ -6796,7 +6797,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={legalitasForm.penerbit}
                     onChange={(e) => setLegalitasForm({ ...legalitasForm, penerbit: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                   <datalist id="legalitas-penerbit-suggestions">
                     <option value="Notaris" />
@@ -6817,7 +6818,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={legalitasForm.jenisDokumen}
                   onChange={(e) => setLegalitasForm({ ...legalitasForm, jenisDokumen: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -6828,19 +6829,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   placeholder="e.g. Asli tersimpan di brankas HO / Perpanjangan 2027"
                   value={legalitasForm.catatan}
                   onChange={(e) => setLegalitasForm({ ...legalitasForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
               {/* Upload Berkas Dokumen (Bisa pilih banyak / multi files) */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #0284c7', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '8px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <UploadCloud size={15} />
                     <span>Upload Berkas Dokumen Legalitas (Bisa Pilih Banyak / Multi-Files)</span>
                   </div>
                   {legalitasForm.files.length > 0 && (
-                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(2, 132, 199, 0.25)', color: '#bae6fd', fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(147, 51, 234, 0.25)', color: '#e9d5ff', fontWeight: 800 }}>
                       {legalitasForm.files.length} Berkas Dipilih
                     </span>
                   )}
@@ -6901,15 +6902,16 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => { setIsLegalitasModalOpen(false); setEditingLegalitasId(null); }}
                   className="btn btn-secondary btn-sm"
+                  style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}
                 >
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#0284c7', fontWeight: 800 }}>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   {editingLegalitasId ? 'Simpan Perubahan' : 'Simpan & Unggah Dokumen'}
                 </button>
               </div>
@@ -6938,35 +6940,38 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #a855f7',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '560px',
-              maxHeight: '90vh',
+              maxWidth: '520px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>➕ Upload Berkas Legalitas Proyek</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FolderArchive size={18} color="#c084fc" />
+                <span>➕ Upload Berkas Legalitas Proyek</span>
+              </div>
               <button onClick={() => setIsProyekModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveProyek} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveProyek} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Proyek *</label>
                   <select
                     value={proyekForm.category}
                     onChange={(e) => setProyekForm({ ...proyekForm, category: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="SHGB Induk">SHGB Induk</option>
-                    <option value="SHGB Pecahan">SHGB Pecahan</option>
-                    <option value="PBB">PBB</option>
-                    <option value="Peta Bidang Tanah">Peta Bidang Tanah</option>
-                    <option value="Histori Lahan">Histori Lahan</option>
+                    <option value="SHGB Induk" style={{ background: '#0f172a', color: '#ffffff' }}>SHGB Induk</option>
+                    <option value="SHGB Pecahan" style={{ background: '#0f172a', color: '#ffffff' }}>SHGB Pecahan</option>
+                    <option value="PBB" style={{ background: '#0f172a', color: '#ffffff' }}>PBB</option>
+                    <option value="Peta Bidang Tanah" style={{ background: '#0f172a', color: '#ffffff' }}>Peta Bidang Tanah</option>
+                    <option value="Histori Lahan" style={{ background: '#0f172a', color: '#ffffff' }}>Histori Lahan</option>
                   </select>
                 </div>
                 <div>
@@ -6974,10 +6979,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={proyekForm.project}
                     onChange={(e) => setProyekForm({ ...proyekForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
                   </select>
                 </div>
               </div>
@@ -6990,7 +6995,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={proyekForm.docName}
                   onChange={(e) => setProyekForm({ ...proyekForm, docName: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -7003,7 +7008,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={proyekForm.docNo}
                     onChange={(e) => setProyekForm({ ...proyekForm, docNo: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -7013,7 +7018,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. 15.000 m² / 72 m²"
                     value={proyekForm.luas}
                     onChange={(e) => setProyekForm({ ...proyekForm, luas: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -7026,7 +7031,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. Kantor Pertanahan ATR/BPN"
                     value={proyekForm.agency}
                     onChange={(e) => setProyekForm({ ...proyekForm, agency: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -7036,7 +7041,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. Berlaku s/d 2045 / Lunas"
                     value={proyekForm.validity}
                     onChange={(e) => setProyekForm({ ...proyekForm, validity: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -7048,12 +7053,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   placeholder="Status pemegang hak, riwayat pembebasan, atau catatan yuridis..."
                   value={proyekForm.notes}
                   onChange={(e) => setProyekForm({ ...proyekForm, notes: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
               {/* Upload File Attachment */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '8px', padding: '12px' }}>
                 <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
                   <span>Upload Berkas Fisik Sertifikat / PBB / Peta Bidang (PDF / Scan)</span>
@@ -7072,9 +7077,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsProyekModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#7e22ce' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+                <button type="button" onClick={() => setIsProyekModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   Simpan & Unggah Berkas
                 </button>
               </div>
@@ -7094,36 +7099,36 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             background: 'rgba(0, 0, 0, 0.88)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'center',
             zIndex: 99999,
-            padding: '2rem 1rem',
-            overflowY: 'auto'
+            padding: '1rem'
           }}
         >
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #059669',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '620px',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)',
-              margin: 'auto 0'
+              maxWidth: '520px',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#34d399', padding: '6px', borderRadius: '8px' }}>
-                  <ShieldCheck size={20} />
+                <div style={{ background: 'rgba(147, 51, 234, 0.15)', color: '#c084fc', padding: '6px', borderRadius: '8px' }}>
+                  <ShieldCheck size={20} color="#c084fc" />
                 </div>
                 <div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>
                     {editingPerizinanId ? 'Edit Dokumen Perizinan' : 'Tambah Dokumen Perizinan Baru'}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    PPKR, Pengesahan Siteplan, dan Persetujuan Bangunan Gedung (PBG)
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    PPKR, Pengesahan Siteplan, dan PBG
                   </div>
                 </div>
               </div>
@@ -7136,9 +7141,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </button>
             </div>
 
-            <form onSubmit={handleSavePerizinan} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={handleSavePerizinan} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {/* Row 1: No Dok & Tanggal */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
                     Nomor Dokumen *
@@ -7149,7 +7154,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={perizinanForm.noDok}
                     onChange={(e) => setPerizinanForm({ ...perizinanForm, noDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -7161,13 +7166,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={perizinanForm.tanggalDok}
                     onChange={(e) => setPerizinanForm({ ...perizinanForm, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               {/* Row 2: Proyek & Kategori */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
                     Proyek Kawasan *
@@ -7175,10 +7180,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={perizinanForm.project}
                     onChange={(e) => setPerizinanForm({ ...perizinanForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
                   </select>
                 </div>
                 <div>
@@ -7195,11 +7200,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       }
                       setPerizinanForm({ ...perizinanForm, kategori: newCat, nama: defaultNama });
                     }}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="PPKR">PPKR (Kesesuaian Tata Ruang)</option>
-                    <option value="Siteplan">Siteplan (Pengesahan Kawasan)</option>
-                    <option value="PBG">PBG (Persetujuan Bangunan Gedung)</option>
+                    <option value="PPKR" style={{ background: '#0f172a', color: '#ffffff' }}>PPKR (Kesesuaian Tata Ruang)</option>
+                    <option value="Siteplan" style={{ background: '#0f172a', color: '#ffffff' }}>Siteplan (Pengesahan Kawasan)</option>
+                    <option value="PBG" style={{ background: '#0f172a', color: '#ffffff' }}>PBG (Persetujuan Bangunan Gedung)</option>
                   </select>
                 </div>
               </div>
@@ -7216,7 +7221,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={perizinanForm.nama}
                   onChange={(e) => setPerizinanForm({ ...perizinanForm, nama: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
                 <datalist id="perizinan-instansi-suggestions">
                   <option value="Dinas Tata Ruang & DPMPTSP" />
@@ -7239,7 +7244,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={perizinanForm.judulDokumen}
                   onChange={(e) => setPerizinanForm({ ...perizinanForm, judulDokumen: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -7253,13 +7258,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   placeholder="e.g. Masa berlaku 3 tahun, siap lanjut permohonan siteplan"
                   value={perizinanForm.catatan}
                   onChange={(e) => setPerizinanForm({ ...perizinanForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
               {/* Row 6: Upload Multi-Berkas (Dukungan Geser Kiri / Kanan) */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '10px', padding: '14px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '10px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={16} />
                   <span>Upload Berkas Dokumen (Bisa pilih 2 berkas atau lebih)</span>
                 </label>
@@ -7291,7 +7296,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <CheckCircle2 size={13} color="#34d399" />
+                          <CheckCircle2 size={13} color="#c084fc" />
                           <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{fileObj.name}</span>
                           <span style={{ color: '#64748b' }}>({fileObj.size})</span>
                         </div>
@@ -7316,19 +7321,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => { setIsPerizinanModalOpen(false); setEditingPerizinanId(null); }}
                   className="btn btn-secondary btn-sm"
-                  style={{ background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1' }}
+                  style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary btn-sm"
-                  style={{ background: '#059669', color: '#ffffff', fontWeight: 800, padding: '7px 18px', borderRadius: '6px' }}
+                  style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800, padding: '7px 18px', borderRadius: '6px' }}
                 >
                   {editingPerizinanId ? 'Perbarui Dokumen Perizinan' : 'Simpan Dokumen Perizinan'}
                 </button>
@@ -7358,25 +7363,25 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #f43f5e',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '620px',
-              maxHeight: '90vh',
+              maxWidth: '520px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Scale size={18} color="#fb7185" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Scale size={18} color="#c084fc" />
                 <span>{editingLitigasiId ? 'Edit Dokumen Litigasi' : 'Tambah Dokumen Litigasi Baru'}</span>
               </div>
               <button onClick={() => setIsLitigasiModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveLitigasi} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveLitigasi} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen *</label>
@@ -7385,7 +7390,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={litigasiForm.noDok}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, noDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
                   />
                 </div>
                 <div>
@@ -7395,7 +7400,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={litigasiForm.tanggalDok}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -7406,10 +7411,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={litigasiForm.project}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
                   </select>
                 </div>
                 <div>
@@ -7417,13 +7422,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={litigasiForm.kategori}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, kategori: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Klarifikasi Lahan">Klarifikasi Lahan</option>
-                    <option value="Somasi Wanprestasi">Somasi Wanprestasi</option>
-                    <option value="Mediasi Warga">Mediasi Warga</option>
-                    <option value="Sengketa Konsumen">Sengketa Konsumen</option>
-                    <option value="Gugatan Perdata">Gugatan Perdata</option>
+                    <option value="Klarifikasi Lahan" style={{ background: '#0f172a', color: '#ffffff' }}>Klarifikasi Lahan</option>
+                    <option value="Somasi Wanprestasi" style={{ background: '#0f172a', color: '#ffffff' }}>Somasi Wanprestasi</option>
+                    <option value="Mediasi Warga" style={{ background: '#0f172a', color: '#ffffff' }}>Mediasi Warga</option>
+                    <option value="Sengketa Konsumen" style={{ background: '#0f172a', color: '#ffffff' }}>Sengketa Konsumen</option>
+                    <option value="Gugatan Perdata" style={{ background: '#0f172a', color: '#ffffff' }}>Gugatan Perdata</option>
                   </select>
                 </div>
               </div>
@@ -7436,7 +7441,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={litigasiForm.nama}
                   onChange={(e) => setLitigasiForm({ ...litigasiForm, nama: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -7448,7 +7453,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   value={litigasiForm.judulDokumen}
                   onChange={(e) => setLitigasiForm({ ...litigasiForm, judulDokumen: e.target.value })}
                   required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                 />
               </div>
 
@@ -7460,7 +7465,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. Sedang Proses Mediasi BPN / Selesai Damai"
                     value={litigasiForm.catatan}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, catatan: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -7469,14 +7474,14 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     type="text"
                     value={litigasiForm.pic}
                     onChange={(e) => setLitigasiForm({ ...litigasiForm, pic: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               {/* Upload Multi-File Lampiran Berkas */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#fb7185', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '8px', padding: '12px' }}>
+                <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
                   <span>Upload Berkas / Lampiran Dokumen (Bisa Pilih Banyak Berkas)</span>
                 </label>
@@ -7509,7 +7514,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          <CheckCircle2 size={12} color="#34d399" />
+                          <CheckCircle2 size={12} color="#c084fc" />
                           <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
                           <span style={{ color: '#64748b' }}>({f.size})</span>
                         </div>
@@ -7527,9 +7532,9 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsLitigasiModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: '#e11d48' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+                <button type="button" onClick={() => setIsLitigasiModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   {editingLitigasiId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
                 </button>
               </div>
@@ -8017,22 +8022,22 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '660px',
-              maxHeight: '90vh',
+              maxWidth: '540px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.8rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <MapPin size={18} color="#c084fc" />
                 <span>{editingHistoryTanahId ? 'Edit Data Lahan' : 'Tambah Data Lahan Baru'}</span>
               </div>
               <button onClick={() => setIsHistoryTanahModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveHistoryTanah} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSaveHistoryTanah} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {/* Baris 1: No. Dok & Tanggal */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
@@ -8042,7 +8047,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={historyTanahForm.noDok}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, noDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
                   />
                 </div>
                 <div>
@@ -8052,7 +8057,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={historyTanahForm.tanggalDok}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -8064,10 +8069,10 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={historyTanahForm.project}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
+                    <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
                   </select>
                 </div>
                 <div>
@@ -8075,15 +8080,15 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   <select
                     value={historyTanahForm.jenisDokumen}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, jenisDokumen: e.target.value, kategori: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   >
-                    <option value="AJB Asal">AJB Asal</option>
-                    <option value="Girik / Letter C">Girik / Letter C</option>
-                    <option value="Surat Pelepasan Hak (SPH)">Surat Pelepasan Hak (SPH)</option>
-                    <option value="Riwayat Tanah Desa">Riwayat Tanah Desa</option>
-                    <option value="Kwitansi Pembebasan">Kwitansi Pembebasan</option>
-                    <option value="SHM / SHGB Asal">SHM / SHGB Asal</option>
-                    <option value="Lainnya">Lainnya</option>
+                    <option value="AJB Asal" style={{ background: '#0f172a', color: '#ffffff' }}>AJB Asal</option>
+                    <option value="Girik / Letter C" style={{ background: '#0f172a', color: '#ffffff' }}>Girik / Letter C</option>
+                    <option value="Surat Pelepasan Hak (SPH)" style={{ background: '#0f172a', color: '#ffffff' }}>Surat Pelepasan Hak (SPH)</option>
+                    <option value="Riwayat Tanah Desa" style={{ background: '#0f172a', color: '#ffffff' }}>Riwayat Tanah Desa</option>
+                    <option value="Kwitansi Pembebasan" style={{ background: '#0f172a', color: '#ffffff' }}>Kwitansi Pembebasan</option>
+                    <option value="SHM / SHGB Asal" style={{ background: '#0f172a', color: '#ffffff' }}>SHM / SHGB Asal</option>
+                    <option value="Lainnya" style={{ background: '#0f172a', color: '#ffffff' }}>Lainnya</option>
                   </select>
                 </div>
               </div>
@@ -8098,7 +8103,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={historyTanahForm.namaPenjual}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, namaPenjual: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -8109,7 +8114,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     value={historyTanahForm.pemilik}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, pemilik: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
@@ -8134,7 +8139,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       });
                     }}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                   {historyTanahForm.hargaPerMeter && (
                     <div style={{ fontSize: '0.68rem', color: '#93c5fd', marginTop: '2px' }}>
@@ -8160,7 +8165,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                       });
                     }}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                   {historyTanahForm.luas && (
                     <div style={{ fontSize: '0.68rem', color: '#f8fafc', marginTop: '2px' }}>
@@ -8171,7 +8176,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               {/* Baris 5: Jumlah (Total Nilai Lahan) */}
-              <div style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '8px', padding: '10px 14px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px solid #1e293b', borderRadius: '8px', padding: '10px 12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800 }}>Total Jumlah Nilai Lahan (Rp)</label>
                   <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>Otomatis: Luas × Harga per m²</span>
@@ -8180,7 +8185,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   type="number"
                   value={historyTanahForm.jumlah}
                   onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, jumlah: Number(e.target.value) || 0 })}
-                  style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '6px', padding: '8px 10px', color: '#34d399', fontSize: '0.9rem', fontWeight: 900 }}
+                  style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '6px', padding: '6px 10px', color: '#34d399', fontSize: '0.88rem', fontWeight: 900 }}
                 />
                 <div style={{ fontSize: '0.76rem', color: '#34d399', fontWeight: 800, marginTop: '4px' }}>
                   {formatRupiah(historyTanahForm.jumlah)}
@@ -8196,7 +8201,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     placeholder="e.g. Masuk induk cluster Jasmine, batas patok BPN aman"
                     value={historyTanahForm.catatan}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, catatan: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
@@ -8205,13 +8210,13 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                     type="text"
                     value={historyTanahForm.pic}
                     onChange={(e) => setHistoryTanahForm({ ...historyTanahForm, pic: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               {/* Upload Multi-File Lampiran Berkas */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ background: '#0f172a', border: '1.5px dashed rgba(192, 132, 252, 0.4)', borderRadius: '8px', padding: '12px' }}>
                 <label style={{ fontSize: '0.74rem', color: '#c084fc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                   <UploadCloud size={14} />
                   <span>Upload Berkas / Dokumen Alas Hak Lahan (Bisa Banyak File)</span>
@@ -8245,7 +8250,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          <CheckCircle2 size={12} color="#34d399" />
+                          <CheckCircle2 size={12} color="#c084fc" />
                           <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
                           <span style={{ color: '#64748b' }}>({f.size})</span>
                         </div>
@@ -8263,12 +8268,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsHistoryTanahModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+                <button type="button" onClick={() => setIsHistoryTanahModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
                 <button
                   type="submit"
                   className="btn btn-primary btn-sm"
-                  style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800 }}
+                  style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}
                 >
                   {editingHistoryTanahId ? 'Simpan Perubahan Lahan' : 'Simpan Data Lahan'}
                 </button>
@@ -8795,21 +8800,21 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #10b981',
+              border: '1.5px solid #9333ea',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '820px',
-              maxHeight: '92vh',
+              maxWidth: '740px',
+              maxHeight: '85vh',
               overflowY: 'auto',
-              padding: '1.6rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)'
+              padding: '1.25rem 1.4rem',
+              boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)'
             }}
           >
             {/* Header Modal */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '12px', marginBottom: '1.2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '10px', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '8px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Wallet size={22} />
+                <div style={{ background: 'rgba(147, 51, 234, 0.15)', color: '#c084fc', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Wallet size={20} color="#c084fc" />
                 </div>
                 <div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>
@@ -11126,46 +11131,46 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {isShgbModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SHGB</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto', padding: '1.25rem 1.4rem', boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '4px 10px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem' }}>SHGB</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
                   {editingShgbId ? 'Edit Data Sertifikat SHGB' : 'Tambah Data Sertifikat SHGB'}
                 </h3>
               </div>
               <button onClick={() => setIsShgbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSaveShgb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSaveShgb} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. SHGB *</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. SHGB *</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: 0124/Serpong/2025"
                   value={shgbForm.noShgb}
                   onChange={(e) => setShgbForm({ ...shgbForm, noShgb: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Release</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tanggal Release</label>
                   <input
                     type="date"
                     value={shgbForm.tanggalRelease}
                     onChange={(e) => setShgbForm({ ...shgbForm, tanggalRelease: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status *</label>
                   <select
                     value={shgbForm.status}
                     onChange={(e) => setShgbForm({ ...shgbForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800 }}
                     required
                   >
                     <option value="Induk" style={{ background: '#0f172a', color: '#ffffff' }}>Induk</option>
@@ -11174,45 +11179,46 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Luas (m²)</label>
                   <input
                     type="number"
+                    step="any"
                     placeholder="25000"
                     value={shgbForm.luas}
                     onChange={(e) => setShgbForm({ ...shgbForm, luas: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Blok</label>
                   <input
                     type="text"
-                    placeholder="Contoh: A / Induk"
+                    placeholder="A / Induk"
                     value={shgbForm.blok}
                     onChange={(e) => setShgbForm({ ...shgbForm, blok: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit/Kav</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. Unit</label>
                   <input
                     type="text"
-                    placeholder="Contoh: 01 / -"
+                    placeholder="01 / -"
                     value={shgbForm.noUnit}
                     onChange={(e) => setShgbForm({ ...shgbForm, noUnit: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Proyek Terkait</label>
                 <select
                   value={shgbForm.project}
                   onChange={(e) => setShgbForm({ ...shgbForm, project: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 >
                   <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
                   <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
@@ -11220,12 +11226,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas Sertifikat (PDF / JPG)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Upload Berkas Sertifikat (PDF / JPG)</label>
                 <input
                   type="file"
                   onChange={handleShgbFileChange}
                   accept=".pdf,image/*"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '6px 10px', color: '#ffffff', fontSize: '0.78rem' }}
                 />
                 {shgbForm.fileName && (
                   <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -11236,19 +11242,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Legal</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Catatan Legal</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Catatan pendaftaran, tanggal release dari BPN, keterangan status..."
                   value={shgbForm.catatan}
                   onChange={(e) => setShgbForm({ ...shgbForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsShgbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800 }}>Simpan Data SHGB</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.75rem', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
+                <button type="button" onClick={() => setIsShgbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1', padding: '6px 14px', fontSize: '0.8rem' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800, color: '#ffffff', padding: '6px 16px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)' }}>Simpan Data SHGB</button>
               </div>
             </form>
           </div>
@@ -11328,46 +11334,46 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {isImbModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>IMB / PBG</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto', padding: '1.25rem 1.4rem', boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '4px 10px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem' }}>IMB / PBG</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
                   {editingImbId ? 'Edit Data IMB / PBG' : 'Tambah Data IMB / PBG'}
                 </h3>
               </div>
               <button onClick={() => setIsImbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSaveImb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSaveImb} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. IMB / PBG *</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. IMB / PBG *</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: 648.1/045/DPMPTSP/2025"
                   value={imbForm.noImb}
                   onChange={(e) => setImbForm({ ...imbForm, noImb: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Release</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tanggal Release</label>
                   <input
                     type="date"
                     value={imbForm.tanggalRelease}
                     onChange={(e) => setImbForm({ ...imbForm, tanggalRelease: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status *</label>
                   <select
                     value={imbForm.status}
                     onChange={(e) => setImbForm({ ...imbForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800 }}
                     required
                   >
                     <option value="Induk" style={{ background: '#0f172a', color: '#ffffff' }}>Induk</option>
@@ -11376,45 +11382,46 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Luas (m²)</label>
                   <input
                     type="number"
+                    step="any"
                     placeholder="72"
                     value={imbForm.luas}
                     onChange={(e) => setImbForm({ ...imbForm, luas: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Blok</label>
                   <input
                     type="text"
                     placeholder="A"
                     value={imbForm.blok}
                     onChange={(e) => setImbForm({ ...imbForm, blok: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. Unit</label>
                   <input
                     type="text"
                     placeholder="01"
                     value={imbForm.noUnit}
                     onChange={(e) => setImbForm({ ...imbForm, noUnit: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Proyek Terkait</label>
                 <select
                   value={imbForm.project}
                   onChange={(e) => setImbForm({ ...imbForm, project: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 >
                   <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
                   <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
@@ -11422,12 +11429,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas IMB / PBG (PDF / JPG)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Upload Berkas IMB / PBG (PDF / JPG)</label>
                 <input
                   type="file"
                   onChange={handleImbFileChange}
                   accept=".pdf,image/*"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '6px 10px', color: '#ffffff', fontSize: '0.78rem' }}
                 />
                 {imbForm.fileName && (
                   <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -11438,19 +11445,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Perizinan</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Catatan Perizinan</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Catatan persetujuan teknis, dinas penerbit, keterangan spesifikasi..."
                   value={imbForm.catatan}
                   onChange={(e) => setImbForm({ ...imbForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsImbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>Simpan IMB / PBG</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.75rem', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
+                <button type="button" onClick={() => setIsImbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1', padding: '6px 14px', fontSize: '0.8rem' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', border: 'none', fontWeight: 800, color: '#ffffff', padding: '6px 16px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)' }}>Simpan IMB / PBG</button>
               </div>
             </form>
           </div>
@@ -11530,46 +11537,46 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {isPbbModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SPPT - PBB</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto', padding: '1.25rem 1.4rem', boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '4px 10px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem' }}>SPPT - PBB</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
                   {editingPbbId ? 'Edit Data SPPT - PBB' : 'Tambah Data SPPT - PBB'}
                 </h3>
               </div>
               <button onClick={() => setIsPbbModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSavePbb} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSavePbb} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>NOP (Nomor Objek Pajak) *</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>NOP (Nomor Objek Pajak) *</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: 36.74.020.005.012-0001.0"
                   value={pbbForm.nop}
                   onChange={(e) => setPbbForm({ ...pbbForm, nop: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tahun Pajak</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tahun Pajak</label>
                   <input
                     type="number"
                     value={pbbForm.tahun}
                     onChange={(e) => setPbbForm({ ...pbbForm, tahun: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status *</label>
                   <select
                     value={pbbForm.status}
                     onChange={(e) => setPbbForm({ ...pbbForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800 }}
                     required
                   >
                     <option value="Induk" style={{ background: '#0f172a', color: '#ffffff' }}>Induk</option>
@@ -11578,61 +11585,63 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Luas (m2)</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Luas (m²)</label>
                   <input
                     type="number"
+                    step="any"
                     placeholder="120"
                     value={pbbForm.luas}
                     onChange={(e) => setPbbForm({ ...pbbForm, luas: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Blok</label>
                   <input
                     type="text"
                     placeholder="A"
                     value={pbbForm.blok}
                     onChange={(e) => setPbbForm({ ...pbbForm, blok: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. Unit</label>
                   <input
                     type="text"
                     placeholder="01"
                     value={pbbForm.noUnit}
                     onChange={(e) => setPbbForm({ ...pbbForm, noUnit: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>NJOP (Rp)</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>NJOP (Rp)</label>
                   <input
                     type="number"
+                    step="any"
                     placeholder="Contoh: 4200000"
                     value={pbbForm.njop}
                     onChange={(e) => setPbbForm({ ...pbbForm, njop: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                   {pbbForm.njop && (
-                    <div style={{ fontSize: '0.74rem', color: '#34d399', marginTop: '2px', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '2px', fontWeight: 700 }}>
                       = {formatRupiah(pbbForm.njop)}
                     </div>
                   )}
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Proyek</label>
                   <select
                     value={pbbForm.project}
                     onChange={(e) => setPbbForm({ ...pbbForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   >
                     <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
                     <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
@@ -11641,12 +11650,12 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas SPPT - PBB (PDF / JPG)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Upload Berkas SPPT - PBB (PDF / JPG)</label>
                 <input
                   type="file"
                   onChange={handlePbbFileChange}
                   accept=".pdf,image/*"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '6px 10px', color: '#ffffff', fontSize: '0.78rem' }}
                 />
                 {pbbForm.fileName && (
                   <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -11657,19 +11666,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Catatan</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Keterangan ketetapan pajak, tanggal pembayaran, riwayat lunas..."
                   value={pbbForm.catatan}
                   onChange={(e) => setPbbForm({ ...pbbForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsPbbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800 }}>Simpan SPPT-PBB</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.75rem', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
+                <button type="button" onClick={() => setIsPbbModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1', padding: '6px 14px', fontSize: '0.8rem' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800, padding: '6px 16px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)' }}>Simpan SPPT-PBB</button>
               </div>
             </form>
           </div>
@@ -11750,73 +11759,73 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {isSuratModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>SURAT</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto', padding: '1.25rem 1.4rem', boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '4px 10px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem' }}>SURAT</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
                   {editingSuratId ? 'Edit Data Surat' : 'Tambah Surat Masuk / Keluar'}
                 </h3>
               </div>
               <button onClick={() => setIsSuratModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSaveSurat} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+            <form onSubmit={handleSaveSurat} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Surat *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. Surat *</label>
                   <input
                     type="text"
                     required
                     placeholder="Contoh: 012/LEG-EXT/AMS/X/2025"
                     value={suratForm.noSurat}
                     onChange={(e) => setSuratForm({ ...suratForm, noSurat: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal Surat</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tanggal Surat</label>
                   <input
                     type="date"
                     value={suratForm.tanggal}
                     onChange={(e) => setSuratForm({ ...suratForm, tanggal: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Dari (Pengirim) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Dari (Pengirim) *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: PT Ashoka Enterprise Development"
+                    placeholder="Contoh: PT Ashoka Enterprise"
                     value={suratForm.dari}
                     onChange={(e) => setSuratForm({ ...suratForm, dari: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Kepada (Penerima) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Kepada (Penerima) *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Kantor Pertanahan (BPN) Kota Tangsel"
+                    placeholder="Contoh: Kantor Pertanahan BPN"
                     value={suratForm.kepada}
                     onChange={(e) => setSuratForm({ ...suratForm, kepada: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status (Wajib 2 Pilihan: Surat Keluar / Masuk) *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status *</label>
                   <select
                     value={suratForm.status}
                     onChange={(e) => setSuratForm({ ...suratForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800 }}
                     required
                   >
                     <option value="Surat Keluar" style={{ background: '#0f172a', color: '#ffffff' }}>Surat Keluar</option>
@@ -11824,11 +11833,11 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Proyek Terkait</label>
                   <select
                     value={suratForm.project}
                     onChange={(e) => setSuratForm({ ...suratForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   >
                     <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
                     <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
@@ -11837,24 +11846,24 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Perihal Surat *</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Perihal Surat *</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: Permohonan Penerbitan Sertifikat HGB Pecahan Blok A"
                   value={suratForm.perihal}
                   onChange={(e) => setSuratForm({ ...suratForm, perihal: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Berkas Surat (PDF / JPG)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Upload Berkas Surat (PDF / JPG)</label>
                 <input
                   type="file"
                   onChange={handleSuratFileChange}
                   accept=".pdf,image/*"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '6px 10px', color: '#ffffff', fontSize: '0.78rem' }}
                 />
                 {suratForm.fileName && (
                   <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -11865,19 +11874,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan Persuratan</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Catatan Persuratan</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   placeholder="Catatan disposisi, nomor resi kurir/tanda terima, follow up..."
                   value={suratForm.catatan}
                   onChange={(e) => setSuratForm({ ...suratForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsSuratModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800 }}>Simpan Data Surat</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.75rem', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
+                <button type="button" onClick={() => setIsSuratModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1', padding: '6px 14px', fontSize: '0.8rem' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800, padding: '6px 16px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)' }}>Simpan Data Surat</button>
               </div>
             </form>
           </div>
@@ -11960,48 +11969,48 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
       {/* ========================================================================= */}
       {isStkModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.95)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '5px 12px', borderRadius: '5px', fontWeight: 900, fontSize: '0.85rem' }}>STK / BAST</div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #9333ea', borderRadius: '16px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto', padding: '1.25rem 1.4rem', boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.35)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{ background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', border: '1px solid #9333ea', padding: '4px 10px', borderRadius: '5px', fontWeight: 900, fontSize: '0.8rem' }}>STK / BAST</div>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
                   {editingStkId ? 'Edit Catatan STK / BAST' : 'Tambah Catatan Serah Terima Kunci'}
                 </h3>
               </div>
               <button onClick={() => setIsStkModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSaveStk} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+            <form onSubmit={handleSaveStk} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. STK / BAST *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. STK / BAST *</label>
                   <input
                     type="text"
                     required
                     placeholder="Contoh: 049/BAST-STK/AMS-PRK/X/2025"
                     value={stkForm.noStk}
                     onChange={(e) => setStkForm({ ...stkForm, noStk: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tanggal STK</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tanggal STK</label>
                   <input
                     type="date"
                     value={stkForm.tanggal}
                     onChange={(e) => setStkForm({ ...stkForm, tanggal: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Proyek Terkait</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Proyek Terkait</label>
                   <select
                     value={stkForm.project}
                     onChange={(e) => setStkForm({ ...stkForm, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   >
                     <option value="Ashoka Park" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka Park</option>
                     <option value="Ashoka View" style={{ background: '#0f172a', color: '#ffffff' }}>Ashoka View</option>
@@ -12009,60 +12018,60 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Blok</label>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Blok</label>
                     <input
                       type="text"
-                      placeholder="Contoh: A"
+                      placeholder="A"
                       value={stkForm.blok}
                       onChange={(e) => setStkForm({ ...stkForm, blok: e.target.value })}
-                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. Unit *</label>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. Unit *</label>
                     <input
                       type="text"
                       required
-                      placeholder="Contoh: A-01"
+                      placeholder="A-01"
                       value={stkForm.unitNo}
                       onChange={(e) => setStkForm({ ...stkForm, unitNo: e.target.value })}
-                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                     />
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Nama Konsumen *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Nama Konsumen *</label>
                   <input
                     type="text"
                     required
                     placeholder="Nama Lengkap Pemilik Unit"
                     value={stkForm.konsumen}
                     onChange={(e) => setStkForm({ ...stkForm, konsumen: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>No. HP / WhatsApp</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>No. HP / WhatsApp</label>
                   <input
                     type="text"
                     placeholder="08xxxxxxxxxx"
                     value={stkForm.phone}
                     onChange={(e) => setStkForm({ ...stkForm, phone: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status Serah Terima *</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status Serah Terima *</label>
                   <select
                     value={stkForm.status}
                     onChange={(e) => setStkForm({ ...stkForm, status: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #9333ea', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem', fontWeight: 800 }}
                     required
                   >
                     <option value="BAST Lengkap" style={{ background: '#0f172a', color: '#ffffff' }}>BAST Lengkap</option>
@@ -12071,35 +12080,35 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Tipe Bangunan Rumah</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Tipe Bangunan</label>
                   <input
                     type="text"
-                    placeholder="Contoh: 36/72 atau 45/90"
+                    placeholder="Contoh: 36/72"
                     value={stkForm.tipe}
                     onChange={(e) => setStkForm({ ...stkForm, tipe: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Status Legalitas Sertifikat</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Status Legalitas Sertifikat</label>
                 <input
                   type="text"
-                  placeholder="Contoh: SHGB Induk No. 2045/Tangsel (Proses Pecahan SHM)"
+                  placeholder="Contoh: SHGB Induk No. 2045/Tangsel"
                   value={stkForm.legalStatus}
                   onChange={(e) => setStkForm({ ...stkForm, legalStatus: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Upload Dokumen BAST Fisik (PDF / Scan)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Upload Dokumen BAST Fisik (PDF / Scan)</label>
                 <input
                   type="file"
                   onChange={handleStkFileChange}
                   accept=".pdf,image/*"
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '6px 10px', color: '#ffffff', fontSize: '0.78rem' }}
                 />
                 {stkForm.fileName && (
                   <div style={{ marginTop: '4px', fontSize: '0.74rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -12110,19 +12119,19 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '4px' }}>Catatan / Detail Penyerahan Fisik</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#cbd5e1', marginBottom: '3px' }}>Catatan / Detail Penyerahan Fisik</label>
                 <textarea
-                  rows={3}
-                  placeholder="Catatan penyerahan kunci, nomor meteran PLN/PDAM, daftar checklist retensi..."
+                  rows={2}
+                  placeholder="Catatan penyerahan kunci, nomor meteran PLN/PDAM..."
                   value={stkForm.catatan}
                   onChange={(e) => setStkForm({ ...stkForm, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '7px', padding: '7px 10px', color: '#ffffff', fontSize: '0.8rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsStkModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1' }}>Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800 }}>Simpan Catatan STK</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.75rem', borderTop: '1px solid #1e293b', paddingTop: '0.75rem' }}>
+                <button type="button" onClick={() => setIsStkModalOpen(false)} className="btn btn-secondary btn-sm" style={{ background: '#1e293b', border: 'none', color: '#cbd5e1', padding: '6px 14px', fontSize: '0.8rem' }}>Batal</button>
+                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', fontWeight: 800, padding: '6px 16px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)' }}>Simpan Catatan STK</button>
               </div>
             </form>
           </div>
