@@ -4685,7 +4685,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <FileSpreadsheet size={16} /> 📋 Tampilan Terpadu (Format Excel)
+              <FileSpreadsheet size={16} /> Tampilan Terpadu (Format Excel)
             </button>
 
             {/* 2. Daftar Persediaan */}
@@ -4708,7 +4708,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <BarChart3 size={16} /> 📊 Daftar Persediaan
+              <BarChart3 size={16} /> Daftar Persediaan
             </button>
 
             {/* 3. Barang Masuk */}
@@ -4731,7 +4731,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <ArrowDownLeft size={16} /> 📥 Barang Masuk ({persediaanBarangMasuk.length})
+              <ArrowDownLeft size={16} /> Barang Masuk ({persediaanBarangMasuk.length})
             </button>
 
             {/* 4. Barang Keluar */}
@@ -4754,7 +4754,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <ArrowUpRight size={16} /> 📤 Barang Keluar ({persediaanBarangKeluar.length})
+              <ArrowUpRight size={16} /> Barang Keluar ({persediaanBarangKeluar.length})
             </button>
 
             {/* 5. Data Base Barang */}
@@ -4777,7 +4777,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <Package size={16} /> 📦 Data Base Barang ({persediaanMasterBarang.length})
+              <Package size={16} /> Data Base Barang ({persediaanMasterBarang.length})
             </button>
 
             {/* 6. Pemindahan Barang (Mutasi Antar Proyek) */}
@@ -4800,7 +4800,7 @@ export const TeknikModule = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              <RefreshCw size={16} /> 🔄 Pemindahan Barang ({persediaanMutasiBarang.length})
+              <RefreshCw size={16} /> Pemindahan Barang ({persediaanMutasiBarang.length})
             </button>
           </div>
         </div>
@@ -5091,9 +5091,6 @@ export const TeknikModule = () => {
               {/* STATUS TENAGA KERJA FILTER PILLS */}
               <div className="glass-card" style={{ padding: '0.65rem 1rem', marginBottom: '1rem', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#f8fafc', marginRight: '4px' }}>
-                    👷 Status Tenaga Kerja:
-                  </span>
 
                   {/* Semua Tenaga Kerja */}
                   <button 
@@ -5130,7 +5127,7 @@ export const TeknikModule = () => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    👑 Mandor ({countMandor})
+                    Mandor ({countMandor})
                   </button>
 
                   {/* Tukang */}
@@ -5149,7 +5146,7 @@ export const TeknikModule = () => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    🔨 Tukang ({countTukang})
+                    Tukang ({countTukang})
                   </button>
 
                   {/* Kenek */}
@@ -5168,7 +5165,7 @@ export const TeknikModule = () => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    🧱 Kenek ({countKenek})
+                    Kenek ({countKenek})
                   </button>
                 </div>
 
