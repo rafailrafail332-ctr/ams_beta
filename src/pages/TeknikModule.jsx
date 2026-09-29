@@ -4500,12 +4500,12 @@ export const TeknikModule = () => {
   };
 
   return (
-    <div className="module-animated-view">
+    <div className="module-animated-view teknik-module-wrapper">
       {/* PAGE HEADER */}
       <div className="page-header" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <HardHat size={28} color="#0284c7" /> Teknik & Konstruksi
+            <HardHat size={28} color="#034efc" /> Teknik & Konstruksi
           </h1>
           <p className="page-subtitle">
             Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja, spreadsheet RAB, & laporan rekapitulasi progres.
@@ -4540,190 +4540,66 @@ export const TeknikModule = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* LEVEL 1: TIGA KATEGORI UTAMA                                              */}
-      {/* 1. PEKERJAAN HARIAN (Warna Biru HR & GA #0284c7)                          */}
-      {/* 2. PEKERJAAN BORONGAN (Warna Biru Langit #00a2ed)                         */}
-      {/* 3. DATA BASE TERPADU PROYEK (Warna Emerald #10b981)                       */}
+      {/* BILAH SUB-MODUL TEKNIK UTAMA (SESUAI STANDAR LEGAL & WARNA BIRU #034efc)   */}
       {/* ========================================================================= */}
       <div
+        className="glass-card"
         style={{
+          background: '#090d16',
+          border: '1.5px solid #1e293b',
+          borderRadius: '14px',
+          padding: '0.65rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: '8px',
           marginBottom: '1.25rem',
-          background: '#090d16',
-          padding: '8px',
-          borderRadius: '12px',
-          border: '1px solid #1e293b'
+          alignItems: 'center'
         }}
       >
-        {/* Tombol 1: Pekerjaan Harian */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('harian');
-            if (setActiveSubTab) setActiveSubTab('harian');
-          }}
-          style={{
-            background: mainCategory === 'harian' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
-            color: mainCategory === 'harian' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'harian' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'harian' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
-          }}
-        >
-          <Users size={16} />
-          <span>1. Pekerjaan Harian</span>
-        </button>
-
-        {/* Tombol 2: Pekerjaan Borongan */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('borongan');
-            if (setActiveSubTab) setActiveSubTab('borongan');
-          }}
-          style={{
-            background: mainCategory === 'borongan' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
-            color: mainCategory === 'borongan' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'borongan' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'borongan' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
-          }}
-        >
-          <Building2 size={16} />
-          <span>2. Pekerjaan Borongan</span>
-        </button>
-
-        {/* Tombol 3: Tukar Faktur */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('tukar_faktur');
-            if (setActiveSubTab) setActiveSubTab('tukar_faktur');
-          }}
-          style={{
-            background: mainCategory === 'tukar_faktur' ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' : '#0f172a',
-            color: mainCategory === 'tukar_faktur' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'tukar_faktur' ? '1.5px solid #a855f7' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'tukar_faktur' ? '0 4px 12px rgba(124, 58, 237, 0.35)' : 'none'
-          }}
-        >
-          <FileText size={16} />
-          <span>3. Tukar Faktur</span>
-        </button>
-
-        {/* Tombol 4: Persediaan */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('persediaan');
-            if (setActiveSubTab) setActiveSubTab('persediaan');
-          }}
-          style={{
-            background: mainCategory === 'persediaan' ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)' : '#0f172a',
-            color: mainCategory === 'persediaan' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'persediaan' ? '1.5px solid #f59e0b' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'persediaan' ? '0 4px 12px rgba(245, 158, 11, 0.35)' : 'none'
-          }}
-        >
-          <Boxes size={16} />
-          <span>4. Persediaan</span>
-        </button>
-
-        {/* Tombol 5: Data Base Terpadu */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('database');
-            if (setActiveSubTab) setActiveSubTab('database');
-          }}
-          style={{
-            background: mainCategory === 'database' ? 'linear-gradient(135deg, #059669 0%, #047857 100%)' : '#0f172a',
-            color: mainCategory === 'database' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'database' ? '1.5px solid #10b981' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'database' ? '0 4px 12px rgba(16, 185, 129, 0.35)' : 'none'
-          }}
-        >
-          <Database size={16} />
-          <span>5. Data Base Terpadu</span>
-        </button>
-
-        {/* Tombol 6: Upload Foto */}
-        <button
-          type="button"
-          onClick={() => {
-            setMainCategory('upload_foto');
-            if (setActiveSubTab) setActiveSubTab('upload_foto');
-          }}
-          style={{
-            background: mainCategory === 'upload_foto' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#0f172a',
-            color: mainCategory === 'upload_foto' ? '#ffffff' : '#94a3b8',
-            border: mainCategory === 'upload_foto' ? '1.5px solid #38bdf8' : '1px solid #1e293b',
-            borderRadius: '10px',
-            padding: '9px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.2s',
-            boxShadow: mainCategory === 'upload_foto' ? '0 4px 12px rgba(2, 132, 199, 0.35)' : 'none'
-          }}
-        >
-          <Camera size={16} />
-          <span>6. Upload Foto</span>
-        </button>
+        {[
+          { id: 'harian', label: 'Pekerjaan Harian', icon: Users },
+          { id: 'borongan', label: 'Pekerjaan Borongan', icon: Building2 },
+          { id: 'tukar_faktur', label: 'Tukar Faktur', icon: FileText },
+          { id: 'persediaan', label: 'Persediaan', icon: Boxes },
+          { id: 'database', label: 'Data Base Terpadu', icon: Database },
+          { id: 'upload_foto', label: 'Upload Foto', icon: Camera }
+        ].map(tab => {
+          const isActive = mainCategory === tab.id;
+          const IconComponent = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setMainCategory(tab.id);
+                if (setActiveSubTab) setActiveSubTab(tab.id);
+              }}
+              style={{
+                background: isActive
+                  ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
+                  : '#0f172a',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #60a5fa' : '1px solid #1e293b',
+                borderRadius: '8px',
+                padding: '8px 10px',
+                fontSize: '0.8rem',
+                fontWeight: isActive ? 900 : 700,
+                cursor: 'pointer',
+                textAlign: 'center',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 78, 252, 0.45)' : 'none',
+                transition: 'all 0.18s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <IconComponent size={15} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ========================================================================= */}
@@ -4731,7 +4607,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'tukar_faktur' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #7c3aed', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #034efc', flexWrap: 'wrap' }}>
             
             {/* 1. Input & Rekapitulasi Faktur */}
             <button
@@ -4743,13 +4619,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabTukarFaktur === 'input_tf' ? '2px solid #8b5cf6' : '1px solid #475569',
-                background: subTabTukarFaktur === 'input_tf' ? '#7c3aed' : '#1e293b',
-                color: subTabTukarFaktur === 'input_tf' ? '#ffffff' : '#cbd5e1',
+                border: subTabTukarFaktur === 'input_tf' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabTukarFaktur === 'input_tf' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabTukarFaktur === 'input_tf' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabTukarFaktur === 'input_tf' ? '0 2px 8px rgba(124, 58, 237, 0.4)' : 'none',
+                boxShadow: subTabTukarFaktur === 'input_tf' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4766,13 +4642,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabTukarFaktur === 'laporan_tf' ? '2px solid #00a2ed' : '1px solid #475569',
-                background: subTabTukarFaktur === 'laporan_tf' ? '#00a2ed' : '#1e293b',
-                color: subTabTukarFaktur === 'laporan_tf' ? '#ffffff' : '#cbd5e1',
+                border: subTabTukarFaktur === 'laporan_tf' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabTukarFaktur === 'laporan_tf' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabTukarFaktur === 'laporan_tf' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabTukarFaktur === 'laporan_tf' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
+                boxShadow: subTabTukarFaktur === 'laporan_tf' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4787,7 +4663,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'persediaan' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #f59e0b', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #034efc', flexWrap: 'wrap' }}>
             
             {/* 1. Tampilan Terpadu (Format Excel) */}
             <button
@@ -4799,13 +4675,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'terpadu' ? '2px solid #f59e0b' : '1px solid #475569',
-                background: subTabPersediaan === 'terpadu' ? '#d97706' : '#1e293b',
-                color: subTabPersediaan === 'terpadu' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'terpadu' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'terpadu' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'terpadu' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'terpadu' ? '0 2px 8px rgba(217, 119, 6, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'terpadu' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4822,13 +4698,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'daftar' ? '2px solid #10b981' : '1px solid #475569',
-                background: subTabPersediaan === 'daftar' ? '#059669' : '#1e293b',
-                color: subTabPersediaan === 'daftar' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'daftar' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'daftar' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'daftar' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'daftar' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'daftar' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4845,13 +4721,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'masuk' ? '2px solid #38bdf8' : '1px solid #475569',
-                background: subTabPersediaan === 'masuk' ? '#0284c7' : '#1e293b',
-                color: subTabPersediaan === 'masuk' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'masuk' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'masuk' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'masuk' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'masuk' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'masuk' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4868,13 +4744,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'keluar' ? '2px solid #ec4899' : '1px solid #475569',
-                background: subTabPersediaan === 'keluar' ? '#db2777' : '#1e293b',
-                color: subTabPersediaan === 'keluar' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'keluar' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'keluar' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'keluar' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'keluar' ? '0 2px 8px rgba(219, 39, 119, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'keluar' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4891,13 +4767,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'database' ? '2px solid #a855f7' : '1px solid #475569',
-                background: subTabPersediaan === 'database' ? '#7c3aed' : '#1e293b',
-                color: subTabPersediaan === 'database' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'database' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'database' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'database' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'database' ? '0 2px 8px rgba(124, 58, 237, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'database' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4914,13 +4790,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabPersediaan === 'mutasi' ? '2px solid #3b82f6' : '1px solid #475569',
-                background: subTabPersediaan === 'mutasi' ? '#2563eb' : '#1e293b',
-                color: subTabPersediaan === 'mutasi' ? '#ffffff' : '#cbd5e1',
+                border: subTabPersediaan === 'mutasi' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabPersediaan === 'mutasi' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabPersediaan === 'mutasi' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabPersediaan === 'mutasi' ? '0 2px 8px rgba(37, 99, 235, 0.4)' : 'none',
+                boxShadow: subTabPersediaan === 'mutasi' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4940,7 +4816,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'database' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #10b981', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #034efc', flexWrap: 'wrap' }}>
             
             {/* 1. Vendor */}
             <button
@@ -4952,13 +4828,13 @@ export const TeknikModule = () => {
                 fontSize: '0.84rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabDatabase === 'vendor' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'vendor' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'vendor' ? '#ffffff' : '#cbd5e1',
+                border: subTabDatabase === 'vendor' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabDatabase === 'vendor' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabDatabase === 'vendor' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabDatabase === 'vendor' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabDatabase === 'vendor' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4975,13 +4851,13 @@ export const TeknikModule = () => {
                 fontSize: '0.84rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabDatabase === 'tenaga_kerja' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'tenaga_kerja' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'tenaga_kerja' ? '#ffffff' : '#cbd5e1',
+                border: subTabDatabase === 'tenaga_kerja' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabDatabase === 'tenaga_kerja' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabDatabase === 'tenaga_kerja' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabDatabase === 'tenaga_kerja' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabDatabase === 'tenaga_kerja' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -4998,13 +4874,13 @@ export const TeknikModule = () => {
                 fontSize: '0.84rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabDatabase === 'karyawan' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'karyawan' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'karyawan' ? '#ffffff' : '#cbd5e1',
+                border: subTabDatabase === 'karyawan' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabDatabase === 'karyawan' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabDatabase === 'karyawan' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabDatabase === 'karyawan' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabDatabase === 'karyawan' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5021,13 +4897,13 @@ export const TeknikModule = () => {
                 fontSize: '0.84rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabDatabase === 'unit' ? '2px solid #10b981' : '1px solid #334155',
-                background: subTabDatabase === 'unit' ? '#10b981' : '#1e293b',
-                color: subTabDatabase === 'unit' ? '#ffffff' : '#cbd5e1',
+                border: subTabDatabase === 'unit' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabDatabase === 'unit' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabDatabase === 'unit' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabDatabase === 'unit' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabDatabase === 'unit' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5045,7 +4921,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'harian' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #0284c7', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #034efc', flexWrap: 'wrap' }}>
             
             {/* 1. Data Base tenaga kerja */}
             <button
@@ -5057,13 +4933,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'database' ? '2px solid #38bdf8' : '1px solid #475569',
-                background: subTabHarian === 'database' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
-                color: '#ffffff',
+                border: subTabHarian === 'database' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabHarian === 'database' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabHarian === 'database' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'database' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'database' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5080,13 +4956,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'input_absen' ? '2px solid #38bdf8' : '1px solid #475569',
-                background: subTabHarian === 'input_absen' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
-                color: '#ffffff',
+                border: subTabHarian === 'input_absen' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabHarian === 'input_absen' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabHarian === 'input_absen' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'input_absen' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'input_absen' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5103,13 +4979,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabHarian === 'detail_absen' ? '2px solid #38bdf8' : '1px solid #475569',
-                background: subTabHarian === 'detail_absen' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : '#1e293b',
-                color: '#ffffff',
+                border: subTabHarian === 'detail_absen' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabHarian === 'detail_absen' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabHarian === 'detail_absen' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabHarian === 'detail_absen' ? '0 2px 8px rgba(2, 132, 199, 0.4)' : 'none',
+                boxShadow: subTabHarian === 'detail_absen' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5127,7 +5003,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {mainCategory === 'borongan' && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #00a2ed', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', background: '#0f172a', padding: '0.65rem 0.85rem', borderRadius: '10px', border: '1.5px solid #034efc', flexWrap: 'wrap' }}>
             
             {/* 1. PERTAMA (PALING KIRI): Laporan Rekapitulasi RAB */}
             <button
@@ -5139,13 +5015,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabBorongan === 'laporan_rab' ? '2px solid #00a2ed' : '1px solid #475569',
-                background: subTabBorongan === 'laporan_rab' ? '#00a2ed' : '#1e293b',
-                color: subTabBorongan === 'laporan_rab' ? '#ffffff' : '#cbd5e1',
+                border: subTabBorongan === 'laporan_rab' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabBorongan === 'laporan_rab' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabBorongan === 'laporan_rab' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabBorongan === 'laporan_rab' ? '0 2px 8px rgba(0, 162, 237, 0.4)' : 'none',
+                boxShadow: subTabBorongan === 'laporan_rab' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5162,13 +5038,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabBorongan === 'hasil_opname' ? '2px solid #10b981' : '1px solid #475569',
-                background: subTabBorongan === 'hasil_opname' ? '#10b981' : '#1e293b',
-                color: subTabBorongan === 'hasil_opname' ? '#ffffff' : '#cbd5e1',
+                border: subTabBorongan === 'hasil_opname' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabBorongan === 'hasil_opname' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabBorongan === 'hasil_opname' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabBorongan === 'hasil_opname' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+                boxShadow: subTabBorongan === 'hasil_opname' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5185,13 +5061,13 @@ export const TeknikModule = () => {
                 fontSize: '0.86rem',
                 fontWeight: 900,
                 cursor: 'pointer',
-                border: subTabBorongan === 'input_rab' ? '2px solid #f59e0b' : '1px solid #475569',
-                background: subTabBorongan === 'input_rab' ? '#f59e0b' : '#1e293b',
-                color: subTabBorongan === 'input_rab' ? '#000000' : '#cbd5e1',
+                border: subTabBorongan === 'input_rab' ? '1.5px solid #60a5fa' : '1px solid #334155',
+                background: subTabBorongan === 'input_rab' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : '#1e293b',
+                color: subTabBorongan === 'input_rab' ? '#ffffff' : '#94a3b8',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: subTabBorongan === 'input_rab' ? '0 2px 8px rgba(245, 158, 11, 0.4)' : 'none',
+                boxShadow: subTabBorongan === 'input_rab' ? '0 2px 10px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -5313,7 +5189,7 @@ export const TeknikModule = () => {
           {/* ===================================================================== */}
           {/* 2. TABEL DATABASE TENAGA KERJA (NAMA | STATUS | UPAH | AKSI)             */}
           {/* ===================================================================== */}
-          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '2px solid #0284c7', overflow: 'hidden' }}>
+          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.35rem', background: '#1e293b', border: '1.5px solid #034efc', overflow: 'hidden' }}>
             
             {/* HEADER TOOLBAR DENGAN "DATABASE TENAGA KERJA" DI SISI KIRI */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.65rem' }}>
@@ -5429,25 +5305,25 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* TABLE: No. | Nama | Status | Upah | Aksi */}
-                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '0.5rem' }}>
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #034efc', marginBottom: '0.5rem' }}>
                   <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '640px', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ background: '#0284c7', color: '#ffffff' }}>
-                        <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
+                      <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                        <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                           No.
                         </th>
-                        <th style={{ minWidth: '220px', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
+                        <th style={{ minWidth: '220px', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                             Nama Tenaga Kerja <ArrowDownAZ size={15} />
                           </span>
                         </th>
-                        <th style={{ width: '160px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                        <th style={{ width: '160px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                           Status
                         </th>
-                        <th style={{ width: '180px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
+                        <th style={{ width: '180px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
                           Upah Harian
                         </th>
-                        <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
+                        <th style={{ width: '130px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                           Aksi
                         </th>
                       </tr>
@@ -5456,7 +5332,7 @@ export const TeknikModule = () => {
                     <tbody>
                       {sortedAndFilteredDatabaseRows.length === 0 ? (
                         <tr>
-                          <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', background: '#0f172a', color: '#94a3b8', fontWeight: 800 }}>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', background: '#0f172a', color: '#ffffff', fontWeight: 800 }}>
                             Tidak ada data tenaga kerja yang sesuai dengan filter upah / pencarian.
                           </td>
                         </tr>
@@ -5470,7 +5346,7 @@ export const TeknikModule = () => {
                             }}
                           >
                             {/* 1. No. */}
-                            <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ffffff', padding: '8px 4px' }}>
                               {idx + 1}
                             </td>
 
@@ -5599,7 +5475,7 @@ export const TeknikModule = () => {
           {/* 2. SUB-VIEW: INPUT ABSEN HARIAN (FORM LANGSUNG LENGKAP & CEPAT)       */}
           {/* ===================================================================== */}
           {subTabHarian === 'input_absen' && (
-            <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '2px solid #0284c7', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
+            <div className="glass-card" style={{ padding: '1.5rem', background: '#1e293b', border: '1.5px solid #034efc', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid #334155', paddingBottom: '0.75rem' }}>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Plus size={22} color="#0284c7" /> Form Input Absen Harian Tenaga Kerja
@@ -6140,10 +6016,10 @@ export const TeknikModule = () => {
                 </p>
               </div>
             ) : (
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #0369a1' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1080px', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th rowSpan={2} style={{ width: '45px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>No.</th>
                       <th rowSpan={2} style={{ width: '135px', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>Proyek</th>
                       <th rowSpan={2} style={{ width: '160px', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>Nama</th>
@@ -6152,7 +6028,7 @@ export const TeknikModule = () => {
                       <th rowSpan={2} style={{ verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', minWidth: '240px', padding: '9px 8px' }}>Catatan Pekerjaan</th>
                       <th rowSpan={2} style={{ width: '110px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>Aksi</th>
                     </tr>
-                    <tr style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Jam Masuk</th>
                       <th style={{ width: '90px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Jam Pulang</th>
                       <th style={{ width: '85px', textAlign: 'center', border: '1px solid #0369a1', fontWeight: 900, fontSize: '0.82rem', color: '#ffffff', padding: '7px 4px' }}>Lembur</th>
@@ -6164,7 +6040,7 @@ export const TeknikModule = () => {
                   <tbody>
                     {filteredAttendanceList.map((row, idx) => (
                       <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
-                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '8px 4px' }}>{idx + 1}</td>
+                        <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ffffff', padding: '8px 4px' }}>{idx + 1}</td>
                         <td style={{ fontWeight: 800, border: '1px solid #334155', padding: '8px 8px' }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 900, background: (row.proyek || '').includes('Park') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: (row.proyek || '').includes('Park') ? '#34d399' : '#fbbf24', border: `1.5px solid ${(row.proyek || '').includes('Park') ? '#10B981' : '#F59E0B'}` }}>
                             {(row.proyek || '').includes('Park') ? '🌳' : '🏔️'} {row.proyek}
@@ -6921,34 +6797,34 @@ export const TeknikModule = () => {
             </div>
 
             {/* Table Container */}
-            <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #0284c7' }}>
+            <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px', fontSize: '0.82rem' }}>
                 <thead>
-                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
-                    <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 4px' }}>No.</th>
-                    <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
-                    <th style={{ width: '160px', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
-                    <th style={{ width: '160px', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
-                    <th style={{ border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Pekerjaan</th>
-                    <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Jumlah (Rp)</th>
-                    <th style={{ width: '175px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Pembayaran Sblmnya</th>
-                    <th style={{ width: '150px', textAlign: 'right', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
-                    <th style={{ width: '130px', textAlign: 'center', border: '1.5px solid #0369a1', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                    <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 4px' }}>No.</th>
+                    <th style={{ width: '95px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
+                    <th style={{ width: '160px', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
+                    <th style={{ width: '160px', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
+                    <th style={{ border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Pekerjaan</th>
+                    <th style={{ width: '145px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Jumlah (Rp)</th>
+                    <th style={{ width: '175px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Pembayaran Sblmnya</th>
+                    <th style={{ width: '150px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
+                    <th style={{ width: '130px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPekerjaanList.length === 0 && (
                     Array.from({ length: 3 }).map((_, rIdx) => (
                       <tr key={`empty-${rIdx}`} style={{ height: '38px', background: rIdx % 2 === 0 ? '#1e293b' : '#0f172a' }}>
-                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#64748b' }}>-</td>
-                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#64748b' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'right', color: '#ffffff' }}>-</td>
+                        <td style={{ border: '1px solid #334155', textAlign: 'center', color: '#ffffff' }}>-</td>
                       </tr>
                     ))
                   )}
@@ -6968,12 +6844,12 @@ export const TeknikModule = () => {
                           }}
                         >
                           {/* 1. No */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#94a3b8', verticalAlign: 'top' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#ffffff', verticalAlign: 'top' }}>
                             {idx + 1}
                           </td>
 
                           {/* 2. Tanggal */}
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '10px 6px', verticalAlign: 'top' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#ffffff', padding: '10px 6px', verticalAlign: 'top' }}>
                             <div style={{ color: '#ffffff', fontWeight: 800 }}>{formatTanggalIndo(item.tanggal)}</div>
                             {formatTanggalLengkap(item.tanggal) && (
                               <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -7422,56 +7298,56 @@ export const TeknikModule = () => {
               </span>
             </div>
 
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '0.5rem' }}>
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #034efc', marginBottom: '0.5rem' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1200px', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
-                    <th style={{ width: '80px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                    <th style={{ width: '80px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
                       No. SPK
                     </th>
-                    <th style={{ width: '120px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
+                    <th style={{ width: '120px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 6px' }}>
                       Tgl Opname<br/><span style={{ fontSize: '0.72rem', fontWeight: 700 }}>(History)</span>
                     </th>
-                    <th style={{ minWidth: '120px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '120px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Proyek
                     </th>
-                    <th style={{ minWidth: '110px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '110px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nama Vendor
                     </th>
-                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Blok
                     </th>
-                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       No.
                     </th>
-                    <th style={{ minWidth: '100px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '100px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Lain - Lain
                     </th>
-                    <th style={{ minWidth: '170px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ minWidth: '170px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pekerjaan
                     </th>
-                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Harga RAB
                     </th>
-                    <th style={{ width: '85px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '85px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Progress
                     </th>
-                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nilai Opname
                     </th>
-                    <th style={{ width: '95px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '95px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Retensi 5%
                     </th>
-                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '110px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Nilai Progress
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pembayaran sebelumnya
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 8px' }}>
                       Pembyaran saat ini
                     </th>
-                    <th style={{ width: '110px', textAlign: 'center', background: '#10b981', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '110px', textAlign: 'center', background: '#10b981', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '9px 4px' }}>
                       Aksi
                     </th>
                   </tr>
@@ -7704,7 +7580,7 @@ export const TeknikModule = () => {
                   {/* JIKA BELUM ADA DATA OPNAME SAMA SEKALI */}
                   {filteredHasilOpnameSheets.filter(sheet => (sheet.opnameHistory && sheet.opnameHistory.length > 0) || (sheet.tanggalOpname && sheet.tanggalOpname !== '') || (sheet.items && sheet.items.length > 0) || ((sheet.noInput || '').trim() !== '')).length === 0 && (
                     <tr>
-                      <td colSpan={15} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8', background: '#0f172a', border: '1px solid #334155' }}>
+                      <td colSpan={15} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#ffffff', background: '#0f172a', border: '1px solid #334155' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
                           <ClipboardCheck size={36} color="#64748b" />
                           <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#cbd5e1' }}>Belum Ada Data Rekapitulasi Opname</div>
@@ -7746,38 +7622,38 @@ export const TeknikModule = () => {
             </div>
 
             {/* TABEL HASIL OPNAME PERSIS SEPERTI FOTO EXCEL */}
-            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #0284c7', marginBottom: '1.25rem' }}>
+            <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #034efc', marginBottom: '1.25rem' }}>
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#0284c7', color: '#ffffff' }}>
-                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                    <th style={{ width: '50px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                       No.
                     </th>
-                    <th style={{ minWidth: '220px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
+                    <th style={{ minWidth: '220px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 12px' }}>
                       Item Pekerjaan
                     </th>
-                    <th style={{ width: '150px', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '150px', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Spesifikasi
                     </th>
-                    <th style={{ width: '75px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '75px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Vol
                     </th>
-                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
+                    <th style={{ width: '60px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 4px' }}>
                       Sat
                     </th>
-                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Harga Satuan
                     </th>
-                    <th style={{ width: '140px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '140px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Jumlah
                     </th>
-                    <th style={{ width: '80px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '80px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Bobot
                     </th>
-                    <th style={{ width: '130px', textAlign: 'center', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '130px', textAlign: 'center', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Progress
                     </th>
-                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1.5px solid #0369a1', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
+                    <th style={{ width: '120px', textAlign: 'right', background: '#0284c7', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.88rem', color: '#ffffff', padding: '9px 8px' }}>
                       Bobot Progress
                     </th>
                   </tr>
@@ -7793,7 +7669,7 @@ export const TeknikModule = () => {
                       }}
                     >
                       {/* 1. No. */}
-                      <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#cbd5e1', padding: '8px 4px' }}>
+                      <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ffffff', padding: '8px 4px' }}>
                         {idx + 1}
                       </td>
 
@@ -7803,7 +7679,7 @@ export const TeknikModule = () => {
                       </td>
 
                       {/* 3. Spesifikasi */}
-                      <td style={{ border: '1px solid #334155', padding: '8px 8px', color: '#cbd5e1', fontSize: '0.84rem' }}>
+                      <td style={{ border: '1px solid #334155', padding: '8px 8px', color: '#ffffff', fontSize: '0.84rem' }}>
                         {row.spesifikasi || '-'}
                       </td>
 
@@ -7813,7 +7689,7 @@ export const TeknikModule = () => {
                       </td>
 
                       {/* 5. Sat */}
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', fontWeight: 800, color: '#94a3b8' }}>
+                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 4px', fontWeight: 800, color: '#ffffff' }}>
                         {row.sat || '-'}
                       </td>
 
@@ -7862,19 +7738,19 @@ export const TeknikModule = () => {
 
                   {/* BARIS TOTAL */}
                   <tr style={{ background: '#0284c7', color: '#ffffff', fontWeight: 900 }}>
-                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #0369a1', fontSize: '0.92rem', color: '#ffffff' }}>
+                    <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                       Total
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.92rem', color: '#ffffff' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                       {formatRupiahDesimal(activeSheetCalc.totalHargaRab)}
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.88rem', color: '#ffffff' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1px solid #1d4ed8', fontSize: '0.88rem', color: '#ffffff' }}>
                       
                     </td>
-                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.85rem', color: '#ffffff' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1px solid #1d4ed8', fontSize: '0.85rem', color: '#ffffff' }}>
                       
                     </td>
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1.5px solid #0369a1', fontSize: '0.95rem', color: '#ffffff' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1px solid #1d4ed8', fontSize: '0.95rem', color: '#ffffff' }}>
                       {formatDecimal(activeSheetCalc.progresPersen)}%
                     </td>
                   </tr>
@@ -8261,51 +8137,51 @@ export const TeknikModule = () => {
                 </p>
               </div>
             ) : (
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1150px', textAlign: 'left' }}>
                   <thead>
                     {/* EXACT HEADER OF media_1787930910161.png */}
-                    <tr style={{ color: '#000000' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       {/* Left tan columns */}
-                      <th style={{ width: '85px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '85px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         No. SPK
                       </th>
-                      <th style={{ width: '90px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '90px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         Tanggal
                       </th>
-                      <th style={{ width: '115px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>
+                      <th style={{ width: '115px', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 6px' }}>
                         Proyek
                       </th>
-                      <th style={{ width: '125px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 6px' }}>
+                      <th style={{ width: '125px', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 6px' }}>
                         Nama Vendor
                       </th>
-                      <th style={{ width: '55px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '55px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         Blok
                       </th>
-                      <th style={{ width: '55px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '55px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         No.
                       </th>
-                      <th style={{ width: '110px', textAlign: 'center', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '110px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         Lain - Lain
                       </th>
-                      <th style={{ minWidth: '220px', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                      <th style={{ minWidth: '220px', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 8px' }}>
                         Pekerjaan
                       </th>
-                      <th style={{ width: '135px', textAlign: 'right', background: '#cb8a58', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                      <th style={{ width: '135px', textAlign: 'right', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 8px' }}>
                         Harga RAB
                       </th>
 
                       {/* Right brighter peach columns */}
-                      <th style={{ width: '85px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '85px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         Progress
                       </th>
-                      <th style={{ width: '125px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                      <th style={{ width: '125px', textAlign: 'right', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 8px' }}>
                         Retensi
                       </th>
-                      <th style={{ width: '135px', textAlign: 'right', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 8px' }}>
+                      <th style={{ width: '135px', textAlign: 'right', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 8px' }}>
                         Nilai Progress
                       </th>
-                      <th style={{ width: '100px', textAlign: 'center', background: '#f6b26b', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.86rem', color: '#000000', padding: '8px 4px' }}>
+                      <th style={{ width: '100px', textAlign: 'center', background: 'transparent', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.86rem', color: '#ffffff', padding: '8px 4px' }}>
                         Aksi
                       </th>
                     </tr>
@@ -8320,7 +8196,7 @@ export const TeknikModule = () => {
                         </td>
 
                         {/* 2. Tanggal */}
-                        <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '8px 4px' }}>
+                        <td style={{ textAlign: 'center', fontWeight: 800, border: '1px solid #334155', color: '#ffffff', fontSize: '0.83rem', padding: '8px 4px' }}>
                           {row.tanggal}
                         </td>
 
@@ -8345,7 +8221,7 @@ export const TeknikModule = () => {
                         </td>
 
                         {/* 7. Fasum */}
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', color: '#cbd5e1', fontSize: '0.83rem', padding: '8px 4px' }}>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', color: '#ffffff', fontSize: '0.83rem', padding: '8px 4px' }}>
                           {row.fasum || ''}
                         </td>
 
@@ -8465,22 +8341,22 @@ export const TeknikModule = () => {
 
                     {/* TOTAL DI PALING BAWAH LAPORAN */}
                     <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                      <td colSpan={8} style={{ textAlign: 'left', padding: '10px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      <td colSpan={8} style={{ textAlign: 'left', padding: '10px 12px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                         Total Keseluruhan ({filteredLaporanSheets.length} Pekerjaan / SPK)
                       </td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                         {formatRupiahDesimal(grandTotalHargaRab)}
                       </td>
-                      <td style={{ textAlign: 'center', padding: '10px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#000000' }}>
+                      <td style={{ textAlign: 'center', padding: '10px 4px', border: '1px solid #1d4ed8', fontSize: '0.85rem', color: '#ffffff' }}>
                         -
                       </td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                         {formatRupiahDesimal(grandTotalRetensi)}
                       </td>
-                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                      <td style={{ textAlign: 'right', padding: '10px 8px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                         {formatRupiahDesimal(grandTotalNilaiProgress)}
                       </td>
-                      <td style={{ border: '1.5px solid #78350f' }}></td>
+                      <td style={{ border: '1px solid #1d4ed8' }}></td>
                     </tr>
                   </tbody>
                 </table>
@@ -9275,27 +9151,27 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* Table Container */}
-                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '2px solid #5b21b6' }}>
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                   <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px', fontSize: '0.82rem' }}>
                     <thead>
-                      <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
-                        <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 4px' }}>No.</th>
-                        <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
-                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>No. TT</th>
-                        <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
-                        <th style={{ width: '160px', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
-                        <th style={{ border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Keterangan</th>
-                        <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Nilai Faktur (Rp)</th>
-                        <th style={{ width: '165px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sudah Dibayar</th>
-                        <th style={{ width: '145px', textAlign: 'right', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
-                        <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 6px' }}>Status</th>
-                        <th style={{ width: '160px', textAlign: 'center', border: '1.5px solid #4c1d95', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
+                      <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                        <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 4px' }}>No.</th>
+                        <th style={{ width: '95px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 6px' }}>Tanggal</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 6px' }}>No. TT</th>
+                        <th style={{ width: '160px', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Nama Vendor</th>
+                        <th style={{ width: '160px', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Proyek</th>
+                        <th style={{ border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Keterangan</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Nilai Faktur (Rp)</th>
+                        <th style={{ width: '165px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Sudah Dibayar</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Sisa Pembayaran</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 6px' }}>Status</th>
+                        <th style={{ width: '160px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, padding: '9px 8px' }}>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredTukarFakturList.length === 0 && (
                         <tr style={{ height: '50px', background: '#0f172a' }}>
-                          <td colSpan={11} style={{ textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', padding: '18px' }}>
+                          <td colSpan={11} style={{ textAlign: 'center', color: '#ffffff', fontStyle: 'italic', padding: '18px' }}>
                             Tidak ada data Tukar Faktur yang sesuai dengan filter.
                           </td>
                         </tr>
@@ -9315,12 +9191,12 @@ export const TeknikModule = () => {
                             }}
                           >
                             {/* 1. No */}
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#94a3b8', verticalAlign: 'top' }}>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 800, padding: '10px 4px', color: '#ffffff', verticalAlign: 'top' }}>
                               {idx + 1}
                             </td>
 
                             {/* 2. Tanggal */}
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1', padding: '10px 6px', verticalAlign: 'top' }}>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', fontWeight: 700, color: '#ffffff', padding: '10px 6px', verticalAlign: 'top' }}>
                               <div style={{ color: '#ffffff', fontWeight: 800 }}>{formatTanggalIndo(item.tanggal)}</div>
                               {formatTanggalLengkap(item.tanggal) && (
                                 <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -9571,7 +9447,7 @@ export const TeknikModule = () => {
                             <span>{formatRupiahDesimal(grandSummaryTf.totSisa)}</span>
                           </div>
                         </td>
-                        <td colSpan={2} style={{ padding: '12px 6px', textAlign: 'center', color: '#94a3b8', fontSize: '0.78rem' }}>
+                        <td colSpan={2} style={{ padding: '12px 6px', textAlign: 'center', color: '#ffffff', fontSize: '0.78rem' }}>
                           {filteredTukarFakturList.filter(i => i.isLunas).length} Lunas
                         </td>
                       </tr>
@@ -9723,10 +9599,10 @@ export const TeknikModule = () => {
                 <h4 style={{ color: '#c084fc', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.65rem' }}>
                   📊 Ringkasan Komparasi Proyek
                 </h4>
-                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
                     <thead>
-                      <tr style={{ background: '#0f172a', color: '#cbd5e1', borderBottom: '1.5px solid #334155' }}>
+                      <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '1.5px solid #1d4ed8' }}>
                         <th style={{ padding: '9px 12px', textAlign: 'left' }}>Proyek Perumahan</th>
                         <th style={{ padding: '9px 12px', textAlign: 'center', width: '110px' }}>Jumlah TT</th>
                         <th style={{ padding: '9px 12px', textAlign: 'right', width: '180px' }}>Total Nilai Faktur</th>
@@ -9789,10 +9665,10 @@ export const TeknikModule = () => {
                 <h4 style={{ color: '#ffffff', fontWeight: 900, fontSize: '0.95rem', marginBottom: '0.65rem' }}>
                   📄 Rincian Dokumen Tukar Faktur ({filteredLaporanTfList.length} Faktur)
                 </h4>
-                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                <div className="table-responsive" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                     <thead>
-                      <tr style={{ background: '#0f172a', color: '#cbd5e1', borderBottom: '1.5px solid #334155' }}>
+                      <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '1.5px solid #1d4ed8' }}>
                         <th style={{ padding: '8px 6px', textAlign: 'center', width: '40px' }}>No.</th>
                         <th style={{ padding: '8px 8px', textAlign: 'center', width: '90px' }}>Tanggal</th>
                         <th style={{ padding: '8px 8px', textAlign: 'center', width: '90px' }}>No. TT</th>
@@ -9809,8 +9685,8 @@ export const TeknikModule = () => {
                     <tbody>
                       {filteredLaporanTfList.map((item, lIdx) => (
                         <tr key={item.id || lIdx} style={{ background: lIdx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#94a3b8' }}>{lIdx + 1}</td>
-                          <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1' }}>{formatTanggalIndo(item.tanggal)}</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', color: '#ffffff' }}>{lIdx + 1}</td>
+                          <td style={{ padding: '8px 8px', textAlign: 'center', color: '#ffffff' }}>{formatTanggalIndo(item.tanggal)}</td>
                           <td style={{ padding: '8px 8px', textAlign: 'center' }}>
                             <span style={{ background: '#7c3aed', color: '#ffffff', padding: '2px 7px', borderRadius: '4px', fontWeight: 900, fontSize: '0.76rem' }}>
                               {item.noTt}
@@ -9992,27 +9868,27 @@ export const TeknikModule = () => {
                   </div>
 
                   {/* Tabel Data Base Sesuai Gambar */}
-                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #6b21a8', borderRadius: '6px' }}>
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1.5px solid #034efc', borderRadius: '6px' }}>
                     <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.78rem' }}>
                       <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
-                        <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
-                          <th style={{ width: '75px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Kode</th>
-                          <th style={{ border: '1px solid #6d28d9', padding: '6px 8px', fontWeight: 900 }}>Nama Barang</th>
-                          <th style={{ width: '55px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Satuan</th>
-                          <th style={{ width: '45px', textAlign: 'center', border: '1px solid #6d28d9', padding: '6px 4px', fontWeight: 900 }}>Aksi</th>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '75px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900 }}>Kode</th>
+                          <th style={{ border: '1px solid #1d4ed8', padding: '6px 8px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '55px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900 }}>Satuan</th>
+                          <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '6px 4px', fontWeight: 900 }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredMasterBarang.length === 0 ? (
                           <tr>
-                            <td colSpan={4} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada master barang</td>
+                            <td colSpan={4} style={{ textAlign: 'center', padding: '1.25rem', color: '#ffffff' }}>Belum ada master barang</td>
                           </tr>
                         ) : (
                           filteredMasterBarang.map((b, idx) => (
                             <tr key={b.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
                               <td style={{ textAlign: 'center', fontWeight: 800, color: '#c084fc', border: '1px solid #334155', padding: '5px 4px' }}>{b.kode}</td>
                               <td style={{ fontWeight: 800, color: '#f8fafc', border: '1px solid #334155', padding: '5px 8px' }}>{b.nama}</td>
-                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '5px 4px' }}>{normalizeSatuan(b.satuan)}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#ffffff', border: '1px solid #334155', padding: '5px 4px' }}>{normalizeSatuan(b.satuan)}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
                                 <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
                                   <button
@@ -10091,10 +9967,10 @@ export const TeknikModule = () => {
                   </div>
 
                   {/* Tabel Barang Masuk Sesuai Gambar */}
-                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #0369a1', borderRadius: '6px' }}>
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1.5px solid #034efc', borderRadius: '6px' }}>
                     <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '650px', fontSize: '0.78rem' }}>
                       <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
-                        <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                           <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
                           <th style={{ width: '80px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
                           <th style={{ width: '70px', border: '1px solid #0369a1', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
@@ -10110,20 +9986,20 @@ export const TeknikModule = () => {
                       <tbody>
                         {filteredBarangMasuk.length === 0 ? (
                           <tr>
-                            <td colSpan={10} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada data barang masuk</td>
+                            <td colSpan={10} style={{ textAlign: 'center', padding: '1.25rem', color: '#ffffff' }}>Belum ada data barang masuk</td>
                           </tr>
                         ) : (
                           filteredBarangMasuk.map((m, idx) => (
                             <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff' }}>{m.tanggal}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{m.proyek}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{m.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#10b981', fontWeight: 900 }}>{m.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#f59e0b', fontWeight: 800 }}>{m.vendor || '-'}</td>
-                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff' }}>{m.keterangan || '-'}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
                                 <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
                                   <button
@@ -10202,41 +10078,41 @@ export const TeknikModule = () => {
                   </div>
 
                   {/* Tabel Barang Keluar Sesuai Gambar */}
-                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #be185d', borderRadius: '6px' }}>
+                  <div className="table-container" style={{ maxHeight: '310px', overflowY: 'auto', overflowX: 'auto', border: '1.5px solid #034efc', borderRadius: '6px' }}>
                     <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '680px', fontSize: '0.78rem' }}>
                       <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
-                        <tr style={{ background: '#db2777', color: '#ffffff' }}>
-                          <th style={{ width: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
-                          <th style={{ width: '80px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
-                          <th style={{ width: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
-                          <th style={{ minWidth: '120px', border: '1px solid #be185d', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
-                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
-                          <th style={{ width: '70px', minWidth: '70px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
-                          <th style={{ width: '85px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
-                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
-                          <th style={{ width: '45px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
-                          <th style={{ minWidth: '85px', border: '1px solid #be185d', padding: '6px 6px', fontWeight: 900 }}>Lain-lain</th>
-                          <th style={{ width: '40px', border: '1px solid #be185d', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Tgl</th>
+                          <th style={{ width: '80px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900 }}>Proyek</th>
+                          <th style={{ width: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '120px', border: '1.5px solid #034efc', padding: '6px 6px', fontWeight: 900 }}>Nama Barang</th>
+                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '70px', minWidth: '70px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Sat</th>
+                          <th style={{ width: '85px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'right' }}>Avg</th>
+                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Blok</th>
+                          <th style={{ width: '45px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>No.</th>
+                          <th style={{ minWidth: '85px', border: '1.5px solid #034efc', padding: '6px 6px', fontWeight: 900 }}>Lain-lain</th>
+                          <th style={{ width: '40px', border: '1.5px solid #034efc', padding: '6px 4px', fontWeight: 900, textAlign: 'center' }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredBarangKeluar.length === 0 ? (
                           <tr>
-                            <td colSpan={11} style={{ textAlign: 'center', padding: '1.25rem', color: '#94a3b8' }}>Belum ada data barang keluar</td>
+                            <td colSpan={11} style={{ textAlign: 'center', padding: '1.25rem', color: '#ffffff' }}>Belum ada data barang keluar</td>
                           </tr>
                         ) : (
                           filteredBarangKeluar.map((k, idx) => (
                             <tr key={k.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#cbd5e1' }}>{k.tanggal}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff' }}>{k.tanggal}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 4px', color: '#f472b6', fontWeight: 800 }}>{k.proyek}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#c084fc', fontWeight: 800 }}>{k.kode}</td>
                               <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#f43f5e', fontWeight: 900 }}>{k.qty}</td>
-                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
+                              <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#ffffff', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
                               <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '5px 4px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 4px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
-                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#94a3b8' }}>{k.fasum || '-'}</td>
+                              <td style={{ border: '1px solid #334155', padding: '5px 6px', color: '#ffffff' }}>{k.fasum || '-'}</td>
                               <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '5px 2px' }}>
                                 <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
                                   <button
@@ -10325,29 +10201,29 @@ export const TeknikModule = () => {
                 </div>
 
                 {/* Tabel Daftar Persediaan */}
-                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
+                <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                   <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1000px' }}>
                     <thead>
-                      <tr style={{ background: '#10b981', color: '#000000' }}>
-                        <th style={{ width: '40px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>No.</th>
-                        <th style={{ width: '110px', border: '1px solid #059669', padding: '8px 8px', fontWeight: 900, fontSize: '0.84rem' }}>Proyek</th>
-                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Kode</th>
-                        <th style={{ minWidth: '180px', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Nama Barang</th>
-                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Masuk</th>
-                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Mutasi (+/-)</th>
-                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Keluar</th>
-                        <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.88rem', background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
-                        <th style={{ width: '70px', minWidth: '70px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem', whiteSpace: 'nowrap' }}>Satuan</th>
-                        <th style={{ width: '115px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Avg Harga</th>
-                        <th style={{ width: '145px', textAlign: 'right', border: '1px solid #059669', padding: '8px 10px', fontWeight: 900, fontSize: '0.88rem', background: '#059669', color: '#ffffff' }}>Jumlah (Rp)</th>
-                        <th style={{ width: '95px', textAlign: 'center', border: '1px solid #059669', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Status</th>
-                        <th style={{ width: '130px', textAlign: 'center', border: '1px solid #059669', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>Pintasan</th>
+                      <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                        <th style={{ width: '40px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>No.</th>
+                        <th style={{ width: '110px', border: '1px solid #1d4ed8', padding: '8px 8px', fontWeight: 900, fontSize: '0.84rem' }}>Proyek</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Kode</th>
+                        <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Nama Barang</th>
+                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Masuk</th>
+                        <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Mutasi (+/-)</th>
+                        <th style={{ width: '80px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Keluar</th>
+                        <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.88rem', background: 'transparent', color: '#ffffff' }}>Sisa Qty</th>
+                        <th style={{ width: '70px', minWidth: '70px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem', whiteSpace: 'nowrap' }}>Satuan</th>
+                        <th style={{ width: '115px', textAlign: 'right', border: '1px solid #1d4ed8', padding: '8px 10px', fontWeight: 900, fontSize: '0.84rem' }}>Avg Harga</th>
+                        <th style={{ width: '145px', textAlign: 'right', border: '1px solid #1d4ed8', padding: '8px 10px', fontWeight: 900, fontSize: '0.88rem', background: 'transparent', color: '#ffffff' }}>Jumlah (Rp)</th>
+                        <th style={{ width: '95px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 6px', fontWeight: 900, fontSize: '0.84rem' }}>Status</th>
+                        <th style={{ width: '130px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '8px 4px', fontWeight: 900, fontSize: '0.84rem' }}>Pintasan</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredDaftarPersediaan.length === 0 ? (
                         <tr>
-                          <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                          <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
                             Data persediaan kosong / belum ada barang yang di-input untuk proyek ini
                           </td>
                         </tr>
@@ -10357,7 +10233,7 @@ export const TeknikModule = () => {
                           const isEmpty = item.sisaQty <= 0;
                           return (
                             <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
                               <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8' }}>
                                 <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
                                   {item.proyek}
@@ -10379,7 +10255,7 @@ export const TeknikModule = () => {
                               <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
                                 {item.sisaQty}
                               </td>
-                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px', whiteSpace: 'nowrap' }}>{item.satuan}</td>
+                              <td style={{ textAlign: 'center', fontWeight: 700, color: '#ffffff', border: '1px solid #334155', padding: '7px 6px', whiteSpace: 'nowrap' }}>{item.satuan}</td>
                               <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
                                 Rp {formatRupiah(item.avgHarga)}
                               </td>
@@ -10595,29 +10471,29 @@ export const TeknikModule = () => {
               </div>
 
               {/* Table */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #059669' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1100px' }}>
                   <thead>
-                    <tr style={{ background: '#10b981', color: '#000000' }}>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>No.</th>
-                      <th style={{ width: '120px', border: '1px solid #059669', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
-                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
-                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Mutasi (+/-)</th>
-                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Total Keluar</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Sisa Qty</th>
-                      <th style={{ width: '65px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
-                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900 }}>Avg Harga</th>
-                      <th style={{ width: '150px', textAlign: 'right', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, background: '#059669', color: '#ffffff' }}>Jumlah Nilai (Rp)</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900 }}>Status</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #059669', padding: '9px 4px', fontWeight: 900 }}>Pintasan</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '120px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Total Masuk</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Mutasi (+/-)</th>
+                      <th style={{ width: '85px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Total Keluar</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, background: 'transparent', color: '#ffffff' }}>Sisa Qty</th>
+                      <th style={{ width: '65px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Satuan</th>
+                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Avg Harga</th>
+                      <th style={{ width: '150px', textAlign: 'right', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, background: 'transparent', color: '#ffffff' }}>Jumlah Nilai (Rp)</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Status</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>Pintasan</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredDaftarPersediaan.length === 0 ? (
                       <tr>
-                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
                           Tidak ada data persediaan sesuai filter
                         </td>
                       </tr>
@@ -10627,7 +10503,7 @@ export const TeknikModule = () => {
                         const isEmpty = item.sisaQty <= 0;
                         return (
                           <tr key={item.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', fontWeight: 900, color: item.proyek.includes('Park') ? '#34d399' : '#38bdf8', whiteSpace: 'nowrap' }}>
                               <span style={{ padding: '2px 6px', borderRadius: '4px', background: item.proyek.includes('Park') ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)', border: `1px solid ${item.proyek.includes('Park') ? '#10b981' : '#0284c7'}` }}>
                                 {item.proyek}
@@ -10649,7 +10525,7 @@ export const TeknikModule = () => {
                             <td style={{ textAlign: 'center', fontWeight: 900, color: isEmpty ? '#f87171' : '#34d399', fontSize: '0.95rem', border: '1px solid #334155', padding: '7px 6px', background: isEmpty ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)' }}>
                               {item.sisaQty}
                             </td>
-                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 6px' }}>{item.satuan}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#ffffff', border: '1px solid #334155', padding: '7px 6px' }}>{item.satuan}</td>
                             <td style={{ textAlign: 'right', fontWeight: 800, color: '#fbbf24', border: '1px solid #334155', padding: '7px 10px' }}>
                               Rp {formatRupiah(item.avgHarga)}
                             </td>
@@ -10758,7 +10634,7 @@ export const TeknikModule = () => {
           {/* VIEW 3: BARANG MASUK (TAMPILAN RINCI / FULL VIEW)                     */}
           {/* --------------------------------------------------------------------- */}
           {subTabPersediaan === 'masuk' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #0284c7', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -10846,10 +10722,10 @@ export const TeknikModule = () => {
               </div>
 
               {/* Tabel Barang Masuk */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #0369a1' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
-                    <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '45px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 4px', fontWeight: 900 }}>No.</th>
                       <th style={{ width: '95px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
                       <th style={{ width: '110px', border: '1px solid #0369a1', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
@@ -10867,7 +10743,7 @@ export const TeknikModule = () => {
                   <tbody>
                     {filteredBarangMasuk.length === 0 ? (
                       <tr>
-                        <td colSpan={12} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={12} style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
                           Belum ada catatan barang masuk
                         </td>
                       </tr>
@@ -10876,17 +10752,17 @@ export const TeknikModule = () => {
                         const totalBiaya = (Number(m.qty) || 0) * (Number(m.hargaSatuan) || 0);
                         return (
                           <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff' }}>{m.tanggal}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>{m.proyek}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#10b981', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#38bdf8', fontWeight: 800 }}>Rp {formatRupiah(m.hargaSatuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#10b981', fontWeight: 900 }}>Rp {formatRupiah(totalBiaya)}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>{m.vendor || '-'}</td>
-                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#94a3b8' }}>{m.keterangan || '-'}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#ffffff' }}>{m.keterangan || '-'}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
                               <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                                 <button
@@ -11022,29 +10898,29 @@ export const TeknikModule = () => {
               </div>
 
               {/* Tabel Barang Keluar */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #be185d' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
-                    <tr style={{ background: '#db2777', color: '#ffffff' }}>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 4px', fontWeight: 900 }}>No.</th>
-                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
-                      <th style={{ width: '110px', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #be185d', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
-                      <th style={{ width: '70px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Qty Keluar</th>
-                      <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Satuan</th>
-                      <th style={{ width: '120px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Avg Harga</th>
-                      <th style={{ width: '135px', textAlign: 'right', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900, background: '#be185d' }}>Nilai Pemakaian</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>Blok</th>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 6px', fontWeight: 900 }}>No. Unit</th>
-                      <th style={{ minWidth: '120px', border: '1px solid #be185d', padding: '9px 8px', fontWeight: 900 }}>Lain-lain / Fasum</th>
-                      <th style={{ width: '75px', textAlign: 'center', border: '1px solid #be185d', padding: '9px 4px', fontWeight: 900 }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                      <th style={{ width: '45px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 4px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
+                      <th style={{ width: '110px', border: '1.5px solid #034efc', padding: '9px 8px', fontWeight: 900 }}>Proyek</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900 }}>Kode</th>
+                      <th style={{ minWidth: '200px', border: '1.5px solid #034efc', padding: '9px 10px', fontWeight: 900 }}>Nama Barang</th>
+                      <th style={{ width: '70px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900 }}>Qty Keluar</th>
+                      <th style={{ width: '80px', minWidth: '80px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900, whiteSpace: 'nowrap' }}>Satuan</th>
+                      <th style={{ width: '120px', textAlign: 'right', border: '1.5px solid #034efc', padding: '9px 8px', fontWeight: 900 }}>Avg Harga</th>
+                      <th style={{ width: '135px', textAlign: 'right', border: '1.5px solid #034efc', padding: '9px 8px', fontWeight: 900, background: '#be185d' }}>Nilai Pemakaian</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900 }}>Blok</th>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 6px', fontWeight: 900 }}>No. Unit</th>
+                      <th style={{ minWidth: '120px', border: '1.5px solid #034efc', padding: '9px 8px', fontWeight: 900 }}>Lain-lain / Fasum</th>
+                      <th style={{ width: '75px', textAlign: 'center', border: '1.5px solid #034efc', padding: '9px 4px', fontWeight: 900 }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredBarangKeluar.length === 0 ? (
                       <tr>
-                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={13} style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
                           Belum ada catatan barang keluar
                         </td>
                       </tr>
@@ -11053,18 +10929,18 @@ export const TeknikModule = () => {
                         const nilaiPemakaian = (Number(k.qty) || 0) * (Number(k.avgHarga) || 0);
                         return (
                           <tr key={k.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{k.tanggal}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff' }}>{k.tanggal}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 800 }}>{k.proyek}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{k.kode}</td>
                             <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{k.namaBarang}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#f43f5e', fontWeight: 900, fontSize: '0.92rem' }}>{k.qty}</td>
-                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
+                            <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff', whiteSpace: 'nowrap' }}>{normalizeSatuan(k.satuan)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#fbbf24', fontWeight: 800 }}>Rp {formatRupiah(k.avgHarga)}</td>
                             <td style={{ textAlign: 'right', border: '1px solid #334155', padding: '7px 8px', color: '#f472b6', fontWeight: 900 }}>Rp {formatRupiah(nilaiPemakaian)}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.blok || '-'}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#38bdf8', fontWeight: 800 }}>{k.noUnit || '-'}</td>
-                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#94a3b8' }}>{k.fasum || '-'}</td>
+                            <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#ffffff' }}>{k.fasum || '-'}</td>
                             <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
                               <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                                 <button
@@ -11151,25 +11027,25 @@ export const TeknikModule = () => {
               </div>
 
               {/* Tabel Data Base Master Barang */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #7c3aed' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
                   <thead>
-                    <tr style={{ background: '#7c3aed', color: '#ffffff' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900 }}>No.</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900 }}>Kode Barang</th>
-                      <th style={{ minWidth: '220px', border: '1px solid #6d28d9', padding: '9px 12px', fontWeight: 900 }}>Nama Material / Barang</th>
-                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Satuan Standar</th>
-                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Total Masuk</th>
-                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Total Keluar</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 8px', fontWeight: 900 }}>Sisa Fisik</th>
-                      <th style={{ width: '140px', textAlign: 'right', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900 }}>Avg Harga Saat Ini</th>
-                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900 }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>No.</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Kode Barang</th>
+                      <th style={{ minWidth: '220px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900 }}>Nama Material / Barang</th>
+                      <th style={{ width: '90px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Satuan Standar</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Total Masuk</th>
+                      <th style={{ width: '95px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Total Keluar</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Sisa Fisik</th>
+                      <th style={{ width: '140px', textAlign: 'right', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900 }}>Avg Harga Saat Ini</th>
+                      <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMasterBarang.length === 0 ? (
                       <tr>
-                        <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
                           Belum ada master barang terdaftar
                         </td>
                       </tr>
@@ -11178,10 +11054,10 @@ export const TeknikModule = () => {
                         const summary = persediaanSummaryList.find(s => s.id === b.id || s.kode === b.kode);
                         return (
                           <tr key={b.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 6px' }}>{idx + 1}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 6px' }}>{idx + 1}</td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: '#c084fc', border: '1px solid #334155', padding: '7px 10px' }}>{b.kode}</td>
                             <td style={{ fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 12px' }}>{b.nama}</td>
-                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#cbd5e1', border: '1px solid #334155', padding: '7px 8px' }}>{normalizeSatuan(b.satuan)}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color: '#ffffff', border: '1px solid #334155', padding: '7px 8px' }}>{normalizeSatuan(b.satuan)}</td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyMasuk || 0}</td>
                             <td style={{ textAlign: 'center', fontWeight: 800, color: '#f472b6', border: '1px solid #334155', padding: '7px 8px' }}>{summary?.totalQtyKeluar || 0}</td>
                             <td style={{ textAlign: 'center', fontWeight: 900, color: (summary?.sisaQty || 0) <= 0 ? '#f87171' : '#34d399', border: '1px solid #334155', padding: '7px 8px' }}>
@@ -11310,10 +11186,10 @@ export const TeknikModule = () => {
               </div>
 
               {/* Tabel Pemindahan Barang */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #2563eb' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
-                    <tr style={{ background: '#2563eb', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '45px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 4px', fontWeight: 900 }}>No.</th>
                       <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900 }}>Tanggal</th>
                       <th style={{ width: '130px', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900 }}>Dari Proyek (Asal)</th>
@@ -11330,15 +11206,15 @@ export const TeknikModule = () => {
                   <tbody>
                     {filteredPersediaanMutasi.length === 0 ? (
                       <tr>
-                        <td colSpan={11} style={{ textAlign: 'center', padding: '2.5rem', color: '#94a3b8' }}>
+                        <td colSpan={11} style={{ textAlign: 'center', padding: '2.5rem', color: '#ffffff' }}>
                           Belum ada riwayat pemindahan barang antar proyek. Klik <strong>"+ Catat Pemindahan Barang"</strong> untuk memulai.
                         </td>
                       </tr>
                     ) : (
                       filteredPersediaanMutasi.map((m, idx) => (
                         <tr key={m.id || idx} style={{ background: idx % 2 === 0 ? '#1e293b' : '#0f172a', borderBottom: '1px solid #334155' }}>
-                          <td style={{ textAlign: 'center', fontWeight: 800, color: '#94a3b8', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#cbd5e1' }}>{m.tanggal}</td>
+                          <td style={{ textAlign: 'center', fontWeight: 800, color: '#ffffff', border: '1px solid #334155', padding: '7px 4px' }}>{idx + 1}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff' }}>{m.tanggal}</td>
                           <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#f87171', fontWeight: 800 }}>
                             <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444' }}>
                               {m.dariProyek}
@@ -11353,8 +11229,8 @@ export const TeknikModule = () => {
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#c084fc', fontWeight: 900 }}>{m.kode}</td>
                           <td style={{ border: '1px solid #334155', padding: '7px 10px', color: '#ffffff', fontWeight: 800 }}>{m.namaBarang}</td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#60a5fa', fontWeight: 900, fontSize: '0.92rem' }}>{m.qty}</td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
-                          <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#cbd5e1' }}>{m.keterangan || '-'}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 6px', color: '#ffffff', whiteSpace: 'nowrap' }}>{normalizeSatuan(m.satuan)}</td>
+                          <td style={{ border: '1px solid #334155', padding: '7px 8px', color: '#ffffff' }}>{m.keterangan || '-'}</td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '7px 4px' }}>
                             <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                               <button
@@ -11470,16 +11346,16 @@ export const TeknikModule = () => {
               </div>
 
               {/* Table Vendor */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #065f46' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '760px' }}>
                   <thead>
-                    <tr style={{ background: '#10b981', color: '#ffffff' }}>
-                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '220px', border: '1px solid #059669', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Vendor / Perusahaan</th>
-                      <th style={{ width: '160px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
-                      <th style={{ width: '180px', border: '1px solid #059669', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP / NIK</th>
-                      <th style={{ width: '150px', textAlign: 'center', border: '1px solid #059669', padding: '9px 8px', fontWeight: 900, fontSize: '0.86rem' }}>Status</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #059669', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                      <th style={{ width: '60px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '220px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Vendor / Perusahaan</th>
+                      <th style={{ width: '160px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
+                      <th style={{ width: '180px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. KTP / NIK</th>
+                      <th style={{ width: '150px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900, fontSize: '0.86rem' }}>Status</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -11487,7 +11363,7 @@ export const TeknikModule = () => {
                       .filter(r => !searchDbVendor || [r.nama, r.noHp, r.noKtp, r.status].some(v => (v || '').toLowerCase().includes(searchDbVendor.toLowerCase().trim())))
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#ffffff' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
@@ -11501,7 +11377,7 @@ export const TeknikModule = () => {
                               <Phone size={13} /> {row.noHp || '-'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1', letterSpacing: '0.5px' }}>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.5px' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <CreditCard size={13} color="#94a3b8" /> {row.noKtp || '-'}
                             </span>
@@ -11558,7 +11434,7 @@ export const TeknikModule = () => {
           {/* 2. TABEL DATA BASE TENAGA KERJA (Nama | No. HP | Status | Upah)       */}
           {/* --------------------------------------------------------------------- */}
           {subTabDatabase === 'tenaga_kerja' && (
-            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '2px solid #0284c7', marginBottom: '1.5rem' }}>
+            <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #034efc', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -11589,10 +11465,10 @@ export const TeknikModule = () => {
               </div>
 
               {/* Table Worker */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #0369a1' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '760px' }}>
                   <thead>
-                    <tr style={{ background: '#0284c7', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '60px', textAlign: 'center', border: '1px solid #0369a1', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
                       <th style={{ minWidth: '220px', border: '1px solid #0369a1', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Tenaga Kerja</th>
                       <th style={{ width: '160px', border: '1px solid #0369a1', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP / WhatsApp</th>
@@ -11604,7 +11480,7 @@ export const TeknikModule = () => {
                   <tbody>
                     {databasePekerjaRows.map((row, idx) => (
                       <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                        <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#ffffff' }}>{idx + 1}</td>
                         <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
@@ -11709,20 +11585,20 @@ export const TeknikModule = () => {
               </div>
 
               {/* Table Karyawan */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #6d28d9' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
-                    <tr style={{ background: '#8b5cf6', color: '#ffffff' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
-                      <th style={{ minWidth: '200px', border: '1px solid #6d28d9', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Karyawan</th>
-                      <th style={{ width: '140px', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
-                      <th style={{ width: '160px', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NIK</th>
-                      <th style={{ width: '170px', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>T / T / L</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
-                      <th style={{ width: '150px', border: '1px solid #6d28d9', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Divisi & Jabatan</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Status</th>
-                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>KTP / NIK</th>
-                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #6d28d9', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
+                      <th style={{ minWidth: '200px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Karyawan</th>
+                      <th style={{ width: '140px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>No. HP</th>
+                      <th style={{ width: '160px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>NIK</th>
+                      <th style={{ width: '170px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>T / T / L</th>
+                      <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Alamat</th>
+                      <th style={{ width: '150px', border: '1px solid #1d4ed8', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem' }}>Divisi & Jabatan</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Status</th>
+                      <th style={{ width: '120px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>KTP / NIK</th>
+                      <th style={{ width: '110px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -11730,7 +11606,7 @@ export const TeknikModule = () => {
                       .filter(r => !searchDbKaryawan || [r.nama, r.noHp, r.nik, r.jabatan, r.alamat].some(v => (v || '').toLowerCase().includes(searchDbKaryawan.toLowerCase().trim())))
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#ffffff' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#8b5cf6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900 }}>
@@ -11740,9 +11616,9 @@ export const TeknikModule = () => {
                             </div>
                           </td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>{row.noHp || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.nik || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#cbd5e1' }}>{row.ttl || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#94a3b8' }}>{row.alamat || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#ffffff' }}>{row.nik || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#ffffff' }}>{row.ttl || '-'}</td>
+                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.82rem', color: '#ffffff' }}>{row.alamat || '-'}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 10px' }}>
                             <div style={{ fontWeight: 900, color: '#c084fc', fontSize: '0.84rem' }}>{row.jabatan || '-'}</div>
                             <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{row.divisi || 'Teknik'}</div>
@@ -11861,10 +11737,10 @@ export const TeknikModule = () => {
               </div>
 
               {/* Table Unit */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #1d4ed8' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '700px' }}>
                   <thead>
-                    <tr style={{ background: '#3b82f6', color: '#ffffff' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                       <th style={{ width: '60px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem' }}>No.</th>
                       <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem' }}>Nama Proyek</th>
                       <th style={{ width: '100px', textAlign: 'center', border: '1px solid #1d4ed8', padding: '9px 8px', fontWeight: 900, fontSize: '0.86rem' }}>Blok</th>
@@ -11880,7 +11756,7 @@ export const TeknikModule = () => {
                       .filter(r => !searchDbUnit || [r.proyek, r.blok, r.nomor, r.type].some(v => (v || '').toLowerCase().includes(searchDbUnit.toLowerCase().trim())))
                       .map((row, idx) => (
                         <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#ffffff' }}>{idx + 1}</td>
                           <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: row.proyek.includes('Park') ? '#34d399' : '#fbbf24' }}>
                             {row.proyek}
                           </td>
@@ -11893,10 +11769,10 @@ export const TeknikModule = () => {
                           <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#ffffff' }}>
                             {row.type}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#cbd5e1' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
                             {row.lb} m²
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#cbd5e1' }}>
+                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 8px', fontWeight: 800, color: '#ffffff' }}>
                             {row.lt} m²
                           </td>
                           <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
@@ -12145,10 +12021,10 @@ export const TeknikModule = () => {
             </div>
 
             {/* Table */}
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #1e293b', background: '#0a0f1d' }}>
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc', background: '#0a0f1d' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
                 <thead>
-                  <tr style={{ background: '#0f172a', borderBottom: '2px solid #334155', color: '#94a3b8', textTransform: 'uppercase', fontSize: '0.74rem', letterSpacing: '0.05em' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', borderBottom: '2px solid #1d4ed8', color: '#ffffff', textTransform: 'uppercase', fontSize: '0.74rem', letterSpacing: '0.05em' }}>
                     <th style={{ padding: '12px 14px', width: '45px', textAlign: 'center' }}>No.</th>
                     <th style={{ padding: '12px 14px' }}>Proyek</th>
                     <th style={{ padding: '12px 14px' }}>Type</th>
@@ -12162,7 +12038,7 @@ export const TeknikModule = () => {
                 <tbody>
                   {filteredUploadFotoRows.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                      <td colSpan={8} style={{ padding: '40px 20px', textAlign: 'center', color: '#ffffff' }}>
                         <Camera size={42} style={{ margin: '0 auto 12px auto', opacity: 0.4, display: 'block' }} />
                         <div style={{ fontWeight: 800, fontSize: '0.96rem', color: '#cbd5e1' }}>Belum ada data dokumentasi foto unit</div>
                         <p style={{ margin: '6px 0 16px 0', fontSize: '0.82rem' }}>Silakan tambahkan data dokumentasi unit baru dari database yang tersedia.</p>
@@ -12195,7 +12071,7 @@ export const TeknikModule = () => {
                           onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)'}
                         >
                           {/* No. */}
-                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#64748b' }}>
+                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>
                             {idx + 1}
                           </td>
 
@@ -12273,7 +12149,7 @@ export const TeknikModule = () => {
                                     height: '66px',
                                     borderRadius: '8px',
                                     overflow: 'hidden',
-                                    border: '2px solid #0284c7',
+                                    border: '1.5px solid #034efc',
                                     cursor: 'pointer',
                                     flexShrink: 0,
                                     position: 'relative',
@@ -12524,7 +12400,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isMasterWorkerModalOpen && (
         <div className="modal-backdrop" style={{ zIndex: 1100 }}>
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <HardHat size={22} color="#38bdf8" /> 
@@ -12667,7 +12543,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isAbsenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff' }}>
+          <div className="modal-content" style={{ maxWidth: '640px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
                 <HardHat size={22} color="#0284c7" /> 
@@ -13167,45 +13043,45 @@ export const TeknikModule = () => {
 
                   {/* DAFTAR ITEM PEKERJAAN & INPUT PROGRES REALISASI (HANYA INI YANG BISA DIUBAH) */}
                   {/* FULL SPREADSHEET TABLE GRID (PERSIS TABEL INPUT EDIT RAB) */}
-                  <div style={{ overflowX: 'auto', borderRadius: '6px', border: '2px solid #78350f', marginBottom: '0.85rem' }}>
+                  <div style={{ overflowX: 'auto', borderRadius: '6px', border: '1.5px solid #034efc', marginBottom: '0.85rem' }}>
                     <table style={{ width: '100%', minWidth: '1020px', borderCollapse: 'collapse', fontSize: '0.82rem', background: '#0f172a' }}>
                       <thead>
                         {/* HEADER ROW (PEACH #f6b26b WITH DEEP BLACK TEXT PERSIS FOTO) */}
-                        <tr style={{ background: '#f6b26b', color: '#000000' }}>
-                          <th style={{ width: '40px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '40px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
                             No.
                           </th>
-                          <th style={{ minWidth: '180px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ minWidth: '180px', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
                             Item Pekerjaan
                           </th>
-                          <th style={{ minWidth: '130px', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
+                          <th style={{ minWidth: '130px', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 8px' }}>
                             Spesifikasi
                           </th>
-                          <th style={{ width: '60px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
+                          <th style={{ width: '60px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Vol
                           </th>
-                          <th style={{ width: '50px', textAlign: 'center', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
+                          <th style={{ width: '50px', textAlign: 'center', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 4px' }}>
                             Sat
                           </th>
-                          <th style={{ width: '110px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
+                          <th style={{ width: '110px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Harga Satuan
                           </th>
-                          <th style={{ width: '115px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
+                          <th style={{ width: '115px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Jumlah
                           </th>
-                          <th style={{ width: '60px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
+                          <th style={{ width: '60px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Bobot
                           </th>
-                          <th style={{ width: '85px', textAlign: 'center', background: '#e2e8f0', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#0f172a', padding: '8px 4px' }}>
+                          <th style={{ width: '85px', textAlign: 'center', background: '#e2e8f0', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.82rem', color: '#0f172a', padding: '8px 4px' }}>
                             Progres Lalu
                           </th>
-                          <th style={{ width: '105px', textAlign: 'center', background: '#34d399', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
+                          <th style={{ width: '105px', textAlign: 'center', background: '#34d399', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
                             ➕ Tambah (%)
                           </th>
-                          <th style={{ width: '100px', textAlign: 'center', background: '#38bdf8', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
+                          <th style={{ width: '100px', textAlign: 'center', background: '#38bdf8', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.82rem', color: '#000000', padding: '8px 4px' }}>
                             Total Progres
                           </th>
-                          <th style={{ width: '105px', textAlign: 'right', border: '1.5px solid #78350f', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
+                          <th style={{ width: '105px', textAlign: 'right', border: '1px solid #1d4ed8', fontWeight: 900, fontSize: '0.84rem', color: '#000000', padding: '8px 6px' }}>
                             Bobot Progress
                           </th>
                         </tr>
@@ -13220,7 +13096,7 @@ export const TeknikModule = () => {
                           return (
                             <tr key={it.id || iIdx} style={{ backgroundColor: iIdx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#f8fafc' }}>
                               {/* 1. No */}
-                              <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#94a3b8', padding: '6px 4px' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 900, border: '1px solid #334155', color: '#ffffff', padding: '6px 4px' }}>
                                 {iIdx + 1}
                               </td>
 
@@ -13230,7 +13106,7 @@ export const TeknikModule = () => {
                               </td>
 
                               {/* 3. Spesifikasi (Terkunci) */}
-                              <td style={{ border: '1px solid #334155', padding: '6px 8px', color: '#cbd5e1', fontSize: '0.82rem' }}>
+                              <td style={{ border: '1px solid #334155', padding: '6px 8px', color: '#ffffff', fontSize: '0.82rem' }}>
                                 {it.spesifikasi || '-'}
                               </td>
 
@@ -13357,25 +13233,25 @@ export const TeknikModule = () => {
 
                         {/* SUMMARY ROW TOTAL */}
                         <tr style={{ background: '#f6b26b', color: '#000000', fontWeight: 900 }}>
-                          <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td colSpan={6} style={{ textAlign: 'left', padding: '9px 12px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                             Total
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                             {formatRupiahDesimal(liveCalc.totalHargaRab)}
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                             {liveCalc.totalHargaRab > 0 ? '1,00' : '0,00'}
                           </td>
-                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.82rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1px solid #1d4ed8', fontSize: '0.82rem', color: '#ffffff' }}>
                             {formatDecimal(targetSummary.progresPersen)}%
                           </td>
-                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.82rem', color: '#065f46' }}>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1px solid #1d4ed8', fontSize: '0.82rem', color: '#065f46' }}>
                             {liveCalc.progresPersen > targetSummary.progresPersen ? `+${formatDecimal(liveCalc.progresPersen - targetSummary.progresPersen)}%` : '-'}
                           </td>
-                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1.5px solid #78350f', fontSize: '0.85rem', color: '#0369a1' }}>
+                          <td style={{ textAlign: 'center', padding: '9px 4px', border: '1px solid #1d4ed8', fontSize: '0.85rem', color: '#0369a1' }}>
                             {formatDecimal(liveCalc.progresPersen)}%
                           </td>
-                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1.5px solid #78350f', fontSize: '0.92rem', color: '#000000' }}>
+                          <td style={{ textAlign: 'right', padding: '9px 6px', border: '1px solid #1d4ed8', fontSize: '0.92rem', color: '#ffffff' }}>
                             {formatDecimal(liveCalc.progresPersen)}%
                           </td>
                         </tr>
@@ -13839,10 +13715,10 @@ export const TeknikModule = () => {
                     </span>
                   </div>
 
-                  <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                       <thead>
-                        <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                           <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>No.</th>
                           <th style={{ padding: '9px 10px', textAlign: 'center', width: '110px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📅 Tanggal Bayar</th>
                           <th style={{ padding: '9px 12px', textAlign: 'right', width: '165px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>💰 Bayar Berapa (Nominal)</th>
@@ -13854,15 +13730,15 @@ export const TeknikModule = () => {
                       <tbody>
                         {historyList.length === 0 && (
                           <tr style={{ background: '#0f172a', height: '44px' }}>
-                            <td colSpan={6} style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem', padding: '12px' }}>
+                            <td colSpan={6} style={{ textAlign: 'center', color: '#ffffff', fontSize: '0.82rem', padding: '12px' }}>
                               Belum ada catatan riwayat pembayaran untuk pekerjaan ini.
                             </td>
                           </tr>
                         )}
                         {historyList.map((hist, hIdx) => (
                             <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
-                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
-                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
+                              <td style={{ padding: '8px 8px', textAlign: 'center', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                                 <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatTanggalIndo(hist.tanggal)}</div>
                                 {formatTanggalLengkap(hist.tanggal) && (
                                   <div style={{ fontSize: '0.7rem', color: '#38bdf8', marginTop: '1px' }}>
@@ -13922,7 +13798,7 @@ export const TeknikModule = () => {
                                 <span>{formatRupiahDesimal(totalBayar)}</span>
                               </div>
                             </td>
-                            <td colSpan={3} style={{ padding: '10px 10px', color: '#94a3b8', fontSize: '0.78rem', verticalAlign: 'middle' }}>
+                            <td colSpan={3} style={{ padding: '10px 10px', color: '#ffffff', fontSize: '0.78rem', verticalAlign: 'middle' }}>
                               {historyList.length}x transaksi pembayaran dicatat untuk pekerjaan ini
                             </td>
                           </tr>
@@ -14303,10 +14179,10 @@ export const TeknikModule = () => {
                     </span>
                   </div>
 
-                  <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                       <thead>
-                        <tr style={{ background: '#1e293b', color: '#cbd5e1' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
                           <th style={{ padding: '9px 10px', textAlign: 'center', width: '40px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>No.</th>
                           <th style={{ padding: '9px 10px', textAlign: 'center', width: '110px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>📅 Tanggal Bayar</th>
                           <th style={{ padding: '9px 12px', textAlign: 'right', width: '165px', borderBottom: '1px solid #334155', verticalAlign: 'middle' }}>💰 Bayar Berapa (Nominal)</th>
@@ -14318,15 +14194,15 @@ export const TeknikModule = () => {
                       <tbody>
                         {historyList.length === 0 && (
                           <tr style={{ background: '#0f172a', height: '44px' }}>
-                            <td colSpan={6} style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem', padding: '12px' }}>
+                            <td colSpan={6} style={{ textAlign: 'center', color: '#ffffff', fontSize: '0.82rem', padding: '12px' }}>
                               Belum ada catatan riwayat pembayaran untuk dokumen faktur ini.
                             </td>
                           </tr>
                         )}
                         {historyList.map((hist, hIdx) => (
                           <tr key={hist.id || hIdx} style={{ background: hIdx % 2 === 0 ? '#0f172a' : '#1e293b', borderBottom: '1px solid #334155' }}>
-                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#94a3b8', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
-                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#cbd5e1', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle' }}>{hIdx + 1}</td>
+                            <td style={{ padding: '8px 8px', textAlign: 'center', color: '#ffffff', fontWeight: 800, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                               <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatTanggalIndo(hist.tanggal)}</div>
                               {formatTanggalLengkap(hist.tanggal) && (
                                 <div style={{ fontSize: '0.7rem', color: '#c084fc', marginTop: '1px' }}>
@@ -14386,7 +14262,7 @@ export const TeknikModule = () => {
                               <span>{formatRupiahDesimal(totalBayar)}</span>
                             </div>
                           </td>
-                          <td colSpan={3} style={{ padding: '10px 10px', color: '#94a3b8', fontSize: '0.78rem', verticalAlign: 'middle' }}>
+                          <td colSpan={3} style={{ padding: '10px 10px', color: '#ffffff', fontSize: '0.78rem', verticalAlign: 'middle' }}>
                             {historyList.length}x transaksi pembayaran dicatat untuk faktur ini
                           </td>
                         </tr>
@@ -14922,7 +14798,7 @@ export const TeknikModule = () => {
                       placeholder="Jumlah yang dipindahkan..."
                       value={mutasiFormData.qty}
                       onChange={(e) => setMutasiFormData({ ...mutasiFormData, qty: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #2563eb', borderRadius: '6px', color: '#60a5fa', fontWeight: 900, padding: '5px 10px', fontSize: '0.9rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #034efc', borderRadius: '6px', color: '#60a5fa', fontWeight: 900, padding: '5px 10px', fontSize: '0.9rem' }}
                     />
 
                     {/* Satuan */}
@@ -15127,7 +15003,7 @@ export const TeknikModule = () => {
       {/* ========================================================================= */}
       {isBarangMasukModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '2px solid #0284c7', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
+          <div className="modal-content" style={{ maxWidth: '780px', width: '95%', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px', boxSizing: 'border-box' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155', padding: '1rem 1.25rem' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900, margin: 0 }}>
                 <ArrowDownLeft size={20} color="#38bdf8" />
@@ -16695,7 +16571,7 @@ export const TeknikModule = () => {
 
             <div className="modal-body" style={{ padding: '1.25rem' }}>
               {/* Unit Info Card */}
-              <div style={{ background: '#064e3b', border: '1px solid #059669', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem' }}>
+              <div style={{ background: '#064e3b', border: '1px solid #1d4ed8', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ecfdf5' }}>
                     {targetWaItem.proyek} - Blok {targetWaItem.blok} No. {targetWaItem.no}
@@ -16725,7 +16601,7 @@ export const TeknikModule = () => {
                       width: '100%',
                       height: '40px',
                       background: '#022c22',
-                      border: '1.5px solid #059669',
+                      border: '1.5px solid #034efc',
                       borderRadius: '6px',
                       color: '#ecfdf5',
                       fontWeight: 800,
@@ -16753,7 +16629,7 @@ export const TeknikModule = () => {
                   style={{
                     width: '100%',
                     background: '#022c22',
-                    border: '1.5px solid #059669',
+                    border: '1.5px solid #034efc',
                     borderRadius: '6px',
                     color: '#f0fdf4',
                     fontSize: '0.84rem',

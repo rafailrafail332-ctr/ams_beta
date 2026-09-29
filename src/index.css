@@ -676,6 +676,50 @@ body {
 }
 
 /* ========================================================================= */
+/* TEKNIK MODULE CUSTOM BLUE #034efc THEME & WHITE TABLE TEXT               */
+/* ========================================================================= */
+.teknik-module-wrapper .table-container,
+.teknik-module-wrapper .table-responsive,
+.teknik-module-wrapper div[style*="overflowX: 'auto'"],
+.teknik-module-wrapper div[style*="overflow-x: auto"] {
+  border: 1.5px solid #034efc !important;
+  box-shadow: 0 4px 18px rgba(3, 78, 252, 0.2) !important;
+}
+
+.teknik-module-wrapper table thead tr {
+  background: linear-gradient(135deg, #034efc 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+}
+
+.teknik-module-wrapper table thead th {
+  background: transparent !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+
+.teknik-module-wrapper table thead th * {
+  color: #ffffff !important;
+}
+
+.teknik-module-wrapper table tbody tr {
+  color: #ffffff !important;
+}
+
+.teknik-module-wrapper table tbody td {
+  color: #ffffff !important;
+}
+
+.teknik-module-wrapper table tbody td div:not([style*="background"]):not([class*="badge"]),
+.teknik-module-wrapper table tbody td span:not([style*="background"]):not([class*="badge"]),
+.teknik-module-wrapper table tbody td p {
+  color: #ffffff !important;
+}
+
+.teknik-module-wrapper table tbody tr:hover {
+  background: rgba(3, 78, 252, 0.12) !important;
+}
+
+/* ========================================================================= */
 /* ENTERPRISE PRINT & CETAK SHEET STYLES (CLEAN WHITE A4 / LETTER)           */
 /* ========================================================================= */
 @media print {
