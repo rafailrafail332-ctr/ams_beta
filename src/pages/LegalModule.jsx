@@ -3098,8 +3098,8 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
     { id: 'shgb', label: 'SHGB', icon: FileText },
     { id: 'imb', label: 'IMB / PBG', icon: Building2 },
     { id: 'pbb', label: 'SPPT - PBB', icon: Receipt },
-    { id: 'surat', label: 'Surat Masuk & Keluar', icon: Mail },
-    { id: 'stk', label: 'STK (Serah Terima Kunci)', icon: KeyRound }
+    { id: 'surat', label: 'Surat', icon: Mail },
+    { id: 'stk', label: 'STK', icon: KeyRound }
   ];
 
   return (
@@ -6008,7 +6008,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
               </div>
               <div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                  11. STK (Surat Serah Terima Kunci)
+                  STK (Surat Serah Terima Kunci)
                 </h3>
                 <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
                   Register Berita Acara Serah Terima Kunci (BAST), Administrasi Kunci Unit & Berkas Legal Konsumen
