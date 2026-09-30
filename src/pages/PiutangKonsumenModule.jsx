@@ -2243,7 +2243,7 @@ export const PiutangKonsumenModule = () => {
         style={{
           padding: 0,
           background: '#0f172a',
-          border: '1.5px solid #0284c7',
+          border: '1.5px solid #03f4fc',
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 8px 30px rgba(0,0,0,0.4)'
@@ -2259,64 +2259,65 @@ export const PiutangKonsumenModule = () => {
               textAlign: 'left'
             }}
           >
-            {/* MARKETING TURQUOISE HEADER ROW */}
+            {/* MARKETING CYAN #03f4fc HEADER ROW */}
             <thead>
               <tr
                 style={{
-                  background: 'linear-gradient(135deg, #47c9af, #168a74)',
-                  color: '#ffffff',
+                  background: '#03f4fc',
+                  color: '#0a1128',
                   textAlign: 'center',
                   fontWeight: 900,
-                  borderBottom: '2px solid #0f766e'
+                  borderBottom: '2px solid #02c2ca'
                 }}
               >
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '35px' }}>No.</th>
-                <th style={{ padding: '11px 12px', border: '1px solid #0369a1', minWidth: '160px', textAlign: 'left' }}>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '35px', color: '#0a1128', fontWeight: 900 }}>No.</th>
+                <th style={{ padding: '11px 12px', border: '1px solid #02c2ca', minWidth: '160px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>
                   Nama Konsumen
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #0369a1', minWidth: '105px' }}>Proyek</th>
-                <th style={{ padding: '11px 8px', border: '1px solid #0369a1', minWidth: '85px' }}>Type</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '50px' }}>Blok</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '45px' }}>No.</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '45px' }}>LB</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '45px' }}>LT</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #0369a1', minWidth: '45px' }}>LT+</th>
-                <th style={{ padding: '11px 8px', border: '1px solid #0369a1', minWidth: '85px' }}>Total LB/LT</th>
-                <th style={{ padding: '11px 10px', border: '1px solid #0369a1', minWidth: '105px', textAlign: 'right' }}>
+                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '105px', color: '#0a1128', fontWeight: 900 }}>Proyek</th>
+                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '85px', color: '#0a1128', fontWeight: 900 }}>Type</th>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '50px', color: '#0a1128', fontWeight: 900 }}>Blok</th>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>No.</th>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LB</th>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LT</th>
+                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LT+</th>
+                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '85px', color: '#0a1128', fontWeight: 900 }}>Total LB/LT</th>
+                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '105px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
                   Harga Jual
                 </th>
-                <th style={{ padding: '11px 8px', border: '1px solid #0369a1', minWidth: '75px', textAlign: 'right' }}>
+                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '75px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
                   Disc
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #0369a1', minWidth: '110px', textAlign: 'right' }}>
+                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '110px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
                   Harga Jual Net
                 </th>
-                <th style={{ padding: '11px 9px', border: '1px solid #0369a1', minWidth: '85px', textAlign: 'right' }}>
+                <th style={{ padding: '11px 9px', border: '1px solid #02c2ca', minWidth: '85px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
                   Booking
                 </th>
                 <th
                   style={{
                     padding: '11px 9px',
-                    border: '1px solid #0369a1',
+                    border: '1px solid #02c2ca',
                     minWidth: '95px',
                     textAlign: 'right',
-                    background: '#ca8a04'
+                    color: '#0a1128',
+                    fontWeight: 900
                   }}
                   title="Total DP yang telah dibayar oleh konsumen"
                 >
                   Dp
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #0369a1', minWidth: '110px', textAlign: 'right' }}>
+                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '110px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
                   Sisa Pembayaran
                 </th>
-                {/* RENAMED FROM 'Pembayaran' TO 'Angsuran' PER USER EXPLICIT REQUEST */}
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #0369a1',
+                    border: '1px solid #02c2ca',
                     minWidth: '100px',
                     textAlign: 'right',
-                    background: '#9333ea'
+                    color: '#0a1128',
+                    fontWeight: 900
                   }}
                   title="Total Angsuran yang telah dibayar oleh konsumen"
                 >
@@ -2325,10 +2326,11 @@ export const PiutangKonsumenModule = () => {
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #0369a1',
+                    border: '1px solid #02c2ca',
                     minWidth: '110px',
                     textAlign: 'right',
-                    background: '#0369a1'
+                    color: '#0a1128',
+                    fontWeight: 900
                   }}
                   title="Sisa saldo hutang / piutang konsumen yang belum dibayar"
                 >
@@ -2337,10 +2339,11 @@ export const PiutangKonsumenModule = () => {
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #0369a1',
+                    border: '1px solid #02c2ca',
                     minWidth: '200px',
                     textAlign: 'center',
-                    background: '#047857'
+                    color: '#0a1128',
+                    fontWeight: 900
                   }}
                 >
                   Aksi
@@ -3027,12 +3030,12 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr>
-                          <th style={{ width: '40px', textAlign: 'center' }}>No</th>
-                          <th style={{ width: '120px' }}>Tanggal</th>
-                          <th style={{ width: '150px', textAlign: 'right' }}>Jumlah (Rp)</th>
-                          <th>Keterangan</th>
-                          <th style={{ width: '150px', textAlign: 'center' }}>Aksi</th>
+                        <tr style={{ background: '#03f4fc', color: '#0a1128' }}>
+                          <th style={{ width: '40px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>No</th>
+                          <th style={{ width: '120px', color: '#0a1128', fontWeight: 900 }}>Tanggal</th>
+                          <th style={{ width: '150px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Jumlah (Rp)</th>
+                          <th style={{ color: '#0a1128', fontWeight: 900 }}>Keterangan</th>
+                          <th style={{ width: '150px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3365,12 +3368,12 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr>
-                          <th style={{ width: '40px', textAlign: 'center' }}>No</th>
-                          <th style={{ width: '120px' }}>Tanggal</th>
-                          <th style={{ width: '150px', textAlign: 'right' }}>Jumlah (Rp)</th>
-                          <th>Keterangan</th>
-                          <th style={{ width: '150px', textAlign: 'center' }}>Aksi</th>
+                        <tr style={{ background: '#03f4fc', color: '#0a1128' }}>
+                          <th style={{ width: '40px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>No</th>
+                          <th style={{ width: '120px', color: '#0a1128', fontWeight: 900 }}>Tanggal</th>
+                          <th style={{ width: '150px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Jumlah (Rp)</th>
+                          <th style={{ color: '#0a1128', fontWeight: 900 }}>Keterangan</th>
+                          <th style={{ width: '150px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>

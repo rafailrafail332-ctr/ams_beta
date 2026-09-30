@@ -1172,7 +1172,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         className="glass-card"
         style={{
           background: '#0f172a',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          border: '1.5px solid #03f4fc',
           borderRadius: '12px',
           padding: '1.25rem'
         }}
@@ -1180,7 +1180,7 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.2rem', paddingBottom: '1rem', borderBottom: '1px solid #1e293b' }}>
           <div>
             <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Building2 size={18} color="#34d399" />
+              <Building2 size={18} color="#03f4fc" />
               Daftar Konsumen Closing ({filteredSales.length} Transaksi)
             </h3>
             <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '3px' }}>
@@ -1300,17 +1300,17 @@ export const MarketingGrafikModule = ({ salesList = [], databaseKonsumenRows = [
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table" style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#1e293b', color: '#f8fafc', borderBottom: '2px solid #334155' }}>
-                <th style={{ padding: '9px 12px', textAlign: 'center', width: '35px' }}>No</th>
-                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Nama Pembeli Closing</th>
-                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Proyek</th>
-                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Unit</th>
-                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Tipe Rumah</th>
-                <th style={{ padding: '9px 12px', textAlign: 'right' }}>Harga Net Closing</th>
-                <th style={{ padding: '9px 12px', textAlign: 'right' }}>Uang Masuk DP+UTJ</th>
-                <th style={{ padding: '9px 12px', textAlign: 'left' }}>Marketing</th>
-                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Tanggal Closing</th>
-                <th style={{ padding: '9px 12px', textAlign: 'center' }}>Status</th>
+              <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
+                <th style={{ padding: '9px 12px', textAlign: 'center', width: '35px', color: '#0a1128', fontWeight: 900 }}>No</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>Nama Pembeli Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>Proyek</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Unit</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>Tipe Rumah</th>
+                <th style={{ padding: '9px 12px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Harga Net Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Uang Masuk DP+UTJ</th>
+                <th style={{ padding: '9px 12px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>Marketing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Tanggal Closing</th>
+                <th style={{ padding: '9px 12px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Status</th>
               </tr>
             </thead>
             <tbody>
