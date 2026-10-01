@@ -53,8 +53,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState(() => {
     if (activeSubTab && [
-      'database-karyawan', 'recruitment', 'kontrak-kerja', 'fasilitas',
-      'absensi', 'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan'
+      'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
+      'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan', 'fasilitas', 'cctv'
     ].includes(activeSubTab)) {
       return activeSubTab;
     }
@@ -63,8 +63,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   useEffect(() => {
     if (activeSubTab && [
-      'database-karyawan', 'recruitment', 'kontrak-kerja', 'fasilitas',
-      'absensi', 'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan'
+      'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
+      'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan', 'fasilitas', 'cctv'
     ].includes(activeSubTab)) {
       setActiveTab(activeSubTab);
     }
@@ -108,6 +108,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Ahmad Rafail',
       nik: '3201011508900001',
       npwp: '09.123.456.7-432.000',
+      noRekening: 'BCA 8830192819 a.n Ahmad Rafail',
       alamat: 'Jl. Raya Pemda No. 12, Cibinong, Bogor',
       noHp: '0812-9988-7711',
       phone: '0812-9988-7711',
@@ -139,6 +140,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Yazid Hizbullah, S.E.,S.T',
       nik: '3201021204880002',
       npwp: '08.234.567.8-431.000',
+      noRekening: 'Mandiri 133001829102 a.n Yazid Hizbullah',
       alamat: 'Komplek Permata Indah Blok B3, Bogor',
       noHp: '0813-1122-3344',
       phone: '0813-1122-3344',
@@ -170,6 +172,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Adhi Himawan, S.E.Sy',
       nik: '3201031907890003',
       npwp: '07.345.678.9-432.000',
+      noRekening: 'BSI 7129384729 a.n Adhi Himawan',
       alamat: 'Perum Gria Indah 2 Blok D5, Depok',
       noHp: '0815-5566-7788',
       phone: '0815-5566-7788',
@@ -200,6 +203,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Dodi Syaiful Nugroho',
       nik: '3201042409920004',
       npwp: '06.456.789.0-433.000',
+      noRekening: 'BCA 6040192837 a.n Dodi Syaiful Nugroho',
       alamat: 'Jl. Raya Sentul KM 5, Babakan Madang, Bogor',
       noHp: '0817-2233-4455',
       phone: '0817-2233-4455',
@@ -230,6 +234,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Wahyu Salma Septiani, S.H',
       nik: '3201055503950005',
       npwp: '05.567.890.1-434.000',
+      noRekening: 'BCA 7710294821 a.n Wahyu Salma Septiani',
       alamat: 'Jl. Margonda Raya No. 102, Depok',
       noHp: '0812-7788-9900',
       phone: '0812-7788-9900',
@@ -260,6 +265,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Yulieka Rachmawati, S.Si',
       nik: '3201064807940006',
       npwp: '04.678.901.2-435.000',
+      noRekening: 'Mandiri 133002918291 a.n Yulieka Rachmawati',
       alamat: 'Cluster Cendana Blok C No. 7, Cibinong, Bogor',
       noHp: '0813-8899-0011',
       phone: '0813-8899-0011',
@@ -289,6 +295,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Amanda Chesyariani Hermawan',
       nik: '3201076211970007',
       npwp: '03.789.012.3-436.000',
+      noRekening: 'BCA 8840192839 a.n Amanda Chesyariani',
       alamat: 'Jl. Padjajaran No. 44, Bogor',
       noHp: '0818-4455-6677',
       phone: '0818-4455-6677',
@@ -319,6 +326,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Tarkum Aditya',
       nik: '3201081109960008',
       npwp: '02.890.123.4-437.000',
+      noRekening: 'Mandiri 133009182736 a.n Tarkum Aditya',
       alamat: 'Jl. Pajajaran Indah No. 15, Bogor',
       noHp: '0819-3322-1100',
       phone: '0819-3322-1100',
@@ -348,6 +356,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Hapip Alamsyah',
       nik: '3201091506910009',
       npwp: '01.901.234.5-438.000',
+      noRekening: 'BCA 8820194819 a.n Hapip Alamsyah',
       alamat: 'Kp. Muara RT 02/05, Bojonggede, Bogor',
       noHp: '0813-7766-5544',
       phone: '0813-7766-5544',
@@ -378,6 +387,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       nama: 'Hartono (Danru)',
       nik: '3201100508890010',
       npwp: '00.912.345.6-439.000',
+      noRekening: 'BRI 029101829471 a.n Hartono',
       alamat: 'Jl. Raya Cikaret No. 8, Cibinong, Bogor',
       noHp: '0857-1122-3399',
       phone: '0857-1122-3399',
@@ -406,11 +416,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   const [employees, setEmployees] = useState(() => {
     try {
-      const savedV4 = localStorage.getItem('ams_hr_database_karyawan_v4');
-      if (savedV4) return JSON.parse(savedV4);
-      const savedV3 = localStorage.getItem('ams_hr_database_karyawan_v3');
-      if (savedV3) {
-        const parsed = JSON.parse(savedV3);
+      const savedV5 = localStorage.getItem('ams_hr_database_karyawan_v5');
+      if (savedV5) return JSON.parse(savedV5);
+      const savedV4 = localStorage.getItem('ams_hr_database_karyawan_v4') || localStorage.getItem('ams_hr_database_karyawan_v3');
+      if (savedV4) {
+        const parsed = JSON.parse(savedV4);
         return parsed.map((item, idx) => {
           const match = initialEmployees.find(ie => ie.id === item.id) || initialEmployees[idx] || {};
           return {
@@ -418,6 +428,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             ...item,
             nik: item.nik || match.nik || `320101${String(idx + 1).padStart(10, '0')}`,
             npwp: item.npwp || match.npwp || '00.000.000.0-000.000',
+            noRekening: item.noRekening || match.noRekening || 'BCA 0000000000',
             alamat: item.alamat || match.alamat || 'Bogor, Jawa Barat',
             noHp: item.noHp || item.phone || match.noHp || '0812-0000-0000',
             phone: item.phone || item.noHp || match.phone || '0812-0000-0000',
@@ -436,7 +447,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_hr_database_karyawan_v4', JSON.stringify(employees));
+      localStorage.setItem('ams_hr_database_karyawan_v5', JSON.stringify(employees));
     } catch {}
   }, [employees]);
 
@@ -986,6 +997,59 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   }, [securityOps]);
 
   // =============================================================
+  // 10. CCTV MONITORING & KEAMANAN STORE
+  // =============================================================
+  const initialCctvs = [
+    {
+      id: 'CCTV-001',
+      noDok: 'CCTV/AMS-SEC/2026/01',
+      tanggalDok: '2026-09-25',
+      project: 'Ashoka Park',
+      nama: 'Titik Pos Satpam & Gerbang Utama',
+      kategori: 'Kamera Gerbang & Perimeter',
+      judulDokumen: 'Kamera IP Hikvision 4MP DarkFighter - Gerbang Utama In/Out',
+      catatan: 'Aktif 24 Jam • Cloud Storage NVR 30 Hari • Fitur Plat Nomor ANPR',
+      files: [{ name: 'Log_Setup_CCTV_Gerbang_AshokaPark.pdf', size: '1.4 MB' }]
+    },
+    {
+      id: 'CCTV-002',
+      noDok: 'CCTV/AMS-SEC/2026/02',
+      tanggalDok: '2026-09-26',
+      project: 'Head Office Bizhub',
+      nama: 'Titik Lobby & Marketing Gallery',
+      kategori: 'Kamera Indoor & Kantor',
+      judulDokumen: 'Kamera Dome Audio Dual-Way - Lobby Resepsionis & Ruang Rapat',
+      catatan: 'Resolusi 2K QHD • Backup UPS 4 Jam • Live Streaming Aplikasi',
+      files: [{ name: 'Manual_NVR_Bizhub_CCTV.pdf', size: '2.1 MB' }]
+    },
+    {
+      id: 'CCTV-003',
+      noDok: 'CCTV/AMS-SEC/2026/03',
+      tanggalDok: '2026-09-27',
+      project: 'Ashoka View',
+      nama: 'Titik Gudang Material & Workshop',
+      kategori: 'Kamera Proyek & Lahan',
+      judulDokumen: 'Kamera PTZ 360 Outdoor Night Vision - Area Gudang & Batching Plant',
+      catatan: 'Infra Red 100m • Motion Detection Alarm • Sensor Gerak Malam',
+      files: [{ name: 'Denah_Titik_Kamera_AshokaView.pdf', size: '1.8 MB' }]
+    }
+  ];
+
+  const [cctvs, setCctvs] = useState(() => {
+    try {
+      const s = localStorage.getItem('ams_hr_cctv_v1');
+      if (s) return JSON.parse(s);
+    } catch {}
+    return initialCctvs;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_hr_cctv_v1', JSON.stringify(cctvs));
+    } catch {}
+  }, [cctvs]);
+
+  // =============================================================
   // COMMON SEARCH & FILTER STATES FOR EACH TAB
   // =============================================================
   const [searchTerm, setSearchTerm] = useState('');
@@ -1020,6 +1084,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     // Data Base Karyawan specific fields
     nik: '',
     npwp: '',
+    noRekening: '',
     alamat: '',
     noHp: '',
     jabatan: '',
@@ -1045,9 +1110,10 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'management-asset': return assets;
       case 'maintanance': return maintenanceTickets;
       case 'keamanan-kebersihan': return securityOps;
+      case 'cctv': return cctvs;
       default: return employees;
     }
-  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securityOps]);
+  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securityOps, cctvs]);
 
   // Filtered dataset
   const filteredDataset = useMemo(() => {
@@ -1062,6 +1128,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         (item.catatan && item.catatan.toLowerCase().includes(q)) ||
         (item.nik && item.nik.toLowerCase().includes(q)) ||
         (item.npwp && item.npwp.toLowerCase().includes(q)) ||
+        (item.noRekening && item.noRekening.toLowerCase().includes(q)) ||
         (item.jabatan && item.jabatan.toLowerCase().includes(q)) ||
         (item.penempatan && item.penempatan.toLowerCase().includes(q)) ||
         (item.status && item.status.toLowerCase().includes(q)) ||
@@ -1091,18 +1158,26 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     return ['ALL', ...cats];
   }, [currentDataset, activeTab]);
 
-  // Configuration 9 Tabs sesuai gambar user (tanpa angka/count)
-  const HR_GA_SUBTABS = [
+  // Configuration 10 Tabs sesuai 2 bagian navigasi:
+  // Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI
+  const HR_GA_SUBTABS_TOP = [
     { id: 'database-karyawan', label: 'Data Base Karyawan' },
     { id: 'recruitment', label: 'Recruitment' },
     { id: 'kontrak-kerja', label: 'Kontrak Kerja' },
-    { id: 'fasilitas', label: 'Fasilitas' },
     { id: 'absensi', label: 'Absensi' },
-    { id: 'kpi', label: 'KPI' },
+    { id: 'kpi', label: 'KPI' }
+  ];
+
+  // Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Keamanan & Kebersihan, Fasilitas, CCTV
+  const HR_GA_SUBTABS_BOTTOM = [
     { id: 'management-asset', label: 'Management Asset' },
     { id: 'maintanance', label: 'Maintanance' },
-    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' }
+    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' },
+    { id: 'fasilitas', label: 'Fasilitas' },
+    { id: 'cctv', label: 'CCTV' }
   ];
+
+  const HR_GA_SUBTABS = [...HR_GA_SUBTABS_TOP, ...HR_GA_SUBTABS_BOTTOM];
 
   // Title info per tab
   const getTabTitle = () => {
@@ -1110,13 +1185,14 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'database-karyawan': return { title: 'Data Base Karyawan', sub: 'Pencatatan data induk karyawan, NIK, jabatan, status kerja & berkas identitas resmi.' };
       case 'recruitment': return { title: 'Recruitment', sub: 'Pipeline pendaftaran pelamar, seleksi berkas, jadwal wawancara & offering letter.' };
       case 'kontrak-kerja': return { title: 'Kontrak Kerja', sub: 'Monitoring masa berlaku perjanjian kerja (PKWT/PKWTT), draf kontrak & alert perpanjangan.' };
-      case 'fasilitas': return { title: 'Fasilitas', sub: 'Inventarisasi sarana kantor pemasaran, galeri display, utilitas listrik & akomodasi pekerja.' };
       case 'absensi': return { title: 'Absensi', sub: 'Rekapitulasi presensi harian masuk dan pulang, toleransi keterlambatan & surat izin sakit/tugas.' };
       case 'kpi': return { title: 'KPI', sub: 'Rapor evaluasi capaian kinerja berkala karyawan, penilaian disiplin, target output & etika kerja.' };
       case 'management-asset': return { title: 'Management Asset', sub: 'Pencatatan aset tetap perusahaan, kode inventaris, lokasi penempatan & nilai perolehan.' };
       case 'maintanance': return { title: 'Maintanance', sub: 'Jadwal dan tiket perbaikan berkala armada dinas, AC kantor, genset & utilitas operasional.' };
       case 'keamanan-kebersihan': return { title: 'Keamanan & Kebersihan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & checklist sanitasi CS.' };
-      default: return { title: 'HR & GA', sub: 'Sistem Manajemen Human Resources & General Affair' };
+      case 'fasilitas': return { title: 'Fasilitas', sub: 'Inventarisasi sarana kantor pemasaran, galeri display, utilitas listrik & akomodasi pekerja.' };
+      case 'cctv': return { title: 'CCTV', sub: 'Monitoring titik kamera pengawas, instalasi NVR/DVR, rekaman keamanan gerbang & kawasan proyek.' };
+      default: return { title: 'Hr & Ga', sub: 'Sistem Manajemen Human Resources & General Affair' };
     }
   };
 
@@ -1127,12 +1203,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       'database-karyawan': 'AMS-EMP-2026-',
       'recruitment': 'REC/AMS-JOB/2026/',
       'kontrak-kerja': 'PKWT/AMS-HR/2026/',
-      'fasilitas': 'FAS/AMS-FAS/2026/',
       'absensi': 'ATT/AMS-PR/2026/',
       'kpi': 'KPI/AMS-Q3/2026/',
       'management-asset': 'AST-GA-2026-',
       'maintanance': 'MNT/AMS-TKT/2026/',
-      'keamanan-kebersihan': 'OPS/SEC-CLN/2026/'
+      'keamanan-kebersihan': 'OPS/SEC-CLN/2026/',
+      'fasilitas': 'FAS/AMS-FAS/2026/',
+      'cctv': 'CCTV/AMS-SEC/2026/'
     };
     const nextSeq = String(currentDataset.length + 1).padStart(2, '0');
     setFormState({
@@ -1147,6 +1224,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       // Employee specific defaults
       nik: '',
       npwp: '',
+      noRekening: '',
       alamat: '',
       noHp: '',
       jabatan: '',
@@ -1177,6 +1255,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       // Employee specific
       nik: item.nik || '',
       npwp: item.npwp || '',
+      noRekening: item.noRekening || '',
       alamat: item.alamat || '',
       noHp: item.noHp || item.phone || '',
       jabatan: item.jabatan || item.judulDokumen || '',
@@ -1199,12 +1278,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         case 'database-karyawan': setEmployees(updater); break;
         case 'recruitment': setCandidates(updater); break;
         case 'kontrak-kerja': setContracts(updater); break;
-        case 'fasilitas': setFacilities(updater); break;
         case 'absensi': setAttendances(updater); break;
         case 'kpi': setKpis(updater); break;
         case 'management-asset': setAssets(updater); break;
         case 'maintanance': setMaintenanceTickets(updater); break;
         case 'keamanan-kebersihan': setSecurityOps(updater); break;
+        case 'fasilitas': setFacilities(updater); break;
+        case 'cctv': setCctvs(updater); break;
       }
       showNotification(`Dokumen "${title || id}" berhasil dihapus!`, 'info');
     }
@@ -1227,6 +1307,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     const payload = {
       ...formState,
       nama: formState.nama.trim(),
+      noRekening: formState.noRekening || '',
       // Ensure sync between specific employee fields and generic fields
       judulDokumen: formState.jabatan || formState.judulDokumen || 'Staff Karyawan',
       project: formState.penempatan || formState.project || 'Head Office Bizhub',
@@ -1262,12 +1343,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'database-karyawan': setEmployees(updater); break;
       case 'recruitment': setCandidates(updater); break;
       case 'kontrak-kerja': setContracts(updater); break;
-      case 'fasilitas': setFacilities(updater); break;
       case 'absensi': setAttendances(updater); break;
       case 'kpi': setKpis(updater); break;
       case 'management-asset': setAssets(updater); break;
       case 'maintanance': setMaintenanceTickets(updater); break;
       case 'keamanan-kebersihan': setSecurityOps(updater); break;
+      case 'fasilitas': setFacilities(updater); break;
+      case 'cctv': setCctvs(updater); break;
     }
 
     setIsFormModalOpen(false);
@@ -1313,6 +1395,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         'Nama Karyawan': item.nama || '-',
         'NIK': item.nik || '-',
         'NPWP': item.npwp || '-',
+        'No. Rekening': item.noRekening || '-',
         'Jabatan': item.jabatan || item.judulDokumen || '-',
         'Penempatan': item.penempatan || item.project || '-',
         'Status': item.status || item.catatan || '-',
@@ -1397,12 +1480,12 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           <Users size={22} />
         </div>
         <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
-          HR & GA
+          Hr & Ga
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 9 SUB-TAB: KOTAK-KOTAK EMERALD GREEN ELEGAN                        */}
+      {/* BILAH 10 SUB-TAB HR & GA: DUA BAGIAN (ATAS: HR, BAWAH: GA)               */}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -1410,43 +1493,93 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           background: '#090d16',
           border: '1.5px solid #1e293b',
           borderRadius: '14px',
-          padding: '0.65rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-          gap: '8px',
-          alignItems: 'center'
+          padding: '0.75rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
         }}
       >
-        {HR_GA_SUBTABS.map(tab => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              style={{
-                background: isActive
-                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                  : '#0f172a',
-                color: isActive ? '#ffffff' : '#94a3b8',
-                border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '0.8rem',
-                fontWeight: isActive ? 900 : 700,
-                cursor: 'pointer',
-                textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
-                transition: 'all 0.18s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+        {/* Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '8px',
+            alignItems: 'center'
+          }}
+        >
+          {HR_GA_SUBTABS_TOP.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                style={{
+                  background: isActive
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : '#0f172a',
+                  color: isActive ? '#ffffff' : '#94a3b8',
+                  border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  fontSize: '0.8rem',
+                  fontWeight: isActive ? 900 : 700,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
+                  transition: 'all 0.18s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Keamanan & Kebersihan, Fasilitas, CCTV */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '8px',
+            alignItems: 'center'
+          }}
+        >
+          {HR_GA_SUBTABS_BOTTOM.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                style={{
+                  background: isActive
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : '#0f172a',
+                  color: isActive ? '#ffffff' : '#94a3b8',
+                  border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  fontSize: '0.8rem',
+                  fontWeight: isActive ? 900 : 700,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
+                  transition: 'all 0.18s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -1662,6 +1795,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                     <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Karyawan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NIK</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NPWP</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Rekening</th>
                     <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Jabatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Penempatan</th>
                     <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
@@ -1717,7 +1851,14 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           {item.npwp || '-'}
                         </td>
 
-                        {/* 5. Jabatan */}
+                        {/* 5. No. Rekening */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#34d399', borderRight: '1px solid #1e293b', fontWeight: 700, verticalAlign: 'middle', fontSize: '0.74rem' }}>
+                          <span style={{ background: 'rgba(16, 185, 129, 0.12)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                            {item.noRekening || '-'}
+                          </span>
+                        </td>
+
+                        {/* 6. Jabatan */}
                         <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
                           <span style={{ color: '#f1f5f9', fontWeight: 700 }}>
                             {item.jabatan || item.judulDokumen || '-'}
@@ -2124,8 +2265,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                   />
                 </div>
 
-                {/* 2 & 3. NIK & NPWP */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {/* 2, 3 & 4. NIK, NPWP & No. Rekening Bank */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                   <div>
                     <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>NIK (Nomor KTP)</label>
                     <input
@@ -2144,6 +2285,16 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                       onChange={(e) => setFormState({ ...formState, npwp: e.target.value })}
                       placeholder="Nomor NPWP Karyawan"
                       style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '4px' }}>No. Rekening Bank</label>
+                    <input
+                      type="text"
+                      value={formState.noRekening}
+                      onChange={(e) => setFormState({ ...formState, noRekening: e.target.value })}
+                      placeholder="e.g. BCA 8830192819"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #059669', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                     />
                   </div>
                 </div>
@@ -2877,6 +3028,10 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                           <tr>
                             <td style={{ padding: '4px 8px', fontWeight: 700 }}>NPWP</td>
                             <td style={{ padding: '4px 8px' }}>: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{viewingDoc.npwp || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>No. Rekening Bank</td>
+                            <td style={{ padding: '4px 8px' }}>: <span style={{ fontWeight: 700, color: '#047857' }}>{viewingDoc.noRekening || '-'}</span></td>
                           </tr>
                           <tr>
                             <td style={{ padding: '4px 8px', fontWeight: 700 }}>Alamat Domisili</td>

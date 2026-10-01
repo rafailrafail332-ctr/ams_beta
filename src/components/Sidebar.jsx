@@ -81,13 +81,14 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-db', title: '1. Data Base Karyawan', moduleKey: 'hr-ga', subTabKey: 'database-karyawan', icon: Users, color: '#38BDF8' },
         { id: 'hrga-recruitment', title: '2. Recruitment Karyawan', moduleKey: 'hr-ga', subTabKey: 'recruitment', icon: UserCheck, color: '#34D399' },
         { id: 'hrga-kontrak', title: '3. Kontrak Kerja PKWT', moduleKey: 'hr-ga', subTabKey: 'kontrak-kerja', icon: FileText, color: '#F59E0B' },
-        { id: 'hrga-fasilitas', title: '4. Fasilitas Kantor & Mess', moduleKey: 'hr-ga', subTabKey: 'fasilitas', icon: Building2, color: '#38BDF8' },
-        { id: 'hrga-absensi', title: '5. Absensi & Presensi', moduleKey: 'hr-ga', subTabKey: 'absensi', icon: Clock, color: '#10B981' },
-        { id: 'hrga-kpi', title: '6. KPI Evaluasi Kinerja', moduleKey: 'hr-ga', subTabKey: 'kpi', icon: Award, color: '#FBBF24' },
-        { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
-        { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
-        { id: 'hrga-security', title: '9. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'proc-logistik', title: '10. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
+        { id: 'hrga-absensi', title: '4. Absensi & Presensi', moduleKey: 'hr-ga', subTabKey: 'absensi', icon: Clock, color: '#10B981' },
+        { id: 'hrga-kpi', title: '5. KPI Evaluasi Kinerja', moduleKey: 'hr-ga', subTabKey: 'kpi', icon: Award, color: '#FBBF24' },
+        { id: 'hrga-asset', title: '6. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
+        { id: 'hrga-maintanance', title: '7. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
+        { id: 'hrga-security', title: '8. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'hrga-fasilitas', title: '9. Fasilitas Kantor & Mess', moduleKey: 'hr-ga', subTabKey: 'fasilitas', icon: Building2, color: '#38BDF8' },
+        { id: 'hrga-cctv', title: '10. CCTV Keamanan & Monitoring', moduleKey: 'hr-ga', subTabKey: 'cctv', icon: Eye, color: '#34D399' },
+        { id: 'proc-logistik', title: '11. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
 
@@ -192,7 +193,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     { id: 'teknik', mainTitle: 'Teknik & Konstruksi', tab: 'teknik', icon: HardHat, color: '#38BDF8' },
     { id: 'marketing', mainTitle: 'Marketing & Sales', tab: 'marketing', icon: Tag, color: '#FBBF24' },
     { id: 'piutang-konsumen', mainTitle: 'Piutang Konsumen', tab: 'piutang-konsumen', icon: CreditCard, color: '#F59E0B' },
-    { id: 'hr-ga', mainTitle: 'HR & GA', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
+    { id: 'hr-ga', mainTitle: 'Hr & Ga', tab: 'hr-ga', icon: Users, color: '#38BDF8' },
     { id: 'legal', mainTitle: 'Legal Corporate', tab: 'legal', icon: Scale, color: '#C084FC' },
     { id: 'finance', mainTitle: 'Finance & Payment', tab: 'finance', icon: DollarSign, color: '#60A5FA' },
     { id: 'cr', mainTitle: 'Customer Relation (STK)', tab: 'customer-relation', icon: HeartHandshake, color: '#FB7185' },
