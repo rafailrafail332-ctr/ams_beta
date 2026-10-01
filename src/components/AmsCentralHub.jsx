@@ -55,13 +55,8 @@ export const AmsCentralHub = ({
       if (onSelectModule) {
         onSelectModule('users');
       }
-    } else {
-      if (showNotification) {
-        showNotification('Akses Terbatas: Hanya akun Pak Yazid (Direktur Utama) atau Super Admin yang dapat mengakses Modul Admin.', 'warning');
-      } else {
-        alert('Akses Terbatas: Hanya akun Pak Yazid (Direktur Utama) atau Super Admin yang dapat mengakses Modul Admin.');
-      }
     }
+    // Jika non-admin, tidak terjadi apa-apa sama sekali
   };
 
   // Support controlled or uncontrolled theme
@@ -323,7 +318,6 @@ export const AmsCentralHub = ({
           onClick={handleLogoClick}
           role="button"
           tabIndex={0}
-          title="Klik untuk Masuk ke Modul Admin"
           style={{
             display: 'flex',
             flexDirection: 'column',
