@@ -97,7 +97,8 @@ function AppContent() {
       case 'procurement':
         return 'Procurement & Pengadaan Vendor Material';
       case 'users':
-        return 'Manajemen Users';
+      case 'admin':
+        return 'Modul Super Admin - Manajemen Users';
       case 'piutang-konsumen':
         return 'Piutang Konsumen (DP & Angsuran)';
       default:
@@ -183,7 +184,7 @@ function AppContent() {
                 )}
                 {currentTab === 'customer-relation' && <CustomerRelationModule />}
                 {currentTab === 'procurement' && <ProcurementModule />}
-                {currentTab === 'users' && <UserManagement />}
+                {(currentTab === 'users' || currentTab === 'admin') && <UserManagement />}
                 {currentTab === 'piutang-konsumen' && <PiutangKonsumenModule />}
               </div>
             </ErrorBoundary>

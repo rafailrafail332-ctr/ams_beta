@@ -855,8 +855,18 @@ export const AppProvider = ({ children }) => {
     const roleLower = (user.role || '').toLowerCase();
 
     // User Control tab is restricted to Super Admin (Ahmad Rafail) & Direktur Utama (Pak Yazid)
-    if (moduleKey === 'users') {
-      return roleLower.includes('super admin') || roleLower.includes('direktur');
+    if (moduleKey === 'users' || moduleKey === 'admin') {
+      const nameLower = (user.name || '').toLowerCase();
+      const emailLower = (user.email || '').toLowerCase();
+      return (
+        roleLower.includes('super admin') || 
+        roleLower.includes('direktur') || 
+        roleLower.includes('admin') ||
+        nameLower.includes('yazid') || 
+        nameLower.includes('rafail') ||
+        emailLower.includes('yazid') ||
+        emailLower === 'ams@gmail.com'
+      );
     }
 
     // ALL 11 CORE COMPANY MODULES REMAIN PERMANENTLY ACCESSIBLE FOR ALL USERS

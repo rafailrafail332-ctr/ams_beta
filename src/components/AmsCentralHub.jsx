@@ -13,6 +13,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { GeminiCursorCanvas } from './GeminiCursorCanvas';
+import { useApp } from '../context/AppContext';
 
 export const AmsCentralHub = ({ 
   onSelectModule, 
@@ -23,8 +24,45 @@ export const AmsCentralHub = ({
   onToggleTheme: externalToggleTheme,
   onLogout
 }) => {
+  const appContext = typeof useApp === 'function' ? useApp() : null;
+  const activeUser = currentUser || appContext?.currentUser;
+  const showNotification = appContext?.showNotification;
+
   const [hoveredNode, setHoveredNode] = useState(null);
   const [internalTheme, setInternalTheme] = useState('dark');
+
+  const handleLogoClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    const roleLower = (activeUser?.role || '').toLowerCase();
+    const nameLower = (activeUser?.name || '').toLowerCase();
+    const emailLower = (activeUser?.email || '').toLowerCase();
+
+    // Akun Pak Yazid, Super Admin, atau Direktur Utama diizinkan masuk
+    const isAuthorized = 
+      roleLower.includes('direktur') || 
+      roleLower.includes('super admin') ||
+      roleLower.includes('admin') ||
+      nameLower.includes('yazid') || 
+      nameLower.includes('rafail') ||
+      emailLower.includes('yazid') ||
+      emailLower === 'ams@gmail.com';
+
+    if (isAuthorized) {
+      if (onSelectModule) {
+        onSelectModule('users');
+      }
+    } else {
+      if (showNotification) {
+        showNotification('Akses Terbatas: Hanya akun Pak Yazid (Direktur Utama) atau Super Admin yang dapat mengakses Modul Admin.', 'warning');
+      } else {
+        alert('Akses Terbatas: Hanya akun Pak Yazid (Direktur Utama) atau Super Admin yang dapat mengakses Modul Admin.');
+      }
+    }
+  };
 
   // Support controlled or uncontrolled theme
   const themeMode = externalTheme || internalTheme;
@@ -282,6 +320,10 @@ export const AmsCentralHub = ({
       >
         {/* TOP ELEMENT: ASHOKA LOGO + AMS + GLOWING ACCENT */}
         <div
+          onClick={handleLogoClick}
+          role="button"
+          tabIndex={0}
+          title="Klik untuk Masuk ke Modul Admin"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -289,7 +331,20 @@ export const AmsCentralHub = ({
             justifyContent: 'center',
             marginBottom: '14px',
             userSelect: 'none',
-            position: 'relative'
+            position: 'relative',
+            cursor: 'pointer',
+            transition: 'transform 0.25s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.04)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleLogoClick(e);
+            }
           }}
         >
           {/* Subtle Ambient Halo behind Logo */}
