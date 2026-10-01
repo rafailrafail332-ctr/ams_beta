@@ -54,7 +54,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const [activeTab, setActiveTab] = useState(() => {
     if (activeSubTab && [
       'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
-      'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan', 'fasilitas', 'cctv'
+      'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan-kebersihan', 'cctv'
     ].includes(activeSubTab)) {
       return activeSubTab;
     }
@@ -64,7 +64,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   useEffect(() => {
     if (activeSubTab && [
       'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
-      'kpi', 'management-asset', 'maintanance', 'keamanan-kebersihan', 'fasilitas', 'cctv'
+      'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan-kebersihan', 'cctv'
     ].includes(activeSubTab)) {
       setActiveTab(activeSubTab);
     }
@@ -1050,6 +1050,59 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   }, [cctvs]);
 
   // =============================================================
+  // 11. GATHERING & OUTING STORE
+  // =============================================================
+  const initialGatherings = [
+    {
+      id: 'GTH-001',
+      noDok: 'GTH/AMS-HR/2026/01',
+      tanggalDok: '2026-08-15',
+      project: 'Semua Proyek',
+      nama: 'Panitia Gathering HR & GA (PIC: Dodi Syaiful)',
+      kategori: 'Family Gathering',
+      judulDokumen: 'Proposal & Anggaran Family Gathering Tahunan PT Yazfi - Puncak Bogor',
+      catatan: 'Rencana 120 Peserta Karyawan & Keluarga • Rundown Acara, Doorprize & Transportasi Bus Pariwisata',
+      files: [{ name: 'Proposal_Family_Gathering_2026.pdf', size: '2.4 MB' }]
+    },
+    {
+      id: 'GTH-002',
+      noDok: 'GTH/AMS-HR/2026/02',
+      tanggalDok: '2026-04-10',
+      project: 'Head Office Bizhub',
+      nama: 'Panitia Halal Bihalal & Silaturahmi Direksi',
+      kategori: 'Halal Bihalal',
+      judulDokumen: 'Laporan & Dokumentasi Silaturahmi Halal Bihalal Idul Fitri 1447 H',
+      catatan: 'Sukses Terlaksana di Marketing Gallery Bizhub • Tausiyah & Ramah Tamah Manajemen',
+      files: [{ name: 'Dokumentasi_Halal_Bihalal_2026.pdf', size: '3.1 MB' }]
+    },
+    {
+      id: 'GTH-003',
+      noDok: 'GTH/AMS-HR/2026/03',
+      tanggalDok: '2026-06-20',
+      project: 'Ashoka Park',
+      nama: 'Team Building Lapangan & Marketing',
+      kategori: 'Team Building',
+      judulDokumen: 'Kegiatan Outbound & Leadership Training Karyawan Proyek Ashoka Park',
+      catatan: 'Peningkatan Sinergi Tim Lapangan, Teknik & Sales • Lokasi Camp Hulu Cai Ciawi',
+      files: [{ name: 'LPJ_Team_Building_Outbound.pdf', size: '1.9 MB' }]
+    }
+  ];
+
+  const [gatherings, setGatherings] = useState(() => {
+    try {
+      const s = localStorage.getItem('ams_hr_gathering_v1');
+      if (s) return JSON.parse(s);
+    } catch {}
+    return initialGatherings;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_hr_gathering_v1', JSON.stringify(gatherings));
+    } catch {}
+  }, [gatherings]);
+
+  // =============================================================
   // COMMON SEARCH & FILTER STATES FOR EACH TAB
   // =============================================================
   const [searchTerm, setSearchTerm] = useState('');
@@ -1104,16 +1157,17 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'database-karyawan': return employees;
       case 'recruitment': return candidates;
       case 'kontrak-kerja': return contracts;
-      case 'fasilitas': return facilities;
       case 'absensi': return attendances;
       case 'kpi': return kpis;
+      case 'gathering': return gatherings;
       case 'management-asset': return assets;
       case 'maintanance': return maintenanceTickets;
+      case 'fasilitas': return facilities;
       case 'keamanan-kebersihan': return securityOps;
       case 'cctv': return cctvs;
       default: return employees;
     }
-  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securityOps, cctvs]);
+  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securityOps, cctvs, gatherings]);
 
   // Filtered dataset
   const filteredDataset = useMemo(() => {
@@ -1158,22 +1212,23 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     return ['ALL', ...cats];
   }, [currentDataset, activeTab]);
 
-  // Configuration 10 Tabs sesuai 2 bagian navigasi:
-  // Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI
+  // Configuration 11 Tabs sesuai 2 bagian navigasi:
+  // Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI, Gathering
   const HR_GA_SUBTABS_TOP = [
     { id: 'database-karyawan', label: 'Data Base Karyawan' },
     { id: 'recruitment', label: 'Recruitment' },
     { id: 'kontrak-kerja', label: 'Kontrak Kerja' },
     { id: 'absensi', label: 'Absensi' },
-    { id: 'kpi', label: 'KPI' }
+    { id: 'kpi', label: 'KPI' },
+    { id: 'gathering', label: 'Gathering' }
   ];
 
-  // Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Keamanan & Kebersihan, Fasilitas, CCTV
+  // Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Fasilitas, Keamanan & Kebersihan, CCTV
   const HR_GA_SUBTABS_BOTTOM = [
     { id: 'management-asset', label: 'Management Asset' },
     { id: 'maintanance', label: 'Maintanance' },
-    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' },
     { id: 'fasilitas', label: 'Fasilitas' },
+    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' },
     { id: 'cctv', label: 'CCTV' }
   ];
 
@@ -1187,10 +1242,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'kontrak-kerja': return { title: 'Kontrak Kerja', sub: 'Monitoring masa berlaku perjanjian kerja (PKWT/PKWTT), draf kontrak & alert perpanjangan.' };
       case 'absensi': return { title: 'Absensi', sub: 'Rekapitulasi presensi harian masuk dan pulang, toleransi keterlambatan & surat izin sakit/tugas.' };
       case 'kpi': return { title: 'KPI', sub: 'Rapor evaluasi capaian kinerja berkala karyawan, penilaian disiplin, target output & etika kerja.' };
+      case 'gathering': return { title: 'Gathering', sub: 'Dokumentasi agenda gathering perusahaan, family gathering tahunan, halal bihalal & outbound karyawan.' };
       case 'management-asset': return { title: 'Management Asset', sub: 'Pencatatan aset tetap perusahaan, kode inventaris, lokasi penempatan & nilai perolehan.' };
       case 'maintanance': return { title: 'Maintanance', sub: 'Jadwal dan tiket perbaikan berkala armada dinas, AC kantor, genset & utilitas operasional.' };
-      case 'keamanan-kebersihan': return { title: 'Keamanan & Kebersihan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & checklist sanitasi CS.' };
       case 'fasilitas': return { title: 'Fasilitas', sub: 'Inventarisasi sarana kantor pemasaran, galeri display, utilitas listrik & akomodasi pekerja.' };
+      case 'keamanan-kebersihan': return { title: 'Keamanan & Kebersihan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & checklist sanitasi CS.' };
       case 'cctv': return { title: 'CCTV', sub: 'Monitoring titik kamera pengawas, instalasi NVR/DVR, rekaman keamanan gerbang & kawasan proyek.' };
       default: return { title: 'Hr & Ga', sub: 'Sistem Manajemen Human Resources & General Affair' };
     }
@@ -1205,10 +1261,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       'kontrak-kerja': 'PKWT/AMS-HR/2026/',
       'absensi': 'ATT/AMS-PR/2026/',
       'kpi': 'KPI/AMS-Q3/2026/',
+      'gathering': 'GTH/AMS-HR/2026/',
       'management-asset': 'AST-GA-2026-',
       'maintanance': 'MNT/AMS-TKT/2026/',
-      'keamanan-kebersihan': 'OPS/SEC-CLN/2026/',
       'fasilitas': 'FAS/AMS-FAS/2026/',
+      'keamanan-kebersihan': 'OPS/SEC-CLN/2026/',
       'cctv': 'CCTV/AMS-SEC/2026/'
     };
     const nextSeq = String(currentDataset.length + 1).padStart(2, '0');
@@ -1280,10 +1337,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         case 'kontrak-kerja': setContracts(updater); break;
         case 'absensi': setAttendances(updater); break;
         case 'kpi': setKpis(updater); break;
+        case 'gathering': setGatherings(updater); break;
         case 'management-asset': setAssets(updater); break;
         case 'maintanance': setMaintenanceTickets(updater); break;
-        case 'keamanan-kebersihan': setSecurityOps(updater); break;
         case 'fasilitas': setFacilities(updater); break;
+        case 'keamanan-kebersihan': setSecurityOps(updater); break;
         case 'cctv': setCctvs(updater); break;
       }
       showNotification(`Dokumen "${title || id}" berhasil dihapus!`, 'info');
@@ -1345,10 +1403,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'kontrak-kerja': setContracts(updater); break;
       case 'absensi': setAttendances(updater); break;
       case 'kpi': setKpis(updater); break;
+      case 'gathering': setGatherings(updater); break;
       case 'management-asset': setAssets(updater); break;
       case 'maintanance': setMaintenanceTickets(updater); break;
-      case 'keamanan-kebersihan': setSecurityOps(updater); break;
       case 'fasilitas': setFacilities(updater); break;
+      case 'keamanan-kebersihan': setSecurityOps(updater); break;
       case 'cctv': setCctvs(updater); break;
     }
 

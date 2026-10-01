@@ -40,7 +40,9 @@ import {
   LogOut,
   MapPin,
   Mail,
-  Camera
+  Camera,
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -83,12 +85,13 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-kontrak', title: '3. Kontrak Kerja PKWT', moduleKey: 'hr-ga', subTabKey: 'kontrak-kerja', icon: FileText, color: '#F59E0B' },
         { id: 'hrga-absensi', title: '4. Absensi & Presensi', moduleKey: 'hr-ga', subTabKey: 'absensi', icon: Clock, color: '#10B981' },
         { id: 'hrga-kpi', title: '5. KPI Evaluasi Kinerja', moduleKey: 'hr-ga', subTabKey: 'kpi', icon: Award, color: '#FBBF24' },
-        { id: 'hrga-asset', title: '6. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
-        { id: 'hrga-maintanance', title: '7. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
-        { id: 'hrga-security', title: '8. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'hrga-gathering', title: '6. Gathering & Outing', moduleKey: 'hr-ga', subTabKey: 'gathering', icon: Sparkles, color: '#F59E0B' },
+        { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
+        { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
         { id: 'hrga-fasilitas', title: '9. Fasilitas Kantor & Mess', moduleKey: 'hr-ga', subTabKey: 'fasilitas', icon: Building2, color: '#38BDF8' },
-        { id: 'hrga-cctv', title: '10. CCTV Keamanan & Monitoring', moduleKey: 'hr-ga', subTabKey: 'cctv', icon: Eye, color: '#34D399' },
-        { id: 'proc-logistik', title: '11. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
+        { id: 'hrga-security', title: '10. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'hrga-cctv', title: '11. CCTV Keamanan & Monitoring', moduleKey: 'hr-ga', subTabKey: 'cctv', icon: Eye, color: '#34D399' },
+        { id: 'proc-logistik', title: '12. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
 
