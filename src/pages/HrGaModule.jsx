@@ -105,146 +105,338 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     {
       id: 'EMP-001',
       noDok: 'AMS-2024-001',
+      nama: 'Ahmad Rafail',
+      nik: '3201011508900001',
+      npwp: '09.123.456.7-432.000',
+      alamat: 'Jl. Raya Pemda No. 12, Cibinong, Bogor',
+      noHp: '0812-9988-7711',
+      phone: '0812-9988-7711',
+      jabatan: 'Super Admin & Direktur Utama',
+      penempatan: 'Head Office Bizhub',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Siti Nurhaliza',
+        anak1: 'Muhammad Rayhan',
+        anak2: 'Aisyah Zahra',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-01-01',
       tanggalDok: '2024-01-01',
       project: 'Head Office Bizhub',
-      nama: 'Ahmad Rafail',
-      kategori: 'Direksi Utama',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Super Admin & Direktur Utama',
       catatan: 'Karyawan Tetap (PKWTT) • Grade Executive',
-      files: [{ name: 'KTP_Ahmad_Rafail.pdf', size: '1.2 MB' }, { name: 'SK_Direksi_Utama.pdf', size: '850 KB' }],
-      phone: '0812-9988-7711',
-      email: 'rafail@ams.co.id'
+      files: [
+        { name: 'KTP_Ahmad_Rafail.pdf', size: '1.2 MB' },
+        { name: 'SK_Direksi_Utama.pdf', size: '850 KB' },
+        { name: 'Kartu_Keluarga_Ahmad.pdf', size: '1.1 MB' }
+      ]
     },
     {
       id: 'EMP-002',
       noDok: 'AMS-2024-002',
+      nama: 'Yazid Hizbullah, S.E.,S.T',
+      nik: '3201021204880002',
+      npwp: '08.234.567.8-431.000',
+      alamat: 'Komplek Permata Indah Blok B3, Bogor',
+      noHp: '0813-1122-3344',
+      phone: '0813-1122-3344',
+      jabatan: 'Direktur Utama & Finance Director',
+      penempatan: 'Head Office Bizhub',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Fatimah Az-Zahra',
+        anak1: 'Khalid Al-Walid',
+        anak2: 'Maryam Khairunnisa',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-01-01',
       tanggalDok: '2024-01-01',
       project: 'Head Office Bizhub',
-      nama: 'Yazid Hizbullah, S.E.,S.T',
-      kategori: 'Direksi & Finance',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Direktur Utama & Finance Director',
       catatan: 'Karyawan Tetap (PKWTT) • Grade Executive',
-      files: [{ name: 'KTP_Yazid_Hizbullah.pdf', size: '1.4 MB' }, { name: 'NPWP_Yazid.pdf', size: '600 KB' }],
-      phone: '0813-1122-3344',
-      email: 'ams@gmail.com'
+      files: [
+        { name: 'KTP_Yazid_Hizbullah.pdf', size: '1.4 MB' },
+        { name: 'NPWP_Yazid.pdf', size: '600 KB' },
+        { name: 'Ijazah_S1_Teknik.pdf', size: '2.3 MB' }
+      ]
     },
     {
       id: 'EMP-003',
       noDok: 'AMS-2024-003',
+      nama: 'Adhi Himawan, S.E.Sy',
+      nik: '3201031907890003',
+      npwp: '07.345.678.9-432.000',
+      alamat: 'Perum Gria Indah 2 Blok D5, Depok',
+      noHp: '0815-5566-7788',
+      phone: '0815-5566-7788',
+      jabatan: 'General Manager (Ops, Marketing & GA)',
+      penempatan: 'Head Office Bizhub',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Rina Rahmawati',
+        anak1: 'Kenzo Himawan',
+        anak2: '',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-02-01',
       tanggalDok: '2024-02-01',
       project: 'Head Office Bizhub',
-      nama: 'Adhi Himawan, S.E.Sy',
-      kategori: 'Manajemen Operasional',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'General Manager (Ops, Marketing & GA)',
       catatan: 'Karyawan Tetap (PKWTT) • Grade A1',
-      files: [{ name: 'KTP_Adhi_Himawan.pdf', size: '950 KB' }, { name: 'BPJS_Ketenagakerjaan.pdf', size: '420 KB' }],
-      phone: '0815-5566-7788',
-      email: 'adhi@ams.co.id'
+      files: [
+        { name: 'KTP_Adhi_Himawan.pdf', size: '950 KB' },
+        { name: 'BPJS_Ketenagakerjaan.pdf', size: '420 KB' }
+      ]
     },
     {
       id: 'EMP-004',
       noDok: 'AMS-2024-004',
+      nama: 'Dodi Syaiful Nugroho',
+      nik: '3201042409920004',
+      npwp: '06.456.789.0-433.000',
+      alamat: 'Jl. Raya Sentul KM 5, Babakan Madang, Bogor',
+      noHp: '0817-2233-4455',
+      phone: '0817-2233-4455',
+      jabatan: 'Head of HR & GA (General Affair)',
+      penempatan: 'Head Office & Site Office',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Dewi Lestari',
+        anak1: 'Arka Syaiful',
+        anak2: 'Bima Syaiful',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-02-15',
       tanggalDok: '2024-02-15',
       project: 'Head Office & Site Office',
-      nama: 'Dodi Syaiful Nugroho',
-      kategori: 'HR & GA',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Head of HR & GA (General Affair)',
       catatan: 'Karyawan Tetap (PKWTT) • Grade A2',
-      files: [{ name: 'KTP_Dodi_Syaiful.pdf', size: '1.1 MB' }, { name: 'Sertifikat_CHRP.pdf', size: '1.8 MB' }],
-      phone: '0817-2233-4455',
-      email: 'dodi@ams.co.id'
+      files: [
+        { name: 'KTP_Dodi_Syaiful.pdf', size: '1.1 MB' },
+        { name: 'Sertifikat_CHRP.pdf', size: '1.8 MB' }
+      ]
     },
     {
       id: 'EMP-005',
       noDok: 'AMS-2024-005',
+      nama: 'Wahyu Salma Septiani, S.H',
+      nik: '3201055503950005',
+      npwp: '05.567.890.1-434.000',
+      alamat: 'Jl. Margonda Raya No. 102, Depok',
+      noHp: '0812-7788-9900',
+      phone: '0812-7788-9900',
+      jabatan: 'Head of Legal & Perizinan Properti',
+      penempatan: 'Ashoka Park',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Dimas Prasetyo',
+        anak1: 'Nadia Septiani',
+        anak2: '',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-03-01',
       tanggalDok: '2024-03-01',
       project: 'Ashoka Park',
-      nama: 'Wahyu Salma Septiani, S.H',
-      kategori: 'Legal & Perizinan',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Head of Legal & Perizinan Properti',
       catatan: 'Karyawan Tetap (PKWTT) • Grade A2',
-      files: [{ name: 'KTP_Wahyu_Salma.pdf', size: '890 KB' }, { name: 'Ijazah_Hukum_S1.pdf', size: '2.1 MB' }],
-      phone: '0812-7788-9900',
-      email: 'salma@ams.co.id'
+      files: [
+        { name: 'KTP_Wahyu_Salma.pdf', size: '890 KB' },
+        { name: 'Ijazah_Hukum_S1.pdf', size: '2.1 MB' }
+      ]
     },
     {
       id: 'EMP-006',
       noDok: 'AMS-2024-006',
+      nama: 'Yulieka Rachmawati, S.Si',
+      nik: '3201064807940006',
+      npwp: '04.678.901.2-435.000',
+      alamat: 'Cluster Cendana Blok C No. 7, Cibinong, Bogor',
+      noHp: '0813-8899-0011',
+      phone: '0813-8899-0011',
+      jabatan: 'Head of Marketing & Sales Division',
+      penempatan: 'Ashoka Park',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Andri Wicaksono',
+        anak1: 'Ghaisan Wicaksono',
+        anak2: 'Zhafira Wicaksono',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-03-10',
       tanggalDok: '2024-03-10',
       project: 'Ashoka Park',
-      nama: 'Yulieka Rachmawati, S.Si',
-      kategori: 'Marketing & Sales',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Head of Marketing & Sales Division',
       catatan: 'Karyawan Tetap (PKWTT) • Grade A2',
-      files: [{ name: 'KTP_Yulieka.pdf', size: '1.0 MB' }],
-      phone: '0813-8899-0011',
-      email: 'yulieka@ams.co.id'
+      files: [
+        { name: 'KTP_Yulieka.pdf', size: '1.0 MB' }
+      ]
     },
     {
       id: 'EMP-007',
       noDok: 'AMS-2024-007',
+      nama: 'Amanda Chesyariani Hermawan',
+      nik: '3201076211970007',
+      npwp: '03.789.012.3-436.000',
+      alamat: 'Jl. Padjajaran No. 44, Bogor',
+      noHp: '0818-4455-6677',
+      phone: '0818-4455-6677',
+      jabatan: 'Admin Marketing & SPR Specialist',
+      penempatan: 'Ashoka View',
+      status: 'Karyawan Kontrak (PKWT)',
+      namaKeluarga: {
+        istriSuami: '-',
+        anak1: '',
+        anak2: '',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-05-01',
       tanggalDok: '2024-05-01',
       project: 'Ashoka View',
-      nama: 'Amanda Chesyariani Hermawan',
-      kategori: 'Marketing & Sales',
+      kategori: 'Karyawan Kontrak (PKWT)',
       judulDokumen: 'Admin Marketing & SPR Specialist',
       catatan: 'Karyawan Kontrak (PKWT) • Grade B1',
-      files: [{ name: 'KTP_Amanda.pdf', size: '750 KB' }, { name: 'CV_Amanda_Chesyariani.pdf', size: '1.5 MB' }],
-      phone: '0818-4455-6677',
-      email: 'amanda@ams.co.id'
+      files: [
+        { name: 'KTP_Amanda.pdf', size: '750 KB' },
+        { name: 'CV_Amanda_Chesyariani.pdf', size: '1.5 MB' }
+      ]
     },
     {
       id: 'EMP-008',
       noDok: 'AMS-2024-008',
+      nama: 'Tarkum Aditya',
+      nik: '3201081109960008',
+      npwp: '02.890.123.4-437.000',
+      alamat: 'Jl. Pajajaran Indah No. 15, Bogor',
+      noHp: '0819-3322-1100',
+      phone: '0819-3322-1100',
+      jabatan: 'Finance Officer & Accounting',
+      penempatan: 'Head Office Bizhub',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Ratna Sari',
+        anak1: 'Danial Aditya',
+        anak2: '',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-04-01',
       tanggalDok: '2024-04-01',
       project: 'Head Office Bizhub',
-      nama: 'Tarkum Aditya',
-      kategori: 'Finance & Akuntansi',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Finance Officer & Accounting',
       catatan: 'Karyawan Tetap (PKWTT) • Grade B1',
-      files: [{ name: 'KTP_Tarkum_Aditya.pdf', size: '820 KB' }],
-      phone: '0819-3322-1100',
-      email: 'tarkum@ams.co.id'
+      files: [
+        { name: 'KTP_Tarkum_Aditya.pdf', size: '820 KB' }
+      ]
     },
     {
       id: 'EMP-009',
       noDok: 'AMS-2024-009',
+      nama: 'Hapip Alamsyah',
+      nik: '3201091506910009',
+      npwp: '01.901.234.5-438.000',
+      alamat: 'Kp. Muara RT 02/05, Bojonggede, Bogor',
+      noHp: '0813-7766-5544',
+      phone: '0813-7766-5544',
+      jabatan: 'Site Operations Manager',
+      penempatan: 'Ashoka Park',
+      status: 'Karyawan Tetap (PKWTT)',
+      namaKeluarga: {
+        istriSuami: 'Nurul Hidayah',
+        anak1: 'Fathan Alamsyah',
+        anak2: 'Farhan Alamsyah',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-02-20',
       tanggalDok: '2024-02-20',
       project: 'Ashoka Park',
-      nama: 'Hapip Alamsyah',
-      kategori: 'Teknik & Konstruksi',
+      kategori: 'Karyawan Tetap (PKWTT)',
       judulDokumen: 'Site Operations Manager',
       catatan: 'Karyawan Tetap (PKWTT) • Grade A2',
-      files: [{ name: 'KTP_Hapip.pdf', size: '920 KB' }, { name: 'SKK_Pelaksana_Lapangan.pdf', size: '1.6 MB' }],
-      phone: '0813-7766-5544',
-      email: 'hapip@ams.co.id'
+      files: [
+        { name: 'KTP_Hapip.pdf', size: '920 KB' },
+        { name: 'SKK_Pelaksana_Lapangan.pdf', size: '1.6 MB' }
+      ]
     },
     {
       id: 'EMP-010',
       noDok: 'AMS-2024-010',
+      nama: 'Hartono (Danru)',
+      nik: '3201100508890010',
+      npwp: '00.912.345.6-439.000',
+      alamat: 'Jl. Raya Cikaret No. 8, Cibinong, Bogor',
+      noHp: '0857-1122-3399',
+      phone: '0857-1122-3399',
+      jabatan: 'Komandan Regu Security Satpam',
+      penempatan: 'Ashoka Park',
+      status: 'Karyawan Kontrak (PKWT)',
+      namaKeluarga: {
+        istriSuami: 'Sri Wahyuni',
+        anak1: 'Rian Hartono',
+        anak2: '',
+        anak3: '',
+        anak4: ''
+      },
+      tanggalMasuk: '2024-06-01',
       tanggalDok: '2024-06-01',
       project: 'Ashoka Park',
-      nama: 'Hartono (Danru)',
-      kategori: 'HR & GA (Keamanan)',
+      kategori: 'Karyawan Kontrak (PKWT)',
       judulDokumen: 'Komandan Regu Security Satpam',
       catatan: 'Karyawan Kontrak (PKWT) • Grade C1',
-      files: [{ name: 'KTA_Satpam_Hartono.pdf', size: '680 KB' }, { name: 'Sertifikat_Gada_Pratama.pdf', size: '1.4 MB' }],
-      phone: '0857-1122-3399',
-      email: 'security@ams.co.id'
+      files: [
+        { name: 'KTA_Satpam_Hartono.pdf', size: '680 KB' },
+        { name: 'Sertifikat_Gada_Pratama.pdf', size: '1.4 MB' }
+      ]
     }
   ];
 
   const [employees, setEmployees] = useState(() => {
     try {
-      const saved = localStorage.getItem('ams_hr_database_karyawan_v3');
-      if (saved) return JSON.parse(saved);
+      const savedV4 = localStorage.getItem('ams_hr_database_karyawan_v4');
+      if (savedV4) return JSON.parse(savedV4);
+      const savedV3 = localStorage.getItem('ams_hr_database_karyawan_v3');
+      if (savedV3) {
+        const parsed = JSON.parse(savedV3);
+        return parsed.map((item, idx) => {
+          const match = initialEmployees.find(ie => ie.id === item.id) || initialEmployees[idx] || {};
+          return {
+            ...match,
+            ...item,
+            nik: item.nik || match.nik || `320101${String(idx + 1).padStart(10, '0')}`,
+            npwp: item.npwp || match.npwp || '00.000.000.0-000.000',
+            alamat: item.alamat || match.alamat || 'Bogor, Jawa Barat',
+            noHp: item.noHp || item.phone || match.noHp || '0812-0000-0000',
+            phone: item.phone || item.noHp || match.phone || '0812-0000-0000',
+            jabatan: item.jabatan || item.judulDokumen || match.jabatan || 'Staff',
+            penempatan: item.penempatan || item.project || match.penempatan || 'Head Office Bizhub',
+            status: item.status || item.catatan || match.status || 'Karyawan Tetap (PKWTT)',
+            namaKeluarga: item.namaKeluarga || match.namaKeluarga || { istriSuami: '-', anak1: '', anak2: '', anak3: '', anak4: '' },
+            tanggalMasuk: item.tanggalMasuk || item.tanggalDok || match.tanggalMasuk || '2024-01-01',
+            files: item.files || match.files || []
+          };
+        });
+      }
     } catch {}
     return initialEmployees;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_hr_database_karyawan_v3', JSON.stringify(employees));
+      localStorage.setItem('ams_hr_database_karyawan_v4', JSON.stringify(employees));
     } catch {}
   }, [employees]);
 
@@ -819,12 +1011,26 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const [formState, setFormState] = useState({
     noDok: '',
     tanggalDok: new Date().toISOString().split('T')[0],
-    project: 'Ashoka Park',
+    project: 'Head Office Bizhub',
     nama: '',
     kategori: '',
     judulDokumen: '',
     catatan: '',
-    files: []
+    files: [],
+    // Data Base Karyawan specific fields
+    nik: '',
+    npwp: '',
+    alamat: '',
+    noHp: '',
+    jabatan: '',
+    penempatan: 'Head Office Bizhub',
+    status: 'Karyawan Tetap (PKWTT)',
+    istriSuami: '',
+    anak1: '',
+    anak2: '',
+    anak3: '',
+    anak4: '',
+    tanggalMasuk: new Date().toISOString().split('T')[0]
   });
 
   // Getter data aktif berdasarkan activeTab
@@ -853,10 +1059,23 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         (item.nama && item.nama.toLowerCase().includes(q)) ||
         (item.judulDokumen && item.judulDokumen.toLowerCase().includes(q)) ||
         (item.kategori && item.kategori.toLowerCase().includes(q)) ||
-        (item.catatan && item.catatan.toLowerCase().includes(q));
+        (item.catatan && item.catatan.toLowerCase().includes(q)) ||
+        (item.nik && item.nik.toLowerCase().includes(q)) ||
+        (item.npwp && item.npwp.toLowerCase().includes(q)) ||
+        (item.jabatan && item.jabatan.toLowerCase().includes(q)) ||
+        (item.penempatan && item.penempatan.toLowerCase().includes(q)) ||
+        (item.status && item.status.toLowerCase().includes(q)) ||
+        (item.alamat && item.alamat.toLowerCase().includes(q)) ||
+        (item.noHp && item.noHp.toLowerCase().includes(q)) ||
+        (item.phone && item.phone.toLowerCase().includes(q));
 
-      const matchKategori = filterKategori === 'ALL' || (item.kategori || '').toLowerCase() === filterKategori.toLowerCase();
-      const matchProject = filterProject === 'ALL' || (item.project || '').toLowerCase().includes(filterProject.toLowerCase());
+      const matchKategori = filterKategori === 'ALL' || 
+        (item.kategori || '').toLowerCase() === filterKategori.toLowerCase() ||
+        (item.status || '').toLowerCase() === filterKategori.toLowerCase();
+
+      const matchProject = filterProject === 'ALL' || 
+        (item.project || '').toLowerCase().includes(filterProject.toLowerCase()) ||
+        (item.penempatan || '').toLowerCase().includes(filterProject.toLowerCase());
 
       return matchSearch && matchKategori && matchProject;
     });
@@ -864,9 +1083,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   // Categories list per tab
   const tabCategories = useMemo(() => {
+    if (activeTab === 'database-karyawan') {
+      const statuses = Array.from(new Set(currentDataset.map(d => d.status || d.kategori).filter(Boolean)));
+      return ['ALL', ...statuses];
+    }
     const cats = Array.from(new Set(currentDataset.map(d => d.kategori).filter(Boolean)));
     return ['ALL', ...cats];
-  }, [currentDataset]);
+  }, [currentDataset, activeTab]);
 
   // Configuration 9 Tabs sesuai gambar user (tanpa angka/count)
   const HR_GA_SUBTABS = [
@@ -901,7 +1124,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const handleOpenAdd = () => {
     setEditingItemId(null);
     const prefixMap = {
-      'database-karyawan': 'AMS-2026-',
+      'database-karyawan': 'AMS-EMP-2026-',
       'recruitment': 'REC/AMS-JOB/2026/',
       'kontrak-kerja': 'PKWT/AMS-HR/2026/',
       'fasilitas': 'FAS/AMS-FAS/2026/',
@@ -915,27 +1138,56 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     setFormState({
       noDok: `${prefixMap[activeTab] || 'DOC/AMS/'}${nextSeq}`,
       tanggalDok: new Date().toISOString().split('T')[0],
-      project: 'Ashoka Park',
+      project: 'Head Office Bizhub',
       nama: '',
       kategori: tabCategories.find(c => c !== 'ALL') || 'Umum',
       judulDokumen: '',
       catatan: '',
-      files: []
+      files: [],
+      // Employee specific defaults
+      nik: '',
+      npwp: '',
+      alamat: '',
+      noHp: '',
+      jabatan: '',
+      penempatan: 'Head Office Bizhub',
+      status: 'Karyawan Tetap (PKWTT)',
+      istriSuami: '',
+      anak1: '',
+      anak2: '',
+      anak3: '',
+      anak4: '',
+      tanggalMasuk: new Date().toISOString().split('T')[0]
     });
     setIsFormModalOpen(true);
   };
 
   const handleOpenEdit = (item) => {
     setEditingItemId(item.id);
+    const fam = item.namaKeluarga || {};
     setFormState({
       noDok: item.noDok || '',
-      tanggalDok: item.tanggalDok || '',
-      project: item.project || 'Ashoka Park',
-      nama: item.nama || '',
-      kategori: item.kategori || '',
-      judulDokumen: item.judulDokumen || '',
+      tanggalDok: item.tanggalDok || item.tanggalMasuk || '',
+      project: item.project || item.penempatan || 'Head Office Bizhub',
+      nama: item.nama || item.name || '',
+      kategori: item.kategori || item.status || '',
+      judulDokumen: item.judulDokumen || item.jabatan || '',
       catatan: item.catatan || '',
-      files: item.files || []
+      files: item.files || [],
+      // Employee specific
+      nik: item.nik || '',
+      npwp: item.npwp || '',
+      alamat: item.alamat || '',
+      noHp: item.noHp || item.phone || '',
+      jabatan: item.jabatan || item.judulDokumen || '',
+      penempatan: item.penempatan || item.project || 'Head Office Bizhub',
+      status: item.status || item.catatan || 'Karyawan Tetap (PKWTT)',
+      istriSuami: fam.istriSuami || item.istriSuami || '',
+      anak1: fam.anak1 || item.anak1 || '',
+      anak2: fam.anak2 || item.anak2 || '',
+      anak3: fam.anak3 || item.anak3 || '',
+      anak4: fam.anak4 || item.anak4 || '',
+      tanggalMasuk: item.tanggalMasuk || item.tanggalDok || new Date().toISOString().split('T')[0]
     });
     setIsFormModalOpen(true);
   };
@@ -960,18 +1212,47 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   const handleSaveForm = (e) => {
     e.preventDefault();
-    if (!formState.nama || !formState.judulDokumen) {
-      showNotification('Mohon lengkapi Nama dan Judul Dokumen!', 'warning');
-      return;
+    if (activeTab === 'database-karyawan') {
+      if (!formState.nama) {
+        showNotification('Mohon lengkapi Nama Karyawan!', 'warning');
+        return;
+      }
+    } else {
+      if (!formState.nama || !formState.judulDokumen) {
+        showNotification('Mohon lengkapi Nama dan Judul Dokumen!', 'warning');
+        return;
+      }
     }
+
+    const payload = {
+      ...formState,
+      nama: formState.nama.trim(),
+      // Ensure sync between specific employee fields and generic fields
+      judulDokumen: formState.jabatan || formState.judulDokumen || 'Staff Karyawan',
+      project: formState.penempatan || formState.project || 'Head Office Bizhub',
+      penempatan: formState.penempatan || formState.project || 'Head Office Bizhub',
+      kategori: formState.status || formState.kategori || 'Karyawan Tetap (PKWTT)',
+      status: formState.status || formState.kategori || 'Karyawan Tetap (PKWTT)',
+      tanggalDok: formState.tanggalMasuk || formState.tanggalDok || new Date().toISOString().split('T')[0],
+      tanggalMasuk: formState.tanggalMasuk || formState.tanggalDok || new Date().toISOString().split('T')[0],
+      phone: formState.noHp || formState.phone || '',
+      noHp: formState.noHp || formState.phone || '',
+      namaKeluarga: {
+        istriSuami: formState.istriSuami || '',
+        anak1: formState.anak1 || '',
+        anak2: formState.anak2 || '',
+        anak3: formState.anak3 || '',
+        anak4: formState.anak4 || ''
+      }
+    };
 
     const updater = (prev) => {
       if (editingItemId) {
-        return prev.map(item => item.id === editingItemId ? { ...item, ...formState } : item);
+        return prev.map(item => item.id === editingItemId ? { ...item, ...payload } : item);
       } else {
         const newItem = {
-          ...formState,
-          id: `ID-${Date.now()}`
+          ...payload,
+          id: `EMP-${Date.now()}`
         };
         return [newItem, ...prev];
       }
@@ -990,7 +1271,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     }
 
     setIsFormModalOpen(false);
-    showNotification(`Dokumen ${formState.judulDokumen} berhasil ${editingItemId ? 'diperbarui' : 'disimpan'}!`, 'success');
+    showNotification(`Data ${formState.nama} berhasil ${editingItemId ? 'diperbarui' : 'disimpan'}!`, 'success');
   };
 
   // Upload file handlers
@@ -1025,17 +1306,39 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
   // Export Excel
   const handleExportExcel = () => {
-    const exportData = filteredDataset.map((item, idx) => ({
-      'No': idx + 1,
-      'No. Dok': item.noDok || '-',
-      'Tanggal Dokumen': item.tanggalDok || '-',
-      'Proyek': item.project || '-',
-      'Nama': item.nama || '-',
-      'Kategori': item.kategori || '-',
-      'Judul Dokumen': item.judulDokumen || '-',
-      'Jumlah Berkas': (item.files && item.files.length) || 0,
-      'Catatan': item.catatan || '-'
-    }));
+    let exportData;
+    if (activeTab === 'database-karyawan') {
+      exportData = filteredDataset.map((item, idx) => ({
+        'No': idx + 1,
+        'Nama Karyawan': item.nama || '-',
+        'NIK': item.nik || '-',
+        'NPWP': item.npwp || '-',
+        'Jabatan': item.jabatan || item.judulDokumen || '-',
+        'Penempatan': item.penempatan || item.project || '-',
+        'Status': item.status || item.catatan || '-',
+        'Tanggal Masuk': item.tanggalMasuk || item.tanggalDok || '-',
+        'No. HP': item.noHp || item.phone || '-',
+        'Alamat': item.alamat || '-',
+        'Istri / Suami': (item.namaKeluarga && item.namaKeluarga.istriSuami) || item.istriSuami || '-',
+        'Anak 1': (item.namaKeluarga && item.namaKeluarga.anak1) || item.anak1 || '-',
+        'Anak 2': (item.namaKeluarga && item.namaKeluarga.anak2) || item.anak2 || '-',
+        'Anak 3': (item.namaKeluarga && item.namaKeluarga.anak3) || item.anak3 || '-',
+        'Anak 4': (item.namaKeluarga && item.namaKeluarga.anak4) || item.anak4 || '-',
+        'Jumlah Berkas Dokumen': (item.files && item.files.length) || 0
+      }));
+    } else {
+      exportData = filteredDataset.map((item, idx) => ({
+        'No': idx + 1,
+        'No. Dok': item.noDok || '-',
+        'Tanggal Dokumen': item.tanggalDok || '-',
+        'Proyek': item.project || '-',
+        'Nama': item.nama || '-',
+        'Kategori': item.kategori || '-',
+        'Judul Dokumen': item.judulDokumen || '-',
+        'Jumlah Berkas': (item.files && item.files.length) || 0,
+        'Catatan': item.catatan || '-'
+      }));
+    }
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
@@ -1350,142 +1653,340 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             </button>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-              <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
-                  <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                  <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                  <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                  <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                  <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
-                  <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
-                  <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
-                  <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                  <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
-                  <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDataset.map((item, idx) => (
-                  <tr
-                    key={item.id}
-                    style={{
-                      borderBottom: '1px solid #1e293b',
-                      background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
-                      whiteSpace: 'nowrap',
-                      transition: 'background 0.15s'
-                    }}
-                  >
-                    {/* 1. No. */}
-                    <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      {idx + 1}
-                    </td>
+          activeTab === 'database-karyawan' ? (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Karyawan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NIK</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>NPWP</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Jabatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Penempatan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Masuk</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. HP</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Alamat</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama Keluarga</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDataset.map((item, idx) => {
+                    const filesCount = (item.files || []).length;
+                    const fam = item.namaKeluarga || {};
+                    const childrenList = [fam.anak1, fam.anak2, fam.anak3, fam.anak4].filter(Boolean);
 
-                    {/* 2. No. Dok */}
-                    <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#34d399', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      {item.noDok || item.nik || item.code || item.id}
-                    </td>
-
-                    {/* 3. Tanggal Dokumen */}
-                    <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      {formatDisplayDate(item.tanggalDok || item.date || item.appliedDate || item.startDate || item.purchaseDate || item.reportDate)}
-                    </td>
-
-                    {/* 4. Proyek / Lokasi */}
-                    <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <span
+                    return (
+                      <tr
+                        key={item.id}
                         style={{
-                          fontSize: '0.72rem',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: (item.project || item.location || '').toLowerCase().includes('park') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                          color: (item.project || item.location || '').toLowerCase().includes('park') ? '#34d399' : '#fbbf24',
-                          fontWeight: 800,
-                          whiteSpace: 'nowrap'
+                          borderBottom: '1px solid #1e293b',
+                          background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s'
                         }}
                       >
-                        {item.project || item.location || 'Ashoka Park'}
-                      </span>
-                    </td>
+                        {/* 1. No */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {idx + 1}
+                        </td>
 
-                    {/* 5. Nama */}
-                    <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
-                        {item.nama || item.name || item.empName || '-'}
-                      </span>
-                    </td>
+                        {/* 2. Nama Karyawan */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.72rem', flexShrink: 0 }}>
+                              {(item.nama || 'K').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, color: '#ffffff' }}>{item.nama}</div>
+                              <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'monospace' }}>{item.id || item.noDok}</div>
+                            </div>
+                          </div>
+                        </td>
 
-                    {/* 6. Kategori */}
-                    <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <span
-                        style={{
-                          fontSize: '0.72rem',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          background: 'rgba(16, 185, 129, 0.15)',
-                          color: '#34d399',
-                          fontWeight: 800,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {item.kategori || item.dept || item.position || item.contractType || item.category || item.status || 'Umum'}
-                      </span>
-                    </td>
+                        {/* 3. NIK */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: '#34d399', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.nik || '-'}
+                        </td>
 
-                    {/* 7. Judul Dokumen */}
-                    <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                        {item.judulDokumen || item.role || item.title || item.issue || '-'}
-                      </span>
-                    </td>
+                        {/* 4. NPWP */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid #1e293b', fontFamily: 'monospace', verticalAlign: 'middle' }}>
+                          {item.npwp || '-'}
+                        </td>
 
-                    {/* 8. Berkas - Tombol "View" Saja Bersih */}
-                    <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setViewingDoc(item);
-                          setCurrentFileSlide(0);
-                          setDocPrintMode('all');
-                        }}
-                        style={{
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '4px 12px',
-                          borderRadius: '5px',
-                          fontWeight: 900,
-                          fontSize: '0.74rem',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
-                          transition: 'transform 0.1s',
-                          whiteSpace: 'nowrap'
-                        }}
-                        title="Lihat Pratinjau Dokumen & Berkas"
-                      >
-                        <Eye size={12} />
-                        <span>View</span>
-                      </button>
-                    </td>
+                        {/* 5. Jabatan */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span style={{ color: '#f1f5f9', fontWeight: 700 }}>
+                            {item.jabatan || item.judulDokumen || '-'}
+                          </span>
+                        </td>
 
-                    {/* 9. Catatan */}
-                    <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      {item.catatan || item.notes || item.note ? (
-                        <span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#fde047', whiteSpace: 'nowrap' }}>
-                          {item.catatan || item.notes || item.note}
+                        {/* 6. Penempatan */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              color: '#34d399',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              fontWeight: 800
+                            }}
+                          >
+                            {item.penempatan || item.project || 'Head Office Bizhub'}
+                          </span>
+                        </td>
+
+                        {/* 7. Status */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: (item.status || item.catatan || '').includes('Tetap') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                              color: (item.status || item.catatan || '').includes('Tetap') ? '#34d399' : '#fbbf24',
+                              border: (item.status || item.catatan || '').includes('Tetap') ? '1px solid #10b981' : '1px solid #f59e0b',
+                              fontWeight: 800
+                            }}
+                          >
+                            {item.status || item.catatan || 'Karyawan Tetap'}
+                          </span>
+                        </td>
+
+                        {/* 8. Tanggal Masuk */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {formatDisplayDate(item.tanggalMasuk || item.tanggalDok)}
+                        </td>
+
+                        {/* 9. No. HP */}
+                        <td style={{ padding: '10px 12px', textAlign: 'center', color: '#38bdf8', fontWeight: 600, borderRight: '1px solid #1e293b', verticalAlign: 'middle', fontFamily: 'monospace' }}>
+                          {item.noHp || item.phone || '-'}
+                        </td>
+
+                        {/* 10. Alamat */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', verticalAlign: 'middle', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: '#cbd5e1', fontSize: '0.74rem' }} title={item.alamat}>
+                            {item.alamat || '-'}
+                          </span>
+                        </td>
+
+                        {/* 11. Nama Keluarga */}
+                        <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', verticalAlign: 'middle', maxWidth: '220px' }}>
+                          <div style={{ fontSize: '0.73rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            {fam.istriSuami ? (
+                              <div style={{ color: '#ffffff' }}>
+                                <span style={{ color: '#94a3b8' }}>Pasangan: </span>{fam.istriSuami}
+                              </div>
+                            ) : (
+                              <span style={{ color: '#64748b' }}>-</span>
+                            )}
+                            {childrenList.length > 0 && (
+                              <div style={{ color: '#34d399', fontSize: '0.69rem' }}>
+                                {childrenList.length} Anak: {childrenList.join(', ')}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* 12. Dokumen Karyawan */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', verticalAlign: 'middle' }}>
+                          {filesCount > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setViewingDoc(item);
+                                setCurrentFileSlide(0);
+                                setDocPrintMode('all');
+                              }}
+                              style={{
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#34d399',
+                                border: '1px solid #10b981',
+                                padding: '3px 10px',
+                                borderRadius: '5px',
+                                fontWeight: 800,
+                                fontSize: '0.72rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              title="Lihat Berkas Dokumen Karyawan"
+                            >
+                              <Paperclip size={12} />
+                              <span>{filesCount} Dokumen</span>
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Belum ada</span>
+                          )}
+                        </td>
+
+                        {/* 13. Aksi */}
+                        <td style={{ padding: '10px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setViewingDoc(item);
+                                setCurrentFileSlide(0);
+                                setDocPrintMode('all');
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '4px 10px',
+                                borderRadius: '5px',
+                                fontWeight: 800,
+                                fontSize: '0.72rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              title="Pratinjau / Cetak Lembar Data Karyawan"
+                            >
+                              <Eye size={12} />
+                              <span>View</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(item)}
+                              style={{
+                                background: '#1e293b',
+                                color: '#34d399',
+                                border: '1px solid #334155',
+                                padding: '4px 7px',
+                                borderRadius: '5px',
+                                cursor: 'pointer'
+                              }}
+                              title="Edit Data Karyawan"
+                            >
+                              <Edit3 size={12} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem(item.id, item.nama)}
+                              style={{
+                                background: '#1e293b',
+                                color: '#ef4444',
+                                border: '1px solid #334155',
+                                padding: '4px 7px',
+                                borderRadius: '5px',
+                                cursor: 'pointer'
+                              }}
+                              title="Hapus Karyawan"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDataset.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      style={{
+                        borderBottom: '1px solid #1e293b',
+                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                        whiteSpace: 'nowrap',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {/* 1. No. */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {idx + 1}
+                      </td>
+
+                      {/* 2. No. Dok */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#34d399', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.noDok || item.nik || item.code || item.id}
+                      </td>
+
+                      {/* 3. Tanggal Dokumen */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDisplayDate(item.tanggalDok || item.date || item.appliedDate || item.startDate || item.purchaseDate || item.reportDate)}
+                      </td>
+
+                      {/* 4. Proyek / Lokasi */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: (item.project || item.location || '').toLowerCase().includes('park') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            color: (item.project || item.location || '').toLowerCase().includes('park') ? '#34d399' : '#fbbf24',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.project || item.location || 'Ashoka Park'}
                         </span>
-                      ) : (
-                        <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
-                      )}
-                    </td>
+                      </td>
 
-                    {/* 10. Aksi */}
-                    <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                      <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                      {/* 5. Nama */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
+                          {item.nama || item.name || item.empName || '-'}
+                        </span>
+                      </td>
+
+                      {/* 6. Kategori */}
+                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            color: '#34d399',
+                            fontWeight: 800,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.kategori || item.dept || item.position || item.contractType || item.category || item.status || 'Umum'}
+                        </span>
+                      </td>
+
+                      {/* 7. Judul Dokumen */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          {item.judulDokumen || item.role || item.title || item.issue || '-'}
+                        </span>
+                      </td>
+
+                      {/* 8. Berkas - Tombol "View" Saja Bersih */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         <button
                           type="button"
                           onClick={() => {
@@ -1493,34 +1994,79 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                             setCurrentFileSlide(0);
                             setDocPrintMode('all');
                           }}
-                          title="Pratinjau & Cetak Dokumen"
-                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '4px 12px',
+                            borderRadius: '5px',
+                            fontWeight: 900,
+                            fontSize: '0.74rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
+                            transition: 'transform 0.1s',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title="Lihat Pratinjau Dokumen & Berkas"
                         >
-                          <Printer size={12} />
+                          <Eye size={12} />
+                          <span>View</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(item)}
-                          title="Edit Dokumen"
-                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                        >
-                          <Edit3 size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteItem(item.id, item.judulDokumen || item.nama || item.noDok)}
-                          title="Hapus Dokumen"
-                          style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+
+                      {/* 9. Catatan */}
+                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {item.catatan || item.notes || item.note ? (
+                          <span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#fde047', whiteSpace: 'nowrap' }}>
+                            {item.catatan || item.notes || item.note}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
+                        )}
+                      </td>
+
+                      {/* 10. Aksi */}
+                      <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setViewingDoc(item);
+                              setCurrentFileSlide(0);
+                              setDocPrintMode('all');
+                            }}
+                            title="Pratinjau & Cetak Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Printer size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteItem(item.id, item.judulDokumen || item.nama || item.noDok)}
+                            title="Hapus Dokumen"
+                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
 
@@ -1547,7 +2093,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               border: '1.5px solid #10b981',
               borderRadius: '16px',
               width: '100%',
-              maxWidth: '620px',
+              maxWidth: activeTab === 'database-karyawan' ? '720px' : '620px',
               maxHeight: '90vh',
               overflowY: 'auto',
               padding: '1.8rem',
@@ -1562,152 +2108,397 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               <button onClick={() => setIsFormModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {/* FORM KHUSUS SUBTAB: DATA BASE KARYAWAN (SESUAI GAMBAR REFERENSI USER) */}
+            {activeTab === 'database-karyawan' ? (
+              <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* 1. Nama */}
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '4px' }}>Nama Karyawan *</label>
                   <input
                     type="text"
-                    value={formState.noDok}
-                    onChange={(e) => setFormState({ ...formState, noDok: e.target.value })}
+                    value={formState.nama}
+                    onChange={(e) => setFormState({ ...formState, nama: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    placeholder="Nama Lengkap Karyawan (e.g. Dodi Syaiful Nugroho)"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #059669', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.82rem', fontWeight: 600 }}
                   />
                 </div>
+
+                {/* 2 & 3. NIK & NPWP */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>NIK (Nomor KTP)</label>
+                    <input
+                      type="text"
+                      value={formState.nik}
+                      onChange={(e) => setFormState({ ...formState, nik: e.target.value })}
+                      placeholder="16 Digit NIK"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#34d399', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>NPWP</label>
+                    <input
+                      type="text"
+                      value={formState.npwp}
+                      onChange={(e) => setFormState({ ...formState, npwp: e.target.value })}
+                      placeholder="Nomor NPWP Karyawan"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Alamat */}
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Alamat</label>
+                  <textarea
+                    rows={2}
+                    value={formState.alamat}
+                    onChange={(e) => setFormState({ ...formState, alamat: e.target.value })}
+                    placeholder="Alamat lengkap domisili / tempat tinggal saat ini"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', resize: 'vertical' }}
+                  />
+                </div>
+
+                {/* 5 & 6. No. HP & Jabatan */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>No. HP / WhatsApp</label>
+                    <input
+                      type="text"
+                      value={formState.noHp}
+                      onChange={(e) => setFormState({ ...formState, noHp: e.target.value })}
+                      placeholder="e.g. 0812-3456-7890"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#38bdf8', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Jabatan *</label>
+                    <input
+                      type="text"
+                      value={formState.jabatan}
+                      onChange={(e) => setFormState({ ...formState, jabatan: e.target.value, judulDokumen: e.target.value })}
+                      required
+                      placeholder="e.g. Project Manager, Arsitek, Legal, Site Supervisor..."
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
+
+                {/* 7 & 8. Penempatan & Status */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Penempatan</label>
+                    <select
+                      value={formState.penempatan}
+                      onChange={(e) => setFormState({ ...formState, penempatan: e.target.value, project: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    >
+                      <option value="Head Office Bizhub">Head Office Bizhub</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Semua Proyek">Semua Proyek</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Status</label>
+                    <select
+                      value={formState.status}
+                      onChange={(e) => setFormState({ ...formState, status: e.target.value, kategori: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    >
+                      <option value="Karyawan Tetap (PKWTT)">Karyawan Tetap (PKWTT)</option>
+                      <option value="Karyawan Kontrak (PKWT)">Karyawan Kontrak (PKWT)</option>
+                      <option value="Probation / Masa Percobaan">Probation / Masa Percobaan</option>
+                      <option value="Freelance / Konsultan">Freelance / Konsultan</option>
+                      <option value="Magang / Intern">Magang / Intern</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 9. Nama Keluarga (Istri/Suami & Anak 1 - 4) */}
+                <div style={{ background: '#0b1324', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Users size={14} />
+                    <span>Nama Keluarga</span>
+                  </div>
+
+                  <div style={{ marginBottom: '8px' }}>
+                    <label style={{ fontSize: '0.72rem', color: '#cbd5e1', display: 'block', marginBottom: '3px' }}>&bull; Istri / Suami</label>
+                    <input
+                      type="text"
+                      value={formState.istriSuami}
+                      onChange={(e) => setFormState({ ...formState, istriSuami: e.target.value })}
+                      placeholder="Nama Istri atau Suami"
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.78rem' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#cbd5e1', display: 'block', marginBottom: '3px' }}>&bull; Anak 1</label>
+                      <input
+                        type="text"
+                        value={formState.anak1}
+                        onChange={(e) => setFormState({ ...formState, anak1: e.target.value })}
+                        placeholder="Nama Anak ke-1"
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#cbd5e1', display: 'block', marginBottom: '3px' }}>&bull; Anak 2</label>
+                      <input
+                        type="text"
+                        value={formState.anak2}
+                        onChange={(e) => setFormState({ ...formState, anak2: e.target.value })}
+                        placeholder="Nama Anak ke-2"
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#cbd5e1', display: 'block', marginBottom: '3px' }}>&bull; Anak 3</label>
+                      <input
+                        type="text"
+                        value={formState.anak3}
+                        onChange={(e) => setFormState({ ...formState, anak3: e.target.value })}
+                        placeholder="Nama Anak ke-3"
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.72rem', color: '#cbd5e1', display: 'block', marginBottom: '3px' }}>&bull; Anak 4</label>
+                      <input
+                        type="text"
+                        value={formState.anak4}
+                        onChange={(e) => setFormState({ ...formState, anak4: e.target.value })}
+                        placeholder="Nama Anak ke-4"
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.78rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 10. Tanggal Masuk */}
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '4px' }}>Tanggal Masuk *</label>
                   <input
                     type="date"
-                    value={formState.tanggalDok}
-                    onChange={(e) => setFormState({ ...formState, tanggalDok: e.target.value })}
+                    value={formState.tanggalMasuk}
+                    onChange={(e) => setFormState({ ...formState, tanggalMasuk: e.target.value, tanggalDok: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #059669', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek / Penempatan</label>
-                  <select
-                    value={formState.project}
-                    onChange={(e) => setFormState({ ...formState, project: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                  >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
-                    <option value="Head Office Bizhub">Head Office Bizhub</option>
-                    <option value="Semua Proyek">Semua Proyek</option>
-                  </select>
+                {/* 11. Upload Dokumen Karyawan (Bisa upload beberapa berkas) */}
+                <div style={{ background: '#0f172a', border: '1.5px dashed #059669', borderRadius: '10px', padding: '12px' }}>
+                  <label style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <UploadCloud size={16} />
+                    <span>Upload Dokumen Karyawan (KTP, NPWP, KK, Ijazah, CV, SK, Sertifikat, dll - Bisa Upload Beberapa Dokumen)</span>
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                    style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                  />
+
+                  {/* List Dokumen Terunggah */}
+                  {formState.files && formState.files.length > 0 && (
+                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
+                        Daftar Dokumen Terpilih ({formState.files.length} berkas):
+                      </div>
+                      {formState.files.map((f, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#090d16',
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #065f46',
+                            fontSize: '0.72rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                            <CheckCircle2 size={12} color="#34d399" />
+                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
+                            <span style={{ color: '#64748b' }}>({f.size})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(i)}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px 4px', fontWeight: 900 }}
+                            title="Hapus berkas ini"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                  <button type="button" onClick={() => setIsFormModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
+                  <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)', fontWeight: 800 }}>
+                    {editingItemId ? 'Simpan Perubahan Karyawan' : 'Simpan Data Base Karyawan'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* FORM GENERIK DOKUMEN HR & GA UNTUK 8 SUBTAB LAINNYA */
+              <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nomor Dokumen *</label>
+                    <input
+                      type="text"
+                      value={formState.noDok}
+                      onChange={(e) => setFormState({ ...formState, noDok: e.target.value })}
+                      required
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Tanggal Dokumen *</label>
+                    <input
+                      type="date"
+                      value={formState.tanggalDok}
+                      onChange={(e) => setFormState({ ...formState, tanggalDok: e.target.value })}
+                      required
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Proyek / Penempatan</label>
+                    <select
+                      value={formState.project}
+                      onChange={(e) => setFormState({ ...formState, project: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    >
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Head Office Bizhub">Head Office Bizhub</option>
+                      <option value="Semua Proyek">Semua Proyek</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Dokumen *</label>
+                    <input
+                      type="text"
+                      value={formState.kategori}
+                      onChange={(e) => setFormState({ ...formState, kategori: e.target.value })}
+                      required
+                      placeholder="e.g. Direksi, Pelamar, PKWT, Tetap..."
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Kategori Dokumen *</label>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Orang / Barang / PIC *</label>
                   <input
                     type="text"
-                    value={formState.kategori}
-                    onChange={(e) => setFormState({ ...formState, kategori: e.target.value })}
+                    placeholder="e.g. Nama Karyawan / Nama Kandidat / PIC Aset / Personel Jaga..."
+                    value={formState.nama}
+                    onChange={(e) => setFormState({ ...formState, nama: e.target.value })}
                     required
-                    placeholder="e.g. Direksi, Pelamar, PKWT, Tetap..."
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
                   />
                 </div>
-              </div>
 
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Nama Orang / Barang / PIC *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Nama Karyawan / Nama Kandidat / PIC Aset / Personel Jaga..."
-                  value={formState.nama}
-                  onChange={(e) => setFormState({ ...formState, nama: e.target.value })}
-                  required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Dokumen / Uraian *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Jabatan / Draf PKWT / Sarana / Presensi / Scorecard KPI..."
+                    value={formState.judulDokumen}
+                    onChange={(e) => setFormState({ ...formState, judulDokumen: e.target.value })}
+                    required
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
 
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Judul Dokumen / Uraian *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Jabatan / Draf PKWT / Sarana / Presensi / Scorecard KPI..."
-                  value={formState.judulDokumen}
-                  onChange={(e) => setFormState({ ...formState, judulDokumen: e.target.value })}
-                  required
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Keterangan Tambahan</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Status kerja, masa berlaku, skor, kondisi barang, shift kerja..."
+                    value={formState.catatan}
+                    onChange={(e) => setFormState({ ...formState, catatan: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                </div>
 
-              <div>
-                <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Catatan / Keterangan Tambahan</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Status kerja, masa berlaku, skor, kondisi barang, shift kerja..."
-                  value={formState.catatan}
-                  onChange={(e) => setFormState({ ...formState, catatan: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem' }}
-                />
-              </div>
+                {/* Upload Multi-File Lampiran Berkas */}
+                <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
+                  <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <UploadCloud size={14} />
+                    <span>Upload Berkas / Lampiran Fisik (Bisa Pilih Banyak Berkas)</span>
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                    style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
+                  />
 
-              {/* Upload Multi-File Lampiran Berkas */}
-              <div style={{ background: '#0f172a', border: '1.5px dashed #334155', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                  <UploadCloud size={14} />
-                  <span>Upload Berkas / Lampiran Fisik (Bisa Pilih Banyak Berkas)</span>
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleFileUpload}
-                  style={{ fontSize: '0.76rem', color: '#cbd5e1' }}
-                />
-
-                {/* List Berkas Terunggah */}
-                {formState.files && formState.files.length > 0 && (
-                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
-                      Daftar Berkas Terpilih ({formState.files.length} berkas):
-                    </div>
-                    {formState.files.map((f, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          background: '#090d16',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #1e293b',
-                          fontSize: '0.72rem'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                          <CheckCircle2 size={12} color="#34d399" />
-                          <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
-                          <span style={{ color: '#64748b' }}>({f.size})</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFile(i)}
-                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px 4px' }}
-                          title="Hapus berkas ini"
-                        >
-                          ✕
-                        </button>
+                  {/* List Berkas Terunggah */}
+                  {formState.files && formState.files.length > 0 && (
+                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>
+                        Daftar Berkas Terpilih ({formState.files.length} berkas):
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      {formState.files.map((f, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#090d16',
+                            padding: '5px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #1e293b',
+                            fontSize: '0.72rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                            <CheckCircle2 size={12} color="#34d399" />
+                            <span style={{ color: '#ffffff', fontWeight: 600 }}>{f.name}</span>
+                            <span style={{ color: '#64748b' }}>({f.size})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(i)}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px 4px' }}
+                            title="Hapus berkas ini"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
-                <button type="button" onClick={() => setIsFormModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
-                <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
-                  {editingItemId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
-                </button>
-              </div>
-            </form>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '1rem' }}>
+                  <button type="button" onClick={() => setIsFormModalOpen(false)} className="btn btn-secondary btn-sm">Batal</button>
+                  <button type="submit" className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
+                    {editingItemId ? 'Simpan Perubahan' : 'Simpan & Catat Dokumen'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -2071,30 +2862,106 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                       Telah dicatatkan dan diverifikasi dalam sistem operasional HR & GA data administrasi perusahaan dengan rincian identitas sebagai berikut:
                     </p>
 
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', margin: '10px 0' }}>
-                      <tbody>
-                        <tr>
-                          <td style={{ width: '170px', padding: '5px 8px', fontWeight: 700 }}>Proyek / Penempatan</td>
-                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.project || viewingDoc.location || '-'}</strong></td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Nama Terkait / PIC</td>
-                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.nama || viewingDoc.name || viewingDoc.empName || '-'}</strong></td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Kategori Dokumen</td>
-                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800, color: '#0284c7' }}>{viewingDoc.kategori || viewingDoc.dept || viewingDoc.status || '-'}</span></td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Judul Dokumen / Jabatan</td>
-                          <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.judulDokumen || viewingDoc.role || viewingDoc.title || '-'}</strong></td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '5px 8px', fontWeight: 700 }}>Catatan & Keterangan</td>
-                          <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800 }}>{viewingDoc.catatan || viewingDoc.notes || viewingDoc.note || '-'}</span></td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    {/* Table Rincian: Format Khusus Data Base Karyawan VS Dokumen Standar */}
+                    {(activeTab === 'database-karyawan' || viewingDoc.nik || viewingDoc.namaKeluarga) ? (
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', margin: '10px 0' }}>
+                        <tbody>
+                          <tr>
+                            <td style={{ width: '180px', padding: '4px 8px', fontWeight: 700 }}>Nama Lengkap</td>
+                            <td style={{ padding: '4px 8px' }}>: <strong>{viewingDoc.nama || viewingDoc.name || '-'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>NIK (Nomor KTP)</td>
+                            <td style={{ padding: '4px 8px' }}>: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#047857' }}>{viewingDoc.nik || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>NPWP</td>
+                            <td style={{ padding: '4px 8px' }}>: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{viewingDoc.npwp || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Alamat Domisili</td>
+                            <td style={{ padding: '4px 8px' }}>: {viewingDoc.alamat || '-'}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>No. HP / WhatsApp</td>
+                            <td style={{ padding: '4px 8px' }}>: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{viewingDoc.noHp || viewingDoc.phone || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Jabatan</td>
+                            <td style={{ padding: '4px 8px' }}>: <strong>{viewingDoc.jabatan || viewingDoc.judulDokumen || '-'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Penempatan</td>
+                            <td style={{ padding: '4px 8px' }}>: <strong style={{ color: '#047857' }}>{viewingDoc.penempatan || viewingDoc.project || 'Head Office Bizhub'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Status Kepegawaian</td>
+                            <td style={{ padding: '4px 8px' }}>: <span style={{ fontWeight: 800, color: '#0284c7' }}>{viewingDoc.status || viewingDoc.kategori || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Tanggal Masuk</td>
+                            <td style={{ padding: '4px 8px' }}>: <strong>{formatDisplayDate(viewingDoc.tanggalMasuk || viewingDoc.tanggalDok)}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700, verticalAlign: 'top' }}>Nama Keluarga</td>
+                            <td style={{ padding: '4px 8px' }}>
+                              <div>: Istri / Suami: <strong>{(viewingDoc.namaKeluarga && viewingDoc.namaKeluarga.istriSuami) || viewingDoc.istriSuami || '-'}</strong></div>
+                              <div style={{ paddingLeft: '10px', marginTop: '2px', color: '#475569', fontSize: '0.8rem' }}>
+                                {(() => {
+                                  const fam = viewingDoc.namaKeluarga || {};
+                                  const kids = [
+                                    fam.anak1 ? `Anak 1: ${fam.anak1}` : (viewingDoc.anak1 ? `Anak 1: ${viewingDoc.anak1}` : null),
+                                    fam.anak2 ? `Anak 2: ${fam.anak2}` : (viewingDoc.anak2 ? `Anak 2: ${viewingDoc.anak2}` : null),
+                                    fam.anak3 ? `Anak 3: ${fam.anak3}` : (viewingDoc.anak3 ? `Anak 3: ${viewingDoc.anak3}` : null),
+                                    fam.anak4 ? `Anak 4: ${fam.anak4}` : (viewingDoc.anak4 ? `Anak 4: ${viewingDoc.anak4}` : null),
+                                  ].filter(Boolean);
+
+                                  return kids.length > 0 ? kids.map((k, idx) => (
+                                    <div key={idx}>&bull; {k}</div>
+                                  )) : <div>&bull; Belum dicatatkan data anak</div>;
+                                })()}
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '4px 8px', fontWeight: 700 }}>Dokumen Terlampir</td>
+                            <td style={{ padding: '4px 8px' }}>
+                              : Terlampir <strong>{(viewingDoc.files || []).length} berkas digital</strong>
+                              {(viewingDoc.files || []).length > 0 && (
+                                <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: '6px' }}>
+                                  ({(viewingDoc.files || []).map(f => f.name).join(', ')})
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    ) : (
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', margin: '10px 0' }}>
+                        <tbody>
+                          <tr>
+                            <td style={{ width: '170px', padding: '5px 8px', fontWeight: 700 }}>Proyek / Penempatan</td>
+                            <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.project || viewingDoc.location || '-'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '5px 8px', fontWeight: 700 }}>Nama Terkait / PIC</td>
+                            <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.nama || viewingDoc.name || viewingDoc.empName || '-'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '5px 8px', fontWeight: 700 }}>Kategori Dokumen</td>
+                            <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800, color: '#0284c7' }}>{viewingDoc.kategori || viewingDoc.dept || viewingDoc.status || '-'}</span></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '5px 8px', fontWeight: 700 }}>Judul Dokumen / Jabatan</td>
+                            <td style={{ padding: '5px 8px' }}>: <strong>{viewingDoc.judulDokumen || viewingDoc.role || viewingDoc.title || '-'}</strong></td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '5px 8px', fontWeight: 700 }}>Catatan & Keterangan</td>
+                            <td style={{ padding: '5px 8px' }}>: <span style={{ fontWeight: 800 }}>{viewingDoc.catatan || viewingDoc.notes || viewingDoc.note || '-'}</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    )}
 
                     <p style={{ margin: '12px 0 0 0' }}>
                       Dokumen ini sah terdaftar sebagai arsip ketenagakerjaan dan fasilitas operasional dalam Ashoka Management System (AMS) serta memiliki kekuatan pembuktian internal yang dapat dipertanggungjawabkan.

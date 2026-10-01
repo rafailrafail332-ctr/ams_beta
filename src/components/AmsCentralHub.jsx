@@ -94,7 +94,7 @@ export const AmsCentralHub = ({
     },
     { 
       key: 'hr-ga', 
-      label: 'HR & GA', 
+      label: 'Hr & Ga', 
       sub: 'SDM, Aset & Operasional', 
       desc: 'Kepegawaian, Fasilitas & Kendaraan', 
       color: '#10b981', 
@@ -924,7 +924,7 @@ export const AmsCentralHub = ({
                     color: hoveredNode === 'hr-ga' ? '#10b981' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
-                    HR & GA
+                    Hr & Ga
                   </div>
                   <div style={{ 
                     fontSize: '0.68rem', 
