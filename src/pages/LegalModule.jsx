@@ -3103,7 +3103,7 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
   ];
 
   return (
-    <div style={{ color: '#f1f5f9' }}>
+    <div className="legal-module-wrapper" style={{ color: '#f1f5f9' }}>
       {/* ========================================================================= */}
       {/* HEADER UTAMA MODUL LEGAL CORPORATE (4 MODUL RESMI DENGAN FITUR UPLOAD)    */}
       {/* ========================================================================= */}

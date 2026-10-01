@@ -720,6 +720,28 @@ body {
 }
 
 /* ========================================================================= */
+/* LEGAL MODULE: ALL TEXT IN TABLES IS REGULAR (TIDAK ADA YANG BOLD)         */
+/* ========================================================================= */
+.legal-module-wrapper table,
+.legal-module-wrapper table th,
+.legal-module-wrapper table td,
+.legal-module-wrapper table thead,
+.legal-module-wrapper table tbody,
+.legal-module-wrapper table tr,
+.legal-module-wrapper table th *,
+.legal-module-wrapper table td *,
+.legal-module-wrapper table td b,
+.legal-module-wrapper table td strong,
+.legal-module-wrapper table td span,
+.legal-module-wrapper table td div,
+.legal-module-wrapper table td p,
+.legal-module-wrapper table td button,
+.legal-module-wrapper table td a {
+  font-weight: 400 !important;
+}
+
+
+/* ========================================================================= */
 /* ENTERPRISE PRINT & CETAK SHEET STYLES (CLEAN WHITE A4 / LETTER)           */
 /* ========================================================================= */
 @media print {
