@@ -52,21 +52,28 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   // 9. Keamanan & Kebersihan
   // -------------------------------------------------------------
   const [activeTab, setActiveTab] = useState(() => {
-    if (activeSubTab && [
-      'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
-      'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan-kebersihan', 'cctv'
-    ].includes(activeSubTab)) {
-      return activeSubTab;
+    if (activeSubTab) {
+      if (activeSubTab === 'keamanan-kebersihan') return 'keamanan';
+      if ([
+        'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
+        'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan', 'kebersihan', 'cctv'
+      ].includes(activeSubTab)) {
+        return activeSubTab;
+      }
     }
     return 'database-karyawan';
   });
 
   useEffect(() => {
-    if (activeSubTab && [
-      'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
-      'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan-kebersihan', 'cctv'
-    ].includes(activeSubTab)) {
-      setActiveTab(activeSubTab);
+    if (activeSubTab) {
+      if (activeSubTab === 'keamanan-kebersihan') {
+        setActiveTab('keamanan');
+      } else if ([
+        'database-karyawan', 'recruitment', 'kontrak-kerja', 'absensi',
+        'kpi', 'gathering', 'management-asset', 'maintanance', 'fasilitas', 'keamanan', 'kebersihan', 'cctv'
+      ].includes(activeSubTab)) {
+        setActiveTab(activeSubTab);
+      }
     }
   }, [activeSubTab]);
 
@@ -922,9 +929,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   }, [maintenanceTickets]);
 
   // =============================================================
-  // 9. KEAMANAN & KEBERSIHAN STORE
+  // 9. KEAMANAN POS SATPAM STORE
   // =============================================================
-  const initialSecurityOps = [
+  const initialSecurities = [
     {
       id: 'SEC-001',
       noDok: 'SEC/AMS-POS/2026/0926-01',
@@ -957,7 +964,33 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       judulDokumen: 'Laporan Jaga Pos Lapangan Ashoka View Cidokom',
       catatan: 'Patroli Rutin Aktif • Tamu: 8 Orang, Truk Material: 3 Unit',
       files: [{ name: 'Logbook_Pos_Ashoka_View.pdf', size: '1.2 MB' }]
-    },
+    }
+  ];
+
+  const [securities, setSecurities] = useState(() => {
+    try {
+      const s = localStorage.getItem('ams_hr_security_v3');
+      if (s) return JSON.parse(s);
+      const old = localStorage.getItem('ams_hr_security_v2');
+      if (old) {
+        const parsed = JSON.parse(old);
+        const filtered = parsed.filter(item => !item.id?.startsWith('CLN-'));
+        if (filtered.length > 0) return filtered;
+      }
+    } catch {}
+    return initialSecurities;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ams_hr_security_v3', JSON.stringify(securities));
+    } catch {}
+  }, [securities]);
+
+  // =============================================================
+  // 10. KEBERSIHAN & SANITASI STORE
+  // =============================================================
+  const initialCleanings = [
     {
       id: 'CLN-001',
       noDok: 'CLN/AMS-OPS/2026/0926-01',
@@ -979,22 +1012,39 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       judulDokumen: 'Checklist Kebersihan Ruang Direksi & Kantor Head Office',
       catatan: 'Selesai Dibersihkan • Meja Rapat, Karpet & Sanitasi Rapi',
       files: [{ name: 'Checklist_HO_Bizhub.pdf', size: '850 KB' }]
+    },
+    {
+      id: 'CLN-003',
+      noDok: 'CLN/AMS-OPS/2026/0926-03',
+      tanggalDok: '2026-09-26',
+      project: 'Ashoka Park',
+      nama: 'Siti Aminah & Tim CS Lapangan',
+      kategori: 'Kebersihan Taman & Kawasan',
+      judulDokumen: 'Laporan Pembersihan Jalur Boulevard & Taman Utama Proyek',
+      catatan: 'Penyiraman Tanaman & Pembuangan Sampah Terjadwal • Kawasan Bersih & Rapi',
+      files: [{ name: 'Logbook_Kebersihan_Taman.pdf', size: '1.1 MB' }]
     }
   ];
 
-  const [securityOps, setSecurityOps] = useState(() => {
+  const [cleanings, setCleanings] = useState(() => {
     try {
-      const s = localStorage.getItem('ams_hr_security_v2');
+      const s = localStorage.getItem('ams_hr_cleaning_v1');
       if (s) return JSON.parse(s);
+      const old = localStorage.getItem('ams_hr_security_v2');
+      if (old) {
+        const parsed = JSON.parse(old);
+        const filtered = parsed.filter(item => item.id?.startsWith('CLN-'));
+        if (filtered.length > 0) return filtered;
+      }
     } catch {}
-    return initialSecurityOps;
+    return initialCleanings;
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('ams_hr_security_v2', JSON.stringify(securityOps));
+      localStorage.setItem('ams_hr_cleaning_v1', JSON.stringify(cleanings));
     } catch {}
-  }, [securityOps]);
+  }, [cleanings]);
 
   // =============================================================
   // 10. CCTV MONITORING & KEAMANAN STORE
@@ -1163,11 +1213,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'management-asset': return assets;
       case 'maintanance': return maintenanceTickets;
       case 'fasilitas': return facilities;
-      case 'keamanan-kebersihan': return securityOps;
+      case 'keamanan': return securities;
+      case 'kebersihan': return cleanings;
+      case 'keamanan-kebersihan': return securities;
       case 'cctv': return cctvs;
       default: return employees;
     }
-  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securityOps, cctvs, gatherings]);
+  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securities, cleanings, cctvs, gatherings]);
 
   // Filtered dataset
   const filteredDataset = useMemo(() => {
@@ -1212,8 +1264,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     return ['ALL', ...cats];
   }, [currentDataset, activeTab]);
 
-  // Configuration 11 Tabs sesuai 2 bagian navigasi:
-  // Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI, Gathering
+  // Configuration 12 Tabs (2 Baris Sejajar Rata 6 Kolom):
+  // Bagian Atas (HR - 6 Tab Sejajar): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI, Gathering
   const HR_GA_SUBTABS_TOP = [
     { id: 'database-karyawan', label: 'Data Base Karyawan' },
     { id: 'recruitment', label: 'Recruitment' },
@@ -1223,12 +1275,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     { id: 'gathering', label: 'Gathering' }
   ];
 
-  // Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Fasilitas, Keamanan & Kebersihan, CCTV
+  // Bagian Bawah (GA - 6 Tab Sejajar): Management Asset, Maintanance, Fasilitas, Keamanan, Kebersihan, CCTV
   const HR_GA_SUBTABS_BOTTOM = [
     { id: 'management-asset', label: 'Management Asset' },
     { id: 'maintanance', label: 'Maintanance' },
     { id: 'fasilitas', label: 'Fasilitas' },
-    { id: 'keamanan-kebersihan', label: 'Keamanan & Kebersihan' },
+    { id: 'keamanan', label: 'Keamanan' },
+    { id: 'kebersihan', label: 'Kebersihan' },
     { id: 'cctv', label: 'CCTV' }
   ];
 
@@ -1246,7 +1299,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'management-asset': return { title: 'Management Asset', sub: 'Pencatatan aset tetap perusahaan, kode inventaris, lokasi penempatan & nilai perolehan.' };
       case 'maintanance': return { title: 'Maintanance', sub: 'Jadwal dan tiket perbaikan berkala armada dinas, AC kantor, genset & utilitas operasional.' };
       case 'fasilitas': return { title: 'Fasilitas', sub: 'Inventarisasi sarana kantor pemasaran, galeri display, utilitas listrik & akomodasi pekerja.' };
-      case 'keamanan-kebersihan': return { title: 'Keamanan & Kebersihan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & checklist sanitasi CS.' };
+      case 'keamanan': return { title: 'Keamanan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & buku mutasi penjagaan.' };
+      case 'kebersihan': return { title: 'Kebersihan', sub: 'Checklist kebersihan kantor pemasaran, sanitasi toilet, pembersihan taman boulevard & pembuangan sampah.' };
+      case 'keamanan-kebersihan': return { title: 'Keamanan', sub: 'Laporan shift harian satpam, pos gerbang utama, kontrol armada truk & buku mutasi penjagaan.' };
       case 'cctv': return { title: 'CCTV', sub: 'Monitoring titik kamera pengawas, instalasi NVR/DVR, rekaman keamanan gerbang & kawasan proyek.' };
       default: return { title: 'Hr & Ga', sub: 'Sistem Manajemen Human Resources & General Affair' };
     }
@@ -1265,7 +1320,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       'management-asset': 'AST-GA-2026-',
       'maintanance': 'MNT/AMS-TKT/2026/',
       'fasilitas': 'FAS/AMS-FAS/2026/',
-      'keamanan-kebersihan': 'OPS/SEC-CLN/2026/',
+      'keamanan': 'SEC/AMS-POS/2026/',
+      'kebersihan': 'CLN/AMS-OPS/2026/',
+      'keamanan-kebersihan': 'SEC/AMS-POS/2026/',
       'cctv': 'CCTV/AMS-SEC/2026/'
     };
     const nextSeq = String(currentDataset.length + 1).padStart(2, '0');
@@ -1341,7 +1398,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         case 'management-asset': setAssets(updater); break;
         case 'maintanance': setMaintenanceTickets(updater); break;
         case 'fasilitas': setFacilities(updater); break;
-        case 'keamanan-kebersihan': setSecurityOps(updater); break;
+        case 'keamanan': setSecurities(updater); break;
+        case 'kebersihan': setCleanings(updater); break;
+        case 'keamanan-kebersihan': setSecurities(updater); break;
         case 'cctv': setCctvs(updater); break;
       }
       showNotification(`Dokumen "${title || id}" berhasil dihapus!`, 'info');
@@ -1407,7 +1466,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       case 'management-asset': setAssets(updater); break;
       case 'maintanance': setMaintenanceTickets(updater); break;
       case 'fasilitas': setFacilities(updater); break;
-      case 'keamanan-kebersihan': setSecurityOps(updater); break;
+      case 'keamanan': setSecurities(updater); break;
+      case 'kebersihan': setCleanings(updater); break;
+      case 'keamanan-kebersihan': setSecurities(updater); break;
       case 'cctv': setCctvs(updater); break;
     }
 
@@ -1544,7 +1605,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* BILAH 10 SUB-TAB HR & GA: DUA BAGIAN (ATAS: HR, BAWAH: GA)               */}
+      {/* BILAH SUB-TAB HR & GA: DUA BAGIAN SEJAJAR RATA (ATAS: HR, BAWAH: GA)       */}
       {/* ========================================================================= */}
       <div
         className="glass-card"
@@ -1555,16 +1616,18 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           padding: '0.75rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '8px',
+          overflowX: 'auto'
         }}
       >
-        {/* Bagian Atas (Foto Kiri): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI */}
+        {/* Bagian Atas (HR - 6 Tab Sejajar Rata): Data Base Karyawan, Recruitment, Kontrak Kerja, Absensi, KPI, Gathering */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))',
             gap: '8px',
-            alignItems: 'center'
+            alignItems: 'stretch',
+            minWidth: '760px'
           }}
         >
           {HR_GA_SUBTABS_TOP.map(tab => {
@@ -1580,7 +1643,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                   color: isActive ? '#ffffff' : '#94a3b8',
                   border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
                   borderRadius: '8px',
-                  padding: '10px 14px',
+                  padding: '10px 6px',
                   fontSize: '0.8rem',
                   fontWeight: isActive ? 900 : 700,
                   cursor: 'pointer',
@@ -1590,7 +1653,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  width: '100%'
                 }}
               >
                 <span>{tab.label}</span>
@@ -1599,13 +1663,14 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           })}
         </div>
 
-        {/* Bagian Bawah (Foto Kanan): Management Asset, Maintanance, Keamanan & Kebersihan, Fasilitas, CCTV */}
+        {/* Bagian Bawah (GA - 6 Tab Sejajar Rata): Management Asset, Maintanance, Fasilitas, Keamanan, Kebersihan, CCTV */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))',
             gap: '8px',
-            alignItems: 'center'
+            alignItems: 'stretch',
+            minWidth: '760px'
           }}
         >
           {HR_GA_SUBTABS_BOTTOM.map(tab => {
@@ -1621,7 +1686,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                   color: isActive ? '#ffffff' : '#94a3b8',
                   border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
                   borderRadius: '8px',
-                  padding: '10px 14px',
+                  padding: '10px 6px',
                   fontSize: '0.8rem',
                   fontWeight: isActive ? 900 : 700,
                   cursor: 'pointer',
@@ -1631,7 +1696,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  width: '100%'
                 }}
               >
                 <span>{tab.label}</span>

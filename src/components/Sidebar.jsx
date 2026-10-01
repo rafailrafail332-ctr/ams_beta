@@ -89,9 +89,10 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'hrga-asset', title: '7. Management Asset', moduleKey: 'hr-ga', subTabKey: 'management-asset', icon: Package, color: '#A855F7' },
         { id: 'hrga-maintanance', title: '8. Maintanance & Servis', moduleKey: 'hr-ga', subTabKey: 'maintanance', icon: Wrench, color: '#38BDF8' },
         { id: 'hrga-fasilitas', title: '9. Fasilitas Kantor & Mess', moduleKey: 'hr-ga', subTabKey: 'fasilitas', icon: Building2, color: '#38BDF8' },
-        { id: 'hrga-security', title: '10. Keamanan & Kebersihan', moduleKey: 'hr-ga', subTabKey: 'keamanan-kebersihan', icon: ShieldCheck, color: '#38BDF8' },
-        { id: 'hrga-cctv', title: '11. CCTV Keamanan & Monitoring', moduleKey: 'hr-ga', subTabKey: 'cctv', icon: Eye, color: '#34D399' },
-        { id: 'proc-logistik', title: '12. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
+        { id: 'hrga-security', title: '10. Keamanan & Pos Satpam', moduleKey: 'hr-ga', subTabKey: 'keamanan', icon: ShieldCheck, color: '#38BDF8' },
+        { id: 'hrga-kebersihan', title: '11. Kebersihan & Sanitasi', moduleKey: 'hr-ga', subTabKey: 'kebersihan', icon: Sparkles, color: '#10B981' },
+        { id: 'hrga-cctv', title: '12. CCTV Keamanan & Monitoring', moduleKey: 'hr-ga', subTabKey: 'cctv', icon: Eye, color: '#34D399' },
+        { id: 'proc-logistik', title: '13. Pengadaan & Logistik', moduleKey: 'procurement', subTabKey: 'default', icon: FileText, color: '#FBBF24' }
       ];
     }
 
