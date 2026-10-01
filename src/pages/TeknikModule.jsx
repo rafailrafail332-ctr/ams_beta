@@ -61,7 +61,10 @@ import {
   Camera,
   MessageCircle,
   Share2,
-  Lock
+  Lock,
+  TreePine,
+  Trees,
+  Landmark
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -883,6 +886,96 @@ export const TeknikModule = () => {
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   };
 
+  // Kategori Fasum dan Utilitas Resmi Berdasarkan Dokumen
+  const FASUM_CATEGORIES = [
+    'Masjid',
+    'Sarana Olah Raga',
+    'Gerbang',
+    'Taman',
+    'Jalan lingkungan',
+    'Jaringan Listrik',
+    'Saluran Air',
+    'Turab',
+    'Pagar Area',
+    'CCTV',
+    'Lain - lain'
+  ];
+
+  const STORAGE_KEY_UPLOAD_FOTO_FASUM = 'ams_teknik_upload_foto_fasum_v1';
+  const defaultUploadFotoFasum = [
+    {
+      id: 'UFF-01',
+      proyek: 'Ashoka View',
+      jenisFasum: 'Gerbang',
+      namaFasum: 'Main Gate Gerbang Masuk & Pos Jaga',
+      catatan: 'Pekerjaan gapura utama dan pos sekuriti gerbang depan telah selesai 95%.',
+      photos: [
+        {
+          id: 'ph-fasum-101',
+          url: createConstructionSvg('Gerbang Utama & Pos Jaga', 'Ashoka View - Gerbang Utama', '#10b981', '2025-08-12'),
+          name: 'Gerbang_Utama_AshokaView.jpg',
+          tanggal: '2025-08-12',
+          keterangan: 'Pekerjaan struktur gapura utama perumahan dan pos penjagaan sekuriti'
+        },
+        {
+          id: 'ph-fasum-102',
+          url: createConstructionSvg('Pemasangan Pintu Gerbang & PJU', 'Ashoka View - Gerbang Utama', '#38bdf8', '2025-08-20'),
+          name: 'Pintu_Gerbang_PJU.jpg',
+          tanggal: '2025-08-20',
+          keterangan: 'Finishing cat gapura dan instalasi lampu sorot penerangan gerbang'
+        }
+      ]
+    },
+    {
+      id: 'UFF-02',
+      proyek: 'Ashoka View',
+      jenisFasum: 'Masjid',
+      namaFasum: 'Masjid Jami Al-Hidayah Kawasan',
+      catatan: 'Struktur kubah, plester aci dinding, dan instalasi tempat wudhu sedang berlangsung.',
+      photos: [
+        {
+          id: 'ph-fasum-201',
+          url: createConstructionSvg('Struktur Bangunan Masjid', 'Ashoka View - Masjid Al-Hidayah', '#0284c7', '2025-08-08'),
+          name: 'Masjid_Al_Hidayah_Struktur.jpg',
+          tanggal: '2025-08-08',
+          keterangan: 'Pemasangan kubah utama dan dinding perimeter masjid'
+        }
+      ]
+    },
+    {
+      id: 'UFF-03',
+      proyek: 'Ashoka Park',
+      jenisFasum: 'Jalan lingkungan',
+      namaFasum: 'Pengecoran Jalan Lingkungan Row 8',
+      catatan: 'Pekerjaan rigid pavement cor beton jalan lingkungan blok B dan C.',
+      photos: [
+        {
+          id: 'ph-fasum-301',
+          url: createConstructionSvg('Pengecoran Jalan Beton Row 8', 'Ashoka Park - Jalan Lingkungan', '#f59e0b', '2025-08-15'),
+          name: 'Jalan_Lingkungan_Row8.jpg',
+          tanggal: '2025-08-15',
+          keterangan: 'Pengecoran rabat beton K-300 jalan lingkungan utama'
+        }
+      ]
+    },
+    {
+      id: 'UFF-04',
+      proyek: 'Ashoka Park',
+      jenisFasum: 'Taman',
+      namaFasum: 'Taman Penghijauan & Area Bermain',
+      catatan: 'Penanaman pohon peneduh, rumput gajah mini, dan pembuatan bangku taman.',
+      photos: [
+        {
+          id: 'ph-fasum-401',
+          url: createConstructionSvg('Penghijauan Taman Kawasan', 'Ashoka Park - Taman Bermain', '#10b981', '2025-08-18'),
+          name: 'Taman_Kawasan_Hijau.jpg',
+          tanggal: '2025-08-18',
+          keterangan: 'Penataan landscape taman terbuka hijau dan area bermain anak'
+        }
+      ]
+    }
+  ];
+
   const STORAGE_KEY_UPLOAD_FOTO = 'ams_teknik_upload_foto_v3';
   const defaultUploadFoto = [
     {
@@ -1057,6 +1150,41 @@ export const TeknikModule = () => {
   useEffect(() => {
     saveCloudStore(STORAGE_KEY_UPLOAD_FOTO, uploadFotoRows);
   }, [uploadFotoRows]);
+
+  // Subtab Upload Foto: 'unit' | 'fasum'
+  const [uploadFotoActiveSubTab, setUploadFotoActiveSubTab] = useState('unit');
+
+  // STATE DOKUMENTASI FOTO FASUM DAN UTILITAS
+  const [uploadFotoFasumRows, setUploadFotoFasumRows] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_UPLOAD_FOTO_FASUM);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultUploadFotoFasum;
+  });
+
+  useEffect(() => {
+    saveCloudStore(STORAGE_KEY_UPLOAD_FOTO_FASUM, uploadFotoFasumRows);
+  }, [uploadFotoFasumRows]);
+
+  const [searchFasum, setSearchFasum] = useState('');
+  const [filterFasumProyek, setFilterFasumProyek] = useState('ALL');
+  const [filterFasumJenis, setFilterFasumJenis] = useState('ALL');
+
+  // Form Add / Edit Fasum Modal State
+  const [isFasumModalOpen, setIsFasumModalOpen] = useState(false);
+  const [editingFasumId, setEditingFasumId] = useState(null);
+  const [fasumForm, setFasumForm] = useState({
+    proyek: 'Ashoka View',
+    jenisFasum: 'Masjid',
+    namaFasum: '',
+    catatan: '',
+    tanggal: getTodayDateString(),
+    newPhotos: []
+  });
 
   const [searchFoto, setSearchFoto] = useState('');
   const [filterFotoProyek, setFilterFotoProyek] = useState('ALL');
@@ -1259,6 +1387,129 @@ export const TeknikModule = () => {
       return matchSearch && matchProyek && matchBlok;
     });
   }, [uploadFotoRows, searchFoto, filterFotoProyek, filterFotoBlok]);
+
+  // Filtered Fasum Rows
+  const filteredUploadFotoFasumRows = useMemo(() => {
+    return uploadFotoFasumRows.filter(row => {
+      const matchProyek = filterFasumProyek === 'ALL' || row.proyek === filterFasumProyek;
+      const matchJenis = filterFasumJenis === 'ALL' || row.jenisFasum === filterFasumJenis;
+      const q = searchFasum.toLowerCase().trim();
+      const matchSearch = !q || 
+        (row.proyek || '').toLowerCase().includes(q) || 
+        (row.jenisFasum || '').toLowerCase().includes(q) || 
+        (row.namaFasum || '').toLowerCase().includes(q) || 
+        (row.catatan || '').toLowerCase().includes(q);
+      return matchProyek && matchJenis && matchSearch;
+    });
+  }, [uploadFotoFasumRows, filterFasumProyek, filterFasumJenis, searchFasum]);
+
+  const handleOpenAddFasum = () => {
+    setEditingFasumId(null);
+    setFasumForm({
+      proyek: 'Ashoka View',
+      jenisFasum: 'Masjid',
+      namaFasum: '',
+      catatan: '',
+      tanggal: getTodayDateString(),
+      newPhotos: []
+    });
+    setIsFasumModalOpen(true);
+  };
+
+  const handleOpenEditFasum = (item) => {
+    setEditingFasumId(item.id);
+    const itemTanggal = (item.photos && item.photos[0]?.tanggal) || getTodayDateString();
+    setFasumForm({
+      proyek: item.proyek || 'Ashoka View',
+      jenisFasum: item.jenisFasum || 'Masjid',
+      namaFasum: item.namaFasum || '',
+      catatan: item.catatan || '',
+      tanggal: itemTanggal,
+      newPhotos: []
+    });
+    setIsFasumModalOpen(true);
+  };
+
+  const handleFasumPhotoFilesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setFasumForm(prev => ({
+          ...prev,
+          newPhotos: [
+            ...prev.newPhotos,
+            {
+              id: `ph-fasum-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+              url: ev.target.result,
+              name: file.name,
+              tanggal: prev.tanggal || getTodayDateString(),
+              keterangan: `Dokumentasi Fasum ${file.name}`
+            }
+          ]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+    showNotification(`${files.length} foto fasum siap diunggah!`, 'info');
+  };
+
+  const handleSaveFasumRecord = (e) => {
+    e.preventDefault();
+    if (!fasumForm.proyek || !fasumForm.jenisFasum) {
+      showNotification('Mohon lengkapi Proyek dan Jenis Fasum!', 'warning');
+      return;
+    }
+
+    if (editingFasumId) {
+      setUploadFotoFasumRows(prev => prev.map(row => {
+        if (row.id === editingFasumId) {
+          return {
+            ...row,
+            proyek: fasumForm.proyek,
+            jenisFasum: fasumForm.jenisFasum,
+            namaFasum: fasumForm.namaFasum.trim() || `${fasumForm.jenisFasum} Kawasan`,
+            catatan: fasumForm.catatan.trim(),
+            photos: [...(row.photos || []), ...fasumForm.newPhotos]
+          };
+        }
+        return row;
+      }));
+      showNotification(`Data Dokumentasi Fasum "${fasumForm.jenisFasum}" berhasil diperbarui!`, 'success');
+    } else {
+      const newItem = {
+        id: `UFF-${Date.now()}`,
+        proyek: fasumForm.proyek,
+        jenisFasum: fasumForm.jenisFasum,
+        namaFasum: fasumForm.namaFasum.trim() || `${fasumForm.jenisFasum} Kawasan`,
+        catatan: fasumForm.catatan.trim(),
+        photos: fasumForm.newPhotos.length > 0 ? fasumForm.newPhotos : [
+          {
+            id: `ph-fasum-def-${Date.now()}`,
+            url: createConstructionSvg('Dokumentasi Fasum', `${fasumForm.proyek} - ${fasumForm.jenisFasum}`, '#10b981', fasumForm.tanggal || getTodayDateString()),
+            name: `Dokumentasi_${fasumForm.jenisFasum.replace(/\s+/g, '_')}.jpg`,
+            tanggal: fasumForm.tanggal || getTodayDateString(),
+            keterangan: `Pencatatan awal dokumentasi ${fasumForm.jenisFasum}`
+          }
+        ]
+      };
+      setUploadFotoFasumRows([newItem, ...uploadFotoFasumRows]);
+      showNotification(`Dokumentasi Fasum "${newItem.jenisFasum}" berhasil ditambahkan!`, 'success');
+    }
+    setIsFasumModalOpen(false);
+  };
+
+  const handleDeleteFasumRecord = (id, label) => {
+    if (window.confirm(`Hapus catatan dokumentasi fasum "${label}"?`)) {
+      setUploadFotoFasumRows(prev => prev.filter(row => row.id !== id));
+      showNotification(`Catatan foto fasum "${label}" berhasil dihapus.`, 'warning');
+      if (activeCarouselItem?.id === id) {
+        setActiveCarouselItem(null);
+      }
+    }
+  };
 
   const handleOpenAddFoto = () => {
     setEditingFotoId(null);
@@ -1463,7 +1714,22 @@ export const TeknikModule = () => {
       return row;
     }));
 
-    showNotification(`${newPhotoObjs.length} foto berhasil diunggah ke Blok ${quickUploadTarget.blok} No. ${quickUploadTarget.no}!`, 'success');
+    setUploadFotoFasumRows(prev => prev.map(row => {
+      if (row.id === quickUploadTarget.id) {
+        const updatedPhotos = [...(row.photos || []), ...newPhotoObjs];
+        if (activeCarouselItem?.id === row.id) {
+          setActiveCarouselItem({ ...row, photos: updatedPhotos });
+        }
+        return {
+          ...row,
+          photos: updatedPhotos
+        };
+      }
+      return row;
+    }));
+
+    const targetLabel = quickUploadTarget.blok ? `Blok ${quickUploadTarget.blok} No. ${quickUploadTarget.no}` : (quickUploadTarget.namaFasum || quickUploadTarget.jenisFasum || 'Fasum');
+    showNotification(`${newPhotoObjs.length} foto berhasil diunggah ke ${targetLabel}!`, 'success');
     setIsQuickUploadModalOpen(false);
     setQuickUploadFiles([]);
     setQuickUploadKeterangan('');
@@ -1472,9 +1738,15 @@ export const TeknikModule = () => {
 
   const handleDeletePhotoFromCarousel = (photoId) => {
     if (!activeCarouselItem) return;
-    if (window.confirm('Hapus foto ini dari galeri unit?')) {
+    if (window.confirm('Hapus foto ini dari galeri?')) {
       const updatedPhotos = (activeCarouselItem.photos || []).filter(p => p.id !== photoId);
       setUploadFotoRows(prev => prev.map(row => {
+        if (row.id === activeCarouselItem.id) {
+          return { ...row, photos: updatedPhotos };
+        }
+        return row;
+      }));
+      setUploadFotoFasumRows(prev => prev.map(row => {
         if (row.id === activeCarouselItem.id) {
           return { ...row, photos: updatedPhotos };
         }
@@ -12037,49 +12309,129 @@ export const TeknikModule = () => {
                 </span>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    Dokumentasi & Galeri Foto Lapangan Unit
+                    {uploadFotoActiveSubTab === 'fasum' ? 'Dokumentasi & Galeri Foto Fasum dan Utilitas' : 'Dokumentasi & Galeri Foto Lapangan Unit'}
                   </h2>
                   <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                    Monitoring visual pembangunan unit fisik, galeri carousel interaktif, dan pelaporan WhatsApp ke konsumen.
+                    {uploadFotoActiveSubTab === 'fasum'
+                      ? 'Monitoring visual pembangunan fasilitas umum, sarana ibadah, taman, jalan lingkungan, saluran air, dan utilitas kawasan.'
+                      : 'Monitoring visual pembangunan unit fisik, galeri carousel interaktif, dan pelaporan WhatsApp ke konsumen.'}
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={handleOpenAddFoto}
-                  className="btn btn-primary"
-                  style={{
-                    background: 'linear-gradient(135deg, #0284c7, #2563eb)',
-                    border: 'none',
-                    fontWeight: 900,
-                    fontSize: '0.84rem',
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
-                  }}
-                >
-                  <Plus size={16} />
-                  + Tambah Dokumentasi Unit
-                </button>
+              {/* Subtab Switcher: Upload Foto Unit vs Upload Foto Fasum */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#090d16', padding: '4px', borderRadius: '10px', border: '1.5px solid #1e293b' }}>
+                  <button
+                    type="button"
+                    onClick={() => setUploadFotoActiveSubTab('unit')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontWeight: 900,
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: uploadFotoActiveSubTab === 'unit' ? 'linear-gradient(135deg, #0284c7, #2563eb)' : 'transparent',
+                      color: uploadFotoActiveSubTab === 'unit' ? '#ffffff' : '#94a3b8',
+                      transition: 'all 0.2s ease',
+                      boxShadow: uploadFotoActiveSubTab === 'unit' ? '0 4px 12px rgba(2, 132, 199, 0.4)' : 'none'
+                    }}
+                  >
+                    <Home size={15} />
+                    <span>1. Upload Foto Unit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setUploadFotoActiveSubTab('fasum')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontWeight: 900,
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: uploadFotoActiveSubTab === 'fasum' ? 'linear-gradient(135deg, #10b981, #059669)' : 'transparent',
+                      color: uploadFotoActiveSubTab === 'fasum' ? '#ffffff' : '#94a3b8',
+                      transition: 'all 0.2s ease',
+                      boxShadow: uploadFotoActiveSubTab === 'fasum' ? '0 4px 12px rgba(16, 185, 129, 0.4)' : 'none'
+                    }}
+                  >
+                    <TreePine size={15} />
+                    <span>2. Upload Foto Fasum</span>
+                  </button>
+                </div>
+
+                {uploadFotoActiveSubTab === 'unit' ? (
+                  <button
+                    type="button"
+                    onClick={handleOpenAddFoto}
+                    className="btn btn-primary"
+                    style={{
+                      background: 'linear-gradient(135deg, #0284c7, #2563eb)',
+                      border: 'none',
+                      fontWeight: 900,
+                      fontSize: '0.84rem',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)'
+                    }}
+                  >
+                    <Plus size={16} />
+                    + Tambah Dokumentasi Unit
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleOpenAddFasum}
+                    className="btn btn-success"
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      border: 'none',
+                      fontWeight: 900,
+                      fontSize: '0.84rem',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)'
+                    }}
+                  >
+                    <Plus size={16} />
+                    + Tambah Dokumentasi Fasum
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Quick Stats Banner */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '1.25rem' }}>
               <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8' }}>
-                  <Building2 size={20} />
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: uploadFotoActiveSubTab === 'unit' ? 'rgba(2, 132, 199, 0.15)' : 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: uploadFotoActiveSubTab === 'unit' ? '#38bdf8' : '#34d399' }}>
+                  {uploadFotoActiveSubTab === 'unit' ? <Building2 size={20} /> : <TreePine size={20} />}
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Unit Terdokumentasi</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc' }}>{uploadFotoRows.length} Kavling</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                    {uploadFotoActiveSubTab === 'unit' ? 'Total Unit Terdokumentasi' : 'Total Fasum Terdokumentasi'}
+                  </div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc' }}>
+                    {uploadFotoActiveSubTab === 'unit' ? `${uploadFotoRows.length} Kavling` : `${uploadFotoFasumRows.length} Titik Fasum`}
+                  </div>
                 </div>
               </div>
 
@@ -12090,23 +12442,31 @@ export const TeknikModule = () => {
                 <div>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Foto Tersimpan</div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#4ade80' }}>
-                    {uploadFotoRows.reduce((acc, row) => acc + ((row.photos && row.photos.length) || 0), 0)} Foto
+                    {uploadFotoActiveSubTab === 'unit'
+                      ? `${uploadFotoRows.reduce((acc, row) => acc + ((row.photos && row.photos.length) || 0), 0)} Foto`
+                      : `${uploadFotoFasumRows.reduce((acc, row) => acc + ((row.photos && row.photos.length) || 0), 0)} Foto`}
                   </div>
                 </div>
               </div>
 
               <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fbbf24' }}>
-                  <Users size={20} />
+                  {uploadFotoActiveSubTab === 'unit' ? <Users size={20} /> : <Landmark size={20} />}
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Database Unit Sinkron</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>{databaseUnitRows.length} Terdaftar</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                    {uploadFotoActiveSubTab === 'unit' ? 'Database Unit Sinkron' : 'Kategori Fasum Resmi'}
+                  </div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>
+                    {uploadFotoActiveSubTab === 'unit' ? `${databaseUnitRows.length} Terdaftar` : `${FASUM_CATEGORIES.length} Kategori`}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Filter Toolbar */}
+            {uploadFotoActiveSubTab === 'unit' ? (
+              <>
+            {/* Filter Toolbar Unit */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '1rem', background: '#0f172a', padding: '10px 14px', borderRadius: '8px', border: '1px solid #1e293b' }}>
               {/* Search input */}
               <div style={{ position: 'relative', flex: '1 1 240px' }}>
@@ -12567,13 +12927,358 @@ export const TeknikModule = () => {
               </table>
             </div>
 
-            {/* Footer Summary Info */}
+            {/* Footer Summary Info Unit */}
             <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
               <div>Menampilkan {filteredUploadFotoRows.length} dari {uploadFotoRows.length} unit terdokumentasi</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <CheckCircle2 size={13} color="#22c55e" /> Data tersinkron otomatis ke MySQL Cloud & LocalStorage
               </div>
             </div>
+            </>
+            ) : (
+            <>
+            {/* ======================================================= */}
+            {/* VIEW TAB 2: UPLOAD FOTO FASUM DAN UTILITAS             */}
+            {/* ======================================================= */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '1rem', background: '#0f172a', padding: '10px 14px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+              {/* Search input Fasum */}
+              <div style={{ position: 'relative', flex: '1 1 240px' }}>
+                <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                <input
+                  type="text"
+                  placeholder="Cari Proyek, Jenis Fasum, Lokasi, Catatan..."
+                  value={searchFasum}
+                  onChange={(e) => setSearchFasum(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    padding: '0 12px 0 34px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Filter Proyek Fasum */}
+              <div style={{ minWidth: '160px' }}>
+                <select
+                  value={filterFasumProyek}
+                  onChange={(e) => setFilterFasumProyek(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">🏢 Semua Proyek</option>
+                  {[...new Set(uploadFotoFasumRows.map(u => u.proyek).filter(Boolean))].map(pr => (
+                    <option key={pr} value={pr}>{pr}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filter Jenis Fasum (11 Kategori) */}
+              <div style={{ minWidth: '180px' }}>
+                <select
+                  value={filterFasumJenis}
+                  onChange={(e) => setFilterFasumJenis(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#34d399',
+                    fontSize: '0.84rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">🌳 Semua Jenis Fasum</option>
+                  {FASUM_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {(searchFasum || filterFasumProyek !== 'ALL' || filterFasumJenis !== 'ALL') && (
+                <button
+                  type="button"
+                  onClick={() => { setSearchFasum(''); setFilterFasumProyek('ALL'); setFilterFasumJenis('ALL'); }}
+                  style={{
+                    height: '36px',
+                    padding: '0 12px',
+                    background: '#334155',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#f87171',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <X size={14} /> Reset
+                </button>
+              )}
+            </div>
+
+            {/* Table Fasum: NO BLOK, NO NOMOR */}
+            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #10b981', background: '#0a0f1d' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderBottom: '2px solid #059669', color: '#ffffff', textTransform: 'uppercase', fontSize: '0.74rem', letterSpacing: '0.05em' }}>
+                    <th style={{ padding: '12px 14px', width: '45px', textAlign: 'center' }}>No.</th>
+                    <th style={{ padding: '12px 14px', width: '160px' }}>Proyek</th>
+                    <th style={{ padding: '12px 14px', width: '170px' }}>Jenis Fasum</th>
+                    <th style={{ padding: '12px 14px', minWidth: '200px' }}>Nama / Lokasi Fasum</th>
+                    <th style={{ padding: '12px 14px', minWidth: '240px' }}>View</th>
+                    <th style={{ padding: '12px 14px', minWidth: '220px' }}>Catatan</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', minWidth: '220px' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUploadFotoFasumRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '40px 20px', textAlign: 'center', color: '#ffffff' }}>
+                        <TreePine size={42} style={{ margin: '0 auto 12px auto', opacity: 0.4, display: 'block', color: '#34d399' }} />
+                        <div style={{ fontWeight: 800, fontSize: '0.96rem', color: '#cbd5e1' }}>Belum ada data dokumentasi foto fasum & utilitas</div>
+                        <p style={{ margin: '6px 0 16px 0', fontSize: '0.82rem' }}>Silakan tambahkan data dokumentasi fasilitas umum dari daftar 11 kategori yang tersedia.</p>
+                        <button
+                          type="button"
+                          onClick={handleOpenAddFasum}
+                          className="btn btn-success"
+                          style={{ background: '#10b981', border: 'none', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 800 }}
+                        >
+                          + Tambah Dokumentasi Fasum Sekarang
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredUploadFotoFasumRows.map((row, idx) => {
+                      const photoList = row.photos || [];
+                      const totalPhotos = photoList.length;
+                      const lastIndex = totalPhotos > 0 ? totalPhotos - 1 : 0;
+                      const lastPhoto = totalPhotos > 0 ? photoList[lastIndex] : null;
+
+                      return (
+                        <tr 
+                          key={row.id || idx}
+                          style={{ 
+                            borderBottom: '1px solid #1e293b', 
+                            background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)',
+                            transition: 'background 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.08)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.4)'}
+                        >
+                          {/* No. */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>
+                            {idx + 1}
+                          </td>
+
+                          {/* Proyek */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Building2 size={14} color="#34d399" />
+                              {row.proyek}
+                            </div>
+                          </td>
+
+                          {/* Jenis Fasum (11 Opsi) */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ 
+                              background: 'rgba(16, 185, 129, 0.15)', 
+                              color: '#34d399', 
+                              border: '1px solid rgba(16, 185, 129, 0.35)', 
+                              padding: '4px 10px', 
+                              borderRadius: '6px', 
+                              fontSize: '0.78rem', 
+                              fontWeight: 800,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}>
+                              <TreePine size={12} />
+                              {row.jenisFasum}
+                            </span>
+                          </td>
+
+                          {/* Nama / Lokasi Fasum */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ fontWeight: 800, color: '#f8fafc' }}>
+                              {row.namaFasum || row.jenisFasum}
+                            </div>
+                          </td>
+
+                          {/* View (Thumbnail Foto Terakhir + Badge Total) */}
+                          <td style={{ padding: '12px 14px' }}>
+                            {totalPhotos > 0 && lastPhoto ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div 
+                                  onClick={() => {
+                                    setActiveCarouselItem(row);
+                                    setCarouselIndex(lastIndex);
+                                  }}
+                                  style={{
+                                    width: '64px',
+                                    height: '50px',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden',
+                                    border: '1.5px solid #10b981',
+                                    cursor: 'pointer',
+                                    flexShrink: 0,
+                                    position: 'relative',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                                  }}
+                                  title="Klik untuk membuka Galeri Carousel Foto Fasum"
+                                >
+                                  <img 
+                                    src={lastPhoto.url} 
+                                    alt={lastPhoto.name || 'Dokumentasi Fasum'} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Camera size={12} /> {totalPhotos} Foto Tersimpan
+                                  </div>
+                                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Calendar size={11} /> {lastPhoto.tanggal || '-'}
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: '0.78rem', color: '#64748b', fontStyle: 'italic' }}>Belum ada foto</span>
+                            )}
+                          </td>
+
+                          {/* Catatan / Keterangan Progres */}
+                          <td style={{ padding: '12px 14px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+                              {row.catatan || '-'}
+                            </div>
+                          </td>
+
+                          {/* Aksi */}
+                          <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                              {/* 1. Buka Galeri Carousel */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setActiveCarouselItem(row);
+                                  setCarouselIndex(lastIndex);
+                                }}
+                                title="Buka Galeri Foto"
+                                style={{
+                                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  color: '#ffffff',
+                                  padding: '5px 9px',
+                                  fontSize: '0.76rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <Eye size={13} /> Galeri
+                              </button>
+
+                              {/* 2. Upload Foto Tambahan Cepat */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenQuickUpload(row)}
+                                title="Upload Foto Tambahan"
+                                style={{
+                                  background: 'rgba(56, 189, 248, 0.15)',
+                                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                                  borderRadius: '6px',
+                                  color: '#38bdf8',
+                                  padding: '5px 8px',
+                                  fontSize: '0.76rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                <Camera size={13} /> +Foto
+                              </button>
+
+                              {/* 3. Edit Record */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditFasum(row)}
+                                title="Edit Data Fasum"
+                                style={{
+                                  background: 'rgba(245, 158, 11, 0.15)',
+                                  border: '1px solid rgba(245, 158, 11, 0.4)',
+                                  borderRadius: '6px',
+                                  color: '#fbbf24',
+                                  padding: '5px 8px',
+                                  fontSize: '0.76rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Edit3 size={13} />
+                              </button>
+
+                              {/* 4. Hapus Record */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFasumRecord(row.id, row.namaFasum || row.jenisFasum)}
+                                title="Hapus Dokumentasi Fasum Ini"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  borderRadius: '6px',
+                                  color: '#f87171',
+                                  padding: '5px 8px',
+                                  fontSize: '0.76rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer Summary Info Fasum */}
+            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+              <div>Menampilkan {filteredUploadFotoFasumRows.length} dari {uploadFotoFasumRows.length} titik fasum & utilitas</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckCircle2 size={13} color="#22c55e" /> Data tersinkron otomatis ke MySQL Cloud & LocalStorage
+              </div>
+            </div>
+            </>
+            )}
 
           </div>
         </div>
@@ -16354,11 +17059,21 @@ export const TeknikModule = () => {
                 </span>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc' }}>
-                    {activeCarouselItem.proyek} - Blok {activeCarouselItem.blok} No. {activeCarouselItem.no}
+                    {activeCarouselItem.jenisFasum 
+                      ? `${activeCarouselItem.proyek} - ${activeCarouselItem.namaFasum || activeCarouselItem.jenisFasum}`
+                      : `${activeCarouselItem.proyek} - Blok ${activeCarouselItem.blok} No. ${activeCarouselItem.no}`}
                   </h3>
                   <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
-                    Tipe: <span style={{ color: '#38bdf8', fontWeight: 700 }}>{activeCarouselItem.type}</span> 
-                    {activeCarouselItem.konsumen ? ` • Konsumen: ${activeCarouselItem.konsumen}` : ''}
+                    {activeCarouselItem.jenisFasum ? (
+                      <>
+                        Jenis Fasum: <span style={{ color: '#10b981', fontWeight: 700 }}>{activeCarouselItem.jenisFasum}</span>
+                      </>
+                    ) : (
+                      <>
+                        Tipe: <span style={{ color: '#38bdf8', fontWeight: 700 }}>{activeCarouselItem.type}</span> 
+                        {activeCarouselItem.konsumen ? ` • Konsumen: ${activeCarouselItem.konsumen}` : ''}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -16983,7 +17698,10 @@ export const TeknikModule = () => {
             <div className="modal-header" style={{ borderBottom: '1px solid #1e293b' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8', fontWeight: 900 }}>
                 <Camera size={20} color="#38bdf8" />
-                Upload Foto Tambahan: Blok {quickUploadTarget.blok} No. {quickUploadTarget.no}
+                {quickUploadTarget.jenisFasum 
+                  ? `Upload Foto Tambahan: ${quickUploadTarget.namaFasum || quickUploadTarget.jenisFasum}`
+                  : `Upload Foto Tambahan: Blok ${quickUploadTarget.blok} No. ${quickUploadTarget.no}`
+                }
               </h3>
               <button onClick={() => setIsQuickUploadModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={20} />
@@ -16993,10 +17711,16 @@ export const TeknikModule = () => {
             <div className="modal-body" style={{ padding: '1.25rem' }}>
               <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.25rem' }}>
                 <div style={{ fontWeight: 800, color: '#f8fafc' }}>
-                  {quickUploadTarget.proyek} - Blok {quickUploadTarget.blok} No. {quickUploadTarget.no}
+                  {quickUploadTarget.jenisFasum 
+                    ? `${quickUploadTarget.proyek} • ${quickUploadTarget.jenisFasum} ${quickUploadTarget.namaFasum ? `(${quickUploadTarget.namaFasum})` : ''}`
+                    : `${quickUploadTarget.proyek} - Blok ${quickUploadTarget.blok} No. ${quickUploadTarget.no}`
+                  }
                 </div>
                 <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: '2px' }}>
-                  Tipe: {quickUploadTarget.type} • Foto saat ini: {(quickUploadTarget.photos || []).length} Foto
+                  {quickUploadTarget.jenisFasum 
+                    ? `Fasilitas Umum & Utilitas Kawasan • Foto saat ini: ${(quickUploadTarget.photos || []).length} Foto`
+                    : `Tipe: ${quickUploadTarget.type} • Foto saat ini: ${(quickUploadTarget.photos || []).length} Foto`
+                  }
                 </div>
               </div>
 
@@ -17448,6 +18172,199 @@ export const TeknikModule = () => {
                   style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px' }}
                 >
                   💾 {editingFotoId ? 'Simpan Perubahan' : 'Simpan Dokumentasi Unit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL FORM TAMBAH / EDIT DOKUMENTASI FASUM FOTO (TANPA BLOK & NO UNIT)   */}
+      {/* ========================================================================= */}
+      {isFasumModalOpen && (
+        <div className="modal-backdrop" style={{ zIndex: 1200, background: 'rgba(0,0,0,0.85)' }}>
+          <div className="modal-content" style={{ maxWidth: '580px', background: '#0b1120', border: '1.5px solid #10b981', color: '#ffffff' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #1e293b' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#34d399', fontWeight: 900 }}>
+                <Trees size={20} color="#34d399" />
+                {editingFasumId ? 'Edit Catatan Fasilitas Umum' : 'Tambah Dokumentasi Fasum Baru'}
+              </h3>
+              <button onClick={() => setIsFasumModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveFasumRecord}>
+              <div className="modal-body" style={{ padding: '1.25rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#34d399' }}>
+                    🌿 Dokumentasi Fasilitas Umum & Kawasan
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', marginTop: '2px' }}>
+                    Dokumentasi infrastruktur, utilitas, dan sarana bersama kawasan tanpa blok & nomor unit.
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  {/* Proyek */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Proyek Kawasan: *
+                    </label>
+                    <select
+                      value={fasumForm.proyek}
+                      onChange={(e) => setFasumForm({ ...fasumForm, proyek: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', padding: '0 8px', fontSize: '0.84rem', outline: 'none' }}
+                      required
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Grand Ashoka">Grand Ashoka</option>
+                      <option value="Bukit Ashoka">Bukit Ashoka</option>
+                      <option value="Griya Ashoka">Griya Ashoka</option>
+                    </select>
+                  </div>
+
+                  {/* Jenis Fasum (11 Kategori dari gambar user) */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                      Jenis Fasum: *
+                    </label>
+                    <select
+                      value={fasumForm.jenisFasum}
+                      onChange={(e) => setFasumForm({ ...fasumForm, jenisFasum: e.target.value })}
+                      style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #10b981', borderRadius: '6px', color: '#34d399', fontWeight: 800, padding: '0 8px', fontSize: '0.84rem', outline: 'none' }}
+                      required
+                    >
+                      {FASUM_CATEGORIES.map(cat => (
+                        <option key={cat} value={cat} style={{ background: '#0f172a', color: '#ffffff' }}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Nama / Lokasi Detail Fasum */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Nama / Keterangan Lokasi Spesifik:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Masjid Jami' Sektor Depan, Taman Bermain Blok Timur, Turab Sisi Sungai, dll."
+                    value={fasumForm.namaFasum}
+                    onChange={(e) => setFasumForm({ ...fasumForm, namaFasum: e.target.value })}
+                    style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '3px' }}>
+                    * Opsional. Jika dikosongkan akan otomatis memakai nama Jenis Fasum.
+                  </div>
+                </div>
+
+                {/* Tanggal Dokumentasi */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Tanggal Dokumentasi:
+                  </label>
+                  <input
+                    type="date"
+                    value={fasumForm.tanggal}
+                    onChange={(e) => setFasumForm({ ...fasumForm, tanggal: e.target.value })}
+                    style={{ width: '100%', height: '38px', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#ffffff', padding: '0 10px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Catatan / Keterangan Progres */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Catatan Progres / Kondisi Fasum:
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Contoh: Pemasangan tiang lampu selesai 100%, pengaspalan jalan lingkungan segmen A telah siap..."
+                    value={fasumForm.catatan}
+                    onChange={(e) => setFasumForm({ ...fasumForm, catatan: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '6px', color: '#cbd5e1', padding: '8px 12px', fontSize: '0.84rem', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Upload File Foto */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>
+                    Pilih File Foto Lapangan ({fasumForm.newPhotos.length} dipilih):
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFasumPhotoFilesChange}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1.5px solid #334155',
+                      borderRadius: '6px',
+                      color: '#94a3b8',
+                      padding: '8px 10px',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+
+                  {/* Preview Grid */}
+                  {fasumForm.newPhotos.length > 0 && (
+                    <div style={{ marginTop: '10px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', maxHeight: '120px', overflowY: 'auto' }}>
+                        {fasumForm.newPhotos.map((f, idx) => (
+                          <div key={idx} style={{ position: 'relative', width: '100%', paddingTop: '75%', borderRadius: '6px', overflow: 'hidden', border: '1px solid #10b981' }}>
+                            <img src={f.url} alt={f.name} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFasumForm(prev => ({
+                                  ...prev,
+                                  newPhotos: prev.newPhotos.filter((_, i) => i !== idx)
+                                }));
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '2px',
+                                right: '2px',
+                                background: 'rgba(239, 68, 68, 0.9)',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '18px',
+                                height: '18px',
+                                fontSize: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer'
+                              }}
+                              title="Hapus foto ini"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #1e293b', padding: '1rem 1.25rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsFasumModalOpen(false)}>
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ background: 'linear-gradient(135deg, #059669, #10b981)', border: 'none', fontWeight: 900, color: '#ffffff', padding: '8px 18px' }}
+                >
+                  💾 {editingFasumId ? 'Simpan Perubahan Fasum' : 'Simpan Dokumentasi Fasum'}
                 </button>
               </div>
             </form>
