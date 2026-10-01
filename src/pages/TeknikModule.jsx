@@ -751,6 +751,10 @@ export const TeknikModule = () => {
       npwp: '81.234.567.8-428.000',
       alamat: 'Jl. Gatot Subroto No. 102, Bandung',
       referensi: 'Pameran Mall Festival',
+      proyek: 'Ashoka View',
+      blok: 'A',
+      nomor: '01',
+      type: 'Type 36/60',
       ktpFile: null,
       ktpFileName: 'ktp_budi_santoso.jpg'
     },
@@ -762,6 +766,10 @@ export const TeknikModule = () => {
       npwp: '82.345.678.9-428.000',
       alamat: 'Jl. Cempaka Putih No. 15, Jakarta Pusat',
       referensi: 'Iklan Instagram',
+      proyek: 'Ashoka View',
+      blok: 'A',
+      nomor: '02',
+      type: 'Type 36/60',
       ktpFile: null,
       ktpFileName: 'ktp_siti_rahmawati.jpg'
     },
@@ -773,8 +781,27 @@ export const TeknikModule = () => {
       npwp: '83.456.789.0-428.000',
       alamat: 'Jl. Pasirkaliki No. 89, Bandung',
       referensi: 'Rekomendasi Teman',
+      proyek: 'Ashoka View',
+      blok: 'B',
+      nomor: '05',
+      type: 'Type 45/84',
       ktpFile: null,
       ktpFileName: 'ktp_hendra_gunawan.jpg'
+    },
+    {
+      id: 'KNS-04',
+      nama: 'Ratna Pertiwi',
+      noHp: '0813-8877-6655',
+      nik: '3374116209870002',
+      npwp: '78.901.234.5-508.000',
+      alamat: 'Jl. Majapahit No. 50, Semarang',
+      referensi: 'Brosur',
+      proyek: 'Ashoka Park',
+      blok: 'A',
+      nomor: '01',
+      type: 'Type 54/90',
+      ktpFile: null,
+      ktpFileName: ''
     }
   ];
   const [databaseKonsumenRows, setDatabaseKonsumenRows] = useState(() => {
@@ -1041,6 +1068,8 @@ export const TeknikModule = () => {
   // Form Add / Edit Unit Modal State
   const [isFotoModalOpen, setIsFotoModalOpen] = useState(false);
   const [editingFotoId, setEditingFotoId] = useState(null);
+  const [searchUnitFotoQuery, setSearchUnitFotoQuery] = useState('');
+  const [isSearchUnitFotoOpen, setIsSearchUnitFotoOpen] = useState(false);
   const [fotoForm, setFotoForm] = useState({
     unitId: '',
     proyek: 'Ashoka View',
@@ -1053,6 +1082,133 @@ export const TeknikModule = () => {
     tanggal: getTodayDateString(),
     newPhotos: []
   });
+
+  // Kumpulan Unit & Konsumen Terpadu untuk Pencarian Cepat Dokumentasi Foto
+  const availableUnitsAndCustomers = useMemo(() => {
+    let salesFromMarketing = [];
+    try {
+      const savedSales = localStorage.getItem('ams_teknik_marketing_sales_v1');
+      if (savedSales) {
+        const parsed = JSON.parse(savedSales);
+        if (Array.isArray(parsed)) salesFromMarketing = parsed;
+      }
+    } catch (e) {}
+
+    const list = [];
+
+    // 1. Dari databaseUnitRows
+    (databaseUnitRows || []).forEach(u => {
+      const matchedK = (databaseKonsumenRows || []).find(k => 
+        ((k.proyek && k.proyek.toLowerCase() === (u.proyek || '').toLowerCase()) || !k.proyek) &&
+        (k.blok && k.blok.toUpperCase() === (u.blok || '').toUpperCase()) &&
+        (k.nomor && String(k.nomor).toLowerCase() === String(u.nomor || '').toLowerCase())
+      ) || (databaseKonsumenRows || []).find(k => 
+        (k.unitId && k.unitId === u.id) ||
+        (k.alamat && k.alamat.toLowerCase().includes((u.blok || '').toLowerCase()) && k.alamat.toLowerCase().includes((u.nomor || '').toLowerCase()))
+      );
+
+      const matchedSales = !matchedK ? salesFromMarketing.find(s => 
+        (s.project && s.project.toLowerCase() === (u.proyek || '').toLowerCase()) &&
+        (s.blok && s.blok.toUpperCase() === (u.blok || '').toUpperCase()) &&
+        (s.nomor && String(s.nomor).toLowerCase() === String(u.nomor || '').toLowerCase())
+      ) : null;
+
+      const customerName = matchedK?.nama || matchedSales?.customerName || '';
+      const customerPhone = matchedK?.noHp || matchedSales?.phone || '';
+
+      list.push({
+        key: `unit-${u.id}-${u.proyek}-${u.blok}-${u.nomor}`,
+        unitId: u.id,
+        proyek: u.proyek || 'Ashoka View',
+        blok: u.blok || '',
+        nomor: u.nomor || '',
+        type: u.type || 'Type 36/60',
+        konsumen: customerName,
+        phone: customerPhone
+      });
+    });
+
+    // 2. Dari databaseKonsumenRows yang memiliki blok & nomor tapi belum ada di list
+    (databaseKonsumenRows || []).forEach(k => {
+      if (k.blok && k.nomor) {
+        const alreadyExists = list.some(item => 
+          item.proyek?.toLowerCase() === (k.proyek || '').toLowerCase() &&
+          item.blok?.toUpperCase() === (k.blok || '').toUpperCase() &&
+          String(item.nomor) === String(k.nomor)
+        );
+        if (!alreadyExists) {
+          list.push({
+            key: `kns-${k.id}`,
+            unitId: k.unitId || `UNT-K-${k.id}`,
+            proyek: k.proyek || 'Ashoka View',
+            blok: k.blok,
+            nomor: k.nomor,
+            type: k.type || 'Type 36/60',
+            konsumen: k.nama,
+            phone: k.noHp
+          });
+        }
+      }
+    });
+
+    // 3. Dari sales marketing jika belum terdaftar
+    salesFromMarketing.forEach(s => {
+      if (s.blok && s.nomor) {
+        const alreadyExists = list.some(item => 
+          item.proyek?.toLowerCase() === (s.project || '').toLowerCase() &&
+          item.blok?.toUpperCase() === (s.blok || '').toUpperCase() &&
+          String(item.nomor) === String(s.nomor)
+        );
+        if (!alreadyExists) {
+          list.push({
+            key: `sales-${s.id}`,
+            unitId: `UNT-S-${s.id}`,
+            proyek: s.project || 'Ashoka View',
+            blok: s.blok,
+            nomor: s.nomor,
+            type: s.type || 'Type 36/60',
+            konsumen: s.customerName || '',
+            phone: s.phone || ''
+          });
+        }
+      }
+    });
+
+    return list;
+  }, [databaseUnitRows, databaseKonsumenRows]);
+
+  const filteredUnitsForFoto = useMemo(() => {
+    if (!searchUnitFotoQuery.trim()) {
+      return availableUnitsAndCustomers.slice(0, 10);
+    }
+    const q = searchUnitFotoQuery.toLowerCase().trim();
+    const cleanDigits = q.replace(/\D/g, '');
+    return availableUnitsAndCustomers.filter(item => {
+      const unitStr = `${item.proyek} blok ${item.blok} no ${item.nomor} ${item.blok}${item.nomor} ${item.type}`.toLowerCase();
+      const custStr = (item.konsumen || '').toLowerCase();
+      const phoneClean = (item.phone || '').replace(/\D/g, '');
+      const matchUnit = unitStr.includes(q);
+      const matchCust = custStr.includes(q);
+      const matchPhone = cleanDigits && phoneClean.includes(cleanDigits);
+      return matchUnit || matchCust || matchPhone;
+    });
+  }, [searchUnitFotoQuery, availableUnitsAndCustomers]);
+
+  const handleSelectUnitItem = (item) => {
+    setFotoForm(prev => ({
+      ...prev,
+      unitId: item.unitId,
+      proyek: item.proyek,
+      type: item.type,
+      blok: item.blok,
+      no: item.nomor,
+      konsumen: item.konsumen || prev.konsumen,
+      phone: item.phone || prev.phone
+    }));
+    setSearchUnitFotoQuery(`${item.proyek} - Blok ${item.blok} No. ${item.nomor}`);
+    setIsSearchUnitFotoOpen(false);
+    showNotification(`Data Unit Blok ${item.blok} No. ${item.nomor} ${item.konsumen ? `(${item.konsumen})` : ''} berhasil dimuat!`, 'success');
+  };
 
   // Quick Upload Modal State
   const [isQuickUploadModalOpen, setIsQuickUploadModalOpen] = useState(false);
@@ -1103,6 +1259,8 @@ export const TeknikModule = () => {
 
   const handleOpenAddFoto = () => {
     setEditingFotoId(null);
+    setSearchUnitFotoQuery('');
+    setIsSearchUnitFotoOpen(false);
     setFotoForm({
       unitId: '',
       proyek: 'Ashoka View',
@@ -1120,6 +1278,8 @@ export const TeknikModule = () => {
 
   const handleOpenEditFoto = (item) => {
     setEditingFotoId(item.id);
+    setSearchUnitFotoQuery(item.proyek && item.blok && item.no ? `${item.proyek} - Blok ${item.blok} No. ${item.no}` : '');
+    setIsSearchUnitFotoOpen(false);
     const itemTanggal = (item.photos && item.photos[0]?.tanggal) || getTodayDateString();
     setFotoForm({
       unitId: item.unitId || '',
@@ -16851,37 +17011,151 @@ export const TeknikModule = () => {
             <form onSubmit={handleSaveFotoRecord}>
               <div className="modal-body" style={{ padding: '1.25rem', maxHeight: '70vh', overflowY: 'auto' }}>
                 
-                {/* Opsi Ambil Dari Database Unit Terpadu */}
-                {!editingFotoId && databaseUnitRows.length > 0 && (
-                  <div style={{ background: 'rgba(2, 132, 199, 0.1)', border: '1px solid #0284c7', borderRadius: '8px', padding: '10px 14px', marginBottom: '1.25rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 900, color: '#38bdf8', marginBottom: '6px' }}>
-                      ⚡ Pilih Cepat Dari Database Unit yang Tersedia:
-                    </label>
-                    <select
-                      value={fotoForm.unitId}
-                      onChange={(e) => handleSelectUnitFromDb(e.target.value)}
-                      style={{
-                        width: '100%',
-                        height: '38px',
-                        background: '#0f172a',
-                        border: '1.5px solid #0284c7',
-                        borderRadius: '6px',
-                        color: '#f8fafc',
-                        padding: '0 10px',
-                        fontSize: '0.86rem',
-                        fontWeight: 800,
-                        outline: 'none'
-                      }}
-                    >
-                      <option value="">-- Pilih Unit dari Database Terpadu --</option>
-                      {databaseUnitRows.map(u => (
-                        <option key={u.id} value={u.id}>
-                          {u.proyek} - Blok {u.blok} No. {u.nomor} ({u.type})
-                        </option>
-                      ))}
-                    </select>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
-                      Memilih unit akan otomatis mengisi proyek, blok, tipe, serta mencocokkan data konsumen.
+                {/* PENCARIAN UNIT CEPAT: KETIK DULU DARI DATABASE */}
+                {!editingFotoId && (
+                  <div style={{ background: 'rgba(2, 132, 199, 0.12)', border: '1.5px solid #0284c7', borderRadius: '10px', padding: '12px 14px', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', fontWeight: 900, color: '#38bdf8' }}>
+                        <Search size={15} color="#38bdf8" />
+                        Pilih Cepat (Ketik untuk Cari Unit / Konsumen):
+                      </label>
+                      <span style={{ fontSize: '0.7rem', background: '#0284c7', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
+                        Otomatis Terisi
+                      </span>
+                    </div>
+
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        placeholder="🔍 Ketik No. Unit, Blok, Nama Konsumen, atau No. WA (misal: 01, Blok A, Budi, 0812)..."
+                        value={searchUnitFotoQuery}
+                        onChange={(e) => {
+                          setSearchUnitFotoQuery(e.target.value);
+                          setIsSearchUnitFotoOpen(true);
+                        }}
+                        onFocus={() => setIsSearchUnitFotoOpen(true)}
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          background: '#0f172a',
+                          border: '1.5px solid #38bdf8',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          padding: '0 32px 0 12px',
+                          fontSize: '0.86rem',
+                          fontWeight: 800,
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      {searchUnitFotoQuery && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchUnitFotoQuery('');
+                            setIsSearchUnitFotoOpen(false);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            padding: '4px'
+                          }}
+                          title="Hapus pencarian"
+                        >
+                          ✕
+                        </button>
+                      )}
+
+                      {/* Dropdown Hasil Pencarian saat Ngetik */}
+                      {isSearchUnitFotoOpen && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '105%',
+                            left: 0,
+                            right: 0,
+                            background: '#0b1120',
+                            border: '1.5px solid #0284c7',
+                            borderRadius: '8px',
+                            maxHeight: '220px',
+                            overflowY: 'auto',
+                            zIndex: 50,
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.95)',
+                            padding: '4px'
+                          }}
+                        >
+                          {filteredUnitsForFoto.length === 0 ? (
+                            <div style={{ padding: '10px 14px', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center' }}>
+                              Tidak ditemukan data dengan kata kunci "{searchUnitFotoQuery}"
+                            </div>
+                          ) : (
+                            filteredUnitsForFoto.map(item => (
+                              <div
+                                key={item.key}
+                                onClick={() => handleSelectUnitItem(item)}
+                                style={{
+                                  padding: '8px 10px',
+                                  borderRadius: '5px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  borderBottom: '1px solid #1e293b',
+                                  transition: 'background 0.15s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(56, 189, 248, 0.18)'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              >
+                                <div>
+                                  <div style={{ fontSize: '0.84rem', fontWeight: 900, color: '#38bdf8' }}>
+                                    {item.proyek} &bull; Blok {item.blok} No. {item.nomor} <span style={{ color: '#94a3b8', fontWeight: 700 }}>({item.type})</span>
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'flex', gap: '8px', marginTop: '2px', alignItems: 'center' }}>
+                                    <span>👤 {item.konsumen || 'Belum ada data konsumen'}</span>
+                                    {item.phone && <span style={{ color: '#4ade80', fontWeight: 800 }}>📱 {item.phone}</span>}
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  style={{
+                                    background: '#0284c7',
+                                    border: 'none',
+                                    color: '#ffffff',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 900,
+                                    padding: '4px 10px',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Pilih Unit
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Indikator Unit yang Sedang Terpilih */}
+                    {fotoForm.blok && fotoForm.no && (
+                      <div style={{ marginTop: '8px', padding: '6px 10px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '6px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#34d399', fontWeight: 800 }}>
+                          ✓ Terpilih: <strong>{fotoForm.proyek} - Blok {fotoForm.blok} No. {fotoForm.no}</strong> {fotoForm.konsumen ? `(Pemilik: ${fotoForm.konsumen})` : ''}
+                        </span>
+                        <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Ketik di atas untuk mencari unit lain</span>
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '6px' }}>
+                      💡 Ketik nomor unit, nama konsumen, atau no WA. Saat diklik, seluruh data unit & nomor WA otomatis terisi.
                     </div>
                   </div>
                 )}
