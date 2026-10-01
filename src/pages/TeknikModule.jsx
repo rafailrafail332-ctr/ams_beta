@@ -60,7 +60,8 @@ import {
   ChevronLeft,
   Camera,
   MessageCircle,
-  Share2
+  Share2,
+  Lock
 } from 'lucide-react';
 
 // Indonesian Terbilang Utility
@@ -1222,6 +1223,8 @@ export const TeknikModule = () => {
   const [targetWaItem, setTargetWaItem] = useState(null);
   const [waPhone, setWaPhone] = useState('');
   const [waMessage, setWaMessage] = useState('');
+  const [selectedWaPhotoId, setSelectedWaPhotoId] = useState(null);
+  const [waDeskripsi, setWaDeskripsi] = useState('');
 
   // Keyboard Navigation for Carousel (ArrowLeft & ArrowRight to slide)
   useEffect(() => {
@@ -1491,15 +1494,40 @@ export const TeknikModule = () => {
     const phoneFormatted = cleanNo.startsWith('0') ? '62' + cleanNo.slice(1) : (cleanNo.startsWith('62') ? cleanNo : (cleanNo ? '62' + cleanNo : ''));
     setWaPhone(phoneFormatted || item.phone || '');
     
-    const latestTgl = (item.photos && item.photos[0]?.tanggal) ? formatTanggalIndo(item.photos[0].tanggal) : formatTanggalIndo(getTodayDateString());
-    const msg = `Halo Bapak/Ibu ${item.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${item.proyek}\n🏠 Kavling: Blok ${item.blok} No. ${item.no} (${item.type})\n📅 Tanggal Update: ${latestTgl}\n📝 Catatan Progres: ${item.catatan || 'Pekerjaan konstruksi berjalan sesuai jadwal.'}\n📸 Jumlah Dokumentasi: ${(item.photos || []).length} Foto Lapangan\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
+    const photos = item.photos || [];
+    const defaultPhoto = photos.length > 0 ? photos[photos.length - 1] : null;
+    const defaultPhotoId = defaultPhoto ? defaultPhoto.id : null;
+    setSelectedWaPhotoId(defaultPhotoId);
+
+    const initialDeskripsi = defaultPhoto?.keterangan || item.catatan || 'Pekerjaan pembangunan fisik unit berjalan lancar sesuai jadwal lapangan.';
+    setWaDeskripsi(initialDeskripsi);
+
+    const tglFoto = defaultPhoto?.tanggal ? formatTanggalIndo(defaultPhoto.tanggal) : formatTanggalIndo(getTodayDateString());
+    const msg = `Halo Bapak/Ibu ${item.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${item.proyek}\n🏠 Kavling: Blok ${item.blok} No. ${item.no} (${item.type})\n📅 Tanggal Dokumentasi: ${tglFoto}\n📝 Progres Pekerjaan:\n${initialDeskripsi}\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
     setWaMessage(msg);
     setIsWaModalOpen(true);
   };
 
+  const handleSelectWaPhoto = (photo) => {
+    setSelectedWaPhotoId(photo.id);
+    const newDeskripsi = photo.keterangan || targetWaItem?.catatan || 'Pekerjaan pembangunan fisik unit berjalan lancar sesuai jadwal lapangan.';
+    setWaDeskripsi(newDeskripsi);
+    const tglFoto = photo.tanggal ? formatTanggalIndo(photo.tanggal) : formatTanggalIndo(getTodayDateString());
+    const msg = `Halo Bapak/Ibu ${targetWaItem?.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${targetWaItem?.proyek}\n🏠 Kavling: Blok ${targetWaItem?.blok} No. ${targetWaItem?.no} (${targetWaItem?.type})\n📅 Tanggal Dokumentasi: ${tglFoto}\n📝 Progres Pekerjaan:\n${newDeskripsi}\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
+    setWaMessage(msg);
+  };
+
+  const handleWaDeskripsiChange = (newDeskripsi) => {
+    setWaDeskripsi(newDeskripsi);
+    const currentPhoto = (targetWaItem?.photos || []).find(p => p.id === selectedWaPhotoId);
+    const tglFoto = currentPhoto?.tanggal ? formatTanggalIndo(currentPhoto.tanggal) : formatTanggalIndo(getTodayDateString());
+    const msg = `Halo Bapak/Ibu ${targetWaItem?.konsumen || 'Pemilik Unit'},\n\nBerikut kami sampaikan update laporan progres fisik unit properti Anda di perumahan kami:\n\n🏢 Proyek: ${targetWaItem?.proyek}\n🏠 Kavling: Blok ${targetWaItem?.blok} No. ${targetWaItem?.no} (${targetWaItem?.type})\n📅 Tanggal Dokumentasi: ${tglFoto}\n📝 Progres Pekerjaan:\n${newDeskripsi}\n\nApabila Bapak/Ibu ada pertanyaan seputar pembangunan unit, silakan hubungi tim kami.\n\nTerima kasih,\nTim Teknik & Site Operations\nPT ASHOKA ENTERPRISE REALTY`;
+    setWaMessage(msg);
+  };
+
   const handleSendWaDirect = () => {
     if (!waPhone) {
-      showNotification('Mohon masukkan nomor WhatsApp tujuan!', 'warning');
+      showNotification('Nomor WhatsApp belum terdaftar pada unit ini! Silakan gunakan tombol Edit di tabel untuk mengisi nomor WA.', 'warning');
       return;
     }
     const clean = waPhone.replace(/[^0-9]/g, '');
@@ -16726,70 +16754,180 @@ export const TeknikModule = () => {
               </button>
             </div>
 
-            <div className="modal-body" style={{ padding: '1.25rem' }}>
-              {/* Unit Info Card */}
-              <div style={{ background: '#064e3b', border: '1px solid #1d4ed8', borderRadius: '8px', padding: '10px 14px', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#ecfdf5' }}>
+            <div className="modal-body" style={{ padding: '1.25rem', maxHeight: '78vh', overflowY: 'auto' }}>
+              {/* Unit Info Card & Locked Phone Number */}
+              <div style={{ background: '#064e3b', border: '1.5px solid #16a34a', borderRadius: '10px', padding: '12px 14px', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '0.94rem', color: '#ecfdf5' }}>
                     {targetWaItem.proyek} - Blok {targetWaItem.blok} No. {targetWaItem.no}
                   </div>
                   <span style={{ background: '#10b981', color: '#064e3b', fontWeight: 900, fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px' }}>
                     {targetWaItem.type}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#a7f3d0' }}>
-                  Konsumen: <strong>{targetWaItem.konsumen || 'Belum diisi'}</strong> • Total Foto: <strong>{(targetWaItem.photos || []).length} Foto</strong>
+                
+                {/* Informasi Konsumen & Nomor WA Terkunci Otomatis */}
+                <div style={{ background: '#022c22', border: '1px solid #14532d', borderRadius: '7px', padding: '8px 12px', marginTop: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.74rem', color: '#a7f3d0' }}>Konsumen Pemilik Unit:</div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 900, color: '#ffffff' }}>
+                        👤 {targetWaItem.konsumen || 'Belum diisi'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.74rem', color: '#a7f3d0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Nomor WhatsApp:</span>
+                        <span style={{ background: 'rgba(34, 197, 94, 0.25)', color: '#4ade80', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          <Lock size={10} /> Terkunci
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 900, color: targetWaItem.phone ? '#4ade80' : '#f87171' }}>
+                        📱 {targetWaItem.phone || 'Belum ada nomor WA'}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#6ee7b7', marginTop: '6px', borderTop: '1px dashed #14532d', paddingTop: '4px' }}>
+                    🔒 Nomor WA otomatis terkunci sesuai data unit. Untuk mengganti nomor, silakan gunakan tombol <strong>Edit</strong> di tabel.
+                  </div>
                 </div>
               </div>
 
-              {/* Form Phone Number */}
+              {/* Pilih Foto Dokumentasi Berdasarkan Tanggal Upload */}
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '8px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Camera size={15} color="#4ade80" />
+                    Pilih Foto Dokumentasi yang Ingin Dilaporkan:
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#a7f3d0', fontWeight: 700 }}>
+                    {(targetWaItem.photos || []).length} Foto Tersedia
+                  </span>
+                </label>
+
+                {(targetWaItem.photos && targetWaItem.photos.length > 0) ? (
+                  <div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px', maxHeight: '170px', overflowY: 'auto', padding: '6px', background: '#022c22', border: '1px solid #14532d', borderRadius: '8px', marginBottom: '8px' }}>
+                      {targetWaItem.photos.map((photo, pIdx) => {
+                        const isSelected = selectedWaPhotoId === photo.id;
+                        return (
+                          <div
+                            key={photo.id || pIdx}
+                            onClick={() => handleSelectWaPhoto(photo)}
+                            style={{
+                              border: isSelected ? '2px solid #22c55e' : '1px solid #1e293b',
+                              background: isSelected ? 'rgba(34, 197, 94, 0.2)' : '#011c15',
+                              borderRadius: '7px',
+                              padding: '6px',
+                              cursor: 'pointer',
+                              position: 'relative',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ position: 'relative', width: '100%', paddingTop: '65%', borderRadius: '4px', overflow: 'hidden', marginBottom: '5px', background: '#000' }}>
+                              <img src={photo.url} alt={photo.name} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                              {isSelected && (
+                                <div style={{ position: 'absolute', top: '3px', right: '3px', background: '#22c55e', color: '#ffffff', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
+                                  ✓
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 900, color: isSelected ? '#4ade80' : '#38bdf8' }}>
+                              📅 {formatTanggalIndo(photo.tanggal)}
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }} title={photo.keterangan || photo.name}>
+                              {photo.keterangan || photo.name}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Banner Pratinjau Foto Terpilih & Tombol Unduh Cepat */}
+                    {(() => {
+                      const selPhoto = (targetWaItem.photos || []).find(p => p.id === selectedWaPhotoId) || targetWaItem.photos[targetWaItem.photos.length - 1];
+                      if (!selPhoto) return null;
+                      return (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.4)', borderRadius: '6px', padding: '6px 10px', fontSize: '0.78rem' }}>
+                          <span style={{ color: '#4ade80', fontWeight: 800 }}>
+                            ✓ Terpilih: <strong>Foto Tanggal {formatTanggalIndo(selPhoto.tanggal)}</strong>
+                          </span>
+                          {selPhoto.url && (
+                            <a
+                              href={selPhoto.url}
+                              download={selPhoto.name || `Foto_Progres_${targetWaItem.blok}_${targetWaItem.no}.jpg`}
+                              style={{
+                                background: '#16a34a',
+                                color: '#ffffff',
+                                padding: '4px 10px',
+                                borderRadius: '4px',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              title="Unduh foto ini untuk dilampirkan langsung di WhatsApp"
+                            >
+                              <Download size={13} /> Unduh Foto Ini
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <div style={{ padding: '10px 14px', background: '#022c22', border: '1px solid #14532d', borderRadius: '6px', fontSize: '0.78rem', color: '#a7f3d0' }}>
+                    Belum ada foto yang di-upload pada unit ini. Laporan WhatsApp akan memuat catatan progres umum.
+                  </div>
+                )}
+              </div>
+
+              {/* Deskripsi Progres Unit (Bisa Diedit Sesuai Foto Terpilih) */}
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
-                  Nomor WhatsApp Tujuan (Awali dengan 62 atau 08...):
+                  📝 Deskripsi / Keterangan Progres Unit:
                 </label>
-                <div style={{ position: 'relative' }}>
-                  <Phone size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#4ade80' }} />
-                  <input
-                    type="text"
-                    placeholder="Contoh: 628123456789 atau 08123456789"
-                    value={waPhone}
-                    onChange={(e) => setWaPhone(e.target.value)}
-                    style={{
-                      width: '100%',
-                      height: '40px',
-                      background: '#022c22',
-                      border: '1.5px solid #034efc',
-                      borderRadius: '6px',
-                      color: '#ecfdf5',
-                      fontWeight: 800,
-                      padding: '0 12px 0 38px',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#6ee7b7', marginTop: '4px' }}>
-                  Sistem otomatis mengonversi nomor awalan 08 menjadi format internasional 62.
+                <textarea
+                  rows={2}
+                  placeholder="Ketik deskripsi progres pekerjaan unit..."
+                  value={waDeskripsi}
+                  onChange={(e) => handleWaDeskripsiChange(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#022c22',
+                    border: '1.5px solid #16a34a',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    padding: '8px 12px',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <div style={{ fontSize: '0.7rem', color: '#6ee7b7', marginTop: '3px' }}>
+                  💡 Mengetik deskripsi di atas akan otomatis memperbarui teks pesan WhatsApp di bawah.
                 </div>
               </div>
 
-              {/* Textarea Message */}
+              {/* Pratinjau Isi Pesan WhatsApp */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', marginBottom: '6px' }}>
-                  Isi Pesan WhatsApp:
+                  💬 Pratinjau Pesan WhatsApp yang Akan Dikirim:
                 </label>
                 <textarea
-                  rows={8}
+                  rows={6}
                   value={waMessage}
                   onChange={(e) => setWaMessage(e.target.value)}
                   style={{
                     width: '100%',
-                    background: '#022c22',
-                    border: '1.5px solid #034efc',
+                    background: '#011c15',
+                    border: '1px solid #14532d',
                     borderRadius: '6px',
                     color: '#f0fdf4',
-                    fontSize: '0.84rem',
+                    fontSize: '0.82rem',
                     lineHeight: '1.5',
                     padding: '10px 12px',
                     outline: 'none',
@@ -16812,23 +16950,24 @@ export const TeknikModule = () => {
               <button
                 type="button"
                 onClick={handleSendWaDirect}
+                disabled={!waPhone}
                 style={{
-                  background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                  background: !waPhone ? '#334155' : 'linear-gradient(135deg, #22c55e, #16a34a)',
                   border: 'none',
                   fontWeight: 900,
-                  color: '#ffffff',
+                  color: !waPhone ? '#94a3b8' : '#ffffff',
                   padding: '9px 18px',
                   borderRadius: '6px',
-                  cursor: 'pointer',
+                  cursor: !waPhone ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   fontSize: '0.85rem',
-                  boxShadow: '0 4px 12px rgba(34, 197, 94, 0.4)'
+                  boxShadow: !waPhone ? 'none' : '0 4px 12px rgba(34, 197, 94, 0.4)'
                 }}
               >
                 <MessageCircle size={16} />
-                Buka WhatsApp & Kirim Pesan
+                {!waPhone ? 'Nomor WA Kosong (Edit di Tabel)' : 'Buka WhatsApp & Kirim Pesan'}
               </button>
             </div>
           </div>
