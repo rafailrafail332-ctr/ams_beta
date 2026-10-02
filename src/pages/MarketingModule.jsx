@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { PiutangKonsumenModule } from './PiutangKonsumenModule';
 import { MarketingGrafikModule } from './MarketingGrafikModule';
+import { MarketingEventModule } from './MarketingEventModule';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -313,8 +314,9 @@ export const MarketingModule = () => {
   const sprFileInputRef = useRef(null);
   const [activeUploadTargetId, setActiveUploadTargetId] = useState(null);
 
-  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit, piutang_konsumen, grafik)
+  // Sub-view Tab Control (leads, spr, input_spr, db_konsumen, db_unit, piutang_konsumen, grafik, marketing_event)
   const currentSubView = 
+    (activeSubTab === 'event' || activeSubTab === 'marketing_event' || activeSubTab === 'marketing-event' || activeSubTab === 'marketing_events' || activeSubTab === 'marketing-events') ? 'marketing_event' :
     (activeSubTab === 'grafik' || activeSubTab === 'grafik_penjualan' || activeSubTab === 'grafik-penjualan' || activeSubTab === 'chart') ? 'grafik' :
     (activeSubTab === 'piutang' || activeSubTab === 'piutang_konsumen' || activeSubTab === 'piutang-konsumen') ? 'piutang_konsumen' :
     (activeSubTab === 'input_spr' || activeSubTab === 'form_spr') ? 'input_spr' :
@@ -2610,106 +2612,65 @@ export const MarketingModule = () => {
         </div>
       </div>
 
-      {/* SUB-MODULE TABS NAVIGATION (SESUAI HIRARKI DATA BASE) */}
-      <div className="tab-list no-print" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <button
-          className={`tab-item ${currentSubView === 'leads' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('leads')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'leads' ? '#03f4fc' : undefined,
-            color: currentSubView === 'leads' ? '#03f4fc' : undefined
-          }}
-        >
-          <Users size={16} color={currentSubView === 'leads' ? '#03f4fc' : undefined} /> 1. Pipeline CRM Leads & Komisi Sales Tracker
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'spr' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('spr')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'spr' ? '#03f4fc' : undefined,
-            color: currentSubView === 'spr' ? '#03f4fc' : undefined
-          }}
-        >
-          <FileText size={16} color={currentSubView === 'spr' ? '#03f4fc' : undefined} /> 2. Transaksi Penjualan & Upload Dokumen SPR
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'input_spr' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('input_spr')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'input_spr' ? '#03f4fc' : undefined,
-            color: currentSubView === 'input_spr' ? '#03f4fc' : undefined
-          }}
-        >
-          <FileCheck2 size={16} color={currentSubView === 'input_spr' ? '#03f4fc' : undefined} /> 3. Formulir Input SPR Resmi (MKT-FR)
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'db_konsumen' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('db_konsumen')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'db_konsumen' ? '#03f4fc' : undefined,
-            color: currentSubView === 'db_konsumen' ? '#03f4fc' : undefined
-          }}
-        >
-          <Users size={16} color={currentSubView === 'db_konsumen' ? '#03f4fc' : undefined} /> 4. Data Base Konsumen ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'db_unit' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('db_unit')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'db_unit' ? '#03f4fc' : undefined,
-            color: currentSubView === 'db_unit' ? '#03f4fc' : undefined
-          }}
-        >
-          <Home size={16} color={currentSubView === 'db_unit' ? '#03f4fc' : undefined} /> 5. Data Base Unit Properti ({databaseUnitRows.length})
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'piutang_konsumen' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('piutang_konsumen')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'piutang_konsumen' ? '#03f4fc' : undefined,
-            color: currentSubView === 'piutang_konsumen' ? '#03f4fc' : undefined
-          }}
-        >
-          <CreditCard size={16} color={currentSubView === 'piutang_konsumen' ? '#03f4fc' : undefined} /> 6. Piutang Konsumen (DP & Angsuran)
-        </button>
-        <button
-          className={`tab-item ${currentSubView === 'grafik' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('grafik')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: 800,
-            borderColor: currentSubView === 'grafik' ? '#03f4fc' : undefined,
-            color: currentSubView === 'grafik' ? '#03f4fc' : undefined
-          }}
-        >
-          <BarChart3 size={16} color={currentSubView === 'grafik' ? '#03f4fc' : undefined} /> 7. Grafik Penjualan (Bulan & Tahun)
-        </button>
+      {/* ========================================================================= */}
+      {/* BILAH 8 SUB-MODUL MARKETING UTAMA (DESAIN KAYA LEGAL: FULL IJO KOTAK TEKS PUTIH) */}
+      {/* ========================================================================= */}
+      <div
+        className="glass-card no-print"
+        style={{
+          background: '#090d16',
+          border: '1.5px solid #1e293b',
+          borderRadius: '14px',
+          padding: '0.65rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gap: '8px',
+          marginBottom: '1.25rem',
+          alignItems: 'center'
+        }}
+      >
+        {[
+          { id: 'leads', label: '1. CRM Leads', icon: Users },
+          { id: 'spr', label: '2. Transaksi SPR', icon: FileText },
+          { id: 'input_spr', label: '3. Input Form SPR', icon: FileCheck2 },
+          { id: 'db_konsumen', label: `4. Data Base Konsumen (${databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})`, icon: Users },
+          { id: 'db_unit', label: `5. Data Base Unit (${databaseUnitRows.length})`, icon: Home },
+          { id: 'piutang_konsumen', label: '6. Piutang Konsumen', icon: CreditCard },
+          { id: 'grafik', label: '7. Grafik Penjualan', icon: BarChart3 },
+          { id: 'marketing_event', label: '8. Marketing Event', icon: Calendar }
+        ].map(tab => {
+          const isActive = currentSubView === tab.id;
+          const IconComp = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              style={{
+                background: isActive
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                  : '#0f172a',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
+                borderRadius: '8px',
+                padding: '9px 10px',
+                fontSize: '0.78rem',
+                fontWeight: isActive ? 900 : 700,
+                cursor: 'pointer',
+                textAlign: 'center',
+                boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
+                transition: 'all 0.18s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <IconComp size={15} color={isActive ? '#ffffff' : '#10b981'} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ========================================================================= */}
@@ -5862,6 +5823,13 @@ export const MarketingModule = () => {
           salesList={salesList}
           databaseKonsumenRows={databaseKonsumenRows}
         />
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 8: MARKETING EVENT (JENIS EVENT, PROPOSAL, AKTIVITAS, LAPORAN)        */}
+      {/* ========================================================================= */}
+      {currentSubView === 'marketing_event' && (
+        <MarketingEventModule />
       )}
 
       {/* ========================================================================= */}
