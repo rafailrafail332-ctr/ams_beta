@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { CostOverrunInspector } from '../components/CostOverrunInspector';
+import { FundRequestModal } from '../components/FundRequestModal';
 import { 
   FileCheck, 
   CheckCircle2, 
@@ -20,6 +21,7 @@ import {
 export const TeknikBatp = () => {
   const { showNotification } = useApp();
   const [searchBatp, setSearchBatp] = useState('');
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
 
   const initialBatpList = [
     {
@@ -121,8 +123,28 @@ export const TeknikBatp = () => {
 
       {/* BATP Verification Table */}
       <div className="glass-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Daftar Pengajuan Termin BATP Kontraktor</h3>
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsFundModalOpen(true)}
+          >
+            <DollarSign size={15} color="#ffffff" /> + Ajukan Dana Termin ke Finance
+          </button>
         </div>
 
         {/* Search Bar BATP */}
@@ -215,6 +237,19 @@ export const TeknikBatp = () => {
           </div>
         )}
       </div>
+
+      {/* MODAL PENGAJUAN DANA KE FINANCE */}
+      <FundRequestModal
+        isOpen={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        defaultOrigin="teknik"
+        defaultOriginName="Teknik & Konstruksi"
+        defaultProject="Ashoka View"
+        defaultCategory="Termin Konstruksi BATP"
+        defaultRequester="Hapip Alamsyah / Kholidin (Teknik)"
+        defaultAccountCode="5-101"
+        onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
     </div>
   );
 };

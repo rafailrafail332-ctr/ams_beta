@@ -33,8 +33,10 @@ import {
   FileSpreadsheet,
   ArrowRight,
   UserCheck,
-  Sparkles
+  Sparkles,
+  DollarSign
 } from 'lucide-react';
+import { FundRequestModal } from '../components/FundRequestModal';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -63,6 +65,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     }
     return 'database-karyawan';
   });
+
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
 
   useEffect(() => {
     if (activeSubTab) {
@@ -1579,29 +1583,55 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       <div
         style={{
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
           gap: '12px',
           marginBottom: '0.2rem'
         }}
       >
-        <div
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+            }}
+          >
+            <Users size={22} />
+          </div>
+          <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
+            Hr & Ga
+          </div>
+        </div>
+
+        {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
+        <button
+          type="button"
           style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+            border: '1.5px solid #ef4444',
             color: '#ffffff',
-            display: 'flex',
+            fontWeight: 800,
+            fontSize: '0.82rem',
+            display: 'inline-flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+            cursor: 'pointer'
           }}
+          onClick={() => setIsFundModalOpen(true)}
         >
-          <Users size={22} />
-        </div>
-        <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
-          Hr & Ga
-        </div>
+          <DollarSign size={15} color="#ffffff" /> + Ajukan Dana ke Finance
+        </button>
       </div>
 
       {/* ========================================================================= */}
@@ -3300,6 +3330,18 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         </div>
       )}
 
+      {/* MODAL PENGAJUAN DANA KE FINANCE */}
+      <FundRequestModal
+        isOpen={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        defaultOrigin="hr-ga"
+        defaultOriginName="HR & General Affair"
+        defaultProject="Head Office Bizhub"
+        defaultCategory="Operasional & Pemeliharaan"
+        defaultRequester={currentUser?.name || "Dodi Syaiful Nugroho"}
+        defaultAccountCode="5-301"
+        onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
     </div>
   );
 };

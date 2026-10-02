@@ -51,6 +51,7 @@ import {
 import { PiutangKonsumenModule } from './PiutangKonsumenModule';
 import { MarketingGrafikModule } from './MarketingGrafikModule';
 import { MarketingEventModule } from './MarketingEventModule';
+import { FundRequestModal } from '../components/FundRequestModal';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -294,6 +295,7 @@ export const MarketingModule = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSales, setEditingSales] = useState(null);
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
 
   // Modal Preview Dokumen Berkas (KTP, NPWP, KK, Bukti Transfer)
   const [previewModalDoc, setPreviewModalDoc] = useState(null);
@@ -2609,6 +2611,29 @@ export const MarketingModule = () => {
               <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
+
+          {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
+          <button
+            type="button"
+            className="btn"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsFundModalOpen(true)}
+          >
+            <DollarSign size={15} color="#ffffff" /> + Ajukan Dana ke Finance
+          </button>
         </div>
       </div>
 
@@ -8365,6 +8390,19 @@ export const MarketingModule = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL PENGAJUAN DANA KE FINANCE */}
+      <FundRequestModal
+        isOpen={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        defaultOrigin="marketing"
+        defaultOriginName="Marketing & Sales"
+        defaultProject="Ashoka View"
+        defaultCategory="Promosi & Event"
+        defaultRequester="Adhi Himawan (Marketing)"
+        defaultAccountCode="5-201"
+        onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
     </div>
   );
 };
