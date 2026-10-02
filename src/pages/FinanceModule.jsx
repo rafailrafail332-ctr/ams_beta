@@ -1096,6 +1096,10 @@ export const FinanceModule = () => {
             title="Tren Pengajuan vs Realisasi Pencairan Dana"
             subtitle={`Analisis tren pengeluaran operasional & konstruksi departemen (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
             data={[
+              { label: 'Jan', Total: 42000000, Dicairkan: 40000000 },
+              { label: 'Feb', Total: 48000000, Dicairkan: 45000000 },
+              { label: 'Mar', Total: 55000000, Dicairkan: 52000000 },
+              { label: 'Apr', Total: 60000000, Dicairkan: 56000000 },
               { label: 'Mei', Total: 65000000, Dicairkan: 58000000 },
               { label: 'Jun', Total: 82000000, Dicairkan: 75000000 },
               { label: 'Jul', Total: 95000000, Dicairkan: 88000000 },
@@ -1107,7 +1111,8 @@ export const FinanceModule = () => {
               { key: 'Total', label: 'Total Diajukan', color: '#f59e0b' },
               { key: 'Dicairkan', label: 'Realisasi Dicairkan', color: '#10b981' }
             ]}
-            height={230}
+            badgeText="Disbursement Tracking"
+            height={260}
           />
 
           {/* Filter Bar & Tombol Tambah */}
@@ -1550,6 +1555,10 @@ export const FinanceModule = () => {
             title="Tren Arus Kas Masuk vs Keluar (Cash In vs Cash Out)"
             subtitle={`Monitoring likuiditas transaksi operasional & proyek (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
             data={[
+              { label: 'Jan', In: 280000000, Out: 190000000 },
+              { label: 'Feb', In: 310000000, Out: 210000000 },
+              { label: 'Mar', In: 350000000, Out: 240000000 },
+              { label: 'Apr', In: 320000000, Out: 230000000 },
               { label: 'Mei', In: 340000000, Out: 220000000 },
               { label: 'Jun', In: 420000000, Out: 290000000 },
               { label: 'Jul', In: 480000000, Out: 310000000 },
@@ -1561,7 +1570,8 @@ export const FinanceModule = () => {
               { key: 'In', label: 'Cash In (Penerimaan)', color: '#10b981' },
               { key: 'Out', label: 'Cash Out (Pengeluaran)', color: '#ef4444' }
             ]}
-            height={220}
+            badgeText="Cash Liquidity & Runway"
+            height={260}
           />
 
           {/* Grid Kartu 4 Rekening Bank */}
@@ -2362,6 +2372,10 @@ export const FinanceModule = () => {
             title="Tren Omzet Penjualan Unit: Ashoka View vs Ashoka Park"
             subtitle={`Perbandingan performa penjualan unit properti perumahan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
             data={[
+              { label: 'Jan', AshokaView: 320000000, AshokaPark: 250000000 },
+              { label: 'Feb', AshokaView: 390000000, AshokaPark: 310000000 },
+              { label: 'Mar', AshokaView: 420000000, AshokaPark: 340000000 },
+              { label: 'Apr', AshokaView: 450000000, AshokaPark: 360000000 },
               { label: 'Mei', AshokaView: 485000000, AshokaPark: 380000000 },
               { label: 'Jun', AshokaView: 560000000, AshokaPark: 450000000 },
               { label: 'Jul', AshokaView: 680000000, AshokaPark: 560000000 },
@@ -2373,7 +2387,8 @@ export const FinanceModule = () => {
               { key: 'AshokaView', label: 'Ashoka View (Blok A, B, C)', color: '#38bdf8' },
               { key: 'AshokaPark', label: 'Ashoka Park (Blok PK)', color: '#10b981' }
             ]}
-            height={220}
+            badgeText="Head-to-Head Comparison"
+            height={260}
           />
 
           <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', overflow: 'hidden' }}>
@@ -2875,6 +2890,10 @@ export const FinanceModule = () => {
             title="Tren Pendapatan (Omzet) & Laba Bersih Perusahaan"
             subtitle={`Kinerja profitabilitas konsolidasi tahun berjalan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
             data={[
+              { label: 'Jan', Pendapatan: 380000000, LabaBersih: 110000000 },
+              { label: 'Feb', Pendapatan: 410000000, LabaBersih: 120000000 },
+              { label: 'Mar', Pendapatan: 440000000, LabaBersih: 130000000 },
+              { label: 'Apr', Pendapatan: 460000000, LabaBersih: 135000000 },
               { label: 'Mei', Pendapatan: 480000000, LabaBersih: 140000000 },
               { label: 'Jun', Pendapatan: 590000000, LabaBersih: 185000000 },
               { label: 'Jul', Pendapatan: 670000000, LabaBersih: 220000000 },
@@ -2886,7 +2905,8 @@ export const FinanceModule = () => {
               { key: 'Pendapatan', label: 'Pendapatan (Revenue)', color: '#38bdf8' },
               { key: 'LabaBersih', label: 'Laba Bersih (Net Profit)', color: '#10b981' }
             ]}
-            height={230}
+            badgeText="Executive Financial Performance"
+            height={260}
           />
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
