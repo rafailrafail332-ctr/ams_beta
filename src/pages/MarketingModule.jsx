@@ -2758,18 +2758,18 @@ export const MarketingModule = () => {
           {/* LEADS & COMMISSION TABLE */}
           <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #03f4fc' }}>
             <div className="table-container">
-              <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <table className="custom-table crm-leads-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
                   <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>ID & Tanggal</th>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Nama Konsumen & No WA</th>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Target Unit & Budget</th>
-                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Sumber Lead</th>
-                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Sales Agent</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Potensi Komisi (2.5%)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Tahap Pipeline</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Status Pencairan Komisi</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Aksi Sales</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>ID & Tanggal</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Nama Konsumen & No WA</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Target Unit & Budget</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Sumber Lead</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Sales Agent</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Potensi Komisi (2.5%)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Tahap Pipeline</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Status Pencairan Komisi</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', whiteSpace: 'nowrap', color: '#0a1128' }}>Aksi Sales</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2777,26 +2777,26 @@ export const MarketingModule = () => {
                     const commissionAmount = Math.round((l.budget || 0) * ((l.commissionPct || 2.5) / 100));
 
                     return (
-                      <tr key={l.id}>
-                        <td>
-                          <div style={{ fontWeight: 800, color: '#03f4fc' }}>{l.id}</div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>{l.createdDate}</div>
+                      <tr key={l.id} style={{ color: '#ffffff' }}>
+                        <td style={{ color: '#ffffff' }}>
+                          <div style={{ color: '#ffffff' }}>{l.id}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#ffffff' }}>{l.createdDate}</div>
                         </td>
-                        <td>
-                          <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{l.customerName}</div>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{l.phone}</div>
+                        <td style={{ color: '#ffffff' }}>
+                          <div style={{ color: '#ffffff' }}>{l.customerName}</div>
+                          <div style={{ fontSize: '0.78rem', color: '#ffffff' }}>{l.phone}</div>
                         </td>
-                        <td>
-                          <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{l.unitInterest}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 700 }}>{formatRupiah(l.budget)}</div>
+                        <td style={{ color: '#ffffff' }}>
+                          <div style={{ fontSize: '0.85rem', color: '#ffffff' }}>{l.unitInterest}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#ffffff' }}>{formatRupiah(l.budget)}</div>
                         </td>
-                        <td><span className="badge badge-neutral">{l.source}</span></td>
-                        <td><div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{l.salesPerson}</div></td>
-                        <td>
-                          <div style={{ fontWeight: 900, color: '#10B981', fontSize: '0.9rem' }}>
+                        <td style={{ color: '#ffffff' }}><span className="badge badge-neutral" style={{ color: '#ffffff' }}>{l.source}</span></td>
+                        <td style={{ color: '#ffffff' }}><div style={{ fontSize: '0.85rem', color: '#ffffff' }}>{l.salesPerson}</div></td>
+                        <td style={{ color: '#ffffff' }}>
+                          <div style={{ color: '#ffffff', fontSize: '0.9rem' }}>
                             {formatRupiah(commissionAmount)}
                           </div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>({l.commissionPct || 2.5}% dari harga)</div>
+                          <div style={{ fontSize: '0.7rem', color: '#ffffff' }}>({l.commissionPct || 2.5}% dari harga)</div>
                         </td>
                         <td>
                           <span className={`badge ${

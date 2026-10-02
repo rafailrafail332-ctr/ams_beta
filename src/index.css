@@ -761,6 +761,19 @@ body {
   font-weight: 400 !important;
 }
 
+/* ========================================================================= */
+/* CRM LEADS TABLE: ALL TEXT IN DATA ROWS IS WHITE (#ffffff)                 */
+/* ========================================================================= */
+.crm-leads-table tbody,
+.crm-leads-table tbody tr,
+.crm-leads-table tbody td,
+.crm-leads-table tbody td div:not(button *),
+.crm-leads-table tbody td span:not(button *):not([class*="badge"]),
+.crm-leads-table tbody td p,
+.crm-leads-table tbody td small {
+  color: #ffffff !important;
+}
+
 
 /* ========================================================================= */
 /* ENTERPRISE PRINT & CETAK SHEET STYLES (CLEAN WHITE A4 / LETTER)           */
