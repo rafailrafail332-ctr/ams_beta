@@ -2647,17 +2647,17 @@ export const MarketingModule = () => {
               onClick={() => setActiveSubTab(tab.id)}
               style={{
                 background: isActive
-                  ? '#03f4fc'
+                  ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
                   : '#0f172a',
-                color: isActive ? '#0a1128' : '#94a3b8',
-                border: isActive ? '1.5px solid #02c2ca' : '1px solid #1e293b',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #3b82f6' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '9px 10px',
                 fontSize: '0.78rem',
                 fontWeight: isActive ? 900 : 700,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(3, 244, 252, 0.4)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 78, 252, 0.45)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -2666,7 +2666,7 @@ export const MarketingModule = () => {
                 whiteSpace: 'nowrap'
               }}
             >
-              <IconComp size={15} color={isActive ? '#0a1128' : '#03f4fc'} />
+              <IconComp size={15} color={isActive ? '#ffffff' : '#3b82f6'} />
               <span>{tab.label}</span>
             </button>
           );
@@ -2732,44 +2732,44 @@ export const MarketingModule = () => {
                   placeholder="Cari nama konsumen, unit minat, atau sales agent..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  style={{ paddingLeft: '36px' }}
+                  style={{ paddingLeft: '36px', color: '#ffffff', background: '#0f172a', border: '1px solid #334155' }}
                 />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Filter size={16} color="var(--text-muted)" />
+                <Filter size={16} color="#94a3b8" />
                 <select
                   className="form-control"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{ minWidth: '200px' }}
+                  style={{ minWidth: '200px', color: '#ffffff', background: '#0f172a', border: '1px solid #334155' }}
                 >
-                  <option value="All">Semua Tahap Pipeline</option>
-                  <option value="Lead Baru (Cold)">Lead Baru (Cold)</option>
-                  <option value="Survey Site">Survey Site (Visit Lokasi)</option>
-                  <option value="Prospect Hot (SP3K)">Prospect Hot (SP3K)</option>
-                  <option value="Booking Fee SPR">Booking Fee SPR</option>
-                  <option value="Closed Sold">Closed Sold (Akad)</option>
+                  <option value="All" style={{ background: '#0f172a', color: '#ffffff' }}>Semua Tahap Pipeline</option>
+                  <option value="Lead Baru (Cold)" style={{ background: '#0f172a', color: '#ffffff' }}>Lead Baru (Cold)</option>
+                  <option value="Survey Site" style={{ background: '#0f172a', color: '#ffffff' }}>Survey Site (Visit Lokasi)</option>
+                  <option value="Prospect Hot (SP3K)" style={{ background: '#0f172a', color: '#ffffff' }}>Prospect Hot (SP3K)</option>
+                  <option value="Booking Fee SPR" style={{ background: '#0f172a', color: '#ffffff' }}>Booking Fee SPR</option>
+                  <option value="Closed Sold" style={{ background: '#0f172a', color: '#ffffff' }}>Closed Sold (Akad)</option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* LEADS & COMMISSION TABLE */}
-          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #03f4fc' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #034efc' }}>
             <div className="table-container">
               <table className="custom-table crm-leads-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>ID & Tanggal</th>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Nama Konsumen & No WA</th>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Target Unit & Budget</th>
-                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Sumber Lead</th>
-                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Sales Agent</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Potensi Komisi (2.5%)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Tahap Pipeline</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', whiteSpace: 'nowrap', color: '#0a1128' }}>Status Pencairan Komisi</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', whiteSpace: 'nowrap', color: '#0a1128' }}>Aksi Sales</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>ID & Tanggal</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Nama Konsumen & No WA</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Target Unit & Budget</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Sumber Lead</th>
+                    <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Sales Agent</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Potensi Komisi (2.5%)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Tahap Pipeline</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Status Pencairan Komisi</th>
+                    <th style={{ padding: '11px 10px', textAlign: 'center', whiteSpace: 'nowrap', color: '#ffffff' }}>Aksi Sales</th>
                   </tr>
                 </thead>
                 <tbody>
