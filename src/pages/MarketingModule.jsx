@@ -2502,7 +2502,7 @@ export const MarketingModule = () => {
   const totalOmzet = salesList.reduce((acc, curr) => acc + (curr.status === 'Closed / Sold' ? curr.hargaUnit : 0), 0);
 
   return (
-    <div>
+    <div className="marketing-module-wrapper">
       {/* Hidden File Input for Device SPR File Upload */}
       <input
         type="file"
@@ -2633,8 +2633,8 @@ export const MarketingModule = () => {
           { id: 'leads', label: 'CRM Leads', icon: Users },
           { id: 'spr', label: 'Transaksi SPR', icon: FileText },
           { id: 'input_spr', label: 'Input Form SPR', icon: FileCheck2 },
-          { id: 'db_konsumen', label: `Data Base Konsumen (${databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})`, icon: Users },
-          { id: 'db_unit', label: `Data Base Unit (${databaseUnitRows.length})`, icon: Home },
+          { id: 'db_konsumen', label: 'Data Base Konsumen', icon: Users },
+          { id: 'db_unit', label: 'Data Base Unit', icon: Home },
           { id: 'piutang_konsumen', label: 'Piutang Konsumen', icon: CreditCard },
           { id: 'grafik', label: 'Grafik Penjualan', icon: BarChart3 },
           { id: 'marketing_event', label: 'Marketing Event', icon: Calendar }
@@ -2647,17 +2647,17 @@ export const MarketingModule = () => {
               onClick={() => setActiveSubTab(tab.id)}
               style={{
                 background: isActive
-                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                  ? '#03f4fc'
                   : '#0f172a',
-                color: isActive ? '#ffffff' : '#94a3b8',
-                border: isActive ? '1.5px solid #34d399' : '1px solid #1e293b',
+                color: isActive ? '#0a1128' : '#94a3b8',
+                border: isActive ? '1.5px solid #02c2ca' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '9px 10px',
                 fontSize: '0.78rem',
                 fontWeight: isActive ? 900 : 700,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 244, 252, 0.4)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -2666,7 +2666,7 @@ export const MarketingModule = () => {
                 whiteSpace: 'nowrap'
               }}
             >
-              <IconComp size={15} color={isActive ? '#ffffff' : '#10b981'} />
+              <IconComp size={15} color={isActive ? '#0a1128' : '#03f4fc'} />
               <span>{tab.label}</span>
             </button>
           );

@@ -740,6 +740,27 @@ body {
   font-weight: 400 !important;
 }
 
+/* ========================================================================= */
+/* MARKETING MODULE: ALL TEXT IN TABLES IS REGULAR (TIDAK ADA YANG BOLD)     */
+/* KECUALI HASIL DARI CETAK SPR RESMI                                        */
+/* ========================================================================= */
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) th,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tr,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) th *,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td *,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td b,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td strong,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td span,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td div,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td p,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td button,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td a {
+  font-weight: 400 !important;
+}
+
 
 /* ========================================================================= */
 /* ENTERPRISE PRINT & CETAK SHEET STYLES (CLEAN WHITE A4 / LETTER)           */
