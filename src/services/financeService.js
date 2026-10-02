@@ -314,6 +314,20 @@ export const INITIAL_JURNAL = [
     project: 'Ashoka View',
     status: 'Posted',
     moduleSource: 'Teknik & Konstruksi'
+  },
+  {
+    id: 'JRN-2026-004',
+    refNo: 'BKM/BCA/26/092',
+    date: '2026-10-02',
+    description: 'Penerimaan DP Konsumen Unit PK-05 Ashoka Park',
+    debitAccountCode: '1-102',
+    debitAccountName: 'Bank BCA Operasional',
+    creditAccountCode: '4-101',
+    creditAccountName: 'Pendapatan Penjualan Unit Rumah',
+    amount: 120000000,
+    project: 'Ashoka Park',
+    status: 'Posted',
+    moduleSource: 'Marketing & Sales'
   }
 ];
 
@@ -414,6 +428,18 @@ export const INITIAL_PAYABLES = [
     project: 'Head Office Bizhub',
     dueDate: '2026-10-18',
     status: 'Cicil Sebagian'
+  },
+  {
+    id: 'AP-2026-004',
+    vendor: 'CV Citra Alam Konstruksi',
+    category: 'Cut & Fill Tanah Lahan',
+    billNo: 'INV/CAK/26/04',
+    totalBill: 28000000,
+    paidAmount: 0,
+    remainingAmount: 28000000,
+    project: 'Ashoka Park',
+    dueDate: '2026-10-08',
+    status: 'Menunggu Pengajuan Dana'
   }
 ];
 
@@ -425,6 +451,7 @@ export const INITIAL_TAXES = [
     id: 'TAX-2026-001',
     taxType: 'PPh Final 2.5% Penjualan Rumah',
     taxObject: 'Unit B-04 Ashoka View (Lunas)',
+    project: 'Ashoka View',
     taxBase: 380000000,
     rate: '2.5%',
     taxAmount: 9500000,
@@ -437,6 +464,7 @@ export const INITIAL_TAXES = [
     id: 'TAX-2026-002',
     taxType: 'PPN 11% Unit Komersil',
     taxObject: 'Ruko 02 Bizhub (Tahap 1)',
+    project: 'Bizhub Commercial',
     taxBase: 250000000,
     rate: '11%',
     taxAmount: 27500000,
@@ -449,6 +477,7 @@ export const INITIAL_TAXES = [
     id: 'TAX-2026-003',
     taxType: 'PPh 21 Karyawan & Staf',
     taxObject: 'Gaji Staf & Pimpinan HO',
+    project: 'Head Office Bizhub',
     taxBase: 85000000,
     rate: 'Variatif',
     taxAmount: 4250000,
@@ -456,6 +485,19 @@ export const INITIAL_TAXES = [
     dueDate: '2026-10-10',
     status: 'Disetor & Lapor',
     ntpn: 'NTPN-110294820198421'
+  },
+  {
+    id: 'TAX-2026-004',
+    taxType: 'PPh Final 2.5% Penjualan Rumah',
+    taxObject: 'Unit PK-05 Ashoka Park (DP)',
+    project: 'Ashoka Park',
+    taxBase: 120000000,
+    rate: '2.5%',
+    taxAmount: 3000000,
+    period: 'September 2026',
+    dueDate: '2026-10-15',
+    status: 'Siap Disetor',
+    ntpn: ''
   }
 ];
 
@@ -530,7 +572,19 @@ export const INITIAL_AUDIT = [
 const getStoredItem = (key, fallback) => {
   try {
     const data = localStorage.getItem(key);
-    if (data) return JSON.parse(data);
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && Array.isArray(fallback) && fallback.length > 0 && fallback[0].id) {
+        const existingIds = new Set(parsed.map(p => p.id));
+        const missingFromFallback = fallback.filter(f => !existingIds.has(f.id));
+        if (missingFromFallback.length > 0) {
+          const merged = [...parsed, ...missingFromFallback];
+          localStorage.setItem(key, JSON.stringify(merged));
+          return merged;
+        }
+      }
+      return parsed;
+    }
   } catch (err) {
     console.error(`Error loading key ${key}:`, err);
   }

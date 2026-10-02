@@ -47,6 +47,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { FinanceLineChart } from '../components/FinanceLineChart';
+import { FinanceDonutChart } from '../components/FinanceDonutChart';
 import { TransferProofModal } from '../components/TransferProofModal';
 
 import {
@@ -472,24 +473,44 @@ export const FinanceModule = () => {
     });
   }, [payables, filterProject, filterDateMode, filterMonth, filterDay]);
 
-  // Statistik Pengajuan Dana
+  // Filter Pajak berdasarkan Proyek & Periode
+  const filteredTaxes = useMemo(() => {
+    return taxes.filter(item => {
+      const matchProject =
+        filterProject === 'ALL' ||
+        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase())) ||
+        (item.taxObject && item.taxObject.toLowerCase().includes(filterProject.toLowerCase()));
+
+      let matchDate = true;
+      const itemDate = item.dueDate || '';
+      if (filterDateMode === 'MONTHLY' && filterMonth) {
+        matchDate = itemDate.startsWith(filterMonth);
+      } else if (filterDateMode === 'DAILY' && filterDay) {
+        matchDate = itemDate === filterDay;
+      }
+
+      return matchProject && matchDate;
+    });
+  }, [taxes, filterProject, filterDateMode, filterMonth, filterDay]);
+
+  // Statistik Pengajuan Dana (Reaktif terhadap filter Proyek & Periode)
   const fundStats = useMemo(() => {
-    const totalAmount = fundRequests.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
-    const pendingList = fundRequests.filter(c => c.status === 'Menunggu Review');
-    const approvedList = fundRequests.filter(c => c.status === 'Disetujui');
-    const disbursedList = fundRequests.filter(c => c.status === 'Dicairkan');
+    const totalAmount = filteredFundRequests.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
+    const pendingList = filteredFundRequests.filter(c => c.status === 'Menunggu Review');
+    const approvedList = filteredFundRequests.filter(c => c.status === 'Disetujui');
+    const disbursedList = filteredFundRequests.filter(c => c.status === 'Dicairkan');
 
     return {
-      totalCount: fundRequests.length,
+      totalCount: filteredFundRequests.length,
       totalAmount,
       pendingCount: pendingList.length,
-      pendingAmount: pendingList.reduce((acc, c) => acc + c.amount, 0),
+      pendingAmount: pendingList.reduce((acc, c) => acc + (Number(c.amount) || 0), 0),
       approvedCount: approvedList.length,
-      approvedAmount: approvedList.reduce((acc, c) => acc + c.amount, 0),
+      approvedAmount: approvedList.reduce((acc, c) => acc + (Number(c.amount) || 0), 0),
       disbursedCount: disbursedList.length,
-      disbursedAmount: disbursedList.reduce((acc, c) => acc + c.amount, 0)
+      disbursedAmount: disbursedList.reduce((acc, c) => acc + (Number(c.amount) || 0), 0)
     };
-  }, [fundRequests]);
+  }, [filteredFundRequests]);
 
   // Total Saldo Kas & Bank
   const totalBankBalance = useMemo(() => {
@@ -575,6 +596,90 @@ export const FinanceModule = () => {
       totalEkuitas
     };
   }, [coa]);
+
+  // ===========================================================================
+  // DATASET DONUT CHARTS (KOMPOSISI & ALOKASI DANA MODERN)
+  // ===========================================================================
+  // 1. Donut Dataset: Alokasi Pengajuan Dana per Departemen
+  const fundDonutData = useMemo(() => {
+    const map = {};
+    filteredFundRequests.forEach(req => {
+      const origin = req.originModuleName || req.originModule || 'Lainnya';
+      map[origin] = (map[origin] || 0) + (Number(req.amount) || 0);
+    });
+    const palette = {
+      'Marketing & Sales': '#03cafc',
+      'Teknik & Konstruksi': '#f97316',
+      'HR & General Affair': '#10b981',
+      'Legal & Perizinan': '#a855f7',
+      'Procurement & Logistik': '#3b82f6',
+      'Finance & Acc': '#ef4444'
+    };
+    const items = Object.entries(map).map(([label, value]) => ({
+      label,
+      value,
+      color: palette[label] || '#94a3b8'
+    }));
+    if (items.length === 0) {
+      return [
+        { label: 'Teknik & Konstruksi', value: 73000000, color: '#f97316' },
+        { label: 'Marketing & Promosi', value: 27500000, color: '#03cafc' },
+        { label: 'Legal & Perizinan', value: 18500000, color: '#a855f7' },
+        { label: 'Procurement Material', value: 32000000, color: '#3b82f6' },
+        { label: 'HR & General Affair', value: 6800000, color: '#10b981' }
+      ];
+    }
+    return items;
+  }, [filteredFundRequests]);
+
+  // 2. Donut Dataset: Distribusi Saldo Kas & Bank
+  const bankDonutData = useMemo(() => {
+    return banks.map(b => ({
+      label: b.name.replace(/Operasional|Escrow Penjualan|Proyek/g, '').trim(),
+      value: Number(b.balance) || 0,
+      color: b.color || '#38bdf8'
+    }));
+  }, [banks]);
+
+  // 3. Donut Dataset: Proporsi Penjualan Properti per Proyek
+  const salesDonutData = useMemo(() => {
+    const map = {
+      'Ashoka View': 0,
+      'Ashoka Park': 0,
+      'Bizhub Commercial': 0
+    };
+    filteredSales.forEach(s => {
+      const proj = s.project || 'Ashoka View';
+      const val = Number(s.salePrice) || 0;
+      if (proj.toLowerCase().includes('view')) map['Ashoka View'] += val;
+      else if (proj.toLowerCase().includes('park')) map['Ashoka Park'] += val;
+      else map['Bizhub Commercial'] += val;
+    });
+    const items = [
+      { label: 'Ashoka View', value: map['Ashoka View'], color: '#38bdf8' },
+      { label: 'Ashoka Park', value: map['Ashoka Park'], color: '#10b981' },
+      { label: 'Bizhub Commercial', value: map['Bizhub Commercial'], color: '#f59e0b' }
+    ].filter(i => i.value > 0);
+
+    if (items.length === 0) {
+      return [
+        { label: 'Ashoka View', value: 865000000, color: '#38bdf8' },
+        { label: 'Ashoka Park', value: 560000000, color: '#10b981' },
+        { label: 'Bizhub Commercial', value: 850000000, color: '#f59e0b' }
+      ];
+    }
+    return items;
+  }, [filteredSales]);
+
+  // 4. Donut Dataset: Komposisi Finansial Laba Rugi
+  const pnlDonutData = useMemo(() => {
+    return [
+      { label: 'HPP Konstruksi', value: financialTotals.hpp || 420000000, color: '#f97316' },
+      { label: 'Beban Operasional', value: financialTotals.bebanOps || 120000000, color: '#f59e0b' },
+      { label: 'Beban Pajak', value: financialTotals.bebanPajak || 48000000, color: '#ef4444' },
+      { label: 'Laba Bersih (Net)', value: Math.max(0, financialTotals.labaBersih || 392000000), color: '#10b981' }
+    ];
+  }, [financialTotals]);
 
   // Badge warna modul asal pengajuan
   const getOriginModuleBadge = (origin, originName) => {
@@ -1091,29 +1196,41 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          {/* Grafik Garis Tren Pengajuan vs Pencairan */}
-          <FinanceLineChart
-            title="Tren Pengajuan vs Realisasi Pencairan Dana"
-            subtitle={`Analisis tren pengeluaran operasional & konstruksi departemen (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
-            data={[
-              { label: 'Jan', Total: 42000000, Dicairkan: 40000000 },
-              { label: 'Feb', Total: 48000000, Dicairkan: 45000000 },
-              { label: 'Mar', Total: 55000000, Dicairkan: 52000000 },
-              { label: 'Apr', Total: 60000000, Dicairkan: 56000000 },
-              { label: 'Mei', Total: 65000000, Dicairkan: 58000000 },
-              { label: 'Jun', Total: 82000000, Dicairkan: 75000000 },
-              { label: 'Jul', Total: 95000000, Dicairkan: 88000000 },
-              { label: 'Agt', Total: 110000000, Dicairkan: 102000000 },
-              { label: 'Sep', Total: 135000000, Dicairkan: 125000000 },
-              { label: 'Okt', Total: fundStats.totalAmount || 146000000, Dicairkan: fundStats.disbursedAmount || 118000000 }
-            ]}
-            series={[
-              { key: 'Total', label: 'Total Diajukan', color: '#f59e0b' },
-              { key: 'Dicairkan', label: 'Realisasi Dicairkan', color: '#10b981' }
-            ]}
-            badgeText="Disbursement Tracking"
-            height={260}
-          />
+          {/* Dual Visual: Grafik Garis Tren & Donut Chart Alokasi Departemen */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
+            <FinanceLineChart
+              title="Tren Pengajuan vs Realisasi Pencairan Dana"
+              subtitle={`Analisis tren pengeluaran operasional & konstruksi (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={[
+                { label: 'Jan', Total: 42000000, Dicairkan: 40000000 },
+                { label: 'Feb', Total: 48000000, Dicairkan: 45000000 },
+                { label: 'Mar', Total: 55000000, Dicairkan: 52000000 },
+                { label: 'Apr', Total: 60000000, Dicairkan: 56000000 },
+                { label: 'Mei', Total: 65000000, Dicairkan: 58000000 },
+                { label: 'Jun', Total: 82000000, Dicairkan: 75000000 },
+                { label: 'Jul', Total: 95000000, Dicairkan: 88000000 },
+                { label: 'Agt', Total: 110000000, Dicairkan: 102000000 },
+                { label: 'Sep', Total: 135000000, Dicairkan: 125000000 },
+                { label: 'Okt', Total: fundStats.totalAmount || 146000000, Dicairkan: fundStats.disbursedAmount || 118000000 }
+              ]}
+              series={[
+                { key: 'Total', label: 'Total Diajukan', color: '#f59e0b' },
+                { key: 'Dicairkan', label: 'Realisasi Dicairkan', color: '#10b981' }
+              ]}
+              badgeText="Disbursement Tracking"
+              height={180}
+              projectFilter={filterProject}
+              onProjectChange={setFilterProject}
+            />
+
+            <FinanceDonutChart
+              title="Alokasi Dana per Departemen"
+              subtitle={`Distribusi porsi pengajuan berdasarkan divisi asal (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={fundDonutData}
+              badgeText="Department Share"
+              height={180}
+            />
+          </div>
 
           {/* Filter Bar & Tombol Tambah */}
           <div
@@ -1550,29 +1667,41 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          {/* Grafik Garis Tren Arus Kas (Cash In vs Cash Out) */}
-          <FinanceLineChart
-            title="Tren Arus Kas Masuk vs Keluar (Cash In vs Cash Out)"
-            subtitle={`Monitoring likuiditas transaksi operasional & proyek (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
-            data={[
-              { label: 'Jan', In: 280000000, Out: 190000000 },
-              { label: 'Feb', In: 310000000, Out: 210000000 },
-              { label: 'Mar', In: 350000000, Out: 240000000 },
-              { label: 'Apr', In: 320000000, Out: 230000000 },
-              { label: 'Mei', In: 340000000, Out: 220000000 },
-              { label: 'Jun', In: 420000000, Out: 290000000 },
-              { label: 'Jul', In: 480000000, Out: 310000000 },
-              { label: 'Agt', In: 550000000, Out: 390000000 },
-              { label: 'Sep', In: 610000000, Out: 430000000 },
-              { label: 'Okt', In: 680000000, Out: 485000000 }
-            ]}
-            series={[
-              { key: 'In', label: 'Cash In (Penerimaan)', color: '#10b981' },
-              { key: 'Out', label: 'Cash Out (Pengeluaran)', color: '#ef4444' }
-            ]}
-            badgeText="Cash Liquidity & Runway"
-            height={260}
-          />
+          {/* Dual Visual: Grafik Garis Arus Kas & Donut Chart Likuiditas Bank */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
+            <FinanceLineChart
+              title="Tren Arus Kas Masuk vs Keluar (Cash In vs Cash Out)"
+              subtitle={`Monitoring likuiditas transaksi operasional & proyek (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={[
+                { label: 'Jan', In: 280000000, Out: 190000000 },
+                { label: 'Feb', In: 310000000, Out: 210000000 },
+                { label: 'Mar', In: 350000000, Out: 240000000 },
+                { label: 'Apr', In: 320000000, Out: 230000000 },
+                { label: 'Mei', In: 340000000, Out: 220000000 },
+                { label: 'Jun', In: 420000000, Out: 290000000 },
+                { label: 'Jul', In: 480000000, Out: 310000000 },
+                { label: 'Agt', In: 550000000, Out: 390000000 },
+                { label: 'Sep', In: 610000000, Out: 430000000 },
+                { label: 'Okt', In: 680000000, Out: 485000000 }
+              ]}
+              series={[
+                { key: 'In', label: 'Cash In (Penerimaan)', color: '#10b981' },
+                { key: 'Out', label: 'Cash Out (Pengeluaran)', color: '#ef4444' }
+              ]}
+              badgeText="Cash Runway"
+              height={180}
+              projectFilter={filterProject}
+              onProjectChange={setFilterProject}
+            />
+
+            <FinanceDonutChart
+              title="Komposisi Saldo Kas & Bank"
+              subtitle="Porsi saldo riil yang tersimpan di seluruh rekening operasional & escrow"
+              data={bankDonutData}
+              badgeText="Liquidity Spread"
+              height={180}
+            />
+          </div>
 
           {/* Grid Kartu 4 Rekening Bank */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
@@ -2367,29 +2496,41 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          {/* Grafik Garis Tren Omzet: Ashoka View vs Ashoka Park */}
-          <FinanceLineChart
-            title="Tren Omzet Penjualan Unit: Ashoka View vs Ashoka Park"
-            subtitle={`Perbandingan performa penjualan unit properti perumahan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
-            data={[
-              { label: 'Jan', AshokaView: 320000000, AshokaPark: 250000000 },
-              { label: 'Feb', AshokaView: 390000000, AshokaPark: 310000000 },
-              { label: 'Mar', AshokaView: 420000000, AshokaPark: 340000000 },
-              { label: 'Apr', AshokaView: 450000000, AshokaPark: 360000000 },
-              { label: 'Mei', AshokaView: 485000000, AshokaPark: 380000000 },
-              { label: 'Jun', AshokaView: 560000000, AshokaPark: 450000000 },
-              { label: 'Jul', AshokaView: 680000000, AshokaPark: 560000000 },
-              { label: 'Agt', AshokaView: 750000000, AshokaPark: 680000000 },
-              { label: 'Sep', AshokaView: 865000000, AshokaPark: 810000000 },
-              { label: 'Okt', AshokaView: 940000000, AshokaPark: 890000000 }
-            ]}
-            series={[
-              { key: 'AshokaView', label: 'Ashoka View (Blok A, B, C)', color: '#38bdf8' },
-              { key: 'AshokaPark', label: 'Ashoka Park (Blok PK)', color: '#10b981' }
-            ]}
-            badgeText="Head-to-Head Comparison"
-            height={260}
-          />
+          {/* Dual Visual: Tren Penjualan & Donut Chart Proporsi Omzet Proyek */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
+            <FinanceLineChart
+              title="Tren Omzet Penjualan Unit: Ashoka View vs Ashoka Park"
+              subtitle={`Perbandingan performa penjualan unit properti perumahan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={[
+                { label: 'Jan', AshokaView: 320000000, AshokaPark: 250000000 },
+                { label: 'Feb', AshokaView: 390000000, AshokaPark: 310000000 },
+                { label: 'Mar', AshokaView: 420000000, AshokaPark: 340000000 },
+                { label: 'Apr', AshokaView: 450000000, AshokaPark: 360000000 },
+                { label: 'Mei', AshokaView: 485000000, AshokaPark: 380000000 },
+                { label: 'Jun', AshokaView: 560000000, AshokaPark: 450000000 },
+                { label: 'Jul', AshokaView: 680000000, AshokaPark: 560000000 },
+                { label: 'Agt', AshokaView: 750000000, AshokaPark: 680000000 },
+                { label: 'Sep', AshokaView: 865000000, AshokaPark: 810000000 },
+                { label: 'Okt', AshokaView: 940000000, AshokaPark: 890000000 }
+              ]}
+              series={[
+                { key: 'AshokaView', label: 'Ashoka View (Blok A, B, C)', color: '#38bdf8' },
+                { key: 'AshokaPark', label: 'Ashoka Park (Blok PK)', color: '#10b981' }
+              ]}
+              badgeText="Head-to-Head Comparison"
+              height={180}
+              projectFilter={filterProject}
+              onProjectChange={setFilterProject}
+            />
+
+            <FinanceDonutChart
+              title="Proporsi Omzet Properti"
+              subtitle={`Porsi kontribusi omzet penjualan per kawasan perumahan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={salesDonutData}
+              badgeText="Revenue Contribution"
+              height={180}
+            />
+          </div>
 
           <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
@@ -2698,10 +2839,19 @@ export const FinanceModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {taxes.map((item) => (
+                {filteredTaxes.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                      Tidak ada data kewajiban pajak untuk filter ({filterProject} • {filterDateMode}).
+                    </td>
+                  </tr>
+                ) : filteredTaxes.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 800, color: '#f87171' }}>{item.taxType}</td>
-                    <td style={{ padding: '12px 14px', color: '#ffffff' }}>{item.taxObject}</td>
+                    <td style={{ padding: '12px 14px', color: '#ffffff' }}>
+                      <div>{item.taxObject}</div>
+                      {item.project && <div style={{ fontSize: '0.7rem', color: '#f87171' }}>{item.project}</div>}
+                    </td>
                     <td style={{ padding: '12px 14px', textAlign: 'right', color: '#cbd5e1' }}>
                       Rp {Number(item.taxBase).toLocaleString('id-ID')}
                     </td>
@@ -2885,29 +3035,41 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          {/* Grafik Garis Tren Finansial Eksekutif */}
-          <FinanceLineChart
-            title="Tren Pendapatan (Omzet) & Laba Bersih Perusahaan"
-            subtitle={`Kinerja profitabilitas konsolidasi tahun berjalan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
-            data={[
-              { label: 'Jan', Pendapatan: 380000000, LabaBersih: 110000000 },
-              { label: 'Feb', Pendapatan: 410000000, LabaBersih: 120000000 },
-              { label: 'Mar', Pendapatan: 440000000, LabaBersih: 130000000 },
-              { label: 'Apr', Pendapatan: 460000000, LabaBersih: 135000000 },
-              { label: 'Mei', Pendapatan: 480000000, LabaBersih: 140000000 },
-              { label: 'Jun', Pendapatan: 590000000, LabaBersih: 185000000 },
-              { label: 'Jul', Pendapatan: 670000000, LabaBersih: 220000000 },
-              { label: 'Agt', Pendapatan: 790000000, LabaBersih: 280000000 },
-              { label: 'Sep', Pendapatan: 890000000, LabaBersih: 335000000 },
-              { label: 'Okt', Pendapatan: financialTotals.pendapatan || 980000000, LabaBersih: financialTotals.labaBersih || 390000000 }
-            ]}
-            series={[
-              { key: 'Pendapatan', label: 'Pendapatan (Revenue)', color: '#38bdf8' },
-              { key: 'LabaBersih', label: 'Laba Bersih (Net Profit)', color: '#10b981' }
-            ]}
-            badgeText="Executive Financial Performance"
-            height={260}
-          />
+          {/* Dual Visual: Tren Finansial Eksekutif & Donut Chart Alokasi Laba Rugi */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
+            <FinanceLineChart
+              title="Tren Pendapatan (Omzet) & Laba Bersih Perusahaan"
+              subtitle={`Kinerja profitabilitas konsolidasi tahun berjalan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={[
+                { label: 'Jan', Pendapatan: 380000000, LabaBersih: 110000000 },
+                { label: 'Feb', Pendapatan: 410000000, LabaBersih: 120000000 },
+                { label: 'Mar', Pendapatan: 440000000, LabaBersih: 130000000 },
+                { label: 'Apr', Pendapatan: 460000000, LabaBersih: 135000000 },
+                { label: 'Mei', Pendapatan: 480000000, LabaBersih: 140000000 },
+                { label: 'Jun', Pendapatan: 590000000, LabaBersih: 185000000 },
+                { label: 'Jul', Pendapatan: 670000000, LabaBersih: 220000000 },
+                { label: 'Agt', Pendapatan: 790000000, LabaBersih: 280000000 },
+                { label: 'Sep', Pendapatan: 890000000, LabaBersih: 335000000 },
+                { label: 'Okt', Pendapatan: financialTotals.pendapatan || 980000000, LabaBersih: financialTotals.labaBersih || 390000000 }
+              ]}
+              series={[
+                { key: 'Pendapatan', label: 'Pendapatan (Revenue)', color: '#38bdf8' },
+                { key: 'LabaBersih', label: 'Laba Bersih (Net Profit)', color: '#10b981' }
+              ]}
+              badgeText="Executive Financial Performance"
+              height={180}
+              projectFilter={filterProject}
+              onProjectChange={setFilterProject}
+            />
+
+            <FinanceDonutChart
+              title="Struktur Biaya vs Profitabilitas"
+              subtitle={`Komposisi HPP, beban operasional, pajak & net profit (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={pnlDonutData}
+              badgeText="Cost & Margin Breakdown"
+              height={180}
+            />
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
             
