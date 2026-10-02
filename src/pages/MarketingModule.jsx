@@ -2630,14 +2630,14 @@ export const MarketingModule = () => {
         }}
       >
         {[
-          { id: 'leads', label: '1. CRM Leads', icon: Users },
-          { id: 'spr', label: '2. Transaksi SPR', icon: FileText },
-          { id: 'input_spr', label: '3. Input Form SPR', icon: FileCheck2 },
-          { id: 'db_konsumen', label: `4. Data Base Konsumen (${databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})`, icon: Users },
-          { id: 'db_unit', label: `5. Data Base Unit (${databaseUnitRows.length})`, icon: Home },
-          { id: 'piutang_konsumen', label: '6. Piutang Konsumen', icon: CreditCard },
-          { id: 'grafik', label: '7. Grafik Penjualan', icon: BarChart3 },
-          { id: 'marketing_event', label: '8. Marketing Event', icon: Calendar }
+          { id: 'leads', label: 'CRM Leads', icon: Users },
+          { id: 'spr', label: 'Transaksi SPR', icon: FileText },
+          { id: 'input_spr', label: 'Input Form SPR', icon: FileCheck2 },
+          { id: 'db_konsumen', label: `Data Base Konsumen (${databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length})`, icon: Users },
+          { id: 'db_unit', label: `Data Base Unit (${databaseUnitRows.length})`, icon: Home },
+          { id: 'piutang_konsumen', label: 'Piutang Konsumen', icon: CreditCard },
+          { id: 'grafik', label: 'Grafik Penjualan', icon: BarChart3 },
+          { id: 'marketing_event', label: 'Marketing Event', icon: Calendar }
         ].map(tab => {
           const isActive = currentSubView === tab.id;
           const IconComp = tab.icon;
