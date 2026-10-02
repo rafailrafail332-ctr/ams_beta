@@ -1785,7 +1785,7 @@ export const PiutangKonsumenModule = () => {
         style={{
           padding: '1.25rem 1.5rem',
           background: '#0f172a',
-          border: '1.5px solid #0284c7',
+          border: '1.5px solid #03cafc',
           borderRadius: '14px',
           marginBottom: '1.5rem',
           boxShadow: '0 8px 24px rgba(2, 132, 199, 0.15)'
@@ -1835,7 +1835,7 @@ export const PiutangKonsumenModule = () => {
               title="Tarik data otomatis dari transaksi penjualan SPR yang sudah closing"
               style={{
                 background: 'rgba(56, 189, 248, 0.15)',
-                color: '#38bdf8',
+                color: '#03cafc',
                 border: '1px solid #0284c7',
                 fontWeight: 800,
                 display: 'inline-flex',
@@ -1852,7 +1852,7 @@ export const PiutangKonsumenModule = () => {
               className="btn btn-primary btn-sm"
               onClick={handleOpenAddRow}
               style={{
-                background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
                 border: 'none',
                 color: '#ffffff',
                 fontWeight: 800,
@@ -1861,7 +1861,7 @@ export const PiutangKonsumenModule = () => {
                 gap: '0.4rem',
                 padding: '0.45rem 1rem',
                 borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)'
+                boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)'
               }}
             >
               <Plus size={16} /> + Tambah Piutang Konsumen
@@ -1905,7 +1905,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#034efc',
+                background: '#03cafc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -1942,7 +1942,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#034efc',
+                background: '#03cafc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -1979,7 +1979,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#034efc',
+                background: '#03cafc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -2016,7 +2016,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span
               style={{
-                background: '#034efc',
+                background: '#03cafc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -2176,7 +2176,7 @@ export const PiutangKonsumenModule = () => {
           }}
         >
           <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700 }}>Total Harga Jual Net</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#03cafc', marginTop: '4px' }}>
             {formatRupiah(totals.hargaJualNet)}
           </div>
           <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
@@ -2223,12 +2223,12 @@ export const PiutangKonsumenModule = () => {
           style={{
             padding: '1rem 1.25rem',
             background: '#1e293b',
-            border: '1.5px solid #0284c7',
+            border: '1.5px solid #03cafc',
             borderRadius: '10px'
           }}
         >
-          <div style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: 800 }}>Total Sisa Saldo Piutang</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8', marginTop: '4px' }}>
+          <div style={{ fontSize: '0.78rem', color: '#03cafc', fontWeight: 800 }}>Total Sisa Saldo Piutang</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#03cafc', marginTop: '4px' }}>
             {formatRupiah(totals.saldo)}
           </div>
           <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>Sisa kewajiban konsumen</div>
@@ -2243,7 +2243,7 @@ export const PiutangKonsumenModule = () => {
         style={{
           padding: 0,
           background: '#0f172a',
-          border: '1.5px solid #034efc',
+          border: '1.5px solid #03cafc',
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 8px 30px rgba(0,0,0,0.4)'
@@ -2259,15 +2259,15 @@ export const PiutangKonsumenModule = () => {
               textAlign: 'left'
             }}
           >
-            {/* MARKETING ROYAL BLUE #034efc HEADER ROW */}
+            {/* MARKETING ROYAL BLUE #03cafc HEADER ROW */}
             <thead>
               <tr
                 style={{
-                  background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                  background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
                   color: '#ffffff',
                   textAlign: 'center',
                   fontWeight: 800,
-                  borderBottom: '2px solid #1d4ed8'
+                  borderBottom: '2px solid #03cafc'
                 }}
               >
                 <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '35px', color: '#ffffff', fontWeight: 800 }}>No.</th>
@@ -2375,7 +2375,7 @@ export const PiutangKonsumenModule = () => {
                           <span
                             style={{
                               fontSize: '0.67rem',
-                              color: '#38bdf8',
+                              color: '#03cafc',
                               background: 'rgba(56, 189, 248, 0.1)',
                               border: '1px solid rgba(56, 189, 248, 0.25)',
                               padding: '1px 5px',
@@ -2414,7 +2414,7 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Blok */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.blok}
                     </td>
 
@@ -2439,7 +2439,7 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Total LB/LT */}
-                    <td style={{ textAlign: 'center', padding: '9px 8px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.totalLbLt}
                     </td>
 
@@ -2454,7 +2454,7 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Harga Jual Net */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 10px', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.hargaJualNet)}
                     </td>
 
@@ -2557,7 +2557,7 @@ export const PiutangKonsumenModule = () => {
                           onClick={() => handleOpenKwitansiModal(row)}
                           title="Cetak Bukti Kwitansi (Booking / DP / Angsuran)"
                           style={{
-                            background: 'linear-gradient(135deg, #034efc, #1d4ed8)',
+                            background: 'linear-gradient(135deg, #03cafc, #1d4ed8)',
                             border: '1px solid #1d4ed8',
                             color: '#ffffff',
                             fontWeight: 800,
@@ -2568,7 +2568,7 @@ export const PiutangKonsumenModule = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            boxShadow: '0 2px 6px rgba(3, 78, 252, 0.3)'
+                            boxShadow: '0 2px 6px rgba(3, 202, 252, 0.3)'
                           }}
                         >
                           <Printer size={13} /> KWI
@@ -2580,7 +2580,7 @@ export const PiutangKonsumenModule = () => {
                           onClick={() => setRekapModalRow(getCalculatedRow(row))}
                           title="Buka Lembar Rekapitulasi Pembayaran & Cetak"
                           style={{
-                            background: 'linear-gradient(135deg, #034efc, #1d4ed8)',
+                            background: 'linear-gradient(135deg, #03cafc, #1d4ed8)',
                             border: '1px solid #1d4ed8',
                             color: '#ffffff',
                             fontWeight: 800,
@@ -2591,7 +2591,7 @@ export const PiutangKonsumenModule = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            boxShadow: '0 2px 6px rgba(3, 78, 252, 0.3)'
+                            boxShadow: '0 2px 6px rgba(3, 202, 252, 0.3)'
                           }}
                         >
                           <FileText size={13} /> Rekap
@@ -2605,7 +2605,7 @@ export const PiutangKonsumenModule = () => {
                           style={{
                             background: '#1e293b',
                             border: '1px solid #475569',
-                            color: '#38bdf8',
+                            color: '#03cafc',
                             padding: '4px 6px',
                             borderRadius: '5px',
                             cursor: 'pointer'
@@ -2641,7 +2641,7 @@ export const PiutangKonsumenModule = () => {
                   <td colSpan={19} style={{ textAlign: 'center', padding: '2.5rem', color: '#94a3b8' }}>
                     Belum ada data piutang konsumen yang cocok dengan filter. Klik{' '}
                     <strong style={{ color: '#f59e0b' }}>"+ Tambah Piutang Konsumen"</strong> atau{' '}
-                    <strong style={{ color: '#38bdf8' }}>"Sinkron dari Penjualan"</strong>.
+                    <strong style={{ color: '#03cafc' }}>"Sinkron dari Penjualan"</strong>.
                   </td>
                 </tr>
               )}
@@ -2651,7 +2651,7 @@ export const PiutangKonsumenModule = () => {
             <tfoot>
               <tr
                 style={{
-                  background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                  background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
                   color: '#ffffff',
                   fontWeight: 800,
                   fontSize: '0.82rem',
@@ -2797,7 +2797,7 @@ export const PiutangKonsumenModule = () => {
             >
               <div>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Harga Net</div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#38bdf8' }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#03cafc' }}>
                   {formatRupiah(activePaymentRow.hargaJualNet)}
                 </div>
               </div>
@@ -3023,7 +3023,7 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff' }}>
                           <th style={{ width: '40px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>No</th>
                           <th style={{ width: '120px', color: '#ffffff', fontWeight: 800 }}>Tanggal</th>
                           <th style={{ width: '150px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>Jumlah (Rp)</th>
@@ -3037,7 +3037,7 @@ export const PiutangKonsumenModule = () => {
                           if (isEditing) {
                             return (
                               <tr key={p.id || idx} style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid #38bdf8' }}>
-                                <td style={{ textAlign: 'center', fontWeight: 800, color: '#38bdf8' }}>{idx + 1}</td>
+                                <td style={{ textAlign: 'center', fontWeight: 800, color: '#03cafc' }}>{idx + 1}</td>
                                 <td>
                                   <input
                                     type="date"
@@ -3361,7 +3361,7 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                        <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff' }}>
                           <th style={{ width: '40px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>No</th>
                           <th style={{ width: '120px', color: '#ffffff', fontWeight: 800 }}>Tanggal</th>
                           <th style={{ width: '150px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>Jumlah (Rp)</th>
@@ -3834,7 +3834,7 @@ export const PiutangKonsumenModule = () => {
                   marginBottom: '1rem'
                 }}
               >
-                <div style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.84rem', marginBottom: '0.75rem' }}>
+                <div style={{ fontWeight: 800, color: '#03cafc', fontSize: '0.84rem', marginBottom: '0.75rem' }}>
                   Nilai Transaksi & Diskon
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
@@ -3888,7 +3888,7 @@ export const PiutangKonsumenModule = () => {
                 </div>
 
                 <div style={{ marginTop: '0.75rem', padding: '0.5rem', background: '#0f172a', borderRadius: '6px', fontSize: '0.8rem', color: '#cbd5e1' }}>
-                  Harga Net Terhitung: <strong style={{ color: '#38bdf8' }}>{formatRupiah(Math.max(0, (rowFormData.hargaJual || 0) - (rowFormData.disc || 0)))}</strong>
+                  Harga Net Terhitung: <strong style={{ color: '#03cafc' }}>{formatRupiah(Math.max(0, (rowFormData.hargaJual || 0) - (rowFormData.disc || 0)))}</strong>
                 </div>
               </div>
 
@@ -3966,7 +3966,7 @@ export const PiutangKonsumenModule = () => {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.4rem' }}>🖨️</span>
-                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#03cafc' }}>
                     Cetak Bukti Kwitansi Pembayaran
                   </h3>
                 </div>
@@ -4027,7 +4027,7 @@ export const PiutangKonsumenModule = () => {
                       </span>
                     </div>
                     <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: '4px' }}>
-                      Nominal Booking: <strong style={{ color: '#38bdf8', fontSize: '0.95rem' }}>{formatRupiah(kwitansiSelectRow.booking)}</strong>
+                      Nominal Booking: <strong style={{ color: '#03cafc', fontSize: '0.95rem' }}>{formatRupiah(kwitansiSelectRow.booking)}</strong>
                       {kwitansiSelectRow.periode && <span style={{ color: '#94a3b8', marginLeft: '8px' }}>(Periode: {formatMonthYear(kwitansiSelectRow.periode)})</span>}
                     </div>
                   </div>
@@ -4519,7 +4519,7 @@ export const PiutangKonsumenModule = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileText size={18} style={{ color: '#38bdf8' }} />
+                  <FileText size={18} style={{ color: '#03cafc' }} />
                   <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>
                     Rekapitulasi Pembayaran — {row.namaKonsumen} ({row.proyek} Blok {row.blok} No. {row.noUnit})
                   </span>

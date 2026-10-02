@@ -2521,7 +2521,7 @@ export const MarketingModule = () => {
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {currentSubView === 'leads' && (
-            <button className="btn btn-primary" onClick={handleOpenAddLead} style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}>
+            <button className="btn btn-primary" onClick={handleOpenAddLead} style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }}>
               <Plus size={16} /> Tambah Lead Prospek Baru
             </button>
           )}
@@ -2529,7 +2529,7 @@ export const MarketingModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className="btn btn-primary"
-                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }}
                 onClick={handleCreateNewOfficialSpr}
                 title="Buka Formulir Input SPR Resmi (MKT-FR-00 & MKT-FR-01)"
               >
@@ -2559,7 +2559,7 @@ export const MarketingModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className="btn btn-secondary"
-                style={{ background: '#334155', color: '#f8fafc', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                style={{ background: '#1e293b', color: '#03cafc', border: '1px solid #03cafc', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                 onClick={() => setActiveSubTab('spr')}
                 title="Kembali ke Tabel Daftar Penjualan & SPR"
               >
@@ -2568,9 +2568,9 @@ export const MarketingModule = () => {
               <button
                 className="btn btn-secondary"
                 style={{
-                  background: sprViewMode === 'preview' ? 'rgba(3, 78, 252, 0.25)' : '#1e293b',
+                  background: sprViewMode === 'preview' ? 'rgba(3, 202, 252, 0.25)' : '#1e293b',
                   color: sprViewMode === 'preview' ? '#ffffff' : '#cbd5e1',
-                  borderColor: '#034efc',
+                  borderColor: '#03cafc',
                   fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
@@ -2591,7 +2591,7 @@ export const MarketingModule = () => {
               </button>
               <button
                 className="btn btn-primary"
-                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }}
                 onClick={handleSaveOfficialSpr}
                 title="Simpan Transaksi SPR ini ke Database Penjualan"
               >
@@ -2600,12 +2600,12 @@ export const MarketingModule = () => {
             </div>
           )}
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }} onClick={handleOpenAddCalonKonsumen}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }} onClick={handleOpenAddCalonKonsumen}>
               <Plus size={16} /> + Tambah Calon Konsumen
             </button>
           )}
           {currentSubView === 'db_unit' && (
-            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }} onClick={handleOpenAddUnit}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }} onClick={handleOpenAddUnit}>
               <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
@@ -2647,17 +2647,17 @@ export const MarketingModule = () => {
               onClick={() => setActiveSubTab(tab.id)}
               style={{
                 background: isActive
-                  ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
+                  ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)'
                   : '#0f172a',
                 color: isActive ? '#ffffff' : '#94a3b8',
-                border: isActive ? '1.5px solid #3b82f6' : '1px solid #1e293b',
+                border: isActive ? '1.5px solid #03cafc' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '9px 10px',
                 fontSize: '0.78rem',
                 fontWeight: isActive ? 900 : 700,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(3, 78, 252, 0.45)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 202, 252, 0.45)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -2666,7 +2666,7 @@ export const MarketingModule = () => {
                 whiteSpace: 'nowrap'
               }}
             >
-              <IconComp size={15} color={isActive ? '#ffffff' : '#3b82f6'} />
+              <IconComp size={15} color={isActive ? '#ffffff' : '#03cafc'} />
               <span>{tab.label}</span>
             </button>
           );
@@ -2680,28 +2680,28 @@ export const MarketingModule = () => {
         <div>
           {/* COMMISSION & LEADS KPI SUMMARY BANNER */}
           <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <DollarSign size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Potensi Komisi Sales (2.5%)</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#3b82f6' }}>{formatRupiah(totalCommissionPotential)}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#03cafc' }}>{formatRupiah(totalCommissionPotential)}</div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckCircle2 size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Komisi Sudah Cair (Rekening)</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#3b82f6' }}>{formatRupiah(totalCommissionCair)}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#03cafc' }}>{formatRupiah(totalCommissionCair)}</div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={24} />
               </div>
               <div>
@@ -2710,8 +2710,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Target size={24} />
               </div>
               <div>
@@ -2756,11 +2756,11 @@ export const MarketingModule = () => {
           </div>
 
           {/* LEADS & COMMISSION TABLE */}
-          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #034efc' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #03cafc' }}>
             <div className="table-container">
               <table className="custom-table crm-leads-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8', whiteSpace: 'nowrap' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc', whiteSpace: 'nowrap' }}>
                     <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>ID & Tanggal</th>
                     <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Nama Konsumen & No WA</th>
                     <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Target Unit & Budget</th>
@@ -2861,8 +2861,8 @@ export const MarketingModule = () => {
         <div>
           {/* KPI Cards Grid */}
           <div className="grid-4" style={{ marginBottom: '2rem' }}>
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <DollarSign size={24} />
               </div>
               <div>
@@ -2871,8 +2871,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FileCheck2 size={24} />
               </div>
               <div>
@@ -2881,8 +2881,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Clock size={24} />
               </div>
               <div>
@@ -2891,8 +2891,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03cafc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Target size={24} />
               </div>
               <div>
@@ -2975,11 +2975,11 @@ export const MarketingModule = () => {
           </div>
 
           {/* Main Sales Table */}
-          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #034efc' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #03cafc' }}>
             <div className="table-container">
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8', whiteSpace: 'nowrap' }}>
+                  <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc', whiteSpace: 'nowrap' }}>
                     <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>ID & Unit</th>
                     <th style={{ padding: '11px 14px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Nama Konsumen</th>
                     <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Harga Jual (Rp)</th>
@@ -2994,7 +2994,7 @@ export const MarketingModule = () => {
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(3, 78, 252, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#034efc' }}>
+                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(3, 202, 252, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#03cafc' }}>
                             <FileText size={28} />
                           </div>
                           <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
@@ -3360,7 +3360,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 202, 252, 0.4)' }}
                     title="Simpan data SPR ini ke tabel Transaksi Penjualan & SPR"
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui di Transaksi' : 'Simpan ke Transaksi'}
@@ -3386,7 +3386,7 @@ export const MarketingModule = () => {
                         fontSize: '0.78rem',
                         fontWeight: 800,
                         cursor: 'pointer',
-                        border: sprOfficial.template === 'YSP' ? '2px solid #3b82f6' : '1px solid #475569',
+                        border: sprOfficial.template === 'YSP' ? '2px solid #03cafc' : '1px solid #475569',
                         background: sprOfficial.template === 'YSP' ? 'rgba(59, 130, 246, 0.2)' : '#0f172a',
                         color: sprOfficial.template === 'YSP' ? '#60a5fa' : '#94a3b8',
                         display: 'flex',
@@ -4446,7 +4446,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 202, 252, 0.4)' }}
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi Penjualan' : 'Simpan ke Transaksi Penjualan'}
                   </button>
@@ -4458,18 +4458,18 @@ export const MarketingModule = () => {
             {/* TAMPILAN PREVIEW CONTROLS DI LAYAR (HANYA AKTIF SAAT PREVIEW MODE)         */}
             {/* ========================================================================= */}
             {sprViewMode === 'preview' && (
-              <div className="no-print" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', background: '#0f172a', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1.5px solid #034efc' }}>
+              <div className="no-print" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', background: '#0f172a', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1.5px solid #03cafc' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setSprViewMode('form')}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#034efc' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#03cafc', borderColor: '#03cafc' }}
                 >
                   <ChevronLeft size={16} /> Kembali ke Formulir Input
                 </button>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {sprOfficial.editingSalesId && (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(3, 78, 252, 0.15)', border: '1px solid #034efc', color: '#3b82f6', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(3, 202, 252, 0.15)', border: '1px solid #03cafc', color: '#03cafc', fontSize: '0.75rem', fontWeight: 800 }}>
                       <CheckCircle2 size={13} /> Terhubung: {sprOfficial.editingSalesId}
                     </div>
                   )}
@@ -4485,7 +4485,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 202, 252, 0.4)' }}
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi' : 'Simpan ke Transaksi'}
                   </button>
@@ -5064,13 +5064,13 @@ export const MarketingModule = () => {
       {/* TAB 3: DATA BASE KONSUMEN (CALON KONSUMEN, HOT PROSPEK, KONSUMEN RESMI)   */}
       {/* ========================================================================= */}
       {currentSubView === 'db_konsumen' && (
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #034efc', marginBottom: '1.5rem', borderRadius: '12px' }}>
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #03cafc', marginBottom: '1.5rem', borderRadius: '12px' }}>
           
           {/* Header & Sub-Pill Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.85rem' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Users size={24} color="#034efc" /> DATA BASE KONSUMEN
+                <Users size={24} color="#03cafc" /> DATA BASE KONSUMEN
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
                 Hierarki manajemen relasi pembeli: Calon Konsumen &rarr; Hot Prospek &rarr; Konsumen Resmi (Closed Deal)
@@ -5089,12 +5089,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)' : 'transparent',
                   color: subTabKonsumen === 'calon' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(3, 202, 252, 0.4)' : 'none'
                 }}
               >
                 <UserPlus size={14} /> Calon Konsumen
@@ -5110,12 +5110,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)' : 'transparent',
                   color: subTabKonsumen === 'hot' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(3, 202, 252, 0.4)' : 'none'
                 }}
               >
                 <Flame size={14} /> Hot Prospek
@@ -5131,12 +5131,12 @@ export const MarketingModule = () => {
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)' : 'transparent',
                   color: subTabKonsumen === 'konsumen' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(3, 202, 252, 0.4)' : 'none'
                 }}
               >
                 <CheckCircle2 size={14} /> Daftar Konsumen Closing
@@ -5151,7 +5151,7 @@ export const MarketingModule = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ background: 'rgba(3, 78, 252, 0.15)', color: '#3b82f6', border: '1px solid #034efc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 800 }}>
+                  <span style={{ background: 'rgba(3, 202, 252, 0.15)', color: '#03cafc', border: '1px solid #03cafc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 800 }}>
                     Tahap Awal &bull; Data Calon Konsumen
                   </span>
                 </div>
@@ -5193,7 +5193,7 @@ export const MarketingModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddCalonKonsumen}
-                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Calon Konsumen
                   </button>
@@ -5201,10 +5201,10 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Calon Konsumen */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
-                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                       <th style={{ width: '45px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
                       <th style={{ width: '135px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama</th>
                       <th style={{ width: '130px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Proyek</th>
@@ -5231,7 +5231,7 @@ export const MarketingModule = () => {
                           <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
                           <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#034efc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>
+                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#03cafc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
                               </div>
                               <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
@@ -5396,10 +5396,10 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Hot Prospek */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
-                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                       <th style={{ width: '50px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
                       <th style={{ width: '150px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama</th>
                       <th style={{ width: '135px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Proyek</th>
@@ -5550,10 +5550,10 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Closing */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
-                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                    <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                       <th style={{ width: '40px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
                       <th style={{ minWidth: '150px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama Konsumen</th>
                       <th style={{ minWidth: '160px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Unit & Kavling</th>
@@ -5574,7 +5574,7 @@ export const MarketingModule = () => {
                           <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
                           <td style={{ padding: '8px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#034efc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#03cafc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'K'}
                               </div>
                               <div>
@@ -5721,7 +5721,7 @@ export const MarketingModule = () => {
               <button
                 type="button"
                 onClick={handleOpenAddUnit}
-                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 202, 252, 0.4)' }}
               >
                 <Plus size={16} /> Tambah Unit Properti
               </button>
@@ -5729,10 +5729,10 @@ export const MarketingModule = () => {
           </div>
 
           {/* Table Unit Properti */}
-          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
             <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                   <th style={{ width: '50px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
                   <th style={{ minWidth: '180px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 12px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama Proyek</th>
                   <th style={{ width: '90px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Blok</th>
@@ -6354,7 +6354,7 @@ export const MarketingModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   {editingSales ? 'Perbarui Transaksi' : 'Simpan Transaksi Penjualan'}
                 </button>
               </div>
@@ -6481,7 +6481,7 @@ export const MarketingModule = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsLeadModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>Simpan Lead Prospek</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>Simpan Lead Prospek</button>
               </div>
             </form>
           </div>
@@ -6494,7 +6494,7 @@ export const MarketingModule = () => {
           <div className="modal-content" style={{ maxWidth: '850px', background: '#0f172a' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header no-print">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Printer size={20} color="#3b82f6" /> Form Surat Pesanan Rumah (SPR) Resmi
+                <Printer size={20} color="#03cafc" /> Form Surat Pesanan Rumah (SPR) Resmi
               </h3>
               <button onClick={() => setIsSprModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -6708,10 +6708,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <CheckCircle2 size={20} color="#3b82f6" />
+                <CheckCircle2 size={20} color="#03cafc" />
                 {editingKonsumenId ? 'Edit Data Closing' : 'Data Closing (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7039,7 +7039,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Closing
                 </button>
               </div>
@@ -7053,10 +7053,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isCalonKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <UserPlus size={20} color="#3b82f6" />
+                <UserPlus size={20} color="#03cafc" />
                 {editingCalonKonsumenId ? 'Edit Data Base Calon Konsumen' : 'Data Base Calon Konsumen (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsCalonKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7236,7 +7236,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Calon Konsumen
                 </button>
               </div>
@@ -7250,10 +7250,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isHotProspekModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Flame size={20} color="#3b82f6" />
+                <Flame size={20} color="#03cafc" />
                 {editingHotProspekId ? 'Edit Data Base Hot Prospek' : 'Data Base Hot Prospek (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsHotProspekModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7362,7 +7362,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHotProspekModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Hot Prospek
                 </button>
               </div>
@@ -7376,10 +7376,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isUnitModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Home size={20} color="#3b82f6" />
+                <Home size={20} color="#03cafc" />
                 {editingUnitId ? 'Edit Data Base Unit Properti' : 'Data Base Unit Properti (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsUnitModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7401,7 +7401,7 @@ export const MarketingModule = () => {
                       placeholder="Nama proyek (Ashoka View, dll)..."
                       value={unitFormData.proyek}
                       onChange={(e) => setUnitFormData({ ...unitFormData, proyek: e.target.value })}
-                      style={{ background: '#0f172a', border: '1.5px solid #3b82f6', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
+                      style={{ background: '#0f172a', border: '1.5px solid #03cafc', borderRadius: '6px', color: '#ffffff', fontWeight: 800, padding: '6px 10px', fontSize: '0.86rem' }}
                     />
 
                     {/* Blok */}
@@ -7468,7 +7468,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsUnitModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Unit Properti
                 </button>
               </div>
@@ -7482,10 +7482,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isMoveToHotModalOpen && targetMoveCalonItem && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Flame size={22} color="#3b82f6" />
+                <Flame size={22} color="#03cafc" />
                 Pindahkan ke HOT PROSPEK
               </h3>
               <button onClick={() => setIsMoveToHotModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7575,7 +7575,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToHotModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <Flame size={16} /> 🚀 Pindahkan ke Hot Prospek
                 </button>
               </div>
@@ -7589,10 +7589,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isMoveToKonsumenModalOpen && targetMoveHotItem && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '1.5px solid #03cafc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <CheckCircle2 size={22} color="#3b82f6" />
+                <CheckCircle2 size={22} color="#03cafc" />
                 Closing
               </h3>
               <button onClick={() => setIsMoveToKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -8065,7 +8065,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle2 size={16} /> 💾 Simpan Closing
                 </button>
               </div>

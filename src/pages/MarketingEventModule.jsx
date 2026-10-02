@@ -691,14 +691,14 @@ export const MarketingEventModule = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+              background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
               color: '#ffffff',
               padding: '8px 22px',
               borderRadius: '10px',
               fontWeight: 800,
               fontSize: '1.15rem',
               letterSpacing: '0.04em',
-              boxShadow: '0 4px 16px rgba(3, 78, 252, 0.4)'
+              boxShadow: '0 4px 16px rgba(3, 202, 252, 0.4)'
             }}
           >
             <Calendar size={22} color="#ffffff" />
@@ -721,14 +721,14 @@ export const MarketingEventModule = () => {
             onClick={handleOpenAdd}
             className="btn btn-primary btn-sm"
             style={{
-              background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+              background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
               border: 'none',
               color: '#ffffff',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)',
+              boxShadow: '0 4px 12px rgba(3, 202, 252, 0.4)',
               fontSize: '0.78rem'
             }}
           >
@@ -763,17 +763,17 @@ export const MarketingEventModule = () => {
               onClick={() => setEventTab(tab.id)}
               style={{
                 background: isActive
-                  ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
+                  ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)'
                   : '#0f172a',
                 color: isActive ? '#ffffff' : '#94a3b8',
-                border: isActive ? '1.5px solid #1d4ed8' : '1px solid #1e293b',
+                border: isActive ? '1.5px solid #03cafc' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '9px 14px',
                 fontSize: '0.82rem',
                 fontWeight: isActive ? 800 : 600,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(3, 78, 252, 0.4)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 202, 252, 0.4)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -862,12 +862,12 @@ export const MarketingEventModule = () => {
             </div>
 
             <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={20} />
               </div>
               <div>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Akumulasi Target Leads</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#03cafc' }}>
                   {eventTypes.reduce((acc, c) => acc + (Number(c.targetLeads) || 0), 0)} Kontak
                 </div>
               </div>
@@ -887,10 +887,10 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Jenis Event */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                   <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
                   <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>ID & Nama Event</th>
                   <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Kategori</th>
@@ -916,11 +916,11 @@ export const MarketingEventModule = () => {
                       {idx + 1}
                     </td>
                     <td style={{ padding: '9px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <div style={{ fontFamily: 'monospace', color: '#38bdf8', fontSize: '0.72rem' }}>{item.id}</div>
+                      <div style={{ fontFamily: 'monospace', color: '#03cafc', fontSize: '0.72rem' }}>{item.id}</div>
                       <div>{item.namaEvent}</div>
                     </td>
                     <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.72rem' }}>
+                      <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#03cafc', fontSize: '0.72rem' }}>
                         {item.kategori}
                       </span>
                     </td>
@@ -1004,12 +1004,12 @@ export const MarketingEventModule = () => {
             </div>
 
             <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Target size={20} />
               </div>
               <div>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Target Closing Unit</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#03cafc' }}>
                   {proposals.reduce((acc, c) => acc + (Number(c.targetClosing) || 0), 0)} Unit
                 </div>
               </div>
@@ -1017,10 +1017,10 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Proposal */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                   <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
                   <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. Proposal</th>
                   <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Judul Proposal Event</th>
@@ -1046,7 +1046,7 @@ export const MarketingEventModule = () => {
                     <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.noProposal}
                     </td>
                     <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
@@ -1088,7 +1088,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(item.files[0])}
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ background: 'none', border: 'none', color: '#03cafc', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           title="Unduh Berkas Proposal"
                         >
                           <Paperclip size={12} /> {item.files.length} File
@@ -1102,7 +1102,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #03cafc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail Proposal"
                         >
                           <Eye size={12} />
@@ -1151,12 +1151,12 @@ export const MarketingEventModule = () => {
             </div>
 
             <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={20} />
               </div>
               <div>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Leads Terkumpul</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#03cafc' }}>
                   {activities.reduce((acc, c) => acc + (Number(c.leads) || 0), 0)} Kontak
                 </div>
               </div>
@@ -1176,10 +1176,10 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Aktivitas */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                   <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
                   <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. Log</th>
                   <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Nama Event & Proyek</th>
@@ -1205,7 +1205,7 @@ export const MarketingEventModule = () => {
                     <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.noAktivitas}
                     </td>
                     <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
@@ -1222,7 +1222,7 @@ export const MarketingEventModule = () => {
                     <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.pengunjung} Orang
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.leads} Kontak
                     </td>
                     <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
@@ -1236,7 +1236,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(item.files[0])}
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ background: 'none', border: 'none', color: '#03cafc', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           title="Unduh Dokumentasi Foto"
                         >
                           <Paperclip size={12} /> {item.files.length} Foto
@@ -1250,7 +1250,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #03cafc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail Aktivitas"
                         >
                           <Eye size={12} />
@@ -1311,12 +1311,12 @@ export const MarketingEventModule = () => {
             </div>
 
             <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', color: '#03cafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={20} />
               </div>
               <div>
                 <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Leads Terkumpul</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#03cafc' }}>
                   {reports.reduce((acc, c) => acc + (Number(c.totalLeads) || 0), 0)} Kontak
                 </div>
               </div>
@@ -1336,10 +1336,10 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Laporan LPJ */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03cafc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)', color: '#ffffff', borderBottom: '2px solid #03cafc' }}>
                   <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
                   <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. LPJ</th>
                   <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Nama Event</th>
@@ -1385,7 +1385,7 @@ export const MarketingEventModule = () => {
                       <div style={{ color: '#ef4444' }}>{formatRupiah(item.realisasiBiaya)}</div>
                       <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Budget: {formatRupiah(item.anggaranDiajukan)}</div>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#03cafc', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.totalLeads} Kontak
                     </td>
                     <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
@@ -1407,7 +1407,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(item.files[0])}
-                          style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ background: 'none', border: 'none', color: '#03cafc', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           title="Unduh Berkas LPJ"
                         >
                           <Paperclip size={12} /> {item.files.length} File
@@ -1421,7 +1421,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #03cafc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail LPJ"
                         >
                           <Eye size={12} />
@@ -1472,7 +1472,7 @@ export const MarketingEventModule = () => {
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #034efc',
+              border: '1.5px solid #03cafc',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '620px',
@@ -1484,7 +1484,7 @@ export const MarketingEventModule = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Calendar size={18} color="#034efc" />
+                <Calendar size={18} color="#03cafc" />
                 <span>
                   {editingItem ? 'Edit' : 'Tambah'} {modalType === 'jenis' ? 'Jenis Event' : modalType === 'proposal' ? 'Proposal Event' : modalType === 'aktivitas' ? 'Aktivitas Event' : 'Laporan LPJ Event'}
                 </span>
@@ -1816,13 +1816,13 @@ export const MarketingEventModule = () => {
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, display: 'block', marginBottom: '4px' }}>Leads Didapat</label>
+                      <label style={{ fontSize: '0.74rem', color: '#03cafc', fontWeight: 800, display: 'block', marginBottom: '4px' }}>Leads Didapat</label>
                       <input
                         type="number"
                         placeholder="e.g. 24"
                         value={formState.leads || ''}
                         onChange={(e) => setFormState({ ...formState, leads: e.target.value })}
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#38bdf8', fontSize: '0.8rem', fontWeight: 800 }}
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#03cafc', fontSize: '0.8rem', fontWeight: 800 }}
                       />
                     </div>
                     <div>
@@ -1914,13 +1914,13 @@ export const MarketingEventModule = () => {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                     <div>
-                      <label style={{ fontSize: '0.74rem', color: '#38bdf8', display: 'block', marginBottom: '4px' }}>Total Leads</label>
+                      <label style={{ fontSize: '0.74rem', color: '#03cafc', display: 'block', marginBottom: '4px' }}>Total Leads</label>
                       <input
                         type="number"
                         placeholder="e.g. 42"
                         value={formState.totalLeads || ''}
                         onChange={(e) => setFormState({ ...formState, totalLeads: e.target.value })}
-                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#38bdf8', fontSize: '0.8rem' }}
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#03cafc', fontSize: '0.8rem' }}
                       />
                     </div>
                     <div>
@@ -2014,11 +2014,11 @@ export const MarketingEventModule = () => {
                   type="submit"
                   className="btn btn-primary btn-sm"
                   style={{
-                    background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                    background: 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)',
                     border: 'none',
                     color: '#ffffff',
                     fontWeight: 800,
-                    boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)'
+                    boxShadow: '0 4px 12px rgba(3, 202, 252, 0.4)'
                   }}
                 >
                   Simpan Data
@@ -2049,7 +2049,7 @@ export const MarketingEventModule = () => {
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #034efc',
+              border: '1.5px solid #03cafc',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '680px',
@@ -2061,7 +2061,7 @@ export const MarketingEventModule = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Eye size={18} color="#034efc" />
+                <Eye size={18} color="#03cafc" />
                 <span>Lembar Rincian Dokumen Event</span>
               </div>
               <button onClick={() => setViewingItem(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
@@ -2133,7 +2133,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(f)}
-                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', color: '#ffffff', fontWeight: 800, border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ background: 'linear-gradient(135deg, #03cafc, #1d4ed8)', color: '#ffffff', fontWeight: 800, border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                         >
                           <Download size={11} /> Unduh
                         </button>
@@ -2157,7 +2157,7 @@ export const MarketingEventModule = () => {
                 type="button"
                 onClick={() => setViewingItem(null)}
                 className="btn btn-primary btn-sm"
-                style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', fontWeight: 800 }}
+                style={{ background: 'linear-gradient(135deg, #03cafc, #1d4ed8)', border: 'none', color: '#ffffff', fontWeight: 800 }}
               >
                 Tutup
               </button>

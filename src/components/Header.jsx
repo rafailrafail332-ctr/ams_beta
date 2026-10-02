@@ -57,7 +57,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 : isHrGaTab
                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                 : isMarketingTab
-                ? 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)'
+                ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)'
                 : isTeknikTab
                 ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
                 : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
@@ -73,7 +73,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 : isHrGaTab
                 ? '0 2px 10px rgba(16, 185, 129, 0.45)'
                 : isMarketingTab
-                ? '0 2px 10px rgba(71, 201, 175, 0.45)'
+                ? '0 2px 10px rgba(3, 202, 252, 0.45)'
                 : isTeknikTab
                 ? '0 2px 10px rgba(3, 78, 252, 0.45)'
                 : '0 2px 10px rgba(2, 132, 199, 0.4)',
@@ -113,14 +113,14 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 height: '32px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: isLegalTab ? '1.5px solid #c084fc' : isHrGaTab ? '1.5px solid #34d399' : isMarketingTab ? '1.5px solid #47c9af' : '1.5px solid #0284c7'
+                border: isLegalTab ? '1.5px solid #c084fc' : isHrGaTab ? '1.5px solid #34d399' : isMarketingTab ? '1.5px solid #03cafc' : '1.5px solid #0284c7'
               }}
             />
             <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>
                 {currentUser?.name || 'Yazid Hizbullah, S.E.,S.T'}
               </div>
-              <div style={{ fontSize: '0.7rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#47c9af' : '#38bdf8', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : '#38bdf8', fontWeight: 700 }}>
                 {currentUser?.role || 'Direktur Utama'}
               </div>
             </div>

@@ -88,8 +88,8 @@ export const AmsCentralHub = ({
       label: 'Marketing', 
       sub: 'Penjualan & Konsumen', 
       desc: 'Unit Properti, Akad & Leads Marketing', 
-      color: '#47c9af', 
-      lightColor: '#168a74',
+      color: '#03cafc', 
+      lightColor: '#0284c7',
       icon: TrendingUp
     },
     { 
@@ -458,7 +458,7 @@ export const AmsCentralHub = ({
               </linearGradient>
               <linearGradient id="streamGradMarketing" x1="0%" y1="50%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#47c9af" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#03cafc" stopOpacity="0.95" />
               </linearGradient>
               <linearGradient id="streamGradHr" x1="0%" y1="50%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
@@ -820,16 +820,16 @@ export const AmsCentralHub = ({
                 onMouseLeave={() => setHoveredNode(null)}
                 style={{
                   background: isDark 
-                    ? (hoveredNode === 'marketing' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                    ? (hoveredNode === 'marketing' ? 'rgba(3, 202, 252, 0.2)' : 'rgba(15, 23, 42, 0.75)')
                     : (hoveredNode === 'marketing' ? '#f0f9ff' : '#ffffff'),
                   border: hoveredNode === 'marketing' 
-                    ? '2px solid #38bdf8' 
+                    ? '2px solid #03cafc' 
                     : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
                   borderRadius: '16px',
                   padding: '12px 20px',
                   backdropFilter: 'blur(16px)',
                   boxShadow: hoveredNode === 'marketing'
-                    ? '0 12px 30px rgba(56, 189, 248, 0.35), 0 0 15px rgba(56, 189, 248, 0.2)'
+                    ? '0 12px 30px rgba(3, 202, 252, 0.35), 0 0 15px rgba(3, 202, 252, 0.2)'
                     : (isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 6px 20px rgba(0, 0, 0, 0.06)'),
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -843,11 +843,11 @@ export const AmsCentralHub = ({
                     width: '38px',
                     height: '38px',
                     borderRadius: '12px',
-                    background: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
+                    background: hoveredNode === 'marketing' ? '#03cafc' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: hoveredNode === 'marketing' ? '#ffffff' : '#0284c7',
+                    color: hoveredNode === 'marketing' ? '#ffffff' : '#03cafc',
                     flexShrink: 0,
                     transition: 'all 0.2s ease'
                   }}
@@ -858,7 +858,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '1.45rem', 
                     fontWeight: 900, 
-                    color: hoveredNode === 'marketing' ? '#38bdf8' : (isDark ? '#f8fafc' : '#0f172a'), 
+                    color: '#03cafc', 
                     lineHeight: 1.1 
                   }}>
                     Marketing
@@ -866,7 +866,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '0.68rem', 
                     fontWeight: 700, 
-                    color: hoveredNode === 'marketing' ? '#0284c7' : (isDark ? '#94a3b8' : '#64748b'), 
+                    color: '#03cafc', 
                     marginTop: '4px' 
                   }}>
                     Penjualan Unit

@@ -746,9 +746,9 @@ body {
 /* KECUALI HASIL DARI CETAK SPR RESMI                                        */
 /* ========================================================================= */
 .marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead tr {
-  background: linear-gradient(135deg, #034efc 0%, #1d4ed8 100%) !important;
+  background: linear-gradient(135deg, #03cafc 0%, #0284c7 100%) !important;
   color: #ffffff !important;
-  border-bottom: 2px solid #1d4ed8 !important;
+  border-bottom: 2px solid #03cafc !important;
 }
 
 .marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead th {
