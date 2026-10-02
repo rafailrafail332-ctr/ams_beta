@@ -679,7 +679,7 @@ export const MarketingEventModule = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', color: '#f1f5f9' }}>
+    <div className="marketing-module-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', color: '#f1f5f9' }}>
       
       {/* ========================================================================= */}
       {/* HEADER UTAMA: MARKETING EVENT                                             */}
@@ -691,17 +691,17 @@ export const MarketingEventModule = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              background: '#03f4fc',
-              color: '#0a1128',
+              background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+              color: '#ffffff',
               padding: '8px 22px',
               borderRadius: '10px',
-              fontWeight: 900,
+              fontWeight: 800,
               fontSize: '1.15rem',
               letterSpacing: '0.04em',
-              boxShadow: '0 4px 16px rgba(3, 244, 252, 0.4)'
+              boxShadow: '0 4px 16px rgba(3, 78, 252, 0.4)'
             }}
           >
-            <Calendar size={22} color="#0a1128" />
+            <Calendar size={22} color="#ffffff" />
             <span>MARKETING EVENT</span>
           </div>
           <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '6px' }}>
@@ -721,14 +721,14 @@ export const MarketingEventModule = () => {
             onClick={handleOpenAdd}
             className="btn btn-primary btn-sm"
             style={{
-              background: '#03f4fc',
+              background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
               border: 'none',
-              color: '#0a1128',
-              fontWeight: 900,
+              color: '#ffffff',
+              fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 4px 12px rgba(3, 244, 252, 0.4)',
+              boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)',
               fontSize: '0.78rem'
             }}
           >
@@ -738,7 +738,7 @@ export const MarketingEventModule = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* 4 SUB-TAB NAVIGASI MARKETING EVENT: FULL IJO KOTAK, TEKS BERWARNA PUTIH   */}
+      {/* 4 SUB-TAB NAVIGASI MARKETING EVENT: ROYAL BLUE KOTAK, TEKS BERWARNA PUTIH */}
       {/* (Jenis Event | Proposal | Aktivitas | Laporan)                            */}
       {/* ========================================================================= */}
       <div
@@ -763,17 +763,17 @@ export const MarketingEventModule = () => {
               onClick={() => setEventTab(tab.id)}
               style={{
                 background: isActive
-                  ? '#03f4fc'
+                  ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
                   : '#0f172a',
-                color: isActive ? '#0a1128' : '#94a3b8',
-                border: isActive ? '1.5px solid #02c2ca' : '1px solid #1e293b',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                border: isActive ? '1.5px solid #1d4ed8' : '1px solid #1e293b',
                 borderRadius: '8px',
                 padding: '9px 14px',
                 fontSize: '0.82rem',
-                fontWeight: isActive ? 900 : 700,
+                fontWeight: isActive ? 800 : 600,
                 cursor: 'pointer',
                 textAlign: 'center',
-                boxShadow: isActive ? '0 4px 14px rgba(3, 244, 252, 0.4)' : 'none',
+                boxShadow: isActive ? '0 4px 14px rgba(3, 78, 252, 0.4)' : 'none',
                 transition: 'all 0.18s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -782,7 +782,7 @@ export const MarketingEventModule = () => {
                 whiteSpace: 'nowrap'
               }}
             >
-              <IconComp size={16} color={isActive ? '#0a1128' : '#03f4fc'} />
+              <IconComp size={16} color={isActive ? '#ffffff' : '#94a3b8'} />
               <span>{tab.label}</span>
             </button>
           );
@@ -831,7 +831,7 @@ export const MarketingEventModule = () => {
               border: '1px solid #1e293b',
               borderRadius: '8px',
               padding: '6px 12px',
-              color: '#03f4fc',
+              color: '#ffffff',
               fontSize: '0.78rem',
               fontWeight: 700
             }}
@@ -887,20 +887,20 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Jenis Event */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No.</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>ID & Nama Event</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Kategori</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Lokasi / Venue</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Proyek</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Target Leads</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Target Closing</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>PIC Penanggung Jawab</th>
-                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Status</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#0a1128' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>ID & Nama Event</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Kategori</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Lokasi / Venue</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Proyek</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Target Leads</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Target Closing</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>PIC Penanggung Jawab</th>
+                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Status</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -908,40 +908,40 @@ export const MarketingEventModule = () => {
                   <tr
                     key={item.id}
                     style={{
-                      borderBottom: '1px solid #1e293b',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                       background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)'
                     }}
                   >
-                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', color: '#ffffff', borderRight: '1px solid #1e293b' }}>
-                      <div style={{ fontFamily: 'monospace', color: '#34d399', fontSize: '0.72rem' }}>{item.id}</div>
+                    <td style={{ padding: '9px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <div style={{ fontFamily: 'monospace', color: '#38bdf8', fontSize: '0.72rem' }}>{item.id}</div>
                       <div>{item.namaEvent}</div>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.72rem' }}>
                         {item.kategori}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.lokasi}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem' }}>
                         {item.proyek}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.targetLeads} Orang
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.targetClosing} Unit
                     </td>
-                    <td style={{ padding: '9px 12px', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.pic}
                     </td>
-                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontSize: '0.72rem' }}>
                         {item.status}
                       </span>
@@ -1017,21 +1017,21 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Proposal */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No.</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No. Proposal</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Judul Proposal Event</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Proyek</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Tanggal Acara</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Lokasi / Venue</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Anggaran Diajukan</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Target Closing</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Status Approval</th>
-                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Berkas</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#0a1128' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. Proposal</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Judul Proposal Event</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Proyek</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Tanggal Acara</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Lokasi / Venue</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Anggaran Diajukan</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Target Closing</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Status Approval</th>
+                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Berkas</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -1039,38 +1039,38 @@ export const MarketingEventModule = () => {
                   <tr
                     key={item.id}
                     style={{
-                      borderBottom: '1px solid #1e293b',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                       background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)'
                     }}
                   >
-                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#34d399', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.noProposal}
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div>{item.judul}</div>
                       <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{item.jenisEvent}</div>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem' }}>
                         {item.proyek}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatDisplayDate(item.tanggalMulai)}
                     </td>
-                    <td style={{ padding: '9px 12px', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.lokasi}
                     </td>
-                    <td style={{ padding: '9px 14px', textAlign: 'right', color: '#fbbf24', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', textAlign: 'right', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatRupiah(item.anggaranDiajukan)}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.targetClosing} Unit
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span
                         style={{
                           padding: '2px 8px',
@@ -1083,7 +1083,7 @@ export const MarketingEventModule = () => {
                         {item.status}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.files && item.files.length > 0 ? (
                         <button
                           type="button"
@@ -1102,7 +1102,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: '#03f4fc', border: 'none', color: '#0a1128', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail Proposal"
                         >
                           <Eye size={12} />
@@ -1176,21 +1176,21 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Aktivitas */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No.</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No. Log</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Nama Event & Proyek</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Tanggal & Jam</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Tim / SPG Bertugas</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Pengunjung</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Leads Didapat</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Closing Unit</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Catatan Lapangan</th>
-                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Dokumentasi</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#0a1128' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. Log</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Nama Event & Proyek</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Tanggal & Jam</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Tim / SPG Bertugas</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Pengunjung</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Leads Didapat</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Closing Unit</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Catatan Lapangan</th>
+                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Dokumentasi</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -1198,40 +1198,40 @@ export const MarketingEventModule = () => {
                   <tr
                     key={item.id}
                     style={{
-                      borderBottom: '1px solid #1e293b',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                       background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)'
                     }}
                   >
-                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#34d399', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.noAktivitas}
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div>{item.namaEvent}</div>
                       <div style={{ fontSize: '0.7rem', color: '#34d399' }}>{item.proyek} • {item.lokasi}</div>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div>{formatDisplayDate(item.tanggal)}</div>
                       <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{item.jam}</div>
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.timBertugas}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#e2e8f0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.pengunjung} Orang
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.leads} Kontak
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.closing} Unit
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.catatan}
                     </td>
-                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.files && item.files.length > 0 ? (
                         <button
                           type="button"
@@ -1250,7 +1250,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: '#03f4fc', border: 'none', color: '#0a1128', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail Aktivitas"
                         >
                           <Eye size={12} />
@@ -1336,23 +1336,23 @@ export const MarketingEventModule = () => {
           </div>
 
           {/* Table Laporan LPJ */}
-          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
               <thead>
-                <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No.</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>No. LPJ</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Nama Event</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Tanggal</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Proyek</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Budget vs Realisasi</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Leads</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Closing</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Omset Penjualan</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>ROI</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Evaluasi Hasil</th>
-                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #02c2ca', fontWeight: 800, color: '#0a1128' }}>Berkas LPJ</th>
-                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#0a1128' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                  <th style={{ padding: '10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No.</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>No. LPJ</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Nama Event</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Tanggal</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Proyek</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Budget vs Realisasi</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Leads</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Closing</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'right', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Omset Penjualan</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>ROI</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'left', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Evaluasi Hasil</th>
+                  <th style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.15)', fontWeight: 800, color: '#ffffff' }}>Berkas LPJ</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#ffffff' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -1360,49 +1360,49 @@ export const MarketingEventModule = () => {
                   <tr
                     key={item.id}
                     style={{
-                      borderBottom: '1px solid #1e293b',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                       background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)'
                     }}
                   >
-                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#34d399', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', fontFamily: 'monospace', color: '#34d399', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.noLaporan}
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.namaEvent}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatDisplayDate(item.tanggalEvent)}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem' }}>
                         {item.proyek}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 14px', textAlign: 'right', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', textAlign: 'right', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div style={{ color: '#ef4444' }}>{formatRupiah(item.realisasiBiaya)}</div>
                       <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Budget: {formatRupiah(item.anggaranDiajukan)}</div>
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.totalLeads} Kontak
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.totalClosing} Unit
                     </td>
-                    <td style={{ padding: '9px 14px', textAlign: 'right', color: '#34d399', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 14px', textAlign: 'right', color: '#34d399', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatRupiah(item.omsetPenjualan)}
                     </td>
-                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 12px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontSize: '0.72rem' }}>
                         {item.roi}
                       </span>
                     </td>
-                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid #1e293b', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <td style={{ padding: '9px 14px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.evaluasi}
                     </td>
-                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid #1e293b' }}>
+                    <td style={{ padding: '9px 10px', textAlign: 'center', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {item.files && item.files.length > 0 ? (
                         <button
                           type="button"
@@ -1421,7 +1421,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => setViewingItem(item)}
-                          style={{ background: '#03f4fc', border: 'none', color: '#0a1128', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
+                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', padding: '3px 8px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
                           title="Lihat Detail LPJ"
                         >
                           <Eye size={12} />
@@ -1472,7 +1472,7 @@ export const MarketingEventModule = () => {
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #03f4fc',
+              border: '1.5px solid #034efc',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '620px',
@@ -1484,7 +1484,7 @@ export const MarketingEventModule = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Calendar size={18} color="#03f4fc" />
+                <Calendar size={18} color="#034efc" />
                 <span>
                   {editingItem ? 'Edit' : 'Tambah'} {modalType === 'jenis' ? 'Jenis Event' : modalType === 'proposal' ? 'Proposal Event' : modalType === 'aktivitas' ? 'Aktivitas Event' : 'Laporan LPJ Event'}
                 </span>
@@ -2014,11 +2014,11 @@ export const MarketingEventModule = () => {
                   type="submit"
                   className="btn btn-primary btn-sm"
                   style={{
-                    background: '#03f4fc',
+                    background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
                     border: 'none',
-                    color: '#0a1128',
-                    fontWeight: 900,
-                    boxShadow: '0 4px 12px rgba(3, 244, 252, 0.4)'
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)'
                   }}
                 >
                   Simpan Data
@@ -2049,7 +2049,7 @@ export const MarketingEventModule = () => {
           <div
             style={{
               background: '#090d16',
-              border: '1.5px solid #03f4fc',
+              border: '1.5px solid #034efc',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '680px',
@@ -2061,7 +2061,7 @@ export const MarketingEventModule = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Eye size={18} color="#03f4fc" />
+                <Eye size={18} color="#034efc" />
                 <span>Lembar Rincian Dokumen Event</span>
               </div>
               <button onClick={() => setViewingItem(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
@@ -2133,7 +2133,7 @@ export const MarketingEventModule = () => {
                         <button
                           type="button"
                           onClick={() => handleDownloadFile(f)}
-                          style={{ background: '#03f4fc', color: '#0a1128', fontWeight: 800, border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', color: '#ffffff', fontWeight: 800, border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                         >
                           <Download size={11} /> Unduh
                         </button>
@@ -2157,7 +2157,7 @@ export const MarketingEventModule = () => {
                 type="button"
                 onClick={() => setViewingItem(null)}
                 className="btn btn-primary btn-sm"
-                style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900 }}
+                style={{ background: 'linear-gradient(135deg, #034efc, #1d4ed8)', border: 'none', color: '#ffffff', fontWeight: 800 }}
               >
                 Tutup
               </button>

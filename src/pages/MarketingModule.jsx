@@ -2521,7 +2521,7 @@ export const MarketingModule = () => {
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {currentSubView === 'leads' && (
-            <button className="btn btn-primary" onClick={handleOpenAddLead} style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }}>
+            <button className="btn btn-primary" onClick={handleOpenAddLead} style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}>
               <Plus size={16} /> Tambah Lead Prospek Baru
             </button>
           )}
@@ -2529,7 +2529,7 @@ export const MarketingModule = () => {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 className="btn btn-primary"
-                style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                 onClick={handleCreateNewOfficialSpr}
                 title="Buka Formulir Input SPR Resmi (MKT-FR-00 & MKT-FR-01)"
               >
@@ -2568,9 +2568,9 @@ export const MarketingModule = () => {
               <button
                 className="btn btn-secondary"
                 style={{
-                  background: sprViewMode === 'preview' ? 'rgba(3, 244, 252, 0.2)' : '#1e293b',
-                  color: sprViewMode === 'preview' ? '#03f4fc' : '#cbd5e1',
-                  borderColor: '#03f4fc',
+                  background: sprViewMode === 'preview' ? 'rgba(3, 78, 252, 0.25)' : '#1e293b',
+                  color: sprViewMode === 'preview' ? '#ffffff' : '#cbd5e1',
+                  borderColor: '#034efc',
                   fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
@@ -2591,7 +2591,7 @@ export const MarketingModule = () => {
               </button>
               <button
                 className="btn btn-primary"
-                style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                 onClick={handleSaveOfficialSpr}
                 title="Simpan Transaksi SPR ini ke Database Penjualan"
               >
@@ -2600,12 +2600,12 @@ export const MarketingModule = () => {
             </div>
           )}
           {currentSubView === 'db_konsumen' && subTabKonsumen === 'calon' && (
-            <button className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }} onClick={handleOpenAddCalonKonsumen}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }} onClick={handleOpenAddCalonKonsumen}>
               <Plus size={16} /> + Tambah Calon Konsumen
             </button>
           )}
           {currentSubView === 'db_unit' && (
-            <button className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }} onClick={handleOpenAddUnit}>
+            <button className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }} onClick={handleOpenAddUnit}>
               <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
@@ -2680,28 +2680,28 @@ export const MarketingModule = () => {
         <div>
           {/* COMMISSION & LEADS KPI SUMMARY BANNER */}
           <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <DollarSign size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Potensi Komisi Sales (2.5%)</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#03f4fc' }}>{formatRupiah(totalCommissionPotential)}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#3b82f6' }}>{formatRupiah(totalCommissionPotential)}</div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckCircle2 size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Komisi Sudah Cair (Rekening)</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#03f4fc' }}>{formatRupiah(totalCommissionCair)}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#3b82f6' }}>{formatRupiah(totalCommissionCair)}</div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users size={24} />
               </div>
               <div>
@@ -2710,8 +2710,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Target size={24} />
               </div>
               <div>
@@ -2861,28 +2861,28 @@ export const MarketingModule = () => {
         <div>
           {/* KPI Cards Grid */}
           <div className="grid-4" style={{ marginBottom: '2rem' }}>
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <DollarSign size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Omzet Closed</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#03f4fc' }}>{formatRupiah(totalOmzet)}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8' }}>{formatRupiah(totalOmzet)}</div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FileCheck2 size={24} />
               </div>
               <div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Dokumen SPR Terbit / Upload</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{salesList.filter(s => s.sprFileUrl || s.sprOfficialState).length} / {salesList.length} <span style={{ fontSize: '0.8rem', color: '#03f4fc' }}>Tersimpan</span></div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{salesList.filter(s => s.sprFileUrl || s.sprOfficialState).length} / {salesList.length} <span style={{ fontSize: '0.8rem', color: '#38bdf8' }}>Tersimpan</span></div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Clock size={24} />
               </div>
               <div>
@@ -2891,8 +2891,8 @@ export const MarketingModule = () => {
               </div>
             </div>
 
-            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #03f4fc' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #034efc' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(3, 78, 252, 0.15)', color: '#034efc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Target size={24} />
               </div>
               <div>
@@ -2975,18 +2975,18 @@ export const MarketingModule = () => {
           </div>
 
           {/* Main Sales Table */}
-          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #03f4fc' }}>
+          <div className="glass-card" style={{ padding: '0.5rem', border: '1.5px solid #034efc' }}>
             <div className="table-container">
               <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%' }}>
                 <thead>
-                  <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>ID & Unit</th>
-                    <th style={{ padding: '11px 14px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Nama Konsumen</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Harga Jual (Rp)</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Status Berkas SPR (Staf Upload)</th>
-                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Sales Agent</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.15)', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Status Penjualan</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap', color: '#0a1128' }}>Aksi Dokumen SPR</th>
+                  <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8', whiteSpace: 'nowrap' }}>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>ID & Unit</th>
+                    <th style={{ padding: '11px 14px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Nama Konsumen</th>
+                    <th style={{ padding: '11px 14px', textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Harga Jual (Rp)</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Status Berkas SPR (Staf Upload)</th>
+                    <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Sales Agent</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap', color: '#ffffff' }}>Status Penjualan</th>
+                    <th style={{ padding: '11px 12px', textAlign: 'center', whiteSpace: 'nowrap', color: '#ffffff' }}>Aksi Dokumen SPR</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2994,7 +2994,7 @@ export const MarketingModule = () => {
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(3, 244, 252, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#03f4fc' }}>
+                          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(3, 78, 252, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#034efc' }}>
                             <FileText size={28} />
                           </div>
                           <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
@@ -3360,7 +3360,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 244, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
                     title="Simpan data SPR ini ke tabel Transaksi Penjualan & SPR"
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui di Transaksi' : 'Simpan ke Transaksi'}
@@ -4446,7 +4446,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 244, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi Penjualan' : 'Simpan ke Transaksi Penjualan'}
                   </button>
@@ -4458,18 +4458,18 @@ export const MarketingModule = () => {
             {/* TAMPILAN PREVIEW CONTROLS DI LAYAR (HANYA AKTIF SAAT PREVIEW MODE)         */}
             {/* ========================================================================= */}
             {sprViewMode === 'preview' && (
-              <div className="no-print" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', background: '#0f172a', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1.5px solid #03f4fc' }}>
+              <div className="no-print" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', background: '#0f172a', padding: '0.85rem 1.25rem', borderRadius: '10px', border: '1.5px solid #034efc' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setSprViewMode('form')}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#03f4fc', borderColor: '#03f4fc' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, background: '#1e293b', color: '#ffffff', borderColor: '#034efc' }}
                 >
                   <ChevronLeft size={16} /> Kembali ke Formulir Input
                 </button>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {sprOfficial.editingSalesId && (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(3, 244, 252, 0.15)', border: '1px solid #03f4fc', color: '#03f4fc', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', borderRadius: '6px', background: 'rgba(3, 78, 252, 0.15)', border: '1px solid #034efc', color: '#3b82f6', fontSize: '0.75rem', fontWeight: 800 }}>
                       <CheckCircle2 size={13} /> Terhubung: {sprOfficial.editingSalesId}
                     </div>
                   )}
@@ -4485,7 +4485,7 @@ export const MarketingModule = () => {
                     type="button"
                     className="btn btn-primary"
                     onClick={handleSaveOfficialSpr}
-                    style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 244, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem', boxShadow: '0 4px 15px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Check size={16} /> {sprOfficial.editingSalesId ? 'Perbarui Transaksi' : 'Simpan ke Transaksi'}
                   </button>
@@ -5064,13 +5064,13 @@ export const MarketingModule = () => {
       {/* TAB 3: DATA BASE KONSUMEN (CALON KONSUMEN, HOT PROSPEK, KONSUMEN RESMI)   */}
       {/* ========================================================================= */}
       {currentSubView === 'db_konsumen' && (
-        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #03f4fc', marginBottom: '1.5rem', borderRadius: '12px' }}>
+        <div className="glass-card" style={{ padding: '1.25rem', background: '#1e293b', border: '1.5px solid #034efc', marginBottom: '1.5rem', borderRadius: '12px' }}>
           
           {/* Header & Sub-Pill Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.85rem' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Users size={24} color="#03f4fc" /> DATA BASE KONSUMEN ({databaseCalonKonsumenRows.length + databaseHotProspekRows.length + databaseKonsumenRows.length} Data)
+                <Users size={24} color="#034efc" /> DATA BASE KONSUMEN
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700 }}>
                 Hierarki manajemen relasi pembeli: Calon Konsumen &rarr; Hot Prospek &rarr; Konsumen Resmi (Closed Deal)
@@ -5085,19 +5085,19 @@ export const MarketingModule = () => {
                 style={{
                   padding: '6px 14px',
                   borderRadius: '7px',
-                  fontWeight: 900,
+                  fontWeight: 800,
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'calon' ? '#03f4fc' : 'transparent',
-                  color: subTabKonsumen === 'calon' ? '#0a1128' : '#94a3b8',
+                  background: subTabKonsumen === 'calon' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  color: subTabKonsumen === 'calon' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(3, 244, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'calon' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
                 }}
               >
-                <UserPlus size={14} /> 1. Calon Konsumen ({databaseCalonKonsumenRows.length})
+                <UserPlus size={14} /> Calon Konsumen
               </button>
 
               <button
@@ -5106,19 +5106,19 @@ export const MarketingModule = () => {
                 style={{
                   padding: '6px 14px',
                   borderRadius: '7px',
-                  fontWeight: 900,
+                  fontWeight: 800,
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'hot' ? '#03f4fc' : 'transparent',
-                  color: subTabKonsumen === 'hot' ? '#0a1128' : '#94a3b8',
+                  background: subTabKonsumen === 'hot' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  color: subTabKonsumen === 'hot' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(3, 244, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'hot' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
                 }}
               >
-                <Flame size={14} /> 2. Hot Prospek ({databaseHotProspekRows.length})
+                <Flame size={14} /> Hot Prospek
               </button>
 
               <button
@@ -5127,19 +5127,19 @@ export const MarketingModule = () => {
                 style={{
                   padding: '6px 14px',
                   borderRadius: '7px',
-                  fontWeight: 900,
+                  fontWeight: 800,
                   fontSize: '0.82rem',
                   cursor: 'pointer',
                   border: 'none',
-                  background: subTabKonsumen === 'konsumen' ? '#03f4fc' : 'transparent',
-                  color: subTabKonsumen === 'konsumen' ? '#0a1128' : '#94a3b8',
+                  background: subTabKonsumen === 'konsumen' ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)' : 'transparent',
+                  color: subTabKonsumen === 'konsumen' ? '#ffffff' : '#94a3b8',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(3, 244, 252, 0.4)' : 'none'
+                  boxShadow: subTabKonsumen === 'konsumen' ? '0 2px 8px rgba(3, 78, 252, 0.4)' : 'none'
                 }}
               >
-                <CheckCircle2 size={14} /> 3. Closing ({databaseKonsumenRows.length})
+                <CheckCircle2 size={14} /> Daftar Konsumen Closing
               </button>
             </div>
           </div>
@@ -5151,7 +5151,7 @@ export const MarketingModule = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.65rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ background: 'rgba(3, 244, 252, 0.15)', color: '#03f4fc', border: '1px solid #03f4fc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 900 }}>
+                  <span style={{ background: 'rgba(3, 78, 252, 0.15)', color: '#3b82f6', border: '1px solid #034efc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 800 }}>
                     Tahap Awal &bull; Data Calon Konsumen
                   </span>
                 </div>
@@ -5193,7 +5193,7 @@ export const MarketingModule = () => {
                   <button
                     type="button"
                     onClick={handleOpenAddCalonKonsumen}
-                    style={{ background: '#03f4fc', color: '#0a1128', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }}
+                    style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
                   >
                     <Plus size={16} /> Tambah Calon Konsumen
                   </button>
@@ -5201,19 +5201,19 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Calon Konsumen */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '950px' }}>
                   <thead>
-                    <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                      <th style={{ width: '45px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No.</th>
-                      <th style={{ width: '135px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Nama</th>
-                      <th style={{ width: '130px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Proyek</th>
-                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No. HP</th>
-                      <th style={{ width: '120px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Domisili</th>
-                      <th style={{ width: '110px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Marketing</th>
-                      <th style={{ minWidth: '150px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Referensi</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Catatan</th>
-                      <th style={{ width: '170px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                      <th style={{ width: '45px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
+                      <th style={{ width: '135px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama</th>
+                      <th style={{ width: '130px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Proyek</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No. HP</th>
+                      <th style={{ width: '120px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Domisili</th>
+                      <th style={{ width: '110px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Marketing</th>
+                      <th style={{ minWidth: '150px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Referensi</th>
+                      <th style={{ minWidth: '160px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Catatan</th>
+                      <th style={{ width: '170px', textAlign: 'center', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -5227,50 +5227,50 @@ export const MarketingModule = () => {
                         return [r.nama, r.proyek, r.noHp, r.domisili, r.marketing, r.referensi, r.referensiBuyer, r.referensiLain, r.catatan].some(v => (v || '').toLowerCase().includes(q));
                       })
                       .map((row, idx) => (
-                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#ffffff' }}>
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                          <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#ec4899', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900, flexShrink: 0 }}>
+                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#034efc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'C'}
                               </div>
                               <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <Home size={13} color="#38bdf8" /> {row.proyek || 'Ashoka View'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
                               title="Chat via WhatsApp"
-                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'underline', whiteSpace: 'nowrap' }}
                             >
                               <Phone size={13} color="#22c55e" style={{ flexShrink: 0 }} />
                               <span style={{ whiteSpace: 'nowrap' }}>{row.noHp || '-'}</span>
                             </button>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <MapPin size={13} color="#f472b6" /> {row.domisili || '-'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fcd34d' }}>
-                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
                               {row.marketing || 'Amanda'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem' }}>
+                          <td style={{ padding: '8px 10px', fontSize: '0.8rem', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             {row.referensi === 'Get Buyer' ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 900, background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid #10b981', width: 'fit-content' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid #10b981', width: 'fit-content' }}>
                                   <Users size={12} /> Get Buyer
                                 </span>
                                 {row.referensiBuyer ? (
-                                  <span style={{ fontSize: '0.74rem', color: '#fcd34d', fontWeight: 800 }}>
+                                  <span style={{ fontSize: '0.74rem', color: '#fcd34d' }}>
                                     Ref: {row.referensiBuyer}
                                   </span>
                                 ) : (
@@ -5279,7 +5279,7 @@ export const MarketingModule = () => {
                               </div>
                             ) : row.referensi === 'Lain-lain' ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(148, 163, 184, 0.15)', color: '#cbd5e1', border: '1px solid #64748b', width: 'fit-content' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(148, 163, 184, 0.15)', color: '#cbd5e1', border: '1px solid #64748b', width: 'fit-content' }}>
                                   Lain-lain
                                 </span>
                                 {row.referensiLain && (
@@ -5289,19 +5289,19 @@ export const MarketingModule = () => {
                                 )}
                               </div>
                             ) : row.referensi === 'WI' ? (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
                                 WI (Walk In)
                               </span>
                             ) : (
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
                                 {row.referensi || 'Iklan'}
                               </span>
                             )}
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                          <td style={{ padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             {row.catatan || '-'}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                          <td style={{ textAlign: 'center', padding: '6px 4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
                               {/* AKSI PROSPEK: PINDAH KE HOT PROSPEK */}
                               <button
@@ -5396,66 +5396,66 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Hot Prospek */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1050px' }}>
                   <thead>
-                    <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                      <th style={{ width: '50px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No.</th>
-                      <th style={{ width: '150px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Nama</th>
-                      <th style={{ width: '135px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Proyek</th>
-                      <th style={{ width: '165px', whiteSpace: 'nowrap', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No. HP</th>
-                      <th style={{ width: '130px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Domisili</th>
-                      <th style={{ width: '120px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Marketing</th>
-                      <th style={{ minWidth: '170px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Minat Unit / Tipe</th>
-                      <th style={{ minWidth: '180px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Catatan</th>
-                      <th style={{ width: '180px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                      <th style={{ width: '50px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
+                      <th style={{ width: '150px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama</th>
+                      <th style={{ width: '135px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Proyek</th>
+                      <th style={{ width: '165px', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No. HP</th>
+                      <th style={{ width: '130px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Domisili</th>
+                      <th style={{ width: '120px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Marketing</th>
+                      <th style={{ minWidth: '170px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Minat Unit / Tipe</th>
+                      <th style={{ minWidth: '180px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Catatan</th>
+                      <th style={{ width: '180px', textAlign: 'center', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {databaseHotProspekRows
                       .filter(r => !searchDbHotProspek || [r.nama, r.proyek, r.noHp, r.domisili, r.marketing, r.minat, r.catatan].some(v => (v || '').toLowerCase().includes(searchDbHotProspek.toLowerCase().trim())))
                       .map((row, idx) => (
-                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#ffffff' }}>
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                          <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#f97316', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900, flexShrink: 0 }}>
+                              <div style={{ width: '26px', height: '26px', minWidth: '26px', borderRadius: '50%', background: '#f97316', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, flexShrink: 0 }}>
                                 <Flame size={14} />
                               </div>
                               <span style={{ fontSize: '0.84rem' }}>{row.nama}</span>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#38bdf8' }}>
+                          <td style={{ padding: '8px 10px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                               <Home size={13} color="#38bdf8" /> {row.proyek || 'Ashoka View'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '8px 10px', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
                               title="Chat via WhatsApp"
-                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'underline', whiteSpace: 'nowrap' }}
                             >
                               <Phone size={13} color="#22c55e" style={{ flexShrink: 0 }} />
                               <span style={{ whiteSpace: 'nowrap' }}>{row.noHp || '-'}</span>
                             </button>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>{row.domisili || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
-                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 800, background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                          <td style={{ padding: '8px 10px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{row.domisili || '-'}</td>
+                          <td style={{ padding: '8px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
                               {row.marketing || 'Amanda'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#38bdf8' }}>
+                          <td style={{ padding: '8px 10px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               🏠 {row.minat || '-'}
                             </span>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                          <td style={{ padding: '8px 10px', fontSize: '0.8rem', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             {row.catatan || '-'}
                           </td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                          <td style={{ textAlign: 'center', padding: '6px 4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', flexWrap: 'wrap' }}>
                               {/* AKSI CLOSING: PINDAH KE KONSUMEN */}
                               <button
@@ -5550,71 +5550,71 @@ export const MarketingModule = () => {
               </div>
 
               {/* Table Closing */}
-              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+              <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
                 <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '1250px' }}>
                   <thead>
-                    <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                      <th style={{ width: '40px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No.</th>
-                      <th style={{ minWidth: '150px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Nama Konsumen</th>
-                      <th style={{ minWidth: '160px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Unit & Kavling</th>
-                      <th style={{ minWidth: '130px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Harga Jual</th>
-                      <th style={{ minWidth: '120px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Booking / DP</th>
-                      <th style={{ width: '135px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No. HP</th>
-                      <th style={{ minWidth: '140px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Alamat</th>
-                      <th style={{ width: '100px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Marketing</th>
-                      <th style={{ width: '130px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Dokumen</th>
-                      <th style={{ width: '80px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Aksi</th>
+                    <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                      <th style={{ width: '40px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
+                      <th style={{ minWidth: '150px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama Konsumen</th>
+                      <th style={{ minWidth: '160px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Unit & Kavling</th>
+                      <th style={{ minWidth: '130px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Harga Jual</th>
+                      <th style={{ minWidth: '120px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Booking / DP</th>
+                      <th style={{ width: '135px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No. HP</th>
+                      <th style={{ minWidth: '140px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Alamat</th>
+                      <th style={{ width: '100px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Marketing</th>
+                      <th style={{ width: '130px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Dokumen</th>
+                      <th style={{ width: '80px', textAlign: 'center', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {databaseKonsumenRows
                       .filter(r => !searchDbKonsumen || [r.nama, r.proyek, r.blok, r.nomor, r.type, r.nik, r.npwp, r.noHp, r.email, r.pekerjaan, r.alamat, r.marketing].some(v => (v || '').toLowerCase().includes(searchDbKonsumen.toLowerCase().trim())))
                       .map((row, idx) => (
-                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                        <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                          <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
+                          <td style={{ padding: '8px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#03f4fc', color: '#0a1128', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 900, flexShrink: 0 }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#034efc', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
                                 {row.nama ? row.nama.charAt(0).toUpperCase() : 'K'}
                               </div>
                               <div>
                                 <div>{row.nama}</div>
-                                {row.pekerjaan && <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>{row.pekerjaan}</div>}
+                                {row.pekerjaan && <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{row.pekerjaan}</div>}
                               </div>
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
-                            <div style={{ color: '#38bdf8', fontWeight: 900 }}>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ color: '#38bdf8', fontWeight: 800 }}>
                               {row.blok ? `Blok ${row.blok} No. ${row.nomor || '-'}` : (row.proyek || 'Ashoka View')}
                             </div>
                             <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
                               {row.type || 'Unit Standar'} {row.proyek ? `• ${row.proyek}` : ''}
                             </div>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
-                            <div style={{ color: '#ffffff', fontWeight: 900 }}>{formatRupiah(row.hargaJual || 0)}</div>
+                          <td style={{ padding: '8px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ color: '#ffffff' }}>{formatRupiah(row.hargaJual || 0)}</div>
                             {row.diskon > 0 && (
-                              <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 700 }}>
+                              <div style={{ fontSize: '0.72rem', color: '#f87171' }}>
                                 Diskon: {formatRupiah(row.diskon)}
                               </div>
                             )}
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#34d399' }}>
+                          <td style={{ padding: '8px 10px', color: '#34d399', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             {formatRupiah(row.bookingDp || 0)}
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800 }}>
+                          <td style={{ padding: '8px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenWACustomer(row.noHp, row.nama)}
                               title="Chat via WhatsApp"
-                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, textDecoration: 'underline' }}
+                              style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'underline' }}
                             >
                               <Phone size={13} color="#22c55e" /> {row.noHp || '-'}
                             </button>
                           </td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontSize: '0.8rem', color: '#cbd5e1' }}>{row.alamat || '-'}</td>
-                          <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#fbbf24' }}>{row.marketing || 'Amanda'}</td>
-                          <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px' }}>
+                          <td style={{ padding: '8px 10px', fontSize: '0.8rem', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{row.alamat || '-'}</td>
+                          <td style={{ padding: '8px 10px', color: '#fbbf24', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{row.marketing || 'Amanda'}</td>
+                          <td style={{ textAlign: 'center', padding: '8px 6px', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenViewClosingDocs(row)}
@@ -5721,7 +5721,7 @@ export const MarketingModule = () => {
               <button
                 type="button"
                 onClick={handleOpenAddUnit}
-                style={{ background: '#03f4fc', color: '#0a1128', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 900, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 244, 252, 0.4)' }}
+                style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', border: 'none', padding: '7px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.84rem', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)' }}
               >
                 <Plus size={16} /> Tambah Unit Properti
               </button>
@@ -5729,18 +5729,18 @@ export const MarketingModule = () => {
           </div>
 
           {/* Table Unit Properti */}
-          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #03f4fc' }}>
+          <div className="table-container" style={{ overflowX: 'auto', borderRadius: '8px', border: '1.5px solid #034efc' }}>
             <table className="custom-table" style={{ borderCollapse: 'collapse', width: '100%', minWidth: '850px' }}>
               <thead>
-                <tr style={{ background: '#03f4fc', color: '#0a1128', borderBottom: '2px solid #02c2ca' }}>
-                  <th style={{ width: '50px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>No.</th>
-                  <th style={{ minWidth: '180px', border: '1px solid #02c2ca', padding: '9px 12px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Nama Proyek</th>
-                  <th style={{ width: '90px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Blok</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Nomor Unit</th>
-                  <th style={{ minWidth: '160px', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Tipe Rumah</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>LB (m²)</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 10px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>LT (m²)</th>
-                  <th style={{ width: '110px', textAlign: 'center', border: '1px solid #02c2ca', padding: '9px 6px', fontWeight: 900, fontSize: '0.86rem', color: '#0a1128' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff', borderBottom: '2px solid #1d4ed8' }}>
+                  <th style={{ width: '50px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>No.</th>
+                  <th style={{ minWidth: '180px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 12px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nama Proyek</th>
+                  <th style={{ width: '90px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Blok</th>
+                  <th style={{ width: '110px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Nomor Unit</th>
+                  <th style={{ minWidth: '160px', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Tipe Rumah</th>
+                  <th style={{ width: '110px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>LB (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', padding: '9px 10px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>LT (m²)</th>
+                  <th style={{ width: '110px', textAlign: 'center', padding: '9px 6px', fontWeight: 800, fontSize: '0.86rem', color: '#ffffff' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -5751,29 +5751,29 @@ export const MarketingModule = () => {
                     return matchProyek && matchSearch;
                   })
                   .map((row, idx) => (
-                    <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a', color: '#ffffff' }}>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 6px', fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 900, color: '#ffffff' }}>
+                    <tr key={row.id || idx} style={{ backgroundColor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                      <td style={{ textAlign: 'center', padding: '8px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>{idx + 1}</td>
+                      <td style={{ padding: '8px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <Home size={14} color="#03f4fc" /> {row.proyek}
+                          <Home size={14} color="#38bdf8" /> {row.proyek}
                         </span>
                       </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#38bdf8' }}>
+                      <td style={{ textAlign: 'center', padding: '8px 10px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         Blok {row.blok}
                       </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#fcd34d' }}>
+                      <td style={{ textAlign: 'center', padding: '8px 10px', color: '#fcd34d', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         No. {row.nomor}
                       </td>
-                      <td style={{ border: '1px solid #334155', padding: '8px 10px', fontWeight: 800, color: '#cbd5e1' }}>
+                      <td style={{ padding: '8px 10px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         {row.type}
                       </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#a7f3d0' }}>
+                      <td style={{ textAlign: 'center', padding: '8px 10px', color: '#a7f3d0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         {row.lb} m²
                       </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '8px 10px', fontWeight: 900, color: '#a7f3d0' }}>
+                      <td style={{ textAlign: 'center', padding: '8px 10px', color: '#a7f3d0', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                         {row.lt} m²
                       </td>
-                      <td style={{ textAlign: 'center', border: '1px solid #334155', padding: '6px 4px' }}>
+                      <td style={{ textAlign: 'center', padding: '6px 4px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                           <button
                             type="button"
@@ -6354,7 +6354,7 @@ export const MarketingModule = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900 }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>
                   {editingSales ? 'Perbarui Transaksi' : 'Simpan Transaksi Penjualan'}
                 </button>
               </div>
@@ -6481,7 +6481,7 @@ export const MarketingModule = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsLeadModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', color: '#0a1128', fontWeight: 900 }}>Simpan Lead Prospek</button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', color: '#ffffff', fontWeight: 800 }}>Simpan Lead Prospek</button>
               </div>
             </form>
           </div>
@@ -6494,7 +6494,7 @@ export const MarketingModule = () => {
           <div className="modal-content" style={{ maxWidth: '850px', background: '#0f172a' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header no-print">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Printer size={20} color="#03f4fc" /> Form Surat Pesanan Rumah (SPR) Resmi
+                <Printer size={20} color="#3b82f6" /> Form Surat Pesanan Rumah (SPR) Resmi
               </h3>
               <button onClick={() => setIsSprModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -6708,10 +6708,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <CheckCircle2 size={20} color="#03f4fc" />
+                <CheckCircle2 size={20} color="#3b82f6" />
                 {editingKonsumenId ? 'Edit Data Closing' : 'Data Closing (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7039,7 +7039,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Closing
                 </button>
               </div>
@@ -7053,10 +7053,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isCalonKonsumenModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <UserPlus size={20} color="#03f4fc" />
+                <UserPlus size={20} color="#3b82f6" />
                 {editingCalonKonsumenId ? 'Edit Data Base Calon Konsumen' : 'Data Base Calon Konsumen (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsCalonKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7236,7 +7236,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsCalonKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Calon Konsumen
                 </button>
               </div>
@@ -7250,10 +7250,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isHotProspekModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Flame size={20} color="#03f4fc" />
+                <Flame size={20} color="#3b82f6" />
                 {editingHotProspekId ? 'Edit Data Base Hot Prospek' : 'Data Base Hot Prospek (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsHotProspekModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7362,7 +7362,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsHotProspekModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Hot Prospek
                 </button>
               </div>
@@ -7376,10 +7376,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isUnitModalOpen && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Home size={20} color="#03f4fc" />
+                <Home size={20} color="#3b82f6" />
                 {editingUnitId ? 'Edit Data Base Unit Properti' : 'Data Base Unit Properti (Tambah Baru)'}
               </h3>
               <button onClick={() => setIsUnitModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7468,7 +7468,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsUnitModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff' }}>
                   💾 Simpan Unit Properti
                 </button>
               </div>
@@ -7482,10 +7482,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isMoveToHotModalOpen && targetMoveCalonItem && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '520px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <Flame size={22} color="#03f4fc" />
+                <Flame size={22} color="#3b82f6" />
                 Pindahkan ke HOT PROSPEK
               </h3>
               <button onClick={() => setIsMoveToHotModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -7575,7 +7575,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToHotModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <Flame size={16} /> 🚀 Pindahkan ke Hot Prospek
                 </button>
               </div>
@@ -7589,10 +7589,10 @@ export const MarketingModule = () => {
       {/* ========================================================================= */}
       {isMoveToKonsumenModalOpen && targetMoveHotItem && (
         <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '1.5px solid #03f4fc', color: '#ffffff', borderRadius: '12px' }}>
+          <div className="modal-content" style={{ maxWidth: '600px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
             <div className="modal-header" style={{ borderBottom: '1px solid #334155' }}>
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 900 }}>
-                <CheckCircle2 size={22} color="#03f4fc" />
+                <CheckCircle2 size={22} color="#3b82f6" />
                 Closing
               </h3>
               <button onClick={() => setIsMoveToKonsumenModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -8065,7 +8065,7 @@ export const MarketingModule = () => {
 
               <div className="modal-footer" style={{ borderTop: '1px solid #334155', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsMoveToKonsumenModalOpen(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ background: '#03f4fc', border: 'none', fontWeight: 900, color: '#0a1128', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', border: 'none', fontWeight: 800, color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle2 size={16} /> 💾 Simpan Closing
                 </button>
               </div>

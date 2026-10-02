@@ -741,40 +741,61 @@ body {
 }
 
 /* ========================================================================= */
-/* MARKETING MODULE: ALL TEXT IN TABLES IS REGULAR (TIDAK ADA YANG BOLD)     */
+/* ALL MARKETING DATA TABLES: UNIFIED ROYAL BLUE #034efc THEME & WHITE TEXT  */
+/* (CRM Leads, Transaksi SPR, DB Konsumen, DB Unit, Piutang, Marketing Event)*/
 /* KECUALI HASIL DARI CETAK SPR RESMI                                        */
 /* ========================================================================= */
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) th,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tr,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) th *,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td *,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td b,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td strong,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td span,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td div,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td p,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td button,
-.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) td a {
-  font-weight: 400 !important;
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead tr {
+  background: linear-gradient(135deg, #034efc 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 2px solid #1d4ed8 !important;
 }
 
-/* ========================================================================= */
-/* CRM LEADS TABLE: ALL TEXT IN HEADERS AND DATA ROWS IS WHITE (#ffffff)     */
-/* ========================================================================= */
-.crm-leads-table thead tr,
-.crm-leads-table thead th,
-.crm-leads-table thead th *,
-.crm-leads-table tbody,
-.crm-leads-table tbody tr,
-.crm-leads-table tbody td,
-.crm-leads-table tbody td div:not(button *),
-.crm-leads-table tbody td span:not(button *):not([class*="badge"]),
-.crm-leads-table tbody td p,
-.crm-leads-table tbody td small {
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead th {
+  background: transparent !important;
   color: #ffffff !important;
+  border: none !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 10px 12px !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead th * {
+  color: #ffffff !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) thead th:last-child {
+  border-right: none !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody tr {
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td {
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 8px 12px !important;
+  font-size: 0.8rem !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td:last-child {
+  border-right: none !important;
+}
+
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td div:not(button *),
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td span:not(button *):not([class*="badge"]),
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td p,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td small,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td b,
+.marketing-module-wrapper table:not(#spr-official-print-document *):not(#spr-printable-area *) tbody td strong {
+  color: #ffffff !important;
+  font-weight: 400 !important;
 }
 
 

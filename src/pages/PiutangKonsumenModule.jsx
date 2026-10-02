@@ -1776,7 +1776,7 @@ export const PiutangKonsumenModule = () => {
   };
 
   return (
-    <div style={{ padding: '0 0 2.5rem' }}>
+    <div className="marketing-module-wrapper" style={{ padding: '0 0 2.5rem' }}>
       {/* ------------------------------------------------------------- */}
       {/* EXCEL TITLE BANNER & FILTER BAR (SESUAI DOKUMEN SCREENSHOT)   */}
       {/* ------------------------------------------------------------- */}
@@ -1852,16 +1852,16 @@ export const PiutangKonsumenModule = () => {
               className="btn btn-primary btn-sm"
               onClick={handleOpenAddRow}
               style={{
-                background: 'linear-gradient(135deg, #47c9af 0%, #168a74 100%)',
-                border: '1px solid #47c9af',
+                background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                border: 'none',
                 color: '#ffffff',
-                fontWeight: 900,
+                fontWeight: 800,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.4rem',
                 padding: '0.45rem 1rem',
                 borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(71, 201, 175, 0.4)'
+                boxShadow: '0 2px 8px rgba(3, 78, 252, 0.4)'
               }}
             >
               <Plus size={16} /> + Tambah Piutang Konsumen
@@ -1905,7 +1905,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#0284c7',
+                background: '#034efc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -1942,7 +1942,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#0284c7',
+                background: '#034efc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -1979,7 +1979,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
-                background: '#0284c7',
+                background: '#034efc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -2016,7 +2016,7 @@ export const PiutangKonsumenModule = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span
               style={{
-                background: '#0284c7',
+                background: '#034efc',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.78rem',
@@ -2243,7 +2243,7 @@ export const PiutangKonsumenModule = () => {
         style={{
           padding: 0,
           background: '#0f172a',
-          border: '1.5px solid #03f4fc',
+          border: '1.5px solid #034efc',
           borderRadius: '12px',
           overflow: 'hidden',
           boxShadow: '0 8px 30px rgba(0,0,0,0.4)'
@@ -2259,65 +2259,65 @@ export const PiutangKonsumenModule = () => {
               textAlign: 'left'
             }}
           >
-            {/* MARKETING CYAN #03f4fc HEADER ROW */}
+            {/* MARKETING ROYAL BLUE #034efc HEADER ROW */}
             <thead>
               <tr
                 style={{
-                  background: '#03f4fc',
-                  color: '#0a1128',
+                  background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                  color: '#ffffff',
                   textAlign: 'center',
-                  fontWeight: 900,
-                  borderBottom: '2px solid #02c2ca'
+                  fontWeight: 800,
+                  borderBottom: '2px solid #1d4ed8'
                 }}
               >
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '35px', color: '#0a1128', fontWeight: 900 }}>No.</th>
-                <th style={{ padding: '11px 12px', border: '1px solid #02c2ca', minWidth: '160px', textAlign: 'left', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '35px', color: '#ffffff', fontWeight: 800 }}>No.</th>
+                <th style={{ padding: '11px 12px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '160px', textAlign: 'left', color: '#ffffff', fontWeight: 800 }}>
                   Nama Konsumen
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '105px', color: '#0a1128', fontWeight: 900 }}>Proyek</th>
-                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '85px', color: '#0a1128', fontWeight: 900 }}>Type</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '50px', color: '#0a1128', fontWeight: 900 }}>Blok</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>No.</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LB</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LT</th>
-                <th style={{ padding: '11px 6px', border: '1px solid #02c2ca', minWidth: '45px', color: '#0a1128', fontWeight: 900 }}>LT+</th>
-                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '85px', color: '#0a1128', fontWeight: 900 }}>Total LB/LT</th>
-                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '105px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '105px', color: '#ffffff', fontWeight: 800 }}>Proyek</th>
+                <th style={{ padding: '11px 8px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '85px', color: '#ffffff', fontWeight: 800 }}>Type</th>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '50px', color: '#ffffff', fontWeight: 800 }}>Blok</th>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '45px', color: '#ffffff', fontWeight: 800 }}>No.</th>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '45px', color: '#ffffff', fontWeight: 800 }}>LB</th>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '45px', color: '#ffffff', fontWeight: 800 }}>LT</th>
+                <th style={{ padding: '11px 6px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '45px', color: '#ffffff', fontWeight: 800 }}>LT+</th>
+                <th style={{ padding: '11px 8px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '85px', color: '#ffffff', fontWeight: 800 }}>Total LB/LT</th>
+                <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '105px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>
                   Harga Jual
                 </th>
-                <th style={{ padding: '11px 8px', border: '1px solid #02c2ca', minWidth: '75px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 8px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '75px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>
                   Disc
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '110px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '110px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>
                   Harga Jual Net
                 </th>
-                <th style={{ padding: '11px 9px', border: '1px solid #02c2ca', minWidth: '85px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 9px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '85px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>
                   Booking
                 </th>
                 <th
                   style={{
                     padding: '11px 9px',
-                    border: '1px solid #02c2ca',
+                    borderRight: '1px solid rgba(255,255,255,0.15)',
                     minWidth: '95px',
                     textAlign: 'right',
-                    color: '#0a1128',
-                    fontWeight: 900
+                    color: '#ffffff',
+                    fontWeight: 800
                   }}
                   title="Total DP yang telah dibayar oleh konsumen"
                 >
                   Dp
                 </th>
-                <th style={{ padding: '11px 10px', border: '1px solid #02c2ca', minWidth: '110px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>
+                <th style={{ padding: '11px 10px', borderRight: '1px solid rgba(255,255,255,0.15)', minWidth: '110px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>
                   Sisa Pembayaran
                 </th>
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #02c2ca',
+                    borderRight: '1px solid rgba(255,255,255,0.15)',
                     minWidth: '100px',
                     textAlign: 'right',
-                    color: '#0a1128',
-                    fontWeight: 900
+                    color: '#ffffff',
+                    fontWeight: 800
                   }}
                   title="Total Angsuran yang telah dibayar oleh konsumen"
                 >
@@ -2326,11 +2326,11 @@ export const PiutangKonsumenModule = () => {
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #02c2ca',
+                    borderRight: '1px solid rgba(255,255,255,0.15)',
                     minWidth: '110px',
                     textAlign: 'right',
-                    color: '#0a1128',
-                    fontWeight: 900
+                    color: '#ffffff',
+                    fontWeight: 800
                   }}
                   title="Sisa saldo hutang / piutang konsumen yang belum dibayar"
                 >
@@ -2339,11 +2339,10 @@ export const PiutangKonsumenModule = () => {
                 <th
                   style={{
                     padding: '11px 10px',
-                    border: '1px solid #02c2ca',
                     minWidth: '200px',
                     textAlign: 'center',
-                    color: '#0a1128',
-                    fontWeight: 900
+                    color: '#ffffff',
+                    fontWeight: 800
                   }}
                 >
                   Aksi
@@ -2359,17 +2358,17 @@ export const PiutangKonsumenModule = () => {
                   <tr
                     key={row.id || idx}
                     style={{
-                      backgroundColor: idx % 2 === 0 ? '#1e293b' : '#0f172a',
-                      borderBottom: '1px solid #334155',
+                      backgroundColor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                       transition: 'background-color 0.15s ease'
                     }}
                   >
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', fontWeight: 800, color: '#94a3b8' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {idx + 1}
                     </td>
 
                     {/* Nama Konsumen */}
-                    <td style={{ padding: '9px 12px', border: '1px solid #334155', fontWeight: 800 }}>
+                    <td style={{ padding: '9px 12px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <div style={{ color: '#ffffff', fontSize: '0.84rem' }}>{row.namaKonsumen}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
                         {row.periode && (
@@ -2380,8 +2379,7 @@ export const PiutangKonsumenModule = () => {
                               background: 'rgba(56, 189, 248, 0.1)',
                               border: '1px solid rgba(56, 189, 248, 0.25)',
                               padding: '1px 5px',
-                              borderRadius: '4px',
-                              fontWeight: 700
+                              borderRadius: '4px'
                             }}
                             title={`Periode Transaksi: ${formatMonthYear(row.periode)}`}
                           >
@@ -2392,7 +2390,6 @@ export const PiutangKonsumenModule = () => {
                           <span
                             style={{
                               fontSize: '0.68rem',
-                              fontWeight: 900,
                               color: '#10b981',
                               background: 'rgba(16, 185, 129, 0.15)',
                               padding: '1px 6px',
@@ -2407,62 +2404,62 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Proyek */}
-                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1px solid #334155', fontWeight: 700, color: '#cbd5e1' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.proyek}
                     </td>
 
                     {/* Type */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', fontWeight: 700, color: '#94a3b8' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#94a3b8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.type}
                     </td>
 
                     {/* Blok */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', fontWeight: 800, color: '#38bdf8' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.blok}
                     </td>
 
                     {/* No Kavling */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', fontWeight: 800, color: '#ffffff' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.noUnit}
                     </td>
 
                     {/* LB */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', color: '#cbd5e1' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.lb}
                     </td>
 
                     {/* LT */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', color: '#cbd5e1' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.lt}
                     </td>
 
                     {/* LT+ */}
-                    <td style={{ textAlign: 'center', padding: '9px 6px', border: '1px solid #334155', color: row.ltPlus > 0 ? '#f59e0b' : '#64748b', fontWeight: row.ltPlus > 0 ? 800 : 500 }}>
+                    <td style={{ textAlign: 'center', padding: '9px 6px', color: row.ltPlus > 0 ? '#f59e0b' : '#64748b', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.ltPlus || 0}
                     </td>
 
                     {/* Total LB/LT */}
-                    <td style={{ textAlign: 'center', padding: '9px 8px', border: '1px solid #334155', fontWeight: 800, color: '#38bdf8' }}>
+                    <td style={{ textAlign: 'center', padding: '9px 8px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {row.totalLbLt}
                     </td>
 
                     {/* Harga Jual */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', border: '1px solid #334155', fontWeight: 700, color: '#ffffff' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 10px', color: '#ffffff', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.hargaJual)}
                     </td>
 
                     {/* Disc */}
-                    <td style={{ textAlign: 'right', padding: '9px 8px', border: '1px solid #334155', color: row.disc > 0 ? '#f87171' : '#64748b', fontWeight: 700 }}>
+                    <td style={{ textAlign: 'right', padding: '9px 8px', color: row.disc > 0 ? '#f87171' : '#64748b', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.disc)}
                     </td>
 
                     {/* Harga Jual Net */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', border: '1px solid #334155', fontWeight: 900, color: '#38bdf8' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 10px', color: '#38bdf8', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.hargaJualNet)}
                     </td>
 
                     {/* Booking */}
-                    <td style={{ textAlign: 'right', padding: '9px 9px', border: '1px solid #334155', fontWeight: 700, color: '#34d399' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 9px', color: '#34d399', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.booking)}
                     </td>
 
@@ -2471,10 +2468,9 @@ export const PiutangKonsumenModule = () => {
                       style={{
                         textAlign: 'right',
                         padding: '8px 10px',
-                        border: '1px solid #334155',
-                        fontWeight: 900,
                         color: '#fbbf24',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        borderRight: '1px solid rgba(255, 255, 255, 0.05)'
                       }}
                       onClick={() => handleOpenPaymentModal(row, 'dp')}
                       title="Klik untuk melihat riwayat & edit pembayaran DP"
@@ -2485,7 +2481,6 @@ export const PiutangKonsumenModule = () => {
                           style={{
                             fontSize: '0.68rem',
                             color: '#94a3b8',
-                            fontWeight: 600,
                             marginTop: '2px'
                           }}
                         >
@@ -2495,7 +2490,7 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Sisa Pembayaran */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', border: '1px solid #334155', fontWeight: 800, color: '#cbd5e1' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 10px', color: '#cbd5e1', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.sisaPembayaran)}
                     </td>
 
@@ -2504,10 +2499,9 @@ export const PiutangKonsumenModule = () => {
                       style={{
                         textAlign: 'right',
                         padding: '8px 10px',
-                        border: '1px solid #334155',
-                        fontWeight: 900,
                         color: '#c084fc',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        borderRight: '1px solid rgba(255, 255, 255, 0.05)'
                       }}
                       onClick={() => handleOpenPaymentModal(row, 'angsuran')}
                       title="Klik untuk melihat riwayat & edit pembayaran Angsuran"
@@ -2518,7 +2512,6 @@ export const PiutangKonsumenModule = () => {
                           style={{
                             fontSize: '0.68rem',
                             color: '#94a3b8',
-                            fontWeight: 600,
                             marginTop: '2px'
                           }}
                         >
@@ -2528,12 +2521,12 @@ export const PiutangKonsumenModule = () => {
                     </td>
 
                     {/* Saldo Akhir */}
-                    <td style={{ textAlign: 'right', padding: '9px 10px', border: '1px solid #334155', fontWeight: 900, color: isLunas ? '#10b981' : '#f59e0b' }}>
+                    <td style={{ textAlign: 'right', padding: '9px 10px', color: isLunas ? '#10b981' : '#f59e0b', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       {formatNumber(row.saldo)}
                     </td>
 
                     {/* Aksi (Tombol Bayar & Edit) */}
-                    <td style={{ textAlign: 'center', padding: '6px 8px', border: '1px solid #334155', whiteSpace: 'nowrap' }}>
+                    <td style={{ textAlign: 'center', padding: '6px 8px', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                         {/* TOMBOL BAYAR (USER EXPLICIT REQUEST) */}
                         <button
@@ -2544,7 +2537,7 @@ export const PiutangKonsumenModule = () => {
                             background: 'linear-gradient(135deg, #059669, #047857)',
                             border: '1px solid #10b981',
                             color: '#ffffff',
-                            fontWeight: 900,
+                            fontWeight: 800,
                             fontSize: '0.74rem',
                             padding: '4px 9px',
                             borderRadius: '5px',
@@ -2564,10 +2557,10 @@ export const PiutangKonsumenModule = () => {
                           onClick={() => handleOpenKwitansiModal(row)}
                           title="Cetak Bukti Kwitansi (Booking / DP / Angsuran)"
                           style={{
-                            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                            border: '1px solid #38bdf8',
+                            background: 'linear-gradient(135deg, #034efc, #1d4ed8)',
+                            border: '1px solid #1d4ed8',
                             color: '#ffffff',
-                            fontWeight: 900,
+                            fontWeight: 800,
                             fontSize: '0.74rem',
                             padding: '4px 8px',
                             borderRadius: '5px',
@@ -2575,7 +2568,7 @@ export const PiutangKonsumenModule = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                            boxShadow: '0 2px 6px rgba(3, 78, 252, 0.3)'
                           }}
                         >
                           <Printer size={13} /> KWI
@@ -2587,10 +2580,10 @@ export const PiutangKonsumenModule = () => {
                           onClick={() => setRekapModalRow(getCalculatedRow(row))}
                           title="Buka Lembar Rekapitulasi Pembayaran & Cetak"
                           style={{
-                            background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                            border: '1px solid #38bdf8',
+                            background: 'linear-gradient(135deg, #034efc, #1d4ed8)',
+                            border: '1px solid #1d4ed8',
                             color: '#ffffff',
-                            fontWeight: 900,
+                            fontWeight: 800,
                             fontSize: '0.74rem',
                             padding: '4px 8px',
                             borderRadius: '5px',
@@ -2598,7 +2591,7 @@ export const PiutangKonsumenModule = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
-                            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                            boxShadow: '0 2px 6px rgba(3, 78, 252, 0.3)'
                           }}
                         >
                           <FileText size={13} /> Rekap
@@ -2654,54 +2647,54 @@ export const PiutangKonsumenModule = () => {
               )}
             </tbody>
 
-            {/* ORANGE / AMBER TOTAL ROW (EXACT MATCH FOOTER IN SCREENSHOT) */}
+            {/* TOTAL ROW IN ROYAL BLUE */}
             <tfoot>
               <tr
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
                   color: '#ffffff',
-                  fontWeight: 900,
+                  fontWeight: 800,
                   fontSize: '0.82rem',
-                  borderTop: '2px solid #0369a1'
+                  borderTop: '2px solid #1d4ed8'
                 }}
               >
                 <td
                   colSpan={10}
                   style={{
                     padding: '11px 14px',
-                    border: '1px solid #0369a1',
+                    borderRight: '1px solid rgba(255, 255, 255, 0.15)',
                     textAlign: 'left',
-                    fontWeight: 900,
+                    fontWeight: 800,
                     letterSpacing: '0.04em'
                   }}
                 >
                   Total
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 10px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.hargaJual)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 8px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 8px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.disc)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 10px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.hargaJualNet)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 9px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 9px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.booking)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 9px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 9px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.dp)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 10px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.sisaPembayaran)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 10px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.angsuran)}
                 </td>
-                <td style={{ textAlign: 'right', padding: '11px 10px', border: '1px solid #0369a1' }}>
+                <td style={{ textAlign: 'right', padding: '11px 10px', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   {formatNumber(totals.saldo)}
                 </td>
-                <td style={{ textAlign: 'center', padding: '11px 10px', border: '1px solid #0369a1' }}>-</td>
+                <td style={{ textAlign: 'center', padding: '11px 10px' }}>-</td>
               </tr>
             </tfoot>
           </table>
@@ -3030,12 +3023,12 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr style={{ background: '#03f4fc', color: '#0a1128' }}>
-                          <th style={{ width: '40px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>No</th>
-                          <th style={{ width: '120px', color: '#0a1128', fontWeight: 900 }}>Tanggal</th>
-                          <th style={{ width: '150px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Jumlah (Rp)</th>
-                          <th style={{ color: '#0a1128', fontWeight: 900 }}>Keterangan</th>
-                          <th style={{ width: '150px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Aksi</th>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '40px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>No</th>
+                          <th style={{ width: '120px', color: '#ffffff', fontWeight: 800 }}>Tanggal</th>
+                          <th style={{ width: '150px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>Jumlah (Rp)</th>
+                          <th style={{ color: '#ffffff', fontWeight: 800 }}>Keterangan</th>
+                          <th style={{ width: '150px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3368,12 +3361,12 @@ export const PiutangKonsumenModule = () => {
                   <div style={{ overflowX: 'auto' }}>
                     <table className="custom-table" style={{ width: '100%', marginBottom: 0 }}>
                       <thead>
-                        <tr style={{ background: '#03f4fc', color: '#0a1128' }}>
-                          <th style={{ width: '40px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>No</th>
-                          <th style={{ width: '120px', color: '#0a1128', fontWeight: 900 }}>Tanggal</th>
-                          <th style={{ width: '150px', textAlign: 'right', color: '#0a1128', fontWeight: 900 }}>Jumlah (Rp)</th>
-                          <th style={{ color: '#0a1128', fontWeight: 900 }}>Keterangan</th>
-                          <th style={{ width: '150px', textAlign: 'center', color: '#0a1128', fontWeight: 900 }}>Aksi</th>
+                        <tr style={{ background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '40px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>No</th>
+                          <th style={{ width: '120px', color: '#ffffff', fontWeight: 800 }}>Tanggal</th>
+                          <th style={{ width: '150px', textAlign: 'right', color: '#ffffff', fontWeight: 800 }}>Jumlah (Rp)</th>
+                          <th style={{ color: '#ffffff', fontWeight: 800 }}>Keterangan</th>
+                          <th style={{ width: '150px', textAlign: 'center', color: '#ffffff', fontWeight: 800 }}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
