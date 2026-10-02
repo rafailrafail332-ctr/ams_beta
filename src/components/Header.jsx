@@ -190,7 +190,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
           >
             Ashoka Management System
           </div>
-          <div style={{ fontSize: '0.68rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#47c9af' : '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '0.68rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
             Asset & Property Management System (AMS)
           </div>
         </div>
@@ -203,15 +203,15 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
             borderRadius: '12px',
             background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
             border: isDark 
-              ? (isLegalTab ? '1.5px solid rgba(192, 132, 252, 0.35)' : isHrGaTab ? '1.5px solid rgba(52, 211, 153, 0.35)' : isMarketingTab ? '1.5px solid rgba(71, 201, 175, 0.45)' : '1.5px solid rgba(255, 255, 255, 0.18)') 
-              : (isLegalTab ? '1.5px solid #e9d5ff' : isHrGaTab ? '1.5px solid #a7f3d0' : isMarketingTab ? '1.5px solid #99f6e4' : '1.5px solid #e2e8f0'),
+              ? (isLegalTab ? '1.5px solid rgba(192, 132, 252, 0.35)' : isHrGaTab ? '1.5px solid rgba(52, 211, 153, 0.35)' : isMarketingTab ? '1.5px solid rgba(3, 202, 252, 0.45)' : '1.5px solid rgba(255, 255, 255, 0.18)') 
+              : (isLegalTab ? '1.5px solid #e9d5ff' : isHrGaTab ? '1.5px solid #a7f3d0' : isMarketingTab ? '1.5px solid #03cafc' : '1.5px solid #e2e8f0'),
             backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: isDark 
-              ? (isLegalTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(192, 132, 252, 0.35)' : isHrGaTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(52, 211, 153, 0.35)' : isMarketingTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(71, 201, 175, 0.4)' : '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)') 
-              : (isLegalTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(168, 85, 247, 0.2)' : isHrGaTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(16, 185, 129, 0.2)' : isMarketingTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(71, 201, 175, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)'),
+              ? (isLegalTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(192, 132, 252, 0.35)' : isHrGaTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(52, 211, 153, 0.35)' : isMarketingTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(3, 202, 252, 0.4)' : '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)') 
+              : (isLegalTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(168, 85, 247, 0.2)' : isHrGaTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(16, 185, 129, 0.2)' : isMarketingTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(3, 202, 252, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)'),
             flexShrink: 0
           }}
         >
