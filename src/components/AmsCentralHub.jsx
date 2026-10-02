@@ -106,8 +106,8 @@ export const AmsCentralHub = ({
       label: 'Finance', 
       sub: 'Keuangan & Kas Bank', 
       desc: 'Arus Kas, Tagihan Vendor & Payment', 
-      color: '#0284c7', 
-      lightColor: '#0369a1',
+      color: '#ef4444', 
+      lightColor: '#b91c1c',
       icon: Wallet
     },
     { 
@@ -962,17 +962,17 @@ export const AmsCentralHub = ({
             onMouseLeave={() => setHoveredNode(null)}
             style={{
               background: isDark 
-                ? (hoveredNode === 'finance' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(15, 23, 42, 0.75)')
-                : (hoveredNode === 'finance' ? '#f0f9ff' : '#ffffff'),
+                ? (hoveredNode === 'finance' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(15, 23, 42, 0.75)')
+                : (hoveredNode === 'finance' ? '#fef2f2' : '#ffffff'),
               border: hoveredNode === 'finance' 
-                ? '2px solid #0284c7' 
+                ? '2px solid #ef4444' 
                 : (isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #e2e8f0'),
               borderRadius: '14px',
               padding: '7px 22px',
               minWidth: '220px',
               backdropFilter: 'blur(16px)',
               boxShadow: hoveredNode === 'finance'
-                ? '0 10px 25px rgba(2, 132, 199, 0.35), 0 0 15px rgba(2, 132, 199, 0.2)'
+                ? '0 10px 25px rgba(239, 68, 68, 0.35), 0 0 15px rgba(239, 68, 68, 0.2)'
                 : (isDark ? '0 4px 16px rgba(0, 0, 0, 0.4)' : '0 4px 16px rgba(0, 0, 0, 0.06)'),
               cursor: 'pointer',
               display: 'flex',
@@ -986,11 +986,11 @@ export const AmsCentralHub = ({
                 width: '32px',
                 height: '32px',
                 borderRadius: '10px',
-                background: hoveredNode === 'finance' ? '#0284c7' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#e0f2fe'),
+                background: hoveredNode === 'finance' ? '#ef4444' : (isDark ? 'rgba(255, 255, 255, 0.08)' : '#fee2e2'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: hoveredNode === 'finance' ? '#ffffff' : '#0284c7',
+                color: hoveredNode === 'finance' ? '#ffffff' : '#ef4444',
                 flexShrink: 0,
                 transition: 'all 0.2s ease'
               }}
@@ -1001,7 +1001,7 @@ export const AmsCentralHub = ({
               <div style={{ 
                 fontSize: '1.25rem', 
                 fontWeight: 900, 
-                color: hoveredNode === 'finance' ? '#38bdf8' : (isDark ? '#f8fafc' : '#0f172a'), 
+                color: hoveredNode === 'finance' ? '#ef4444' : (isDark ? '#f8fafc' : '#0f172a'), 
                 lineHeight: 1.1 
               }}>
                 Finance
@@ -1009,7 +1009,7 @@ export const AmsCentralHub = ({
               <div style={{ 
                 fontSize: '0.64rem', 
                 fontWeight: 700, 
-                color: hoveredNode === 'finance' ? '#0284c7' : (isDark ? '#94a3b8' : '#64748b'), 
+                color: hoveredNode === 'finance' ? '#ef4444' : (isDark ? '#94a3b8' : '#64748b'), 
                 marginTop: '2px' 
               }}>
                 Keuangan & Kas Bank

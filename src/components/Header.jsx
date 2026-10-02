@@ -10,6 +10,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
   const isLegalTab = currentTab === 'legal';
   const isHrGaTab = currentTab === 'hr-ga' || currentTab === 'ga';
   const isMarketingTab = currentTab === 'marketing';
+  const isFinanceTab = currentTab === 'finance';
   const isTeknikTab = currentTab === 'teknik';
   const avatarUrl = getAvatarUrl(currentUser);
 
@@ -58,6 +59,8 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
                 : isMarketingTab
                 ? 'linear-gradient(135deg, #03cafc 0%, #0284c7 100%)'
+                : isFinanceTab
+                ? 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)'
                 : isTeknikTab
                 ? 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)'
                 : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
@@ -74,6 +77,8 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 ? '0 2px 10px rgba(16, 185, 129, 0.45)'
                 : isMarketingTab
                 ? '0 2px 10px rgba(3, 202, 252, 0.45)'
+                : isFinanceTab
+                ? '0 2px 10px rgba(185, 28, 28, 0.45)'
                 : isTeknikTab
                 ? '0 2px 10px rgba(3, 78, 252, 0.45)'
                 : '0 2px 10px rgba(2, 132, 199, 0.4)',
@@ -113,14 +118,14 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
                 height: '32px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                border: isLegalTab ? '1.5px solid #c084fc' : isHrGaTab ? '1.5px solid #34d399' : isMarketingTab ? '1.5px solid #03cafc' : '1.5px solid #0284c7'
+                border: isLegalTab ? '1.5px solid #c084fc' : isHrGaTab ? '1.5px solid #34d399' : isMarketingTab ? '1.5px solid #03cafc' : isFinanceTab ? '1.5px solid #ef4444' : '1.5px solid #0284c7'
               }}
             />
             <div style={{ textAlign: 'left', lineHeight: 1.25 }}>
               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f8fafc' }}>
                 {currentUser?.name || 'Yazid Hizbullah, S.E.,S.T'}
               </div>
-              <div style={{ fontSize: '0.7rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : '#38bdf8', fontWeight: 700 }}>
+              <div style={{ fontSize: '0.7rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : isFinanceTab ? '#ef4444' : '#38bdf8', fontWeight: 700 }}>
                 {currentUser?.role || 'Direktur Utama'}
               </div>
             </div>
@@ -190,7 +195,7 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
           >
             Ashoka Management System
           </div>
-          <div style={{ fontSize: '0.68rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '0.68rem', color: isLegalTab ? '#c084fc' : isHrGaTab ? '#34d399' : isMarketingTab ? '#03cafc' : isFinanceTab ? '#ef4444' : '#38bdf8', fontWeight: 800, letterSpacing: '0.04em' }}>
             Asset & Property Management System (AMS)
           </div>
         </div>
@@ -203,15 +208,15 @@ export const Header = ({ currentTab, setCurrentTab, onBackToLanding, activeTitle
             borderRadius: '12px',
             background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#ffffff',
             border: isDark 
-              ? (isLegalTab ? '1.5px solid rgba(192, 132, 252, 0.35)' : isHrGaTab ? '1.5px solid rgba(52, 211, 153, 0.35)' : isMarketingTab ? '1.5px solid rgba(3, 202, 252, 0.45)' : '1.5px solid rgba(255, 255, 255, 0.18)') 
-              : (isLegalTab ? '1.5px solid #e9d5ff' : isHrGaTab ? '1.5px solid #a7f3d0' : isMarketingTab ? '1.5px solid #03cafc' : '1.5px solid #e2e8f0'),
+              ? (isLegalTab ? '1.5px solid rgba(192, 132, 252, 0.35)' : isHrGaTab ? '1.5px solid rgba(52, 211, 153, 0.35)' : isMarketingTab ? '1.5px solid rgba(3, 202, 252, 0.45)' : isFinanceTab ? '1.5px solid rgba(239, 68, 68, 0.45)' : '1.5px solid rgba(255, 255, 255, 0.18)') 
+              : (isLegalTab ? '1.5px solid #e9d5ff' : isHrGaTab ? '1.5px solid #a7f3d0' : isMarketingTab ? '1.5px solid #03cafc' : isFinanceTab ? '1.5px solid #ef4444' : '1.5px solid #e2e8f0'),
             backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: isDark 
-              ? (isLegalTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(192, 132, 252, 0.35)' : isHrGaTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(52, 211, 153, 0.35)' : isMarketingTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(3, 202, 252, 0.4)' : '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)') 
-              : (isLegalTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(168, 85, 247, 0.2)' : isHrGaTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(16, 185, 129, 0.2)' : isMarketingTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(3, 202, 252, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)'),
+              ? (isLegalTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(192, 132, 252, 0.35)' : isHrGaTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(52, 211, 153, 0.35)' : isMarketingTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(3, 202, 252, 0.4)' : isFinanceTab ? '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(239, 68, 68, 0.4)' : '0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.28)') 
+              : (isLegalTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(168, 85, 247, 0.2)' : isHrGaTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(16, 185, 129, 0.2)' : isMarketingTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(3, 202, 252, 0.25)' : isFinanceTab ? '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(239, 68, 68, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08), 0 0 10px rgba(245, 158, 11, 0.15)'),
             flexShrink: 0
           }}
         >

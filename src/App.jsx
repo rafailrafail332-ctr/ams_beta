@@ -88,7 +88,7 @@ function AppContent() {
       case 'hr':
         return 'Legal Corporate';
       case 'finance':
-        return 'Finance & Payment';
+        return 'Finance & Acc';
       case 'hr-ga':
       case 'ga':
         return 'HR & GA';
