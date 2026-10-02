@@ -83,6 +83,9 @@ export const INITIAL_FUND_REQUESTS = [
     disbursedBankName: 'BCA Operasional Utama (002-988-1234)',
     disbursedAt: '2026-10-01',
     disbursedRef: 'TRX-DISB-2026-001',
+    transferProofUrl: 'sample_transfer_proof',
+    transferProofName: 'Struk_BCA_Transfer_REQ003.jpg',
+    transferNotes: 'Transfer via KlikBCA Bisnis ke Rekening CV Sejuk Abadi Mandiri',
     accountCode: '5-301',
     notes: 'Servis rutin 3 unit AC Sharp & pembelian 12 rompi safety K3 satpam/staf',
     attachments: [{ name: 'Invoice_Bengkel_AC_APD.pdf', size: '890 KB' }]
@@ -130,6 +133,50 @@ export const INITIAL_FUND_REQUESTS = [
     accountCode: '2-101',
     notes: 'Supplier: PT Semen Nusantara Perkasa - Jatuh tempo 7 hari',
     attachments: [{ name: 'PO_Material_042_Invoice.pdf', size: '2.1 MB' }]
+  },
+  {
+    id: 'REQ-2026-006',
+    originModule: 'teknik',
+    originModuleName: 'Teknik & Konstruksi',
+    requester: 'Kholidin (Teknik Lapangan)',
+    title: 'Pengurukan & Pematangan Lahan Blok B Ashoka Park',
+    project: 'Ashoka Park',
+    category: 'Konstruksi & Cut-Fill',
+    amount: 28000000,
+    requestDate: '2026-10-02',
+    dueDate: '2026-10-08',
+    priority: 'Tinggi',
+    status: 'Menunggu Review',
+    approvedBy: null,
+    approvedAt: null,
+    disbursedBankId: null,
+    disbursedBankName: null,
+    disbursedAt: null,
+    accountCode: '5-101',
+    notes: 'Pekerjaan perataan jalan boulevard dan saluran drainase Blok B Ashoka Park',
+    attachments: [{ name: 'SPK_Pematangan_Lahan_AshokaPark.pdf', size: '2.4 MB' }]
+  },
+  {
+    id: 'REQ-2026-007',
+    originModule: 'marketing',
+    originModuleName: 'Marketing & Sales',
+    requester: 'Adhi Himawan (Marketing Head)',
+    title: 'Pemasangan Billboard & Umbul-umbul Gerbang Masuk Ashoka Park',
+    project: 'Ashoka Park',
+    category: 'Promosi & Event',
+    amount: 12500000,
+    requestDate: '2026-10-01',
+    dueDate: '2026-10-06',
+    priority: 'Normal',
+    status: 'Disetujui',
+    approvedBy: 'Yazid Hizbullah, S.E.,S.T',
+    approvedAt: '2026-10-01',
+    disbursedBankId: null,
+    disbursedBankName: null,
+    disbursedAt: null,
+    accountCode: '5-201',
+    notes: 'Branding promosi gerbang masuk cluster baru Ashoka Park',
+    attachments: [{ name: 'Desain_Billboard_AshokaPark.pdf', size: '3.1 MB' }]
   }
 ];
 
@@ -312,6 +359,19 @@ export const INITIAL_SALES = [
     paymentMethod: 'Cash Bertahap 12x',
     status: 'Cicilan Berjalan (3/12)',
     contractDate: '2026-08-10'
+  },
+  {
+    id: 'SLS-2026-004',
+    unitNo: 'PK-05',
+    consumerName: 'dr. Hendra Gunawan, Sp.A',
+    project: 'Ashoka Park',
+    type: 'Rumah Tipe 54/105 Hook',
+    salePrice: 560000000,
+    paidAmount: 120000000,
+    unpaidAmount: 440000000,
+    paymentMethod: 'KPR Bank BCA',
+    status: 'Persetujuan SP3K Bank',
+    contractDate: '2026-09-22'
   }
 ];
 
@@ -596,7 +656,7 @@ export const rejectFundRequest = (requestId, reason = '', rejectorName = 'Financ
  * 3. Otomatis membuat baris pembukuan di Jurnal Umum (Debit Beban, Kredit Bank).
  * 4. Catat riwayat di Audit Log.
  */
-export const disburseFundRequest = (requestId, bankId, officerName = 'Finance Staff') => {
+export const disburseFundRequest = (requestId, bankId, officerName = 'Finance Staff', extraData = {}) => {
   const reqList = getFundRequests();
   const targetReq = reqList.find(r => r.id === requestId);
   if (!targetReq) throw new Error('Pengajuan dana tidak ditemukan!');
@@ -610,7 +670,7 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const refDisburseNo = `BKK/${targetBank.id}/${todayStr.replace(/-/g, '')}/${Math.floor(100 + Math.random() * 900)}`;
+  const refDisburseNo = extraData.transferRefNo || `BKK/${targetBank.id}/${todayStr.replace(/-/g, '')}/${Math.floor(100 + Math.random() * 900)}`;
 
   // 1. Update status Pengajuan Dana
   const updatedReqs = reqList.map(r => {
@@ -621,7 +681,10 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
         disbursedBankId: targetBank.id,
         disbursedBankName: targetBank.name,
         disbursedAt: todayStr,
-        disbursedRef: refDisburseNo
+        disbursedRef: refDisburseNo,
+        transferProofUrl: extraData.transferProofUrl || null,
+        transferProofName: extraData.transferProofName || null,
+        transferNotes: extraData.transferNotes || ''
       };
     }
     return r;

@@ -40,8 +40,14 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Calendar,
-  Layers
+  Layers,
+  UploadCloud,
+  CalendarDays,
+  RotateCcw,
+  FileCheck
 } from 'lucide-react';
+import { FinanceLineChart } from '../components/FinanceLineChart';
+import { TransferProofModal } from '../components/TransferProofModal';
 
 import {
   getFundRequests,
@@ -112,6 +118,21 @@ export const FinanceModule = () => {
   const [filterModuleOrigin, setFilterModuleOrigin] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [selectedGlAccount, setSelectedGlAccount] = useState('1-102'); // untuk submodul Account (buku besar)
+
+  // Filter Proyek & Periode Waktu
+  const [filterProject, setFilterProject] = useState('ALL'); // 'ALL' | 'Ashoka View' | 'Ashoka Park' | 'Head Office Bizhub' | 'Bizhub Commercial'
+  const [filterDateMode, setFilterDateMode] = useState('ALL'); // 'ALL' | 'MONTHLY' | 'DAILY'
+  const [filterMonth, setFilterMonth] = useState('2026-10');
+  const [filterDay, setFilterDay] = useState(new Date().toISOString().split('T')[0]);
+
+  // Modal Bukti Transfer & Struk Digital
+  const [isProofModalOpen, setIsProofModalOpen] = useState(false);
+  const [selectedProofItem, setSelectedProofItem] = useState(null);
+
+  // Form Disburse Extra (Bukti TF, Nomor Referensi, Catatan)
+  const [disburseTransferProof, setDisburseTransferProof] = useState({ url: null, name: '' });
+  const [disburseTransferRef, setDisburseTransferRef] = useState('');
+  const [disburseTransferNotes, setDisburseTransferNotes] = useState('');
 
   // Modal States
   const [isDisburseModalOpen, setIsDisburseModalOpen] = useState(false);
@@ -232,6 +253,10 @@ export const FinanceModule = () => {
 
   const handleOpenDisburseModal = (req) => {
     setSelectedReqForDisburse(req);
+    const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    setDisburseTransferRef(`BKK/TRF/${todayStr}/${Math.floor(100 + Math.random() * 900)}`);
+    setDisburseTransferNotes(`Pencairan dana ${req.id} untuk keperluan: ${req.title}`);
+    setDisburseTransferProof({ url: null, name: '' });
     setIsDisburseModalOpen(true);
   };
 
@@ -242,7 +267,13 @@ export const FinanceModule = () => {
       const result = disburseFundRequest(
         selectedReqForDisburse.id,
         disburseSelectedBankId,
-        'Yazid Hizbullah, S.E.,S.T'
+        'Yazid Hizbullah, S.E.,S.T',
+        {
+          transferRefNo: disburseTransferRef,
+          transferNotes: disburseTransferNotes,
+          transferProofUrl: disburseTransferProof.url,
+          transferProofName: disburseTransferProof.name
+        }
       );
       setFundRequests(getFundRequests());
       setBanks(getBanks());
@@ -353,7 +384,7 @@ export const FinanceModule = () => {
   };
 
   // ===========================================================================
-  // FILTERED DATASETS & METRICS
+  // FILTERED DATASETS & METRICS (PROYEK & PERIODE FILTER)
   // ===========================================================================
   const filteredFundRequests = useMemo(() => {
     return fundRequests.filter(item => {
@@ -366,9 +397,80 @@ export const FinanceModule = () => {
       const matchModule = filterModuleOrigin === 'ALL' || item.originModule === filterModuleOrigin;
       const matchStatus = filterStatus === 'ALL' || item.status === filterStatus;
 
-      return matchSearch && matchModule && matchStatus;
+      // Filter Proyek
+      const matchProject =
+        filterProject === 'ALL' ||
+        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase()));
+
+      // Filter Periode Waktu
+      let matchDate = true;
+      const itemDate = item.requestDate || item.disbursedAt || '';
+      if (filterDateMode === 'MONTHLY' && filterMonth) {
+        matchDate = itemDate.startsWith(filterMonth);
+      } else if (filterDateMode === 'DAILY' && filterDay) {
+        matchDate = itemDate === filterDay;
+      }
+
+      return matchSearch && matchModule && matchStatus && matchProject && matchDate;
     });
-  }, [fundRequests, searchTerm, filterModuleOrigin, filterStatus]);
+  }, [fundRequests, searchTerm, filterModuleOrigin, filterStatus, filterProject, filterDateMode, filterMonth, filterDay]);
+
+  // Filter Penjualan berdasarkan Proyek & Periode
+  const filteredSales = useMemo(() => {
+    return sales.filter(item => {
+      const matchProject =
+        filterProject === 'ALL' ||
+        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase()));
+
+      let matchDate = true;
+      const itemDate = item.contractDate || '';
+      if (filterDateMode === 'MONTHLY' && filterMonth) {
+        matchDate = itemDate.startsWith(filterMonth);
+      } else if (filterDateMode === 'DAILY' && filterDay) {
+        matchDate = itemDate === filterDay;
+      }
+
+      return matchProject && matchDate;
+    });
+  }, [sales, filterProject, filterDateMode, filterMonth, filterDay]);
+
+  // Filter Jurnal Umum berdasarkan Proyek & Periode
+  const filteredJurnal = useMemo(() => {
+    return jurnal.filter(item => {
+      const matchProject =
+        filterProject === 'ALL' ||
+        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase()));
+
+      let matchDate = true;
+      const itemDate = item.date || '';
+      if (filterDateMode === 'MONTHLY' && filterMonth) {
+        matchDate = itemDate.startsWith(filterMonth);
+      } else if (filterDateMode === 'DAILY' && filterDay) {
+        matchDate = itemDate === filterDay;
+      }
+
+      return matchProject && matchDate;
+    });
+  }, [jurnal, filterProject, filterDateMode, filterMonth, filterDay]);
+
+  // Filter Hutang berdasarkan Proyek & Periode
+  const filteredPayables = useMemo(() => {
+    return payables.filter(item => {
+      const matchProject =
+        filterProject === 'ALL' ||
+        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase()));
+
+      let matchDate = true;
+      const itemDate = item.dueDate || '';
+      if (filterDateMode === 'MONTHLY' && filterMonth) {
+        matchDate = itemDate.startsWith(filterMonth);
+      } else if (filterDateMode === 'DAILY' && filterDay) {
+        matchDate = itemDate === filterDay;
+      }
+
+      return matchProject && matchDate;
+    });
+  }, [payables, filterProject, filterDateMode, filterMonth, filterDay]);
 
   // Statistik Pengajuan Dana
   const fundStats = useMemo(() => {
@@ -722,6 +824,209 @@ export const FinanceModule = () => {
       </div>
 
       {/* ========================================================================= */}
+      {/* 🔍 MASTER TOOLBAR FILTER: FILTER PROYEK & WAKTU (BULANAN / HARIAN)         */}
+      {/* ========================================================================= */}
+      <div
+        className="glass-card no-print"
+        style={{
+          background: 'linear-gradient(180deg, #0b1120 0%, #090d16 100%)',
+          border: '1.5px solid #1e293b',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          {/* Label Filter Proyek */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <Building size={16} color="#ef4444" />
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f87171', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              Filter Proyek:
+            </span>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'ALL', label: 'Semua Proyek' },
+                { id: 'Ashoka View', label: '🏡 Ashoka View', highlight: '#38bdf8' },
+                { id: 'Ashoka Park', label: '🌳 Ashoka Park', highlight: '#10b981' },
+                { id: 'Bizhub Commercial', label: '🏢 Bizhub Commercial' },
+                { id: 'Head Office Bizhub', label: '🏛️ Head Office' }
+              ].map((proj) => {
+                const isActive = filterProject === proj.id;
+                return (
+                  <button
+                    key={proj.id}
+                    type="button"
+                    onClick={() => setFilterProject(proj.id)}
+                    style={{
+                      background: isActive
+                        ? 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)'
+                        : '#0f172a',
+                      color: isActive ? '#ffffff' : proj.highlight || '#cbd5e1',
+                      border: isActive ? '1.5px solid #ef4444' : '1px solid #1e293b',
+                      borderRadius: '8px',
+                      padding: '5px 12px',
+                      fontSize: '0.76rem',
+                      fontWeight: isActive ? 800 : 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: isActive ? '0 2px 8px rgba(185, 28, 28, 0.4)' : 'none'
+                    }}
+                  >
+                    {proj.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Reset Filter Button jika ada filter aktif */}
+          {(filterProject !== 'ALL' || filterDateMode !== 'ALL') && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterProject('ALL');
+                setFilterDateMode('ALL');
+              }}
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid #ef4444',
+                color: '#f87171',
+                borderRadius: '6px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <RotateCcw size={12} />
+              <span>Reset Filter</span>
+            </button>
+          )}
+        </div>
+
+        {/* Baris Kedua: Filter Periode Waktu */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <CalendarDays size={16} color="#38bdf8" />
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              Periode Waktu:
+            </span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setFilterDateMode('ALL')}
+                style={{
+                  background: filterDateMode === 'ALL' ? '#1e3a8a' : '#0f172a',
+                  color: filterDateMode === 'ALL' ? '#ffffff' : '#cbd5e1',
+                  border: filterDateMode === 'ALL' ? '1.5px solid #3b82f6' : '1px solid #1e293b',
+                  borderRadius: '6px',
+                  padding: '5px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: filterDateMode === 'ALL' ? 800 : 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Semua Waktu
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterDateMode('MONTHLY')}
+                style={{
+                  background: filterDateMode === 'MONTHLY' ? '#1e3a8a' : '#0f172a',
+                  color: filterDateMode === 'MONTHLY' ? '#ffffff' : '#cbd5e1',
+                  border: filterDateMode === 'MONTHLY' ? '1.5px solid #3b82f6' : '1px solid #1e293b',
+                  borderRadius: '6px',
+                  padding: '5px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: filterDateMode === 'MONTHLY' ? 800 : 600,
+                  cursor: 'pointer'
+                }}
+              >
+                📅 Per Bulan
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterDateMode('DAILY')}
+                style={{
+                  background: filterDateMode === 'DAILY' ? '#1e3a8a' : '#0f172a',
+                  color: filterDateMode === 'DAILY' ? '#ffffff' : '#cbd5e1',
+                  border: filterDateMode === 'DAILY' ? '1.5px solid #3b82f6' : '1px solid #1e293b',
+                  borderRadius: '6px',
+                  padding: '5px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: filterDateMode === 'DAILY' ? 800 : 600,
+                  cursor: 'pointer'
+                }}
+              >
+                📆 Per Hari
+              </button>
+            </div>
+
+            {/* Input Picker sesuai mode */}
+            {filterDateMode === 'MONTHLY' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Pilih Bulan:</span>
+                <input
+                  type="month"
+                  value={filterMonth}
+                  onChange={(e) => setFilterMonth(e.target.value)}
+                  style={{
+                    background: '#0f172a',
+                    border: '1.5px solid #3b82f6',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    color: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 700
+                  }}
+                />
+              </div>
+            )}
+
+            {filterDateMode === 'DAILY' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Pilih Tanggal:</span>
+                <input
+                  type="date"
+                  value={filterDay}
+                  onChange={(e) => setFilterDay(e.target.value)}
+                  style={{
+                    background: '#0f172a',
+                    border: '1.5px solid #3b82f6',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    color: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 700
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Status Keterangan Filter */}
+          <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>Menampilkan data:</span>
+            <strong style={{ color: filterProject === 'ALL' ? '#ffffff' : '#38bdf8' }}>
+              {filterProject === 'ALL' ? 'Semua Proyek' : filterProject}
+            </strong>
+            <span>•</span>
+            <strong style={{ color: filterDateMode === 'ALL' ? '#ffffff' : '#f59e0b' }}>
+              {filterDateMode === 'ALL' ? 'Semua Periode' : filterDateMode === 'MONTHLY' ? `Bulan ${filterMonth}` : `Tgl ${filterDay}`}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
       {/* 🌟 KONTEN DINAMIS: MENAMPILKAN 17 SUB-MODUL FINANCE SECARA LENGKAP         */}
       {/* ========================================================================= */}
 
@@ -785,6 +1090,25 @@ export const FinanceModule = () => {
               </div>
             </div>
           </div>
+
+          {/* Grafik Garis Tren Pengajuan vs Pencairan */}
+          <FinanceLineChart
+            title="Tren Pengajuan vs Realisasi Pencairan Dana"
+            subtitle={`Analisis tren pengeluaran operasional & konstruksi departemen (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+            data={[
+              { label: 'Mei', Total: 65000000, Dicairkan: 58000000 },
+              { label: 'Jun', Total: 82000000, Dicairkan: 75000000 },
+              { label: 'Jul', Total: 95000000, Dicairkan: 88000000 },
+              { label: 'Agt', Total: 110000000, Dicairkan: 102000000 },
+              { label: 'Sep', Total: 135000000, Dicairkan: 125000000 },
+              { label: 'Okt', Total: fundStats.totalAmount || 146000000, Dicairkan: fundStats.disbursedAmount || 118000000 }
+            ]}
+            series={[
+              { key: 'Total', label: 'Total Diajukan', color: '#f59e0b' },
+              { key: 'Dicairkan', label: 'Realisasi Dicairkan', color: '#10b981' }
+            ]}
+            height={230}
+          />
 
           {/* Filter Bar & Tombol Tambah */}
           <div
@@ -1108,6 +1432,34 @@ export const FinanceModule = () => {
                                 </button>
                               )}
 
+                              {item.status === 'Dicairkan' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedProofItem(item);
+                                    setIsProofModalOpen(true);
+                                  }}
+                                  title="Lihat Bukti Transfer & Cetak Struk"
+                                  style={{
+                                    background: 'rgba(16, 185, 129, 0.2)',
+                                    border: '1px solid #10b981',
+                                    color: '#34d399',
+                                    borderRadius: '6px',
+                                    padding: '6px 10px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)'
+                                  }}
+                                >
+                                  <Receipt size={13} />
+                                  <span>Bukti TF</span>
+                                </button>
+                              )}
+
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1193,6 +1545,25 @@ export const FinanceModule = () => {
             </div>
           </div>
 
+          {/* Grafik Garis Tren Arus Kas (Cash In vs Cash Out) */}
+          <FinanceLineChart
+            title="Tren Arus Kas Masuk vs Keluar (Cash In vs Cash Out)"
+            subtitle={`Monitoring likuiditas transaksi operasional & proyek (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+            data={[
+              { label: 'Mei', In: 340000000, Out: 220000000 },
+              { label: 'Jun', In: 420000000, Out: 290000000 },
+              { label: 'Jul', In: 480000000, Out: 310000000 },
+              { label: 'Agt', In: 550000000, Out: 390000000 },
+              { label: 'Sep', In: 610000000, Out: 430000000 },
+              { label: 'Okt', In: 680000000, Out: 485000000 }
+            ]}
+            series={[
+              { key: 'In', label: 'Cash In (Penerimaan)', color: '#10b981' },
+              { key: 'Out', label: 'Cash Out (Pengeluaran)', color: '#ef4444' }
+            ]}
+            height={220}
+          />
+
           {/* Grid Kartu 4 Rekening Bank */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
             {banks.map((bank) => (
@@ -1260,7 +1631,7 @@ export const FinanceModule = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {jurnal.slice(0, 5).map((jrn) => (
+                  {(filteredJurnal.length > 0 ? filteredJurnal : jurnal).slice(0, 5).map((jrn) => (
                     <tr key={jrn.id} style={{ borderBottom: '1px solid #1e293b' }}>
                       <td style={{ padding: '10px 12px', fontWeight: 700, color: '#f87171' }}>{jrn.refNo}</td>
                       <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{jrn.date}</td>
@@ -1363,8 +1734,14 @@ export const FinanceModule = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {jurnal.map((item) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                  {filteredJurnal.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                        Tidak ada transaksi jurnal yang cocok dengan filter ({filterProject} • {filterDateMode}).
+                      </td>
+                    </tr>
+                  ) : filteredJurnal.map((item) => (
+                      <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
                       <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
                         <div style={{ fontWeight: 800, color: '#ffffff' }}>{item.refNo}</div>
                         <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{item.date}</div>
@@ -1980,6 +2357,25 @@ export const FinanceModule = () => {
             </div>
           </div>
 
+          {/* Grafik Garis Tren Omzet: Ashoka View vs Ashoka Park */}
+          <FinanceLineChart
+            title="Tren Omzet Penjualan Unit: Ashoka View vs Ashoka Park"
+            subtitle={`Perbandingan performa penjualan unit properti perumahan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+            data={[
+              { label: 'Mei', AshokaView: 485000000, AshokaPark: 380000000 },
+              { label: 'Jun', AshokaView: 560000000, AshokaPark: 450000000 },
+              { label: 'Jul', AshokaView: 680000000, AshokaPark: 560000000 },
+              { label: 'Agt', AshokaView: 750000000, AshokaPark: 680000000 },
+              { label: 'Sep', AshokaView: 865000000, AshokaPark: 810000000 },
+              { label: 'Okt', AshokaView: 940000000, AshokaPark: 890000000 }
+            ]}
+            series={[
+              { key: 'AshokaView', label: 'Ashoka View (Blok A, B, C)', color: '#38bdf8' },
+              { key: 'AshokaPark', label: 'Ashoka Park (Blok PK)', color: '#10b981' }
+            ]}
+            height={220}
+          />
+
           <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
               <thead>
@@ -1994,8 +2390,14 @@ export const FinanceModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {sales.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                {filteredSales.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                      Tidak ada catatan penjualan unit untuk filter ({filterProject} • {filterDateMode}).
+                    </td>
+                  </tr>
+                ) : filteredSales.map((item) => (
+                    <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ fontWeight: 800, color: '#f87171' }}>{item.unitNo}</div>
                       <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{item.project}</div>
@@ -2056,8 +2458,14 @@ export const FinanceModule = () => {
                 </tr>
               </thead>
               <tbody>
-                {payables.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                {filteredPayables.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                      Tidak ada data hutang usaha untuk filter ({filterProject} • {filterDateMode}).
+                    </td>
+                  </tr>
+                ) : filteredPayables.map((item) => (
+                    <tr key={item.id} style={{ borderBottom: '1px solid #1e293b' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ffffff' }}>
                       {item.vendor}
                     </td>
@@ -2462,6 +2870,25 @@ export const FinanceModule = () => {
             </div>
           </div>
 
+          {/* Grafik Garis Tren Finansial Eksekutif */}
+          <FinanceLineChart
+            title="Tren Pendapatan (Omzet) & Laba Bersih Perusahaan"
+            subtitle={`Kinerja profitabilitas konsolidasi tahun berjalan (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+            data={[
+              { label: 'Mei', Pendapatan: 480000000, LabaBersih: 140000000 },
+              { label: 'Jun', Pendapatan: 590000000, LabaBersih: 185000000 },
+              { label: 'Jul', Pendapatan: 670000000, LabaBersih: 220000000 },
+              { label: 'Agt', Pendapatan: 790000000, LabaBersih: 280000000 },
+              { label: 'Sep', Pendapatan: 890000000, LabaBersih: 335000000 },
+              { label: 'Okt', Pendapatan: financialTotals.pendapatan || 980000000, LabaBersih: financialTotals.labaBersih || 390000000 }
+            ]}
+            series={[
+              { key: 'Pendapatan', label: 'Pendapatan (Revenue)', color: '#38bdf8' },
+              { key: 'LabaBersih', label: 'Laba Bersih (Net Profit)', color: '#10b981' }
+            ]}
+            height={230}
+          />
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
             
             <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2542,17 +2969,19 @@ export const FinanceModule = () => {
               background: '#090d16',
               border: '2px solid #ef4444',
               borderRadius: '14px',
-              maxWidth: '520px',
+              maxWidth: '560px',
               width: '100%',
               padding: '1.75rem',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.8)'
+              boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
+              maxHeight: '92vh',
+              overflowY: 'auto'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1.5px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Wallet size={20} color="#ef4444" />
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                  Konfirmasi Pencairan Dana
+                  Konfirmasi Pencairan Dana & Bukti TF
                 </h3>
               </div>
               <button
@@ -2606,8 +3035,99 @@ export const FinanceModule = () => {
                 </select>
               </div>
 
+              {/* No Bukti / Ref & Catatan Transfer */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nomor Referensi Transfer / BKK:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={disburseTransferRef}
+                    onChange={(e) => setDisburseTransferRef(e.target.value)}
+                    placeholder="Contoh: BKK/BCA/20261002/101"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Metode / Catatan Transfer:
+                  </label>
+                  <input
+                    type="text"
+                    value={disburseTransferNotes}
+                    onChange={(e) => setDisburseTransferNotes(e.target.value)}
+                    placeholder="Contoh: Transfer Real-time BCA"
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Upload Bukti TF */}
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Lampirkan Bukti TF (Struk Transfer / Screenshot / Slip Bank):
+                </label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <label
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: '#1e293b',
+                      border: '1.5px dashed #38bdf8',
+                      borderRadius: '8px',
+                      padding: '8px 14px',
+                      color: '#38bdf8',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <UploadCloud size={16} />
+                    <span>Unggah Struk Bukti TF</span>
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setDisburseTransferProof({
+                            name: file.name,
+                            url: ev.target.result
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </label>
+                  {disburseTransferProof.name && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '6px 10px', borderRadius: '6px', color: '#34d399', fontSize: '0.74rem' }}>
+                      <FileCheck size={14} />
+                      <span style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{disburseTransferProof.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setDisburseTransferProof({ url: null, name: '' })}
+                        style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0 }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {disburseTransferProof.url && disburseTransferProof.url.startsWith('data:image') && (
+                  <div style={{ marginTop: '8px', maxWidth: '160px', maxHeight: '100px', overflow: 'hidden', borderRadius: '6px', border: '1px solid #334155' }}>
+                    <img src={disburseTransferProof.url} alt="Preview Bukti TF" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+              </div>
+
               <div style={{ fontSize: '0.74rem', color: '#94a3b8', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                 <strong>Otomatisasi Sistem:</strong> Saldo rekening akan langsung terpotong, status pengajuan dana berubah menjadi "Dicairkan", dan baris pembukuan di Buku Jurnal Umum akan dibuat otomatis!
+                 <strong>Otomatisasi Sistem:</strong> Saldo rekening bank akan langsung terpotong, status berubah "Dicairkan", bukti TF tersimpan, dan voucher jurnal umum terposting otomatis!
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
@@ -2958,11 +3478,35 @@ export const FinanceModule = () => {
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap', gap: '10px' }}>
+              {selectedDetailItem.status === 'Dicairkan' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedProofItem(selectedDetailItem);
+                    setIsProofModalOpen(true);
+                  }}
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    border: '1.5px solid #10b981',
+                    color: '#34d399',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Receipt size={16} /> Buka Bukti Transfer & Struk Resmi
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsDetailModalOpen(false)}
-                style={{ background: '#1e293b', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', cursor: 'pointer' }}
+                style={{ background: '#1e293b', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', cursor: 'pointer', marginLeft: selectedDetailItem.status === 'Dicairkan' ? 'auto' : '0' }}
               >
                 Tutup
               </button>
@@ -3104,6 +3648,15 @@ export const FinanceModule = () => {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: BUKTI TRANSFER & STRUK DIGITAL RESMI                              */}
+      {/* ========================================================================= */}
+      <TransferProofModal
+        isOpen={isProofModalOpen}
+        onClose={() => setIsProofModalOpen(false)}
+        item={selectedProofItem}
+      />
 
     </div>
   );
