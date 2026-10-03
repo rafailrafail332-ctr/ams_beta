@@ -198,7 +198,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
             margin: '0 0 4px 0',
             textTransform: 'uppercase'
           }}>
-            PT. YAZFI GEMA PERSADA / PT. YAZFI SETIA PERSADA
+            YAZFI CORPORATION
           </h1>
           <div style={{
             fontSize: '0.84rem',
@@ -206,16 +206,8 @@ export const LandingLogin = ({ onLoginSuccess }) => {
             color: '#38bdf8',
             letterSpacing: '0.05em'
           }}>
-            ASHOKA PROPERTY ERP & ASSET MANAGEMENT SYSTEM (AMS)
+            Ashoka Menegemngt Sistem
           </div>
-          <p style={{
-            fontSize: '0.78rem',
-            color: '#94a3b8',
-            marginTop: '5px',
-            marginBottom: 0
-          }}>
-            Pusat Operasional Digital Terpadu Seluruh Divisi Properti & Konstruksi
-          </p>
         </div>
 
         {/* LOGIN GLASS CARD */}
