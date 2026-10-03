@@ -43,7 +43,8 @@ import {
   Camera,
   Eye,
   Sparkles,
-  Calendar
+  Calendar,
+  ClipboardList
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -166,8 +167,9 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
         { id: 'teknik-rab', title: '2. Input RAB & Monitoring Progress', moduleKey: 'teknik', subTabKey: 'rab', icon: Calculator, color: '#F59E0B' },
         { id: 'teknik-tf', title: '3. Tukar Faktur', moduleKey: 'teknik', subTabKey: 'tukar_faktur', icon: FileText, color: '#C084FC' },
         { id: 'teknik-persediaan', title: '4. Persediaan Logistik', moduleKey: 'teknik', subTabKey: 'persediaan', icon: Package, color: '#F59E0B' },
-        { id: 'teknik-database', title: '5. Data Base Terpadu', moduleKey: 'teknik', subTabKey: 'database', icon: Building2, color: '#10B981' },
-        { id: 'teknik-upload-foto', title: '6. Upload Foto Lapangan', moduleKey: 'teknik', subTabKey: 'upload_foto', icon: Camera, color: '#38BDF8' },
+        { id: 'teknik-pengajuan-material', title: '5. Pengajuan Material', moduleKey: 'teknik', subTabKey: 'pengajuan_material', icon: ClipboardList, color: '#38BDF8' },
+        { id: 'teknik-database', title: '6. Data Base Terpadu', moduleKey: 'teknik', subTabKey: 'database', icon: Building2, color: '#10B981' },
+        { id: 'teknik-upload-foto', title: '7. Upload Foto Lapangan', moduleKey: 'teknik', subTabKey: 'upload_foto', icon: Camera, color: '#38BDF8' },
         { id: 'cr-tickets', title: 'Customer Relation & Komplain Retensi', moduleKey: 'customer-relation', subTabKey: 'tickets', icon: HeartHandshake, color: '#FB7185' }
       ];
     }

@@ -64,7 +64,8 @@ import {
   Lock,
   TreePine,
   Trees,
-  Landmark
+  Landmark,
+  ClipboardList
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
@@ -456,6 +457,9 @@ export const TeknikModule = () => {
     if (activeSubTab === 'upload_foto' || activeSubTab === 'upload-foto' || activeSubTab === 'foto' || activeSubTab === 'upload') {
       return 'upload_foto';
     }
+    if (activeSubTab === 'pengajuan_material' || activeSubTab === 'pengajuan-material' || activeSubTab === 'material') {
+      return 'pengajuan_material';
+    }
     return 'harian';
   });
 
@@ -487,6 +491,8 @@ export const TeknikModule = () => {
       setMainCategory('tukar_faktur');
     } else if (activeSubTab === 'persediaan' || activeSubTab === 'stok' || activeSubTab === 'inventory') {
       setMainCategory('persediaan');
+    } else if (activeSubTab === 'pengajuan_material' || activeSubTab === 'pengajuan-material' || activeSubTab === 'material') {
+      setMainCategory('pengajuan_material');
     } else if (activeSubTab === 'absen' || activeSubTab === 'harian') {
       setMainCategory('harian');
     } else if (activeSubTab === 'database') {
@@ -2053,6 +2059,332 @@ export const TeknikModule = () => {
     noUnit: '',
     fasum: ''
   });
+
+  // =========================================================================
+  // SUB-MODUL: PENGAJUAN MATERIAL (KODE, MATERIAL, QTY, SAT, BLOK, NO, KETERANGAN)
+  // Format tabel persis format user (media_1790996938215.jpg) dengan nuansa BIRU TEKNIK
+  // Terintegrasi langsung dengan Database Master Barang (persediaanMasterBarang)
+  // =========================================================================
+  const STORAGE_KEY_PENGAJUAN_MATERIAL = 'ams_teknik_pengajuan_material_v1';
+
+  const defaultPengajuanMaterialList = [
+    {
+      id: 'PMAT-2026-001',
+      tanggal: '2026-10-02',
+      proyek: 'Ashoka View',
+      kode: 'SMN-01',
+      material: 'Semen Gresik 40 Kg',
+      qty: 50,
+      sat: 'Sak',
+      blok: 'Blok A',
+      no: '01',
+      keterangan: 'Pengecoran plat dak lantai 2',
+      status: 'Disetujui',
+      pemohon: 'Mandor Subur'
+    },
+    {
+      id: 'PMAT-2026-002',
+      tanggal: '2026-10-02',
+      proyek: 'Ashoka View',
+      kode: 'BSI-10',
+      material: 'Besi Beton Ulir 10mm SNI',
+      qty: 60,
+      sat: 'Batang',
+      blok: 'Blok A',
+      no: '01',
+      keterangan: 'Pembesian kolom & balok lantai 2',
+      status: 'Disetujui',
+      pemohon: 'Mandor Subur'
+    },
+    {
+      id: 'PMAT-2026-003',
+      tanggal: '2026-10-02',
+      proyek: 'Ashoka View',
+      kode: 'BTR-01',
+      material: 'Bata Ringan Hebel Tebal 10cm',
+      qty: 12,
+      sat: 'M3',
+      blok: 'Blok B',
+      no: '05',
+      keterangan: 'Pasangan dinding kamar lantai 1',
+      status: 'Diajukan',
+      pemohon: 'Mandor Subur'
+    },
+    {
+      id: 'PMAT-2026-004',
+      tanggal: '2026-10-03',
+      proyek: 'Ashoka View',
+      kode: 'PSR-01',
+      material: 'Pasir Cor Extra Lumajang',
+      qty: 2,
+      sat: 'Truk',
+      blok: 'Blok A',
+      no: '02',
+      keterangan: 'Plesteran & acian dinding samping',
+      status: 'Diajukan',
+      pemohon: 'Hapip Alamsyah'
+    },
+    {
+      id: 'PMAT-2026-005',
+      tanggal: '2026-10-03',
+      proyek: 'Ashoka Park',
+      kode: 'KRK-01',
+      material: 'Keramik Granit 60x60 Polish Glazed',
+      qty: 45,
+      sat: 'Dus',
+      blok: 'Blok C',
+      no: '08',
+      keterangan: 'Pemasangan lantai ruang tamu & keluarga',
+      status: 'Diajukan',
+      pemohon: 'Kholidin'
+    },
+    {
+      id: 'PMAT-2026-006',
+      tanggal: '2026-10-03',
+      proyek: 'Ashoka Park',
+      kode: 'PIP-01',
+      material: 'Pipa PVC AW 3/4" Wavin',
+      qty: 15,
+      sat: 'Batang',
+      blok: 'Blok C',
+      no: '08',
+      keterangan: 'Instalasi pipa air bersih & kran utama',
+      status: 'Terkirim',
+      pemohon: 'Kholidin'
+    }
+  ];
+
+  const [pengajuanMaterialList, setPengajuanMaterialList] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PENGAJUAN_MATERIAL);
+      if (saved !== null && saved !== undefined) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return defaultPengajuanMaterialList;
+  });
+
+  const updateAndSavePengajuanMaterial = (nextList, notifMsg = '', notifType = 'success') => {
+    setPengajuanMaterialList(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PENGAJUAN_MATERIAL, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PENGAJUAN_MATERIAL, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
+  // Filter & Search states
+  const [filterPmatProyek, setFilterPmatProyek] = useState('ALL');
+  const [filterPmatBlok, setFilterPmatBlok] = useState('ALL');
+  const [filterPmatStatus, setFilterPmatStatus] = useState('ALL');
+  const [searchPmat, setSearchPmat] = useState('');
+
+  // Modal states
+  const [isPmatModalOpen, setIsPmatModalOpen] = useState(false);
+  const [editingPmatId, setEditingPmatId] = useState(null);
+  const [saveToMasterDb, setSaveToMasterDb] = useState(true);
+  const [pmatFormData, setPmatFormData] = useState({
+    tanggal: getTodayDateString(),
+    proyek: 'Ashoka View',
+    kode: '',
+    material: '',
+    qty: '',
+    sat: 'Sak',
+    blok: 'Blok A',
+    no: '01',
+    keterangan: '',
+    status: 'Diajukan',
+    pemohon: currentUser?.name || 'Mandor Lapangan'
+  });
+
+  // Combined master barang list for Kode, Nama, Satuan lookup
+  const allMasterBarangList = useMemo(() => {
+    const map = new Map();
+    // 1. From persediaanMasterBarang (User's registered master barang)
+    (persediaanMasterBarang || []).forEach(b => {
+      const k = (b.kode || '').trim().toUpperCase();
+      if (k && !map.has(k)) {
+        map.set(k, { kode: b.kode.trim().toUpperCase(), nama: b.nama || '', satuan: b.satuan || 'Sak' });
+      }
+    });
+    // 2. From persediaanSummaryList
+    (persediaanSummaryList || []).forEach(s => {
+      const k = (s.kode || '').trim().toUpperCase();
+      if (k && !map.has(k)) {
+        map.set(k, { kode: s.kode.trim().toUpperCase(), nama: s.nama || '', satuan: s.satuan || 'Sak' });
+      }
+    });
+    // 3. Fallback standard construction materials
+    const standardMaterials = [
+      { kode: 'SMN-01', nama: 'Semen Gresik 40 Kg', satuan: 'Sak' },
+      { kode: 'SMN-02', nama: 'Semen Tiga Roda 50 Kg', satuan: 'Sak' },
+      { kode: 'BSI-08', nama: 'Besi Beton Polos 8mm SNI', satuan: 'Batang' },
+      { kode: 'BSI-10', nama: 'Besi Beton Ulir 10mm SNI', satuan: 'Batang' },
+      { kode: 'BSI-12', nama: 'Besi Beton Ulir 12mm SNI', satuan: 'Batang' },
+      { kode: 'BTR-01', nama: 'Bata Ringan Hebel Tebal 10cm', satuan: 'M3' },
+      { kode: 'PSR-01', nama: 'Pasir Cor Extra Lumajang', satuan: 'M3' },
+      { kode: 'SPL-01', nama: 'Batu Split Cor 1/2', satuan: 'M3' },
+      { kode: 'PIP-01', nama: 'Pipa PVC AW 3/4" Wavin', satuan: 'Batang' },
+      { kode: 'PIP-02', nama: 'Pipa PVC D 4" Wavin', satuan: 'Batang' },
+      { kode: 'KRK-01', nama: 'Keramik Granit 60x60 Polish Glazed', satuan: 'Dus' },
+      { kode: 'CAT-01', nama: 'Cat Tembok Dasar Alkali Resisting', satuan: 'Pail' },
+      { kode: 'CAT-02', nama: 'Cat Tembok Luar Dulux Weathershield', satuan: 'Pail' },
+      { kode: 'KAY-01', nama: 'Kayu Kaso 4x6 Meranti Super', satuan: 'Batang' },
+      { kode: 'TRP-01', nama: 'Triplek Cor Tebal 9mm', satuan: 'Lembar' },
+      { kode: 'BOD-01', nama: 'Bondex / Bondek Cor 0.75mm', satuan: 'Lembar' },
+      { kode: 'WIR-01', nama: 'Wiremesh M8 Standar SNI', satuan: 'Lembar' }
+    ];
+    standardMaterials.forEach(sm => {
+      const k = sm.kode.toUpperCase();
+      if (!map.has(k)) {
+        map.set(k, sm);
+      }
+    });
+    return Array.from(map.values());
+  }, [persediaanMasterBarang, persediaanSummaryList]);
+
+  const handleOpenAddPmat = () => {
+    setEditingPmatId(null);
+    setPmatFormData({
+      tanggal: getTodayDateString(),
+      proyek: (filterPmatProyek !== 'ALL' && filterPmatProyek) ? filterPmatProyek : 'Ashoka View',
+      kode: '',
+      material: '',
+      qty: '',
+      sat: 'Sak',
+      blok: (filterPmatBlok !== 'ALL' && filterPmatBlok) ? filterPmatBlok : 'Blok A',
+      no: '01',
+      keterangan: '',
+      status: 'Diajukan',
+      pemohon: currentUser?.name || 'Mandor Lapangan'
+    });
+    setIsPmatModalOpen(true);
+  };
+
+  const handleOpenEditPmat = (item) => {
+    setEditingPmatId(item.id);
+    setPmatFormData({
+      tanggal: item.tanggal || getTodayDateString(),
+      proyek: item.proyek || 'Ashoka View',
+      kode: item.kode || '',
+      material: item.material || '',
+      qty: item.qty || '',
+      sat: item.sat || 'Sak',
+      blok: item.blok || 'Blok A',
+      no: item.no || '01',
+      keterangan: item.keterangan || '',
+      status: item.status || 'Diajukan',
+      pemohon: item.pemohon || currentUser?.name || 'Mandor Lapangan'
+    });
+    setIsPmatModalOpen(true);
+  };
+
+  const handlePmatKodeSelect = (val) => {
+    const rawVal = val.toUpperCase();
+    const cleanK = rawVal.trim();
+    const matched = allMasterBarangList.find(b => b.kode.trim().toUpperCase() === cleanK || cleanK.startsWith(b.kode.trim().toUpperCase()));
+    if (matched) {
+      setPmatFormData(prev => ({
+        ...prev,
+        kode: matched.kode,
+        material: matched.nama,
+        sat: matched.satuan || prev.sat
+      }));
+    } else {
+      setPmatFormData(prev => ({ ...prev, kode: rawVal }));
+    }
+  };
+
+  const handlePmatMaterialSelect = (val) => {
+    const cleanN = val.trim().toLowerCase();
+    const matched = allMasterBarangList.find(b => b.nama.trim().toLowerCase() === cleanN || cleanN.startsWith(b.nama.trim().toLowerCase()));
+    if (matched) {
+      setPmatFormData(prev => ({
+        ...prev,
+        material: matched.nama,
+        kode: matched.kode,
+        sat: matched.satuan || prev.sat
+      }));
+    } else {
+      setPmatFormData(prev => ({ ...prev, material: val }));
+    }
+  };
+
+  const handleSavePmat = (e) => {
+    e.preventDefault();
+    if (!pmatFormData.material || !pmatFormData.qty) {
+      showNotification('Mohon lengkapi Nama Material dan Kuantitas (Qty)!', 'warning');
+      return;
+    }
+    const cleanKode = (pmatFormData.kode || '').trim().toUpperCase() || `MT-${Date.now().toString().slice(-4)}`;
+    const cleanNama = pmatFormData.material.trim();
+    const cleanSat = (pmatFormData.sat || 'Sak').trim();
+
+    // Auto-save to Master Database Barang if not already registered
+    if (saveToMasterDb) {
+      const existsInDb = persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === cleanKode || b.nama.trim().toLowerCase() === cleanNama.toLowerCase());
+      if (!existsInDb) {
+        const newMaster = {
+          id: `BRG-${Date.now().toString().slice(-4)}`,
+          kode: cleanKode,
+          nama: cleanNama,
+          satuan: cleanSat
+        };
+        updateAndSaveMasterBarang([...persediaanMasterBarang, newMaster]);
+      }
+    }
+
+    if (editingPmatId) {
+      const updated = pengajuanMaterialList.map(item => item.id === editingPmatId ? {
+        ...item,
+        ...pmatFormData,
+        kode: cleanKode,
+        material: cleanNama,
+        qty: Number(pmatFormData.qty) || 0,
+        sat: cleanSat
+      } : item);
+      updateAndSavePengajuanMaterial(updated, `Pengajuan Material "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newEntry = {
+        id: `PMAT-${Date.now().toString().slice(-6)}`,
+        ...pmatFormData,
+        kode: cleanKode,
+        material: cleanNama,
+        qty: Number(pmatFormData.qty) || 0,
+        sat: cleanSat,
+        createdAt: new Date().toISOString()
+      };
+      updateAndSavePengajuanMaterial([newEntry, ...pengajuanMaterialList], `Pengajuan Material "${cleanNama}" berhasil ditambahkan!`, 'success');
+    }
+    setIsPmatModalOpen(false);
+  };
+
+  const handleDeletePmat = (item) => {
+    if (window.confirm(`Hapus pengajuan material "${item.material}" (Blok ${item.blok} No ${item.no})?`)) {
+      const updated = pengajuanMaterialList.filter(row => row.id !== item.id);
+      updateAndSavePengajuanMaterial(updated, `Pengajuan material "${item.material}" berhasil dihapus.`, 'info');
+    }
+  };
+
+  const filteredPengajuanMaterialList = useMemo(() => {
+    return pengajuanMaterialList.filter(item => {
+      if (filterPmatProyek !== 'ALL' && item.proyek !== filterPmatProyek) return false;
+      if (filterPmatBlok !== 'ALL' && item.blok !== filterPmatBlok) return false;
+      if (filterPmatStatus !== 'ALL' && item.status !== filterPmatStatus) return false;
+      if (searchPmat) {
+        const q = searchPmat.toLowerCase();
+        const matchKode = (item.kode || '').toLowerCase().includes(q);
+        const matchMat = (item.material || '').toLowerCase().includes(q);
+        const matchBlok = (item.blok || '').toLowerCase().includes(q);
+        const matchNo = (item.no || '').toLowerCase().includes(q);
+        const matchKet = (item.keterangan || '').toLowerCase().includes(q);
+        const matchPemohon = (item.pemohon || '').toLowerCase().includes(q);
+        if (!matchKode && !matchMat && !matchBlok && !matchNo && !matchKet && !matchPemohon) return false;
+      }
+      return true;
+    });
+  }, [pengajuanMaterialList, filterPmatProyek, filterPmatBlok, filterPmatStatus, searchPmat]);
 
   // SEARCH STATES FOR 6 DATABASES
   const [searchDbVendor, setSearchDbVendor] = useState('');
@@ -5074,6 +5406,7 @@ export const TeknikModule = () => {
           { id: 'borongan', label: 'Pekerjaan Borongan', icon: Building2 },
           { id: 'tukar_faktur', label: 'Tukar Faktur', icon: FileText },
           { id: 'persediaan', label: 'Persediaan', icon: Boxes },
+          { id: 'pengajuan_material', label: 'Pengajuan Material', icon: ClipboardList },
           { id: 'database', label: 'Data Base Terpadu', icon: Database },
           { id: 'upload_foto', label: 'Upload Foto', icon: Camera }
         ].map(tab => {
@@ -13333,6 +13666,811 @@ export const TeknikModule = () => {
             </>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUB-MODUL: PENGAJUAN MATERIAL                                             */}
+      {/* REPLIKASI PERSIS FORMAT TABEL USER (media_1790996938215.jpg)             */}
+      {/* TEMA WARNA: BIRU TEKNIK ("tapi warna nya nanti jangann warnna itu tapi biru")*/}
+      {/* KOLOM: No. | Kode | Material | Qty | Sat | Blok | No. | Keterangan | Aksi  */}
+      {/* Terintegrasi langsung dengan Database Master Barang (persediaanMasterBarang)*/}
+      {/* ========================================================================= */}
+      {mainCategory === 'pengajuan_material' && (
+        <div style={{ animation: 'fadeIn 0.3s ease' }}>
+          <div className="card" style={{ background: '#0b1120', border: '1px solid #1e293b', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
+            
+            {/* Top Row: Title Box "Pengajuan Material" (Biru persis format gambar) & Action Buttons */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+              {/* KOTAK JUDUL BIRU PERSIS GAMBAR USER */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)',
+                border: '1.5px solid #3b82f6',
+                borderRadius: '4px',
+                padding: '10px 28px',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <ClipboardList size={22} color="#ffffff" />
+                <span style={{
+                  color: '#ffffff',
+                  fontSize: '1.25rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.02em',
+                  textTransform: 'none'
+                }}>
+                  Pengajuan Material
+                </span>
+              </div>
+
+              {/* Action Buttons: Tambah Pengajuan, Cetak/Print, Status */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenAddPmat}
+                  style={{
+                    background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                    border: '1.5px solid #60a5fa',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    fontSize: '0.84rem',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)'
+                  }}
+                >
+                  <Plus size={16} /> + Tambah Pengajuan Material
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    color: '#e2e8f0',
+                    padding: '8px 14px',
+                    fontSize: '0.84rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Printer size={15} /> Cetak Form
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-header / Filters Bar */}
+            <div style={{
+              background: '#090d16',
+              border: '1px solid #1e293b',
+              borderRadius: '10px',
+              padding: '0.85rem 1rem',
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              flexWrap: 'wrap'
+            }}>
+              {/* Left: Search input */}
+              <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+                <Search size={16} color="#64748b" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type="text"
+                  placeholder="Cari kode material, nama material, blok, no, keterangan..."
+                  value={searchPmat}
+                  onChange={(e) => setSearchPmat(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '36px',
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    padding: '0 10px 0 34px',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Right: Proyek Filter, Blok Filter, Status Filter */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Proyek Filter */}
+                <select
+                  value={filterPmatProyek}
+                  onChange={(e) => setFilterPmatProyek(e.target.value)}
+                  style={{
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">🏢 Semua Proyek</option>
+                  <option value="Ashoka View">Ashoka View</option>
+                  <option value="Ashoka Park">Ashoka Park</option>
+                  <option value="Bizhub Commercial">Bizhub Commercial</option>
+                </select>
+
+                {/* Blok Filter */}
+                <select
+                  value={filterPmatBlok}
+                  onChange={(e) => setFilterPmatBlok(e.target.value)}
+                  style={{
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">📍 Semua Blok</option>
+                  <option value="Blok A">Blok A</option>
+                  <option value="Blok B">Blok B</option>
+                  <option value="Blok C">Blok C</option>
+                  <option value="Blok D">Blok D</option>
+                  <option value="Fasum">Fasum</option>
+                </select>
+
+                {/* Status Filter */}
+                <select
+                  value={filterPmatStatus}
+                  onChange={(e) => setFilterPmatStatus(e.target.value)}
+                  style={{
+                    height: '36px',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    padding: '0 10px',
+                    outline: 'none',
+                    fontWeight: 700
+                  }}
+                >
+                  <option value="ALL">📋 Semua Status</option>
+                  <option value="Diajukan">Diajukan</option>
+                  <option value="Disetujui">Disetujui</option>
+                  <option value="Terkirim">Terkirim</option>
+                </select>
+
+                {(searchPmat || filterPmatProyek !== 'ALL' || filterPmatBlok !== 'ALL' || filterPmatStatus !== 'ALL') && (
+                  <button
+                    type="button"
+                    onClick={() => { setSearchPmat(''); setFilterPmatProyek('ALL'); setFilterPmatBlok('ALL'); setFilterPmatStatus('ALL'); }}
+                    style={{
+                      height: '36px',
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      borderRadius: '6px',
+                      color: '#f87171',
+                      padding: '0 10px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* TABEL PENGAJUAN MATERIAL (PERSIS FORMAT GAMBAR DENGAN WARNA HEADER BIRU TEKNIK) */}
+            <div className="table-responsive" style={{ overflowX: 'auto', border: '1px solid #1e3a8a', borderRadius: '8px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)', color: '#ffffff' }}>
+                    <th style={{ width: '45px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>No.</th>
+                    <th style={{ width: '110px', border: '1px solid #2563eb', padding: '10px 10px', textAlign: 'center', fontWeight: 900 }}>Kode</th>
+                    <th style={{ minWidth: '220px', border: '1px solid #2563eb', padding: '10px 12px', fontWeight: 900 }}>Material</th>
+                    <th style={{ width: '75px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Qty</th>
+                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Sat</th>
+                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Blok</th>
+                    <th style={{ width: '65px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>No.</th>
+                    <th style={{ minWidth: '220px', border: '1px solid #2563eb', padding: '10px 12px', fontWeight: 900 }}>Keterangan</th>
+                    <th style={{ width: '95px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Status</th>
+                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPengajuanMaterialList.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#94a3b8', border: '1px solid #1e293b' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                          <ClipboardList size={36} color="#3b82f6" style={{ opacity: 0.7 }} />
+                          <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada data Pengajuan Material</div>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Klik tombol "+ Tambah Pengajuan Material" di atas untuk menambahkan data baru.</div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPengajuanMaterialList.map((item, idx) => {
+                      const isEven = idx % 2 === 0;
+                      return (
+                        <tr
+                          key={item.id}
+                          style={{
+                            background: isEven ? '#090f1d' : '#0d1527',
+                            borderBottom: '1px solid #1e293b',
+                            transition: 'background 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#13213c'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = isEven ? '#090f1d' : '#0d1527'}
+                        >
+                          {/* 1. No */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>
+                            {idx + 1}
+                          </td>
+
+                          {/* 2. Kode */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 10px', textAlign: 'center' }}>
+                            <span style={{
+                              background: 'rgba(30, 58, 138, 0.45)',
+                              border: '1px solid #3b82f6',
+                              color: '#93c5fd',
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              fontSize: '0.82rem',
+                              padding: '2px 8px',
+                              borderRadius: '4px'
+                            }}>
+                              {item.kode || '-'}
+                            </span>
+                          </td>
+
+                          {/* 3. Material */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 12px' }}>
+                            <div style={{ fontWeight: 800, color: '#ffffff' }}>{item.material}</div>
+                            {item.proyek && (
+                              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+                                Proyek: {item.proyek} {item.pemohon ? `• Oleh: ${item.pemohon}` : ''}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* 4. Qty */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
+                            <span style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.92rem' }}>
+                              {item.qty}
+                            </span>
+                          </td>
+
+                          {/* 5. Sat */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
+                            <span style={{
+                              background: 'rgba(56, 189, 248, 0.12)',
+                              color: '#7dd3fc',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid rgba(56, 189, 248, 0.25)'
+                            }}>
+                              {item.sat || '-'}
+                            </span>
+                          </td>
+
+                          {/* 6. Blok */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', fontWeight: 800, color: '#f8fafc' }}>
+                            {item.blok || '-'}
+                          </td>
+
+                          {/* 7. No */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', fontWeight: 900, color: '#38bdf8' }}>
+                            {item.no || '-'}
+                          </td>
+
+                          {/* 8. Keterangan */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 12px', color: '#cbd5e1' }}>
+                            {item.keterangan || '-'}
+                          </td>
+
+                          {/* 9. Status */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              background: item.status === 'Disetujui' ? 'rgba(16, 185, 129, 0.15)' : (item.status === 'Terkirim' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)'),
+                              color: item.status === 'Disetujui' ? '#34d399' : (item.status === 'Terkirim' ? '#38bdf8' : '#fbbf24'),
+                              border: `1px solid ${item.status === 'Disetujui' ? 'rgba(16, 185, 129, 0.35)' : (item.status === 'Terkirim' ? 'rgba(56, 189, 248, 0.35)' : 'rgba(245, 158, 11, 0.35)')}`
+                            }}>
+                              {item.status || 'Diajukan'}
+                            </span>
+                          </td>
+
+                          {/* 10. Aksi */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditPmat(item)}
+                                title="Edit Pengajuan Material"
+                                style={{
+                                  background: 'rgba(56, 189, 248, 0.15)',
+                                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                                  borderRadius: '6px',
+                                  color: '#38bdf8',
+                                  padding: '5px 7px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Edit size={13} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeletePmat(item)}
+                                title="Hapus Pengajuan Material"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  borderRadius: '6px',
+                                  color: '#f87171',
+                                  padding: '5px 7px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer Summary Bar */}
+            <div style={{
+              marginTop: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '0.8rem',
+              color: '#64748b',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}>
+              <div>
+                Menampilkan <strong style={{ color: '#ffffff' }}>{filteredPengajuanMaterialList.length}</strong> dari total <strong style={{ color: '#ffffff' }}>{pengajuanMaterialList.length}</strong> data pengajuan material
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#93c5fd' }}>
+                  <Package size={14} /> Terhubung ke Database Master Barang
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#34d399' }}>
+                  <CheckCircle2 size={14} /> Tersimpan Otomatis ke Cloud & LocalStorage
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: FORM PENGAJUAN MATERIAL (TAMBAH & EDIT)                             */}
+      {/* Auto-fill Kode, Material, Satuan langsung dari Database Master Barang       */}
+      {/* ========================================================================= */}
+      {isPmatModalOpen && (
+        <div className="modal-backdrop" style={{ zIndex: 1100 }}>
+          <div className="modal-content" style={{ maxWidth: '620px', background: '#0f172a', border: '1.5px solid #034efc', color: '#ffffff', borderRadius: '12px' }}>
+            <div className="modal-header" style={{ borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ffffff', fontWeight: 900, fontSize: '1.15rem' }}>
+                <ClipboardList size={22} color="#38bdf8" />
+                {editingPmatId ? 'Edit Pengajuan Material' : 'Tambah Pengajuan Material Baru'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsPmatModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePmat}>
+              <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', padding: '1.25rem' }}>
+                
+                {/* Info banner */}
+                <div style={{
+                  background: 'rgba(30, 58, 138, 0.25)',
+                  border: '1px solid #1e40af',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  marginBottom: '1rem',
+                  fontSize: '0.8rem',
+                  color: '#93c5fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Sparkles size={16} color="#60a5fa" />
+                  <span>Ketik atau pilih <strong>Kode</strong> / <strong>Material</strong>, maka Satuan dan data lainnya akan otomatis terisi dari Database Barang.</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+                  {/* Proyek */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Proyek Lokasi *
+                    </label>
+                    <select
+                      value={pmatFormData.proyek}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, proyek: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '38px', background: '#1e293b', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '0 10px', fontSize: '0.85rem' }}
+                    >
+                      <option value="Ashoka View">Ashoka View</option>
+                      <option value="Ashoka Park">Ashoka Park</option>
+                      <option value="Bizhub Commercial">Bizhub Commercial</option>
+                    </select>
+                  </div>
+
+                  {/* Tanggal */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Tanggal Pengajuan *
+                    </label>
+                    <input
+                      type="date"
+                      value={pmatFormData.tanggal}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, tanggal: e.target.value })}
+                      required
+                      style={{ width: '100%', height: '38px', background: '#1e293b', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontWeight: 700, padding: '0 10px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Kode Material & Auto Datalist */}
+                <div style={{ marginTop: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', margin: 0 }}>
+                      Kode Material (Dari Database Barang)
+                    </label>
+                    <span style={{ fontSize: '0.72rem', color: '#38bdf8' }}>Otomatis isi Material & Satuan</span>
+                  </div>
+                  <input
+                    type="text"
+                    list="pmat-modal-kode-datalist"
+                    placeholder="Pilih atau ketik Kode Material (misal: SMN-01, BSI-10)..."
+                    value={pmatFormData.kode}
+                    onChange={(e) => handlePmatKodeSelect(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      background: '#1e293b',
+                      border: '1.5px solid #034efc',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      padding: '0 12px',
+                      fontSize: '0.88rem',
+                      outline: 'none',
+                      fontFamily: 'monospace'
+                    }}
+                  />
+                  <datalist id="pmat-modal-kode-datalist">
+                    {allMasterBarangList.map(b => (
+                      <option key={b.kode} value={b.kode}>
+                        {b.kode} - {b.nama} ({b.satuan})
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+
+                {/* Nama Material & Auto Datalist */}
+                <div style={{ marginTop: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                    Nama Material / Bahan Bangunan *
+                  </label>
+                  <input
+                    type="text"
+                    list="pmat-modal-nama-datalist"
+                    placeholder="Pilih atau ketik nama material (misal: Semen Gresik, Besi Beton, Bata Ringan)..."
+                    value={pmatFormData.material}
+                    onChange={(e) => handlePmatMaterialSelect(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      background: '#1e293b',
+                      border: '1.5px solid #034efc',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      padding: '0 12px',
+                      fontSize: '0.88rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <datalist id="pmat-modal-nama-datalist">
+                    {allMasterBarangList.map(b => (
+                      <option key={`nama-${b.kode}`} value={b.nama}>
+                        {b.nama} [{b.kode}] ({b.satuan})
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+
+                {/* Qty & Satuan */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginTop: '0.85rem' }}>
+                  {/* Qty */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Jumlah Kebutuhan (Qty) *
+                    </label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="any"
+                      placeholder="Contoh: 50"
+                      value={pmatFormData.qty}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, qty: e.target.value })}
+                      required
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#38bdf8',
+                        fontWeight: 900,
+                        padding: '0 12px',
+                        fontSize: '0.95rem'
+                      }}
+                    />
+                  </div>
+
+                  {/* Satuan */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Satuan Material (Sat) *
+                    </label>
+                    <input
+                      type="text"
+                      list="pmat-modal-satuan-datalist"
+                      placeholder="Sak, Batang, M3, Dus..."
+                      value={pmatFormData.sat}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, sat: e.target.value })}
+                      required
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        padding: '0 12px',
+                        fontSize: '0.88rem'
+                      }}
+                    />
+                    <datalist id="pmat-modal-satuan-datalist">
+                      {['Sak', 'Batang', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Roll', 'Kaleng', 'Truk', 'Meter', 'Zak', 'Liter'].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
+                {/* Blok & No Unit */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginTop: '0.85rem' }}>
+                  {/* Blok */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Blok Bangunan
+                    </label>
+                    <input
+                      type="text"
+                      list="pmat-modal-blok-datalist"
+                      placeholder="Contoh: Blok A, Blok B, Fasum..."
+                      value={pmatFormData.blok}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, blok: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        padding: '0 12px',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                    <datalist id="pmat-modal-blok-datalist">
+                      <option value="Blok A">Blok A</option>
+                      <option value="Blok B">Blok B</option>
+                      <option value="Blok C">Blok C</option>
+                      <option value="Blok D">Blok D</option>
+                      <option value="Fasum / Sarana">Fasum / Sarana</option>
+                      <option value="Workshop / Gudang">Workshop / Gudang</option>
+                    </datalist>
+                  </div>
+
+                  {/* No Unit */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Nomor Unit / Rumah (No.)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 01, 02, 12..."
+                      value={pmatFormData.no}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, no: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        padding: '0 12px',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Keterangan */}
+                <div style={{ marginTop: '0.85rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                    Keterangan Peruntukan / Keperluan Pemakaian
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Pengecoran plat dak lantai 2, plesteran dinding kamar..."
+                    value={pmatFormData.keterangan}
+                    onChange={(e) => setPmatFormData({ ...pmatFormData, keterangan: e.target.value })}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      background: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      padding: '0 12px',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+
+                {/* Status & Pemohon */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginTop: '0.85rem' }}>
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Status Pengajuan
+                    </label>
+                    <select
+                      value={pmatFormData.status}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, status: e.target.value })}
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        padding: '0 10px',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      <option value="Diajukan">Diajukan</option>
+                      <option value="Disetujui">Disetujui</option>
+                      <option value="Terkirim">Terkirim</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px', display: 'block' }}>
+                      Pemohon / Mandor Lapangan
+                    </label>
+                    <input
+                      type="text"
+                      value={pmatFormData.pemohon}
+                      onChange={(e) => setPmatFormData({ ...pmatFormData, pemohon: e.target.value })}
+                      placeholder="Nama mandor atau pelaksana..."
+                      style={{
+                        width: '100%',
+                        height: '38px',
+                        background: '#1e293b',
+                        border: '1px solid #334155',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        padding: '0 12px',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Checkbox auto-save to Database Master Barang */}
+                <div style={{ marginTop: '1rem', background: '#090d16', padding: '10px 12px', borderRadius: '8px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="saveToMasterDbCheck"
+                    checked={saveToMasterDb}
+                    onChange={(e) => setSaveToMasterDb(e.target.checked)}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="saveToMasterDbCheck" style={{ fontSize: '0.8rem', color: '#94a3b8', cursor: 'pointer', margin: 0 }}>
+                    Sinkronkan / simpan otomatis material ini ke <strong>Database Master Barang</strong> jika belum ada
+                  </label>
+                </div>
+
+              </div>
+
+              <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsPmatModalOpen(false)}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    color: '#94a3b8',
+                    padding: '8px 16px',
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
+                    border: '1.5px solid #60a5fa',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    padding: '8px 20px',
+                    fontSize: '0.85rem',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 14px rgba(3, 78, 252, 0.4)'
+                  }}
+                >
+                  <Save size={16} /> Simpan Pengajuan Material
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
