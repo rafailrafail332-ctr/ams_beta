@@ -39,6 +39,7 @@ import {
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 import { RecruitmentATSModule } from '../components/RecruitmentATSModule';
+import { ContractApprovalModule } from '../components/ContractApprovalModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -1773,6 +1774,12 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         <RecruitmentATSModule
           candidates={candidates}
           setCandidates={setCandidates}
+          showNotification={showNotification}
+        />
+      ) : activeTab === 'kontrak-kerja' ? (
+        <ContractApprovalModule
+          contracts={contracts}
+          setContracts={setContracts}
           showNotification={showNotification}
         />
       ) : (
