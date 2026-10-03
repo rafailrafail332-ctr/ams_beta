@@ -42,6 +42,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
+import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 
 export const LegalModule = () => {
   const { currentUser, showNotification, activeSubTab } = useApp();
@@ -72,6 +73,7 @@ export const LegalModule = () => {
   });
 
   const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
 
   // Sub-tab under Legalitas: 'perusahaan' vs 'proyek'
   const [legalitasSubTab, setLegalitasSubTab] = useState(() => {
@@ -3140,6 +3142,28 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
             </div>
           </div>
         </div>
+
+        {/* Tombol Status Pengajuan Dana */}
+        <button
+          type="button"
+          style={{
+            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+            border: '1.5px solid #38bdf8',
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '0.82rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 10px rgba(2, 132, 199, 0.35)',
+            cursor: 'pointer'
+          }}
+          onClick={() => setIsTrackerModalOpen(true)}
+        >
+          <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
+        </button>
 
         {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
         <button
@@ -12367,6 +12391,18 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
         defaultRequester="Wahyu Salma Septiani, S.H (Legal)"
         defaultAccountCode="5-401"
         onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
+
+      {/* MODAL PELACAKAN & STATUS PENGAJUAN DANA */}
+      <FundRequestTrackerModal
+        isOpen={isTrackerModalOpen}
+        onClose={() => setIsTrackerModalOpen(false)}
+        originModule="legal"
+        originModuleName="Legal & Perizinan"
+        onOpenNewRequest={() => {
+          setIsTrackerModalOpen(false);
+          setIsFundModalOpen(true);
+        }}
       />
     </div>
   );

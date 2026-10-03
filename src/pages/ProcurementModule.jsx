@@ -27,11 +27,13 @@ import {
   Percent
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
+import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 
 export const ProcurementModule = () => {
   const { showNotification } = useApp();
   const [activeTab, setActiveTab] = useState('vendors'); // 'vendors', 'po', 'tender', 'gr', 'contracts', 'matching'
   const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
 
   // Search filter states for each tab
   const [searchVendor, setSearchVendor] = useState('');
@@ -645,26 +647,48 @@ export const ProcurementModule = () => {
           <h1 className="page-title">Modul Procurement (Pengadaan Material & Vendor Properti)</h1>
           <p className="page-subtitle">Pusat pengadaan bahan bangunan, lelang tender kontraktor, PO material, SPK kontrak, & 3-way invoice matching.</p>
         </div>
-        <button
-          type="button"
-          style={{
-            background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-            border: '1.5px solid #ef4444',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '0.82rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
-            cursor: 'pointer'
-          }}
-          onClick={() => setIsFundModalOpen(true)}
-        >
-          <DollarSign size={15} color="#ffffff" /> + Ajukan Dana PO ke Finance
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              border: '1.5px solid #38bdf8',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(2, 132, 199, 0.35)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsTrackerModalOpen(true)}
+          >
+            <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
+          </button>
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsFundModalOpen(true)}
+          >
+            <DollarSign size={15} color="#ffffff" /> + Ajukan Dana PO ke Finance
+          </button>
+        </div>
       </div>
 
       {/* KPI Stats Bar */}
@@ -1944,6 +1968,18 @@ export const ProcurementModule = () => {
         defaultRequester="Staf Pengadaan Logistik"
         defaultAccountCode="2-101"
         onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
+
+      {/* MODAL PELACAKAN & STATUS PENGAJUAN DANA */}
+      <FundRequestTrackerModal
+        isOpen={isTrackerModalOpen}
+        onClose={() => setIsTrackerModalOpen(false)}
+        originModule="procurement"
+        originModuleName="Procurement & Logistik"
+        onOpenNewRequest={() => {
+          setIsTrackerModalOpen(false);
+          setIsFundModalOpen(true);
+        }}
       />
     </div>
   );

@@ -52,6 +52,7 @@ import { PiutangKonsumenModule } from './PiutangKonsumenModule';
 import { MarketingGrafikModule } from './MarketingGrafikModule';
 import { MarketingEventModule } from './MarketingEventModule';
 import { FundRequestModal } from '../components/FundRequestModal';
+import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 
 const STORAGE_KEY_DB_KONSUMEN = 'ams_teknik_db_konsumen_v1';
 const STORAGE_KEY_DB_CALON_KONSUMEN = 'ams_teknik_db_calon_konsumen_v1';
@@ -296,6 +297,7 @@ export const MarketingModule = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSales, setEditingSales] = useState(null);
   const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
 
   // Modal Preview Dokumen Berkas (KTP, NPWP, KK, Bukti Transfer)
   const [previewModalDoc, setPreviewModalDoc] = useState(null);
@@ -2611,6 +2613,29 @@ export const MarketingModule = () => {
               <Plus size={16} /> + Tambah Unit Properti
             </button>
           )}
+
+          {/* Tombol Status Pengajuan Dana */}
+          <button
+            type="button"
+            className="btn"
+            style={{
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              border: '1.5px solid #38bdf8',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(2, 132, 199, 0.35)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsTrackerModalOpen(true)}
+          >
+            <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
+          </button>
 
           {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
           <button
@@ -8402,6 +8427,18 @@ export const MarketingModule = () => {
         defaultRequester="Adhi Himawan (Marketing)"
         defaultAccountCode="5-201"
         onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
+
+      {/* MODAL PELACAKAN & STATUS PENGAJUAN DANA */}
+      <FundRequestTrackerModal
+        isOpen={isTrackerModalOpen}
+        onClose={() => setIsTrackerModalOpen(false)}
+        originModule="marketing"
+        originModuleName="Marketing & Sales"
+        onOpenNewRequest={() => {
+          setIsTrackerModalOpen(false);
+          setIsFundModalOpen(true);
+        }}
       />
     </div>
   );
