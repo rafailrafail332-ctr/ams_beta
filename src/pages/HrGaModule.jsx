@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
+import { RecruitmentATSModule } from '../components/RecruitmentATSModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -1768,7 +1769,14 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       {/* KONTEN UTAMA TAB: TABEL 10 KOLOM PERSIS SPK & LITIGASI                   */}
       {/* No. | No. Dok | Tanggal Dokumen | Proyek | Nama | Kategori | Judul | Berkas | Catatan | Aksi */}
       {/* ========================================================================= */}
-      <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
+      {activeTab === 'recruitment' ? (
+        <RecruitmentATSModule
+          candidates={candidates}
+          setCandidates={setCandidates}
+          showNotification={showNotification}
+        />
+      ) : (
+        <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
         
         {/* Header Title & Action Buttons */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '1.4rem' }}>
@@ -2392,6 +2400,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           )
         )}
       </div>
+      )}
 
       {/* ========================================================================= */}
       {/* MODAL 1: FORM TAMBAH / EDIT DOKUMEN HR & GA                               */}
