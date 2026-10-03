@@ -44,7 +44,8 @@ import {
   UploadCloud,
   CalendarDays,
   RotateCcw,
-  FileCheck
+  FileCheck,
+  Trash2
 } from 'lucide-react';
 import { FinanceLineChart } from '../components/FinanceLineChart';
 import { FinanceDonutChart } from '../components/FinanceDonutChart';
@@ -57,21 +58,28 @@ import {
   approveFundRequest,
   rejectFundRequest,
   disburseFundRequest,
+  deleteFundRequest,
   getBanks,
   saveBanks,
   getCoa,
   saveCoa,
+  deleteCoaAccount,
   getJurnal,
   saveJurnal,
   addJurnalEntry,
+  deleteJurnalEntry,
   getSales,
   saveSales,
+  deleteSale,
   getPayables,
   savePayables,
+  deletePayable,
   getTaxes,
   saveTaxes,
+  deleteTax,
   getJoblist,
   saveJoblist,
+  deleteJoblistItem,
   getAuditLogs,
   addAuditLog
 } from '../services/financeService';
@@ -284,6 +292,72 @@ export const FinanceModule = () => {
       showNotification(`DANA SEBESAR Rp ${selectedReqForDisburse.amount.toLocaleString('id-ID')} BERHASIL DICAIRKAN! (Ref: ${result.refDisburseNo}). Saldo bank & Jurnal Umum telah terupdate otomatis.`);
     } catch (err) {
       alert(`Gagal mencairkan dana: ${err.message}`);
+    }
+  };
+
+  // ===========================================================================
+  // DELETE HANDLERS (FITUR HAPUS CRUD DI SELURUH MODUL FINANCE)
+  // ===========================================================================
+  const handleDeleteFundRequest = (item) => {
+    if (window.confirm(`Hapus pengajuan dana ${item.id} - "${item.title}"?\nTindakan ini tidak dapat dibatalkan.`)) {
+      deleteFundRequest(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setFundRequests(getFundRequests());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Pengajuan dana ${item.id} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeleteJurnal = (item) => {
+    if (window.confirm(`Hapus transaksi jurnal ${item.refNo || item.id} - "${item.description}"?\nTindakan ini akan membatalkan pembukuan jurnal ini.`)) {
+      deleteJurnalEntry(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setJurnal(getJurnal());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Ayat jurnal ${item.refNo || item.id} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeleteCoa = (item) => {
+    if (window.confirm(`Hapus akun COA ${item.code} - "${item.name}"?\nPastikan akun tidak lagi memiliki mutasi aktif.`)) {
+      deleteCoaAccount(item.code, 'Yazid Hizbullah, S.E.,S.T');
+      setCoa(getCoa());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Akun COA ${item.code} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeletePayable = (item) => {
+    if (window.confirm(`Hapus catatan hutang vendor ${item.vendor} (${item.billNo || item.id})?\nTotal: Rp ${Number(item.totalBill).toLocaleString('id-ID')}`)) {
+      deletePayable(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setPayables(getPayables());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Catatan hutang vendor ${item.vendor} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeleteSale = (item) => {
+    if (window.confirm(`Hapus catatan penjualan unit ${item.unitNo} konsumen "${item.consumerName}"?`)) {
+      deleteSale(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setSales(getSales());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Catatan penjualan unit ${item.unitNo} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeleteTax = (item) => {
+    if (window.confirm(`Hapus data kewajiban pajak ${item.taxType} - ${item.taxObject}?`)) {
+      deleteTax(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setTaxes(getTaxes());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Data pajak ${item.taxType} berhasil dihapus.`);
+    }
+  };
+
+  const handleDeleteJoblist = (item) => {
+    if (window.confirm(`Hapus agenda tugas "${item.task}"?`)) {
+      deleteJoblistItem(item.id, 'Yazid Hizbullah, S.E.,S.T');
+      setJoblist(getJoblist());
+      setAuditLogs(getAuditLogs());
+      showNotification(`Agenda tugas berhasil dihapus.`);
     }
   };
 
@@ -1601,6 +1675,28 @@ export const FinanceModule = () => {
                               >
                                 <Eye size={14} />
                               </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFundRequest(item)}
+                                title="Hapus Pengajuan Dana"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  color: '#f87171',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  borderRadius: '6px',
+                                  padding: '6px 8px',
+                                  fontSize: '0.74rem',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -1878,12 +1974,13 @@ export const FinanceModule = () => {
                     <th style={{ padding: '12px 14px' }}>Akun Kredit</th>
                     <th style={{ padding: '12px 14px', textAlign: 'right' }}>Nominal (Rp)</th>
                     <th style={{ padding: '12px 14px', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredJurnal.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
                         Tidak ada transaksi jurnal yang cocok dengan filter ({filterProject} • {filterDateMode}).
                       </td>
                     </tr>
@@ -1923,6 +2020,30 @@ export const FinanceModule = () => {
                         <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid #10b981', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>
                           ✓ {item.status}
                         </span>
+                      </td>
+
+                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteJurnal(item)}
+                          title="Hapus Transaksi Jurnal"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            color: '#f87171',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            borderRadius: '6px',
+                            padding: '5px 8px',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -1982,6 +2103,7 @@ export const FinanceModule = () => {
                     <th style={{ padding: '12px 14px' }}>Posisi Normal</th>
                     <th style={{ padding: '12px 14px', textAlign: 'right' }}>Saldo Berjalan (Rp)</th>
                     <th style={{ padding: '12px 14px' }}>Keterangan</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2002,6 +2124,29 @@ export const FinanceModule = () => {
                       </td>
                       <td style={{ padding: '12px 14px', color: '#64748b', fontSize: '0.74rem' }}>
                         {item.description}
+                      </td>
+                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCoa(item)}
+                          title="Hapus Akun COA"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            color: '#f87171',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            borderRadius: '6px',
+                            padding: '5px 8px',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -2560,12 +2705,13 @@ export const FinanceModule = () => {
                   <th style={{ padding: '12px 14px', textAlign: 'right' }}>Terbayar (DP/Cash)</th>
                   <th style={{ padding: '12px 14px', textAlign: 'right' }}>Sisa Piutang</th>
                   <th style={{ padding: '12px 14px' }}>Metode & Status</th>
+                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredSales.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
                       Tidak ada catatan penjualan unit untuk filter ({filterProject} • {filterDateMode}).
                     </td>
                   </tr>
@@ -2591,6 +2737,29 @@ export const FinanceModule = () => {
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ color: '#38bdf8', fontSize: '0.74rem', fontWeight: 700 }}>{item.paymentMethod}</div>
                       <div style={{ color: item.unpaidAmount === 0 ? '#10b981' : '#f59e0b', fontSize: '0.72rem' }}>{item.status}</div>
+                    </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSale(item)}
+                        title="Hapus Penjualan"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          borderRadius: '6px',
+                          padding: '5px 8px',
+                          fontSize: '0.72rem',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -2657,37 +2826,61 @@ export const FinanceModule = () => {
                       {item.dueDate}
                     </td>
                     <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewReqForm({
-                            title: `Pelunasan Hutang: ${item.vendor} (${item.category})`,
-                            originModule: 'procurement',
-                            originModuleName: 'Procurement & Logistik',
-                            requester: 'Finance Hutang Staff',
-                            project: item.project,
-                            category: 'Pembayaran Hutang Vendor',
-                            amount: item.remainingAmount,
-                            dueDate: item.dueDate,
-                            priority: 'Mendesak',
-                            accountCode: '2-101',
-                            notes: `Pelunasan faktur tagihan ${item.billNo}`
-                          });
-                          setIsNewRequestModalOpen(true);
-                        }}
-                        style={{
-                          background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-                          border: '1px solid #ef4444',
-                          color: '#ffffff',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Ajukan Bayar
-                      </button>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewReqForm({
+                              title: `Pelunasan Hutang: ${item.vendor} (${item.category})`,
+                              originModule: 'procurement',
+                              originModuleName: 'Procurement & Logistik',
+                              requester: 'Finance Hutang Staff',
+                              project: item.project,
+                              category: 'Pembayaran Hutang Vendor',
+                              amount: item.remainingAmount,
+                              dueDate: item.dueDate,
+                              priority: 'Mendesak',
+                              accountCode: '2-101',
+                              notes: `Pelunasan faktur tagihan ${item.billNo}`
+                            });
+                            setIsNewRequestModalOpen(true);
+                          }}
+                          style={{
+                            background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                            border: '1px solid #ef4444',
+                            color: '#ffffff',
+                            padding: '5px 10px',
+                            borderRadius: '6px',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Ajukan Bayar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePayable(item)}
+                          title="Hapus Hutang"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            color: '#f87171',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            borderRadius: '6px',
+                            padding: '5px 8px',
+                            fontSize: '0.72rem',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                          onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -2853,12 +3046,13 @@ export const FinanceModule = () => {
                   <th style={{ padding: '12px 14px', textAlign: 'right' }}>Pajak Terutang (Rp)</th>
                   <th style={{ padding: '12px 14px' }}>Masa Pajak & Jatuh Tempo</th>
                   <th style={{ padding: '12px 14px' }}>Status & NTPN</th>
+                  <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTaxes.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
                       Tidak ada data kewajiban pajak untuk filter ({filterProject} • {filterDateMode}).
                     </td>
                   </tr>
@@ -2888,6 +3082,29 @@ export const FinanceModule = () => {
                       </span>
                       {item.ntpn && <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>{item.ntpn}</div>}
                     </td>
+                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTax(item)}
+                        title="Hapus Pajak"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          borderRadius: '6px',
+                          padding: '5px 8px',
+                          fontSize: '0.72rem',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -2911,43 +3128,70 @@ export const FinanceModule = () => {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            {joblist.map((job) => (
-              <div
-                key={job.id}
-                className="glass-card"
-                style={{
-                  background: '#090d16',
-                  border: '1px solid #1e293b',
-                  borderRadius: '12px',
-                  padding: '1.2rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#f87171' }}>{job.id}</span>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: job.status === 'In Progress' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(234, 179, 8, 0.15)', color: job.status === 'In Progress' ? '#60a5fa' : '#facc15' }}>
-                    {job.status}
-                  </span>
+          {joblist.length === 0 ? (
+            <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', padding: '2.5rem', textAlign: 'center', color: '#64748b' }}>
+              Tidak ada agenda tugas tim keuangan saat ini.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {joblist.map((job) => (
+                <div
+                  key={job.id}
+                  className="glass-card"
+                  style={{
+                    background: '#090d16',
+                    border: '1px solid #1e293b',
+                    borderRadius: '12px',
+                    padding: '1.2rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#f87171' }}>{job.id}</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: job.status === 'In Progress' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(234, 179, 8, 0.15)', color: job.status === 'In Progress' ? '#60a5fa' : '#facc15' }}>
+                      {job.status}
+                    </span>
+                  </div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
+                    {job.task}
+                  </h4>
+                  <div style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
+                    PIC: <strong style={{ color: '#38bdf8' }}>{job.assignee}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                    {job.notes}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.72rem', color: '#f59e0b' }}>
+                    <span>Jatuh Tempo: {job.dueDate}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#ef4444', fontWeight: 800 }}>Prioritas {job.priority}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteJoblist(job)}
+                        title="Hapus Agenda Tugas"
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          borderRadius: '4px',
+                          padding: '3px 6px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                  {job.task}
-                </h4>
-                <div style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
-                  PIC: <strong style={{ color: '#38bdf8' }}>{job.assignee}</strong>
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                  {job.notes}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.72rem', color: '#f59e0b' }}>
-                  <span>Jatuh Tempo: {job.dueDate}</span>
-                  <span style={{ color: '#ef4444', fontWeight: 800 }}>Prioritas {job.priority}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

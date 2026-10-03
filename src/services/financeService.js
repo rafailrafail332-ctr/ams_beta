@@ -866,3 +866,119 @@ export const addAuditLog = (logItem) => {
   };
   setStoredItem(STORAGE_KEYS.AUDIT, [newLog, ...current]);
 };
+
+// =============================================================================
+// FUNGSI-FUNGSI PENGHAPUSAN DATA (DELETE CRUD) DILENGKAPI AUDIT LOG
+// =============================================================================
+
+export const deleteFundRequest = (id, user = 'Finance User') => {
+  const current = getFundRequests();
+  const target = current.find(r => r.id === id);
+  const updated = current.filter(r => r.id !== id);
+  saveFundRequests(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Pengajuan Dana',
+      details: `Menghapus ${id} (${target.title}) senilai Rp ${Number(target.amount).toLocaleString('id-ID')}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deleteJurnalEntry = (id, user = 'Finance User') => {
+  const current = getJurnal();
+  const target = current.find(j => j.id === id);
+  const updated = current.filter(j => j.id !== id);
+  saveJurnal(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Ayat Jurnal',
+      details: `Menghapus jurnal ${target.refNo || id} (${target.description}) Rp ${Number(target.amount).toLocaleString('id-ID')}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deleteCoaAccount = (code, user = 'Finance User') => {
+  const current = getCoa();
+  const target = current.find(c => c.code === code);
+  const updated = current.filter(c => c.code !== code);
+  saveCoa(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Akun COA',
+      details: `Menghapus akun ${code} - ${target.name} (${target.category})`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deleteSale = (id, user = 'Finance User') => {
+  const current = getSales();
+  const target = current.find(s => s.id === id);
+  const updated = current.filter(s => s.id !== id);
+  saveSales(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Penjualan Unit',
+      details: `Menghapus penjualan unit ${target.unitNo} konsumen ${target.consumerName}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deletePayable = (id, user = 'Finance User') => {
+  const current = getPayables();
+  const target = current.find(p => p.id === id);
+  const updated = current.filter(p => p.id !== id);
+  savePayables(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Hutang Usaha',
+      details: `Menghapus hutang ${target.billNo || id} vendor ${target.vendor} Rp ${Number(target.remainingAmount).toLocaleString('id-ID')}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deleteTax = (id, user = 'Finance User') => {
+  const current = getTaxes();
+  const target = current.find(t => t.id === id);
+  const updated = current.filter(t => t.id !== id);
+  saveTaxes(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Pajak Properti',
+      details: `Menghapus data pajak ${target.taxType} untuk ${target.taxObject}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
+
+export const deleteJoblistItem = (id, user = 'Finance User') => {
+  const current = getJoblist();
+  const target = current.find(j => j.id === id);
+  const updated = current.filter(j => j.id !== id);
+  saveJoblist(updated);
+  if (target) {
+    addAuditLog({
+      user,
+      action: 'Hapus Tugas Joblist',
+      details: `Menghapus tugas ${id}: ${target.task}`,
+      module: 'Finance & Acc'
+    });
+  }
+  return updated;
+};
