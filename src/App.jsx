@@ -22,7 +22,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Lock, ArrowLeft } from 'lucide-react';
 
 function AppContent() {
-  const { currentUser, setCurrentUser, users, canAccessModule } = useApp();
+  const { currentUser, setCurrentUser, users, canAccessModule, setActiveSubTab } = useApp();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentTab, setCurrentTab] = useState('hub');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -132,7 +132,10 @@ function AppContent() {
           <AmsCentralHub
             isLanding={false}
             currentUser={currentUser}
-            onSelectModule={(tabKey) => setCurrentTab(tabKey)}
+            onSelectModule={(tabKey) => {
+              setCurrentTab(tabKey);
+              if (setActiveSubTab) setActiveSubTab('default');
+            }}
             onLogout={handleLogout}
           />
         </ErrorBoundary>

@@ -120,14 +120,14 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen') || roleLower.includes('tarkum')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'fin-pendapatan', title: '1. Pendapatan (Revenue)', moduleKey: 'finance', subTabKey: 'pendapatan', icon: TrendingUp, color: '#10B981' },
-        { id: 'fin-pengeluaran', title: '2. Pengeluaran (OpEx/CapEx)', moduleKey: 'finance', subTabKey: 'pengeluaran', icon: Receipt, color: '#EF4444' },
-        { id: 'fin-piutang', title: '3. Piutang (Konsumen & Bank)', moduleKey: 'finance', subTabKey: 'piutang', icon: DollarSign, color: '#F59E0B' },
-        { id: 'fin-utang', title: '4. Utang (Vendor & Kontraktor)', moduleKey: 'finance', subTabKey: 'utang', icon: CreditCard, color: '#EC4899' },
-        { id: 'fin-invoice', title: '5. Invoice & Pembayaran', moduleKey: 'finance', subTabKey: 'invoice', icon: FileText, color: '#38BDF8' },
-        { id: 'fin-kasbank', title: '6. Kas & Bank (Rekonsiliasi)', moduleKey: 'finance', subTabKey: 'kas_bank', icon: Landmark, color: '#6366F1' },
-        { id: 'fin-budget', title: '7. Budget / Anggaran Proyek', moduleKey: 'finance', subTabKey: 'budget', icon: Calculator, color: '#8B5CF6' },
-        { id: 'fin-laporan', title: '8. Laporan Keuangan (Laba Rugi & Neraca)', moduleKey: 'finance', subTabKey: 'laporan_keuangan', icon: PieChart, color: '#14B8A6' }
+        { id: 'fin-pengajuan-dana', title: '1. Pengajuan Dana & Material', moduleKey: 'finance', subTabKey: 'pengajuan_dana', icon: DollarSign, color: '#EF4444' },
+        { id: 'fin-pendapatan', title: '2. Penjualan & Pendapatan', moduleKey: 'finance', subTabKey: 'penjualan', icon: TrendingUp, color: '#10B981' },
+        { id: 'fin-pengeluaran', title: '3. Buku Jurnal Umum', moduleKey: 'finance', subTabKey: 'jurnal', icon: Receipt, color: '#EF4444' },
+        { id: 'fin-piutang', title: '4. Piutang Konsumen', moduleKey: 'piutang-konsumen', subTabKey: 'default', icon: DollarSign, color: '#F59E0B' },
+        { id: 'fin-utang', title: '5. Hutang Usaha Vendor', moduleKey: 'finance', subTabKey: 'hutang', icon: CreditCard, color: '#EC4899' },
+        { id: 'fin-kasbank', title: '6. Kas & Rekening Bank', moduleKey: 'finance', subTabKey: 'bank', icon: Landmark, color: '#6366F1' },
+        { id: 'fin-budget', title: '7. Kertas Kerja Worksheet', moduleKey: 'finance', subTabKey: 'worksheet', icon: Calculator, color: '#8B5CF6' },
+        { id: 'fin-laporan', title: '8. Laporan Laba Rugi & Neraca', moduleKey: 'finance', subTabKey: 'laba_rugi', icon: PieChart, color: '#14B8A6' }
       ];
     }
 

@@ -2398,6 +2398,16 @@ export const TeknikModule = () => {
       }
     });
 
+    // Fetch Pengajuan Material Batches from MySQL cloud once on mount
+    fetchCloudStore(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setSpbmBatches(val);
+        try {
+          localStorage.setItem(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, JSON.stringify(val));
+        } catch (e) {}
+      }
+    });
+
     const doFetchMaster = () => {
       fetchCloudStore(STORAGE_KEY_RAB_SHEETS, null).then(val => {
         if (val && Array.isArray(val) && val.length > 0) {
@@ -2469,6 +2479,14 @@ export const TeknikModule = () => {
       });
       fetchCloudStore(STORAGE_KEY_PERSEDIAAN_MUTASI, null).then(val => {
         if (val !== null && val !== undefined && Array.isArray(val)) setPersediaanMutasiBarang(val);
+      });
+      fetchCloudStore(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, null).then(val => {
+        if (val !== null && val !== undefined && Array.isArray(val)) {
+          setSpbmBatches(val);
+          try {
+            localStorage.setItem(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, JSON.stringify(val));
+          } catch (e) {}
+        }
       });
     };
 

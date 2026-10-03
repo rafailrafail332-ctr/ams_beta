@@ -83,7 +83,9 @@ import {
   saveJoblist,
   deleteJoblistItem,
   getAuditLogs,
-  addAuditLog
+  addAuditLog,
+  syncFundRequestsFromCloud,
+  STORAGE_KEYS
 } from '../services/financeService';
 
 export const FINANCE_SUBMODULES = [
@@ -128,6 +130,7 @@ export const FinanceModule = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterModuleOrigin, setFilterModuleOrigin] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterCategoryType, setFilterCategoryType] = useState('ALL'); // 'ALL' | 'MATERIAL' | 'OPERASIONAL'
   const [selectedGlAccount, setSelectedGlAccount] = useState('1-102'); // untuk submodul Account (buku besar)
 
   // Filter Proyek & Periode Waktu
@@ -196,8 +199,15 @@ export const FinanceModule = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  // Sync dengan event global jika modul lain menyimpan pengajuan dana
+  // Real-time Multi-Device & Cloud Sync dengan Hosting Sengked MySQL Database
   useEffect(() => {
+    // 1. Initial Cloud Sync from MySQL
+    syncFundRequestsFromCloud().then(res => {
+      if (res && Array.isArray(res) && res.length > 0) {
+        setFundRequests(res);
+      }
+    });
+
     const handleDataChanged = () => {
       setFundRequests(getFundRequests());
       setBanks(getBanks());
@@ -209,8 +219,30 @@ export const FinanceModule = () => {
       setJoblist(getJoblist());
       setAuditLogs(getAuditLogs());
     };
+
+    const handleStorageEvent = (e) => {
+      if (!e.key || e.key === STORAGE_KEYS.FUND_REQUESTS) {
+        handleDataChanged();
+      }
+    };
+
     window.addEventListener('ams-finance-data-changed', handleDataChanged);
-    return () => window.removeEventListener('ams-finance-data-changed', handleDataChanged);
+    window.addEventListener('storage', handleStorageEvent);
+
+    // 2. 5-second polling interval for real-time consistency across all laptops in office
+    const interval = setInterval(() => {
+      syncFundRequestsFromCloud().then(res => {
+        if (res && Array.isArray(res) && res.length > 0) {
+          setFundRequests(res);
+        }
+      });
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('ams-finance-data-changed', handleDataChanged);
+      window.removeEventListener('storage', handleStorageEvent);
+      clearInterval(interval);
+    };
   }, []);
 
   // Sync dengan activeSubTab eksternal jika ada
@@ -533,19 +565,34 @@ export const FinanceModule = () => {
   // ===========================================================================
   const filteredFundRequests = useMemo(() => {
     return fundRequests.filter(item => {
+      if (!item) return false;
+
+      const q = (searchTerm || '').toLowerCase().trim();
       const matchSearch =
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.requester.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.project.toLowerCase().includes(searchTerm.toLowerCase());
+        !q ||
+        (item.title || '').toLowerCase().includes(q) ||
+        (item.id || '').toLowerCase().includes(q) ||
+        (item.requester || '').toLowerCase().includes(q) ||
+        (item.project || '').toLowerCase().includes(q) ||
+        (item.category || '').toLowerCase().includes(q) ||
+        (item.spbmNo || '').toLowerCase().includes(q);
 
       const matchModule = filterModuleOrigin === 'ALL' || item.originModule === filterModuleOrigin;
       const matchStatus = filterStatus === 'ALL' || item.status === filterStatus;
 
+      // Filter Kategori Khusus (Material vs Operasional Lain)
+      let matchCatType = true;
+      const isMaterial = (item.category || '').toLowerCase().includes('material') || (item.materialRows && item.materialRows.length > 0) || Boolean(item.spbmNo);
+      if (filterCategoryType === 'MATERIAL') {
+        matchCatType = isMaterial;
+      } else if (filterCategoryType === 'OPERASIONAL') {
+        matchCatType = !isMaterial;
+      }
+
       // Filter Proyek
       const matchProject =
         filterProject === 'ALL' ||
-        (item.project && item.project.toLowerCase().includes(filterProject.toLowerCase()));
+        ((item.project || '').toLowerCase().includes(filterProject.toLowerCase()));
 
       // Filter Periode Waktu
       let matchDate = true;
@@ -556,9 +603,17 @@ export const FinanceModule = () => {
         matchDate = itemDate === filterDay;
       }
 
-      return matchSearch && matchModule && matchStatus && matchProject && matchDate;
+      return matchSearch && matchModule && matchStatus && matchCatType && matchProject && matchDate;
     });
-  }, [fundRequests, searchTerm, filterModuleOrigin, filterStatus, filterProject, filterDateMode, filterMonth, filterDay]);
+  }, [fundRequests, searchTerm, filterModuleOrigin, filterStatus, filterCategoryType, filterProject, filterDateMode, filterMonth, filterDay]);
+
+  // Tiket Pengajuan Material yang Menunggu Review dari Finance
+  const pendingMaterialTickets = useMemo(() => {
+    return fundRequests.filter(r => 
+      r.status === 'Menunggu Review' && 
+      ((r.category || '').toLowerCase().includes('material') || (r.materialRows && r.materialRows.length > 0) || Boolean(r.spbmNo))
+    );
+  }, [fundRequests]);
 
   // Filter Penjualan berdasarkan Proyek & Periode
   const filteredSales = useMemo(() => {
@@ -1052,19 +1107,38 @@ export const FinanceModule = () => {
               >
                 <IconComp size={15} color={isActive ? '#ffffff' : isHighlight ? '#818cf8' : '#ef4444'} />
                 <span>{tab.label}</span>
-                {tab.id === 'pengajuan_dana' && fundStats.pendingCount > 0 && (
-                  <span
-                    style={{
-                      background: '#ef4444',
-                      color: '#ffffff',
-                      fontSize: '0.68rem',
-                      fontWeight: 900,
-                      padding: '1px 6px',
-                      borderRadius: '10px'
-                    }}
-                  >
-                    {fundStats.pendingCount}
-                  </span>
+                {tab.id === 'pengajuan_dana' && (
+                  <div style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
+                    {pendingMaterialTickets.length > 0 && (
+                      <span
+                        style={{
+                          background: '#2563eb',
+                          color: '#ffffff',
+                          fontSize: '0.65rem',
+                          fontWeight: 900,
+                          padding: '1px 5px',
+                          borderRadius: '8px'
+                        }}
+                        title={`${pendingMaterialTickets.length} Pengajuan Material (SPbM) Baru dari Teknik`}
+                      >
+                        📦 {pendingMaterialTickets.length}
+                      </span>
+                    )}
+                    {fundStats.pendingCount > 0 && (
+                      <span
+                        style={{
+                          background: '#ef4444',
+                          color: '#ffffff',
+                          fontSize: '0.68rem',
+                          fontWeight: 900,
+                          padding: '1px 6px',
+                          borderRadius: '10px'
+                        }}
+                      >
+                        {fundStats.pendingCount}
+                      </span>
+                    )}
+                  </div>
                 )}
               </button>
             );
@@ -1376,6 +1450,77 @@ export const FinanceModule = () => {
             />
           </div>
 
+          {/* Banner Notifikasi Khusus Pengajuan Material Baru dari Teknik */}
+          {pendingMaterialTickets.length > 0 && (
+            <div
+              className="glass-card"
+              style={{
+                background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(37, 99, 235, 0.25) 100%)',
+                border: '1.5px solid #3b82f6',
+                borderRadius: '12px',
+                padding: '14px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.25)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  background: '#1d4ed8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  fontSize: '1.25rem'
+                }}>
+                  📦
+                </div>
+                <div>
+                  <div style={{ fontWeight: 900, color: '#ffffff', fontSize: '0.94rem' }}>
+                    Terdapat {pendingMaterialTickets.length} Berkas Pengajuan Material (SPbM) Baru dari Tim Teknik & Konstruksi!
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#93c5fd', marginTop: '2px' }}>
+                    Silakan klik tombol <strong>"📋 Verifikasi Item Material"</strong> di tabel untuk menetapkan harga dan mencentang baris material yang disetujui.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterCategoryType('MATERIAL');
+                    setFilterStatus('Menunggu Review');
+                    setFilterProject('ALL');
+                    setFilterDateMode('ALL');
+                  }}
+                  style={{
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 10px rgba(37, 99, 235, 0.4)'
+                  }}
+                >
+                  Lihat Tiket Material Ini ({pendingMaterialTickets.length})
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Filter Bar & Tombol Tambah */}
           <div
             className="glass-card"
@@ -1392,12 +1537,72 @@ export const FinanceModule = () => {
             }}
           >
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
+              {/* Category Pills: All vs Material SPbM vs Operasional */}
+              <div style={{ display: 'flex', gap: '5px', background: '#0f172a', padding: '3px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+                <button
+                  type="button"
+                  onClick={() => setFilterCategoryType('ALL')}
+                  style={{
+                    background: filterCategoryType === 'ALL' ? '#334155' : 'transparent',
+                    color: filterCategoryType === 'ALL' ? '#ffffff' : '#94a3b8',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: filterCategoryType === 'ALL' ? 800 : 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Semua
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterCategoryType('MATERIAL')}
+                  style={{
+                    background: filterCategoryType === 'MATERIAL' ? '#1d4ed8' : 'transparent',
+                    color: filterCategoryType === 'MATERIAL' ? '#ffffff' : '#93c5fd',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: filterCategoryType === 'MATERIAL' ? 900 : 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>📦 Material (SPbM)</span>
+                  {pendingMaterialTickets.length > 0 && (
+                    <span style={{ background: '#ef4444', color: '#ffffff', fontSize: '0.62rem', padding: '1px 5px', borderRadius: '8px', fontWeight: 900 }}>
+                      {pendingMaterialTickets.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterCategoryType('OPERASIONAL')}
+                  style={{
+                    background: filterCategoryType === 'OPERASIONAL' ? '#334155' : 'transparent',
+                    color: filterCategoryType === 'OPERASIONAL' ? '#ffffff' : '#94a3b8',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: filterCategoryType === 'OPERASIONAL' ? 800 : 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Operasional Lain
+                </button>
+              </div>
+
               {/* Search */}
-              <div style={{ position: 'relative', minWidth: '240px', flex: 1 }}>
+              <div style={{ position: 'relative', minWidth: '220px', flex: 1 }}>
                 <Search size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
-                  placeholder="Cari ID, Judul, Pemohon, Proyek..."
+                  placeholder="Cari ID, Judul, No SPbM, Pemohon, Proyek..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -1425,9 +1630,9 @@ export const FinanceModule = () => {
                   fontSize: '0.82rem'
                 }}
               >
-                <option value="ALL">Semua Departemen Pengaju</option>
+                <option value="ALL">Semua Departemen</option>
+                <option value="teknik">Teknik & Konstruksi (Material & BATP)</option>
                 <option value="marketing">Marketing & Sales</option>
-                <option value="teknik">Teknik & Konstruksi (BATP)</option>
                 <option value="hr-ga">HR & General Affair</option>
                 <option value="legal">Legal & Perizinan</option>
                 <option value="procurement">Procurement (PO Material)</option>
@@ -1566,14 +1771,52 @@ export const FinanceModule = () => {
                             <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
                               Proyek: <strong style={{ color: '#f87171' }}>{item.project}</strong> • {item.category}
                             </div>
+                            {item.spbmNo && (
+                              <div style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 800, marginTop: '2px' }}>
+                                No. SPbM: {item.spbmNo}
+                              </div>
+                            )}
+                            {item.materialRows && item.materialRows.length > 0 && (
+                              <div style={{ marginTop: '4px' }}>
+                                <span style={{
+                                  background: 'rgba(30, 58, 138, 0.5)',
+                                  border: '1px solid #3b82f6',
+                                  color: '#93c5fd',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  📦 {item.materialRows.length} Item Baris Material
+                                </span>
+                              </div>
+                            )}
                           </td>
 
                           <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                            <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.92rem' }}>
-                              Rp {Number(item.amount).toLocaleString('id-ID')}
-                            </div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                              COA: {item.accountCode || '5-301'}
+                            {Number(item.amount) > 0 ? (
+                              <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.92rem' }}>
+                                Rp {Number(item.amount).toLocaleString('id-ID')}
+                              </div>
+                            ) : (item.materialRows && item.materialRows.length > 0) ? (
+                              <div>
+                                <div style={{ fontWeight: 800, color: '#f59e0b', fontSize: '0.78rem' }}>
+                                  Estimasi Belum Diisi
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                  (Diverifikasi oleh Finance)
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.92rem' }}>
+                                Rp 0
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                              COA: {item.accountCode || '5-101'}
                             </div>
                           </td>
 
@@ -1640,23 +1883,50 @@ export const FinanceModule = () => {
                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                               {item.status === 'Menunggu Review' && (
                                 <>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleApproveRequest(item.id)}
-                                    title="Setujui (ACC)"
-                                    style={{
-                                      background: '#15803d',
-                                      color: '#ffffff',
-                                      border: 'none',
-                                      borderRadius: '6px',
-                                      padding: '6px 10px',
-                                      fontSize: '0.74rem',
-                                      fontWeight: 800,
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    Setujui
-                                  </button>
+                                  {item.materialRows && item.materialRows.length > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedDetailItem(item);
+                                        setIsDetailModalOpen(true);
+                                      }}
+                                      title="Buka Verifikasi & Approval Baris Material"
+                                      style={{
+                                        background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
+                                        color: '#ffffff',
+                                        border: '1px solid #3b82f6',
+                                        borderRadius: '6px',
+                                        padding: '6px 12px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 900,
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
+                                      }}
+                                    >
+                                      📋 Verifikasi ({item.materialRows.length})
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleApproveRequest(item.id)}
+                                      title="Setujui (ACC)"
+                                      style={{
+                                        background: '#15803d',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        padding: '6px 10px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      Setujui
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => handleRejectRequest(item.id)}

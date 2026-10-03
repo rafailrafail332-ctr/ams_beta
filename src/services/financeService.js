@@ -3,6 +3,8 @@
 // Central Hub Data Store untuk Keuangan, Rekening Bank, Jurnal, dan Pengajuan Dana Lintas Modul
 // =============================================================================
 
+import { fetchCloudStore, saveCloudStore } from '../supabase';
+
 export const STORAGE_KEYS = {
   FUND_REQUESTS: 'ams_shared_fund_requests_v1',
   BANKS: 'ams_fin_banks_v1',
@@ -599,6 +601,12 @@ const setStoredItem = (key, value) => {
   } catch (err) {
     console.error(`Error saving key ${key}:`, err);
   }
+  // Simpan secara asinkron ke MySQL database hosting via CloudStore
+  try {
+    saveCloudStore(key, value);
+  } catch (err) {
+    console.warn(`[CloudStore auto-save warning for ${key}]:`, err);
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -608,25 +616,82 @@ export const getFundRequests = () => getStoredItem(STORAGE_KEYS.FUND_REQUESTS, I
 export const saveFundRequests = (list) => setStoredItem(STORAGE_KEYS.FUND_REQUESTS, list);
 
 /**
+ * Sinkronisasi Real-Time Pengajuan Dana dari Database Cloud Hosting
+ * Memastikan pengajuan dari laptop Teknik langsung terbaca di laptop Finance
+ */
+export const syncFundRequestsFromCloud = async () => {
+  try {
+    const cloudData = await fetchCloudStore(STORAGE_KEYS.FUND_REQUESTS, null);
+    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
+      const localData = getFundRequests();
+      const localMap = new Map();
+      
+      // Masukkan localData dulu
+      localData.forEach(item => {
+        if (item && item.id) localMap.set(item.id, item);
+      });
+
+      let hasChanges = false;
+      cloudData.forEach(cloudItem => {
+        if (!cloudItem || !cloudItem.id) return;
+        if (!localMap.has(cloudItem.id)) {
+          localMap.set(cloudItem.id, cloudItem);
+          hasChanges = true;
+        } else {
+          const localItem = localMap.get(cloudItem.id);
+          // Update jika status di cloud berubah atau approval berubah
+          if (
+            cloudItem.status !== localItem.status ||
+            cloudItem.approvedAmount !== localItem.approvedAmount ||
+            (cloudItem.materialRows?.length > 0 && (!localItem.materialRows || localItem.materialRows.length === 0))
+          ) {
+            localMap.set(cloudItem.id, { ...localItem, ...cloudItem });
+            hasChanges = true;
+          }
+        }
+      });
+
+      const merged = Array.from(localMap.values());
+      if (hasChanges || localData.length !== merged.length) {
+        localStorage.setItem(STORAGE_KEYS.FUND_REQUESTS, JSON.stringify(merged));
+        window.dispatchEvent(new CustomEvent('ams-finance-data-changed', { detail: { key: STORAGE_KEYS.FUND_REQUESTS } }));
+        return merged;
+      }
+      return merged;
+    } else {
+      // Jika di cloud belum ada, inisialisasi cloud dengan data lokal yang ada
+      const current = getFundRequests();
+      if (current && current.length > 0) {
+        saveCloudStore(STORAGE_KEYS.FUND_REQUESTS, current);
+      }
+    }
+  } catch (err) {
+    console.warn('Sync fund requests from cloud failed:', err);
+  }
+  return getFundRequests();
+};
+
+/**
  * Dipanggil dari modul mana saja (Marketing, HR/GA, Teknik, Legal, Procurement)
  * untuk mengirimkan pengajuan dana ke Finance.
  */
 export const submitFundRequest = (newRequest) => {
   const currentList = getFundRequests();
   const nextIdSeq = String(currentList.length + 1).padStart(3, '0');
+  const uniqueId = newRequest.id || `REQ-2026-${nextIdSeq}-${Date.now().toString().slice(-3)}`;
   const createdItem = {
-    id: newRequest.id || `REQ-2026-${nextIdSeq}`,
-    originModule: newRequest.originModule || 'operasional',
-    originModuleName: newRequest.originModuleName || 'Operasional Lapangan',
+    id: uniqueId,
+    originModule: newRequest.originModule || 'teknik',
+    originModuleName: newRequest.originModuleName || 'Teknik & Konstruksi',
     requester: newRequest.requester || 'Staf Pemohon',
-    title: newRequest.title || 'Pengajuan Dana Operasional',
-    project: newRequest.project || 'Umum / Head Office',
-    category: newRequest.category || 'Operasional',
+    title: newRequest.title || 'Pengajuan Material Konstruksi',
+    project: newRequest.project || 'Ashoka View',
+    category: newRequest.category || 'Pengajuan Material Konstruksi',
     amount: Number(newRequest.amount) || 0,
     approvedAmount: newRequest.approvedAmount !== undefined ? Number(newRequest.approvedAmount) : (Number(newRequest.amount) || 0),
     requestDate: newRequest.requestDate || new Date().toISOString().split('T')[0],
     dueDate: newRequest.dueDate || new Date().toISOString().split('T')[0],
-    priority: newRequest.priority || 'Normal',
+    priority: newRequest.priority || 'Tinggi',
     status: 'Menunggu Review',
     approvedBy: null,
     approvedAt: null,
@@ -639,11 +704,14 @@ export const submitFundRequest = (newRequest) => {
     attachments: newRequest.attachments || [],
     spbmNo: newRequest.spbmNo || null,
     spbmId: newRequest.spbmId || null,
-    materialRows: newRequest.materialRows || []
+    materialRows: Array.isArray(newRequest.materialRows) ? newRequest.materialRows : []
   };
 
-  const updated = [createdItem, ...currentList];
+  const updated = [createdItem, ...currentList.filter(x => x.id !== uniqueId)];
   saveFundRequests(updated);
+
+  // Sync instan ke CloudStore
+  saveCloudStore(STORAGE_KEYS.FUND_REQUESTS, updated);
 
   // Catat ke audit log
   addAuditLog({
@@ -725,6 +793,8 @@ export const updateFundRequestMaterialRows = (requestId, updatedRows, financeOff
           return b;
         });
         localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+        saveCloudStore(BATCH_KEY, syncUpdated);
+        window.dispatchEvent(new CustomEvent('ams-finance-data-changed', { detail: { key: BATCH_KEY } }));
       }
     }
   } catch (e) {}
@@ -935,6 +1005,8 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
           return b;
         });
         localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+        saveCloudStore(BATCH_KEY, syncUpdated);
+        window.dispatchEvent(new CustomEvent('ams-finance-data-changed', { detail: { key: BATCH_KEY } }));
       }
     }
   } catch (e) {}
