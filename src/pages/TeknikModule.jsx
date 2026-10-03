@@ -2198,194 +2198,6 @@ export const TeknikModule = () => {
     pemohon: currentUser?.name || 'Mandor Lapangan'
   });
 
-  // Combined master barang list for Kode, Nama, Satuan lookup
-  const allMasterBarangList = useMemo(() => {
-    const map = new Map();
-    // 1. From persediaanMasterBarang (User's registered master barang)
-    (persediaanMasterBarang || []).forEach(b => {
-      const k = (b.kode || '').trim().toUpperCase();
-      if (k && !map.has(k)) {
-        map.set(k, { kode: b.kode.trim().toUpperCase(), nama: b.nama || '', satuan: b.satuan || 'Sak' });
-      }
-    });
-    // 2. From persediaanSummaryList
-    (persediaanSummaryList || []).forEach(s => {
-      const k = (s.kode || '').trim().toUpperCase();
-      if (k && !map.has(k)) {
-        map.set(k, { kode: s.kode.trim().toUpperCase(), nama: s.nama || '', satuan: s.satuan || 'Sak' });
-      }
-    });
-    // 3. Fallback standard construction materials
-    const standardMaterials = [
-      { kode: 'SMN-01', nama: 'Semen Gresik 40 Kg', satuan: 'Sak' },
-      { kode: 'SMN-02', nama: 'Semen Tiga Roda 50 Kg', satuan: 'Sak' },
-      { kode: 'BSI-08', nama: 'Besi Beton Polos 8mm SNI', satuan: 'Batang' },
-      { kode: 'BSI-10', nama: 'Besi Beton Ulir 10mm SNI', satuan: 'Batang' },
-      { kode: 'BSI-12', nama: 'Besi Beton Ulir 12mm SNI', satuan: 'Batang' },
-      { kode: 'BTR-01', nama: 'Bata Ringan Hebel Tebal 10cm', satuan: 'M3' },
-      { kode: 'PSR-01', nama: 'Pasir Cor Extra Lumajang', satuan: 'M3' },
-      { kode: 'SPL-01', nama: 'Batu Split Cor 1/2', satuan: 'M3' },
-      { kode: 'PIP-01', nama: 'Pipa PVC AW 3/4" Wavin', satuan: 'Batang' },
-      { kode: 'PIP-02', nama: 'Pipa PVC D 4" Wavin', satuan: 'Batang' },
-      { kode: 'KRK-01', nama: 'Keramik Granit 60x60 Polish Glazed', satuan: 'Dus' },
-      { kode: 'CAT-01', nama: 'Cat Tembok Dasar Alkali Resisting', satuan: 'Pail' },
-      { kode: 'CAT-02', nama: 'Cat Tembok Luar Dulux Weathershield', satuan: 'Pail' },
-      { kode: 'KAY-01', nama: 'Kayu Kaso 4x6 Meranti Super', satuan: 'Batang' },
-      { kode: 'TRP-01', nama: 'Triplek Cor Tebal 9mm', satuan: 'Lembar' },
-      { kode: 'BOD-01', nama: 'Bondex / Bondek Cor 0.75mm', satuan: 'Lembar' },
-      { kode: 'WIR-01', nama: 'Wiremesh M8 Standar SNI', satuan: 'Lembar' }
-    ];
-    standardMaterials.forEach(sm => {
-      const k = sm.kode.toUpperCase();
-      if (!map.has(k)) {
-        map.set(k, sm);
-      }
-    });
-    return Array.from(map.values());
-  }, [persediaanMasterBarang, persediaanSummaryList]);
-
-  const handleOpenAddPmat = () => {
-    setEditingPmatId(null);
-    setPmatFormData({
-      tanggal: getTodayDateString(),
-      proyek: (filterPmatProyek !== 'ALL' && filterPmatProyek) ? filterPmatProyek : 'Ashoka View',
-      kode: '',
-      material: '',
-      qty: '',
-      sat: 'Sak',
-      blok: (filterPmatBlok !== 'ALL' && filterPmatBlok) ? filterPmatBlok : 'Blok A',
-      no: '01',
-      keterangan: '',
-      status: 'Diajukan',
-      pemohon: currentUser?.name || 'Mandor Lapangan'
-    });
-    setIsPmatModalOpen(true);
-  };
-
-  const handleOpenEditPmat = (item) => {
-    setEditingPmatId(item.id);
-    setPmatFormData({
-      tanggal: item.tanggal || getTodayDateString(),
-      proyek: item.proyek || 'Ashoka View',
-      kode: item.kode || '',
-      material: item.material || '',
-      qty: item.qty || '',
-      sat: item.sat || 'Sak',
-      blok: item.blok || 'Blok A',
-      no: item.no || '01',
-      keterangan: item.keterangan || '',
-      status: item.status || 'Diajukan',
-      pemohon: item.pemohon || currentUser?.name || 'Mandor Lapangan'
-    });
-    setIsPmatModalOpen(true);
-  };
-
-  const handlePmatKodeSelect = (val) => {
-    const rawVal = val.toUpperCase();
-    const cleanK = rawVal.trim();
-    const matched = allMasterBarangList.find(b => b.kode.trim().toUpperCase() === cleanK || cleanK.startsWith(b.kode.trim().toUpperCase()));
-    if (matched) {
-      setPmatFormData(prev => ({
-        ...prev,
-        kode: matched.kode,
-        material: matched.nama,
-        sat: matched.satuan || prev.sat
-      }));
-    } else {
-      setPmatFormData(prev => ({ ...prev, kode: rawVal }));
-    }
-  };
-
-  const handlePmatMaterialSelect = (val) => {
-    const cleanN = val.trim().toLowerCase();
-    const matched = allMasterBarangList.find(b => b.nama.trim().toLowerCase() === cleanN || cleanN.startsWith(b.nama.trim().toLowerCase()));
-    if (matched) {
-      setPmatFormData(prev => ({
-        ...prev,
-        material: matched.nama,
-        kode: matched.kode,
-        sat: matched.satuan || prev.sat
-      }));
-    } else {
-      setPmatFormData(prev => ({ ...prev, material: val }));
-    }
-  };
-
-  const handleSavePmat = (e) => {
-    e.preventDefault();
-    if (!pmatFormData.material || !pmatFormData.qty) {
-      showNotification('Mohon lengkapi Nama Material dan Kuantitas (Qty)!', 'warning');
-      return;
-    }
-    const cleanKode = (pmatFormData.kode || '').trim().toUpperCase() || `MT-${Date.now().toString().slice(-4)}`;
-    const cleanNama = pmatFormData.material.trim();
-    const cleanSat = (pmatFormData.sat || 'Sak').trim();
-
-    // Auto-save to Master Database Barang if not already registered
-    if (saveToMasterDb) {
-      const existsInDb = persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === cleanKode || b.nama.trim().toLowerCase() === cleanNama.toLowerCase());
-      if (!existsInDb) {
-        const newMaster = {
-          id: `BRG-${Date.now().toString().slice(-4)}`,
-          kode: cleanKode,
-          nama: cleanNama,
-          satuan: cleanSat
-        };
-        updateAndSaveMasterBarang([...persediaanMasterBarang, newMaster]);
-      }
-    }
-
-    if (editingPmatId) {
-      const updated = pengajuanMaterialList.map(item => item.id === editingPmatId ? {
-        ...item,
-        ...pmatFormData,
-        kode: cleanKode,
-        material: cleanNama,
-        qty: Number(pmatFormData.qty) || 0,
-        sat: cleanSat
-      } : item);
-      updateAndSavePengajuanMaterial(updated, `Pengajuan Material "${cleanNama}" berhasil diperbarui!`, 'success');
-    } else {
-      const newEntry = {
-        id: `PMAT-${Date.now().toString().slice(-6)}`,
-        ...pmatFormData,
-        kode: cleanKode,
-        material: cleanNama,
-        qty: Number(pmatFormData.qty) || 0,
-        sat: cleanSat,
-        createdAt: new Date().toISOString()
-      };
-      updateAndSavePengajuanMaterial([newEntry, ...pengajuanMaterialList], `Pengajuan Material "${cleanNama}" berhasil ditambahkan!`, 'success');
-    }
-    setIsPmatModalOpen(false);
-  };
-
-  const handleDeletePmat = (item) => {
-    if (window.confirm(`Hapus pengajuan material "${item.material}" (Blok ${item.blok} No ${item.no})?`)) {
-      const updated = pengajuanMaterialList.filter(row => row.id !== item.id);
-      updateAndSavePengajuanMaterial(updated, `Pengajuan material "${item.material}" berhasil dihapus.`, 'info');
-    }
-  };
-
-  const filteredPengajuanMaterialList = useMemo(() => {
-    return pengajuanMaterialList.filter(item => {
-      if (filterPmatProyek !== 'ALL' && item.proyek !== filterPmatProyek) return false;
-      if (filterPmatBlok !== 'ALL' && item.blok !== filterPmatBlok) return false;
-      if (filterPmatStatus !== 'ALL' && item.status !== filterPmatStatus) return false;
-      if (searchPmat) {
-        const q = searchPmat.toLowerCase();
-        const matchKode = (item.kode || '').toLowerCase().includes(q);
-        const matchMat = (item.material || '').toLowerCase().includes(q);
-        const matchBlok = (item.blok || '').toLowerCase().includes(q);
-        const matchNo = (item.no || '').toLowerCase().includes(q);
-        const matchKet = (item.keterangan || '').toLowerCase().includes(q);
-        const matchPemohon = (item.pemohon || '').toLowerCase().includes(q);
-        if (!matchKode && !matchMat && !matchBlok && !matchNo && !matchKet && !matchPemohon) return false;
-      }
-      return true;
-    });
-  }, [pengajuanMaterialList, filterPmatProyek, filterPmatBlok, filterPmatStatus, searchPmat]);
-
   // SEARCH STATES FOR 6 DATABASES
   const [searchDbVendor, setSearchDbVendor] = useState('');
   const [searchDbKaryawan, setSearchDbKaryawan] = useState('');
@@ -4708,6 +4520,194 @@ export const TeknikModule = () => {
       );
     });
   }, [persediaanSummaryList, searchPersediaan]);
+
+  // Combined master barang list for Kode, Nama, Satuan lookup (Safe: after persediaanSummaryList initialization)
+  const allMasterBarangList = useMemo(() => {
+    const map = new Map();
+    // 1. From persediaanMasterBarang (User's registered master barang)
+    (persediaanMasterBarang || []).forEach(b => {
+      const k = (b.kode || '').trim().toUpperCase();
+      if (k && !map.has(k)) {
+        map.set(k, { kode: b.kode.trim().toUpperCase(), nama: b.nama || '', satuan: b.satuan || 'Sak' });
+      }
+    });
+    // 2. From persediaanSummaryList
+    (persediaanSummaryList || []).forEach(s => {
+      const k = (s.kode || '').trim().toUpperCase();
+      if (k && !map.has(k)) {
+        map.set(k, { kode: s.kode.trim().toUpperCase(), nama: s.nama || '', satuan: s.satuan || 'Sak' });
+      }
+    });
+    // 3. Fallback standard construction materials
+    const standardMaterials = [
+      { kode: 'SMN-01', nama: 'Semen Gresik 40 Kg', satuan: 'Sak' },
+      { kode: 'SMN-02', nama: 'Semen Tiga Roda 50 Kg', satuan: 'Sak' },
+      { kode: 'BSI-08', nama: 'Besi Beton Polos 8mm SNI', satuan: 'Batang' },
+      { kode: 'BSI-10', nama: 'Besi Beton Ulir 10mm SNI', satuan: 'Batang' },
+      { kode: 'BSI-12', nama: 'Besi Beton Ulir 12mm SNI', satuan: 'Batang' },
+      { kode: 'BTR-01', nama: 'Bata Ringan Hebel Tebal 10cm', satuan: 'M3' },
+      { kode: 'PSR-01', nama: 'Pasir Cor Extra Lumajang', satuan: 'M3' },
+      { kode: 'SPL-01', nama: 'Batu Split Cor 1/2', satuan: 'M3' },
+      { kode: 'PIP-01', nama: 'Pipa PVC AW 3/4" Wavin', satuan: 'Batang' },
+      { kode: 'PIP-02', nama: 'Pipa PVC D 4" Wavin', satuan: 'Batang' },
+      { kode: 'KRK-01', nama: 'Keramik Granit 60x60 Polish Glazed', satuan: 'Dus' },
+      { kode: 'CAT-01', nama: 'Cat Tembok Dasar Alkali Resisting', satuan: 'Pail' },
+      { kode: 'CAT-02', nama: 'Cat Tembok Luar Dulux Weathershield', satuan: 'Pail' },
+      { kode: 'KAY-01', nama: 'Kayu Kaso 4x6 Meranti Super', satuan: 'Batang' },
+      { kode: 'TRP-01', nama: 'Triplek Cor Tebal 9mm', satuan: 'Lembar' },
+      { kode: 'BOD-01', nama: 'Bondex / Bondek Cor 0.75mm', satuan: 'Lembar' },
+      { kode: 'WIR-01', nama: 'Wiremesh M8 Standar SNI', satuan: 'Lembar' }
+    ];
+    standardMaterials.forEach(sm => {
+      const k = sm.kode.toUpperCase();
+      if (!map.has(k)) {
+        map.set(k, sm);
+      }
+    });
+    return Array.from(map.values());
+  }, [persediaanMasterBarang, persediaanSummaryList]);
+
+  const handleOpenAddPmat = () => {
+    setEditingPmatId(null);
+    setPmatFormData({
+      tanggal: getTodayDateString(),
+      proyek: (filterPmatProyek !== 'ALL' && filterPmatProyek) ? filterPmatProyek : 'Ashoka View',
+      kode: '',
+      material: '',
+      qty: '',
+      sat: 'Sak',
+      blok: (filterPmatBlok !== 'ALL' && filterPmatBlok) ? filterPmatBlok : 'Blok A',
+      no: '01',
+      keterangan: '',
+      status: 'Diajukan',
+      pemohon: currentUser?.name || 'Mandor Lapangan'
+    });
+    setIsPmatModalOpen(true);
+  };
+
+  const handleOpenEditPmat = (item) => {
+    setEditingPmatId(item.id);
+    setPmatFormData({
+      tanggal: item.tanggal || getTodayDateString(),
+      proyek: item.proyek || 'Ashoka View',
+      kode: item.kode || '',
+      material: item.material || '',
+      qty: item.qty || '',
+      sat: item.sat || 'Sak',
+      blok: item.blok || 'Blok A',
+      no: item.no || '01',
+      keterangan: item.keterangan || '',
+      status: item.status || 'Diajukan',
+      pemohon: item.pemohon || currentUser?.name || 'Mandor Lapangan'
+    });
+    setIsPmatModalOpen(true);
+  };
+
+  const handlePmatKodeSelect = (val) => {
+    const rawVal = val.toUpperCase();
+    const cleanK = rawVal.trim();
+    const matched = allMasterBarangList.find(b => b.kode.trim().toUpperCase() === cleanK || cleanK.startsWith(b.kode.trim().toUpperCase()));
+    if (matched) {
+      setPmatFormData(prev => ({
+        ...prev,
+        kode: matched.kode,
+        material: matched.nama,
+        sat: matched.satuan || prev.sat
+      }));
+    } else {
+      setPmatFormData(prev => ({ ...prev, kode: rawVal }));
+    }
+  };
+
+  const handlePmatMaterialSelect = (val) => {
+    const cleanN = val.trim().toLowerCase();
+    const matched = allMasterBarangList.find(b => b.nama.trim().toLowerCase() === cleanN || cleanN.startsWith(b.nama.trim().toLowerCase()));
+    if (matched) {
+      setPmatFormData(prev => ({
+        ...prev,
+        material: matched.nama,
+        kode: matched.kode,
+        sat: matched.satuan || prev.sat
+      }));
+    } else {
+      setPmatFormData(prev => ({ ...prev, material: val }));
+    }
+  };
+
+  const handleSavePmat = (e) => {
+    e.preventDefault();
+    if (!pmatFormData.material || !pmatFormData.qty) {
+      showNotification('Mohon lengkapi Nama Material dan Kuantitas (Qty)!', 'warning');
+      return;
+    }
+    const cleanKode = (pmatFormData.kode || '').trim().toUpperCase() || `MT-${Date.now().toString().slice(-4)}`;
+    const cleanNama = pmatFormData.material.trim();
+    const cleanSat = (pmatFormData.sat || 'Sak').trim();
+
+    // Auto-save to Master Database Barang if not already registered
+    if (saveToMasterDb) {
+      const existsInDb = persediaanMasterBarang.some(b => b.kode.trim().toUpperCase() === cleanKode || b.nama.trim().toLowerCase() === cleanNama.toLowerCase());
+      if (!existsInDb) {
+        const newMaster = {
+          id: `BRG-${Date.now().toString().slice(-4)}`,
+          kode: cleanKode,
+          nama: cleanNama,
+          satuan: cleanSat
+        };
+        updateAndSaveMasterBarang([...persediaanMasterBarang, newMaster]);
+      }
+    }
+
+    if (editingPmatId) {
+      const updated = pengajuanMaterialList.map(item => item.id === editingPmatId ? {
+        ...item,
+        ...pmatFormData,
+        kode: cleanKode,
+        material: cleanNama,
+        qty: Number(pmatFormData.qty) || 0,
+        sat: cleanSat
+      } : item);
+      updateAndSavePengajuanMaterial(updated, `Pengajuan Material "${cleanNama}" berhasil diperbarui!`, 'success');
+    } else {
+      const newEntry = {
+        id: `PMAT-${Date.now().toString().slice(-6)}`,
+        ...pmatFormData,
+        kode: cleanKode,
+        material: cleanNama,
+        qty: Number(pmatFormData.qty) || 0,
+        sat: cleanSat,
+        createdAt: new Date().toISOString()
+      };
+      updateAndSavePengajuanMaterial([newEntry, ...pengajuanMaterialList], `Pengajuan Material "${cleanNama}" berhasil ditambahkan!`, 'success');
+    }
+    setIsPmatModalOpen(false);
+  };
+
+  const handleDeletePmat = (item) => {
+    if (window.confirm(`Hapus pengajuan material "${item.material}" (Blok ${item.blok} No ${item.no})?`)) {
+      const updated = pengajuanMaterialList.filter(row => row.id !== item.id);
+      updateAndSavePengajuanMaterial(updated, `Pengajuan material "${item.material}" berhasil dihapus.`, 'info');
+    }
+  };
+
+  const filteredPengajuanMaterialList = useMemo(() => {
+    return pengajuanMaterialList.filter(item => {
+      if (filterPmatProyek !== 'ALL' && item.proyek !== filterPmatProyek) return false;
+      if (filterPmatBlok !== 'ALL' && item.blok !== filterPmatBlok) return false;
+      if (filterPmatStatus !== 'ALL' && item.status !== filterPmatStatus) return false;
+      if (searchPmat) {
+        const q = searchPmat.toLowerCase();
+        const matchKode = (item.kode || '').toLowerCase().includes(q);
+        const matchMat = (item.material || '').toLowerCase().includes(q);
+        const matchBlok = (item.blok || '').toLowerCase().includes(q);
+        const matchNo = (item.no || '').toLowerCase().includes(q);
+        const matchKet = (item.keterangan || '').toLowerCase().includes(q);
+        const matchPemohon = (item.pemohon || '').toLowerCase().includes(q);
+        if (!matchKode && !matchMat && !matchBlok && !matchNo && !matchKet && !matchPemohon) return false;
+      }
+      return true;
+    });
+  }, [pengajuanMaterialList, filterPmatProyek, filterPmatBlok, filterPmatStatus, searchPmat]);
 
   const filteredBarangMasuk = useMemo(() => {
     return persediaanBarangMasuk.filter(item => {
