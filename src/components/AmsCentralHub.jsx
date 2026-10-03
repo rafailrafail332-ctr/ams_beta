@@ -76,7 +76,7 @@ export const AmsCentralHub = ({
     },
     { 
       key: 'legal', 
-      label: 'legal', 
+      label: 'Legal', 
       sub: 'SPK, Izin & Legalitas', 
       desc: 'Legal Corporate, Perizinan & Dokumen', 
       color: '#c084fc', 
@@ -641,7 +641,7 @@ export const AmsCentralHub = ({
                     color: hoveredNode === 'legal' ? '#c084fc' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
-                    legal
+                    Legal
                   </div>
                   <div style={{ 
                     fontSize: '0.68rem', 
@@ -858,7 +858,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '1.45rem', 
                     fontWeight: 900, 
-                    color: '#03cafc', 
+                    color: hoveredNode === 'marketing' ? '#03cafc' : (isDark ? '#f8fafc' : '#0f172a'), 
                     lineHeight: 1.1 
                   }}>
                     Marketing
@@ -866,7 +866,7 @@ export const AmsCentralHub = ({
                   <div style={{ 
                     fontSize: '0.68rem', 
                     fontWeight: 700, 
-                    color: '#03cafc', 
+                    color: hoveredNode === 'marketing' ? '#0284c7' : (isDark ? '#94a3b8' : '#64748b'), 
                     marginTop: '4px' 
                   }}>
                     Penjualan Unit
