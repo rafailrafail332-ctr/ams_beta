@@ -1107,39 +1107,6 @@ export const FinanceModule = () => {
               >
                 <IconComp size={15} color={isActive ? '#ffffff' : isHighlight ? '#818cf8' : '#ef4444'} />
                 <span>{tab.label}</span>
-                {tab.id === 'pengajuan_dana' && (
-                  <div style={{ display: 'inline-flex', gap: '3px', alignItems: 'center' }}>
-                    {pendingMaterialTickets.length > 0 && (
-                      <span
-                        style={{
-                          background: '#2563eb',
-                          color: '#ffffff',
-                          fontSize: '0.65rem',
-                          fontWeight: 900,
-                          padding: '1px 5px',
-                          borderRadius: '8px'
-                        }}
-                        title={`${pendingMaterialTickets.length} Pengajuan Material (SPbM) Baru dari Teknik`}
-                      >
-                        📦 {pendingMaterialTickets.length}
-                      </span>
-                    )}
-                    {fundStats.pendingCount > 0 && (
-                      <span
-                        style={{
-                          background: '#ef4444',
-                          color: '#ffffff',
-                          fontSize: '0.68rem',
-                          fontWeight: 900,
-                          padding: '1px 6px',
-                          borderRadius: '10px'
-                        }}
-                      >
-                        {fundStats.pendingCount}
-                      </span>
-                    )}
-                  </div>
-                )}
               </button>
             );
           })}

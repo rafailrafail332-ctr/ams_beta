@@ -120,7 +120,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onOpenPr
     if (roleLower.includes('finance') || roleLower.includes('accounting') || roleLower.includes('tax') || roleLower.includes('collection') || roleLower.includes('jezen') || roleLower.includes('tarkum')) {
       return [
         { id: 'todo-attendance', title: 'To-Do List Harian', moduleKey: 'todo-attendance', subTabKey: 'todo', icon: CheckSquare, color: '#F59E0B' },
-        { id: 'fin-pengajuan-dana', title: '1. Pengajuan Dana & Material', moduleKey: 'finance', subTabKey: 'pengajuan_dana', icon: DollarSign, color: '#EF4444' },
+        { id: 'fin-pengajuan-dana', title: '1. Pengajuan Dana', moduleKey: 'finance', subTabKey: 'pengajuan_dana', icon: DollarSign, color: '#EF4444' },
         { id: 'fin-pendapatan', title: '2. Penjualan & Pendapatan', moduleKey: 'finance', subTabKey: 'penjualan', icon: TrendingUp, color: '#10B981' },
         { id: 'fin-pengeluaran', title: '3. Buku Jurnal Umum', moduleKey: 'finance', subTabKey: 'jurnal', icon: Receipt, color: '#EF4444' },
         { id: 'fin-piutang', title: '4. Piutang Konsumen', moduleKey: 'piutang-konsumen', subTabKey: 'default', icon: DollarSign, color: '#F59E0B' },

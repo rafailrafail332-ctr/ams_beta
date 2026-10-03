@@ -612,59 +612,135 @@ const setStoredItem = (key, value) => {
 // -----------------------------------------------------------------------------
 // PENGAJUAN DANA LINTAS MODUL (FUND REQUESTS CRUD & DISBURSEMENT)
 // -----------------------------------------------------------------------------
-export const getFundRequests = () => getStoredItem(STORAGE_KEYS.FUND_REQUESTS, INITIAL_FUND_REQUESTS);
+export const getFundRequests = () => {
+  const base = getStoredItem(STORAGE_KEYS.FUND_REQUESTS, INITIAL_FUND_REQUESTS);
+  try {
+    const spbmLocal = localStorage.getItem('ams_teknik_spbm_batches_v1');
+    if (spbmLocal) {
+      const batches = JSON.parse(spbmLocal);
+      if (Array.isArray(batches) && batches.length > 0) {
+        const map = new Map(base.map(x => [x.id, x]));
+        batches.forEach(b => {
+          if (!b) return;
+          const reqId = b.fundRequestId || `REQ-${b.id || b.noDok}`;
+          const existing = map.get(reqId) || Array.from(map.values()).find(r => r.spbmNo === b.noDok || r.spbmId === b.id);
+          const rows = b.rows || b.items || [];
+          let totalEst = Number(b.totalEstimatedAmount || b.totalEstimasi || 0);
+          if (totalEst === 0 && rows.length > 0) {
+            totalEst = rows.reduce((acc, r) => acc + (Number(r.subtotal) || (Number(r.hargaSatuan || 0) * Number(r.qty || 0)) || 0), 0);
+          }
+          if (!existing) {
+            map.set(reqId, {
+              id: reqId,
+              originModule: 'teknik',
+              originModuleName: 'Teknik & Konstruksi',
+              requester: b.pemohon || 'Staf Teknik',
+              title: `Pengajuan Material [${b.noDok}] - ${b.proyek || 'Proyek'} (${rows.length} Item)`,
+              project: b.proyek || 'Ashoka View',
+              category: 'Pengajuan Material Konstruksi',
+              amount: totalEst,
+              approvedAmount: Number(b.totalApprovedAmount || 0),
+              requestDate: b.tanggal || (b.createdAt ? b.createdAt.split('T')[0] : '2026-10-03'),
+              dueDate: b.tanggal || '2026-10-03',
+              priority: 'Tinggi',
+              status: b.status || 'Menunggu Review',
+              accountCode: '5-101',
+              notes: b.catatan || `Pengajuan SPbM No: ${b.noDok}`,
+              attachments: [],
+              spbmNo: b.noDok,
+              spbmId: b.id,
+              materialRows: rows
+            });
+          }
+        });
+        return Array.from(map.values());
+      }
+    }
+  } catch (e) {}
+  return base;
+};
 export const saveFundRequests = (list) => setStoredItem(STORAGE_KEYS.FUND_REQUESTS, list);
 
 /**
- * Sinkronisasi Real-Time Pengajuan Dana dari Database Cloud Hosting
- * Memastikan pengajuan dari laptop Teknik langsung terbaca di laptop Finance
+ * Sinkronisasi Real-Time Pengajuan Dana & Material dari Database Cloud Hosting
+ * Menggabungkan pengajuan umum dan SPbM Teknik secara menyeluruh
  */
 export const syncFundRequestsFromCloud = async () => {
   try {
-    const cloudData = await fetchCloudStore(STORAGE_KEYS.FUND_REQUESTS, null);
-    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
-      const localData = getFundRequests();
-      const localMap = new Map();
-      
-      // Masukkan localData dulu
-      localData.forEach(item => {
-        if (item && item.id) localMap.set(item.id, item);
-      });
+    const [cloudFundRequests, cloudSpbmBatches] = await Promise.all([
+      fetchCloudStore(STORAGE_KEYS.FUND_REQUESTS, null),
+      fetchCloudStore('ams_teknik_spbm_batches_v1', null)
+    ]);
 
-      let hasChanges = false;
-      cloudData.forEach(cloudItem => {
+    const localData = getFundRequests();
+    const map = new Map();
+
+    localData.forEach(item => {
+      if (item && item.id) map.set(item.id, item);
+    });
+
+    if (cloudFundRequests && Array.isArray(cloudFundRequests)) {
+      cloudFundRequests.forEach(cloudItem => {
         if (!cloudItem || !cloudItem.id) return;
-        if (!localMap.has(cloudItem.id)) {
-          localMap.set(cloudItem.id, cloudItem);
-          hasChanges = true;
+        if (!map.has(cloudItem.id)) {
+          map.set(cloudItem.id, cloudItem);
         } else {
-          const localItem = localMap.get(cloudItem.id);
-          // Update jika status di cloud berubah atau approval berubah
-          if (
-            cloudItem.status !== localItem.status ||
-            cloudItem.approvedAmount !== localItem.approvedAmount ||
-            (cloudItem.materialRows?.length > 0 && (!localItem.materialRows || localItem.materialRows.length === 0))
-          ) {
-            localMap.set(cloudItem.id, { ...localItem, ...cloudItem });
-            hasChanges = true;
-          }
+          const localItem = map.get(cloudItem.id);
+          map.set(cloudItem.id, { ...localItem, ...cloudItem });
         }
       });
-
-      const merged = Array.from(localMap.values());
-      if (hasChanges || localData.length !== merged.length) {
-        localStorage.setItem(STORAGE_KEYS.FUND_REQUESTS, JSON.stringify(merged));
-        window.dispatchEvent(new CustomEvent('ams-finance-data-changed', { detail: { key: STORAGE_KEYS.FUND_REQUESTS } }));
-        return merged;
-      }
-      return merged;
-    } else {
-      // Jika di cloud belum ada, inisialisasi cloud dengan data lokal yang ada
-      const current = getFundRequests();
-      if (current && current.length > 0) {
-        saveCloudStore(STORAGE_KEYS.FUND_REQUESTS, current);
-      }
     }
+
+    if (cloudSpbmBatches && Array.isArray(cloudSpbmBatches)) {
+      cloudSpbmBatches.forEach(b => {
+        if (!b) return;
+        const targetReqId = b.fundRequestId || `REQ-${b.id || b.noDok}`;
+        const existing = map.get(targetReqId) || Array.from(map.values()).find(r => r.spbmNo === b.noDok || r.spbmId === b.id);
+        const rows = b.rows || b.items || [];
+        let totalEst = Number(b.totalEstimatedAmount || b.totalEstimasi || 0);
+        if (totalEst === 0 && rows.length > 0) {
+          totalEst = rows.reduce((acc, r) => acc + (Number(r.subtotal) || (Number(r.hargaSatuan || 0) * Number(r.qty || 0)) || 0), 0);
+        }
+
+        if (!existing) {
+          map.set(targetReqId, {
+            id: targetReqId,
+            originModule: 'teknik',
+            originModuleName: 'Teknik & Konstruksi',
+            requester: b.pemohon || 'Staf Teknik',
+            title: `Pengajuan Material [${b.noDok}] - ${b.proyek || 'Proyek'} (${rows.length} Item)`,
+            project: b.proyek || 'Ashoka View',
+            category: 'Pengajuan Material Konstruksi',
+            amount: totalEst,
+            approvedAmount: Number(b.totalApprovedAmount || 0),
+            requestDate: b.tanggal || (b.createdAt ? b.createdAt.split('T')[0] : '2026-10-03'),
+            dueDate: b.tanggal || '2026-10-03',
+            priority: 'Tinggi',
+            status: b.status || 'Menunggu Review',
+            accountCode: '5-101',
+            notes: b.catatan || `Pengajuan SPbM No: ${b.noDok}`,
+            attachments: [],
+            spbmNo: b.noDok,
+            spbmId: b.id,
+            materialRows: rows
+          });
+        } else {
+          map.set(existing.id, {
+            ...existing,
+            materialRows: rows.length > 0 ? rows : existing.materialRows,
+            spbmNo: b.noDok || existing.spbmNo,
+            spbmId: b.id || existing.spbmId,
+            amount: (existing.amount || 0) === 0 && totalEst > 0 ? totalEst : existing.amount
+          });
+        }
+      });
+    }
+
+    const merged = Array.from(map.values());
+    localStorage.setItem(STORAGE_KEYS.FUND_REQUESTS, JSON.stringify(merged));
+    saveCloudStore(STORAGE_KEYS.FUND_REQUESTS, merged);
+    window.dispatchEvent(new CustomEvent('ams-finance-data-changed', { detail: { key: STORAGE_KEYS.FUND_REQUESTS } }));
+    return merged;
   } catch (err) {
     console.warn('Sync fund requests from cloud failed:', err);
   }
