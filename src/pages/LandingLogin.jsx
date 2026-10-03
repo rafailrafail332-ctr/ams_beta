@@ -395,7 +395,7 @@ export const LandingLogin = ({ onLoginSuccess }) => {
           fontSize: '0.74rem',
           color: '#64748b'
         }}>
-          &copy; 2026 Ashoka Asset Management System (AMS) &bull; PT Yazfi Gema Persada / PT Yazfi Setia Persada. All rights reserved.
+          &copy; 2026 Ashoka Asset Management System (AMS) &bull; YAZFI CORPORATION All rights reserved.
         </div>
       </div>
 
