@@ -3143,49 +3143,52 @@ Dokumen ini merupakan salinan arsip digital resmi dari AMS Properti.
           </div>
         </div>
 
-        {/* Tombol Status Pengajuan Dana */}
-        <button
-          type="button"
-          style={{
-            background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-            border: '1.5px solid #ef4444',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '0.82rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
-            cursor: 'pointer'
-          }}
-          onClick={() => setIsTrackerModalOpen(true)}
-        >
-          <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
-        </button>
+        {/* GRUP TOMBOL PENGAJUAN & STATUS DANA RAPAT */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          {/* Tombol Status Pengajuan Dana */}
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsTrackerModalOpen(true)}
+          >
+            <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
+          </button>
 
-        {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
-        <button
-          type="button"
-          style={{
-            background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-            border: '1.5px solid #ef4444',
-            color: '#ffffff',
-            fontWeight: 800,
-            fontSize: '0.82rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
-            cursor: 'pointer'
-          }}
-          onClick={() => setIsFundModalOpen(true)}
-        >
-          <DollarSign size={15} color="#ffffff" /> + Ajukan Dana ke Finance
-        </button>
+          {/* Tombol Ajukan Dana Terintegrasi ke Finance & Acc */}
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsFundModalOpen(true)}
+          >
+            <DollarSign size={15} color="#ffffff" /> + Ajukan Dana ke Finance
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}

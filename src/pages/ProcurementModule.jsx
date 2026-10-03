@@ -647,7 +647,7 @@ export const ProcurementModule = () => {
           <h1 className="page-title">Modul Procurement (Pengadaan Material & Vendor Properti)</h1>
           <p className="page-subtitle">Pusat pengadaan bahan bangunan, lelang tender kontraktor, PO material, SPK kontrak, & 3-way invoice matching.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
           <button
             type="button"
             style={{

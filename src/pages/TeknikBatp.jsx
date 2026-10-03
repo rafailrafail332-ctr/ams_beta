@@ -127,7 +127,7 @@ export const TeknikBatp = () => {
       <div className="glass-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Daftar Pengajuan Termin BATP Kontraktor</h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <button
               type="button"
               style={{
