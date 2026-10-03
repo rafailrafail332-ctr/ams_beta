@@ -20,7 +20,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Receipt
+  Receipt,
+  Paperclip
 } from 'lucide-react';
 import { getFundRequests, deleteFundRequest } from '../services/financeService';
 import { TransferProofModal } from './TransferProofModal';
@@ -198,8 +199,8 @@ export const FundRequestTrackerModal = ({
                   type="button"
                   onClick={onOpenNewRequest}
                   style={{
-                    background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-                    border: '1.5px solid #ef4444',
+                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                    border: '1.5px solid #38bdf8',
                     color: '#ffffff',
                     fontWeight: 700,
                     fontSize: '0.8rem',
@@ -209,7 +210,7 @@ export const FundRequestTrackerModal = ({
                     alignItems: 'center',
                     gap: '6px',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
                   }}
                 >
                   <Plus size={15} /> + Ajukan Dana Baru
@@ -890,6 +891,62 @@ export const FundRequestTrackerModal = ({
                               }}
                             >
                               <strong style={{ color: '#cbd5e1' }}>Catatan / Deskripsi Keperluan:</strong> {item.notes}
+                            </div>
+                          )}
+
+                          {/* Berkas Lampiran Pendukung */}
+                          {item.attachments && item.attachments.length > 0 && (
+                            <div
+                              style={{
+                                background: '#0f172a',
+                                border: '1px solid #1e293b',
+                                borderRadius: '8px',
+                                padding: '10px 12px',
+                                marginBottom: '10px'
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  color: '#38bdf8',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  marginBottom: '8px'
+                                }}
+                              >
+                                <Paperclip size={14} /> Berkas Lampiran Pendukung ({item.attachments.length}):
+                              </div>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {item.attachments.map((att, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={att.dataUrl || '#'}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    download={att.name || `lampiran_${idx + 1}`}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '6px',
+                                      background: '#090e1a',
+                                      border: '1px solid #334155',
+                                      borderRadius: '6px',
+                                      padding: '6px 10px',
+                                      fontSize: '0.74rem',
+                                      color: '#e2e8f0',
+                                      textDecoration: 'none',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <FileText size={13} color="#38bdf8" />
+                                    <span>{att.name}</span>
+                                    {att.size && <span style={{ color: '#64748b', fontSize: '0.68rem' }}>({att.size})</span>}
+                                    <ExternalLink size={12} color="#94a3b8" />
+                                  </a>
+                                ))}
+                              </div>
                             </div>
                           )}
 

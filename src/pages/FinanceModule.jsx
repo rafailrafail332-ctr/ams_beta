@@ -45,7 +45,8 @@ import {
   CalendarDays,
   RotateCcw,
   FileCheck,
-  Trash2
+  Trash2,
+  Paperclip
 } from 'lucide-react';
 import { FinanceLineChart } from '../components/FinanceLineChart';
 import { FinanceDonutChart } from '../components/FinanceDonutChart';
@@ -3851,9 +3852,9 @@ export const FinanceModule = () => {
             className="glass-card"
             style={{
               background: '#090d16',
-              border: '2px solid #ef4444',
+              border: '1.5px solid #1e293b',
               borderRadius: '14px',
-              maxWidth: '560px',
+              maxWidth: '580px',
               width: '100%',
               padding: '1.75rem',
               boxShadow: '0 10px 40px rgba(0,0,0,0.8)'
@@ -3861,7 +3862,7 @@ export const FinanceModule = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1.5px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={20} color="#ef4444" />
+                <FileText size={20} color="#38bdf8" />
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
                   Rincian Tiket Pengajuan {selectedDetailItem.id}
                 </h3>
@@ -3910,6 +3911,42 @@ export const FinanceModule = () => {
                   {selectedDetailItem.notes || 'Tidak ada catatan tambahan.'}
                 </div>
               </div>
+
+              {selectedDetailItem.attachments && selectedDetailItem.attachments.length > 0 && (
+                <div style={{ marginTop: '8px' }}>
+                  <span style={{ color: '#38bdf8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Paperclip size={14} /> Dokumen Lampiran Pendukung ({selectedDetailItem.attachments.length}):
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
+                    {selectedDetailItem.attachments.map((att, idx) => (
+                      <a
+                        key={idx}
+                        href={att.dataUrl || '#'}
+                        target="_blank"
+                        rel="noreferrer"
+                        download={att.name || `lampiran_${idx + 1}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: '#0f172a',
+                          border: '1px solid #334155',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          fontSize: '0.74rem',
+                          color: '#e2e8f0',
+                          textDecoration: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <FileText size={13} color="#38bdf8" />
+                        <span>{att.name}</span>
+                        {att.size && <span style={{ color: '#64748b', fontSize: '0.68rem' }}>({att.size})</span>}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {selectedDetailItem.disbursedBankName && (
                 <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '10px', borderRadius: '8px', marginTop: '6px' }}>
