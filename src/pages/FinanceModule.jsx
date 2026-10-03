@@ -60,6 +60,7 @@ import {
   rejectFundRequest,
   disburseFundRequest,
   deleteFundRequest,
+  updateFundRequestMaterialRows,
   getBanks,
   saveBanks,
   getCoa,
@@ -261,6 +262,73 @@ export const FinanceModule = () => {
     }
   };
 
+  // State untuk Checklist & Verifikasi Approval Per Baris Material SPbM
+  const [materialReviewRows, setMaterialReviewRows] = useState([]);
+
+  useEffect(() => {
+    if (selectedDetailItem && Array.isArray(selectedDetailItem.materialRows)) {
+      setMaterialReviewRows(JSON.parse(JSON.stringify(selectedDetailItem.materialRows)));
+    } else {
+      setMaterialReviewRows([]);
+    }
+  }, [selectedDetailItem]);
+
+  const handleToggleMaterialRowStatus = (rowId, newStatus) => {
+    setMaterialReviewRows(prev => prev.map(r => {
+      if (r.id === rowId) {
+        return {
+          ...r,
+          status: newStatus,
+          isApproved: newStatus === 'Disetujui'
+        };
+      }
+      return r;
+    }));
+  };
+
+  const handleUpdateMaterialRowPrice = (rowId, priceVal) => {
+    const p = Math.max(0, Number(priceVal) || 0);
+    setMaterialReviewRows(prev => prev.map(r => {
+      if (r.id === rowId) {
+        const q = Number(r.qty) || 0;
+        return {
+          ...r,
+          hargaSatuan: p,
+          subtotal: p * q
+        };
+      }
+      return r;
+    }));
+  };
+
+  const handleSaveMaterialReview = (andDisburse = false) => {
+    if (!selectedDetailItem) return;
+    try {
+      const res = updateFundRequestMaterialRows(
+        selectedDetailItem.id,
+        materialReviewRows,
+        'Yazid Hizbullah, S.E.,S.T (Finance Director)'
+      );
+      const updatedList = getFundRequests();
+      setFundRequests(updatedList);
+      const updatedSelected = updatedList.find(x => x.id === selectedDetailItem.id);
+      setSelectedDetailItem(updatedSelected);
+
+      showNotification(`Verifikasi item material berhasil disimpan! Disetujui total: Rp ${res.approvedAmount.toLocaleString('id-ID')}`, 'success');
+
+      if (andDisburse) {
+        if (res.approvedAmount <= 0) {
+          alert('Belum ada nominal yang disetujui untuk dicairkan (Rp 0). Pastikan minimal 1 baris material disetujui dan memiliki harga satuan/subtotal.');
+          return;
+        }
+        setIsDetailModalOpen(false);
+        handleOpenDisburseModal(updatedSelected);
+      }
+    } catch (err) {
+      showNotification(err.message, 'error');
+    }
+  };
+
   const handleOpenDisburseModal = (req) => {
     setSelectedReqForDisburse(req);
     const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -290,7 +358,8 @@ export const FinanceModule = () => {
       setJurnal(getJurnal());
       setAuditLogs(getAuditLogs());
       setIsDisburseModalOpen(false);
-      showNotification(`DANA SEBESAR Rp ${selectedReqForDisburse.amount.toLocaleString('id-ID')} BERHASIL DICAIRKAN! (Ref: ${result.refDisburseNo}). Saldo bank & Jurnal Umum telah terupdate otomatis.`);
+      const nominalCair = result.disburseAmount ? result.disburseAmount : (selectedReqForDisburse.approvedAmount > 0 ? selectedReqForDisburse.approvedAmount : selectedReqForDisburse.amount);
+      showNotification(`DANA SEBESAR Rp ${nominalCair.toLocaleString('id-ID')} BERHASIL DICAIRKAN! (Ref: ${result.refDisburseNo}). Saldo bank & Jurnal Umum telah terupdate otomatis.`);
     } catch (err) {
       alert(`Gagal mencairkan dana: ${err.message}`);
     }
@@ -3854,17 +3923,19 @@ export const FinanceModule = () => {
               background: '#090d16',
               border: '1.5px solid #1e293b',
               borderRadius: '14px',
-              maxWidth: '580px',
+              maxWidth: (selectedDetailItem.materialRows && selectedDetailItem.materialRows.length > 0) ? '980px' : '580px',
               width: '100%',
               padding: '1.75rem',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.8)'
+              boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
+              maxHeight: '92vh',
+              overflowY: 'auto'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1.5px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={20} color="#38bdf8" />
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                  Rincian Tiket Pengajuan {selectedDetailItem.id}
+                  Rincian Tiket Pengajuan {selectedDetailItem.id} {selectedDetailItem.spbmNo ? `(${selectedDetailItem.spbmNo})` : ''}
                 </h3>
               </div>
               <button
@@ -3884,7 +3955,7 @@ export const FinanceModule = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '6px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginTop: '6px' }}>
                 <div>
                   <span style={{ color: '#94a3b8' }}>Departemen Asal:</span>
                   <div style={{ fontWeight: 800, color: '#38bdf8' }}>{selectedDetailItem.originModuleName}</div>
@@ -3898,12 +3969,267 @@ export const FinanceModule = () => {
                   <div style={{ fontWeight: 700, color: '#f87171' }}>{selectedDetailItem.project}</div>
                 </div>
                 <div>
-                  <span style={{ color: '#94a3b8' }}>Nominal:</span>
+                  <span style={{ color: '#94a3b8' }}>Tanggal Pengajuan:</span>
+                  <div style={{ fontWeight: 700, color: '#ffffff' }}>{selectedDetailItem.requestDate}</div>
+                </div>
+                <div>
+                  <span style={{ color: '#94a3b8' }}>Status Pengajuan:</span>
+                  <div>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      background: selectedDetailItem.status === 'Dicairkan' ? 'rgba(16, 185, 129, 0.2)' : (selectedDetailItem.status === 'Disetujui' ? 'rgba(56, 189, 248, 0.2)' : (selectedDetailItem.status === 'Ditolak' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)')),
+                      color: selectedDetailItem.status === 'Dicairkan' ? '#34d399' : (selectedDetailItem.status === 'Disetujui' ? '#38bdf8' : (selectedDetailItem.status === 'Ditolak' ? '#f87171' : '#fbbf24')),
+                      border: `1px solid ${selectedDetailItem.status === 'Dicairkan' ? '#10b981' : (selectedDetailItem.status === 'Disetujui' ? '#38bdf8' : (selectedDetailItem.status === 'Ditolak' ? '#ef4444' : '#f59e0b'))}`
+                    }}>
+                      {selectedDetailItem.status}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <span style={{ color: '#94a3b8' }}>Total Nominal:</span>
                   <div style={{ fontWeight: 900, color: '#34d399', fontSize: '1.1rem' }}>
-                    Rp {Number(selectedDetailItem.amount).toLocaleString('id-ID')}
+                    Rp {Number(selectedDetailItem.approvedAmount > 0 ? selectedDetailItem.approvedAmount : selectedDetailItem.amount).toLocaleString('id-ID')}
+                    {selectedDetailItem.approvedAmount > 0 && selectedDetailItem.approvedAmount !== selectedDetailItem.amount && (
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', fontWeight: 600 }}>
+                        (Dari total diajukan: Rp {Number(selectedDetailItem.amount).toLocaleString('id-ID')})
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* JIKA MEMILIKI RINCIAN BARIS MATERIAL (SPbM DARI TEKNIK) */}
+              {selectedDetailItem.materialRows && selectedDetailItem.materialRows.length > 0 && (
+                <div style={{ marginTop: '14px', borderTop: '1px solid #1e293b', paddingTop: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)',
+                        color: '#ffffff',
+                        fontSize: '0.78rem',
+                        fontWeight: 900,
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: '1px solid #3b82f6'
+                      }}>
+                        Tabel Rincian Material SPbM
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                        Pilih baris yang <strong>Disetujui [✓]</strong> atau <strong>Ditolak [✗]</strong>. Finance hanya membayar yang disetujui saja.
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMaterialReviewRows(prev => prev.map(r => ({ ...r, status: 'Disetujui', isApproved: true })));
+                        }}
+                        style={{
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          border: '1px solid rgba(16, 185, 129, 0.4)',
+                          color: '#34d399',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✓ Setujui Semua
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMaterialReviewRows(prev => prev.map(r => ({ ...r, status: 'Ditolak', isApproved: false })));
+                        }}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          color: '#f87171',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✗ Tolak Semua
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="table-responsive" style={{ overflowX: 'auto', border: '1px solid #1e3a8a', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '35px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>No</th>
+                          <th style={{ width: '85px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'center' }}>Tanggal</th>
+                          <th style={{ width: '80px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '160px', border: '1px solid #2563eb', padding: '8px 10px' }}>Material</th>
+                          <th style={{ width: '60px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '55px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '65px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Blok/No</th>
+                          <th style={{ minWidth: '130px', border: '1px solid #2563eb', padding: '8px 8px' }}>Keterangan</th>
+                          <th style={{ width: '115px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'right' }}>Harga Satuan</th>
+                          <th style={{ width: '115px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'right' }}>Subtotal</th>
+                          <th style={{ width: '150px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'center' }}>Approval Finance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {materialReviewRows.map((row, idx) => {
+                          const isApp = row.status === 'Disetujui' || row.isApproved === true;
+                          const isRej = row.status === 'Ditolak' || row.isApproved === false;
+                          const rowBg = isApp ? 'rgba(16, 185, 129, 0.08)' : (isRej ? 'rgba(239, 68, 68, 0.08)' : (idx % 2 === 0 ? '#090f1d' : '#0d1527'));
+
+                          return (
+                            <tr key={row.id || idx} style={{ background: rowBg, borderBottom: '1px solid #1e293b' }}>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 4px', textAlign: 'center', color: '#94a3b8' }}>
+                                {idx + 1}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 8px', textAlign: 'center', color: '#cbd5e1', fontSize: '0.74rem' }}>
+                                {row.tanggal || selectedDetailItem.requestDate}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 8px', textAlign: 'center' }}>
+                                <span style={{ background: 'rgba(30, 58, 138, 0.4)', border: '1px solid #3b82f6', color: '#93c5fd', fontFamily: 'monospace', fontWeight: 800, padding: '1px 5px', borderRadius: '3px', fontSize: '0.72rem' }}>
+                                  {row.kode || '-'}
+                                </span>
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 10px', fontWeight: 700, color: '#ffffff' }}>
+                                {row.material}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 6px', textAlign: 'center', fontWeight: 900, color: '#38bdf8' }}>
+                                {row.qty}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 6px', textAlign: 'center', color: '#cbd5e1' }}>
+                                {row.sat}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 6px', textAlign: 'center', color: '#cbd5e1' }}>
+                                {row.blok || '-'} {row.unitNo || row.no ? `/${row.unitNo || row.no}` : ''}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 8px', color: '#94a3b8', fontSize: '0.74rem' }}>
+                                {row.keterangan || '-'}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '4px 6px', textAlign: 'right' }}>
+                                {selectedDetailItem.status === 'Dicairkan' ? (
+                                  <span style={{ color: '#ffffff', fontWeight: 700 }}>
+                                    Rp {Number(row.hargaSatuan || 0).toLocaleString('id-ID')}
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={row.hargaSatuan || ''}
+                                    onChange={(e) => handleUpdateMaterialRowPrice(row.id, e.target.value)}
+                                    style={{
+                                      width: '90px',
+                                      height: '28px',
+                                      background: '#0f172a',
+                                      border: '1px solid #334155',
+                                      borderRadius: '4px',
+                                      color: '#ffffff',
+                                      textAlign: 'right',
+                                      padding: '0 6px',
+                                      fontSize: '0.76rem'
+                                    }}
+                                  />
+                                )}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 8px', textAlign: 'right', fontWeight: 800, color: isApp ? '#34d399' : (isRej ? '#64748b' : '#38bdf8') }}>
+                                Rp {Number(row.subtotal || ((Number(row.hargaSatuan || 0)) * (Number(row.qty || 0)))).toLocaleString('id-ID')}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '6px 8px', textAlign: 'center' }}>
+                                {selectedDetailItem.status === 'Dicairkan' ? (
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '2px 8px',
+                                    borderRadius: '10px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    background: isApp ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                    color: isApp ? '#34d399' : '#f87171',
+                                    border: `1px solid ${isApp ? '#10b981' : '#ef4444'}`
+                                  }}>
+                                    {isApp ? '✓ Disetujui' : (isRej ? '✗ Ditolak' : 'Menunggu')}
+                                  </span>
+                                ) : (
+                                  <div style={{ display: 'inline-flex', gap: '4px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleMaterialRowStatus(row.id, 'Disetujui')}
+                                      style={{
+                                        background: isApp ? '#10b981' : 'rgba(16, 185, 129, 0.15)',
+                                        border: `1.5px solid ${isApp ? '#34d399' : 'rgba(16, 185, 129, 0.4)'}`,
+                                        color: isApp ? '#ffffff' : '#34d399',
+                                        borderRadius: '5px',
+                                        padding: '3px 8px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      ✓ Setuju
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleMaterialRowStatus(row.id, 'Ditolak')}
+                                      style={{
+                                        background: isRej ? '#ef4444' : 'rgba(239, 68, 68, 0.15)',
+                                        border: `1.5px solid ${isRej ? '#f87171' : 'rgba(239, 68, 68, 0.4)'}`,
+                                        color: isRej ? '#ffffff' : '#f87171',
+                                        borderRadius: '5px',
+                                        padding: '3px 8px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      ✗ Tolak
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Summary baris yang disetujui / ditolak */}
+                  <div style={{
+                    marginTop: '8px',
+                    background: '#090d16',
+                    border: '1px solid #1e293b',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    fontSize: '0.78rem'
+                  }}>
+                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                      <span>Total Item: <strong style={{ color: '#ffffff' }}>{materialReviewRows.length}</strong></span>
+                      <span style={{ color: '#34d399' }}>✓ Disetujui: <strong>{materialReviewRows.filter(r => r.status === 'Disetujui' || r.isApproved).length}</strong></span>
+                      <span style={{ color: '#f87171' }}>✗ Ditolak: <strong>{materialReviewRows.filter(r => r.status === 'Ditolak').length}</strong></span>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ color: '#94a3b8' }}>Total Yang Disetujui Untuk Dibayar: </span>
+                      <strong style={{ color: '#34d399', fontSize: '0.95rem' }}>
+                        Rp {materialReviewRows.reduce((sum, r) => (r.status === 'Disetujui' || r.isApproved) ? sum + (Number(r.subtotal) || (Number(r.hargaSatuan || 0) * Number(r.qty || 0)) || 0) : sum, 0).toLocaleString('id-ID')}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div style={{ marginTop: '8px' }}>
                 <span style={{ color: '#94a3b8' }}>Catatan / Justifikasi:</span>
@@ -3953,40 +4279,87 @@ export const FinanceModule = () => {
                   <div style={{ color: '#34d399', fontWeight: 800 }}>Telah Dicairkan:</div>
                   <div style={{ color: '#ffffff', fontSize: '0.8rem', marginTop: '2px' }}>
                     via {selectedDetailItem.disbursedBankName} • Ref: {selectedDetailItem.disbursedRef} • Tanggal: {selectedDetailItem.disbursedAt}
+                    {selectedDetailItem.disbursedAmount && (
+                      <div style={{ fontWeight: 800, color: '#34d399', marginTop: '3px' }}>
+                        Nominal Dicairkan: Rp {Number(selectedDetailItem.disbursedAmount).toLocaleString('id-ID')}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap', gap: '10px' }}>
-              {selectedDetailItem.status === 'Dicairkan' && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedProofItem(selectedDetailItem);
-                    setIsProofModalOpen(true);
-                  }}
-                  style={{
-                    background: 'rgba(16, 185, 129, 0.2)',
-                    border: '1.5px solid #10b981',
-                    color: '#34d399',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Receipt size={16} /> Buka Bukti Transfer & Struk Resmi
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {selectedDetailItem.materialRows && selectedDetailItem.materialRows.length > 0 && selectedDetailItem.status !== 'Dicairkan' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleSaveMaterialReview(false)}
+                      style={{
+                        background: '#1e3a8a',
+                        border: '1px solid #3b82f6',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '8px 14px',
+                        fontSize: '0.82rem',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      💾 Simpan Status Checklist Baris
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSaveMaterialReview(true)}
+                      style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: '1px solid #34d399',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '8px 16px',
+                        fontSize: '0.82rem',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+                      }}
+                    >
+                      💰 Setujui & Lanjutkan Bayar Yang Disetujui
+                    </button>
+                  </>
+                )}
+
+                {selectedDetailItem.status === 'Dicairkan' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedProofItem(selectedDetailItem);
+                      setIsProofModalOpen(true);
+                    }}
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.2)',
+                      border: '1.5px solid #10b981',
+                      color: '#34d399',
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Receipt size={16} /> Buka Bukti Transfer & Struk Resmi
+                  </button>
+                )}
+              </div>
+
               <button
                 type="button"
                 onClick={() => setIsDetailModalOpen(false)}
-                style={{ background: '#1e293b', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', cursor: 'pointer', marginLeft: selectedDetailItem.status === 'Dicairkan' ? 'auto' : '0' }}
+                style={{ background: '#1e293b', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', cursor: 'pointer', marginLeft: 'auto' }}
               >
                 Tutup
               </button>

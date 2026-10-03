@@ -65,10 +65,12 @@ import {
   TreePine,
   Trees,
   Landmark,
-  ClipboardList
+  ClipboardList,
+  Send
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
+import { submitFundRequest, getFundRequests } from '../services/financeService';
 
 // Indonesian Terbilang Utility
 function angkaTerbilang(nilai) {
@@ -2173,6 +2175,118 @@ export const TeknikModule = () => {
     saveCloudStore(STORAGE_KEY_PENGAJUAN_MATERIAL, nextList);
     if (notifMsg) showNotification(notifMsg, notifType);
   };
+
+  // =========================================================================
+  // SUB-MODUL: PENGAJUAN MATERIAL (KODE, MATERIAL, QTY, SAT, BLOK, NO, KETERANGAN)
+  // Input Langsung Di Dalam Baris Tabel (Inline) + Pengajuan 1 Tabel Penuh (SPbM)
+  // Tabel Rekapitulasi Pengajuan Material + Terintegrasi ke Finance
+  // =========================================================================
+  const STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES = 'ams_teknik_spbm_batches_v1';
+
+  const defaultSpbmBatches = [
+    {
+      id: 'SPBM-2026-001',
+      noDok: 'SPBM/TNK/2026/001',
+      tanggal: '2026-10-02',
+      proyek: 'Ashoka View',
+      pemohon: 'Mandor Subur',
+      catatan: 'Material pengecoran plat dak lantai 2 unit A01',
+      totalItem: 3,
+      totalEstimatedAmount: 18500000,
+      totalApprovedAmount: 8950000,
+      status: 'Disetujui Sebagian',
+      fundRequestId: 'REQ-2026-002',
+      createdAt: '2026-10-02T08:30:00.000Z',
+      rows: [
+        { id: 'R1', no: 1, tanggal: '2026-10-02', kode: 'SMN-01', material: 'Semen Gresik 40 Kg', qty: 50, sat: 'Sak', blok: 'Blok A', unitNo: '01', keterangan: 'Cor dak lantai 2', status: 'Disetujui', hargaSatuan: 65000, subtotal: 3250000 },
+        { id: 'R2', no: 2, tanggal: '2026-10-02', kode: 'BSI-10', material: 'Besi Beton Ulir 10mm SNI', qty: 60, sat: 'Batang', blok: 'Blok A', unitNo: '01', keterangan: 'Pembesian balok & ring', status: 'Disetujui', hargaSatuan: 95000, subtotal: 5700000 },
+        { id: 'R3', no: 3, tanggal: '2026-10-02', kode: 'BTR-01', material: 'Bata Ringan Hebel Tebal 10cm', qty: 12, sat: 'M3', blok: 'Blok B', unitNo: '05', keterangan: 'Pasangan dinding kamar', status: 'Ditolak', hargaSatuan: 650000, subtotal: 7800000 }
+      ]
+    },
+    {
+      id: 'SPBM-2026-002',
+      noDok: 'SPBM/TNK/2026/002',
+      tanggal: '2026-10-03',
+      proyek: 'Ashoka Park',
+      pemohon: 'Kholidin',
+      catatan: 'Pengadaan material keramik & pipa PVC finishing',
+      totalItem: 2,
+      totalEstimatedAmount: 6750000,
+      totalApprovedAmount: 0,
+      status: 'Menunggu Review',
+      fundRequestId: null,
+      createdAt: '2026-10-03T09:15:00.000Z',
+      rows: [
+        { id: 'R4', no: 1, tanggal: '2026-10-03', kode: 'KRK-01', material: 'Keramik Granit 60x60 Polish Glazed', qty: 45, sat: 'Dus', blok: 'Blok C', unitNo: '08', keterangan: 'Pemasangan lantai ruang tamu', status: 'Menunggu', hargaSatuan: 120000, subtotal: 5400000 },
+        { id: 'R5', no: 2, tanggal: '2026-10-03', kode: 'PIP-01', material: 'Pipa PVC AW 3/4" Wavin', qty: 15, sat: 'Batang', blok: 'Blok C', unitNo: '08', keterangan: 'Instalasi pipa air bersih', status: 'Menunggu', hargaSatuan: 90000, subtotal: 1350000 }
+      ]
+    }
+  ];
+
+  const [spbmBatches, setSpbmBatches] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultSpbmBatches;
+  });
+
+  const updateAndSaveSpbmBatches = (nextList, notifMsg = '', notifType = 'success') => {
+    setSpbmBatches(nextList);
+    try {
+      localStorage.setItem(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, JSON.stringify(nextList));
+    } catch (e) {}
+    saveCloudStore(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES, nextList);
+    if (notifMsg) showNotification(notifMsg, notifType);
+  };
+
+  const createNewSpbmRow = (initialTanggal) => ({
+    id: `ROW-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    tanggal: initialTanggal || getTodayDateString(),
+    kode: '',
+    material: '',
+    qty: '',
+    sat: 'Sak',
+    blok: 'Blok A',
+    no: '01',
+    keterangan: '',
+    hargaSatuan: 0,
+    subtotal: 0
+  });
+
+  // State Form Header Dokumen SPbM
+  const [spbmFormHeader, setSpbmFormHeader] = useState(() => ({
+    noDok: `SPBM/TNK/${new Date().getFullYear()}/${String(Math.floor(100 + Math.random() * 900))}`,
+    tanggal: getTodayDateString(),
+    proyek: 'Ashoka View',
+    pemohon: currentUser?.name || 'Mandor Lapangan',
+    catatan: ''
+  }));
+
+  // State Draft Rows (Tabel Inline Yang Diisi Langsung)
+  const [spbmDraftRows, setSpbmDraftRows] = useState(() => [createNewSpbmRow()]);
+
+  // State Modal Detail Rincian Status Baris SPbM
+  const [selectedSpbmBatchDetail, setSelectedSpbmBatchDetail] = useState(null);
+  const [isSpbmDetailModalOpen, setIsSpbmDetailModalOpen] = useState(false);
+
+  // Sync status SPbM dengan modul Finance secara real-time
+  useEffect(() => {
+    const handleFinanceSync = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_PENGAJUAN_MATERIAL_BATCHES);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setSpbmBatches(parsed);
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('ams-finance-data-changed', handleFinanceSync);
+    return () => window.removeEventListener('ams-finance-data-changed', handleFinanceSync);
+  }, []);
 
   // Filter & Search states
   const [filterPmatProyek, setFilterPmatProyek] = useState('ALL');
@@ -4566,6 +4680,248 @@ export const TeknikModule = () => {
     });
     return Array.from(map.values());
   }, [persediaanMasterBarang, persediaanSummaryList]);
+
+  // =========================================================================
+  // HANDLERS FOR INLINE DRAFT ROWS & PENGAJUAN 1 TABEL PENUH (SPbM) KE FINANCE
+  // =========================================================================
+  const handleAddSpbmDraftRow = () => {
+    setSpbmDraftRows(prev => [...prev, createNewSpbmRow(spbmFormHeader.tanggal)]);
+  };
+
+  const handleRemoveSpbmDraftRow = (rowId) => {
+    setSpbmDraftRows(prev => {
+      const next = prev.filter(r => r.id !== rowId);
+      return next.length > 0 ? next : [createNewSpbmRow(spbmFormHeader.tanggal)];
+    });
+  };
+
+  const handleUpdateSpbmDraftRow = (rowId, field, value) => {
+    setSpbmDraftRows(prev => prev.map(r => {
+      if (r.id !== rowId) return r;
+
+      if (field === 'kode') {
+        const rawVal = value.toUpperCase();
+        const cleanK = rawVal.trim();
+        const matched = allMasterBarangList.find(b => b.kode.trim().toUpperCase() === cleanK || cleanK.startsWith(b.kode.trim().toUpperCase()));
+        if (matched) {
+          return {
+            ...r,
+            kode: matched.kode,
+            material: matched.nama,
+            sat: matched.satuan || r.sat
+          };
+        }
+        return { ...r, kode: rawVal };
+      }
+
+      if (field === 'material') {
+        const cleanN = value.trim().toLowerCase();
+        const matched = allMasterBarangList.find(b => b.nama.trim().toLowerCase() === cleanN || cleanN.startsWith(b.nama.trim().toLowerCase()));
+        if (matched) {
+          return {
+            ...r,
+            material: matched.nama,
+            kode: matched.kode,
+            sat: matched.satuan || r.sat
+          };
+        }
+        return { ...r, material: value };
+      }
+
+      if (field === 'qty') {
+        const q = value;
+        const sub = (Number(q) || 0) * (Number(r.hargaSatuan) || 0);
+        return { ...r, qty: q, subtotal: sub };
+      }
+
+      if (field === 'hargaSatuan') {
+        const p = Number(value) || 0;
+        const sub = (Number(r.qty) || 0) * p;
+        return { ...r, hargaSatuan: p, subtotal: sub };
+      }
+
+      return { ...r, [field]: value };
+    }));
+  };
+
+  const handleResetSpbmDraft = () => {
+    if (window.confirm('Bersihkan seluruh baris input material di tabel draft ini?')) {
+      setSpbmDraftRows([createNewSpbmRow(spbmFormHeader.tanggal)]);
+      setSpbmFormHeader(prev => ({
+        ...prev,
+        noDok: `SPBM/TNK/${new Date().getFullYear()}/${String(Math.floor(100 + Math.random() * 900))}`,
+        catatan: ''
+      }));
+      showNotification('Tabel draft pengajuan berhasil direset.', 'info');
+    }
+  };
+
+  const handleAjukanTableKeFinance = () => {
+    const validRows = spbmDraftRows.filter(r => (r.material || '').trim() && Number(r.qty) > 0);
+    if (validRows.length === 0) {
+      showNotification('Mohon isi minimal 1 baris material dengan Nama Material dan Jumlah (Qty) yang valid!', 'warning');
+      return;
+    }
+
+    const docNo = (spbmFormHeader.noDok || `SPBM/TNK/${new Date().getFullYear()}/${String(spbmBatches.length + 1).padStart(3, '0')}`).trim();
+
+    if (!window.confirm(`Ajukan tabel berisikan ${validRows.length} baris material ini ke Finance?\n\nNo. Dokumen: ${docNo}\nTanggal: ${spbmFormHeader.tanggal}\nProyek: ${spbmFormHeader.proyek}\nPemohon: ${spbmFormHeader.pemohon}`)) {
+      return;
+    }
+
+    // Auto-save unknown items to Master Barang if checked
+    if (saveToMasterDb) {
+      const newItemsToAdd = [];
+      validRows.forEach(r => {
+        const k = (r.kode || '').trim().toUpperCase();
+        const m = (r.material || '').trim();
+        if (m) {
+          const exists = persediaanMasterBarang.some(b => (k && b.kode.trim().toUpperCase() === k) || b.nama.trim().toLowerCase() === m.toLowerCase());
+          if (!exists) {
+            newItemsToAdd.push({
+              id: `BRG-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substr(2, 3)}`,
+              kode: k || `MT-${Date.now().toString().slice(-4)}`,
+              nama: m,
+              satuan: r.sat || 'Sak'
+            });
+          }
+        }
+      });
+      if (newItemsToAdd.length > 0) {
+        updateAndSaveMasterBarang([...persediaanMasterBarang, ...newItemsToAdd]);
+      }
+    }
+
+    let totalEstimasi = 0;
+    const processedRows = validRows.map((r, idx) => {
+      let unitPrice = Number(r.hargaSatuan) || 0;
+      if (unitPrice === 0) {
+        const matched = persediaanSummaryList?.find(b => b.kode.toUpperCase() === (r.kode || '').toUpperCase());
+        if (matched && matched.avgPrice) unitPrice = matched.avgPrice;
+      }
+      const subtotal = unitPrice * Number(r.qty);
+      totalEstimasi += subtotal;
+
+      return {
+        id: `ROW-${Date.now()}-${idx + 1}`,
+        no: idx + 1,
+        tanggal: r.tanggal || spbmFormHeader.tanggal,
+        kode: (r.kode || '').trim().toUpperCase() || `MT-${Date.now().toString().slice(-4)}`,
+        material: (r.material || '').trim(),
+        qty: Number(r.qty),
+        sat: (r.sat || 'Sak').trim(),
+        blok: r.blok || '-',
+        unitNo: r.no || '-',
+        keterangan: (r.keterangan || '').trim(),
+        hargaSatuan: unitPrice,
+        subtotal: subtotal,
+        status: 'Menunggu'
+      };
+    });
+
+    const newBatchId = `SPBM-${Date.now().toString().slice(-6)}`;
+
+    // Submit ke service Finance
+    let fundReq = null;
+    try {
+      fundReq = submitFundRequest({
+        originModule: 'teknik',
+        originModuleName: 'Teknik & Konstruksi',
+        requester: spbmFormHeader.pemohon,
+        title: `Pengajuan Material [${docNo}] - ${spbmFormHeader.proyek} (${processedRows.length} Item)`,
+        project: spbmFormHeader.proyek,
+        category: 'Pengajuan Material Konstruksi',
+        amount: totalEstimasi || 0,
+        requestDate: spbmFormHeader.tanggal,
+        dueDate: spbmFormHeader.tanggal,
+        priority: 'Tinggi',
+        accountCode: '5-101',
+        notes: `Pengajuan Material SPbM No: ${docNo}. Proyek: ${spbmFormHeader.proyek}. Pemohon: ${spbmFormHeader.pemohon}. Catatan: ${spbmFormHeader.catatan || '-'}`,
+        spbmNo: docNo,
+        spbmId: newBatchId,
+        materialRows: processedRows
+      });
+    } catch (e) {
+      console.error('Error submitting fund request:', e);
+    }
+
+    const newBatch = {
+      id: newBatchId,
+      noDok: docNo,
+      tanggal: spbmFormHeader.tanggal,
+      proyek: spbmFormHeader.proyek,
+      pemohon: spbmFormHeader.pemohon,
+      catatan: spbmFormHeader.catatan,
+      totalItem: processedRows.length,
+      totalEstimatedAmount: totalEstimasi,
+      totalApprovedAmount: 0,
+      status: 'Menunggu Review',
+      fundRequestId: fundReq?.id || null,
+      createdAt: new Date().toISOString(),
+      rows: processedRows
+    };
+
+    const nextBatches = [newBatch, ...spbmBatches];
+    updateAndSaveSpbmBatches(nextBatches, `Tabel Pengajuan Material [${docNo}] (${processedRows.length} item) berhasil diajukan ke Finance!`, 'success');
+
+    // Reset draft input table
+    setSpbmDraftRows([createNewSpbmRow(spbmFormHeader.tanggal)]);
+    setSpbmFormHeader(prev => ({
+      ...prev,
+      noDok: `SPBM/TNK/${new Date().getFullYear()}/${String(Math.floor(100 + Math.random() * 900))}`,
+      catatan: ''
+    }));
+  };
+
+  const handleOpenSpbmBatchDetail = (batch) => {
+    try {
+      const fundReqs = getFundRequests();
+      const matchedReq = fundReqs.find(r => r.id === batch.fundRequestId || r.spbmNo === batch.noDok);
+      if (matchedReq && matchedReq.materialRows && matchedReq.materialRows.length > 0) {
+        batch = {
+          ...batch,
+          status: matchedReq.status,
+          totalApprovedAmount: matchedReq.approvedAmount || batch.totalApprovedAmount,
+          rows: matchedReq.materialRows
+        };
+      }
+    } catch (e) {}
+
+    setSelectedSpbmBatchDetail(batch);
+    setIsSpbmDetailModalOpen(true);
+  };
+
+  const handleDeleteSpbmBatch = (batch) => {
+    if (batch.status === 'Dicairkan') {
+      alert('Pengajuan material ini sudah dicairkan oleh Finance dan tidak dapat dihapus!');
+      return;
+    }
+    if (window.confirm(`Hapus berkas pengajuan material ${batch.noDok} (${batch.proyek})?`)) {
+      const updated = spbmBatches.filter(b => b.id !== batch.id);
+      updateAndSaveSpbmBatches(updated, `Pengajuan material ${batch.noDok} berhasil dihapus.`, 'info');
+    }
+  };
+
+  const filteredSpbmBatches = useMemo(() => {
+    return spbmBatches.filter(batch => {
+      if (filterPmatProyek !== 'ALL' && batch.proyek !== filterPmatProyek) return false;
+      if (filterPmatStatus !== 'ALL' && batch.status !== filterPmatStatus) return false;
+      if (searchPmat) {
+        const q = searchPmat.toLowerCase();
+        const matchDok = (batch.noDok || '').toLowerCase().includes(q);
+        const matchProyek = (batch.proyek || '').toLowerCase().includes(q);
+        const matchPemohon = (batch.pemohon || '').toLowerCase().includes(q);
+        const matchCatatan = (batch.catatan || '').toLowerCase().includes(q);
+        const matchRows = batch.rows?.some(r =>
+          (r.kode || '').toLowerCase().includes(q) ||
+          (r.material || '').toLowerCase().includes(q) ||
+          (r.blok || '').toLowerCase().includes(q)
+        );
+        if (!matchDok && !matchProyek && !matchPemohon && !matchCatatan && !matchRows) return false;
+      }
+      return true;
+    }).sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+  }, [spbmBatches, filterPmatProyek, filterPmatStatus, searchPmat]);
 
   const handleOpenAddPmat = () => {
     setEditingPmatId(null);
@@ -13671,17 +14027,20 @@ export const TeknikModule = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
       {/* SUB-MODUL: PENGAJUAN MATERIAL                                             */}
-      {/* REPLIKASI PERSIS FORMAT TABEL USER (media_1790996938215.jpg)             */}
+      {/* 1. INPUT INLINE LANGSUNG DI DALAM TABEL (+ Tambah Baris Baru)             */}
+      {/* 2. PENGAJUAN 1 TABEL PENUH (BATCH SPbM) KE FINANCE                        */}
+      {/* 3. TABEL REKAPITULASI PENGAJUAN MATERIAL DENGAN STATUS APPROVAL PER BARIS  */}
       {/* TEMA WARNA: BIRU TEKNIK ("tapi warna nya nanti jangann warnna itu tapi biru")*/}
-      {/* KOLOM: No. | Kode | Material | Qty | Sat | Blok | No. | Keterangan | Aksi  */}
-      {/* Terintegrasi langsung dengan Database Master Barang (persediaanMasterBarang)*/}
       {/* ========================================================================= */}
       {mainCategory === 'pengajuan_material' && (
         <div style={{ animation: 'fadeIn 0.3s ease' }}>
-          <div className="card" style={{ background: '#0b1120', border: '1px solid #1e293b', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
+          
+          {/* BAGIAN 1: FORM DOKUMEN & TABEL INPUT MATERIAL INLINE */}
+          <div className="card" style={{ background: '#0b1120', border: '1.5px solid #1e3a8a', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.75rem', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}>
             
-            {/* Top Row: Title Box "Pengajuan Material" (Biru persis format gambar) & Action Buttons */}
+            {/* Top Row: Title Box "Pengajuan Material" (Biru persis gambar) & Action Buttons */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
               {/* KOTAK JUDUL BIRU PERSIS GAMBAR USER */}
               <div style={{
@@ -13702,15 +14061,15 @@ export const TeknikModule = () => {
                   letterSpacing: '0.02em',
                   textTransform: 'none'
                 }}>
-                  Pengajuan Material
+                  Pengajuan Material (SPbM)
                 </span>
               </div>
 
-              {/* Action Buttons: Tambah Pengajuan, Cetak/Print, Status */}
+              {/* Action Buttons: Tambah Baris Baru, Reset Draft, Cetak Form */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  onClick={handleOpenAddPmat}
+                  onClick={handleAddSpbmDraftRow}
                   style={{
                     background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 100%)',
                     border: '1.5px solid #60a5fa',
@@ -13726,7 +14085,27 @@ export const TeknikModule = () => {
                     boxShadow: '0 4px 12px rgba(3, 78, 252, 0.4)'
                   }}
                 >
-                  <Plus size={16} /> + Tambah Pengajuan Material
+                  <Plus size={16} /> + Tambah Baris Baru
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetSpbmDraft}
+                  style={{
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    color: '#94a3b8',
+                    padding: '8px 14px',
+                    fontSize: '0.84rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <RotateCcw size={14} /> Bersihkan Draft
                 </button>
 
                 <button
@@ -13751,58 +14130,575 @@ export const TeknikModule = () => {
               </div>
             </div>
 
-            {/* Sub-header / Filters Bar */}
+            {/* FORM HEADER SPbM: TANGGAL, NO. DOKUMEN, PROYEK, PEMOHON */}
             <div style={{
               background: '#090d16',
               border: '1px solid #1e293b',
               borderRadius: '10px',
-              padding: '0.85rem 1rem',
-              marginBottom: '1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-              flexWrap: 'wrap'
+              padding: '1rem',
+              marginBottom: '1.25rem'
             }}>
-              {/* Left: Search input */}
-              <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
-                <Search size={16} color="#64748b" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px' }}>
+                {/* 1. Tanggal Pengajuan */}
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                    📅 Tanggal Pengajuan *
+                  </label>
+                  <input
+                    type="date"
+                    value={spbmFormHeader.tanggal}
+                    onChange={(e) => {
+                      const newTgl = e.target.value;
+                      setSpbmFormHeader(prev => ({ ...prev, tanggal: newTgl }));
+                      setSpbmDraftRows(prev => prev.map(r => ({ ...r, tanggal: newTgl })));
+                    }}
+                    style={{
+                      width: '100%',
+                      height: '36px',
+                      background: '#0f172a',
+                      border: '1.5px solid #2563eb',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      padding: '0 10px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* 2. No. Dokumen SPbM */}
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                    📑 No. Dokumen / SPbM
+                  </label>
+                  <input
+                    type="text"
+                    value={spbmFormHeader.noDok}
+                    onChange={(e) => setSpbmFormHeader({ ...spbmFormHeader, noDok: e.target.value })}
+                    placeholder="SPBM/TNK/2026/001"
+                    style={{
+                      width: '100%',
+                      height: '36px',
+                      background: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      color: '#38bdf8',
+                      fontFamily: 'monospace',
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
+                      padding: '0 10px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* 3. Proyek Lokasi */}
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                    🏢 Proyek Lokasi *
+                  </label>
+                  <select
+                    value={spbmFormHeader.proyek}
+                    onChange={(e) => setSpbmFormHeader({ ...spbmFormHeader, proyek: e.target.value })}
+                    style={{
+                      width: '100%',
+                      height: '36px',
+                      background: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      padding: '0 10px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="Ashoka View">Ashoka View</option>
+                    <option value="Ashoka Park">Ashoka Park</option>
+                    <option value="Bizhub Commercial">Bizhub Commercial</option>
+                  </select>
+                </div>
+
+                {/* 4. Pemohon / Mandor Lapangan */}
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                    👷 Pemohon / Mandor Lapangan
+                  </label>
+                  <input
+                    type="text"
+                    value={spbmFormHeader.pemohon}
+                    onChange={(e) => setSpbmFormHeader({ ...spbmFormHeader, pemohon: e.target.value })}
+                    placeholder="Nama pemohon / mandor..."
+                    style={{
+                      width: '100%',
+                      height: '36px',
+                      background: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      padding: '0 10px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Catatan Dokumen */}
+              <div style={{ marginTop: '10px' }}>
                 <input
                   type="text"
-                  placeholder="Cari kode material, nama material, blok, no, keterangan..."
-                  value={searchPmat}
-                  onChange={(e) => setSearchPmat(e.target.value)}
+                  value={spbmFormHeader.catatan}
+                  onChange={(e) => setSpbmFormHeader({ ...spbmFormHeader, catatan: e.target.value })}
+                  placeholder="Catatan / keterangan umum pengajuan SPbM (misal: Kebutuhan mendesak untuk pengecoran dak lantai 2 minggu ini)..."
                   style={{
                     width: '100%',
-                    height: '36px',
+                    height: '34px',
                     background: '#0f172a',
-                    border: '1px solid #334155',
+                    border: '1px solid #1e293b',
                     borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.84rem',
-                    padding: '0 10px 0 34px',
+                    color: '#cbd5e1',
+                    fontSize: '0.8rem',
+                    padding: '0 10px',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
                 />
               </div>
+            </div>
 
-              {/* Right: Proyek Filter, Blok Filter, Status Filter */}
+            {/* TABEL INPUT MATERIAL INLINE (DIISI LANGSUNG DI DALAM TABEL) */}
+            <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#38bdf8' }}>
+                  ✍️ Isi Rincian Material Langsung Pada Baris Tabel Di Bawah:
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                  (Ketik Kode atau Nama Barang untuk auto-fill dari Database Master Barang)
+                </span>
+              </div>
+              <span style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 700 }}>
+                {spbmDraftRows.filter(r => (r.material || '').trim() && Number(r.qty) > 0).length} baris material terisi
+              </span>
+            </div>
+
+            <div className="table-responsive" style={{ overflowX: 'auto', border: '1.5px solid #2563eb', borderRadius: '8px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)', color: '#ffffff' }}>
+                    <th style={{ width: '38px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>No.</th>
+                    <th style={{ width: '120px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Tanggal</th>
+                    <th style={{ width: '115px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Kode</th>
+                    <th style={{ minWidth: '220px', border: '1px solid #2563eb', padding: '10px 10px', fontWeight: 900 }}>Material *</th>
+                    <th style={{ width: '80px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>Qty *</th>
+                    <th style={{ width: '90px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>Sat *</th>
+                    <th style={{ width: '95px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>Blok</th>
+                    <th style={{ width: '70px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>No.</th>
+                    <th style={{ minWidth: '180px', border: '1px solid #2563eb', padding: '10px 10px', fontWeight: 900 }}>Keterangan</th>
+                    <th style={{ width: '50px', border: '1px solid #2563eb', padding: '10px 6px', textAlign: 'center', fontWeight: 900 }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {spbmDraftRows.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={row.id}
+                        style={{
+                          background: isEven ? '#090f1d' : '#0d1527',
+                          borderBottom: '1px solid #1e293b',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        {/* 1. No */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#94a3b8' }}>
+                          {idx + 1}
+                        </td>
+
+                        {/* 2. Tanggal */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="date"
+                            value={row.tanggal || spbmFormHeader.tanggal}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'tanggal', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#ffffff',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              padding: '0 6px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 3. Kode (Datalist auto fill) */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            list="pmat-inline-kode-datalist"
+                            placeholder="SMN-01"
+                            value={row.kode}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'kode', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1.5px solid #2563eb',
+                              borderRadius: '4px',
+                              color: '#93c5fd',
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              padding: '0 6px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 4. Material (Datalist auto fill) */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            list="pmat-inline-nama-datalist"
+                            placeholder="Ketik/Pilih nama material..."
+                            value={row.material}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'material', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1.5px solid #2563eb',
+                              borderRadius: '4px',
+                              color: '#ffffff',
+                              fontWeight: 700,
+                              fontSize: '0.82rem',
+                              padding: '0 8px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 5. Qty */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="any"
+                            placeholder="0"
+                            value={row.qty}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'qty', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#38bdf8',
+                              fontWeight: 900,
+                              textAlign: 'center',
+                              fontSize: '0.88rem',
+                              padding: '0 4px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 6. Sat */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            list="pmat-inline-satuan-datalist"
+                            placeholder="Sak"
+                            value={row.sat}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'sat', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#7dd3fc',
+                              fontWeight: 700,
+                              textAlign: 'center',
+                              fontSize: '0.8rem',
+                              padding: '0 4px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 7. Blok */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            list="pmat-inline-blok-datalist"
+                            placeholder="Blok A"
+                            value={row.blok}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'blok', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#f8fafc',
+                              fontWeight: 700,
+                              textAlign: 'center',
+                              fontSize: '0.8rem',
+                              padding: '0 4px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 8. No */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            placeholder="01"
+                            value={row.no}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'no', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#38bdf8',
+                              fontWeight: 800,
+                              textAlign: 'center',
+                              fontSize: '0.84rem',
+                              padding: '0 4px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 9. Keterangan */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px' }}>
+                          <input
+                            type="text"
+                            placeholder="Pengecoran dak lantai 2..."
+                            value={row.keterangan}
+                            onChange={(e) => handleUpdateSpbmDraftRow(row.id, 'keterangan', e.target.value)}
+                            style={{
+                              width: '100%',
+                              height: '32px',
+                              background: '#0f172a',
+                              border: '1px solid #334155',
+                              borderRadius: '4px',
+                              color: '#cbd5e1',
+                              fontSize: '0.8rem',
+                              padding: '0 8px',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </td>
+
+                        {/* 10. Aksi Hapus Baris */}
+                        <td style={{ border: '1px solid #1e293b', padding: '6px 4px', textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSpbmDraftRow(row.id)}
+                            title="Hapus Baris Ini"
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.15)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              borderRadius: '4px',
+                              color: '#f87171',
+                              padding: '5px',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Datalists for autocomplete */}
+            <datalist id="pmat-inline-kode-datalist">
+              {allMasterBarangList.map(b => (
+                <option key={`c-${b.kode}`} value={b.kode}>
+                  {b.kode} - {b.nama} ({b.satuan})
+                </option>
+              ))}
+            </datalist>
+
+            <datalist id="pmat-inline-nama-datalist">
+              {allMasterBarangList.map(b => (
+                <option key={`n-${b.kode}`} value={b.nama}>
+                  {b.nama} [{b.kode}] ({b.satuan})
+                </option>
+              ))}
+            </datalist>
+
+            <datalist id="pmat-inline-satuan-datalist">
+              {['Sak', 'Batang', 'M3', 'Dus', 'Pcs', 'Kg', 'Lembar', 'Roll', 'Kaleng', 'Truk', 'Meter', 'Zak', 'Liter'].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </datalist>
+
+            <datalist id="pmat-inline-blok-datalist">
+              <option value="Blok A">Blok A</option>
+              <option value="Blok B">Blok B</option>
+              <option value="Blok C">Blok C</option>
+              <option value="Blok D">Blok D</option>
+              <option value="Fasum / Sarana">Fasum / Sarana</option>
+              <option value="Workshop / Gudang">Workshop / Gudang</option>
+            </datalist>
+
+            {/* ACTION BAR DI BAWAH TABEL DRAFT: TAMBAH BARIS & AJUKAN 1 TABEL INI KE FINANCE */}
+            <div style={{
+              marginTop: '1.25rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              paddingTop: '1rem',
+              borderTop: '1px solid #1e293b'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleAddSpbmDraftRow}
+                  style={{
+                    background: '#1e3a8a',
+                    border: '1.5px solid #3b82f6',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    padding: '8px 16px',
+                    fontSize: '0.84rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Plus size={15} /> + Tambah Baris Material
+                </button>
+
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  Isi data baris langsung di dalam tabel di atas.
+                </span>
+              </div>
+
+              {/* TOMBOL UTAMA PENGAJUAN 1 TABEL PENUH KE FINANCE */}
+              <button
+                type="button"
+                onClick={handleAjukanTableKeFinance}
+                style={{
+                  background: 'linear-gradient(135deg, #034efc 0%, #1d4ed8 50%, #10b981 100%)',
+                  border: '2px solid #60a5fa',
+                  borderRadius: '10px',
+                  color: '#ffffff',
+                  padding: '10px 24px',
+                  fontSize: '0.92rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 6px 20px rgba(3, 78, 252, 0.45)',
+                  letterSpacing: '0.01em'
+                }}
+              >
+                <Send size={18} /> 🚀 Ajukan 1 Tabel Ini ke Finance
+              </button>
+            </div>
+
+          </div>
+
+          {/* BAGIAN 2: TABEL REKAPITULASI PENGAJUAN MATERIAL (RIWAYAT & STATUS APPROVAL DARI FINANCE) */}
+          <div className="card" style={{ background: '#0b1120', border: '1px solid #1e293b', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 8px 30px rgba(0,0,0,0.45)' }}>
+            
+            {/* Header Rekap */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileSpreadsheet size={20} color="#38bdf8" />
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Tabel Rekapitulasi Pengajuan Material (SPbM)
+                </h3>
+                <span style={{
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  color: '#38bdf8',
+                  borderRadius: '12px',
+                  padding: '2px 8px',
+                  fontSize: '0.72rem',
+                  fontWeight: 800
+                }}>
+                  {filteredSpbmBatches.length} Berkas Diajukan
+                </span>
+              </div>
+
+              {/* Filters for Rekap */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                {/* Proyek Filter */}
+                {/* Search */}
+                <div style={{ minWidth: '200px', position: 'relative' }}>
+                  <Search size={15} color="#64748b" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder="Cari No. SPbM, proyek, pemohon..."
+                    value={searchPmat}
+                    onChange={(e) => setSearchPmat(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '34px',
+                      background: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '0.8rem',
+                      padding: '0 10px 0 32px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                {/* Filter Proyek */}
                 <select
                   value={filterPmatProyek}
                   onChange={(e) => setFilterPmatProyek(e.target.value)}
                   style={{
-                    height: '36px',
+                    height: '34px',
                     background: '#1e293b',
                     border: '1px solid #334155',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     padding: '0 10px',
-                    outline: 'none',
-                    fontWeight: 700
+                    fontWeight: 700,
+                    outline: 'none'
                   }}
                 >
                   <option value="ALL">🏢 Semua Proyek</option>
@@ -13811,108 +14707,69 @@ export const TeknikModule = () => {
                   <option value="Bizhub Commercial">Bizhub Commercial</option>
                 </select>
 
-                {/* Blok Filter */}
-                <select
-                  value={filterPmatBlok}
-                  onChange={(e) => setFilterPmatBlok(e.target.value)}
-                  style={{
-                    height: '36px',
-                    background: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '6px',
-                    color: '#ffffff',
-                    fontSize: '0.82rem',
-                    padding: '0 10px',
-                    outline: 'none',
-                    fontWeight: 700
-                  }}
-                >
-                  <option value="ALL">📍 Semua Blok</option>
-                  <option value="Blok A">Blok A</option>
-                  <option value="Blok B">Blok B</option>
-                  <option value="Blok C">Blok C</option>
-                  <option value="Blok D">Blok D</option>
-                  <option value="Fasum">Fasum</option>
-                </select>
-
-                {/* Status Filter */}
+                {/* Filter Status */}
                 <select
                   value={filterPmatStatus}
                   onChange={(e) => setFilterPmatStatus(e.target.value)}
                   style={{
-                    height: '36px',
+                    height: '34px',
                     background: '#1e293b',
                     border: '1px solid #334155',
                     borderRadius: '6px',
                     color: '#ffffff',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     padding: '0 10px',
-                    outline: 'none',
-                    fontWeight: 700
+                    fontWeight: 700,
+                    outline: 'none'
                   }}
                 >
                   <option value="ALL">📋 Semua Status</option>
-                  <option value="Diajukan">Diajukan</option>
-                  <option value="Disetujui">Disetujui</option>
-                  <option value="Terkirim">Terkirim</option>
+                  <option value="Menunggu Review">Menunggu Review</option>
+                  <option value="Disetujui Sebagian">Disetujui Sebagian</option>
+                  <option value="Disetujui Penuh">Disetujui Penuh</option>
+                  <option value="Dicairkan">Dicairkan</option>
+                  <option value="Ditolak">Ditolak</option>
                 </select>
-
-                {(searchPmat || filterPmatProyek !== 'ALL' || filterPmatBlok !== 'ALL' || filterPmatStatus !== 'ALL') && (
-                  <button
-                    type="button"
-                    onClick={() => { setSearchPmat(''); setFilterPmatProyek('ALL'); setFilterPmatBlok('ALL'); setFilterPmatStatus('ALL'); }}
-                    style={{
-                      height: '36px',
-                      background: 'rgba(239, 68, 68, 0.15)',
-                      border: '1px solid rgba(239, 68, 68, 0.4)',
-                      borderRadius: '6px',
-                      color: '#f87171',
-                      padding: '0 10px',
-                      fontSize: '0.8rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Reset
-                  </button>
-                )}
               </div>
             </div>
 
-            {/* TABEL PENGAJUAN MATERIAL (PERSIS FORMAT GAMBAR DENGAN WARNA HEADER BIRU TEKNIK) */}
+            {/* TABEL REKAP BATCH SPbM */}
             <div className="table-responsive" style={{ overflowX: 'auto', border: '1px solid #1e3a8a', borderRadius: '8px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem', textAlign: 'left' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)', color: '#ffffff' }}>
-                    <th style={{ width: '45px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>No.</th>
-                    <th style={{ width: '110px', border: '1px solid #2563eb', padding: '10px 10px', textAlign: 'center', fontWeight: 900 }}>Kode</th>
-                    <th style={{ minWidth: '220px', border: '1px solid #2563eb', padding: '10px 12px', fontWeight: 900 }}>Material</th>
-                    <th style={{ width: '75px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Qty</th>
-                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Sat</th>
-                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Blok</th>
-                    <th style={{ width: '65px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>No.</th>
-                    <th style={{ minWidth: '220px', border: '1px solid #2563eb', padding: '10px 12px', fontWeight: 900 }}>Keterangan</th>
-                    <th style={{ width: '95px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Status</th>
-                    <th style={{ width: '85px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Aksi</th>
+                    <th style={{ width: '40px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>No.</th>
+                    <th style={{ width: '150px', border: '1px solid #2563eb', padding: '10px 10px', textAlign: 'center', fontWeight: 900 }}>No. SPbM</th>
+                    <th style={{ width: '105px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Tanggal</th>
+                    <th style={{ width: '140px', border: '1px solid #2563eb', padding: '10px 10px', fontWeight: 900 }}>Proyek</th>
+                    <th style={{ width: '150px', border: '1px solid #2563eb', padding: '10px 10px', fontWeight: 900 }}>Pemohon</th>
+                    <th style={{ width: '90px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Item</th>
+                    <th style={{ width: '160px', border: '1px solid #2563eb', padding: '10px 10px', textAlign: 'center', fontWeight: 900 }}>Status Finance</th>
+                    <th style={{ width: '160px', border: '1px solid #2563eb', padding: '10px 10px', textAlign: 'center', fontWeight: 900 }}>Verifikasi Baris</th>
+                    <th style={{ width: '120px', border: '1px solid #2563eb', padding: '10px 8px', textAlign: 'center', fontWeight: 900 }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPengajuanMaterialList.length === 0 ? (
+                  {filteredSpbmBatches.length === 0 ? (
                     <tr>
-                      <td colSpan={10} style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#94a3b8', border: '1px solid #1e293b' }}>
+                      <td colSpan={9} style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#94a3b8', border: '1px solid #1e293b' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                           <ClipboardList size={36} color="#3b82f6" style={{ opacity: 0.7 }} />
-                          <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada data Pengajuan Material</div>
-                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Klik tombol "+ Tambah Pengajuan Material" di atas untuk menambahkan data baru.</div>
+                          <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada berkas Pengajuan Material</div>
+                          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Isi formulir dan baris material di tabel atas, lalu klik "🚀 Ajukan 1 Tabel Ini ke Finance".</div>
                         </div>
                       </td>
                     </tr>
                   ) : (
-                    filteredPengajuanMaterialList.map((item, idx) => {
+                    filteredSpbmBatches.map((batch, idx) => {
                       const isEven = idx % 2 === 0;
+                      const approvedCount = (batch.rows || []).filter(r => r.status === 'Disetujui' || r.isApproved).length;
+                      const totalCount = (batch.rows || []).length;
+                      const rejectedCount = (batch.rows || []).filter(r => r.status === 'Ditolak').length;
+
                       return (
                         <tr
-                          key={item.id}
+                          key={batch.id}
                           style={{
                             background: isEven ? '#090f1d' : '#0d1527',
                             borderBottom: '1px solid #1e293b',
@@ -13926,7 +14783,7 @@ export const TeknikModule = () => {
                             {idx + 1}
                           </td>
 
-                          {/* 2. Kode */}
+                          {/* 2. No SPbM */}
                           <td style={{ border: '1px solid #1e293b', padding: '9px 10px', textAlign: 'center' }}>
                             <span style={{
                               background: 'rgba(30, 58, 138, 0.45)',
@@ -13938,95 +14795,94 @@ export const TeknikModule = () => {
                               padding: '2px 8px',
                               borderRadius: '4px'
                             }}>
-                              {item.kode || '-'}
+                              {batch.noDok || batch.id}
                             </span>
                           </td>
 
-                          {/* 3. Material */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 12px' }}>
-                            <div style={{ fontWeight: 800, color: '#ffffff' }}>{item.material}</div>
-                            {item.proyek && (
-                              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                                Proyek: {item.proyek} {item.pemohon ? `• Oleh: ${item.pemohon}` : ''}
+                          {/* 3. Tanggal */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', color: '#cbd5e1' }}>
+                            {batch.tanggal}
+                          </td>
+
+                          {/* 4. Proyek */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 10px', fontWeight: 800, color: '#ffffff' }}>
+                            {batch.proyek}
+                          </td>
+
+                          {/* 5. Pemohon */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 10px', color: '#cbd5e1' }}>
+                            {batch.pemohon}
+                          </td>
+
+                          {/* 6. Total Item */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
+                            <span style={{ fontWeight: 900, color: '#38bdf8' }}>
+                              {totalCount} Item
+                            </span>
+                          </td>
+
+                          {/* 7. Status Finance */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 10px', textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '3px 10px',
+                              borderRadius: '12px',
+                              fontSize: '0.74rem',
+                              fontWeight: 800,
+                              background: batch.status === 'Dicairkan' ? 'rgba(16, 185, 129, 0.2)' : (batch.status === 'Disetujui Penuh' ? 'rgba(16, 185, 129, 0.2)' : (batch.status === 'Disetujui Sebagian' ? 'rgba(56, 189, 248, 0.2)' : (batch.status === 'Ditolak' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'))),
+                              color: batch.status === 'Dicairkan' ? '#34d399' : (batch.status === 'Disetujui Penuh' ? '#34d399' : (batch.status === 'Disetujui Sebagian' ? '#38bdf8' : (batch.status === 'Ditolak' ? '#f87171' : '#fbbf24'))),
+                              border: `1px solid ${batch.status === 'Dicairkan' ? '#10b981' : (batch.status === 'Disetujui Penuh' ? '#10b981' : (batch.status === 'Disetujui Sebagian' ? '#38bdf8' : (batch.status === 'Ditolak' ? '#ef4444' : '#f59e0b')))}`
+                            }}>
+                              {batch.status || 'Menunggu Review'}
+                            </span>
+                          </td>
+
+                          {/* 8. Verifikasi Baris */}
+                          <td style={{ border: '1px solid #1e293b', padding: '9px 10px', textAlign: 'center' }}>
+                            {batch.status === 'Menunggu Review' ? (
+                              <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>⏳ Menunggu review Finance</span>
+                            ) : (
+                              <div style={{ fontSize: '0.76rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ color: approvedCount > 0 ? '#34d399' : '#94a3b8', fontWeight: 800 }}>
+                                  ✓ {approvedCount} dari {totalCount} item disetujui
+                                </span>
+                                {rejectedCount > 0 && (
+                                  <span style={{ color: '#f87171', fontSize: '0.7rem' }}>
+                                    ✗ {rejectedCount} item ditolak
+                                  </span>
+                                )}
                               </div>
                             )}
                           </td>
 
-                          {/* 4. Qty */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
-                            <span style={{ fontWeight: 900, color: '#38bdf8', fontSize: '0.92rem' }}>
-                              {item.qty}
-                            </span>
-                          </td>
-
-                          {/* 5. Sat */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
-                            <span style={{
-                              background: 'rgba(56, 189, 248, 0.12)',
-                              color: '#7dd3fc',
-                              fontWeight: 700,
-                              fontSize: '0.78rem',
-                              padding: '3px 8px',
-                              borderRadius: '4px',
-                              border: '1px solid rgba(56, 189, 248, 0.25)'
-                            }}>
-                              {item.sat || '-'}
-                            </span>
-                          </td>
-
-                          {/* 6. Blok */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', fontWeight: 800, color: '#f8fafc' }}>
-                            {item.blok || '-'}
-                          </td>
-
-                          {/* 7. No */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center', fontWeight: 900, color: '#38bdf8' }}>
-                            {item.no || '-'}
-                          </td>
-
-                          {/* 8. Keterangan */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 12px', color: '#cbd5e1' }}>
-                            {item.keterangan || '-'}
-                          </td>
-
-                          {/* 9. Status */}
-                          <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
-                            <span style={{
-                              display: 'inline-block',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              fontSize: '0.74rem',
-                              fontWeight: 800,
-                              background: item.status === 'Disetujui' ? 'rgba(16, 185, 129, 0.15)' : (item.status === 'Terkirim' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)'),
-                              color: item.status === 'Disetujui' ? '#34d399' : (item.status === 'Terkirim' ? '#38bdf8' : '#fbbf24'),
-                              border: `1px solid ${item.status === 'Disetujui' ? 'rgba(16, 185, 129, 0.35)' : (item.status === 'Terkirim' ? 'rgba(56, 189, 248, 0.35)' : 'rgba(245, 158, 11, 0.35)')}`
-                            }}>
-                              {item.status || 'Diajukan'}
-                            </span>
-                          </td>
-
-                          {/* 10. Aksi */}
+                          {/* 9. Aksi */}
                           <td style={{ border: '1px solid #1e293b', padding: '9px 8px', textAlign: 'center' }}>
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                               <button
                                 type="button"
-                                onClick={() => handleOpenEditPmat(item)}
-                                title="Edit Pengajuan Material"
+                                onClick={() => handleOpenSpbmBatchDetail(batch)}
+                                title="Lihat Rincian & Status Baris Finance"
                                 style={{
-                                  background: 'rgba(56, 189, 248, 0.15)',
-                                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                                  background: 'linear-gradient(135deg, #034efc, #1d4ed8)',
+                                  border: 'none',
                                   borderRadius: '6px',
-                                  color: '#38bdf8',
-                                  padding: '5px 7px',
-                                  cursor: 'pointer'
+                                  color: '#ffffff',
+                                  padding: '5px 8px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
                                 }}
                               >
-                                <Edit size={13} />
+                                <Eye size={12} /> Rincian
                               </button>
+
                               <button
                                 type="button"
-                                onClick={() => handleDeletePmat(item)}
-                                title="Hapus Pengajuan Material"
+                                onClick={() => handleDeleteSpbmBatch(batch)}
+                                title="Hapus Berkas Ini"
                                 style={{
                                   background: 'rgba(239, 68, 68, 0.15)',
                                   border: '1px solid rgba(239, 68, 68, 0.4)',
@@ -14060,19 +14916,207 @@ export const TeknikModule = () => {
               gap: '8px'
             }}>
               <div>
-                Menampilkan <strong style={{ color: '#ffffff' }}>{filteredPengajuanMaterialList.length}</strong> dari total <strong style={{ color: '#ffffff' }}>{pengajuanMaterialList.length}</strong> data pengajuan material
+                Menampilkan <strong style={{ color: '#ffffff' }}>{filteredSpbmBatches.length}</strong> berkas SPbM
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#93c5fd' }}>
                   <Package size={14} /> Terhubung ke Database Master Barang
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#34d399' }}>
-                  <CheckCircle2 size={14} /> Tersimpan Otomatis ke Cloud & LocalStorage
+                  <CheckCircle2 size={14} /> Tersinkron Real-time dengan Modul Keuangan (Finance)
                 </span>
               </div>
             </div>
 
           </div>
+
+          {/* ========================================================================= */}
+          {/* MODAL DETAIL RINCIAN STATUS BARIS PENGAJUAN MATERIAL (DARI SISI TEKNIK)   */}
+          {/* ========================================================================= */}
+          {isSpbmDetailModalOpen && selectedSpbmBatchDetail && (
+            <div className="modal-backdrop" style={{ zIndex: 1100 }}>
+              <div className="modal-content" style={{ maxWidth: '880px', background: '#0f172a', border: '1.5px solid #2563eb', color: '#ffffff', borderRadius: '12px' }}>
+                <div className="modal-header" style={{ borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ClipboardList size={22} color="#38bdf8" />
+                    <div>
+                      <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.15rem', color: '#ffffff' }}>
+                        Rincian SPbM: {selectedSpbmBatchDetail.noDok || selectedSpbmBatchDetail.id}
+                      </h3>
+                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                        Proyek: {selectedSpbmBatchDetail.proyek} • Pemohon: {selectedSpbmBatchDetail.pemohon} • Tanggal: {selectedSpbmBatchDetail.tanggal}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsSpbmDetailModalOpen(false)}
+                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="modal-body" style={{ maxHeight: '75vh', overflowY: 'auto', padding: '1.25rem' }}>
+                  {/* Status Banner */}
+                  <div style={{
+                    background: '#090d16',
+                    border: '1px solid #1e293b',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Status Pengajuan di Finance: </span>
+                      <strong style={{
+                        color: selectedSpbmBatchDetail.status === 'Dicairkan' ? '#34d399' : (selectedSpbmBatchDetail.status === 'Disetujui Penuh' ? '#34d399' : (selectedSpbmBatchDetail.status === 'Disetujui Sebagian' ? '#38bdf8' : (selectedSpbmBatchDetail.status === 'Ditolak' ? '#f87171' : '#fbbf24'))),
+                        fontSize: '0.88rem'
+                      }}>
+                        {selectedSpbmBatchDetail.status || 'Menunggu Review'}
+                      </strong>
+                    </div>
+
+                    <div style={{ fontSize: '0.78rem', color: '#cbd5e1' }}>
+                      Item Disetujui: <strong style={{ color: '#34d399' }}>{(selectedSpbmBatchDetail.rows || []).filter(r => r.status === 'Disetujui' || r.isApproved).length}</strong> dari <strong>{(selectedSpbmBatchDetail.rows || []).length}</strong> item
+                    </div>
+                  </div>
+
+                  {/* Tabel Rincian Baris */}
+                  <div className="table-responsive" style={{ overflowX: 'auto', border: '1px solid #1e3a8a', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)', color: '#ffffff' }}>
+                          <th style={{ width: '35px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>No</th>
+                          <th style={{ width: '85px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Kode</th>
+                          <th style={{ minWidth: '180px', border: '1px solid #2563eb', padding: '8px 8px' }}>Material</th>
+                          <th style={{ width: '60px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Qty</th>
+                          <th style={{ width: '60px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Sat</th>
+                          <th style={{ width: '75px', border: '1px solid #2563eb', padding: '8px 6px', textAlign: 'center' }}>Blok/No</th>
+                          <th style={{ minWidth: '150px', border: '1px solid #2563eb', padding: '8px 8px' }}>Keterangan</th>
+                          <th style={{ width: '130px', border: '1px solid #2563eb', padding: '8px 8px', textAlign: 'center' }}>Status Approval</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(selectedSpbmBatchDetail.rows || []).map((r, i) => {
+                          const isApp = r.status === 'Disetujui' || r.isApproved === true;
+                          const isRej = r.status === 'Ditolak' || r.isApproved === false;
+
+                          return (
+                            <tr
+                              key={r.id || i}
+                              style={{
+                                background: isApp ? 'rgba(16, 185, 129, 0.08)' : (isRej ? 'rgba(239, 68, 68, 0.08)' : (i % 2 === 0 ? '#090f1d' : '#0d1527')),
+                                borderBottom: '1px solid #1e293b'
+                              }}
+                            >
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 4px', textAlign: 'center', color: '#94a3b8' }}>
+                                {i + 1}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 6px', textAlign: 'center' }}>
+                                <span style={{ background: 'rgba(30, 58, 138, 0.4)', border: '1px solid #3b82f6', color: '#93c5fd', fontFamily: 'monospace', fontWeight: 800, padding: '1px 5px', borderRadius: '3px', fontSize: '0.74rem' }}>
+                                  {r.kode || '-'}
+                                </span>
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 8px', fontWeight: 800, color: '#ffffff' }}>
+                                {r.material}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 6px', textAlign: 'center', fontWeight: 900, color: '#38bdf8' }}>
+                                {r.qty}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 6px', textAlign: 'center', color: '#cbd5e1' }}>
+                                {r.sat}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 6px', textAlign: 'center', color: '#cbd5e1' }}>
+                                {r.blok || '-'} {r.unitNo || r.no ? `/${r.unitNo || r.no}` : ''}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 8px', color: '#94a3b8', fontSize: '0.76rem' }}>
+                                {r.keterangan || '-'}
+                              </td>
+                              <td style={{ border: '1px solid #1e293b', padding: '7px 8px', textAlign: 'center' }}>
+                                <span style={{
+                                  display: 'inline-block',
+                                  padding: '2px 8px',
+                                  borderRadius: '10px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  background: isApp ? 'rgba(16, 185, 129, 0.2)' : (isRej ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)'),
+                                  color: isApp ? '#34d399' : (isRej ? '#f87171' : '#fbbf24'),
+                                  border: `1px solid ${isApp ? '#10b981' : (isRej ? '#ef4444' : '#f59e0b')}`
+                                }}>
+                                  {isApp ? '✓ Disetujui' : (isRej ? '✗ Ditolak' : '⏳ Menunggu')}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {selectedSpbmBatchDetail.catatan && (
+                    <div style={{ marginTop: '12px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                      Catatan Pengajuan: <span style={{ color: '#cbd5e1' }}>{selectedSpbmBatchDetail.catatan}</span>
+                    </div>
+                  )}
+
+                  {selectedSpbmBatchDetail.disbursedBankName && (
+                    <div style={{ marginTop: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '10px', borderRadius: '8px' }}>
+                      <div style={{ color: '#34d399', fontWeight: 800, fontSize: '0.82rem' }}>Telah Dibayarkan / Dicairkan oleh Finance:</div>
+                      <div style={{ color: '#ffffff', fontSize: '0.78rem', marginTop: '2px' }}>
+                        via {selectedSpbmBatchDetail.disbursedBankName} • Tanggal: {selectedSpbmBatchDetail.disbursedAt}
+                        {selectedSpbmBatchDetail.disbursedAmount && ` • Nominal: Rp ${Number(selectedSpbmBatchDetail.disbursedAmount).toLocaleString('id-ID')}`}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="modal-footer" style={{ borderTop: '1px solid #334155', padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    style={{
+                      background: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      color: '#e2e8f0',
+                      padding: '8px 14px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Printer size={14} /> Cetak Dokumen SPbM
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsSpbmDetailModalOpen(false)}
+                    style={{
+                      background: '#034efc',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      padding: '8px 18px',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       )}
 

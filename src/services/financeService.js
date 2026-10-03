@@ -623,6 +623,7 @@ export const submitFundRequest = (newRequest) => {
     project: newRequest.project || 'Umum / Head Office',
     category: newRequest.category || 'Operasional',
     amount: Number(newRequest.amount) || 0,
+    approvedAmount: newRequest.approvedAmount !== undefined ? Number(newRequest.approvedAmount) : (Number(newRequest.amount) || 0),
     requestDate: newRequest.requestDate || new Date().toISOString().split('T')[0],
     dueDate: newRequest.dueDate || new Date().toISOString().split('T')[0],
     priority: newRequest.priority || 'Normal',
@@ -633,9 +634,12 @@ export const submitFundRequest = (newRequest) => {
     disbursedBankName: null,
     disbursedAt: null,
     disbursedRef: null,
-    accountCode: newRequest.accountCode || '5-301',
+    accountCode: newRequest.accountCode || '5-101',
     notes: newRequest.notes || '',
-    attachments: newRequest.attachments || []
+    attachments: newRequest.attachments || [],
+    spbmNo: newRequest.spbmNo || null,
+    spbmId: newRequest.spbmId || null,
+    materialRows: newRequest.materialRows || []
   };
 
   const updated = [createdItem, ...currentList];
@@ -650,6 +654,89 @@ export const submitFundRequest = (newRequest) => {
   });
 
   return createdItem;
+};
+
+/**
+ * Update status approval per baris material dan hitung total dana yang disetujui oleh Finance
+ */
+export const updateFundRequestMaterialRows = (requestId, updatedRows, financeOfficer = 'Finance Team') => {
+  const currentList = getFundRequests();
+  let calculatedApprovedAmount = 0;
+  let allApproved = true;
+  let anyApproved = false;
+  let allRejected = true;
+
+  updatedRows.forEach(r => {
+    const isApp = r.status === 'Disetujui' || r.isApproved === true;
+    const isRej = r.status === 'Ditolak' || r.isApproved === false;
+    if (isApp) {
+      anyApproved = true;
+      allRejected = false;
+      const rowVal = Number(r.subtotal) || (Number(r.hargaSatuan || 0) * Number(r.qty || 0)) || 0;
+      calculatedApprovedAmount += rowVal;
+    } else if (isRej) {
+      allApproved = false;
+    } else {
+      allApproved = false;
+      allRejected = false;
+    }
+  });
+
+  let newStatus = 'Menunggu Review';
+  if (allRejected && updatedRows.length > 0) {
+    newStatus = 'Ditolak';
+  } else if (allApproved && updatedRows.length > 0) {
+    newStatus = 'Disetujui';
+  } else if (anyApproved) {
+    newStatus = 'Disetujui Sebagian';
+  }
+
+  const updated = currentList.map(req => {
+    if (req.id === requestId) {
+      return {
+        ...req,
+        materialRows: updatedRows,
+        approvedAmount: calculatedApprovedAmount,
+        status: newStatus !== 'Menunggu Review' ? newStatus : req.status,
+        approvedBy: anyApproved ? financeOfficer : req.approvedBy,
+        approvedAt: anyApproved ? new Date().toISOString().split('T')[0] : req.approvedAt
+      };
+    }
+    return req;
+  });
+  saveFundRequests(updated);
+
+  // Sinkronisasi status ke batch SPbM di Modul Teknik
+  try {
+    const BATCH_KEY = 'ams_teknik_spbm_batches_v1';
+    const rawBatches = localStorage.getItem(BATCH_KEY);
+    if (rawBatches) {
+      const parsed = JSON.parse(rawBatches);
+      if (Array.isArray(parsed)) {
+        const syncUpdated = parsed.map(b => {
+          if (b.fundRequestId === requestId || b.noDok === currentList.find(x => x.id === requestId)?.spbmNo) {
+            return {
+              ...b,
+              rows: updatedRows,
+              status: newStatus,
+              totalApprovedAmount: calculatedApprovedAmount
+            };
+          }
+          return b;
+        });
+        localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+      }
+    }
+  } catch (e) {}
+
+  addAuditLog({
+    user: financeOfficer,
+    action: 'Verifikasi Item Material',
+    details: `${requestId}: Verifikasi item SPbM disetujui total Rp ${calculatedApprovedAmount.toLocaleString('id-ID')} (${updatedRows.filter(r => r.status === 'Disetujui').length}/${updatedRows.length} item disetujui)`,
+    module: 'Finance & Acc'
+  });
+
+  return { success: true, newStatus, approvedAmount: calculatedApprovedAmount };
 };
 
 /**
@@ -669,6 +756,24 @@ export const approveFundRequest = (requestId, approverName = 'Pimpinan / Finance
     return req;
   });
   saveFundRequests(updated);
+
+  // Sync status to Teknik batches if SPbM
+  try {
+    const BATCH_KEY = 'ams_teknik_spbm_batches_v1';
+    const rawBatches = localStorage.getItem(BATCH_KEY);
+    if (rawBatches) {
+      const parsed = JSON.parse(rawBatches);
+      if (Array.isArray(parsed)) {
+        const syncUpdated = parsed.map(b => {
+          if (b.fundRequestId === requestId || b.noDok === currentList.find(x => x.id === requestId)?.spbmNo) {
+            return { ...b, status: 'Disetujui Penuh' };
+          }
+          return b;
+        });
+        localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+      }
+    }
+  } catch (e) {}
 
   addAuditLog({
     user: approverName,
@@ -695,6 +800,24 @@ export const rejectFundRequest = (requestId, reason = '', rejectorName = 'Financ
   });
   saveFundRequests(updated);
 
+  // Sync status to Teknik batches if SPbM
+  try {
+    const BATCH_KEY = 'ams_teknik_spbm_batches_v1';
+    const rawBatches = localStorage.getItem(BATCH_KEY);
+    if (rawBatches) {
+      const parsed = JSON.parse(rawBatches);
+      if (Array.isArray(parsed)) {
+        const syncUpdated = parsed.map(b => {
+          if (b.fundRequestId === requestId || b.noDok === currentList.find(x => x.id === requestId)?.spbmNo) {
+            return { ...b, status: 'Ditolak' };
+          }
+          return b;
+        });
+        localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+      }
+    }
+  } catch (e) {}
+
   addAuditLog({
     user: rejectorName,
     action: 'Penolakan Pengajuan Dana',
@@ -709,6 +832,9 @@ export const rejectFundRequest = (requestId, reason = '', rejectorName = 'Financ
  * 2. Saldo rekening Bank yang dipilih langsung terpotong.
  * 3. Otomatis membuat baris pembukuan di Jurnal Umum (Debit Beban, Kredit Bank).
  * 4. Catat riwayat di Audit Log.
+ * 
+ * KHUSUS PENGAJUAN MATERIAL:
+ * Finance hanya mencairkan/membayar total dana untuk baris material yang DISETUJUI.
  */
 export const disburseFundRequest = (requestId, bankId, officerName = 'Finance Staff', extraData = {}) => {
   const reqList = getFundRequests();
@@ -719,8 +845,20 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
   const targetBank = banks.find(b => b.id === bankId);
   if (!targetBank) throw new Error('Rekening bank pencairan tidak valid!');
 
-  if (targetBank.balance < targetReq.amount) {
-    throw new Error(`Saldo bank ${targetBank.name} tidak mencukupi! (Saldo: Rp ${targetBank.balance.toLocaleString('id-ID')}, Dibutuhkan: Rp ${targetReq.amount.toLocaleString('id-ID')})`);
+  // Tentukan nominal pencairan riil: Jika pengajuan material berbaris, cairkan hanya yang disetujui!
+  let disburseAmount = targetReq.amount;
+  if (targetReq.materialRows && targetReq.materialRows.length > 0) {
+    if (targetReq.approvedAmount !== undefined && targetReq.approvedAmount > 0) {
+      disburseAmount = targetReq.approvedAmount;
+    } else if (extraData.customAmount !== undefined && Number(extraData.customAmount) > 0) {
+      disburseAmount = Number(extraData.customAmount);
+    }
+  } else if (extraData.customAmount !== undefined && Number(extraData.customAmount) > 0) {
+    disburseAmount = Number(extraData.customAmount);
+  }
+
+  if (targetBank.balance < disburseAmount) {
+    throw new Error(`Saldo bank ${targetBank.name} tidak mencukupi! (Saldo: Rp ${targetBank.balance.toLocaleString('id-ID')}, Dibutuhkan: Rp ${disburseAmount.toLocaleString('id-ID')})`);
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -732,6 +870,7 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
       return {
         ...r,
         status: 'Dicairkan',
+        disbursedAmount: disburseAmount,
         disbursedBankId: targetBank.id,
         disbursedBankName: targetBank.name,
         disbursedAt: todayStr,
@@ -750,7 +889,7 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
     if (b.id === bankId) {
       return {
         ...b,
-        balance: b.balance - targetReq.amount
+        balance: b.balance - disburseAmount
       };
     }
     return b;
@@ -759,32 +898,55 @@ export const disburseFundRequest = (requestId, bankId, officerName = 'Finance St
 
   // 3. Auto-Posting ke Jurnal Umum
   const coaList = getCoa();
-  const debitCoa = coaList.find(c => c.code === targetReq.accountCode) || { name: 'Beban Operasional Lainnya', code: targetReq.accountCode || '5-301' };
+  const debitCoa = coaList.find(c => c.code === targetReq.accountCode) || { name: 'Beban Pokok Konstruksi & Pembangunan', code: targetReq.accountCode || '5-101' };
   const creditCoa = coaList.find(c => c.code === targetBank.accountCode) || { name: targetBank.name, code: targetBank.accountCode || '1-102' };
 
   addJurnalEntry({
     refNo: refDisburseNo,
     date: todayStr,
-    description: `Pencairan ${targetReq.id} [${targetReq.originModuleName}]: ${targetReq.title}`,
+    description: `Pencairan ${targetReq.id} [${targetReq.originModuleName}]: ${targetReq.title} (Hanya yang disetujui Rp ${disburseAmount.toLocaleString('id-ID')})`,
     debitAccountCode: debitCoa.code,
     debitAccountName: debitCoa.name,
     creditAccountCode: creditCoa.code,
     creditAccountName: creditCoa.name,
-    amount: targetReq.amount,
+    amount: disburseAmount,
     project: targetReq.project,
     status: 'Posted',
     moduleSource: targetReq.originModuleName
   });
 
-  // 4. Catat Audit Log
+  // 4. Sinkronisasi status ke SPbM di Modul Teknik
+  try {
+    const BATCH_KEY = 'ams_teknik_spbm_batches_v1';
+    const rawBatches = localStorage.getItem(BATCH_KEY);
+    if (rawBatches) {
+      const parsed = JSON.parse(rawBatches);
+      if (Array.isArray(parsed)) {
+        const syncUpdated = parsed.map(b => {
+          if (b.fundRequestId === requestId || b.noDok === targetReq.spbmNo) {
+            return {
+              ...b,
+              status: 'Dicairkan',
+              disbursedAt: todayStr,
+              disbursedBankName: targetBank.name,
+              disbursedAmount: disburseAmount
+            };
+          }
+          return b;
+        });
+        localStorage.setItem(BATCH_KEY, JSON.stringify(syncUpdated));
+      }
+    }
+  } catch (e) {}
+
   addAuditLog({
     user: officerName,
     action: 'Pencairan Dana (Disbursement)',
-    details: `Dana ${targetReq.id} Rp ${targetReq.amount.toLocaleString('id-ID')} dicairkan via ${targetBank.name}. Ref: ${refDisburseNo}`,
+    details: `Mencairkan ${targetReq.id} senilai Rp ${disburseAmount.toLocaleString('id-ID')} via ${targetBank.name} (Ref: ${refDisburseNo})`,
     module: 'Finance & Acc'
   });
 
-  return { success: true, refDisburseNo };
+  return { success: true, refDisburseNo, disburseAmount };
 };
 
 // -----------------------------------------------------------------------------
