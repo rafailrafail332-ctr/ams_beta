@@ -66,6 +66,8 @@ import {
   Trees,
   Landmark
 } from 'lucide-react';
+import { FundRequestModal } from '../components/FundRequestModal';
+import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 
 // Indonesian Terbilang Utility
 function angkaTerbilang(nilai) {
@@ -466,6 +468,10 @@ export const TeknikModule = () => {
   const [subTabTukarFaktur, setSubTabTukarFaktur] = useState('input_tf');
   const [subTabPersediaan, setSubTabPersediaan] = useState('terpadu');
   const [subTabDatabase, setSubTabDatabase] = useState('vendor');
+
+  // Modals Pengajuan & Pelacakan Dana Teknik ke Finance
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const [isTrackerModalOpen, setIsTrackerModalOpen] = useState(false);
 
   useEffect(() => {
     if (activeSubTab === 'rab' || activeSubTab === 'input') {
@@ -4971,7 +4977,51 @@ export const TeknikModule = () => {
             Pusat operasional manajemen konstruksi, absensi kehadiran & Database Tenaga Kerja, spreadsheet RAB, & laporan rekapitulasi progres.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {/* Tombol Status Pengajuan Dana Teknik */}
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              border: '1.5px solid #38bdf8',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(2, 132, 199, 0.35)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsTrackerModalOpen(true)}
+          >
+            <FileText size={15} color="#ffffff" /> Status Pengajuan Dana
+          </button>
+
+          {/* Tombol Ajukan Dana Teknik ke Finance */}
+          <button
+            type="button"
+            style={{
+              background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+              border: '1.5px solid #ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
+              cursor: 'pointer'
+            }}
+            onClick={() => setIsFundModalOpen(true)}
+          >
+            <DollarSign size={15} color="#ffffff" /> + Ajukan Dana ke Finance
+          </button>
+
           <button
             type="button"
             onClick={handleManualCloudSync}
@@ -18371,6 +18421,31 @@ export const TeknikModule = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL PENGAJUAN DANA TEKNIK KE FINANCE */}
+      <FundRequestModal
+        isOpen={isFundModalOpen}
+        onClose={() => setIsFundModalOpen(false)}
+        defaultOrigin="teknik"
+        defaultOriginName="Teknik & Konstruksi"
+        defaultProject="Ashoka View"
+        defaultCategory="Termin Konstruksi & Material"
+        defaultRequester={currentUser?.name || "Hapip Alamsyah / Kholidin (Teknik)"}
+        defaultAccountCode="5-101"
+        onSuccess={(req) => showNotification(`Pengajuan dana ${req.id} (${req.title}) berhasil dikirim ke Finance & Acc!`)}
+      />
+
+      {/* MODAL PELACAKAN & STATUS PENGAJUAN DANA TEKNIK */}
+      <FundRequestTrackerModal
+        isOpen={isTrackerModalOpen}
+        onClose={() => setIsTrackerModalOpen(false)}
+        originModule="teknik"
+        originModuleName="Teknik & Konstruksi"
+        onOpenNewRequest={() => {
+          setIsTrackerModalOpen(false);
+          setIsFundModalOpen(true);
+        }}
+      />
     </div>
   );
 };
