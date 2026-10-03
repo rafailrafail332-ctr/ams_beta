@@ -131,8 +131,8 @@ export const TeknikBatp = () => {
             <button
               type="button"
               style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                border: '1.5px solid #38bdf8',
+                background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                border: '1.5px solid #ef4444',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.82rem',
@@ -141,7 +141,7 @@ export const TeknikBatp = () => {
                 gap: '6px',
                 padding: '8px 14px',
                 borderRadius: '8px',
-                boxShadow: '0 2px 10px rgba(2, 132, 199, 0.35)',
+                boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
                 cursor: 'pointer'
               }}
               onClick={() => setIsTrackerModalOpen(true)}
@@ -151,8 +151,8 @@ export const TeknikBatp = () => {
             <button
               type="button"
               style={{
-                background: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
-                border: '1.5px solid #3b82f6',
+                background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                border: '1.5px solid #ef4444',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.82rem',
@@ -161,7 +161,7 @@ export const TeknikBatp = () => {
                 gap: '6px',
                 padding: '8px 14px',
                 borderRadius: '8px',
-                boxShadow: '0 2px 10px rgba(59, 130, 246, 0.35)',
+                boxShadow: '0 2px 10px rgba(185, 28, 28, 0.4)',
                 cursor: 'pointer'
               }}
               onClick={() => setIsFundModalOpen(true)}

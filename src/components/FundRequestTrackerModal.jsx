@@ -199,8 +199,8 @@ export const FundRequestTrackerModal = ({
                   type="button"
                   onClick={onOpenNewRequest}
                   style={{
-                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                    border: '1.5px solid #38bdf8',
+                    background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                    border: '1.5px solid #ef4444',
                     color: '#ffffff',
                     fontWeight: 700,
                     fontSize: '0.8rem',
@@ -210,7 +210,7 @@ export const FundRequestTrackerModal = ({
                     alignItems: 'center',
                     gap: '6px',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
+                    boxShadow: '0 4px 12px rgba(185, 28, 28, 0.4)'
                   }}
                 >
                   <Plus size={15} /> + Ajukan Dana Baru
