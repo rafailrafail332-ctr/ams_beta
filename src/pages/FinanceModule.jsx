@@ -1770,17 +1770,25 @@ export const FinanceModule = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(filteredJurnal.length > 0 ? filteredJurnal : jurnal).slice(0, 5).map((jrn) => (
-                    <tr key={jrn.id} style={{ borderBottom: '1px solid #1e293b' }}>
-                      <td style={{ padding: '10px 12px', fontWeight: 700, color: '#f87171' }}>{jrn.refNo}</td>
-                      <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{jrn.date}</td>
-                      <td style={{ padding: '10px 12px', color: '#ffffff' }}>{jrn.description}</td>
-                      <td style={{ padding: '10px 12px', color: '#38bdf8' }}>{jrn.creditAccountName}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#f87171' }}>
-                        - Rp {Number(jrn.amount).toLocaleString('id-ID')}
+                  {filteredJurnal.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '1.75rem', color: '#64748b' }}>
+                        Tidak ada riwayat mutasi untuk filter ({filterProject} • {filterDateMode}).
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredJurnal.slice(0, 5).map((jrn) => (
+                      <tr key={jrn.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 700, color: '#f87171' }}>{jrn.refNo}</td>
+                        <td style={{ padding: '10px 12px', color: '#94a3b8' }}>{jrn.date}</td>
+                        <td style={{ padding: '10px 12px', color: '#ffffff' }}>{jrn.description}</td>
+                        <td style={{ padding: '10px 12px', color: '#38bdf8' }}>{jrn.creditAccountName}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 800, color: '#f87171' }}>
+                          - Rp {Number(jrn.amount).toLocaleString('id-ID')}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1848,13 +1856,13 @@ export const FinanceModule = () => {
                   STATUS JURNAL: BALANCE (SEIMBANG)
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                  Total {jurnal.length} Transaksi Tercatat • Debit & Kredit Sesuai Standar Akuntansi
+                  Total {filteredJurnal.length} Transaksi Tercatat ({filterProject === 'ALL' ? 'Semua Proyek' : filterProject}) • Debit & Kredit Sesuai Standar Akuntansi
                 </div>
               </div>
             </div>
 
             <div style={{ fontSize: '0.85rem', color: '#ffffff', fontWeight: 800 }}>
-              Total Nilai Jurnal: <span style={{ color: '#38bdf8' }}>Rp {jurnal.reduce((a, b) => a + b.amount, 0).toLocaleString('id-ID')}</span>
+              Total Nilai Jurnal: <span style={{ color: '#38bdf8' }}>Rp {filteredJurnal.reduce((a, b) => a + (Number(b.amount) || 0), 0).toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -2047,7 +2055,7 @@ export const FinanceModule = () => {
           {/* Kartu Ringkasan Akun Terpilih */}
           {(() => {
             const accInfo = coa.find(c => c.code === selectedGlAccount) || coa[0];
-            const relatedTrx = jurnal.filter(
+            const relatedTrx = filteredJurnal.filter(
               j => j.debitAccountCode === accInfo.code || j.creditAccountCode === accInfo.code
             );
 
@@ -2097,7 +2105,7 @@ export const FinanceModule = () => {
                       {relatedTrx.length === 0 ? (
                         <tr>
                           <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                            Belum ada mutasi jurnal untuk akun ini.
+                            Belum ada mutasi jurnal untuk akun ini pada filter ({filterProject} • {filterDateMode}).
                           </td>
                         </tr>
                       ) : (
@@ -2251,45 +2259,54 @@ export const FinanceModule = () => {
             </div>
           </div>
 
-          {/* Kartu Highlight Laba Bersih */}
-          <div
-            className="glass-card"
-            style={{
-              background: 'linear-gradient(135deg, #090d16 0%, #1e1b4b 100%)',
-              border: '1.5px solid #10b981',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '1rem'
-            }}
-          >
-            <div>
-              <div style={{ fontSize: '0.8rem', color: '#a7f3d0', fontWeight: 800 }}>LABA BERSIH SETELAH PAJAK (NET PROFIT)</div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', marginTop: '4px' }}>
-                Rp {financialTotals.labaBersih.toLocaleString('id-ID')}
+          {/* Highlight Laba Bersih & Donut Chart Proporsi Biaya */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
+            <div
+              className="glass-card"
+              style={{
+                background: 'linear-gradient(135deg, #090d16 0%, #1e1b4b 100%)',
+                border: '1.5px solid #10b981',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '1.25rem'
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '0.8rem', color: '#a7f3d0', fontWeight: 800 }}>LABA BERSIH SETELAH PAJAK (NET PROFIT)</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', marginTop: '4px' }}>
+                  Rp {financialTotals.labaBersih.toLocaleString('id-ID')}
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>
+                  Net Profit Margin: <strong style={{ color: '#38bdf8' }}>{((financialTotals.labaBersih / (financialTotals.pendapatan || 1)) * 100).toFixed(1)}%</strong>
+                </div>
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#cbd5e1', marginTop: '4px' }}>
-                Net Profit Margin: <strong style={{ color: '#38bdf8' }}>{((financialTotals.labaBersih / (financialTotals.pendapatan || 1)) * 100).toFixed(1)}%</strong>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Pendapatan (Revenue)</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff' }}>
+                    Rp {financialTotals.pendapatan.toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 14px' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total HPP & Beban</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f87171' }}>
+                    Rp {(financialTotals.hpp + financialTotals.bebanOps + financialTotals.bebanPajak).toLocaleString('id-ID')}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 16px' }}>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total Pendapatan (Revenue)</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff' }}>
-                  Rp {financialTotals.pendapatan.toLocaleString('id-ID')}
-                </div>
-              </div>
-              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '10px 16px' }}>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Total HPP & Beban</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#f87171' }}>
-                  Rp {(financialTotals.hpp + financialTotals.bebanOps + financialTotals.bebanPajak).toLocaleString('id-ID')}
-                </div>
-              </div>
-            </div>
+            <FinanceDonutChart
+              title="Struktur Biaya vs Profitabilitas"
+              subtitle={`Komposisi HPP, beban operasional, beban pajak, dan margin profit (${filterProject === 'ALL' ? 'Semua Proyek' : filterProject})`}
+              data={pnlDonutData}
+              badgeText="Margin Ratio"
+              height={180}
+            />
           </div>
 
           {/* Rincian Baris Laba Rugi */}
