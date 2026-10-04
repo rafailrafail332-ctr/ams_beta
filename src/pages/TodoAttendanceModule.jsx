@@ -1664,13 +1664,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1200px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1250px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  <th style={{ width: '115px', minWidth: '115px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '125px', minWidth: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     Tanggal
                   </th>
-                  <th style={{ width: '120px', minWidth: '120px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     Waktu
                   </th>
                   <th style={{ width: '130px', minWidth: '130px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
@@ -1715,15 +1715,15 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                       }}
                     >
                       {/* 1. Kolom Tanggal */}
-                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem', width: '125px', minWidth: '125px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', whiteSpace: 'nowrap' }}>
                           {item.date || item.assignDate || todayDateStr}
                         </div>
                       </td>
 
                       {/* 2. Kolom Waktu */}
-                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
-                        <div style={{ fontWeight: 800, color: '#F59E0B', fontSize: '0.875rem' }}>
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem', width: '150px', minWidth: '150px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontWeight: 800, color: '#F59E0B', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                           {item.waktu || '08:00 - 17:00'}
                         </div>
                       </td>
