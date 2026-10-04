@@ -1880,58 +1880,6 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
       {/* ================================================================= */}
       {activeTab === 'instruksi' && (
         <div className="glass-card" style={{ padding: '1.75rem' }}>
-          {/* MODERN BANNER HEADER */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))', padding: '1.25rem 1.5rem', borderRadius: '16px', border: '1px solid rgba(56, 189, 248, 0.25)', boxShadow: '0 8px 25px rgba(0,0,0,0.35)' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.2)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38BDF8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Briefcase size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 900, margin: 0, color: '#ffffff', letterSpacing: '-0.02em' }}>
-                  Instruksi & Penugasan Resmi Pimpinan
-                </h3>
-                {isBoss ? (
-                  <span className="badge badge-warning" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem' }}>
-                    <ShieldCheck size={12} /> Mode Pimpinan (BOD / GM / Head)
-                  </span>
-                ) : (
-                  <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem' }}>
-                    <UserCheck size={12} /> Tugas Untuk: {currentUser?.name}
-                  </span>
-                )}
-                <span className="badge badge-success" style={{ fontSize: '0.72rem', padding: '0.35rem 0.75rem', background: 'rgba(37, 211, 102, 0.15)', color: '#25D366', border: '1px solid #25D366' }}>
-                  📲 WA Pak Yazid Terhubung (+{yazidWaNumber})
-                </span>
-              </div>
-              <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: '0.4rem 0 0', lineHeight: 1.5 }}>
-                {isBoss
-                  ? 'Direktur Utama, General Manager, dan Head Marketing menerbitkan instruksi resmi dengan batas waktu deadline kepada staf.'
-                  : 'Daftar instruksi kerja dan mandat tugas dari Pimpinan. Mohon laporkan bukti hasil penyelesaian sebelum batas waktu.'}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => { setTempWaNumber(yazidWaNumber); setIsWaConfigOpen(true); }}
-                style={{ fontSize: '0.78rem', height: '38px', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(37, 211, 102, 0.35)' }}
-                title="Ubah nomor WhatsApp tujuan Pak Yazid"
-              >
-                <PhoneCall size={14} color="#25D366" /> No. WA Pak Yazid (+{yazidWaNumber})
-              </button>
-
-              {isBoss && (
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleOpenAddInstructionModal}
-                  style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800, height: '38px', boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)' }}
-                >
-                  <Plus size={16} /> + Terbitkan Instruksi Baru
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* KPI STAT CARDS FOR INSTRUCTIONS */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
             <div style={{ padding: '0.9rem 1.1rem', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))', border: '1px solid rgba(56, 189, 248, 0.3)', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
@@ -1975,38 +1923,50 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
             </div>
           </div>
 
-          {/* Sub-Filter Tab Selector untuk Instruksi */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', background: 'rgba(15, 23, 42, 0.65)', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-            <button
-              className={`btn btn-sm ${insFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setInsFilter('for_me')}
-              style={{ fontSize: '0.78rem', fontWeight: insFilter === 'for_me' ? 800 : 500 }}
-            >
-              Ditujukan Untuk Saya ({safeInstructions.filter(i => isTaskAssignedToUser(i, currentUser)).length})
-            </button>
-            {isBoss && (
+          {/* Sub-Filter Tab Selector & Action untuk Instruksi */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', background: 'rgba(15, 23, 42, 0.65)', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <button
-                className={`btn btn-sm ${insFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setInsFilter('all')}
-                style={{ fontSize: '0.78rem', fontWeight: insFilter === 'all' ? 800 : 500 }}
+                className={`btn btn-sm ${insFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setInsFilter('for_me')}
+                style={{ fontSize: '0.78rem', fontWeight: insFilter === 'for_me' ? 800 : 500 }}
               >
-                Seluruh Instruksi Proyek ({safeInstructions.length})
+                Ditujukan Untuk Saya ({safeInstructions.filter(i => isTaskAssignedToUser(i, currentUser)).length})
+              </button>
+              {isBoss && (
+                <button
+                  className={`btn btn-sm ${insFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setInsFilter('all')}
+                  style={{ fontSize: '0.78rem', fontWeight: insFilter === 'all' ? 800 : 500 }}
+                >
+                  Seluruh Instruksi Proyek ({safeInstructions.length})
+                </button>
+              )}
+              <button
+                className={`btn btn-sm ${insFilter === 'by_me' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setInsFilter('by_me')}
+                style={{ fontSize: '0.78rem', fontWeight: insFilter === 'by_me' ? 800 : 500 }}
+              >
+                Yang Saya Terbitkan
+              </button>
+              <button
+                className={`btn btn-sm ${insFilter === 'overdue' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setInsFilter('overdue')}
+                style={{ fontSize: '0.78rem', fontWeight: insFilter === 'overdue' ? 800 : 500, background: insFilter === 'overdue' ? undefined : 'rgba(239, 68, 68, 0.1)', color: insFilter === 'overdue' ? undefined : '#EF4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+              >
+                Melewati Batas Waktu ({safeInstructions.filter(i => isInstructionOverdue(i)).length})
+              </button>
+            </div>
+
+            {isBoss && (
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={handleOpenAddInstructionModal}
+                style={{ background: 'linear-gradient(135deg, #0284C7, #0369A1)', border: 'none', fontWeight: 800, height: '34px', fontSize: '0.82rem', flexShrink: 0, whiteSpace: 'nowrap', boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)' }}
+              >
+                <Plus size={16} /> + Terbitkan Instruksi Baru
               </button>
             )}
-            <button
-              className={`btn btn-sm ${insFilter === 'by_me' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setInsFilter('by_me')}
-              style={{ fontSize: '0.78rem', fontWeight: insFilter === 'by_me' ? 800 : 500 }}
-            >
-              Yang Saya Terbitkan
-            </button>
-            <button
-              className={`btn btn-sm ${insFilter === 'overdue' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setInsFilter('overdue')}
-              style={{ fontSize: '0.78rem', fontWeight: insFilter === 'overdue' ? 800 : 500, background: insFilter === 'overdue' ? undefined : 'rgba(239, 68, 68, 0.1)', color: insFilter === 'overdue' ? undefined : '#EF4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-            >
-              Melewati Batas Waktu ({safeInstructions.filter(i => isInstructionOverdue(i)).length})
-            </button>
           </div>
 
           {/* Table Instruksi Pekerjaan */}
