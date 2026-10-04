@@ -55,14 +55,14 @@ import {
 } from 'lucide-react';
 
 export const COMPANY_DIVISIONS = [
-  { id: 'DIV-FIN', name: 'Finance & Accounting', short: 'Finance', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.15)' },
-  { id: 'DIV-DIR', name: 'Direksi (Direktur Utama / GM)', short: 'Direksi', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
-  { id: 'DIV-MKT', name: 'Marketing & Promosi', short: 'Marketing', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
-  { id: 'DIV-HR', name: 'HR & GA (General Affairs)', short: 'HR & GA', color: '#EC4899', bg: 'rgba(236, 72, 153, 0.15)' },
-  { id: 'DIV-LEG', name: 'Legal & Perizinan Properti', short: 'Legal', color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)' },
-  { id: 'DIV-TEK', name: 'Teknik & Lapangan (Sipil/Mandor)', short: 'Teknik', color: '#EAB308', bg: 'rgba(234, 179, 8, 0.15)' },
-  { id: 'DIV-PRO', name: 'Procurement & Vendor Logistik', short: 'Procurement', color: '#6366F1', bg: 'rgba(99, 102, 241, 0.15)' },
-  { id: 'DIV-CRM', name: 'Customer Relation & Konsumen', short: 'Customer Relation', color: '#06B6D4', bg: 'rgba(6, 182, 212, 0.15)' },
+  { id: 'DIV-FIN', name: 'Finance & Payment', short: 'Finance', color: '#60A5FA', bg: 'rgba(96, 165, 250, 0.15)' },
+  { id: 'DIV-DIR', name: 'Eksekutif & Direksi', short: 'Direksi', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
+  { id: 'DIV-MKT', name: 'Marketing & Sales', short: 'Marketing', color: '#FBBF24', bg: 'rgba(251, 191, 36, 0.15)' },
+  { id: 'DIV-HR', name: 'HR & GA Operasional', short: 'HR & GA', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
+  { id: 'DIV-LEG', name: 'Legal Corporate & Perizinan', short: 'Legal', color: '#C084FC', bg: 'rgba(192, 132, 252, 0.15)' },
+  { id: 'DIV-TEK', name: 'Teknik & Konstruksi', short: 'Teknik', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.15)' },
+  { id: 'DIV-PRO', name: 'Procurement & Vendor Logistik', short: 'Procurement', color: '#34D399', bg: 'rgba(52, 211, 153, 0.15)' },
+  { id: 'DIV-CR', name: 'Customer Relation (STK)', short: 'Customer Relation', color: '#FB7185', bg: 'rgba(251, 113, 133, 0.15)' },
   { id: 'DIV-BNK', name: 'Perbankan (KPR / SP3K Bank BTN/Mandiri)', short: 'Perbankan', color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)' },
   { id: 'DIV-NOT', name: 'Notaris & PPAT / BPN', short: 'Notaris', color: '#14B8A6', bg: 'rgba(20, 184, 166, 0.15)' },
   { id: 'DIV-EKS', name: 'Pihak Eksternal / Konsumen', short: 'Eksternal', color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.15)' }
@@ -112,16 +112,17 @@ export const TodoAttendanceModule = () => {
   } = useApp();
 
   // Helper to render Project Badge
+  // Helper to render Project Badge
   const getProjectBadge = (proyekName) => {
     const pStr = (proyekName || '').toLowerCase();
     if (pStr.includes('view')) {
       return (
         <span 
           onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Ashoka View'); }}
-          style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+          style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
           title="Klik untuk menyaring laporan proyek Ashoka View"
         >
-          🏔️ Ashoka View
+          Ashoka View
         </span>
       );
     }
@@ -129,20 +130,20 @@ export const TodoAttendanceModule = () => {
       return (
         <span 
           onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Ashoka Park'); }}
-          style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+          style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
           title="Klik untuk menyaring laporan proyek Ashoka Park"
         >
-          🌳 Ashoka Park
+          Ashoka Park
         </span>
       );
     }
     return (
       <span 
         onClick={(e) => { e.stopPropagation(); setReportProjectFilter('Kantor Pusat'); }}
-        style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.4)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+        style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.4)', padding: '3px 8px', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
         title="Klik untuk menyaring Kantor Pusat / Umum"
       >
-        🏢 {proyekName || 'Kantor Pusat'}
+        {proyekName || 'Kantor Pusat'}
       </span>
     );
   };
@@ -154,10 +155,14 @@ export const TodoAttendanceModule = () => {
     const matched = COMPANY_DIVISIONS.find(d => 
       lower.includes(d.short.toLowerCase()) || 
       lower.includes(d.name.toLowerCase()) ||
-      (d.id === 'DIV-FIN' && (lower.includes('pajak') || lower.includes('kasir') || lower.includes('finance') || lower.includes('keuangan'))) ||
-      (d.id === 'DIV-DIR' && (lower.includes('bod') || lower.includes('direktur') || lower.includes('yazid') || lower.includes('gm') || lower.includes('adhi'))) ||
-      (d.id === 'DIV-MKT' && (lower.includes('sales') || lower.includes('marketing') || lower.includes('iklan') || lower.includes('promo') || lower.includes('brosur'))) ||
-      (d.id === 'DIV-TEK' && (lower.includes('sipil') || lower.includes('mandor') || lower.includes('teknik') || lower.includes('proyek') || lower.includes('qc') || lower.includes('cor'))) ||
+      (d.id === 'DIV-FIN' && (lower.includes('pajak') || lower.includes('kasir') || lower.includes('finance') || lower.includes('keuangan') || lower.includes('accounting') || lower.includes('akuntansi'))) ||
+      (d.id === 'DIV-DIR' && (lower.includes('bod') || lower.includes('direktur') || lower.includes('yazid') || lower.includes('gm') || lower.includes('adhi') || lower.includes('direksi') || lower.includes('eksekutif'))) ||
+      (d.id === 'DIV-MKT' && (lower.includes('sales') || lower.includes('marketing') || lower.includes('iklan') || lower.includes('promo') || lower.includes('brosur') || lower.includes('penjualan'))) ||
+      (d.id === 'DIV-HR' && (lower.includes('hr') || lower.includes('ga') || lower.includes('personalia') || lower.includes('sdm') || lower.includes('dodi') || lower.includes('general affair'))) ||
+      (d.id === 'DIV-LEG' && (lower.includes('legal') || lower.includes('perizinan') || lower.includes('hukum') || lower.includes('salma') || lower.includes('notaris') || lower.includes('corporate'))) ||
+      (d.id === 'DIV-TEK' && (lower.includes('sipil') || lower.includes('mandor') || lower.includes('teknik') || lower.includes('proyek') || lower.includes('qc') || lower.includes('cor') || lower.includes('konstruksi') || lower.includes('kholidin') || lower.includes('hapip'))) ||
+      (d.id === 'DIV-PRO' && (lower.includes('logistik') || lower.includes('procurement') || lower.includes('gudang') || lower.includes('material') || lower.includes('fajar') || lower.includes('vendor'))) ||
+      (d.id === 'DIV-CR' && (lower.includes('customer') || lower.includes('crm') || lower.includes('stk') || lower.includes('komplain') || lower.includes('relation'))) ||
       (d.id === 'DIV-BNK' && (lower.includes('btn') || lower.includes('mandiri') || lower.includes('bca') || lower.includes('bank') || lower.includes('kpr') || lower.includes('sp3k'))) ||
       (d.id === 'DIV-NOT' && (lower.includes('notaris') || lower.includes('ppat') || lower.includes('bpn') || lower.includes('sertifikat')))
     );
@@ -166,8 +171,8 @@ export const TodoAttendanceModule = () => {
     const bg = matched ? matched.bg : 'rgba(56, 189, 248, 0.15)';
 
     return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', background: bg, border: `1px solid ${color}40`, color: color, fontWeight: 700, fontSize: '0.78rem' }}>
-        🏢 {kordinasiText}
+      <div style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '6px', background: bg, border: `1px solid ${color}40`, color: color, fontWeight: 700, fontSize: '0.78rem' }}>
+        {kordinasiText}
       </div>
     );
   };
@@ -1653,22 +1658,25 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  <th style={{ width: '125px', minWidth: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '115px', minWidth: '115px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     Tanggal
                   </th>
-                  <th style={{ width: '135px', minWidth: '135px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '120px', minWidth: '120px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     Waktu
                   </th>
-                  <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    Laporan Harian & Proyek
+                  <th style={{ width: '130px', minWidth: '130px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                    Proyek
                   </th>
-                  <th style={{ width: '190px', minWidth: '190px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ minWidth: '260px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                    Laporan Harian
+                  </th>
+                  <th style={{ width: '180px', minWidth: '180px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     Kordinasi
                   </th>
-                  <th style={{ width: '170px', minWidth: '170px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     PIC
                   </th>
                   <th style={{ width: '145px', minWidth: '145px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>
@@ -1679,7 +1687,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <tbody>
                 {visibleReports.length === 0 ? (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', background: 'var(--bg-card)' }}>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)', background: 'var(--bg-card)' }}>
                       <CheckCircle2 size={36} color="#EAB308" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
                       <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
                         Tidak Ada Baris Laporan Pekerjaan Harian
@@ -1714,11 +1722,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         </div>
                       </td>
 
-                      {/* 3. Kolom Laporan harian & Proyek */}
+                      {/* 3. Kolom Proyek (Terpisah) */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
-                        <div style={{ marginBottom: '5px' }}>
-                          {getProjectBadge(item.proyek || item.project)}
-                        </div>
+                        {getProjectBadge(item.proyek || item.project)}
+                      </td>
+
+                      {/* 4. Kolom Laporan Harian */}
+                      <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div style={{ 
                           fontWeight: 700, 
                           fontSize: '0.9rem', 
@@ -1735,12 +1745,12 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         )}
                       </td>
 
-                      {/* 4. Kolom Kordinasi Divisi */}
+                      {/* 5. Kolom Kordinasi Divisi */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         {getDivisionBadge(item.kordinasi)}
                       </td>
 
-                      {/* 5. Kolom PIC & Pihak Terkait */}
+                      {/* 6. Kolom PIC & Pihak Terkait */}
                       <td style={{ verticalAlign: 'top', borderRight: '1px solid var(--border-color)', padding: '0.85rem 1rem' }}>
                         <div 
                           onClick={() => setSelectedEmployeeFilter(selectedEmployeeFilter === (item.pic || item.assignee) ? 'all' : (item.pic || item.assignee))}
@@ -1755,7 +1765,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                           }}
                           title="Klik untuk menyaring laporan karyawan ini"
                         >
-                          👤 {item.pic || item.assignee || '-'}
+                          {item.pic || item.assignee || '-'}
                         </div>
                         {item.assignedBy && (
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '3px' }}>
@@ -1764,7 +1774,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         )}
                       </td>
 
-                      {/* 6. Kolom Status & Aksi */}
+                      {/* 7. Kolom Status & Aksi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
                           {/* 1. Status Checklist Button */}
@@ -2676,26 +2686,30 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   />
 
                   {/* Quick Pill Buttons */}
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
-                    {COMPANY_DIVISIONS.slice(0, 6).map(d => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => setNewKordinasi(d.name)}
-                        style={{
-                          background: newKordinasi === d.name ? d.color : 'rgba(255,255,255,0.05)',
-                          color: newKordinasi === d.name ? '#0F172A' : d.color,
-                          border: `1px solid ${d.color}60`,
-                          borderRadius: '4px',
-                          padding: '2px 6px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        + {d.short}
-                      </button>
-                    ))}
+                  <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '6px' }}>
+                    {COMPANY_DIVISIONS.slice(0, 8).map(d => {
+                      const isSelected = newKordinasi === d.name || newKordinasi === d.short;
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => setNewKordinasi(d.name)}
+                          style={{
+                            background: isSelected ? d.color : 'rgba(255,255,255,0.06)',
+                            color: isSelected ? '#0F172A' : d.color,
+                            border: `1.5px solid ${d.color}${isSelected ? 'FF' : '60'}`,
+                            borderRadius: '5px',
+                            padding: '3px 8px',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          + {d.short}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -2993,26 +3007,30 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   />
 
                   {/* Quick Pill Buttons */}
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
-                    {COMPANY_DIVISIONS.slice(0, 6).map(d => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => setInsKordinasi(d.name)}
-                        style={{
-                          background: insKordinasi === d.name ? d.color : 'rgba(255,255,255,0.05)',
-                          color: insKordinasi === d.name ? '#0F172A' : d.color,
-                          border: `1px solid ${d.color}60`,
-                          borderRadius: '4px',
-                          padding: '2px 6px',
-                          fontSize: '0.68rem',
-                          fontWeight: 800,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        + {d.short}
-                      </button>
-                    ))}
+                  <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '6px' }}>
+                    {COMPANY_DIVISIONS.slice(0, 8).map(d => {
+                      const isSelected = insKordinasi === d.name || insKordinasi === d.short;
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => setInsKordinasi(d.name)}
+                          style={{
+                            background: isSelected ? d.color : 'rgba(255,255,255,0.06)',
+                            color: isSelected ? '#0F172A' : d.color,
+                            border: `1.5px solid ${d.color}${isSelected ? 'FF' : '60'}`,
+                            borderRadius: '5px',
+                            padding: '3px 8px',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          + {d.short}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
