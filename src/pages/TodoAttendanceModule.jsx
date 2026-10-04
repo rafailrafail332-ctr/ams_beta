@@ -69,13 +69,13 @@ export const COMPANY_DIVISIONS = [
 ];
 
 export const MEDIA_CATEGORIES = [
-  { id: 'CAT-ALL', label: 'Semua Informasi', icon: '📌', color: '#38BDF8' },
-  { id: 'CAT-OFFICE', label: 'Pengumuman Kantor', icon: '🏢', color: '#38BDF8' },
-  { id: 'CAT-SITE', label: 'Update Lapangan', icon: '🏗️', color: '#EAB308' },
-  { id: 'CAT-MKT', label: 'Marketing & Promo', icon: '💡', color: '#10B981' },
-  { id: 'CAT-URGENT', label: 'Peringatan Penting', icon: '⚠️', color: '#EF4444' },
-  { id: 'CAT-VENDOR', label: 'Vendor & Logistik', icon: '📦', color: '#A855F7' },
-  { id: 'CAT-EVENT', label: 'Acara & Agenda', icon: '🎉', color: '#EC4899' }
+  { id: 'CAT-ALL', label: 'Semua Informasi', icon: '', color: '#38BDF8' },
+  { id: 'CAT-OFFICE', label: 'Pengumuman Kantor', icon: '', color: '#38BDF8' },
+  { id: 'CAT-SITE', label: 'Update Lapangan', icon: '', color: '#EAB308' },
+  { id: 'CAT-MKT', label: 'Marketing & Promo', icon: '', color: '#10B981' },
+  { id: 'CAT-URGENT', label: 'Peringatan Penting', icon: '', color: '#EF4444' },
+  { id: 'CAT-VENDOR', label: 'Vendor & Logistik', icon: '', color: '#A855F7' },
+  { id: 'CAT-EVENT', label: 'Acara & Agenda', icon: '', color: '#EC4899' }
 ];
 
 export const COMPANY_PROJECTS = [
@@ -1615,9 +1615,9 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           {reportProjectFilter !== 'all' && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.85rem', marginBottom: '0.75rem', background: reportProjectFilter.includes('View') ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.12)', border: `1px solid ${reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981'}`, borderRadius: '6px', fontSize: '0.825rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981' }}>
-                <span>🏗️ Menyaring Laporan Proyek:</span>
+                <span>Menyaring Laporan Proyek:</span>
                 <span style={{ color: 'var(--text-main)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>
-                  {reportProjectFilter.includes('View') ? '🏔️ Ashoka View (Lokasi 2)' : reportProjectFilter.includes('Park') ? '🌳 Ashoka Park (Lokasi 1)' : '🏢 ' + reportProjectFilter}
+                  {reportProjectFilter.includes('View') ? 'Ashoka View (Lokasi 2)' : reportProjectFilter.includes('Park') ? 'Ashoka Park (Lokasi 1)' : reportProjectFilter}
                 </span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({visibleReports.length} baris pekerjaan ditemukan)</span>
               </div>
@@ -1635,7 +1635,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           {selectedEmployeeFilter !== 'all' && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.85rem', marginBottom: '1rem', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid #38BDF8', borderRadius: '6px', fontSize: '0.825rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: '#38BDF8' }}>
-                <span>🎯 Menyaring Laporan & Rekap Terkait:</span>
+                <span>Menyaring Laporan & Rekap Terkait:</span>
                 <span style={{ color: 'var(--text-main)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>
                   {selectedEmployeeFilter}
                 </span>
@@ -1960,7 +1960,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               onClick={() => setInsFilter('for_me')}
               style={{ fontSize: '0.78rem', fontWeight: insFilter === 'for_me' ? 800 : 500 }}
             >
-              🎯 Ditujukan Untuk Saya ({safeInstructions.filter(i => isTaskAssignedToUser(i, currentUser)).length})
+              Ditujukan Untuk Saya ({safeInstructions.filter(i => isTaskAssignedToUser(i, currentUser)).length})
             </button>
             {isBoss && (
               <button
@@ -1968,7 +1968,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 onClick={() => setInsFilter('all')}
                 style={{ fontSize: '0.78rem', fontWeight: insFilter === 'all' ? 800 : 500 }}
               >
-                📋 Seluruh Instruksi Proyek ({safeInstructions.length})
+                Seluruh Instruksi Proyek ({safeInstructions.length})
               </button>
             )}
             <button
@@ -1976,14 +1976,14 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               onClick={() => setInsFilter('by_me')}
               style={{ fontSize: '0.78rem', fontWeight: insFilter === 'by_me' ? 800 : 500 }}
             >
-              📤 Yang Saya Terbitkan
+              Yang Saya Terbitkan
             </button>
             <button
               className={`btn btn-sm ${insFilter === 'overdue' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setInsFilter('overdue')}
               style={{ fontSize: '0.78rem', fontWeight: insFilter === 'overdue' ? 800 : 500, background: insFilter === 'overdue' ? undefined : 'rgba(239, 68, 68, 0.1)', color: insFilter === 'overdue' ? undefined : '#EF4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
             >
-              ⚠️ Melewati Batas Waktu ({safeInstructions.filter(i => isInstructionOverdue(i)).length})
+              Melewati Batas Waktu ({safeInstructions.filter(i => isInstructionOverdue(i)).length})
             </button>
           </div>
 
@@ -1992,13 +1992,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
             <table className="custom-table" style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
-                  <th style={{ width: '110px', minWidth: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>📌 No. & Tanggal</th>
-                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>⏰ Batas Waktu (Deadline)</th>
-                  <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>📋 Uraian Instruksi Pekerjaan</th>
-                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>👤 Ditugaskan Kepada</th>
-                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>👑 Pemberi Instruksi</th>
-                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>⚡ Status & Laporan</th>
-                  <th style={{ width: '140px', minWidth: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>📲 Lapor WA Pak Yazid</th>
+                  <th style={{ width: '110px', minWidth: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No. & Tanggal</th>
+                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Batas Waktu (Deadline)</th>
+                  <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Uraian Instruksi Pekerjaan</th>
+                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Ditugaskan Kepada</th>
+                  <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Pemberi Instruksi</th>
+                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Status & Laporan</th>
+                  <th style={{ width: '140px', minWidth: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Lapor WA Pak Yazid</th>
                   {isBoss && <th style={{ width: '80px', minWidth: '80px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>}
                 </tr>
               </thead>
@@ -2290,7 +2290,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <span>{cat.icon}</span> {cat.label}
+                    {cat.label}
                   </button>
                 );
               })}
@@ -2415,14 +2415,14 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         </div>
                         <div>
                           <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{item.author}</span> &bull; <span style={{ color: 'var(--text-subtle)' }}>{item.authorRole}</span>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>📅 {item.date} &bull; ⏰ {item.time}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>{item.date} &bull; {item.time}</div>
                         </div>
                       </div>
 
                       {/* Target Division */}
                       {item.targetDivision && item.targetDivision !== 'Seluruh Karyawan & Divisi' && (
                         <div style={{ fontSize: '0.72rem', color: '#38BDF8', background: 'rgba(56, 189, 248, 0.08)', padding: '3px 8px', borderRadius: '4px', marginBottom: '0.75rem', display: 'inline-block' }}>
-                          🎯 Target: {item.targetDivision}
+                          Target: {item.targetDivision}
                         </div>
                       )}
 
@@ -2509,7 +2509,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <div className="modal-body">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Laporan (Maks. 2 Hari)</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>Tanggal Laporan (Maks. 2 Hari)</label>
                     {isBoss ? (
                       <input
                         type="date"
@@ -2528,7 +2528,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                             className={`btn btn-sm ${newDate === todayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                             style={{ flex: 1, padding: '0.25rem', fontSize: '0.72rem', fontWeight: 800 }}
                           >
-                            📅 Hari Ini ({todayDateStr.split('-')[2]}/{todayDateStr.split('-')[1]})
+                            Hari Ini ({todayDateStr.split('-')[2]}/{todayDateStr.split('-')[1]})
                           </button>
                           <button
                             type="button"
@@ -2536,7 +2536,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                             className={`btn btn-sm ${newDate === yesterdayDateStr ? 'btn-primary' : 'btn-secondary'}`}
                             style={{ flex: 1, padding: '0.25rem', fontSize: '0.72rem', fontWeight: 800 }}
                           >
-                            ⏳ Kemarin ({yesterdayDateStr.split('-')[2]}/{yesterdayDateStr.split('-')[1]})
+                            Kemarin ({yesterdayDateStr.split('-')[2]}/{yesterdayDateStr.split('-')[1]})
                           </button>
                         </div>
                         <input
@@ -2556,7 +2556,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     )}
                   </div>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>⏰ Waktu (Rentang Jam)</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>Waktu (Rentang Jam)</label>
                     <input
                       type="text"
                       className="form-control"
@@ -2571,9 +2571,9 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 {/* 1-Click Interactive Project Selector */}
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <label className="form-label" style={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>🏗️ Lokasi Proyek</span>
+                    <span>Lokasi Proyek</span>
                     <span style={{ fontSize: '0.72rem', color: newProject.includes('View') ? '#F59E0B' : newProject.includes('Park') ? '#10B981' : '#C084FC', fontWeight: 800 }}>
-                      🎯 Terpilih: {newProject}
+                      Terpilih: {newProject}
                     </span>
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
@@ -2593,7 +2593,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🌳 Ashoka Park
+                      Ashoka Park
                     </button>
                     <button
                       type="button"
@@ -2611,7 +2611,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🏔️ Ashoka View
+                      Ashoka View
                     </button>
                     <button
                       type="button"
@@ -2629,13 +2629,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🏢 Kantor Pusat
+                      Kantor Pusat
                     </button>
                   </div>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>📝 Laporan Pekerjaan Harian</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Laporan Pekerjaan Harian</label>
                   <textarea
                     rows="3"
                     className="form-control"
@@ -2647,7 +2647,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Koordinasi Divisi Terkait</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Koordinasi Divisi Terkait</label>
                   
                   {/* Select Dropdown Divisi */}
                   <select
@@ -2662,7 +2662,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   >
                     <option value="">-- Pilih Divisi Perusahaan --</option>
                     {COMPANY_DIVISIONS.map(d => (
-                      <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                      <option key={d.id} value={d.name}>{d.name}</option>
                     ))}
                   </select>
 
@@ -2702,10 +2702,10 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                     <label className="form-label" style={{ fontWeight: 800, margin: 0 }}>
-                      👤 PIC Pelaksana & Tujuan Laporan (Klik Nama Karyawan)
+                      PIC Pelaksana & Tujuan Laporan (Klik Nama Karyawan)
                     </label>
                     <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700 }}>
-                      🎯 Terpilih: {newPic}
+                      Terpilih: {newPic}
                     </span>
                   </div>
 
@@ -2746,7 +2746,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                             transition: 'all 0.15s ease'
                           }}
                         >
-                          <span>👤</span> {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
+                          {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
                           {isSelected && <Check size={11} strokeWidth={3} />}
                         </button>
                       );
@@ -2755,22 +2755,22 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🚩 Prioritas</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Prioritas</label>
                   <select
                     className="form-control"
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value)}
                   >
-                    <option value="Tinggi">🔴 Tinggi</option>
-                    <option value="Sedang">🟡 Sedang</option>
-                    <option value="Rendah">🟢 Rendah</option>
+                    <option value="Tinggi">Tinggi</option>
+                    <option value="Sedang">Sedang</option>
+                    <option value="Rendah">Rendah</option>
                   </select>
                 </div>
 
                 {/* Upload Foto Bukti Pekerjaan */}
                 <div className="form-group" style={{ marginTop: '0.75rem' }}>
                   <label className="form-label" style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Camera size={16} color="#38BDF8" /> 📷 Foto Bukti Pekerjaan (Dokumentasi Lapangan / Berkas / Nota)
+                    <Camera size={16} color="#38BDF8" /> Foto Bukti Pekerjaan (Dokumentasi Lapangan / Berkas / Nota)
                   </label>
                   <input
                     type="file"
@@ -2854,7 +2854,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <div className="modal-body">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>📅 Tanggal Diberikan</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>Tanggal Diberikan</label>
                     <input
                       type="date"
                       className="form-control"
@@ -2864,7 +2864,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     />
                   </div>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800, color: '#EF4444' }}>⏰ Deadline (Tanggal)</label>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#EF4444' }}>Deadline (Tanggal)</label>
                     <input
                       type="date"
                       className="form-control"
@@ -2874,7 +2874,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     />
                   </div>
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800, color: '#EF4444' }}>🕒 Jam Deadline</label>
+                    <label className="form-label" style={{ fontWeight: 800, color: '#EF4444' }}>Jam Deadline</label>
                     <input
                       type="time"
                       className="form-control"
@@ -2888,9 +2888,9 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 {/* 1-Click Interactive Project Selector for Instruction */}
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <label className="form-label" style={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>🏗️ Lokasi Proyek</span>
+                    <span>Lokasi Proyek</span>
                     <span style={{ fontSize: '0.72rem', color: insProject.includes('View') ? '#F59E0B' : insProject.includes('Park') ? '#10B981' : '#C084FC', fontWeight: 800 }}>
-                      🎯 Terpilih: {insProject}
+                      Terpilih: {insProject}
                     </span>
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
@@ -2910,7 +2910,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🌳 Ashoka Park
+                      Ashoka Park
                     </button>
                     <button
                       type="button"
@@ -2928,7 +2928,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🏔️ Ashoka View
+                      Ashoka View
                     </button>
                     <button
                       type="button"
@@ -2946,13 +2946,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                         gap: '4px'
                       }}
                     >
-                      🏢 Kantor Pusat
+                      Kantor Pusat
                     </button>
                   </div>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>📜 Uraian Instruksi Pekerjaan</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Uraian Instruksi Pekerjaan</label>
                   <textarea
                     rows="3"
                     className="form-control"
@@ -2964,7 +2964,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🤝 Koordinasi Divisi Terkait</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Koordinasi Divisi Terkait</label>
                   
                   {/* Select Dropdown Divisi */}
                   <select
@@ -2979,7 +2979,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   >
                     <option value="">-- Pilih Divisi Perusahaan --</option>
                     {COMPANY_DIVISIONS.map(d => (
-                      <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                      <option key={d.id} value={d.name}>{d.name}</option>
                     ))}
                   </select>
 
@@ -3019,10 +3019,10 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                     <label className="form-label" style={{ fontWeight: 800, margin: 0 }}>
-                      👤 Ditugaskan Kepada / Tujuan Instruksi (Klik Nama Karyawan)
+                      Ditugaskan Kepada / Tujuan Instruksi (Klik Nama Karyawan)
                     </label>
                     <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 700 }}>
-                      🎯 Terpilih: {insAssignee}
+                      Terpilih: {insAssignee}
                     </span>
                   </div>
 
@@ -3063,7 +3063,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                             transition: 'all 0.15s ease'
                           }}
                         >
-                          <span>👤</span> {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
+                          {u.name.split(',')[0]} <span style={{ opacity: 0.7, fontSize: '0.65rem' }}>({u.role.split(' ')[0]})</span>
                           {isSelected && <Check size={11} strokeWidth={3} />}
                         </button>
                       );
@@ -3072,15 +3072,15 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>🚩 Tingkat Prioritas</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Tingkat Prioritas</label>
                   <select
                     className="form-control"
                     value={insPriority}
                     onChange={(e) => setInsPriority(e.target.value)}
                   >
-                    <option value="Tinggi">🔴 Tinggi (Urgent)</option>
-                    <option value="Sedang">🟡 Sedang</option>
-                    <option value="Rendah">🟢 Rendah</option>
+                    <option value="Tinggi">Tinggi (Urgent)</option>
+                    <option value="Sedang">Sedang</option>
+                    <option value="Rendah">Rendah</option>
                   </select>
                 </div>
 
@@ -3093,7 +3093,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                       onChange={(e) => setAutoSendWa(e.target.checked)}
                       style={{ width: '16px', height: '16px', accentColor: '#25D366' }}
                     />
-                    📲 Buka WhatsApp Pak Yazid (+{yazidWaNumber}) Langsung
+                    Buka WhatsApp Pak Yazid (+{yazidWaNumber}) Langsung
                   </label>
                   <span style={{ fontSize: '0.72rem', color: '#25D366', fontWeight: 800 }}>Otomatis</span>
                 </div>
@@ -3131,7 +3131,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                     {selectedInstructionForAction.instruction}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#F59E0B', marginTop: '4px' }}>
-                    ⏰ Deadline: {selectedInstructionForAction.dueDate} pk {selectedInstructionForAction.dueTime} WIB &bull; Diberikan Oleh: {selectedInstructionForAction.assignedBy}
+                    Deadline: {selectedInstructionForAction.dueDate} pk {selectedInstructionForAction.dueTime} WIB &bull; Diberikan Oleh: {selectedInstructionForAction.assignedBy}
                   </div>
                 </div>
 
@@ -3308,10 +3308,10 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   {selectedReportForPhotoModal.laporan || selectedReportForPhotoModal.text}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '6px', color: 'var(--text-muted)' }}>
-                  <div><strong>👤 PIC:</strong> {selectedReportForPhotoModal.pic || selectedReportForPhotoModal.assignee}</div>
-                  <div><strong>📅 Tanggal:</strong> {selectedReportForPhotoModal.date || selectedReportForPhotoModal.assignDate}</div>
-                  <div><strong>⏰ Waktu:</strong> {selectedReportForPhotoModal.waktu || '08:00 - 17:00'}</div>
-                  <div><strong>🤝 Kordinasi:</strong> {selectedReportForPhotoModal.kordinasi || '-'}</div>
+                  <div><strong>PIC:</strong> {selectedReportForPhotoModal.pic || selectedReportForPhotoModal.assignee}</div>
+                  <div><strong>Tanggal:</strong> {selectedReportForPhotoModal.date || selectedReportForPhotoModal.assignDate}</div>
+                  <div><strong>Waktu:</strong> {selectedReportForPhotoModal.waktu || '08:00 - 17:00'}</div>
+                  <div><strong>Koordinasi:</strong> {selectedReportForPhotoModal.kordinasi || '-'}</div>
                 </div>
                 {selectedReportForPhotoModal.notes && (
                   <div style={{ marginTop: '6px', color: '#10B981', fontWeight: 600 }}>
@@ -3397,7 +3397,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   {/* Kategori Informasi */}
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>🏷️ Kategori Informasi</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>Kategori Informasi</label>
                     <select
                       className="form-control"
                       value={mediaCategory}
@@ -3405,23 +3405,23 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                       style={{ fontWeight: 700 }}
                     >
                       {MEDIA_CATEGORIES.filter(c => c.id !== 'CAT-ALL').map(c => (
-                        <option key={c.id} value={c.label}>{c.icon} {c.label}</option>
+                        <option key={c.id} value={c.label}>{c.label}</option>
                       ))}
                     </select>
                   </div>
 
                   {/* Target Divisi */}
                   <div>
-                    <label className="form-label" style={{ fontWeight: 800 }}>🎯 Target Pembaca</label>
+                    <label className="form-label" style={{ fontWeight: 800 }}>Target Pembaca</label>
                     <select
                       className="form-control"
                       value={mediaTargetDivision}
                       onChange={(e) => setMediaTargetDivision(e.target.value)}
                       style={{ fontWeight: 700 }}
                     >
-                      <option value="Seluruh Karyawan & Divisi">🌐 Seluruh Karyawan & Divisi</option>
+                      <option value="Seluruh Karyawan & Divisi">Seluruh Karyawan & Divisi</option>
                       {COMPANY_DIVISIONS.map(d => (
-                        <option key={d.id} value={d.name}>🏢 {d.name}</option>
+                        <option key={d.id} value={d.name}>{d.name}</option>
                       ))}
                     </select>
                   </div>
@@ -3429,7 +3429,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
                 {/* Isi Informasi Lengkap */}
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>📝 Isi Pesan / Uraian Lengkap</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Isi Pesan / Uraian Lengkap</label>
                   <textarea
                     rows="4"
                     className="form-control"
@@ -3442,7 +3442,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
                 {/* Upload Foto / Brosur Lampiran */}
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>📸 Lampiran Foto / Gambar / Brosur (Opsional)</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Lampiran Foto / Gambar / Brosur (Opsional)</label>
                   <input
                     type="file"
                     accept="image/*"
