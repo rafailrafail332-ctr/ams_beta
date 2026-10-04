@@ -47,6 +47,7 @@ import {
   ExternalLink,
   PhoneCall,
   Megaphone,
+  Info,
   Pin,
   Search,
   Heart,
@@ -68,7 +69,7 @@ export const COMPANY_DIVISIONS = [
 ];
 
 export const MEDIA_CATEGORIES = [
-  { id: 'CAT-ALL', label: 'Semua Informasi', icon: '📢', color: '#38BDF8' },
+  { id: 'CAT-ALL', label: 'Semua Informasi', icon: '📌', color: '#38BDF8' },
   { id: 'CAT-OFFICE', label: 'Pengumuman Kantor', icon: '🏢', color: '#38BDF8' },
   { id: 'CAT-SITE', label: 'Update Lapangan', icon: '🏗️', color: '#EAB308' },
   { id: 'CAT-MKT', label: 'Marketing & Promo', icon: '💡', color: '#10B981' },
@@ -1353,16 +1354,16 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
       {/* Tabs Menu */}
       <div className="tab-list">
         <button className={`tab-item ${activeTab === 'laporan' ? 'active' : ''}`} onClick={() => setActiveTab('laporan')}>
-          <FileText size={16} style={{ display: 'inline', marginRight: '6px' }} /> 1. Laporan Pekerjaan Harian ({visibleReports.length})
+          <FileText size={16} style={{ display: 'inline', marginRight: '6px' }} /> Laporan Pekerjaan Harian
         </button>
         <button className={`tab-item ${activeTab === 'instruksi' ? 'active' : ''}`} onClick={() => setActiveTab('instruksi')}>
-          <Briefcase size={16} style={{ display: 'inline', marginRight: '6px' }} /> 2. Instruksi Pekerjaan Pimpinan ({visibleInstructions.length})
+          <Briefcase size={16} style={{ display: 'inline', marginRight: '6px' }} /> Instruksi Pekerjaan Pimpinan
         </button>
         <button className={`tab-item ${activeTab === 'absen' ? 'active' : ''}`} onClick={() => setActiveTab('absen')}>
-          <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> 3. Log Presensi Geofencing GPS ({safeAttendances.length})
+          <Compass size={16} style={{ display: 'inline', marginRight: '6px' }} /> Log Presensi Geofencing GPS
         </button>
         <button className={`tab-item ${activeTab === 'media-info' ? 'active' : ''}`} onClick={() => setActiveTab('media-info')} style={{ borderColor: activeTab === 'media-info' ? '#38BDF8' : undefined }}>
-          <Megaphone size={16} style={{ display: 'inline', marginRight: '6px', color: '#38BDF8' }} /> 4. 📢 Media Informasi & Mading Tim ({safeMediaInfo.length})
+          <Info size={16} style={{ display: 'inline', marginRight: '6px', color: '#38BDF8' }} /> Media Informasi & Mading Tim
         </button>
       </div>
 
@@ -2242,7 +2243,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #38BDF8, #0284C7)', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(56, 189, 248, 0.3)' }}>
-                  <Megaphone size={22} />
+                  <Info size={22} />
                 </div>
                 <div>
                   <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
@@ -2320,7 +2321,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           {/* Media Info Cards Grid */}
           {visibleMediaList.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
-              <Megaphone size={40} color="#38BDF8" style={{ marginBottom: '0.75rem', opacity: 0.8 }} />
+              <Info size={40} color="#38BDF8" style={{ marginBottom: '0.75rem', opacity: 0.8 }} />
               <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>Belum Ada Informasi / Pengumuman</div>
               <p style={{ fontSize: '0.85rem', marginTop: '4px', maxWidth: '400px', margin: '4px auto 1rem' }}>
                 Jadilah yang pertama menerbitkan memo resmi, berita proyek, atau pengumuman tim!
@@ -3363,7 +3364,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           <div className="modal-content" style={{ maxWidth: '580px' }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Megaphone size={20} color="#38BDF8" /> {editingMediaItem ? 'Edit Informasi / Pengumuman' : 'Terbitkan Informasi / Pengumuman Baru'}
+                <Info size={20} color="#38BDF8" /> {editingMediaItem ? 'Edit Informasi / Pengumuman' : 'Terbitkan Informasi / Pengumuman Baru'}
               </h3>
               <button onClick={() => setIsMediaModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -3381,7 +3382,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
                 {/* Judul Pengumuman */}
                 <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                  <label className="form-label" style={{ fontWeight: 800 }}>📢 Judul Informasi / Pengumuman</label>
+                  <label className="form-label" style={{ fontWeight: 800 }}>Judul Informasi / Pengumuman</label>
                   <input
                     type="text"
                     className="form-control"
@@ -3522,7 +3523,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
           <div className="modal-content" style={{ maxWidth: '680px' }}>
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.05rem' }}>
-                <Megaphone size={18} color="#38BDF8" /> {selectedMediaDetail.title}
+                <Info size={18} color="#38BDF8" /> {selectedMediaDetail.title}
               </h3>
               <button onClick={() => setIsMediaDetailModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
