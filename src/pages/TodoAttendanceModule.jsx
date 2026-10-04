@@ -1524,14 +1524,14 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 onClick={() => setReportPicFilter('all')}
                 style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'all' ? 800 : 500 }}
               >
-                📋 Semua Rekap ({safeTodos.length})
+                Semua Rekapan
               </button>
               <button 
                 className={`btn btn-sm ${reportPicFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setReportPicFilter('for_me')}
                 style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'for_me' ? 800 : 500 }}
               >
-                👤 PIC Saya ({safeTodos.filter(t => isTaskAssignedToUser(t, currentUser)).length})
+                PIC Saya
               </button>
 
               {/* Filter Lokasi Proyek (Ashoka Park vs Ashoka View) */}
@@ -1549,10 +1549,10 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   color: reportProjectFilter !== 'all' ? (reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981') : 'var(--text-main)' 
                 }}
               >
-                <option value="all">🏗️ Semua Proyek</option>
-                <option value="Ashoka Park">🌳 Ashoka Park (Lokasi 1)</option>
-                <option value="Ashoka View">🏔️ Ashoka View (Lokasi 2)</option>
-                <option value="Kantor Pusat">🏢 Kantor Pusat / HO</option>
+                <option value="all">Semua Proyek</option>
+                <option value="Ashoka Park">Ashoka Park (Lokasi 1)</option>
+                <option value="Ashoka View">Ashoka View (Lokasi 2)</option>
+                <option value="Kantor Pusat">Kantor Pusat / HO</option>
               </select>
 
               {/* Filter Nama Karyawan Terkait / PIC */}
@@ -1570,9 +1570,9 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   color: selectedEmployeeFilter !== 'all' ? '#38BDF8' : undefined 
                 }}
               >
-                <option value="all">👤 Semua Nama Karyawan</option>
+                <option value="all">Semua Nama Karyawan</option>
                 {safeUsers.map(u => (
-                  <option key={u.id} value={u.name}>👤 {u.name} ({u.role.split(' ')[0]})</option>
+                  <option key={u.id} value={u.name}>{u.name} ({u.role.split(' ')[0]})</option>
                 ))}
               </select>
 
@@ -1584,8 +1584,8 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 style={{ width: '130px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
               >
                 <option value="all">Semua Status</option>
-                <option value="completed">✓ Selesai</option>
-                <option value="pending">⏳ Pending</option>
+                <option value="completed">Selesai</option>
+                <option value="pending">Pending</option>
               </select>
 
               {/* Filter Divisi */}
@@ -1595,7 +1595,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 onChange={(e) => setReportDivisionFilter(e.target.value)}
                 style={{ width: '150px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
               >
-                <option value="all">🏢 Semua Divisi</option>
+                <option value="all">Semua Divisi</option>
                 {COMPANY_DIVISIONS.map(d => (
                   <option key={d.id} value={d.short}>{d.short}</option>
                 ))}
@@ -1657,22 +1657,22 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
                   <th style={{ width: '125px', minWidth: '125px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    📅 Tanggal
+                    Tanggal
                   </th>
                   <th style={{ width: '135px', minWidth: '135px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    🕒 Waktu
+                    Waktu
                   </th>
                   <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    📝 Laporan Harian & Proyek
+                    Laporan Harian & Proyek
                   </th>
                   <th style={{ width: '190px', minWidth: '190px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    🏢 Kordinasi
+                    Kordinasi
                   </th>
                   <th style={{ width: '170px', minWidth: '170px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
-                    👤 PIC
+                    PIC
                   </th>
                   <th style={{ width: '145px', minWidth: '145px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                    ⚡ Status & Aksi
+                    Status & Aksi
                   </th>
                 </tr>
               </thead>
