@@ -1971,7 +1971,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
           {/* Table Instruksi Pekerjaan */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '950px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
                   <th style={{ width: '110px', minWidth: '110px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No. & Tanggal</th>
@@ -1979,15 +1979,13 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   <th style={{ minWidth: '280px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Uraian Instruksi Pekerjaan</th>
                   <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Ditugaskan Kepada</th>
                   <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Pemberi Instruksi</th>
-                  <th style={{ width: '150px', minWidth: '150px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#38BDF8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Status & Laporan</th>
-                  <th style={{ width: '140px', minWidth: '140px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#25D366', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Lapor WA Pak Yazid</th>
                   {isBoss && <th style={{ width: '80px', minWidth: '80px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
                 {visibleInstructions.length === 0 ? (
                   <tr>
-                    <td colSpan={isBoss ? 8 : 7} style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                    <td colSpan={isBoss ? 6 : 5} style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
                       <CheckCircle2 size={36} color="var(--success)" style={{ marginBottom: '0.5rem', opacity: 0.8 }} />
                       <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
                         Tidak Ada Instruksi Pekerjaan
@@ -2057,48 +2055,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                           <div style={{ fontWeight: 700, fontSize: '0.825rem', color: '#F59E0B' }}>{ins.assignedBy}</div>
                         </td>
 
-                        {/* 6. Status & Laporan */}
-                        <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
-                          {ins.status === 'Selesai' ? (
-                            <span className="badge badge-success" style={{ fontWeight: 800 }}>
-                              <Check size={12} /> Selesai
-                            </span>
-                          ) : (
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={() => handleOpenActionReportModal(ins)}
-                              style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem', fontWeight: 800, background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none' }}
-                            >
-                              <Send size={12} /> Kirim Laporan Selesai
-                            </button>
-                          )}
-                        </td>
-
-                        {/* 7. Direct WhatsApp Button to Pak Yazid */}
-                        <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
-                          <button
-                            className="btn btn-sm"
-                            onClick={() => handleSendToYazidWhatsApp(ins)}
-                            style={{ 
-                              background: '#25D366', 
-                              color: '#FFFFFF', 
-                              fontWeight: 800, 
-                              fontSize: '0.72rem',
-                              padding: '0.35rem 0.6rem',
-                              border: 'none',
-                              borderRadius: '6px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              boxShadow: '0 2px 4px rgba(37, 211, 102, 0.3)'
-                            }}
-                            title={`Kirim laporan instruksi ini langsung ke WhatsApp Pak Yazid (+${yazidWaNumber})`}
-                          >
-                            <MessageSquare size={13} /> Kirim ke WA
-                          </button>
-                        </td>
-
-                        {/* 8. Aksi (Pimpinan) */}
+                        {/* 6. Aksi (Pimpinan) */}
                         {isBoss && (
                           <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
                             <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
