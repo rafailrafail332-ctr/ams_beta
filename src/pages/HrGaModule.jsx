@@ -1213,21 +1213,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const currentDataset = useMemo(() => {
     switch (activeTab) {
       case 'database-karyawan': return employees;
-      case 'recruitment': return candidates;
-      case 'kontrak-kerja': return contracts;
-      case 'absensi': return attendances;
-      case 'kpi': return kpis;
-      case 'gathering': return gatherings;
-      case 'management-asset': return assets;
-      case 'maintanance': return maintenanceTickets;
-      case 'fasilitas': return facilities;
-      case 'keamanan': return securities;
-      case 'kebersihan': return cleanings;
-      case 'keamanan-kebersihan': return securities;
-      case 'cctv': return cctvs;
-      default: return employees;
+      default: return [];
     }
-  }, [activeTab, employees, candidates, contracts, facilities, attendances, kpis, assets, maintenanceTickets, securities, cleanings, cctvs, gatherings]);
+  }, [activeTab, employees]);
 
   // Filtered dataset
   const filteredDataset = useMemo(() => {
@@ -1770,19 +1758,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       {/* KONTEN UTAMA TAB: TABEL 10 KOLOM PERSIS SPK & LITIGASI                   */}
       {/* No. | No. Dok | Tanggal Dokumen | Proyek | Nama | Kategori | Judul | Berkas | Catatan | Aksi */}
       {/* ========================================================================= */}
-      {activeTab === 'recruitment' ? (
-        <RecruitmentATSModule
-          candidates={candidates}
-          setCandidates={setCandidates}
-          showNotification={showNotification}
-        />
-      ) : activeTab === 'kontrak-kerja' ? (
-        <ContractApprovalModule
-          contracts={contracts}
-          setContracts={setContracts}
-          showNotification={showNotification}
-        />
-      ) : (
+      {activeTab === 'database-karyawan' ? (
         <div className="glass-card" style={{ padding: '1.4rem', marginBottom: '1.5rem' }}>
         
         {/* Header Title & Action Buttons */}
@@ -1805,10 +1781,10 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               }}
             >
               <Users size={16} />
-              <span>{getTabTitle().title}</span>
+              <span>Data Base Karyawan</span>
             </span>
             <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-              {getTabTitle().sub}
+              Pencatatan data induk karyawan, NIK, jabatan, status kerja & berkas identitas resmi.
             </div>
           </div>
 
@@ -1850,54 +1826,9 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               }}
             >
               <Plus size={15} />
-              <span>+ Tambah Dokumen {getTabTitle().title}</span>
+              <span>+ Tambah Karyawan</span>
             </button>
           </div>
-        </div>
-
-        {/* Filter Pills Kategori */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '1.2rem', flexWrap: 'wrap' }}>
-          {tabCategories.map(cat => {
-            const isActive = filterKategori === cat;
-            const count = cat === 'ALL'
-              ? currentDataset.length
-              : currentDataset.filter(d => (d.kategori || '').toLowerCase() === cat.toLowerCase()).length;
-
-            return (
-              <button
-                key={cat}
-                onClick={() => setFilterKategori(cat)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '8px',
-                  border: isActive ? '1.5px solid #34d399' : '1px solid #334155',
-                  background: isActive ? 'rgba(16, 185, 129, 0.15)' : '#0f172a',
-                  color: isActive ? '#34d399' : '#94a3b8',
-                  fontSize: '0.76rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <span>{cat === 'ALL' ? 'Semua Kategori' : cat}</span>
-                <span
-                  style={{
-                    fontSize: '0.68rem',
-                    padding: '1px 6px',
-                    borderRadius: '4px',
-                    background: isActive ? '#10b981' : '#1e293b',
-                    color: isActive ? '#ffffff' : '#94a3b8',
-                    fontWeight: 900
-                  }}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
         </div>
 
         {/* Toolbar Pencarian & Dropdown Filter */}
@@ -1945,7 +1876,7 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                 style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '7px 10px', color: '#fff', fontSize: '0.76rem' }}
               >
                 {tabCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat === 'ALL' ? 'Semua Kategori' : cat}</option>
+                  <option key={cat} value={cat}>{cat === 'ALL' ? 'Semua Status Karyawan' : cat}</option>
                 ))}
               </select>
             </div>
@@ -1963,15 +1894,15 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           </div>
         </div>
 
-        {/* TABEL UTAMA 10 KOLOM PERSIS SPK & LITIGASI */}
+        {/* TABEL UTAMA DATABASE KARYAWAN 13 KOLOM */}
         {filteredDataset.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', background: '#090d16', borderRadius: '12px', border: '1.5px dashed #334155' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
               <Users size={28} />
             </div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Dokumen {getTabTitle().title}</div>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>Belum Ada Data Karyawan</div>
             <div style={{ fontSize: '0.78rem', color: '#94a3b8', maxWidth: '420px', margin: '6px auto 1.2rem auto' }}>
-              Daftar arsip dokumen belum tersedia. Klik tombol di bawah untuk menambah data baru.
+              Daftar induk karyawan belum tersedia atau tidak cocok dengan filter pencarian.
             </div>
             <button
               onClick={handleOpenAdd}
@@ -1979,12 +1910,11 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
               style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}
             >
               <Plus size={15} />
-              <span>+ Tambah Dokumen Sekarang</span>
+              <span>+ Tambah Karyawan Baru</span>
             </button>
           </div>
         ) : (
-          activeTab === 'database-karyawan' ? (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
+          <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
                 <thead>
                   <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
@@ -2232,181 +2162,36 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
                 </tbody>
               </table>
             </div>
-          ) : (
-            <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #065f46', boxShadow: '0 4px 20px rgba(5, 150, 105, 0.15)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
-                <thead>
-                  <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b', whiteSpace: 'nowrap' }}>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No.</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>No. Dok</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Tanggal Dokumen</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Proyek</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Nama</th>
-                    <th style={{ padding: '11px 12px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Kategori</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Judul Dokumen</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Berkas</th>
-                    <th style={{ padding: '11px 14px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.2)', fontWeight: 900, whiteSpace: 'nowrap' }}>Catatan</th>
-                    <th style={{ padding: '11px 10px', textAlign: 'center', fontWeight: 900, whiteSpace: 'nowrap' }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredDataset.map((item, idx) => (
-                    <tr
-                      key={item.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.2)',
-                        whiteSpace: 'nowrap',
-                        transition: 'background 0.15s'
-                      }}
-                    >
-                      {/* 1. No. */}
-                      <td style={{ padding: '10px 10px', textAlign: 'center', color: '#94a3b8', fontWeight: 700, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {idx + 1}
-                      </td>
-
-                      {/* 2. No. Dok */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 800, color: '#34d399', borderRight: '1px solid #1e293b', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {item.noDok || item.nik || item.code || item.id}
-                      </td>
-
-                      {/* 3. Tanggal Dokumen */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e2e8f0', fontWeight: 600, borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {formatDisplayDate(item.tanggalDok || item.date || item.appliedDate || item.startDate || item.purchaseDate || item.reportDate)}
-                      </td>
-
-                      {/* 4. Proyek / Lokasi */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: (item.project || item.location || '').toLowerCase().includes('park') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                            color: (item.project || item.location || '').toLowerCase().includes('park') ? '#34d399' : '#fbbf24',
-                            fontWeight: 800,
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {item.project || item.location || 'Ashoka Park'}
-                        </span>
-                      </td>
-
-                      {/* 5. Nama */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <span style={{ fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap' }}>
-                          {item.nama || item.name || item.empName || '-'}
-                        </span>
-                      </td>
-
-                      {/* 6. Kategori */}
-                      <td style={{ padding: '10px 12px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <span
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(16, 185, 129, 0.15)',
-                            color: '#34d399',
-                            fontWeight: 800,
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {item.kategori || item.dept || item.position || item.contractType || item.category || item.status || 'Umum'}
-                        </span>
-                      </td>
-
-                      {/* 7. Judul Dokumen */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <span style={{ color: '#f1f5f9', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          {item.judulDokumen || item.role || item.title || item.issue || '-'}
-                        </span>
-                      </td>
-
-                      {/* 8. Berkas - Tombol "View" Saja Bersih */}
-                      <td style={{ padding: '10px 10px', textAlign: 'center', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setViewingDoc(item);
-                            setCurrentFileSlide(0);
-                            setDocPrintMode('all');
-                          }}
-                          style={{
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '4px 12px',
-                            borderRadius: '5px',
-                            fontWeight: 900,
-                            fontSize: '0.74rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
-                            transition: 'transform 0.1s',
-                            whiteSpace: 'nowrap'
-                          }}
-                          title="Lihat Pratinjau Dokumen & Berkas"
-                        >
-                          <Eye size={12} />
-                          <span>View</span>
-                        </button>
-                      </td>
-
-                      {/* 9. Catatan */}
-                      <td style={{ padding: '10px 14px', borderRight: '1px solid #1e293b', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {item.catatan || item.notes || item.note ? (
-                          <span style={{ fontSize: '0.73rem', fontWeight: 700, color: '#fde047', whiteSpace: 'nowrap' }}>
-                            {item.catatan || item.notes || item.note}
-                          </span>
-                        ) : (
-                          <span style={{ color: '#64748b', whiteSpace: 'nowrap' }}>-</span>
-                        )}
-                      </td>
-
-                      {/* 10. Aksi */}
-                      <td style={{ padding: '10px 10px', textAlign: 'center', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        <div style={{ display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setViewingDoc(item);
-                              setCurrentFileSlide(0);
-                              setDocPrintMode('all');
-                            }}
-                            title="Pratinjau & Cetak Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                          >
-                            <Printer size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(item)}
-                            title="Edit Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#34d399', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                          >
-                            <Edit3 size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem(item.id, item.judulDokumen || item.nama || item.noDok)}
-                            title="Hapus Dokumen"
-                            style={{ background: '#1e293b', border: '1px solid #334155', color: '#ef4444', padding: '5px 7px', borderRadius: '5px', cursor: 'pointer', fontSize: '0.72rem' }}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )
         )}
       </div>
+      ) : (
+        /* KONTEN KOSONG UNTUK SEMUA SUB-MODUL LAINNYA (NAVIGASI TETAP LENGKAP) */
+        <div className="glass-card" style={{ padding: '4.5rem 2rem', textAlign: 'center', marginBottom: '1.5rem', borderRadius: '12px', border: '1px solid #1e293b' }}>
+          <div style={{
+            width: '68px',
+            height: '68px',
+            borderRadius: '16px',
+            background: 'rgba(51, 65, 85, 0.35)',
+            border: '1px solid #334155',
+            color: '#94a3b8',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '1.2rem'
+          }}>
+            <Briefcase size={32} />
+          </div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>
+            Modul {getTabTitle().title}
+          </h3>
+          <p style={{ fontSize: '0.84rem', color: '#64748b', maxWidth: '440px', margin: '0 auto 1.5rem auto', lineHeight: 1.6 }}>
+            Sub modul ini belum memiliki data atau konten aktif. Navigasi telah disiapkan untuk pengisian data mendatang.
+          </p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '20px', background: 'rgba(148, 163, 184, 0.08)', border: '1px solid #334155', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>
+            <Clock3 size={14} />
+            <span>Status: Belum Ada Data (Siap Digunakan)</span>
+          </div>
+        </div>
       )}
 
       {/* ========================================================================= */}
