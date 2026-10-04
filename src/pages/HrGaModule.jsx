@@ -2181,15 +2181,15 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           }}>
             <Briefcase size={32} />
           </div>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.5rem' }}>
             Modul {getTabTitle().title}
           </h3>
-          <p style={{ fontSize: '0.84rem', color: '#64748b', maxWidth: '440px', margin: '0 auto 1.5rem auto', lineHeight: 1.6 }}>
-            Sub modul ini belum memiliki data atau konten aktif. Navigasi telah disiapkan untuk pengisian data mendatang.
+          <p style={{ fontSize: '0.82rem', color: '#64748b', maxWidth: '400px', margin: '0 auto 1.2rem auto' }}>
+            Modul sedang dalam pengerjaan
           </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '20px', background: 'rgba(148, 163, 184, 0.08)', border: '1px solid #334155', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>
-            <Clock3 size={14} />
-            <span>Status: Belum Ada Data (Siap Digunakan)</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#fbbf24', fontSize: '0.74rem', fontWeight: 700 }}>
+            <Clock size={13} />
+            <span>Sedang Dalam Pengerjaan</span>
           </div>
         </div>
       )}
