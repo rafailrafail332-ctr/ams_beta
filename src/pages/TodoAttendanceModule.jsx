@@ -1527,14 +1527,14 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <button 
                 className={`btn btn-sm ${reportPicFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setReportPicFilter('all')}
-                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'all' ? 800 : 500 }}
+                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'all' ? 800 : 500, flexShrink: 0, whiteSpace: 'nowrap' }}
               >
                 Semua Rekapan
               </button>
               <button 
                 className={`btn btn-sm ${reportPicFilter === 'for_me' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setReportPicFilter('for_me')}
-                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'for_me' ? 800 : 500 }}
+                style={{ fontSize: '0.8rem', fontWeight: reportPicFilter === 'for_me' ? 800 : 500, flexShrink: 0, whiteSpace: 'nowrap' }}
               >
                 PIC Saya
               </button>
@@ -1545,8 +1545,11 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 value={reportProjectFilter}
                 onChange={(e) => setReportProjectFilter(e.target.value)}
                 style={{ 
-                  width: '170px', 
+                  width: '190px', 
+                  minWidth: '190px',
+                  flexShrink: 0,
                   height: '36px', 
+                  padding: '0 0.65rem',
                   fontSize: '0.8rem', 
                   fontWeight: 800,
                   borderColor: reportProjectFilter !== 'all' ? (reportProjectFilter.includes('View') ? '#F59E0B' : '#10B981') : '#EAB308', 
@@ -1566,8 +1569,11 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 value={selectedEmployeeFilter}
                 onChange={(e) => setSelectedEmployeeFilter(e.target.value)}
                 style={{ 
-                  width: '185px', 
+                  width: '240px', 
+                  minWidth: '240px',
+                  flexShrink: 0,
                   height: '36px', 
+                  padding: '0 0.65rem',
                   fontSize: '0.8rem', 
                   fontWeight: 700, 
                   borderColor: selectedEmployeeFilter !== 'all' ? '#38BDF8' : undefined, 
@@ -1586,7 +1592,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 className="form-control"
                 value={reportStatusFilter}
                 onChange={(e) => setReportStatusFilter(e.target.value)}
-                style={{ width: '130px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
+                style={{ width: '160px', minWidth: '160px', flexShrink: 0, height: '36px', padding: '0 0.65rem', fontSize: '0.8rem', fontWeight: 700 }}
               >
                 <option value="all">Semua Status</option>
                 <option value="completed">Selesai</option>
@@ -1598,7 +1604,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                 className="form-control"
                 value={reportDivisionFilter}
                 onChange={(e) => setReportDivisionFilter(e.target.value)}
-                style={{ width: '150px', height: '36px', fontSize: '0.8rem', fontWeight: 700 }}
+                style={{ width: '190px', minWidth: '190px', flexShrink: 0, height: '36px', padding: '0 0.65rem', fontSize: '0.8rem', fontWeight: 700 }}
               >
                 <option value="all">Semua Divisi</option>
                 {COMPANY_DIVISIONS.map(d => (
@@ -1609,7 +1615,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
               <button 
                 className="btn btn-primary"
                 onClick={handleOpenAddReportModal}
-                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800, height: '36px', fontSize: '0.85rem' }}
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: 'none', fontWeight: 800, height: '36px', fontSize: '0.85rem', flexShrink: 0, whiteSpace: 'nowrap' }}
               >
                 <Plus size={16} /> + Tambah Baris
               </button>
@@ -1658,7 +1664,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
 
           {/* EXACT SPREADSHEET TABLE: TANGGAL | WAKTU | LAPORAN HARIAN | KORDINASI | PIC */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '12px', overflowX: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', WebkitOverflowScrolling: 'touch' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1200px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
                   <th style={{ width: '115px', minWidth: '115px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
@@ -1679,7 +1685,7 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                   <th style={{ width: '160px', minWidth: '160px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', borderRight: '1px solid rgba(255,255,255,0.06)', whiteSpace: 'nowrap' }}>
                     PIC
                   </th>
-                  <th style={{ width: '145px', minWidth: '145px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                  <th style={{ width: '250px', minWidth: '250px', padding: '0.95rem 1rem', fontWeight: 800, fontSize: '0.8rem', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', whiteSpace: 'nowrap' }}>
                     Status & Aksi
                   </th>
                 </tr>
@@ -1775,22 +1781,24 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                       </td>
 
                       {/* 7. Kolom Status & Aksi */}
-                      <td style={{ verticalAlign: 'top', padding: '0.85rem 1rem', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      <td style={{ verticalAlign: 'middle', padding: '0.85rem 1rem', textAlign: 'center', width: '250px', minWidth: '250px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                           {/* 1. Status Checklist Button */}
                           <button
                             onClick={() => handleToggleReport(item.id)}
                             className={`btn btn-sm ${item.completed ? 'btn-primary' : 'btn-secondary'}`}
                             style={{ 
-                              padding: '0.25rem 0.5rem', 
-                              fontSize: '0.72rem', 
+                              padding: '0.3rem 0.6rem', 
+                              fontSize: '0.75rem', 
                               fontWeight: 800,
                               background: item.completed ? '#10B981' : undefined,
-                              borderColor: item.completed ? '#059669' : undefined
+                              borderColor: item.completed ? '#059669' : undefined,
+                              flexShrink: 0,
+                              whiteSpace: 'nowrap'
                             }}
                             title="Klik untuk menyelesaikan"
                           >
-                            {item.completed ? <Check size={12} /> : null} {item.completed ? 'Selesai' : 'Pending'}
+                            {item.completed ? <Check size={13} /> : null} {item.completed ? 'Selesai' : 'Pending'}
                           </button>
 
                           {/* 2. Photo Proof Button */}
@@ -1799,35 +1807,39 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                               className="btn btn-secondary btn-sm"
                               onClick={() => { setSelectedReportForPhotoModal(item); setIsReportPhotoModalOpen(true); }}
                               style={{ 
-                                padding: '0.25rem 0.45rem', 
-                                fontSize: '0.72rem', 
+                                padding: '0.3rem 0.55rem', 
+                                fontSize: '0.75rem', 
                                 fontWeight: 800, 
                                 background: 'rgba(56, 189, 248, 0.15)', 
                                 color: '#38BDF8', 
                                 borderColor: 'rgba(56, 189, 248, 0.4)',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px'
+                                gap: '4px',
+                                flexShrink: 0,
+                                whiteSpace: 'nowrap'
                               }}
                               title="Lihat Foto Bukti Pekerjaan"
                             >
-                              <Eye size={12} /> Foto Bukti
+                              <Eye size={13} /> Foto Bukti
                             </button>
                           ) : (
                             <button
                               className="btn btn-secondary btn-sm"
                               onClick={() => handleOpenEditReportModal(item)}
                               style={{ 
-                                padding: '0.25rem 0.45rem', 
-                                fontSize: '0.72rem', 
+                                padding: '0.3rem 0.55rem', 
+                                fontSize: '0.75rem', 
                                 color: 'var(--text-muted)',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px'
+                                gap: '4px',
+                                flexShrink: 0,
+                                whiteSpace: 'nowrap'
                               }}
                               title="Upload Foto Bukti Pekerjaan"
                             >
-                              <Camera size={12} /> + Foto
+                              <Camera size={13} /> + Foto
                             </button>
                           )}
 
@@ -1837,18 +1849,18 @@ _Notifikasi otomatis Sistem AMS Ashoka Enterprise_`;
                               <button
                                 className="btn btn-secondary btn-sm"
                                 onClick={() => handleOpenEditReportModal(item)}
-                                style={{ padding: '0.25rem 0.4rem' }}
+                                style={{ padding: '0.3rem 0.45rem', flexShrink: 0 }}
                                 title="Edit Baris"
                               >
-                                <Edit2 size={12} />
+                                <Edit2 size={13} />
                               </button>
                               <button
                                 className="btn btn-secondary btn-sm"
                                 onClick={() => handleDeleteReport(item.id)}
-                                style={{ padding: '0.25rem 0.4rem', color: '#ef4444' }}
+                                style={{ padding: '0.3rem 0.45rem', color: '#ef4444', flexShrink: 0 }}
                                 title="Hapus Baris"
                               >
-                                <Trash2 size={12} />
+                                <Trash2 size={13} />
                               </button>
                             </>
                           )}
