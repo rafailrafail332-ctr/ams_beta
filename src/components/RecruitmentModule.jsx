@@ -977,14 +977,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#94a3b8' }} />
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#10b981' }} />
                 <input
                   type="text"
                   placeholder="Cari nama / posisi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="form-control"
-                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '200px' }}
+                  style={{ paddingLeft: '32px', height: '38px', fontSize: '0.82rem', width: '200px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
                 />
               </div>
 
@@ -992,7 +992,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 className="form-control"
                 value={filterProject}
                 onChange={(e) => setFilterProject(e.target.value)}
-                style={{ height: '36px', fontSize: '0.8rem', width: '150px' }}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  width: '220px',
+                  minWidth: '220px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
               >
                 <option value="ALL">Semua Proyek</option>
                 <option value="Ashoka Park">Ashoka Park</option>
@@ -1008,11 +1021,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   border: 'none',
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  height: '36px',
+                  height: '38px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  flexShrink: 0
                 }}
               >
                 <UploadCloud size={16} /> + Upload CV / Tambah Pelamar
@@ -1073,7 +1087,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
                       {/* Posisi Dilamar (Terpisah) */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.82rem' }}>
+                        <div style={{ fontWeight: 700, color: '#34d399', fontSize: '0.82rem' }}>
                           {app.posisi}
                         </div>
                       </td>
@@ -1112,7 +1126,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         </div>
                         {app.email && (
                           <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Mail size={11} color="#38bdf8" /> {app.email}
+                            <Mail size={11} color="#10b981" /> {app.email}
                           </div>
                         )}
                       </td>
@@ -1123,9 +1137,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                           <button
                             onClick={() => setViewingDoc({ app, file: app.files[0] })}
                             style={{
-                              background: 'rgba(56, 189, 248, 0.15)',
-                              border: '1px solid rgba(56, 189, 248, 0.4)',
-                              color: '#38bdf8',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              color: '#34d399',
                               padding: '5px 10px',
                               borderRadius: '6px',
                               fontSize: '0.75rem',
@@ -1151,14 +1165,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                           style={{
                             background: app.status === 'Diterima' ? 'rgba(34, 197, 94, 0.15)' :
                               app.status === 'Offering' ? 'rgba(16, 185, 129, 0.15)' :
-                              app.status === 'Interview' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                              app.status === 'Interview' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.15)',
                             color: app.status === 'Diterima' ? '#22c55e' :
                               app.status === 'Offering' ? '#10b981' :
-                              app.status === 'Interview' ? '#f59e0b' : '#38bdf8',
+                              app.status === 'Interview' ? '#34d399' : '#34d399',
                             border: `1px solid ${
                               app.status === 'Diterima' ? '#22c55e' :
                               app.status === 'Offering' ? '#10b981' :
-                              app.status === 'Interview' ? '#f59e0b' : '#38bdf8'
+                              app.status === 'Interview' ? '#10b981' : '#10b981'
                             }`,
                             padding: '3px 8px',
                             borderRadius: '12px',
@@ -1229,9 +1243,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span
                   style={{
-                    background: 'rgba(56, 189, 248, 0.15)',
-                    border: '1.5px solid #38bdf8',
-                    color: '#38bdf8',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1.5px solid #10b981',
+                    color: '#34d399',
                     fontSize: '0.82rem',
                     fontWeight: 900,
                     padding: '4px 12px',
@@ -1252,14 +1266,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
             {/* Filter Search, Status Filter & Tombol Atur Jadwal */}
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#38bdf8' }} />
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#10b981' }} />
                 <input
                   type="text"
                   placeholder="Cari nama / posisi / pewawancara..."
                   value={searchInterview}
                   onChange={(e) => setSearchInterview(e.target.value)}
                   className="form-control"
-                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '220px', borderColor: 'rgba(56, 189, 248, 0.4)' }}
+                  style={{ paddingLeft: '32px', height: '38px', fontSize: '0.82rem', width: '220px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
                 />
               </div>
 
@@ -1267,7 +1281,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 className="form-control"
                 value={filterInterviewStatus}
                 onChange={(e) => setFilterInterviewStatus(e.target.value)}
-                style={{ height: '36px', fontSize: '0.8rem', width: '140px', fontWeight: 700 }}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  width: '200px',
+                  minWidth: '200px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
               >
                 <option value="ALL">Semua Status</option>
                 <option value="Terjadwal">Terjadwal</option>
@@ -1282,11 +1309,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   border: 'none',
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  height: '36px',
+                  height: '38px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  flexShrink: 0
                 }}
               >
                 <Calendar size={16} /> + Atur Jadwal Interview
@@ -1298,20 +1326,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
             <table className="custom-table" style={{ width: '100%', minWidth: '1020px', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
-                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Tanggal & Jam</th>
-                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
-                  <th style={{ width: '210px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Metode & Lokasi / Link</th>
-                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Pewawancara</th>
-                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
-                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi, Nilai & WA</th>
+                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(16, 185, 129, 0.4)' }}>
+                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Tanggal & Jam</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
+                  <th style={{ width: '210px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Metode & Lokasi / Link</th>
+                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Pewawancara</th>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
+                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi, Nilai & WA</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredInterviews.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                      <Calendar size={36} color="#38bdf8" style={{ opacity: 0.6, marginBottom: '8px' }} />
+                      <Calendar size={36} color="#10b981" style={{ opacity: 0.6, marginBottom: '8px' }} />
                       <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
                         {searchInterview || filterInterviewStatus !== 'ALL' ? 'Tidak ada agenda wawancara yang sesuai' : 'Belum ada jadwal interview'}
                       </div>
@@ -1328,7 +1356,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.84rem', whiteSpace: 'nowrap' }}>
                           {formatDisplayDate(intw.tanggalInterview)}
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
                           <Clock size={12} /> {intw.jamInterview}
                         </div>
                       </td>
@@ -1336,7 +1364,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       {/* Nama Pelamar & Posisi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{intw.applicantName}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700, marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700, marginTop: '2px' }}>
                           {intw.posisi}
                         </div>
                         {intw.catatan && (
@@ -1367,9 +1395,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <span
                           style={{
-                            background: intw.status === 'Selesai' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-                            color: intw.status === 'Selesai' ? '#10b981' : '#38bdf8',
-                            border: `1px solid ${intw.status === 'Selesai' ? '#10b981' : '#38bdf8'}`,
+                            background: intw.status === 'Selesai' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.12)',
+                            color: '#34d399',
+                            border: '1px solid #10b981',
                             padding: '3px 8px',
                             borderRadius: '12px',
                             fontSize: '0.72rem',
@@ -1411,9 +1439,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             onClick={() => handleOpenAssessmentModal(intw)}
                             className="btn btn-sm"
                             style={{
-                              background: 'rgba(245, 158, 11, 0.15)',
-                              border: '1px solid #f59e0b',
-                              color: '#fbbf24',
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              border: '1px solid #10b981',
+                              color: '#34d399',
                               padding: '3px 7px',
                               fontSize: '0.72rem',
                               fontWeight: 800,
@@ -1479,9 +1507,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span
                   style={{
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    border: '1.5px solid #f59e0b',
-                    color: '#fbbf24',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1.5px solid #10b981',
+                    color: '#34d399',
                     fontSize: '0.82rem',
                     fontWeight: 900,
                     padding: '4px 12px',
@@ -1502,23 +1530,36 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
             {/* Filter Search, Filter Keputusan & Tombol Pilih Pelamar Untuk Dinilai */}
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#fbbf24' }} />
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#10b981' }} />
                 <input
                   type="text"
                   placeholder="Cari nama / posisi..."
                   value={searchAssessment}
                   onChange={(e) => setSearchAssessment(e.target.value)}
                   className="form-control"
-                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '200px', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+                  style={{ paddingLeft: '32px', height: '38px', fontSize: '0.82rem', width: '200px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
                 />
               </div>
 
-              {/* FITUR FILTER KEPUTUSAN (Permintaan User) */}
+              {/* FITUR FILTER KEPUTUSAN (Lebar Diperbesar Sehingga Tidak Terpotong) */}
               <select
                 className="form-control"
                 value={filterKeputusan}
                 onChange={(e) => setFilterKeputusan(e.target.value)}
-                style={{ height: '36px', fontSize: '0.8rem', width: '170px', fontWeight: 700, borderColor: '#f59e0b' }}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  width: '230px',
+                  minWidth: '230px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
               >
                 <option value="ALL">Semua Keputusan</option>
                 <option value="Lolos">Lolos (Siap Offering)</option>
@@ -1530,15 +1571,16 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 className="btn btn-primary"
                 onClick={() => { setPickerSearch(''); setIsPickerModalOpen(true); }}
                 style={{
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   border: 'none',
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  height: '36px',
+                  height: '38px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  flexShrink: 0
                 }}
               >
                 <Users size={16} /> Pilih Pelamar Untuk Dinilai
@@ -1546,26 +1588,26 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
             </div>
           </div>
 
-          {/* Table Hasil Penilaian */}
+          {/* Table Hasil Penilaian (Konsisten Warna Hijau / Emerald) */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
             <table className="custom-table" style={{ width: '100%', minWidth: '1060px', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Tgl Nilai</th>
-                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 1 (HRD)</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 2 (User Divisi)</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 3 (Opsional BOD)</th>
-                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Rata-Rata</th>
-                  <th style={{ width: '170px', minWidth: '170px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Keputusan</th>
-                  <th style={{ width: '120px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
+                <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(16, 185, 129, 0.4)' }}>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Tgl Nilai</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 1 (HRD)</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 2 (User Divisi)</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 3 (Opsional BOD)</th>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Rata-Rata</th>
+                  <th style={{ width: '170px', minWidth: '170px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Keputusan</th>
+                  <th style={{ width: '120px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAssessments.length === 0 ? (
                   <tr>
                     <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                      <Award size={36} color="#f59e0b" style={{ opacity: 0.6, marginBottom: '8px' }} />
+                      <Award size={36} color="#10b981" style={{ opacity: 0.6, marginBottom: '8px' }} />
                       <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
                         {searchAssessment || filterKeputusan !== 'ALL' ? 'Tidak ada hasil penilaian yang sesuai' : 'Belum ada hasil penilaian'}
                       </div>
@@ -1587,7 +1629,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       {/* Nama Pelamar & Posisi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{asm.applicantName}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700, marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700, marginTop: '2px' }}>
                           {asm.posisi}
                         </div>
                         {asm.catatanAkhir && (
@@ -1612,7 +1654,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <div style={{ fontSize: '0.78rem', color: '#f8fafc', fontWeight: 700 }}>
                           {asm.penilai2?.nama || 'Head User'}
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 800, marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, marginTop: '2px' }}>
                           Skor: {asm.penilai2?.skor || 0}/100 • ({asm.penilai2?.rekomendasi || '-'})
                         </div>
                       </td>
@@ -1624,7 +1666,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             <div style={{ fontSize: '0.78rem', color: '#f8fafc', fontWeight: 700 }}>
                               {asm.penilai3?.nama || 'Direksi'}
                             </div>
-                            <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800, marginTop: '2px' }}>
+                            <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, marginTop: '2px' }}>
                               Skor: {asm.penilai3?.skor || 0}/100 • ({asm.penilai3?.rekomendasi || '-'})
                             </div>
                           </>
@@ -1639,9 +1681,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <span
                           style={{
-                            background: 'rgba(245, 158, 11, 0.15)',
-                            border: '1px solid #f59e0b',
-                            color: '#fbbf24',
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            border: '1px solid #10b981',
+                            color: '#34d399',
                             fontWeight: 900,
                             fontSize: '0.88rem',
                             padding: '4px 8px',
@@ -1658,12 +1700,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <span
                           style={{
                             background: asm.keputusanAkhir === 'Lolos' ? 'rgba(16, 185, 129, 0.15)' :
-                              asm.keputusanAkhir === 'Dipertimbangkan' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                              asm.keputusanAkhir === 'Dipertimbangkan' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.15)',
                             color: asm.keputusanAkhir === 'Lolos' ? '#10b981' :
-                              asm.keputusanAkhir === 'Dipertimbangkan' ? '#f59e0b' : '#ef4444',
+                              asm.keputusanAkhir === 'Dipertimbangkan' ? '#34d399' : '#ef4444',
                             border: `1px solid ${
                               asm.keputusanAkhir === 'Lolos' ? '#10b981' :
-                              asm.keputusanAkhir === 'Dipertimbangkan' ? '#f59e0b' : '#ef4444'
+                              asm.keputusanAkhir === 'Dipertimbangkan' ? '#10b981' : '#ef4444'
                             }`,
                             padding: '4px 10px',
                             borderRadius: '12px',
@@ -1761,7 +1803,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   value={searchOffering}
                   onChange={(e) => setSearchOffering(e.target.value)}
                   className="form-control"
-                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '220px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
+                  style={{ paddingLeft: '32px', height: '38px', fontSize: '0.82rem', width: '220px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
                 />
               </div>
 
@@ -1769,7 +1811,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 className="form-control"
                 value={filterOfferingStatus}
                 onChange={(e) => setFilterOfferingStatus(e.target.value)}
-                style={{ height: '36px', fontSize: '0.8rem', width: '140px', fontWeight: 700 }}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  width: '200px',
+                  minWidth: '200px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
               >
                 <option value="ALL">Semua Status</option>
                 <option value="Diterbitkan">Diterbitkan</option>
@@ -1786,11 +1841,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   border: 'none',
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  height: '36px',
+                  height: '38px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  flexShrink: 0
                 }}
               >
                 <FileText size={16} /> + Buat Offering Letter Baru
@@ -1840,7 +1896,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       {/* Nama Pelamar & Jabatan */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{off.applicantName}</div>
-                        <div style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700, marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700, marginTop: '2px' }}>
                           {off.posisi}
                         </div>
                         <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -1890,14 +1946,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <span
                           style={{
                             background: off.statusOffering === 'Diterima' ? 'rgba(34, 197, 94, 0.15)' :
-                              off.statusOffering === 'Diterbitkan' ? 'rgba(56, 189, 248, 0.15)' :
+                              off.statusOffering === 'Diterbitkan' ? 'rgba(16, 185, 129, 0.15)' :
                               off.statusOffering === 'Draf' ? 'rgba(148, 163, 184, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                             color: off.statusOffering === 'Diterima' ? '#22c55e' :
-                              off.statusOffering === 'Diterbitkan' ? '#38bdf8' :
+                              off.statusOffering === 'Diterbitkan' ? '#34d399' :
                               off.statusOffering === 'Draf' ? '#94a3b8' : '#ef4444',
                             border: `1px solid ${
                               off.statusOffering === 'Diterima' ? '#22c55e' :
-                              off.statusOffering === 'Diterbitkan' ? '#38bdf8' :
+                              off.statusOffering === 'Diterbitkan' ? '#10b981' :
                               off.statusOffering === 'Draf' ? '#94a3b8' : '#ef4444'
                             }`,
                             padding: '3px 8px',
@@ -1975,10 +2031,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       {/* ===================================================================== */}
       {isPickerModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #f59e0b', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '85vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '85vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users size={18} color="#f59e0b" />
+                <Users size={18} color="#10b981" />
                 <span>Pilih Pelamar Untuk Dinilai</span>
               </div>
               <button onClick={() => setIsPickerModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -1988,7 +2044,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
             {/* Input Search Box Pelamar */}
             <div style={{ position: 'relative', marginBottom: '1rem' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#f59e0b' }} />
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#10b981' }} />
               <input
                 type="text"
                 autoFocus
@@ -1996,7 +2052,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 value={pickerSearch}
                 onChange={(e) => setPickerSearch(e.target.value)}
                 className="form-control"
-                style={{ paddingLeft: '38px', height: '40px', fontSize: '0.85rem', borderColor: '#f59e0b' }}
+                style={{ paddingLeft: '38px', height: '40px', fontSize: '0.85rem', borderColor: '#10b981' }}
               />
             </div>
 
@@ -2027,12 +2083,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         alignItems: 'center',
                         transition: 'all 0.15s ease'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f59e0b'}
+                      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#10b981'}
                       onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
                     >
                       <div>
                         <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem' }}>{app.nama}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#38bdf8', marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.78rem', color: '#34d399', marginTop: '2px' }}>
                           {app.posisi} • <span style={{ color: '#94a3b8' }}>{app.project}</span>
                         </div>
                       </div>
@@ -2042,14 +2098,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             ✓ Sudah Dinilai
                           </span>
                         ) : (
-                          <span style={{ fontSize: '0.7rem', color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '3px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                          <span style={{ fontSize: '0.7rem', color: '#94a3b8', background: 'rgba(255, 255, 255, 0.06)', padding: '3px 8px', borderRadius: '6px', fontWeight: 800 }}>
                             Belum Dinilai
                           </span>
                         )}
                         <button
                           className="btn btn-primary btn-sm"
                           style={{
-                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                            background: 'linear-gradient(135deg, #10b981, #059669)',
                             border: 'none',
                             fontWeight: 800,
                             fontSize: '0.75rem',
@@ -2172,7 +2228,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
               {/* Upload CV / Dokumen */}
               <div style={{ marginBottom: '14px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', border: '1px dashed #334155' }}>
-                <label style={{ fontSize: '0.76rem', color: '#38bdf8', fontWeight: 800, display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.76rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '6px' }}>
                   📎 Upload Berkas CV / Portofolio (PDF, Doc, Gambar)
                 </label>
                 <input
@@ -2224,10 +2280,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       {/* ===================================================================== */}
       {isInterviewModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #38bdf8', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Calendar size={18} color="#38bdf8" />
+                <Calendar size={18} color="#10b981" />
                 <span>{editingInterview ? 'Edit Jadwal Interview' : 'Atur Jadwal Wawancara Interview'}</span>
               </div>
               <button onClick={() => setIsInterviewModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -2371,7 +2427,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 <button type="button" onClick={() => setIsInterviewModalOpen(false)} className="btn btn-secondary" style={{ fontSize: '0.82rem' }}>
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', border: 'none', fontWeight: 800, fontSize: '0.82rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 800, fontSize: '0.82rem' }}>
                   Simpan Jadwal Interview
                 </button>
               </div>
@@ -2385,10 +2441,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       {/* ===================================================================== */}
       {isAssessmentModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #f59e0b', borderRadius: '16px', width: '100%', maxWidth: '780px', maxHeight: '92vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '780px', maxHeight: '92vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Award size={20} color="#f59e0b" />
+                <Award size={20} color="#10b981" />
                 <span>Formulir Hasil Penilaian: {asmForm.applicantName}</span>
               </div>
               <button onClick={() => setIsAssessmentModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -2398,11 +2454,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
             <form onSubmit={handleSaveAssessment}>
               {/* Header Box Info Pelamar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', padding: '10px 14px', borderRadius: '10px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '10px 14px', borderRadius: '10px', marginBottom: '14px' }}>
                 <div>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Kandidat Yang Dinilai:</div>
                   <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#ffffff' }}>{asmForm.applicantName}</div>
-                  <div style={{ fontSize: '0.76rem', color: '#38bdf8' }}>Posisi: {asmForm.posisi}</div>
+                  <div style={{ fontSize: '0.76rem', color: '#34d399' }}>Posisi: {asmForm.posisi}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Tanggal Evaluasi:</div>
@@ -2521,7 +2577,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               {/* 2. PENILAI 2: USER / KEPALA DIVISI */}
               <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e293b', borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '6px' }}>
-                  <div style={{ fontWeight: 800, color: '#38bdf8', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontWeight: 800, color: '#34d399', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Briefcase size={16} /> 2. Penilai 2 (User / Kepala Divisi Terkait)
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -2546,7 +2602,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       value={asmForm.penilai2?.kompetensiTeknis ?? ''}
                       onChange={(e) => {
                         const val = e.target.value === '' ? '' : Number(e.target.value);
-                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, kompetensiTeknis: val } }));
+                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, competencyTeknis: val } }));
                       }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
@@ -2583,7 +2639,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 800 }}>Skor User (1-100)</label>
+                    <label style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800 }}>Skor User (1-100)</label>
                     <input
                       type="number"
                       min="0"
@@ -2594,7 +2650,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, skor: val } }));
                       }}
                       className="form-control"
-                      style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#38bdf8' }}
+                      style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#10b981' }}
                     />
                   </div>
                 </div>
@@ -2622,9 +2678,9 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               </div>
 
               {/* 3. PENILAI 3: OPSIONAL DIREKSI / BOD */}
-              <div style={{ background: asmForm.penilai3Enabled ? 'rgba(245, 158, 11, 0.05)' : 'rgba(255,255,255,0.01)', border: `1px solid ${asmForm.penilai3Enabled ? '#f59e0b' : '#1e293b'}`, borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
+              <div style={{ background: asmForm.penilai3Enabled ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.01)', border: `1px solid ${asmForm.penilai3Enabled ? '#10b981' : '#1e293b'}`, borderRadius: '12px', padding: '14px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: asmForm.penilai3Enabled ? '10px' : 0 }}>
-                  <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontWeight: 800, color: '#34d399', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Award size={16} /> 3. Penilai 3 (Direksi / BOD / GM — Opsional)
                   </div>
                   <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.76rem', color: '#f8fafc', fontWeight: 700 }}>
@@ -2666,7 +2722,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800 }}>Skor Direksi (1-100)</label>
+                        <label style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 800 }}>Skor Direksi (1-100)</label>
                         <input
                           type="number"
                           min="0"
@@ -2677,7 +2733,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             setAsmForm(prev => ({ ...prev, penilai3: { ...prev.penilai3, skor: val } }));
                           }}
                           className="form-control"
-                          style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#f59e0b' }}
+                          style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#10b981' }}
                         />
                       </div>
                     </div>
@@ -2714,7 +2770,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>Rata-Rata Gabungan:</span>
-                    <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#fbbf24', background: 'rgba(245, 158, 11, 0.2)', padding: '2px 10px', borderRadius: '6px' }}>
+                    <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#34d399', background: 'rgba(16, 185, 129, 0.2)', padding: '2px 10px', borderRadius: '6px' }}>
                       {calculateAverageScore(asmForm)} / 100
                     </span>
                   </div>
@@ -2732,7 +2788,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         fontSize: '0.84rem',
                         fontWeight: 900,
                         padding: '0 0.65rem',
-                        color: asmForm.keputusanAkhir === 'Lolos' ? '#10b981' : asmForm.keputusanAkhir === 'Dipertimbangkan' ? '#f59e0b' : '#ef4444'
+                        color: asmForm.keputusanAkhir === 'Lolos' ? '#10b981' : asmForm.keputusanAkhir === 'Dipertimbangkan' ? '#34d399' : '#ef4444'
                       }}
                     >
                       <option value="Lolos">Lolos (Siap Offering)</option>
@@ -2967,10 +3023,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       {/* ===================================================================== */}
       {viewingDoc && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #38bdf8', borderRadius: '16px', width: '100%', maxWidth: '600px', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '600px', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={18} color="#38bdf8" />
+                <FileText size={18} color="#10b981" />
                 <span>Dokumen CV: {viewingDoc.app?.nama}</span>
               </div>
               <button onClick={() => setViewingDoc(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
@@ -2979,7 +3035,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
             </div>
 
             <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid #1e293b', textAlign: 'center', marginBottom: '1.2rem' }}>
-              <FileText size={48} color="#38bdf8" style={{ marginBottom: '8px', opacity: 0.8 }} />
+              <FileText size={48} color="#10b981" style={{ marginBottom: '8px', opacity: 0.8 }} />
               <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>{viewingDoc.file?.name}</div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>Ukuran Berkas: {viewingDoc.file?.size}</div>
               <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>
