@@ -31,8 +31,11 @@ import {
   Award,
   Layers,
   ArrowRight,
-  Check
+  Check,
+  CreditCard,
+  Send
 } from 'lucide-react';
+import { submitFundRequest, getFundRequests } from '../services/financeService';
 
 // =============================================================================
 // STORAGE KEYS & SEED DATA
@@ -174,7 +177,7 @@ const INITIAL_DOCS = [
     namaAcara: 'Annual Family Gathering & Kick-Off Proyek 2026',
     bulanTahun: '2026-11',
     tanggal: '2026-11-20',
-    kategori: 'Fun Games', // Fun Games, Gala Dinner, Outbound, Doorprize, Seremonial
+    kategori: 'Fun Games',
     judul: 'Keseruan Fun Team Building & Ice Breaking di Lapangan Pinus',
     keterangan: 'Seluruh peserta karyawan dan keluarga berbaur dalam kompetisi balon estafet dan yel-yel kebersamaan divisi.',
     imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80',
@@ -234,7 +237,7 @@ const INITIAL_DOCS = [
     namaAcara: 'Outbound Leadership & Team Bonding Security & GA',
     bulanTahun: '2026-08',
     tanggal: '2026-08-11',
-    kategori: 'Outbound',
+    kategori: 'Rafting',
     judul: 'Petualangan Rafting Arung Jeram Sungai Citarik Bersama Regu GA',
     keterangan: 'Menguji kekompakan dan nyali mendayung perahu karet menaklukkan jeram grade III sungai Citarik.',
     imageUrl: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1200&q=80',
@@ -242,17 +245,21 @@ const INITIAL_DOCS = [
   }
 ];
 
-// 4. DATA SEED RINCIAN ANGGARAN GATHERING
+// 4. DATA SEED RINCIAN ANGGARAN GATHERING (LENGKAP DENGAN DATA REKENING BANK)
 const INITIAL_BUDGETS = [
   {
     id: 'BDG-001',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BCA',
+    noRekening: '002-988-1234',
+    namaPenerima: 'PT Jambuluwuk Sejahtera',
     posPengeluaran: 'Sewa Venue & Akomodasi Resort',
     uraian: 'Sewa 25 unit kamar villa executive & ballroom convention hall selama 3 hari 2 malam',
     rencana: 45000000,
     realisasi: 42500000,
-    status: 'Lunas', // Lunas, DP, Pending
+    status: 'Lunas', // Lunas, Diajukan ke Finance, Pending
+    fundRequestId: 'REQ-2026-001',
     kwitansi: 'KW-JBL-09281.pdf',
     catatan: 'Diskon early booking grup korporat 5% dari pihak manajemen Jambuluwuk'
   },
@@ -260,11 +267,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-002',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'Mandiri',
+    noRekening: '137-00-998877-1',
+    namaPenerima: 'PO Bintang Utama Pariwisata',
     posPengeluaran: 'Transportasi Bus Pariwisata',
     uraian: 'Sewa 2 unit bus pariwisata Big Bus 50 Seat full AC, tol, bensin, dan tip supir',
     rencana: 18000000,
     realisasi: 17000000,
     status: 'Lunas',
+    fundRequestId: 'REQ-2026-002',
     kwitansi: 'KW-BUS-04192.pdf',
     catatan: 'Armada Bintang Utama Luxury Class kondisi prima'
   },
@@ -272,11 +283,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-003',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BCA',
+    noRekening: '883-019-2819',
+    namaPenerima: 'Catering Berkah Nusantara',
     posPengeluaran: 'Konsumsi & Catering Selama Acara',
     uraian: '6x makan berat prasmanan, 4x coffee break premium, & BBQ kambing guling 2 ekor',
     rencana: 22000000,
     realisasi: 21500000,
     status: 'Lunas',
+    fundRequestId: 'REQ-2026-003',
     kwitansi: 'KW-CAT-88192.pdf',
     catatan: 'Menu disukai seluruh peserta termasuk menu ramah anak'
   },
@@ -284,11 +299,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-004',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BSI',
+    noRekening: '712-4455-890',
+    namaPenerima: 'Adventure Pro Outbound',
     posPengeluaran: 'Instruktur Outbound & Fun Games',
     uraian: 'Paket master game, 6 fasilitator lapangan, sound system portable outdoor, & properti lomba',
     rencana: 12000000,
     realisasi: 11500000,
     status: 'Lunas',
+    fundRequestId: 'REQ-2026-004',
     kwitansi: 'KW-OUT-33921.pdf',
     catatan: 'Vendor Adventure Pro Puncak'
   },
@@ -296,11 +315,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-005',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BCA',
+    noRekening: '527-1122-334',
+    namaPenerima: 'Elektronik Maju Jaya',
     posPengeluaran: 'Hadiah Doorprize & Grand Prize',
     uraian: 'Motor listrik 1 unit, Smart TV 43 inch 2 unit, kulkas 1 unit, sepeda, & 20 voucher belanja',
     rencana: 16000000,
     realisasi: 15400000,
     status: 'Lunas',
+    fundRequestId: null,
     kwitansi: 'KW-DPZ-99120.pdf',
     catatan: 'Pembelian langsung dari distributor elektronik resmi'
   },
@@ -308,11 +331,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-006',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BRI',
+    noRekening: '0291-0182-9471',
+    namaPenerima: 'Konveksi Kaos Prima',
     posPengeluaran: 'Merchandise Kaos, Topi & Goodie Bag',
     uraian: '90 pcs kaos polo bordir premium cotton combed 24s, topi rimba, tumbler & tas kain ramah lingkungan',
     rencana: 8500000,
     realisasi: 8000000,
     status: 'Lunas',
+    fundRequestId: null,
     kwitansi: 'KW-MRC-11092.pdf',
     catatan: 'Kualitas bahan adem dan jahitan rapi'
   },
@@ -320,11 +347,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-007',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
-    posPengeluaran: 'Dokumentasi, Foto Drone & Video Aftermovie',
+    namaBank: 'BCA',
+    noRekening: '882-0194-819',
+    namaPenerima: 'Creative Studio 4K',
+    posPengeluaran: 'Dokumentasi Drone & Video Aftermovie',
     uraian: '2 fotografer profesional, 1 videografer drone FPV, & paket editing video aftermovie 4K',
     rencana: 6000000,
     realisasi: 5500000,
-    status: 'Lunas',
+    status: 'Pending',
+    fundRequestId: null,
     kwitansi: 'KW-DOC-77291.pdf',
     catatan: 'Hasil dokumentasi selesai dalam 5 hari kerja'
   },
@@ -332,11 +363,15 @@ const INITIAL_BUDGETS = [
     id: 'BDG-008',
     agendaId: 'GTH-2026-001',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
+    namaBank: 'BCA',
+    noRekening: '002-988-5511',
+    namaPenerima: 'Klinik Medika Sehat',
     posPengeluaran: 'Dana Taktis & Keperluan Medis P3K',
     uraian: 'Obat-obatan umum, kotak P3K darurat, tabung oksigen portable, & biaya tak terduga',
     rencana: 4500000,
     realisasi: 2800000,
-    status: 'Lunas',
+    status: 'Pending',
+    fundRequestId: null,
     kwitansi: 'KW-MED-55102.pdf',
     catatan: 'Sisa dana dikembalikan ke kas operasional GA'
   }
@@ -395,6 +430,33 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   useEffect(() => {
     try { localStorage.setItem(STORAGE_GATHERING_BUDGETS, JSON.stringify(budgets)); } catch {}
   }, [budgets]);
+
+  // REAL-TIME SYNC DENGAN FINANCE: Jika pengajuan dana gathering sudah cair di Finance, ubah status jadi 'Lunas'
+  useEffect(() => {
+    try {
+      const financeRequests = getFundRequests();
+      let hasChange = false;
+      const updatedBudgets = budgets.map(b => {
+        if (!b.fundRequestId) return b;
+        const matchedFr = financeRequests.find(fr => fr.id === b.fundRequestId);
+        if (matchedFr) {
+          // Jika status di Finance sudah 'Dana Cair' atau 'Selesai' atau 'Disetujui'
+          if ((matchedFr.status === 'Dana Cair' || matchedFr.status === 'Selesai') && b.status !== 'Lunas') {
+            hasChange = true;
+            return { ...b, status: 'Lunas' };
+          } else if (matchedFr.status === 'Disetujui' && b.status === 'Pending') {
+            hasChange = true;
+            return { ...b, status: 'Diajukan ke Finance' };
+          }
+        }
+        return b;
+      });
+
+      if (hasChange) {
+        setBudgets(updatedBudgets);
+      }
+    } catch {}
+  }, []);
 
   // Format Helper Rupiah & Tanggal
   const formatRupiah = (val) => {
@@ -519,7 +581,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
     }
   };
 
-  // Broadcast WA info jadwal gathering
   const handleSendWASchedule = (sch) => {
     let cleanPhone = (sch.phonePic || '081299887711').replace(/[^0-9]/g, '');
     if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
@@ -537,7 +598,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   const [searchMOM, setSearchMOM] = useState('');
   const [isMOMModalOpen, setIsMOMModalOpen] = useState(false);
   const [editingMOM, setEditingMOM] = useState(null);
-  const [viewingMOMDoc, setViewingMOMDoc] = useState(null); // Modal lembar MOM resmi
+  const [viewingMOMDoc, setViewingMOMDoc] = useState(null);
 
   const [momForm, setMomForm] = useState({
     agendaId: '',
@@ -620,21 +681,23 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
     }
   };
 
-  // Broadcast WA Notulen MOM
   const handleSendWAMOM = (m) => {
     const text = `*NOTULEN & HASIL EVALUASI GATHERING (MOM)*\n*PT PERSADA NUSANTARA INDONESIA*\n\n📌 *Acara:* ${m.namaAcara}\n📅 *Tanggal:* ${formatDisplayDate(m.tanggal)}\n📍 *Lokasi:* ${m.lokasi}\n🎯 *Goals Capaian:* ${m.goals}\n💡 *Tujuan Acara:* ${m.tujuan}\n\n*HASIL / NOTULEN KEPUTUSAN:*\n${m.momHasil}\n\n👥 *Peserta Hadir:* ${m.pesertaHadir}\n✍️ *Notulis:* ${m.notulis}\n\nDokumen resmi tersimpan di sistem AMS HR & GA.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   // ===========================================================================
-  // SUB-MODUL 3: DOKUMENTASI & FOTO ACARA STATE & HANDLERS
+  // SUB-MODUL 3: DOKUMENTASI & FOTO ACARA (UPLOAD FILE & CUSTOM KATEGORI)
   // ===========================================================================
   const [searchDoc, setSearchDoc] = useState('');
-  const [filterDocEvent, setFilterDocEvent] = useState('ALL'); // ALL or specific event name
-  const [filterDocMonthYear, setFilterDocMonthYear] = useState('ALL'); // ALL, 2026-11, 2026-08, 2026-05
+  const [filterDocEvent, setFilterDocEvent] = useState('ALL');
+  const [filterDocMonthYear, setFilterDocMonthYear] = useState('ALL');
+  const [filterDocCategory, setFilterDocCategory] = useState('ALL');
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
-  const [viewingLightboxIndex, setViewingLightboxIndex] = useState(null); // Lightbox index for filtered docs
+  const [viewingLightboxIndex, setViewingLightboxIndex] = useState(null);
+  const fileInputRef = useRef(null);
+
   const [docForm, setDocForm] = useState({
     agendaId: '',
     namaAcara: '',
@@ -644,10 +707,11 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
     judul: '',
     keterangan: '',
     imageUrl: '',
+    imageFileName: '',
     fotografer: 'Tim HR & GA'
   });
 
-  // Ambil list unik bulan & tahun dari dokumentasi
+  // Ambil list unik bulan & tahun
   const availableMonths = useMemo(() => {
     const months = Array.from(new Set(docs.map(d => d.bulanTahun).filter(Boolean)));
     return months.sort().reverse();
@@ -655,8 +719,12 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
 
   // Ambil list unik nama acara
   const availableEvents = useMemo(() => {
-    const evs = Array.from(new Set(docs.map(d => d.namaAcara).filter(Boolean)));
-    return evs;
+    return Array.from(new Set(docs.map(d => d.namaAcara).filter(Boolean)));
+  }, [docs]);
+
+  // Ambil list unik kategori momen yang dinamis
+  const availableCategories = useMemo(() => {
+    return Array.from(new Set(docs.map(d => d.kategori).filter(Boolean)));
   }, [docs]);
 
   const filteredDocs = useMemo(() => {
@@ -670,44 +738,84 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
 
       const matchEvent = filterDocEvent === 'ALL' || item.namaAcara === filterDocEvent;
       const matchMonth = filterDocMonthYear === 'ALL' || item.bulanTahun === filterDocMonthYear;
+      const matchCategory = filterDocCategory === 'ALL' || item.kategori === filterDocCategory;
 
-      return matchSearch && matchEvent && matchMonth;
+      return matchSearch && matchEvent && matchMonth && matchCategory;
     });
-  }, [docs, searchDoc, filterDocEvent, filterDocMonthYear]);
+  }, [docs, searchDoc, filterDocEvent, filterDocMonthYear, filterDocCategory]);
 
   const handleOpenAddDoc = () => {
     const firstSch = schedules[0];
     setDocForm({
       agendaId: firstSch ? firstSch.id : '',
-      namaAcara: firstSch ? firstSch.namaAcara : 'Annual Family Gathering 2026',
+      namaAcara: firstSch ? firstSch.namaAcara : 'Annual Family Gathering 2026 Puncak',
       bulanTahun: new Date().toISOString().slice(0, 7),
       tanggal: new Date().toISOString().split('T')[0],
       kategori: 'Fun Games',
       judul: '',
       keterangan: '',
       imageUrl: '',
+      imageFileName: '',
       fotografer: 'Tim Dokumentasi HR'
     });
     setIsDocModalOpen(true);
   };
 
+  // Handler Upload File Gambar Langsung (Menggunakan FileReader Base64)
+  const handleImageFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 12 * 1024 * 1024) {
+      showNotification && showNotification('Ukuran file foto maksimal 12 MB!', 'danger');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      setDocForm(prev => ({
+        ...prev,
+        imageUrl: uploadEvent.target.result,
+        imageFileName: file.name
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveDoc = (e) => {
     e.preventDefault();
     if (!docForm.judul.trim()) {
-      showNotification && showNotification('Judul foto / momen wajib diisi!', 'danger');
+      showNotification && showNotification('Judul foto / momen kegiatan wajib diisi!', 'danger');
+      return;
+    }
+
+    if (!docForm.imageUrl) {
+      showNotification && showNotification('Silakan upload file foto dokumentasi terlebih dahulu!', 'warning');
       return;
     }
 
     const newId = `DOC-${String(docs.length + 1).padStart(3, '0')}`;
     const newD = {
       ...docForm,
-      id: newId,
-      imageUrl: docForm.imageUrl.trim() || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80'
+      id: newId
     };
 
     setDocs([newD, ...docs]);
-    showNotification && showNotification('Foto dokumentasi gathering berhasil ditambahkan!', 'success');
+    showNotification && showNotification('Foto dokumentasi gathering berhasil diupload & disimpan!', 'success');
     setIsDocModalOpen(false);
+  };
+
+  // Handler Download Foto Langsung
+  const handleDownloadDoc = (doc) => {
+    if (!doc || !doc.imageUrl) return;
+    const a = document.createElement('a');
+    a.href = doc.imageUrl;
+    const safeTitle = (doc.judul || 'Foto_Gathering').replace(/[^a-zA-Z0-9_-]/g, '_');
+    a.download = `${safeTitle}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showNotification && showNotification(`Foto "${doc.judul}" berhasil diunduh!`, 'success');
   };
 
   const handleDeleteDoc = (id, title) => {
@@ -719,19 +827,26 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   };
 
   // ===========================================================================
-  // SUB-MODUL 4: RINCIAN ANGGARAN & GRAFIK TREN BIAYA STATE & HANDLERS
+  // SUB-MODUL 4: RINCIAN ANGGARAN, REKENING BANK & GRAFIK TREN BIAYA
   // ===========================================================================
   const [searchBudget, setSearchBudget] = useState('');
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
+  const [selectedBudgetForPayment, setSelectedBudgetForPayment] = useState(null); // Modal Konfirmasi Bayar ke Finance
+  const [selectedChartPoint, setSelectedChartPoint] = useState(null); // Titik grafik yang dipilih
+
   const [budgetForm, setBudgetForm] = useState({
     agendaId: '',
     namaAcara: 'Annual Family Gathering 2026 Puncak',
-    posPengeluaran: 'Sewa Venue & Akomodasi',
+    namaBank: 'BCA',
+    noRekening: '',
+    namaPenerima: '',
+    posPengeluaran: '',
     uraian: '',
     rencana: 10000000,
     realisasi: 9500000,
-    status: 'Lunas',
+    status: 'Pending',
+    fundRequestId: null,
     kwitansi: '',
     catatan: ''
   });
@@ -743,6 +858,9 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
         item.posPengeluaran.toLowerCase().includes(q) ||
         item.uraian.toLowerCase().includes(q) ||
         item.namaAcara.toLowerCase().includes(q) ||
+        (item.namaBank && item.namaBank.toLowerCase().includes(q)) ||
+        (item.noRekening && item.noRekening.toLowerCase().includes(q)) ||
+        (item.namaPenerima && item.namaPenerima.toLowerCase().includes(q)) ||
         (item.catatan && item.catatan.toLowerCase().includes(q));
     });
   }, [budgets, searchBudget]);
@@ -759,11 +877,15 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
     setBudgetForm({
       agendaId: firstSch ? firstSch.id : '',
       namaAcara: firstSch ? firstSch.namaAcara : 'Annual Family Gathering 2026 Puncak',
-      posPengeluaran: 'Transportasi Bus Pariwisata',
+      namaBank: 'BCA',
+      noRekening: '',
+      namaPenerima: '',
+      posPengeluaran: '',
       uraian: '',
       rencana: 10000000,
       realisasi: 9500000,
-      status: 'Lunas',
+      status: 'Pending',
+      fundRequestId: null,
       kwitansi: `KW-${Math.floor(10000 + Math.random() * 90000)}.pdf`,
       catatan: ''
     });
@@ -778,8 +900,12 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
 
   const handleSaveBudget = (e) => {
     e.preventDefault();
+    if (!budgetForm.namaBank.trim() || !budgetForm.noRekening.trim() || !budgetForm.namaPenerima.trim()) {
+      showNotification && showNotification('Nama Bank, Nomor Rekening, dan Nama Penerima wajib diisi di bagian atas!', 'danger');
+      return;
+    }
     if (!budgetForm.posPengeluaran.trim() || !budgetForm.uraian.trim()) {
-      showNotification && showNotification('Pos Pengeluaran dan Uraian wajib diisi!', 'danger');
+      showNotification && showNotification('Pos Pengeluaran dan Uraian Kebutuhan wajib diisi!', 'danger');
       return;
     }
 
@@ -800,6 +926,73 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       setBudgets(budgets.filter(b => b.id !== id));
       showNotification && showNotification(`Pos anggaran ${pos} dihapus!`, 'info');
     }
+  };
+
+  // HANDLER KLIK STATUS: OTOMATIS KIRIM PENGAJUAN DANA KE FINANCE / TOGGLE STATUS LUNAS
+  const handleStatusClick = (b) => {
+    if (b.status === 'Lunas') {
+      if (window.confirm(`Status saat ini sudah "Lunas". Ingin mereset status kembali ke "Pending"?`)) {
+        setBudgets(budgets.map(item => item.id === b.id ? { ...item, status: 'Pending', fundRequestId: null } : item));
+        showNotification && showNotification(`Status ${b.posPengeluaran} direset ke Pending`, 'info');
+      }
+      return;
+    }
+
+    // Jika belum lunas, buka modal konfirmasi pengiriman ke Finance
+    setSelectedBudgetForPayment(b);
+  };
+
+  // Proses Kirim Otomatis ke Finance
+  const handleConfirmSendToFinance = () => {
+    if (!selectedBudgetForPayment) return;
+    const b = selectedBudgetForPayment;
+
+    try {
+      const nominal = Number(b.realisasi) || Number(b.rencana) || 0;
+      const createdRequest = submitFundRequest({
+        originModule: 'hrga',
+        originModuleName: 'HR & GA (Gathering)',
+        title: `Biaya Gathering: ${b.posPengeluaran} - ${b.namaAcara}`,
+        amount: nominal,
+        category: 'Kegiatan Gathering',
+        project: 'Head Office Bizhub',
+        requester: 'Panitia Gathering HR & GA',
+        notes: `Pembayaran pos anggaran gathering: ${b.uraian}.\nTransfer ke Bank: ${b.namaBank || 'BCA'} No. Rek: ${b.noRekening || '-'} a.n ${b.namaPenerima || 'Vendor'}.`,
+        dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+        accountCode: '5-301'
+      });
+
+      // Update status pos anggaran menjadi 'Diajukan ke Finance'
+      setBudgets(budgets.map(item => {
+        if (item.id === b.id) {
+          return {
+            ...item,
+            status: 'Diajukan ke Finance',
+            fundRequestId: createdRequest.id
+          };
+        }
+        return item;
+      }));
+
+      showNotification && showNotification(
+        `Pengajuan dana ${formatRupiah(nominal)} untuk "${b.posPengeluaran}" berhasil dikirim otomatis ke Finance & Accounting! (ID: ${createdRequest.id})`,
+        'success'
+      );
+    } catch (err) {
+      console.error(err);
+      showNotification && showNotification(`Gagal mengirim ke Finance: ${err.message}`, 'danger');
+    }
+
+    setSelectedBudgetForPayment(null);
+  };
+
+  // Manual Tandai Lunas Langsung
+  const handleMarkAsPaidManual = () => {
+    if (!selectedBudgetForPayment) return;
+    const b = selectedBudgetForPayment;
+    setBudgets(budgets.map(item => item.id === b.id ? { ...item, status: 'Lunas' } : item));
+    showNotification && showNotification(`Pos anggaran "${b.posPengeluaran}" telah ditandai Lunas!`, 'success');
+    setSelectedBudgetForPayment(null);
   };
 
   // ===========================================================================
@@ -1013,7 +1206,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               marginBottom: '1rem'
             }}
           >
-            {/* Search Bar Sub-Modul 1 */}
             <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
               <Search size={15} color="#10b981" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
@@ -1036,7 +1228,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            {/* Filter Status & Tombol Tambah */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <select
                 value={filterScheduleStatus}
@@ -1114,14 +1305,12 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           transition: 'background 0.15s'
                         }}
                       >
-                        {/* No. Agenda */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#34d399', background: 'rgba(16, 185, 129, 0.12)', padding: '3px 8px', borderRadius: '5px', border: '1px solid rgba(16, 185, 129, 0.3)', fontFamily: 'monospace' }}>
                             {sch.id}
                           </span>
                         </td>
 
-                        {/* Nama Acara & Tema */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.88rem' }}>{sch.namaAcara}</div>
                           <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 700, marginTop: '3px', fontStyle: 'italic' }}>
@@ -1134,7 +1323,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           )}
                         </td>
 
-                        {/* Tanggal & Countdown */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.82rem', color: '#f8fafc', fontWeight: 700 }}>
                             {formatDisplayDate(sch.tanggalMulai)}
@@ -1162,7 +1350,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           </div>
                         </td>
 
-                        {/* Lokasi & Titik Kumpul */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
                             📍 {sch.lokasi}
@@ -1172,7 +1359,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           </div>
                         </td>
 
-                        {/* Target Peserta & PIC */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#34d399' }}>
                             {sch.targetPeserta}
@@ -1182,7 +1368,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           </div>
                         </td>
 
-                        {/* Status */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                           <span
                             style={{
@@ -1203,10 +1388,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           </span>
                         </td>
 
-                        {/* WA & Aksi */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                           <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-                            {/* Tombol Kirim WhatsApp Broadcast */}
                             <button
                               onClick={() => handleSendWASchedule(sch)}
                               style={{
@@ -1223,7 +1406,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                                 cursor: 'pointer',
                                 boxShadow: '0 2px 5px rgba(37, 211, 102, 0.3)'
                               }}
-                              title="Broadcast Informasi Jadwal & Rundown Acara via WhatsApp"
+                              title="Broadcast Informasi Jadwal via WhatsApp"
                             >
                               <MessageSquare size={12} /> WA
                             </button>
@@ -1262,7 +1445,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       {/* ===================================================================== */}
       {activeSubTab === 'mom' && (
         <div>
-          {/* Toolbar Sub-Modul 2 */}
           <div
             style={{
               display: 'flex',
@@ -1277,7 +1459,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               marginBottom: '1rem'
             }}
           >
-            {/* Search Bar Sub-Modul 2 */}
             <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
               <Search size={15} color="#10b981" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
@@ -1319,7 +1500,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
             </button>
           </div>
 
-          {/* TABEL SESUAI PERMINTAAN SPESIFIK USER: TANGGAL, LOKASI, GOALS, TUJUAN, MOM/NOTULEN */}
           <div className="table-container" style={{ border: '1px solid #1e293b', borderRadius: '12px', overflowX: 'auto' }}>
             <table className="custom-table" style={{ width: '100%', minWidth: '1150px', borderCollapse: 'collapse' }}>
               <thead>
@@ -1351,7 +1531,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                         transition: 'background 0.15s'
                       }}
                     >
-                      {/* Tanggal */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
                           {formatDisplayDate(m.tanggal)}
@@ -1361,7 +1540,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                         </span>
                       </td>
 
-                      {/* Lokasi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.84rem' }}>
                           📍 {m.lokasi}
@@ -1371,21 +1549,18 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                         </div>
                       </td>
 
-                      {/* Goals */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, lineHeight: 1.5 }}>
                           🎯 {m.goals}
                         </div>
                       </td>
 
-                      {/* Tujuan */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontSize: '0.8rem', color: '#e2e8f0', lineHeight: 1.5 }}>
                           💡 {m.tujuan}
                         </div>
                       </td>
 
-                      {/* MOM / Hasil / Notulen */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                         <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.5, background: 'rgba(255,255,255,0.02)', padding: '8px 10px', borderRadius: '6px', border: '1px solid #1e293b', whiteSpace: 'pre-line' }}>
                           {m.momHasil.length > 200 ? m.momHasil.slice(0, 200) + '...' : m.momHasil}
@@ -1395,10 +1570,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                         </div>
                       </td>
 
-                      {/* Dokumen & Aksi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-                          {/* Tombol Pratinjau Kertas Notulen A4 Resmi */}
                           <button
                             onClick={() => setViewingMOMDoc(m)}
                             className="btn btn-sm"
@@ -1416,7 +1589,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                             <Eye size={12} /> View
                           </button>
 
-                          {/* Tombol Bagikan Ringkasan via WhatsApp */}
                           <button
                             onClick={() => handleSendWAMOM(m)}
                             style={{
@@ -1463,7 +1635,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       )}
 
       {/* ===================================================================== */}
-      {/* SUB-MODUL 3: DOKUMENTASI & FOTO ACARA (DAPAT DI-FILTER BULAN & ACARA)  */}
+      {/* SUB-MODUL 3: DOKUMENTASI & FOTO ACARA (UPLOAD FILE & CUSTOM KATEGORI) */}
       {/* ===================================================================== */}
       {activeSubTab === 'dokumentasi' && (
         <div>
@@ -1482,8 +1654,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               marginBottom: '1.2rem'
             }}
           >
-            {/* Search Bar Sub-Modul 3 */}
-            <div style={{ position: 'relative', flex: 1, minWidth: '200px', maxWidth: '320px' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '180px', maxWidth: '280px' }}>
               <Search size={15} color="#10b981" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
@@ -1505,7 +1676,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            {/* Filter Bulan & Acara Sesuai Permintaan Spesifik User */}
+            {/* Filter Acara, Bulan, & Kategori Momen */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {/* Filter Acara */}
               <select
@@ -1519,13 +1690,35 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   color: '#ffffff',
                   border: '1px solid #334155',
                   borderRadius: '8px',
-                  padding: '0 12px',
+                  padding: '0 10px',
                   cursor: 'pointer'
                 }}
               >
-                <option value="ALL">Semua Acara Gathering</option>
+                <option value="ALL">Semua Acara</option>
                 {availableEvents.map((ev, i) => (
                   <option key={i} value={ev}>{ev}</option>
+                ))}
+              </select>
+
+              {/* Filter Kategori Momen */}
+              <select
+                value={filterDocCategory}
+                onChange={(e) => setFilterDocCategory(e.target.value)}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  border: '1px solid #334155',
+                  borderRadius: '8px',
+                  padding: '0 10px',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="ALL">Semua Kategori</option>
+                {availableCategories.map((cat, i) => (
+                  <option key={i} value={cat}>{cat}</option>
                 ))}
               </select>
 
@@ -1541,14 +1734,14 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   color: '#ffffff',
                   border: '1px solid #334155',
                   borderRadius: '8px',
-                  padding: '0 12px',
+                  padding: '0 10px',
                   cursor: 'pointer'
                 }}
               >
-                <option value="ALL">Semua Bulan & Periode</option>
+                <option value="ALL">Semua Periode</option>
                 {availableMonths.map((m, i) => {
                   const [y, mm] = m.split('-');
-                  const monthName = new Date(y, Number(mm) - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                  const monthName = new Date(y, Number(mm) - 1, 1).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
                   return <option key={i} value={m}>{monthName}</option>;
                 })}
               </select>
@@ -1568,7 +1761,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
                 }}
               >
-                <Camera size={16} /> + Upload Foto Acara
+                <UploadCloud size={16} /> + Upload Foto Acara
               </button>
             </div>
           </div>
@@ -1579,7 +1772,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               <Camera size={44} color="#10b981" style={{ opacity: 0.6, marginBottom: '10px' }} />
               <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>Tidak Ada Dokumentasi yang Sesuai</h3>
               <p style={{ fontSize: '0.8rem', color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>
-                Coba sesuaikan pilihan filter bulan atau acara di atas, atau klik "+ Upload Foto Acara" untuk menambahkan momen kegiatan baru.
+                Coba sesuaikan pilihan filter di atas, atau klik "+ Upload Foto Acara" untuk mengunggah foto kegiatan dari komputer.
               </p>
             </div>
           ) : (
@@ -1600,8 +1793,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1e293b'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  {/* Foto Thumbnail dengan Overlay Kategori */}
-                  <div style={{ position: 'relative', width: '100%', height: '200px', background: '#020617', cursor: 'pointer' }} onClick={() => setViewingLightboxIndex(idx)}>
+                  {/* Foto Thumbnail */}
+                  <div style={{ position: 'relative', width: '100%', height: '210px', background: '#020617', cursor: 'pointer' }} onClick={() => setViewingLightboxIndex(idx)}>
                     <img
                       src={doc.imageUrl}
                       alt={doc.judul}
@@ -1611,12 +1804,12 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                       }}
                     />
                     <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', gap: '6px' }}>
-                      <span style={{ background: 'rgba(9, 13, 22, 0.85)', backdropFilter: 'blur(4px)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.68rem', fontWeight: 800 }}>
+                      <span style={{ background: 'rgba(9, 13, 22, 0.88)', backdropFilter: 'blur(4px)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '3px 9px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>
                         {doc.kategori}
                       </span>
                     </div>
                     <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                      <span style={{ background: 'rgba(0,0,0,0.75)', color: '#ffffff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ background: 'rgba(0,0,0,0.8)', color: '#ffffff', padding: '3px 8px', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Eye size={11} /> Klik Zoom
                       </span>
                     </div>
@@ -1645,13 +1838,43 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                       <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
                         📸 {doc.fotografer || 'Tim HR'}
                       </div>
-                      <button
-                        onClick={() => handleDeleteDoc(doc.id, doc.judul)}
-                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
-                        title="Hapus Foto"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {/* Tombol Unduh Foto */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadDoc(doc);
+                          }}
+                          className="btn btn-sm"
+                          style={{
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            border: '1px solid #10b981',
+                            color: '#34d399',
+                            padding: '3px 8px',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            borderRadius: '5px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          title="Unduh File Foto Ini"
+                        >
+                          <Download size={12} /> Unduh
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDoc(doc.id, doc.judul);
+                          }}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                          title="Hapus Foto"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1675,23 +1898,19 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               }}
             >
               <div style={{ position: 'relative', maxWidth: '900px', width: '100%', maxHeight: '90vh', background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                {/* Bar Header Lightbox */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', borderBottom: '1px solid #1e293b' }}>
                   <div style={{ color: '#34d399', fontWeight: 800, fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Camera size={16} />
-                    <span>{filteredDocs[viewingLightboxIndex].namaAcara}</span>
+                    <span>{filteredDocs[viewingLightboxIndex].namaAcara} — {filteredDocs[viewingLightboxIndex].kategori}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <a
-                      href={filteredDocs[viewingLightboxIndex].imageUrl}
-                      download={`Foto_${filteredDocs[viewingLightboxIndex].id}.jpg`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    <button
+                      onClick={() => handleDownloadDoc(filteredDocs[viewingLightboxIndex])}
+                      className="btn btn-primary btn-sm"
+                      style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', fontWeight: 800, fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      <Download size={13} /> Unduh Asli
-                    </a>
+                      <Download size={13} /> Unduh File Foto
+                    </button>
                     <button
                       onClick={() => setViewingLightboxIndex(null)}
                       style={{ background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer', padding: '4px' }}
@@ -1701,7 +1920,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   </div>
                 </div>
 
-                {/* Gambar Lightbox dengan Tombol Navigasi Prev/Next */}
                 <div style={{ position: 'relative', width: '100%', height: '520px', background: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img
                     src={filteredDocs[viewingLightboxIndex].imageUrl}
@@ -1728,7 +1946,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   )}
                 </div>
 
-                {/* Caption Bar di Bawah */}
                 <div style={{ padding: '14px 18px', background: '#090d16', borderTop: '1px solid #1e293b' }}>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', color: '#ffffff', fontWeight: 800 }}>
                     {filteredDocs[viewingLightboxIndex].judul}
@@ -1747,7 +1964,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       )}
 
       {/* ===================================================================== */}
-      {/* SUB-MODUL 4: RINCIAN ANGGARAN & GRAFIK TREN BIAYA GATHERING           */}
+      {/* SUB-MODUL 4: RINCIAN ANGGARAN, REKENING BANK & GRAFIK TREN BIAYA      */}
       {/* ===================================================================== */}
       {activeSubTab === 'anggaran' && (
         <div>
@@ -1782,60 +1999,109 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
             </div>
           </div>
 
-          {/* VISUALISASI GRAFIK GARIS (TRAFIK / SVG LINE CHART RINCIAN ANGGARAN GATHERING) */}
-          <div style={{ background: '#020617', border: '1.5px solid #1e293b', borderRadius: '14px', padding: '1.5rem', marginBottom: '1.4rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TrendingUp size={20} color="#10b981" />
-                <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                  Grafik Garis Rincian Biaya per Pos Pengeluaran Gathering
-                </h3>
+          {/* VISUALISASI GRAFIK GARIS KUALITAS TINGGI (TIDAK KEPOTONG, RESPONSIVE, BEZIER SMOOTH) */}
+          <div style={{ background: '#020617', border: '1.5px solid #1e293b', borderRadius: '14px', padding: '1.6rem', marginBottom: '1.4rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <TrendingUp size={20} color="#10b981" />
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                    Grafik Garis Rincian Biaya per Pos Pengeluaran Gathering
+                  </h3>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                  Perbandingan nominal realisasi pengeluaran terhadap rencana anggaran per pos kegiatan
+                </div>
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#34d399' }}></span>
-                  <span>Rencana Anggaran</span>
+
+              {/* Legend */}
+              <div style={{ fontSize: '0.76rem', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.03)', padding: '6px 14px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '12px', height: '3px', background: '#10b981', borderRadius: '2px' }}></span>
+                  <span style={{ fontWeight: 800, color: '#34d399' }}>Realisasi Biaya (Solid)</span>
                 </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
-                  <span>Realisasi Biaya</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '12px', height: '2px', background: '#059669', borderTop: '2px dashed #34d399' }}></span>
+                  <span style={{ fontWeight: 700, color: '#94a3b8' }}>Rencana Anggaran (Putus-putus)</span>
                 </span>
               </div>
             </div>
 
-            {/* Render Kurva SVG Line Chart */}
+            {/* Render Kurva SVG Line Chart dengan Dimensi Luas & Padding Aman (Anti-Cutoff) */}
             {(() => {
               if (budgets.length === 0) return null;
-              const width = 840;
-              const height = 260;
-              const paddingLeft = 75;
-              const paddingRight = 45;
-              const paddingTop = 30;
-              const paddingBottom = 55;
 
-              const maxVal = Math.max(...budgets.map(b => Math.max(Number(b.rencana), Number(b.realisasi)))) * 1.15 || 50000000;
+              const width = 1000;
+              const height = 340;
+              const paddingLeft = 95;
+              const paddingRight = 55;
+              const paddingTop = 45;
+              const paddingBottom = 95; // Ruang ekstra luas agar teks sumbu X tidak terpotong
+
+              const allValues = budgets.flatMap(b => [Number(b.rencana) || 0, Number(b.realisasi) || 0]);
+              const maxVal = Math.max(...allValues) * 1.18 || 50000000;
               const chartW = width - paddingLeft - paddingRight;
               const chartH = height - paddingTop - paddingBottom;
 
-              const pointsRealisasi = budgets.map((b, i) => {
+              // Hitung titik koordinat
+              const ptsRealisasi = budgets.map((b, i) => {
                 const x = budgets.length === 1 ? paddingLeft + chartW / 2 : paddingLeft + (i / (budgets.length - 1)) * chartW;
-                const y = paddingTop + chartH - (Number(b.realisasi) / maxVal) * chartH;
+                const y = paddingTop + chartH - ((Number(b.realisasi) || 0) / maxVal) * chartH;
                 return { x, y, ...b };
               });
 
-              const polylineStr = pointsRealisasi.map(p => `${p.x},${p.y}`).join(' ');
-              const areaStr = pointsRealisasi.length > 0
-                ? `${pointsRealisasi[0].x},${paddingTop + chartH} ` + pointsRealisasi.map(p => `${p.x},${p.y}`).join(' ') + ` ${pointsRealisasi[pointsRealisasi.length - 1].x},${paddingTop + chartH}`
+              const ptsRencana = budgets.map((b, i) => {
+                const x = budgets.length === 1 ? paddingLeft + chartW / 2 : paddingLeft + (i / (budgets.length - 1)) * chartW;
+                const y = paddingTop + chartH - ((Number(b.rencana) || 0) / maxVal) * chartH;
+                return { x, y, ...b };
+              });
+
+              // Helper Generator Kurva Halus (Catmull-Rom to Cubic Bezier Spline)
+              const createSmoothCurve = (pts) => {
+                if (pts.length === 0) return '';
+                if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+                let path = `M ${pts[0].x} ${pts[0].y}`;
+                for (let i = 0; i < pts.length - 1; i++) {
+                  const p0 = pts[i === 0 ? 0 : i - 1];
+                  const p1 = pts[i];
+                  const p2 = pts[i + 1];
+                  const p3 = pts[i + 2] || p2;
+                  const cp1x = p1.x + (p2.x - p0.x) / 6;
+                  const cp1y = p1.y + (p2.y - p0.y) / 6;
+                  const cp2x = p2.x - (p3.x - p1.x) / 6;
+                  const cp2y = p2.y - (p3.y - p1.y) / 6;
+                  path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+                }
+                return path;
+              };
+
+              const pathRealisasi = createSmoothCurve(ptsRealisasi);
+              const pathRencana = createSmoothCurve(ptsRencana);
+
+              const areaRealisasi = ptsRealisasi.length > 0
+                ? `${pathRealisasi} L ${ptsRealisasi[ptsRealisasi.length - 1].x} ${paddingTop + chartH} L ${ptsRealisasi[0].x} ${paddingTop + chartH} Z`
                 : '';
 
               return (
-                <div style={{ width: '100%', overflowX: 'auto' }}>
-                  <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', minWidth: '700px', height: 'auto', overflow: 'visible' }}>
+                <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '6px' }}>
+                  <svg
+                    viewBox={`0 0 ${width} ${height}`}
+                    style={{
+                      width: '100%',
+                      minWidth: '820px',
+                      height: 'auto',
+                      overflow: 'visible'
+                    }}
+                  >
                     <defs>
-                      <linearGradient id="gatheringEmeraldArea" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="emeraldGradientArea" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
                         <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                       </linearGradient>
+                      <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
                     </defs>
 
                     {/* Horizontal Grid lines */}
@@ -1844,69 +2110,186 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                       const labelVal = maxVal * pct;
                       return (
                         <g key={gIdx}>
-                          <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="4 4" />
-                          <text x={paddingLeft - 8} y={y + 4} fill="#64748b" fontSize="10" textAnchor="end" fontFamily="monospace">
+                          <line
+                            x1={paddingLeft}
+                            y1={y}
+                            x2={width - paddingRight}
+                            y2={y}
+                            stroke="rgba(255,255,255,0.07)"
+                            strokeDasharray="4 4"
+                          />
+                          <text
+                            x={paddingLeft - 10}
+                            y={y + 4}
+                            fill="#64748b"
+                            fontSize="11"
+                            fontWeight="600"
+                            textAnchor="end"
+                            fontFamily="monospace"
+                          >
                             {formatRupiah(labelVal).replace(',00', '')}
                           </text>
                         </g>
                       );
                     })}
 
-                    {/* Gradient Area Fill */}
-                    {areaStr && <polygon points={areaStr} fill="url(#gatheringEmeraldArea)" />}
+                    {/* Gradient Area Fill Realisasi */}
+                    {areaRealisasi && <path d={areaRealisasi} fill="url(#emeraldGradientArea)" />}
 
-                    {/* Kurva Garis Neon Emerald */}
-                    <polyline
+                    {/* Kurva Garis Putus-putus Rencana Anggaran */}
+                    <path
+                      d={pathRencana}
                       fill="none"
-                      stroke="#10b981"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={polylineStr}
+                      stroke="#34d399"
+                      strokeWidth="2"
+                      strokeDasharray="6 4"
+                      opacity="0.65"
                     />
 
-                    {/* Titik Interaktif & Label Pos Pengeluaran */}
-                    {pointsRealisasi.map((p, idx) => (
-                      <g key={idx} style={{ cursor: 'pointer' }}>
-                        {/* Garis vertikal tipis ke sumbu X */}
-                        <line x1={p.x} y1={p.y} x2={p.x} y2={paddingTop + chartH} stroke="rgba(16, 185, 129, 0.2)" strokeDasharray="2 2" />
+                    {/* Kurva Garis Solid Realisasi Biaya */}
+                    <path
+                      d={pathRealisasi}
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="3.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      filter="url(#emeraldGlow)"
+                    />
 
-                        {/* Lingkaran Luar */}
-                        <circle cx={p.x} cy={p.y} r="6" fill="#090d16" stroke="#10b981" strokeWidth="2.5" />
-                        {/* Lingkaran Titik Dalam */}
-                        <circle cx={p.x} cy={p.y} r="2.5" fill="#34d399" />
-
-                        {/* Label Angka Nominal di Atas Titik */}
-                        <text
-                          x={p.x}
-                          y={p.y - 12}
-                          fill="#34d399"
-                          fontSize="10"
-                          fontWeight="800"
-                          textAnchor="middle"
-                          fontFamily="sans-serif"
+                    {/* Titik Interaktif & Label Sumbu X yang Bersih dan Tidak Terpotong */}
+                    {ptsRealisasi.map((p, idx) => {
+                      const isSelected = selectedChartPoint && selectedChartPoint.id === p.id;
+                      return (
+                        <g
+                          key={idx}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedChartPoint(p)}
                         >
-                          {formatRupiah(p.realisasi).replace(',00', '')}
-                        </text>
+                          {/* Garis vertikal penunjuk */}
+                          <line
+                            x1={p.x}
+                            y1={p.y}
+                            x2={p.x}
+                            y2={paddingTop + chartH}
+                            stroke={isSelected ? '#34d399' : 'rgba(16, 185, 129, 0.25)'}
+                            strokeWidth={isSelected ? '2' : '1'}
+                            strokeDasharray="3 3"
+                          />
 
-                        {/* Label Pos Pengeluaran di Sumbu X */}
-                        <text
-                          x={p.x}
-                          y={paddingTop + chartH + 16}
-                          fill="#94a3b8"
-                          fontSize="9.5"
-                          fontWeight="700"
-                          textAnchor="middle"
-                          transform={`rotate(15, ${p.x}, ${paddingTop + chartH + 16})`}
-                        >
-                          {p.posPengeluaran.length > 15 ? p.posPengeluaran.slice(0, 15) + '..' : p.posPengeluaran}
-                        </text>
-                      </g>
-                    ))}
+                          {/* Lingkaran Luar */}
+                          <circle
+                            cx={p.x}
+                            cy={p.y}
+                            r={isSelected ? '8' : '6'}
+                            fill="#090d16"
+                            stroke="#10b981"
+                            strokeWidth={isSelected ? '3.5' : '2.5'}
+                          />
+                          {/* Lingkaran Titik Dalam */}
+                          <circle
+                            cx={p.x}
+                            cy={p.y}
+                            r={isSelected ? '4' : '2.5'}
+                            fill="#34d399"
+                          />
+
+                          {/* Label Angka Nominal di Atas Titik */}
+                          <text
+                            x={p.x}
+                            y={Math.max(18, p.y - 12)}
+                            fill="#34d399"
+                            fontSize="10"
+                            fontWeight="800"
+                            textAnchor="middle"
+                            fontFamily="sans-serif"
+                          >
+                            {formatRupiah(p.realisasi).replace(',00', '')}
+                          </text>
+
+                          {/* Label Pos Pengeluaran di Sumbu X (Rotasi -35 Derajat Tanpa Terpotong) */}
+                          <text
+                            x={p.x}
+                            y={paddingTop + chartH + 18}
+                            fill={isSelected ? '#34d399' : '#94a3b8'}
+                            fontSize="10"
+                            fontWeight={isSelected ? '800' : '700'}
+                            textAnchor="end"
+                            transform={`rotate(-35, ${p.x}, ${paddingTop + chartH + 18})`}
+                          >
+                            {p.posPengeluaran.length > 18 ? p.posPengeluaran.slice(0, 18) + '..' : p.posPengeluaran}
+                          </text>
+                        </g>
+                      );
+                    })}
                   </svg>
                 </div>
               );
             })()}
+
+            {/* Highlight Card Detail Pos Pengeluaran yang Diklik pada Grafik */}
+            {selectedChartPoint && (
+              <div
+                style={{
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  border: '1.5px solid #10b981',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  marginTop: '12px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800 }}>DETAIL POS ANGGARAN TERPILIH:</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>
+                    {selectedChartPoint.posPengeluaran}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '2px' }}>
+                    {selectedChartPoint.uraian}
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#34d399', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <CreditCard size={13} />
+                    <span>Rekening: <strong>{selectedChartPoint.namaBank}</strong> - {selectedChartPoint.noRekening} (a.n {selectedChartPoint.namaPenerima})</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Rencana Anggaran:</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f8fafc' }}>{formatRupiah(selectedChartPoint.rencana)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#34d399' }}>Realisasi Biaya:</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 900, color: '#34d399' }}>{formatRupiah(selectedChartPoint.realisasi)}</div>
+                  </div>
+                  <button
+                    onClick={() => handleStatusClick(selectedChartPoint)}
+                    className="btn btn-primary btn-sm"
+                    style={{
+                      background: selectedChartPoint.status === 'Lunas' ? 'rgba(16, 185, 129, 0.25)' : 'linear-gradient(135deg, #10b981, #059669)',
+                      border: '1px solid #10b981',
+                      fontWeight: 800,
+                      fontSize: '0.75rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    {selectedChartPoint.status === 'Lunas' ? '✓ Lunas' : '💸 Proses Bayar via Finance'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedChartPoint(null)}
+                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Toolbar Sub-Modul 4: Search & Tambah Pos Anggaran */}
@@ -1924,12 +2307,11 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               marginBottom: '1rem'
             }}
           >
-            {/* Search Bar Sub-Modul 4 */}
             <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
               <Search size={15} color="#10b981" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
-                placeholder="Cari pos biaya, uraian kebutuhan, nota..."
+                placeholder="Cari pos biaya, no rek, bank, uraian..."
                 value={searchBudget}
                 onChange={(e) => setSearchBudget(e.target.value)}
                 style={{
@@ -1966,19 +2348,19 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
             </button>
           </div>
 
-          {/* TABEL RINCIAN ANGGARAN GATHERING */}
+          {/* TABEL RINCIAN ANGGARAN GATHERING LENGKAP DENGAN REKENING & KLIK BAYAR */}
           <div className="table-container" style={{ border: '1px solid #1e293b', borderRadius: '12px', overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1100px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', color: '#ffffff', borderBottom: '2px solid #064e3b' }}>
-                  <th style={{ width: '50px', padding: '10px 10px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>No.</th>
-                  <th style={{ minWidth: '180px', padding: '10px 14px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Pos Pengeluaran</th>
+                  <th style={{ width: '45px', padding: '10px 8px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>No.</th>
+                  <th style={{ minWidth: '220px', padding: '10px 14px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Pos Pengeluaran & Rekening Tujuan</th>
                   <th style={{ minWidth: '220px', padding: '10px 14px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Uraian Kebutuhan</th>
-                  <th style={{ width: '150px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Rencana Anggaran</th>
-                  <th style={{ width: '150px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Realisasi Biaya</th>
-                  <th style={{ width: '140px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Selisih / Varian</th>
-                  <th style={{ width: '100px', padding: '10px 10px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
-                  <th style={{ width: '100px', padding: '10px 10px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
+                  <th style={{ width: '140px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Rencana Anggaran</th>
+                  <th style={{ width: '140px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Realisasi Biaya</th>
+                  <th style={{ width: '130px', padding: '10px 12px', fontSize: '0.8rem', fontWeight: 900, whiteSpace: 'nowrap' }}>Selisih / Varian</th>
+                  <th style={{ width: '140px', padding: '10px 10px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Status (Klik Bayar)</th>
+                  <th style={{ width: '90px', padding: '10px 8px', fontSize: '0.8rem', fontWeight: 900, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -2002,20 +2384,22 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           transition: 'background 0.15s'
                         }}
                       >
-                        {/* No */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>
                           {idx + 1}
                         </td>
 
-                        {/* Pos Pengeluaran */}
+                        {/* Pos Pengeluaran & Rekening Tujuan Bank */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                          <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.84rem' }}>{b.posPengeluaran}</div>
-                          <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: '2px' }}>
-                            {b.namaAcara}
+                          <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.86rem' }}>{b.posPengeluaran}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CreditCard size={11} />
+                            <span>{b.namaBank || 'BCA'}: <strong>{b.noRekening || '-'}</strong></span>
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '1px' }}>
+                            a.n {b.namaPenerima || 'Penerima Transfer'}
                           </div>
                         </td>
 
-                        {/* Uraian Kebutuhan */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.8rem', color: '#e2e8f0', lineHeight: 1.5 }}>
                             {b.uraian}
@@ -2027,16 +2411,14 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           )}
                         </td>
 
-                        {/* Rencana Anggaran */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.82rem', color: '#f8fafc', fontWeight: 700 }}>
                             {formatRupiah(b.rencana)}
                           </div>
                         </td>
 
-                        {/* Realisasi Biaya */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                          <div style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 900 }}>
+                          <div style={{ fontSize: '0.86rem', color: '#34d399', fontWeight: 900 }}>
                             {formatRupiah(b.realisasi)}
                           </div>
                           {b.kwitansi && (
@@ -2046,7 +2428,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           )}
                         </td>
 
-                        {/* Selisih */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
                           <div style={{ fontSize: '0.82rem', fontWeight: 800, color: selisih >= 0 ? '#10b981' : '#ef4444' }}>
                             {selisih >= 0 ? `+${formatRupiah(selisih)}` : formatRupiah(selisih)}
@@ -2056,24 +2437,40 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                           </div>
                         </td>
 
-                        {/* Status */}
+                        {/* STATUS PEMBAYARAN INTERAKTIF: TINGGAL DIKLIK LANGSUNG PROSES KE FINANCE */}
                         <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
-                          <span
+                          <button
+                            type="button"
+                            onClick={() => handleStatusClick(b)}
                             style={{
-                              background: b.status === 'Lunas' ? 'rgba(16, 185, 129, 0.2)' :
-                                b.status === 'DP' ? 'rgba(52, 211, 153, 0.25)' : 'rgba(100, 116, 139, 0.2)',
+                              background: b.status === 'Lunas' ? 'rgba(16, 185, 129, 0.22)' :
+                                b.status === 'Diajukan ke Finance' ? 'rgba(52, 211, 153, 0.18)' :
+                                b.status === 'DP' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                               color: b.status === 'Lunas' ? '#34d399' :
-                                b.status === 'DP' ? '#10b981' : '#94a3b8',
-                              border: '1px solid #10b981',
-                              padding: '2px 7px',
-                              borderRadius: '10px',
-                              fontSize: '0.7rem',
+                                b.status === 'Diajukan ke Finance' ? '#10b981' :
+                                b.status === 'DP' ? '#34d399' : '#f87171',
+                              border: `1.5px solid ${b.status === 'Lunas' ? '#10b981' : b.status === 'Diajukan ke Finance' ? '#34d399' : b.status === 'DP' ? '#10b981' : '#ef4444'}`,
+                              padding: '5px 10px',
+                              borderRadius: '8px',
+                              fontSize: '0.72rem',
                               fontWeight: 800,
-                              display: 'inline-block'
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.35)',
+                              transition: 'all 0.15s ease'
                             }}
+                            title="Klik untuk bayar / teruskan pengajuan dana ke Finance"
                           >
-                            {b.status}
-                          </span>
+                            {b.status === 'Lunas' ? <CheckCircle2 size={12} /> :
+                             b.status === 'Diajukan ke Finance' ? <Clock size={12} /> :
+                             <DollarSign size={12} />}
+                            <span>{b.status || 'Pending'}</span>
+                          </button>
+                          <div style={{ fontSize: '0.64rem', color: '#64748b', marginTop: '3px' }}>
+                            {b.status === 'Lunas' ? '✓ Lunas Terbayar' : '👉 Klik Bayar / Finance'}
+                          </div>
                         </td>
 
                         {/* Aksi */}
@@ -2113,7 +2510,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       {isScheduleModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
           <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Calendar size={18} color="#10b981" />
@@ -2294,7 +2690,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       {isMOMModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
           <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '720px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Target size={18} color="#10b981" />
@@ -2374,7 +2769,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 <textarea
                   rows="4"
                   required
-                  placeholder="1. Pengarahan Direksi:&#10;2. Evaluasi Mutu Lapangan:&#10;3. Rencana Tindak Lanjut:"
+                  placeholder="1. Poin Arahan Direksi:&#10;2. Evaluasi Mutu Lapangan:&#10;3. Rencana Tindak Lanjut:"
                   value={momForm.momHasil}
                   onChange={(e) => setMomForm({ ...momForm, momHasil: e.target.value })}
                   className="form-control"
@@ -2424,8 +2819,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       {viewingMOMDoc && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
           <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '820px', maxHeight: '92vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
-            
-            {/* Header Action Bar */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ color: '#34d399', fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={18} color="#10b981" />
@@ -2445,9 +2838,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               </div>
             </div>
 
-            {/* LEMBAR KERTAS A4 NOTULEN RESMI PT PERSADA NUSANTARA INDONESIA */}
+            {/* LEMBAR KERTAS A4 NOTULEN RESMI */}
             <div style={{ background: '#ffffff', color: '#0f172a', padding: '2.5rem', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', fontFamily: 'Arial, sans-serif', fontSize: '0.86rem', lineHeight: 1.6 }}>
-              {/* Kop Surat Resmi */}
               <div style={{ textAlign: 'center', borderBottom: '2.5px solid #047857', paddingBottom: '12px', marginBottom: '1.2rem' }}>
                 <div style={{ fontSize: '1.2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#047857' }}>
                   PT PERSADA NUSANTARA INDONESIA
@@ -2460,7 +2852,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 </div>
               </div>
 
-              {/* Rincian Agenda & Waktu */}
               <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px', fontSize: '0.82rem' }}>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
@@ -2486,7 +2877,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 </tbody>
               </table>
 
-              {/* Bagian I: Goals & Tujuan Acara */}
               <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '6px', marginBottom: '14px', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontWeight: 800, color: '#047857', marginBottom: '4px' }}>I. GOALS (TARGET CAPAIAN):</div>
                 <p style={{ margin: '0 0 8px 0', fontSize: '0.82rem', color: '#1e293b' }}>{viewingMOMDoc.goals}</p>
@@ -2494,7 +2884,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 <p style={{ margin: 0, fontSize: '0.82rem', color: '#1e293b' }}>{viewingMOMDoc.tujuan}</p>
               </div>
 
-              {/* Bagian II: Butir Notulen Hasil Keputusan */}
               <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#047857', borderBottom: '1.5px solid #047857', paddingBottom: '4px', marginBottom: '8px' }}>
                 III. KEPUTUSAN & NOTULEN HASIL EVALUASI (MOM)
               </div>
@@ -2502,7 +2891,6 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 {viewingMOMDoc.momHasil}
               </div>
 
-              {/* Tanda Tangan */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', textAlign: 'center', marginTop: '2.5rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
                 <div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Notulis Rapat:</div>
@@ -2518,17 +2906,16 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       )}
 
       {/* ===================================================================== */}
-      {/* MODAL 3: FORM TAMBAH / UPLOAD FOTO DOKUMENTASI                        */}
+      {/* MODAL 3: FORM UPLOAD FILE FOTO DOKUMENTASI (BUKAN URL) & CUSTOM KATEGORI */}
       {/* ===================================================================== */}
       {isDocModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2553,6 +2940,99 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 />
               </div>
 
+              {/* AREA UPLOAD FILE FOTO LANGSUNG (BUKAN INPUT URL TEKS) */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ fontSize: '0.76rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '6px' }}>
+                  Upload File Foto / Gambar Kegiatan *
+                </label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageFileUpload}
+                  style={{ display: 'none' }}
+                />
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed #10b981',
+                    borderRadius: '12px',
+                    padding: '20px 16px',
+                    textAlign: 'center',
+                    background: 'rgba(16, 185, 129, 0.05)',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)'}
+                >
+                  {docForm.imageUrl ? (
+                    <div>
+                      <img
+                        src={docForm.imageUrl}
+                        alt="Preview"
+                        style={{ maxHeight: '180px', maxWidth: '100%', borderRadius: '8px', marginBottom: '8px', objectFit: 'contain' }}
+                      />
+                      <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800 }}>
+                        ✓ File Foto Terpilih: {docForm.imageFileName || 'Foto Kamera/Galeri'}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '2px' }}>
+                        Klik di sini jika ingin mengganti file foto
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <UploadCloud size={40} color="#10b981" style={{ marginBottom: '8px' }} />
+                      <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#f8fafc' }}>
+                        Klik untuk Pilih File Foto dari Komputer
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '3px' }}>
+                        Mendukung format JPG, PNG, WEBP (Langsung tersimpan & dapat diunduh)
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* INPUT KATEGORI MOMEN YANG BEBAS DIKETIK */}
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Kategori Momen (Bebas Diketik / Pilih Cepat) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ketik kategori, misal: Fun Games, Gala Dinner, Rafting, Lomba, Pembagian Hadiah..."
+                  value={docForm.kategori}
+                  onChange={(e) => setDocForm({ ...docForm, kategori: e.target.value })}
+                  className="form-control"
+                  style={{ fontSize: '0.84rem', fontWeight: 700 }}
+                />
+
+                {/* Quick Suggestion Chips */}
+                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '6px' }}>
+                  {['Fun Games', 'Gala Dinner', 'Outbound', 'Doorprize', 'Seremonial', 'Rafting', 'Ice Breaking', 'Foto Bersama'].map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setDocForm({ ...docForm, kategori: cat })}
+                      style={{
+                        background: docForm.kategori === cat ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${docForm.kategori === cat ? '#10b981' : '#334155'}`,
+                        color: docForm.kategori === cat ? '#34d399' : '#94a3b8',
+                        fontSize: '0.68rem',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 <div>
                   <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Tanggal Momen *</label>
@@ -2570,19 +3050,14 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Kategori Momen</label>
-                  <select
-                    value={docForm.kategori}
-                    onChange={(e) => setDocForm({ ...docForm, kategori: e.target.value })}
+                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Fotografer</label>
+                  <input
+                    type="text"
+                    value={docForm.fotografer}
+                    onChange={(e) => setDocForm({ ...docForm, fotografer: e.target.value })}
                     className="form-control"
-                    style={{ fontSize: '0.84rem', fontWeight: 700 }}
-                  >
-                    <option value="Fun Games">Fun Games & Ice Breaking</option>
-                    <option value="Outbound">Outbound & Adventure</option>
-                    <option value="Gala Dinner">Gala Dinner & Barbeque</option>
-                    <option value="Doorprize">Pembagian Doorprize</option>
-                    <option value="Seremonial">Seremonial & Townhall</option>
-                  </select>
+                    style={{ fontSize: '0.84rem' }}
+                  />
                 </div>
               </div>
 
@@ -2599,39 +3074,13 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 />
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>URL Gambar / Foto (Preview Langsung)</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/... atau paste link foto"
-                  value={docForm.imageUrl}
-                  onChange={(e) => setDocForm({ ...docForm, imageUrl: e.target.value })}
-                  className="form-control"
-                  style={{ fontSize: '0.84rem' }}
-                />
-                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
-                  *Jika kosong, sistem akan otomatis menyediakan foto resolusi tinggi berlisensi.
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Keterangan / Caption Foto</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Keterangan / Caption Momen</label>
                 <textarea
                   rows="2"
                   placeholder="Ceritakan momen seru di balik foto ini..."
                   value={docForm.keterangan}
                   onChange={(e) => setDocForm({ ...docForm, keterangan: e.target.value })}
-                  className="form-control"
-                  style={{ fontSize: '0.84rem' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Fotografer / Uploader</label>
-                <input
-                  type="text"
-                  value={docForm.fotografer}
-                  onChange={(e) => setDocForm({ ...docForm, fotografer: e.target.value })}
                   className="form-control"
                   style={{ fontSize: '0.84rem' }}
                 />
@@ -2651,16 +3100,16 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       )}
 
       {/* ===================================================================== */}
-      {/* MODAL 4: FORM TAMBAH / EDIT POS ANGGARAN GATHERING                    */}
+      {/* MODAL 4: FORM TAMBAH / EDIT POS ANGGARAN (NO REK & BANK DI ATAS)      */}
       {/* ===================================================================== */}
       {isBudgetModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <DollarSign size={18} color="#10b981" />
-                <span>{editingBudget ? 'Edit Pos Anggaran Gathering' : 'Tambah Pos Anggaran Baru'}</span>
+                <span>{editingBudget ? 'Edit Pos Anggaran Gathering' : 'Tambah Pos Anggaran Gathering Baru'}</span>
               </div>
               <button onClick={() => setIsBudgetModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
                 <X size={18} />
@@ -2668,6 +3117,62 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
             </div>
 
             <form onSubmit={handleSaveBudget}>
+              
+              {/* BAGIAN ATAS: INFORMASI REKENING BANK & NO REK TUJUAN TRANSFER (PERSIS PERMINTAAN USER) */}
+              <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1.5px solid #10b981', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CreditCard size={15} />
+                  <span>REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE)</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                      Nama Bank Tujuan *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="BCA / Mandiri / BRI / BSI / BNI"
+                      value={budgetForm.namaBank}
+                      onChange={(e) => setBudgetForm({ ...budgetForm, namaBank: e.target.value })}
+                      className="form-control"
+                      style={{ fontSize: '0.84rem', fontWeight: 800 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                      Nomor Rekening Tujuan (No. Rek) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Misal: 002-988-1234"
+                      value={budgetForm.noRekening}
+                      onChange={(e) => setBudgetForm({ ...budgetForm, noRekening: e.target.value })}
+                      className="form-control"
+                      style={{ fontSize: '0.84rem', fontFamily: 'monospace', fontWeight: 800 }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nama Pemilik Rekening / Penerima Transfer *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Misal: PT Jambuluwuk Sejahtera / CV Berkah Nusantara"
+                    value={budgetForm.namaPenerima}
+                    onChange={(e) => setBudgetForm({ ...budgetForm, namaPenerima: e.target.value })}
+                    className="form-control"
+                    style={{ fontSize: '0.84rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* RINCIAN POS ANGGARAN & NOMINAL */}
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Acara Gathering *</label>
                 <input
@@ -2685,7 +3190,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 <input
                   type="text"
                   required
-                  placeholder="Misal: Sewa Venue & Villa, Transportasi Bus, Konsumsi..."
+                  placeholder="Misal: Sewa Venue & Villa, Transportasi Bus, Konsumsi/Catering..."
                   value={budgetForm.posPengeluaran}
                   onChange={(e) => setBudgetForm({ ...budgetForm, posPengeluaran: e.target.value })}
                   className="form-control"
@@ -2740,13 +3245,14 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                     className="form-control"
                     style={{ fontSize: '0.84rem', fontWeight: 700 }}
                   >
-                    <option value="Lunas">Lunas</option>
+                    <option value="Pending">Pending (Belum Dibayar)</option>
+                    <option value="Diajukan ke Finance">Diajukan ke Finance</option>
                     <option value="DP">DP (Uang Muka)</option>
-                    <option value="Pending">Pending / Belum Dibayar</option>
+                    <option value="Lunas">Lunas</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>No. Kwitansi / Bukti Nota</label>
+                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>No. Kwitansi / Nota</label>
                   <input
                     type="text"
                     placeholder="KW-19281.pdf"
@@ -2779,6 +3285,117 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 5: KONFIRMASI BAYAR / KIRIM PENGAJUAN DANA KE FINANCE            */}
+      {/* ===================================================================== */}
+      {selectedBudgetForPayment && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '540px', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.95)' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <DollarSign size={18} color="#10b981" />
+                <span>Proses Pembayaran Anggaran Gathering</span>
+              </div>
+              <button onClick={() => setSelectedBudgetForPayment(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '10px', padding: '14px', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800 }}>POS PENGELUARAN:</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', marginTop: '2px' }}>
+                {selectedBudgetForPayment.posPengeluaran}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '3px' }}>
+                {selectedBudgetForPayment.uraian}
+              </div>
+
+              <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Nominal Dibutuhkan:</div>
+                  <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#34d399' }}>
+                    {formatRupiah(selectedBudgetForPayment.realisasi || selectedBudgetForPayment.rencana)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Rekening Tujuan:</div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#ffffff' }}>
+                    {selectedBudgetForPayment.namaBank || 'BCA'} - {selectedBudgetForPayment.noRekening || '-'}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    a.n {selectedBudgetForPayment.namaPenerima || 'Vendor'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.5, margin: '0 0 1.2rem 0' }}>
+              Pilih tindakan di bawah ini. Anda dapat <strong>mengirimkan pengajuan dana otomatis ke modul Finance & Accounting</strong> agar diproses pencairan dananya, atau langsung <strong>menandai Lunas secara manual</strong> jika telah dibayar.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Opsi 1: Kirim Otomatis ke Finance */}
+              <button
+                type="button"
+                onClick={handleConfirmSendToFinance}
+                className="btn btn-primary"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+                }}
+              >
+                <Send size={15} /> Kirim Pengajuan Otomatis ke Finance & Accounting
+              </button>
+
+              {/* Opsi 2: Tandai Lunas Manual */}
+              <button
+                type="button"
+                onClick={handleMarkAsPaidManual}
+                className="btn btn-secondary"
+                style={{
+                  fontSize: '0.8rem',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <CheckCircle2 size={15} color="#34d399" /> Tandai Lunas Secara Manual
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedBudgetForPayment(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  marginTop: '4px'
+                }}
+              >
+                Batal
+              </button>
+            </div>
+
           </div>
         </div>
       )}
