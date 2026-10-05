@@ -9,7 +9,8 @@ import {
   FileText,
   Trash2,
   Image as ImageIcon,
-  FileCheck
+  FileCheck,
+  CreditCard
 } from 'lucide-react';
 import { submitFundRequest } from '../services/financeService';
 
@@ -33,7 +34,10 @@ export const FundRequestModal = ({
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +5 hari
     priority: 'Normal',
     accountCode: defaultAccountCode,
-    notes: ''
+    notes: '',
+    targetBank: 'BCA',
+    targetAccountNumber: '',
+    targetAccountHolder: ''
   });
 
   const [attachments, setAttachments] = useState([]);
@@ -103,6 +107,12 @@ export const FundRequestModal = ({
         priority: form.priority,
         accountCode: form.accountCode,
         notes: form.notes,
+        targetBank: form.targetBank || 'BCA',
+        targetAccountNumber: form.targetAccountNumber || '-',
+        targetAccountHolder: form.targetAccountHolder || form.requester || '-',
+        namaBank: form.targetBank || 'BCA',
+        noRekening: form.targetAccountNumber || '-',
+        namaPenerima: form.targetAccountHolder || form.requester || '-',
         attachments: attachments
       });
 
@@ -228,6 +238,94 @@ export const FundRequestModal = ({
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* KARTU REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) */}
+            <div
+              style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1.5px solid #10b981',
+                borderRadius: '12px',
+                padding: '12px 14px'
+              }}
+            >
+              <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CreditCard size={15} />
+                <span>REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) *</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nama Bank Tujuan *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="BCA / Mandiri / BRI / BSI / BNI"
+                    value={form.targetBank}
+                    onChange={(e) => setForm({ ...form, targetBank: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #10b981',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: 800,
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nomor Rekening Tujuan (No. Rek) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: 002-988-1234"
+                    value={form.targetAccountNumber}
+                    onChange={(e) => setForm({ ...form, targetAccountNumber: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #10b981',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      color: '#34d399',
+                      fontSize: '0.84rem',
+                      fontFamily: 'monospace',
+                      fontWeight: 800,
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Nama Pemilik Rekening / Penerima Transfer *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: PT Vendor Sukses / Mandor Supardi"
+                  value={form.targetAccountHolder}
+                  onChange={(e) => setForm({ ...form, targetAccountHolder: e.target.value })}
+                  style={{
+                    width: '100%',
+                    background: '#0f172a',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+            </div>
+
             <div>
               <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                 Judul Keperluan Pengajuan Dana *

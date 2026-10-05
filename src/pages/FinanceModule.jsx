@@ -165,7 +165,10 @@ export const FinanceModule = () => {
     dueDate: new Date().toISOString().split('T')[0],
     priority: 'Normal',
     accountCode: '5-301',
-    notes: ''
+    notes: '',
+    targetBank: 'BCA',
+    targetAccountNumber: '',
+    targetAccountHolder: ''
   });
 
   const [isNewJvModalOpen, setIsNewJvModalOpen] = useState(false);
@@ -484,7 +487,10 @@ export const FinanceModule = () => {
         dueDate: new Date().toISOString().split('T')[0],
         priority: 'Normal',
         accountCode: '5-301',
-        notes: ''
+        notes: '',
+        targetBank: 'BCA',
+        targetAccountNumber: '',
+        targetAccountHolder: ''
       });
       showNotification(`Pengajuan ${created.id} berhasil diajukan dan masuk ke antrean Finance!`);
     } catch (err) {
@@ -1738,6 +1744,12 @@ export const FinanceModule = () => {
                             <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
                               Proyek: <strong style={{ color: '#f87171' }}>{item.project}</strong> • {item.category}
                             </div>
+                            {(item.targetBank || item.namaBank || item.targetAccountNumber || item.noRekening) && (
+                              <div style={{ fontSize: '0.71rem', color: '#34d399', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <CreditCard size={12} />
+                                <span>Rek. Tujuan: <strong>{item.targetBank || item.namaBank || 'BCA'}</strong> - {item.targetAccountNumber || item.noRekening || '-'} (a.n {item.targetAccountHolder || item.namaPenerima || item.requester})</span>
+                              </div>
+                            )}
                             {item.spbmNo && (
                               <div style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 800, marginTop: '2px' }}>
                                 No. SPbM: {item.spbmNo}
@@ -3758,6 +3770,67 @@ export const FinanceModule = () => {
               </div>
             </div>
 
+            {/* KARTU REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) */}
+            <div
+              style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1.5px solid #10b981',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                marginBottom: '1.25rem'
+              }}
+            >
+              <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CreditCard size={15} /> REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE)
+                </span>
+                {(selectedReqForDisburse.targetAccountNumber || selectedReqForDisburse.noRekening) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const accNo = selectedReqForDisburse.targetAccountNumber || selectedReqForDisburse.noRekening;
+                      navigator.clipboard.writeText(accNo);
+                      alert(`Nomor rekening ${accNo} berhasil disalin ke clipboard!`);
+                    }}
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.2)',
+                      border: '1px solid #10b981',
+                      color: '#34d399',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      cursor: 'pointer',
+                      fontWeight: 700
+                    }}
+                  >
+                    Salin No Rek
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Bank Tujuan:</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff' }}>
+                    {selectedReqForDisburse.targetBank || selectedReqForDisburse.namaBank || selectedReqForDisburse.bankName || 'BCA (Default)'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Nomor Rekening:</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
+                    {selectedReqForDisburse.targetAccountNumber || selectedReqForDisburse.noRekening || selectedReqForDisburse.accountNumber || '-'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed rgba(16, 185, 129, 0.2)' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Nama Pemilik Rekening / Penerima: </span>
+                <strong style={{ fontSize: '0.84rem', color: '#f8fafc' }}>
+                  {selectedReqForDisburse.targetAccountHolder || selectedReqForDisburse.namaPenerima || selectedReqForDisburse.accountHolder || selectedReqForDisburse.requester}
+                </strong>
+              </div>
+            </div>
+
             <form onSubmit={handleExecuteDisburse} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
@@ -3969,6 +4042,91 @@ export const FinanceModule = () => {
             </div>
 
             <form onSubmit={handleCreateNewRequest} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* KARTU REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) */}
+              <div
+                style={{
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  border: '1.5px solid #10b981',
+                  borderRadius: '12px',
+                  padding: '12px 14px'
+                }}
+              >
+                <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CreditCard size={15} />
+                  <span>REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) *</span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                      Nama Bank Tujuan *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="BCA / Mandiri / BRI / BSI / BNI"
+                      value={newReqForm.targetBank}
+                      onChange={(e) => setNewReqForm({ ...newReqForm, targetBank: e.target.value })}
+                      style={{
+                        width: '100%',
+                        background: '#0f172a',
+                        border: '1px solid #10b981',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        color: '#ffffff',
+                        fontSize: '0.84rem',
+                        fontWeight: 800
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                      Nomor Rekening Tujuan (No. Rek) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Contoh: 002-988-1234"
+                      value={newReqForm.targetAccountNumber}
+                      onChange={(e) => setNewReqForm({ ...newReqForm, targetAccountNumber: e.target.value })}
+                      style={{
+                        width: '100%',
+                        background: '#0f172a',
+                        border: '1px solid #10b981',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                        color: '#34d399',
+                        fontSize: '0.84rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 800
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nama Pemilik Rekening / Penerima Transfer *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: PT Vendor Sukses / CV Berkah"
+                    value={newReqForm.targetAccountHolder}
+                    onChange={(e) => setNewReqForm({ ...newReqForm, targetAccountHolder: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      color: '#ffffff',
+                      fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                   Judul Keperluan Pengajuan Dana *
@@ -4235,6 +4393,65 @@ export const FinanceModule = () => {
                         (Dari total diajukan: Rp {Number(selectedDetailItem.amount).toLocaleString('id-ID')})
                       </span>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              {/* KARTU REKENING TUJUAN TRANSFER (PENCAIRAN DANA OLEH FINANCE) */}
+              <div
+                style={{
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  border: '1.5px solid #10b981',
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  marginTop: '10px'
+                }}
+              >
+                <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 800, marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <CreditCard size={14} /> REKENING TUJUAN TRANSFER (PENCAIRAN DANA)
+                  </span>
+                  {(selectedDetailItem.targetAccountNumber || selectedDetailItem.noRekening) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const accNo = selectedDetailItem.targetAccountNumber || selectedDetailItem.noRekening;
+                        navigator.clipboard.writeText(accNo);
+                        alert(`Nomor rekening ${accNo} berhasil disalin!`);
+                      }}
+                      style={{
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid #10b981',
+                        color: '#34d399',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.68rem',
+                        cursor: 'pointer',
+                        fontWeight: 700
+                      }}
+                    >
+                      Salin No Rek
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Bank Tujuan:</span>
+                    <div style={{ fontWeight: 800, color: '#ffffff' }}>
+                      {selectedDetailItem.targetBank || selectedDetailItem.namaBank || selectedDetailItem.bankName || 'BCA (Default)'}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Nomor Rekening:</span>
+                    <div style={{ fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
+                      {selectedDetailItem.targetAccountNumber || selectedDetailItem.noRekening || selectedDetailItem.accountNumber || '-'}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Nama Pemilik Rekening:</span>
+                    <div style={{ fontWeight: 800, color: '#f8fafc' }}>
+                      {selectedDetailItem.targetAccountHolder || selectedDetailItem.namaPenerima || selectedDetailItem.accountHolder || selectedDetailItem.requester}
+                    </div>
                   </div>
                 </div>
               </div>

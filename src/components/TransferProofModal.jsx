@@ -150,6 +150,22 @@ export const TransferProofModal = ({ isOpen, onClose, item }) => {
             <div style={{ fontWeight: 700, color: '#cbd5e1', fontSize: '0.84rem' }}>{item.title}</div>
           </div>
 
+          {/* Rekening Tujuan Transfer */}
+          <div style={{ background: '#090d16', border: '1px solid #10b981', borderRadius: '8px', padding: '10px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem' }}>
+            <div>
+              <div style={{ color: '#64748b', fontSize: '0.7rem' }}>Rekening Tujuan Transfer:</div>
+              <div style={{ fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
+                {item.targetBank || item.namaBank || 'BCA'} - {item.targetAccountNumber || item.noRekening || '-'}
+              </div>
+            </div>
+            <div>
+              <div style={{ color: '#64748b', fontSize: '0.7rem' }}>Nama Penerima Transfer:</div>
+              <div style={{ fontWeight: 800, color: '#ffffff' }}>
+                {item.targetAccountHolder || item.namaPenerima || item.requester}
+              </div>
+            </div>
+          </div>
+
           {item.transferNotes && (
             <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', padding: '8px 12px', fontSize: '0.76rem', color: '#cbd5e1' }}>
               <strong style={{ color: '#38bdf8' }}>Catatan Transfer:</strong> {item.transferNotes}

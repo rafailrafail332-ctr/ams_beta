@@ -957,6 +957,12 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
         category: 'Kegiatan Gathering',
         project: 'Head Office Bizhub',
         requester: 'Panitia Gathering HR & GA',
+        targetBank: b.namaBank || 'BCA',
+        targetAccountNumber: b.noRekening || '-',
+        targetAccountHolder: b.namaPenerima || 'Vendor Acara',
+        namaBank: b.namaBank || 'BCA',
+        noRekening: b.noRekening || '-',
+        namaPenerima: b.namaPenerima || 'Vendor Acara',
         notes: `Pembayaran pos anggaran gathering: ${b.uraian}.\nTransfer ke Bank: ${b.namaBank || 'BCA'} No. Rek: ${b.noRekening || '-'} a.n ${b.namaPenerima || 'Vendor'}.`,
         dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
         accountCode: '5-301'
@@ -2027,19 +2033,37 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               </div>
             </div>
 
-            {/* Render Kurva SVG Line Chart dengan Dimensi Luas & Padding Aman (Anti-Cutoff) */}
+            {/* Render Kurva SVG Line Chart Modern Executive (Bersih, Rapi & Angka Bulat Juta) */}
             {(() => {
               if (budgets.length === 0) return null;
 
               const width = 1000;
-              const height = 340;
-              const paddingLeft = 95;
-              const paddingRight = 55;
-              const paddingTop = 45;
-              const paddingBottom = 95; // Ruang ekstra luas agar teks sumbu X tidak terpotong
+              const height = 300;
+              const paddingLeft = 85;
+              const paddingRight = 45;
+              const paddingTop = 35;
+              const paddingBottom = 45; // Lapang untuk pill badge nomor pos tanpa teks miring yang terpotong
 
               const allValues = budgets.flatMap(b => [Number(b.rencana) || 0, Number(b.realisasi) || 0]);
-              const maxVal = Math.max(...allValues) * 1.18 || 50000000;
+              const rawMax = Math.max(...allValues, 10000000);
+
+              // Algoritma Angka Bulat Rapi untuk Sumbu Y (Nice Round Millions)
+              let step = 10000000;
+              if (rawMax <= 12000000) step = 3000000;
+              else if (rawMax <= 20000000) step = 5000000;
+              else if (rawMax <= 35000000) step = 10000000;
+              else if (rawMax <= 60000000) step = 15000000;
+              else if (rawMax <= 100000000) step = 25000000;
+              else step = Math.ceil(rawMax / 4 / 10000000) * 10000000;
+
+              const numSteps = Math.max(3, Math.ceil(rawMax / step));
+              const maxVal = step * numSteps;
+
+              const yTicks = [];
+              for (let i = 0; i <= numSteps; i++) {
+                yTicks.push(i * step);
+              }
+
               const chartW = width - paddingLeft - paddingRight;
               const chartH = height - paddingTop - paddingBottom;
 
@@ -2047,13 +2071,13 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               const ptsRealisasi = budgets.map((b, i) => {
                 const x = budgets.length === 1 ? paddingLeft + chartW / 2 : paddingLeft + (i / (budgets.length - 1)) * chartW;
                 const y = paddingTop + chartH - ((Number(b.realisasi) || 0) / maxVal) * chartH;
-                return { x, y, ...b };
+                return { x, y, ...b, index: i + 1 };
               });
 
               const ptsRencana = budgets.map((b, i) => {
                 const x = budgets.length === 1 ? paddingLeft + chartW / 2 : paddingLeft + (i / (budgets.length - 1)) * chartW;
                 const y = paddingTop + chartH - ((Number(b.rencana) || 0) / maxVal) * chartH;
-                return { x, y, ...b };
+                return { x, y, ...b, index: i + 1 };
               });
 
               // Helper Generator Kurva Halus (Catmull-Rom to Cubic Bezier Spline)
@@ -2082,147 +2106,266 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 ? `${pathRealisasi} L ${ptsRealisasi[ptsRealisasi.length - 1].x} ${paddingTop + chartH} L ${ptsRealisasi[0].x} ${paddingTop + chartH} Z`
                 : '';
 
+              const formatYTickLabel = (val) => {
+                if (val === 0) return 'Rp 0';
+                return `Rp ${(val / 1000000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} Jt`;
+              };
+
+              const formatPointCompact = (val) => {
+                if (!val) return '0';
+                return `${(val / 1000000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} Jt`;
+              };
+
               return (
-                <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '6px' }}>
-                  <svg
-                    viewBox={`0 0 ${width} ${height}`}
+                <div style={{ width: '100%' }}>
+                  <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '6px' }}>
+                    <svg
+                      viewBox={`0 0 ${width} ${height}`}
+                      style={{
+                        width: '100%',
+                        minWidth: '780px',
+                        height: 'auto',
+                        overflow: 'visible'
+                      }}
+                    >
+                      <defs>
+                        <linearGradient id="emeraldGradientArea" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.38" />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                        </linearGradient>
+                        <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="3" result="blur" />
+                          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                      </defs>
+
+                      {/* Horizontal Grid lines dengan Angka Bulat Juta Rapi */}
+                      {yTicks.map((tickVal, gIdx) => {
+                        const y = paddingTop + chartH - (tickVal / maxVal) * chartH;
+                        return (
+                          <g key={gIdx}>
+                            <line
+                              x1={paddingLeft}
+                              y1={y}
+                              x2={width - paddingRight}
+                              y2={y}
+                              stroke="rgba(255,255,255,0.06)"
+                              strokeDasharray="4 4"
+                            />
+                            <text
+                              x={paddingLeft - 12}
+                              y={y + 4}
+                              fill="#94a3b8"
+                              fontSize="11"
+                              fontWeight="700"
+                              textAnchor="end"
+                              fontFamily="monospace"
+                            >
+                              {formatYTickLabel(tickVal)}
+                            </text>
+                          </g>
+                        );
+                      })}
+
+                      {/* Gradient Area Fill Realisasi */}
+                      {areaRealisasi && <path d={areaRealisasi} fill="url(#emeraldGradientArea)" />}
+
+                      {/* Kurva Garis Putus-putus Rencana Anggaran */}
+                      <path
+                        d={pathRencana}
+                        fill="none"
+                        stroke="#34d399"
+                        strokeWidth="2"
+                        strokeDasharray="6 4"
+                        opacity="0.65"
+                      />
+
+                      {/* Kurva Garis Solid Realisasi Biaya */}
+                      <path
+                        d={pathRealisasi}
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="3.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        filter="url(#emeraldGlow)"
+                      />
+
+                      {/* Titik Interaktif dengan Badge Nomor Pos Rapi (Tanpa Teks Terpotong) */}
+                      {ptsRealisasi.map((p, idx) => {
+                        const isSelected = selectedChartPoint && selectedChartPoint.id === p.id;
+                        return (
+                          <g
+                            key={idx}
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => setSelectedChartPoint(p)}
+                          >
+                            {/* Garis vertikal penunjuk */}
+                            <line
+                              x1={p.x}
+                              y1={p.y}
+                              x2={p.x}
+                              y2={paddingTop + chartH}
+                              stroke={isSelected ? '#34d399' : 'rgba(16, 185, 129, 0.2)'}
+                              strokeWidth={isSelected ? '2' : '1'}
+                              strokeDasharray="3 3"
+                            />
+
+                            {/* Lingkaran Luar */}
+                            <circle
+                              cx={p.x}
+                              cy={p.y}
+                              r={isSelected ? '8' : '5.5'}
+                              fill="#090d16"
+                              stroke={isSelected ? '#34d399' : '#10b981'}
+                              strokeWidth={isSelected ? '3.5' : '2.5'}
+                            />
+                            {/* Lingkaran Titik Dalam */}
+                            <circle
+                              cx={p.x}
+                              cy={p.y}
+                              r={isSelected ? '4' : '2.5'}
+                              fill="#34d399"
+                            />
+
+                            {/* Label Angka Nominal Ringkas di Atas Titik */}
+                            <g>
+                              <rect
+                                x={p.x - 28}
+                                y={Math.max(12, p.y - 25)}
+                                width={56}
+                                height={18}
+                                rx={9}
+                                fill={isSelected ? '#10b981' : '#0f172a'}
+                                stroke={isSelected ? '#34d399' : '#334155'}
+                                strokeWidth="1"
+                              />
+                              <text
+                                x={p.x}
+                                y={Math.max(12, p.y - 25) + 12}
+                                fill={isSelected ? '#090d16' : '#34d399'}
+                                fontSize="10"
+                                fontWeight="800"
+                                textAnchor="middle"
+                                fontFamily="monospace"
+                              >
+                                {formatPointCompact(p.realisasi)}
+                              </text>
+                            </g>
+
+                            {/* Badge Nomor Pos Pengeluaran di Sumbu X (Bersih, Rapi & Tidak Memotong) */}
+                            <rect
+                              x={p.x - 17}
+                              y={paddingTop + chartH + 10}
+                              width={34}
+                              height={20}
+                              rx={6}
+                              fill={isSelected ? '#10b981' : '#0f172a'}
+                              stroke={isSelected ? '#34d399' : '#334155'}
+                              strokeWidth="1"
+                            />
+                            <text
+                              x={p.x}
+                              y={paddingTop + chartH + 24}
+                              fill={isSelected ? '#090d16' : '#cbd5e1'}
+                              fontSize="10"
+                              fontWeight="800"
+                              textAnchor="middle"
+                            >
+                              #{p.index}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+
+                  {/* Grid Legenda Pos Pengeluaran Interaktif di Bawah Grafik */}
+                  <div
                     style={{
-                      width: '100%',
-                      minWidth: '820px',
-                      height: 'auto',
-                      overflow: 'visible'
+                      marginTop: '12px',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+                      gap: '8px'
                     }}
                   >
-                    <defs>
-                      <linearGradient id="emeraldGradientArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                      </linearGradient>
-                      <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                      </filter>
-                    </defs>
-
-                    {/* Horizontal Grid lines */}
-                    {[0, 0.25, 0.5, 0.75, 1].map((pct, gIdx) => {
-                      const y = paddingTop + chartH * (1 - pct);
-                      const labelVal = maxVal * pct;
+                    {budgets.map((b, idx) => {
+                      const isSelected = selectedChartPoint && selectedChartPoint.id === b.id;
                       return (
-                        <g key={gIdx}>
-                          <line
-                            x1={paddingLeft}
-                            y1={y}
-                            x2={width - paddingRight}
-                            y2={y}
-                            stroke="rgba(255,255,255,0.07)"
-                            strokeDasharray="4 4"
-                          />
-                          <text
-                            x={paddingLeft - 10}
-                            y={y + 4}
-                            fill="#64748b"
-                            fontSize="11"
-                            fontWeight="600"
-                            textAnchor="end"
-                            fontFamily="monospace"
-                          >
-                            {formatRupiah(labelVal).replace(',00', '')}
-                          </text>
-                        </g>
-                      );
-                    })}
-
-                    {/* Gradient Area Fill Realisasi */}
-                    {areaRealisasi && <path d={areaRealisasi} fill="url(#emeraldGradientArea)" />}
-
-                    {/* Kurva Garis Putus-putus Rencana Anggaran */}
-                    <path
-                      d={pathRencana}
-                      fill="none"
-                      stroke="#34d399"
-                      strokeWidth="2"
-                      strokeDasharray="6 4"
-                      opacity="0.65"
-                    />
-
-                    {/* Kurva Garis Solid Realisasi Biaya */}
-                    <path
-                      d={pathRealisasi}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="3.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      filter="url(#emeraldGlow)"
-                    />
-
-                    {/* Titik Interaktif & Label Sumbu X yang Bersih dan Tidak Terpotong */}
-                    {ptsRealisasi.map((p, idx) => {
-                      const isSelected = selectedChartPoint && selectedChartPoint.id === p.id;
-                      return (
-                        <g
-                          key={idx}
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setSelectedChartPoint(p)}
+                        <div
+                          key={b.id || idx}
+                          onClick={() => {
+                            const pt = ptsRealisasi.find(p => p.id === b.id) || b;
+                            setSelectedChartPoint(pt);
+                          }}
+                          style={{
+                            background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                            border: `1.5px solid ${isSelected ? '#10b981' : '#1e293b'}`,
+                            borderRadius: '8px',
+                            padding: '8px 10px',
+                            cursor: 'pointer',
+                            transition: 'all 0.18s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px'
+                          }}
                         >
-                          {/* Garis vertikal penunjuk */}
-                          <line
-                            x1={p.x}
-                            y1={p.y}
-                            x2={p.x}
-                            y2={paddingTop + chartH}
-                            stroke={isSelected ? '#34d399' : 'rgba(16, 185, 129, 0.25)'}
-                            strokeWidth={isSelected ? '2' : '1'}
-                            strokeDasharray="3 3"
-                          />
-
-                          {/* Lingkaran Luar */}
-                          <circle
-                            cx={p.x}
-                            cy={p.y}
-                            r={isSelected ? '8' : '6'}
-                            fill="#090d16"
-                            stroke="#10b981"
-                            strokeWidth={isSelected ? '3.5' : '2.5'}
-                          />
-                          {/* Lingkaran Titik Dalam */}
-                          <circle
-                            cx={p.x}
-                            cy={p.y}
-                            r={isSelected ? '4' : '2.5'}
-                            fill="#34d399"
-                          />
-
-                          {/* Label Angka Nominal di Atas Titik */}
-                          <text
-                            x={p.x}
-                            y={Math.max(18, p.y - 12)}
-                            fill="#34d399"
-                            fontSize="10"
-                            fontWeight="800"
-                            textAnchor="middle"
-                            fontFamily="sans-serif"
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                            <span
+                              style={{
+                                background: isSelected ? '#10b981' : '#1e293b',
+                                color: isSelected ? '#090d16' : '#94a3b8',
+                                fontWeight: 900,
+                                fontSize: '0.72rem',
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}
+                            >
+                              #{idx + 1}
+                            </span>
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontSize: '0.76rem',
+                                  fontWeight: 700,
+                                  color: isSelected ? '#34d399' : '#f8fafc',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}
+                                title={b.posPengeluaran}
+                              >
+                                {b.posPengeluaran}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                Realisasi: <strong style={{ color: '#34d399' }}>{formatRupiah(b.realisasi)}</strong>
+                              </div>
+                            </div>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '0.64rem',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontWeight: 800,
+                              background: b.status === 'Lunas' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(234, 179, 8, 0.2)',
+                              color: b.status === 'Lunas' ? '#34d399' : '#facc15',
+                              border: `1px solid ${b.status === 'Lunas' ? '#10b981' : '#eab308'}`,
+                              flexShrink: 0
+                            }}
                           >
-                            {formatRupiah(p.realisasi).replace(',00', '')}
-                          </text>
-
-                          {/* Label Pos Pengeluaran di Sumbu X (Rotasi -35 Derajat Tanpa Terpotong) */}
-                          <text
-                            x={p.x}
-                            y={paddingTop + chartH + 18}
-                            fill={isSelected ? '#34d399' : '#94a3b8'}
-                            fontSize="10"
-                            fontWeight={isSelected ? '800' : '700'}
-                            textAnchor="end"
-                            transform={`rotate(-35, ${p.x}, ${paddingTop + chartH + 18})`}
-                          >
-                            {p.posPengeluaran.length > 18 ? p.posPengeluaran.slice(0, 18) + '..' : p.posPengeluaran}
-                          </text>
-                        </g>
+                            {b.status}
+                          </span>
+                        </div>
                       );
                     })}
-                  </svg>
+                  </div>
                 </div>
               );
             })()}
