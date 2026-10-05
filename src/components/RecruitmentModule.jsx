@@ -312,9 +312,18 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     try { localStorage.setItem(STORAGE_OFFERINGS, JSON.stringify(offerings)); } catch {}
   }, [offerings]);
 
-  // Search & Filter State
+  // Search & Filter State per Sub-Modul
   const [searchQuery, setSearchQuery] = useState('');
   const [filterProject, setFilterProject] = useState('ALL');
+
+  const [searchInterview, setSearchInterview] = useState('');
+  const [filterInterviewStatus, setFilterInterviewStatus] = useState('ALL');
+
+  const [searchAssessment, setSearchAssessment] = useState('');
+  const [filterKeputusan, setFilterKeputusan] = useState('ALL');
+
+  const [searchOffering, setSearchOffering] = useState('');
+  const [filterOfferingStatus, setFilterOfferingStatus] = useState('ALL');
 
   // Format Helpers
   const formatRupiah = (val) => {
@@ -798,19 +807,73 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     }
   };
 
-  // Filtered applicants
+  // 1. Filtered applicants (Sub-Modul 1)
   const filteredApplicants = useMemo(() => {
     return applicants.filter(app => {
+      const q = searchQuery.toLowerCase();
       const matchSearch = (
-        app.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.posisi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.noDok.toLowerCase().includes(searchQuery.toLowerCase())
+        app.nama.toLowerCase().includes(q) ||
+        app.posisi.toLowerCase().includes(q) ||
+        (app.phone && app.phone.toLowerCase().includes(q)) ||
+        (app.email && app.email.toLowerCase().includes(q)) ||
+        (app.noDok && app.noDok.toLowerCase().includes(q)) ||
+        (app.catatan && app.catatan.toLowerCase().includes(q))
       );
       const matchProject = filterProject === 'ALL' || app.project === filterProject;
       return matchSearch && matchProject;
     });
   }, [applicants, searchQuery, filterProject]);
+
+  // 2. Filtered interviews (Sub-Modul 2)
+  const filteredInterviews = useMemo(() => {
+    return interviews.filter(intw => {
+      const q = searchInterview.toLowerCase();
+      const matchSearch = (
+        intw.applicantName.toLowerCase().includes(q) ||
+        intw.posisi.toLowerCase().includes(q) ||
+        (intw.interviewer && intw.interviewer.toLowerCase().includes(q)) ||
+        (intw.metode && intw.metode.toLowerCase().includes(q)) ||
+        (intw.lokasiLink && intw.lokasiLink.toLowerCase().includes(q)) ||
+        (intw.catatan && intw.catatan.toLowerCase().includes(q))
+      );
+      const matchStatus = filterInterviewStatus === 'ALL' || intw.status === filterInterviewStatus;
+      return matchSearch && matchStatus;
+    });
+  }, [interviews, searchInterview, filterInterviewStatus]);
+
+  // 3. Filtered assessments (Sub-Modul 3 dengan Filter Keputusan & Search)
+  const filteredAssessments = useMemo(() => {
+    return assessments.filter(asm => {
+      const q = searchAssessment.toLowerCase();
+      const matchSearch = (
+        asm.applicantName.toLowerCase().includes(q) ||
+        asm.posisi.toLowerCase().includes(q) ||
+        (asm.catatanAkhir && asm.catatanAkhir.toLowerCase().includes(q)) ||
+        (asm.penilai1?.nama && asm.penilai1.nama.toLowerCase().includes(q)) ||
+        (asm.penilai2?.nama && asm.penilai2.nama.toLowerCase().includes(q)) ||
+        (asm.penilai3?.nama && asm.penilai3.nama.toLowerCase().includes(q))
+      );
+      const matchKeputusan = filterKeputusan === 'ALL' || asm.keputusanAkhir === filterKeputusan;
+      return matchSearch && matchKeputusan;
+    });
+  }, [assessments, searchAssessment, filterKeputusan]);
+
+  // 4. Filtered offerings (Sub-Modul 4)
+  const filteredOfferings = useMemo(() => {
+    return offerings.filter(off => {
+      const q = searchOffering.toLowerCase();
+      const matchSearch = (
+        off.applicantName.toLowerCase().includes(q) ||
+        off.posisi.toLowerCase().includes(q) ||
+        (off.noSurat && off.noSurat.toLowerCase().includes(q)) ||
+        (off.penempatan && off.penempatan.toLowerCase().includes(q)) ||
+        (off.statusKerja && off.statusKerja.toLowerCase().includes(q)) ||
+        (off.catatan && off.catatan.toLowerCase().includes(q))
+      );
+      const matchStatus = filterOfferingStatus === 'ALL' || off.statusOffering === filterOfferingStatus;
+      return matchSearch && matchStatus;
+    });
+  }, [offerings, searchOffering, filterOfferingStatus]);
 
   // Filtered applicants for Picker Modal
   const filteredPickerApplicants = useMemo(() => {
@@ -977,8 +1040,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   <tr>
                     <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <FileText size={36} color="#10b981" style={{ opacity: 0.6, marginBottom: '8px' }} />
-                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada berkas pelamar</div>
-                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "+ Upload CV / Tambah Pelamar" untuk memasukkan data kandidat baru.</p>
+                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
+                        {searchQuery || filterProject !== 'ALL' ? 'Tidak ada berkas pelamar yang sesuai' : 'Belum ada berkas pelamar'}
+                      </div>
+                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                        {searchQuery || filterProject !== 'ALL' ? 'Coba ubah kata kunci pencarian atau sesuaikan filter proyek.' : 'Klik tombol "+ Upload CV / Tambah Pelamar" untuk memasukkan data kandidat baru.'}
+                      </p>
                     </td>
                   </tr>
                 ) : (
@@ -1174,7 +1241,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   Sub-Modul 2: Jadwal Interview
                 </span>
                 <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                  ({interviews.length} agenda wawancara)
+                  ({filteredInterviews.length} agenda wawancara)
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
@@ -1182,23 +1249,49 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               </p>
             </div>
 
-            <button
-              className="btn btn-primary"
-              onClick={() => handleOpenAddInterview()}
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.82rem',
-                height: '36px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-              }}
-            >
-              <Calendar size={16} /> + Atur Jadwal Interview
-            </button>
+            {/* Filter Search, Status Filter & Tombol Atur Jadwal */}
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#38bdf8' }} />
+                <input
+                  type="text"
+                  placeholder="Cari nama / posisi / pewawancara..."
+                  value={searchInterview}
+                  onChange={(e) => setSearchInterview(e.target.value)}
+                  className="form-control"
+                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '220px', borderColor: 'rgba(56, 189, 248, 0.4)' }}
+                />
+              </div>
+
+              <select
+                className="form-control"
+                value={filterInterviewStatus}
+                onChange={(e) => setFilterInterviewStatus(e.target.value)}
+                style={{ height: '36px', fontSize: '0.8rem', width: '140px', fontWeight: 700 }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Terjadwal">Terjadwal</option>
+                <option value="Selesai">Selesai</option>
+              </select>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => handleOpenAddInterview()}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  height: '36px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <Calendar size={16} /> + Atur Jadwal Interview
+              </button>
+            </div>
           </div>
 
           {/* Table Jadwal Interview */}
@@ -1215,16 +1308,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </tr>
               </thead>
               <tbody>
-                {interviews.length === 0 ? (
+                {filteredInterviews.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <Calendar size={36} color="#38bdf8" style={{ opacity: 0.6, marginBottom: '8px' }} />
-                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada jadwal interview</div>
-                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "+ Atur Jadwal Interview" untuk menentukan waktu wawancara pelamar.</p>
+                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
+                        {searchInterview || filterInterviewStatus !== 'ALL' ? 'Tidak ada agenda wawancara yang sesuai' : 'Belum ada jadwal interview'}
+                      </div>
+                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                        {searchInterview || filterInterviewStatus !== 'ALL' ? 'Coba ubah kata kunci pencarian atau reset filter status.' : 'Klik tombol "+ Atur Jadwal Interview" untuk menentukan waktu wawancara pelamar.'}
+                      </p>
                     </td>
                   </tr>
                 ) : (
-                  interviews.map((intw, idx) => (
+                  filteredInterviews.map((intw, idx) => (
                     <tr key={intw.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                       {/* Tanggal & Jam */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
@@ -1394,7 +1491,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   Sub-Modul 3: Hasil Penilaian Wawancara
                 </span>
                 <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                  ({assessments.length} kandidat telah dinilai)
+                  ({filteredAssessments.length} kandidat dinilai)
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
@@ -1402,8 +1499,33 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
               </p>
             </div>
 
-            {/* Tombol Pilih Pelamar Untuk Dinilai (Permintaan User: Tombol + Search Popup) */}
+            {/* Filter Search, Filter Keputusan & Tombol Pilih Pelamar Untuk Dinilai */}
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#fbbf24' }} />
+                <input
+                  type="text"
+                  placeholder="Cari nama / posisi..."
+                  value={searchAssessment}
+                  onChange={(e) => setSearchAssessment(e.target.value)}
+                  className="form-control"
+                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '200px', borderColor: 'rgba(245, 158, 11, 0.4)' }}
+                />
+              </div>
+
+              {/* FITUR FILTER KEPUTUSAN (Permintaan User) */}
+              <select
+                className="form-control"
+                value={filterKeputusan}
+                onChange={(e) => setFilterKeputusan(e.target.value)}
+                style={{ height: '36px', fontSize: '0.8rem', width: '170px', fontWeight: 700, borderColor: '#f59e0b' }}
+              >
+                <option value="ALL">Semua Keputusan</option>
+                <option value="Lolos">Lolos (Siap Offering)</option>
+                <option value="Dipertimbangkan">Dipertimbangkan</option>
+                <option value="Tidak Lolos">Tidak Lolos</option>
+              </select>
+
               <button
                 className="btn btn-primary"
                 onClick={() => { setPickerSearch(''); setIsPickerModalOpen(true); }}
@@ -1440,16 +1562,20 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </tr>
               </thead>
               <tbody>
-                {assessments.length === 0 ? (
+                {filteredAssessments.length === 0 ? (
                   <tr>
                     <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <Award size={36} color="#f59e0b" style={{ opacity: 0.6, marginBottom: '8px' }} />
-                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada hasil penilaian</div>
-                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "Pilih Pelamar Untuk Dinilai" di atas untuk mencari pelamar dan memulai penginputan evaluasi.</p>
+                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
+                        {searchAssessment || filterKeputusan !== 'ALL' ? 'Tidak ada hasil penilaian yang sesuai' : 'Belum ada hasil penilaian'}
+                      </div>
+                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                        {searchAssessment || filterKeputusan !== 'ALL' ? 'Coba ubah kata kunci pencarian atau sesuaikan filter keputusan.' : 'Klik tombol "Pilih Pelamar Untuk Dinilai" di atas untuk mencari pelamar dan memulai penginputan evaluasi.'}
+                      </p>
                     </td>
                   </tr>
                 ) : (
-                  assessments.map((asm, idx) => (
+                  filteredAssessments.map((asm, idx) => (
                     <tr key={asm.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                       {/* Tgl Nilai */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
@@ -1617,31 +1743,59 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   Sub-Modul 4: Jadwal On Duty & Offering Letter
                 </span>
                 <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                  ({offerings.length} surat penawaran diterbitkan)
+                  ({filteredOfferings.length} surat penawaran diterbitkan)
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                Penerbitan Surat Penawaran Kerja (Offering Letter), penetapan tanggal mulai masuk kerja (Jadwal On Duty), kirim WA ke pelamar, dan cetak dokumen resmi.
+                Penerbitan Surat Penawaran Kerja (Offering Letter), penetapan tanggal mulai masuk kerja (Jadwal On Duty), dan kirim konfirmasi ke WhatsApp pelamar.
               </p>
             </div>
 
-            <button
-              className="btn btn-primary"
-              onClick={() => handleOpenAddOffering()}
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.82rem',
-                height: '36px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-              }}
-            >
-              <FileText size={16} /> + Buat Offering Letter Baru
-            </button>
+            {/* Filter Search, Status Filter & Tombol Buat Offering */}
+            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#34d399' }} />
+                <input
+                  type="text"
+                  placeholder="Cari no surat / nama / posisi..."
+                  value={searchOffering}
+                  onChange={(e) => setSearchOffering(e.target.value)}
+                  className="form-control"
+                  style={{ paddingLeft: '32px', height: '36px', fontSize: '0.8rem', width: '220px', borderColor: 'rgba(16, 185, 129, 0.4)' }}
+                />
+              </div>
+
+              <select
+                className="form-control"
+                value={filterOfferingStatus}
+                onChange={(e) => setFilterOfferingStatus(e.target.value)}
+                style={{ height: '36px', fontSize: '0.8rem', width: '140px', fontWeight: 700 }}
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="Diterbitkan">Diterbitkan</option>
+                <option value="Diterima">Diterima</option>
+                <option value="Draf">Draf</option>
+                <option value="Ditolak">Ditolak</option>
+              </select>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => handleOpenAddOffering()}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  height: '36px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <FileText size={16} /> + Buat Offering Letter Baru
+              </button>
+            </div>
           </div>
 
           {/* Table Offering & On Duty */}
@@ -1654,20 +1808,24 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   <th style={{ width: '160px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Jadwal On Duty</th>
                   <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Gaji & Tunjangan</th>
                   <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status Surat</th>
-                  <th style={{ width: '210px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Dokumen, WA & Aksi</th>
+                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>WA & Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {offerings.length === 0 ? (
+                {filteredOfferings.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <FileText size={36} color="#10b981" style={{ opacity: 0.6, marginBottom: '8px' }} />
-                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada offering letter</div>
-                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "+ Buat Offering Letter Baru" untuk menerbitkan penawaran kerja.</p>
+                      <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>
+                        {searchOffering || filterOfferingStatus !== 'ALL' ? 'Tidak ada offering letter yang sesuai' : 'Belum ada offering letter'}
+                      </div>
+                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                        {searchOffering || filterOfferingStatus !== 'ALL' ? 'Coba ubah kata kunci pencarian atau sesuaikan filter status.' : 'Klik tombol "+ Buat Offering Letter Baru" untuk menerbitkan penawaran kerja.'}
+                      </p>
                     </td>
                   </tr>
                 ) : (
-                  offerings.map((off, idx) => (
+                  filteredOfferings.map((off, idx) => (
                     <tr key={off.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                       {/* No Surat & Tgl */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
@@ -1759,7 +1917,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         )}
                       </td>
 
-                      {/* Dokumen, WA & Aksi */}
+                      {/* WA & Aksi (Tombol Cetak Dihapus Sesuai Permintaan User) */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                           {/* Tombol Kirim WhatsApp Offering */}
@@ -1782,27 +1940,6 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             title="Kirim Konfirmasi Offering Letter & On Duty via WhatsApp ke Pelamar"
                           >
                             <MessageSquare size={12} /> WA
-                          </button>
-
-                          <button
-                            onClick={() => setViewingOfferingDoc(off)}
-                            className="btn btn-sm"
-                            style={{
-                              background: 'rgba(56, 189, 248, 0.15)',
-                              border: '1px solid #38bdf8',
-                              color: '#38bdf8',
-                              padding: '4px 8px',
-                              fontSize: '0.72rem',
-                              fontWeight: 800,
-                              borderRadius: '6px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              whiteSpace: 'nowrap'
-                            }}
-                            title="Pratinjau & Cetak Dokumen Offering Letter"
-                          >
-                            <FileText size={12} /> Cetak
                           </button>
 
                           <button
