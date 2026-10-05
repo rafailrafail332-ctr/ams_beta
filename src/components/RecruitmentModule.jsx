@@ -27,7 +27,8 @@ import {
   Building2,
   DollarSign,
   Send,
-  UserCheck
+  UserCheck,
+  MessageSquare
 } from 'lucide-react';
 
 // =============================================================================
@@ -258,7 +259,7 @@ const INITIAL_OFFERINGS = [
 ];
 
 export const RecruitmentModule = ({ currentUser, showNotification }) => {
-  // Sub-Tab Navigation (4 Sub-Modul Permintaan User)
+  // Sub-Tab Navigation (4 Sub-Modul Permintaan User - Tanpa Angka Badge)
   const [activeSubTab, setActiveSubTab] = useState('cv-pelamar');
 
   // Datasets
@@ -330,6 +331,44 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     } catch {
       return dStr;
     }
+  };
+
+  // Helper untuk Membuka WhatsApp Otomatis ke Nomor Pelamar
+  const openWhatsApp = (phone, text) => {
+    if (!phone) {
+      showNotification && showNotification('Nomor telepon / WhatsApp pelamar tidak tersedia!', 'danger');
+      return;
+    }
+    let cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    } else if (!cleanPhone.startsWith('62')) {
+      cleanPhone = '62' + cleanPhone;
+    }
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  };
+
+  // Handler Kirim WA dari Sub-Modul 1 (CV Pelamar)
+  const handleSendWhatsAppApplicant = (app) => {
+    const text = `Halo Bapak/Ibu ${app.nama},\n\nKami dari Tim HRD PT Persada Nusantara Indonesia (AMS Properti) mengonfirmasi bahwa berkas lamaran Anda untuk posisi *${app.posisi}* di proyek *${app.project || 'Ashoka Park'}* telah kami terima dan masuk dalam tahap peninjauan berkas.\n\nTim HRD kami akan mengabari informasi kelanjutan proses seleksi. Terima kasih atas ketertarikan Anda untuk bergabung bersama kami.`;
+    openWhatsApp(app.phone, text);
+  };
+
+  // Handler Kirim WA dari Sub-Modul 2 (Jadwal Interview)
+  const handleSendWhatsAppInterview = (intw) => {
+    const app = applicants.find(a => a.id === intw.applicantId || a.nama === intw.applicantName);
+    const phone = app?.phone || '';
+    const text = `Halo Bapak/Ibu ${intw.applicantName},\n\nKami dari Tim HRD PT Persada Nusantara Indonesia mengundang Anda untuk mengikuti sesi wawancara (interview) posisi *${intw.posisi}* yang dijadwalkan pada:\n- Hari/Tanggal: ${formatDisplayDate(intw.tanggalInterview)}\n- Jam: ${intw.jamInterview} WIB\n- Metode/Lokasi: ${intw.metode} (${intw.lokasiLink || '-'})\n- Pewawancara: ${intw.interviewer}\n\nCatatan: ${intw.catatan || 'Mohon hadir 10 menit sebelum jadwal dimulai'}.\n\nMohon memberikan konfirmasi kehadiran Anda. Terima kasih.`;
+    openWhatsApp(phone, text);
+  };
+
+  // Handler Kirim WA dari Sub-Modul 4 (Jadwal On Duty & Offering Letter)
+  const handleSendWhatsAppOffering = (off) => {
+    const app = applicants.find(a => a.id === off.applicantId || a.nama === off.applicantName);
+    const phone = app?.phone || '';
+    const text = `Halo Bapak/Ibu ${off.applicantName},\n\nSelamat! Anda dinyatakan diterima bergabung di PT Persada Nusantara Indonesia untuk posisi *${off.posisi}*.\n\nBerikut ringkasan Surat Penawaran Kerja (Offering Letter):\n- Nomor Surat: ${off.noSurat}\n- Penempatan: ${off.penempatan}\n- *Jadwal On Duty (Mulai Kerja): ${formatDisplayDate(off.jadwalOnDuty)}*\n- Status Kontrak: ${off.statusKerja}\n- Batas Konfirmasi: ${formatDisplayDate(off.batasKonfirmasi)}\n\nMohon memeriksa dokumen offering letter dan memberikan tanda tangan konfirmasi. Terima kasih.`;
+    openWhatsApp(phone, text);
   };
 
   // ===========================================================================
@@ -405,6 +444,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     keputusanAkhir: 'Lolos',
     catatanAkhir: ''
   });
+
+  // Modal Khusus: Tombol "Pilih Pelamar Untuk Dinilai" dengan Search
+  const [isPickerModalOpen, setIsPickerModalOpen] = useState(false);
+  const [pickerSearch, setPickerSearch] = useState('');
 
   // 4. Modal Offering Letter & On Duty
   const [isOfferingModalOpen, setIsOfferingModalOpen] = useState(false);
@@ -643,12 +686,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     setIsAssessmentModalOpen(true);
   };
 
-  // Hitung otomatis skor rata-rata
+  // Hitung otomatis skor rata-rata dengan aman (tidak macet jika ada input kosong)
   const calculateAverageScore = (form) => {
-    const s1 = Number(form.penilai1?.skor || 85);
-    const s2 = Number(form.penilai2?.skor || 85);
+    const s1 = form.penilai1?.skor === '' ? 0 : Number(form.penilai1?.skor || 0);
+    const s2 = form.penilai2?.skor === '' ? 0 : Number(form.penilai2?.skor || 0);
     if (form.penilai3Enabled) {
-      const s3 = Number(form.penilai3?.skor || 85);
+      const s3 = form.penilai3?.skor === '' ? 0 : Number(form.penilai3?.skor || 0);
       return Math.round((s1 + s2 + s3) / 3);
     }
     return Math.round((s1 + s2) / 2);
@@ -769,19 +812,30 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     });
   }, [applicants, searchQuery, filterProject]);
 
-  // Tab Menu Items
+  // Filtered applicants for Picker Modal
+  const filteredPickerApplicants = useMemo(() => {
+    return applicants.filter(app => {
+      return (
+        app.nama.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+        app.posisi.toLowerCase().includes(pickerSearch.toLowerCase()) ||
+        (app.project && app.project.toLowerCase().includes(pickerSearch.toLowerCase()))
+      );
+    });
+  }, [applicants, pickerSearch]);
+
+  // Tab Menu Items (Permintaan User: Hilangkan Angka/Count Badge)
   const SUBTABS = [
-    { id: 'cv-pelamar', label: '1. Lowongan Terbuka & CV Pelamar', count: applicants.length },
-    { id: 'jadwal-interview', label: '2. Jadwal Interview', count: interviews.length },
-    { id: 'hasil-penilaian', label: '3. Hasil Penilaian', count: assessments.length },
-    { id: 'on-duty', label: '4. Jadwal On Duty & Offering Letter', count: offerings.length }
+    { id: 'cv-pelamar', label: '1. Lowongan Terbuka & CV Pelamar' },
+    { id: 'jadwal-interview', label: '2. Jadwal Interview' },
+    { id: 'hasil-penilaian', label: '3. Hasil Penilaian' },
+    { id: 'on-duty', label: '4. Jadwal On Duty & Offering Letter' }
   ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
       {/* ===================================================================== */}
-      {/* 4 SUB-MODUL RECRUITMENT TABS (PERSIS PERMINTAAN USER)                 */}
+      {/* 4 SUB-MODUL RECRUITMENT TABS (TANPA ANGKA-ANGKA / COUNT BADGE)        */}
       {/* ===================================================================== */}
       <div
         style={{
@@ -815,26 +869,13 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
+                justifyContent: 'center',
                 boxShadow: isActive ? '0 4px 14px rgba(16, 185, 129, 0.45)' : 'none',
                 transition: 'all 0.18s ease',
                 whiteSpace: 'nowrap'
               }}
             >
               <span>{tab.label}</span>
-              <span
-                style={{
-                  background: isActive ? 'rgba(255, 255, 255, 0.25)' : 'rgba(148, 163, 184, 0.15)',
-                  color: isActive ? '#ffffff' : '#94a3b8',
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  fontSize: '0.72rem',
-                  fontWeight: 900
-                }}
-              >
-                {tab.count}
-              </span>
             </button>
           );
         })}
@@ -867,7 +908,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                Unggah CV pelamar, pratinjau berkas dokumen PDF/Word, dan kelola proses seleksi berkas kandidat.
+                Unggah CV pelamar, kirim pesan konfirmasi ke WhatsApp, dan pratinjau berkas dokumen PDF/Word.
               </p>
             </div>
 
@@ -916,24 +957,25 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
             </div>
           </div>
 
-          {/* Table Daftar CV Pelamar */}
+          {/* Table Daftar CV Pelamar (Posisi dan Proyek Dipisah, Tanpa Ikon 📍) */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '980px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(16, 185, 129, 0.4)' }}>
-                  <th style={{ width: '100px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>No. & Tgl</th>
-                  <th style={{ minWidth: '200px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Nama Pelamar</th>
-                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Posisi & Proyek</th>
-                  <th style={{ width: '160px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Kontak / WhatsApp</th>
-                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center' }}>Dokumen CV</th>
-                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center' }}>Status</th>
-                  <th style={{ width: '140px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center' }}>Aksi</th>
+                  <th style={{ width: '100px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>No. & Tgl</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar</th>
+                  <th style={{ width: '170px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Posisi Dilamar</th>
+                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Proyek</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Kontak & WhatsApp</th>
+                  <th style={{ width: '140px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Dokumen CV</th>
+                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
+                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredApplicants.length === 0 ? (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <FileText size={36} color="#10b981" style={{ opacity: 0.6, marginBottom: '8px' }} />
                       <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada berkas pelamar</div>
                       <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "+ Upload CV / Tambah Pelamar" untuk memasukkan data kandidat baru.</p>
@@ -947,7 +989,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94a3b8', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>
                           {app.noDok || `REC-${idx+1}`}
                         </span>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px', whiteSpace: 'nowrap' }}>
                           {formatDisplayDate(app.tanggalMelamar)}
                         </div>
                       </td>
@@ -962,22 +1004,48 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         )}
                       </td>
 
-                      {/* Posisi & Proyek */}
+                      {/* Posisi Dilamar (Terpisah) */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.82rem' }}>{app.posisi}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                          📍 {app.project || 'Ashoka Park'}
+                        <div style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.82rem' }}>
+                          {app.posisi}
                         </div>
                       </td>
 
-                      {/* Kontak */}
+                      {/* Proyek (Terpisah, Tanpa Ikon 📍) */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontSize: '0.8rem', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Phone size={12} color="#10b981" /> {app.phone}
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700 }}>
+                          {app.project || 'Ashoka Park'}
+                        </div>
+                      </td>
+
+                      {/* Kontak & WhatsApp */}
+                      <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#f8fafc', fontWeight: 600 }}>{app.phone}</span>
+                          <button
+                            onClick={() => handleSendWhatsAppApplicant(app)}
+                            style={{
+                              background: '#25D366',
+                              border: 'none',
+                              color: '#ffffff',
+                              padding: '2px 7px',
+                              borderRadius: '4px',
+                              fontSize: '0.7rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              boxShadow: '0 2px 5px rgba(37, 211, 102, 0.3)'
+                            }}
+                            title="Kirim Pesan WhatsApp Konfirmasi ke Pelamar"
+                          >
+                            <MessageSquare size={11} /> WA
+                          </button>
                         </div>
                         {app.email && (
-                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Mail size={12} color="#38bdf8" /> {app.email}
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Mail size={11} color="#38bdf8" /> {app.email}
                           </div>
                         )}
                       </td>
@@ -998,11 +1066,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '4px'
+                              gap: '4px',
+                              whiteSpace: 'nowrap'
                             }}
                             title="Pratinjau Dokumen CV"
                           >
-                            <Eye size={12} /> {app.files[0].name.length > 16 ? app.files[0].name.substring(0, 14) + '...' : app.files[0].name}
+                            <Eye size={12} /> {app.files[0].name.length > 15 ? app.files[0].name.substring(0, 13) + '...' : app.files[0].name}
                           </button>
                         ) : (
                           <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Tidak ada file</span>
@@ -1028,7 +1097,8 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             borderRadius: '12px',
                             fontSize: '0.72rem',
                             fontWeight: 800,
-                            display: 'inline-block'
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
                           }}
                         >
                           {app.status}
@@ -1108,7 +1178,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                Pantau jadwal wawancara masing-masing pelamar, pewawancara terkait, lokasi / tautan video meeting.
+                Pantau jadwal wawancara masing-masing pelamar, kirim undangan interview via WhatsApp, dan evaluasi hasil wawancara.
               </p>
             </div>
 
@@ -1133,15 +1203,15 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
           {/* Table Jadwal Interview */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '980px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1020px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(56, 189, 248, 0.4)' }}>
-                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Tanggal & Jam</th>
-                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Nama Pelamar & Posisi</th>
-                  <th style={{ width: '220px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Metode & Lokasi / Link</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800 }}>Pewawancara (Interviewer)</th>
-                  <th style={{ width: '120px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center' }}>Status</th>
-                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center' }}>Aksi & Nilai</th>
+                  <th style={{ width: '150px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Tanggal & Jam</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
+                  <th style={{ width: '210px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Metode & Lokasi / Link</th>
+                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, whiteSpace: 'nowrap' }}>Pewawancara</th>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
+                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi, Nilai & WA</th>
                 </tr>
               </thead>
               <tbody>
@@ -1158,10 +1228,10 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     <tr key={intw.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                       {/* Tanggal & Jam */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.84rem' }}>
+                        <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.84rem', whiteSpace: 'nowrap' }}>
                           {formatDisplayDate(intw.tanggalInterview)}
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <div style={{ fontSize: '0.74rem', color: '#f59e0b', fontWeight: 800, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
                           <Clock size={12} /> {intw.jamInterview}
                         </div>
                       </td>
@@ -1207,27 +1277,37 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             borderRadius: '12px',
                             fontSize: '0.72rem',
                             fontWeight: 800,
-                            display: 'inline-block'
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
                           }}
                         >
                           {intw.status}
                         </span>
                       </td>
 
-                      {/* Aksi & Nilai */}
+                      {/* Aksi & Nilai & WhatsApp */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {/* Tombol Kirim Undangan WhatsApp */}
                           <button
-                            onClick={() => handleToggleInterviewStatus(intw)}
-                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleSendWhatsAppInterview(intw)}
                             style={{
-                              padding: '3px 6px',
-                              fontSize: '0.72rem',
-                              color: intw.status === 'Selesai' ? '#10b981' : '#94a3b8'
+                              background: '#25D366',
+                              border: 'none',
+                              color: '#ffffff',
+                              padding: '3px 7px',
+                              borderRadius: '4px',
+                              fontSize: '0.7rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              boxShadow: '0 2px 5px rgba(37, 211, 102, 0.3)'
                             }}
-                            title={intw.status === 'Selesai' ? 'Tandai Belum Selesai' : 'Tandai Selesai'}
+                            title="Kirim Undangan Jadwal Interview via WhatsApp ke Pelamar"
                           >
-                            <Check size={12} />
+                            <MessageSquare size={11} /> Undangan WA
                           </button>
 
                           <button
@@ -1248,6 +1328,19 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             title="Input Hasil Penilaian Wawancara"
                           >
                             <Award size={12} /> Nilai
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleInterviewStatus(intw)}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              padding: '3px 6px',
+                              fontSize: '0.72rem',
+                              color: intw.status === 'Selesai' ? '#10b981' : '#94a3b8'
+                            }}
+                            title={intw.status === 'Selesai' ? 'Tandai Belum Selesai' : 'Tandai Selesai'}
+                          >
+                            <Check size={12} />
                           </button>
 
                           <button
@@ -1283,7 +1376,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       {/* ===================================================================== */}
       {activeSubTab === 'hasil-penilaian' && (
         <div className="glass-card" style={{ padding: '1.4rem' }}>
-          {/* Top Bar: Title & Search */}
+          {/* Top Bar: Title & Tombol Pilih Pelamar Dengan Modal Search */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.2rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1305,44 +1398,45 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                Cari nama pelamar untuk mengisi atau melihat formulir evaluasi terstruktur: Penilai 1 (HRD), Penilai 2 (User), dan Penilai 3 (Opsional Direksi).
+                Klik tombol "Pilih Pelamar Untuk Dinilai" untuk mencari pelamar dan membuka formulir evaluasi: Penilai 1 (HRD), Penilai 2 (User), dan Penilai 3 (Opsional Direksi).
               </p>
             </div>
 
-            {/* Quick Candidate Assessment Picker */}
+            {/* Tombol Pilih Pelamar Untuk Dinilai (Permintaan User: Tombol + Search Popup) */}
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <select
-                className="form-control"
-                onChange={(e) => {
-                  const selApp = applicants.find(a => a.id === e.target.value);
-                  if (selApp) handleOpenAssessmentModal(selApp);
+              <button
+                className="btn btn-primary"
+                onClick={() => { setPickerSearch(''); setIsPickerModalOpen(true); }}
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  height: '36px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
                 }}
-                defaultValue=""
-                style={{ height: '36px', fontSize: '0.8rem', minWidth: '220px', borderColor: '#f59e0b' }}
               >
-                <option value="" disabled>-- Pilih Pelamar Untuk Dinilai --</option>
-                {applicants.map(app => (
-                  <option key={app.id} value={app.id}>
-                    {app.nama} ({app.posisi})
-                  </option>
-                ))}
-              </select>
+                <Users size={16} /> Pilih Pelamar Untuk Dinilai
+              </button>
             </div>
           </div>
 
           {/* Table Hasil Penilaian */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1020px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1060px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
-                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Tgl Nilai</th>
-                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Nama Pelamar & Posisi</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Penilai 1 (HRD)</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Penilai 2 (User Divisi)</th>
-                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800 }}>Penilai 3 (Opsional BOD)</th>
-                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center' }}>Rata-Rata</th>
-                  <th style={{ width: '120px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center' }}>Keputusan</th>
-                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center' }}>Aksi</th>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Tgl Nilai</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Posisi</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 1 (HRD)</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 2 (User Divisi)</th>
+                  <th style={{ width: '190px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, whiteSpace: 'nowrap' }}>Penilai 3 (Opsional BOD)</th>
+                  <th style={{ width: '110px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Rata-Rata</th>
+                  <th style={{ width: '170px', minWidth: '170px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Keputusan</th>
+                  <th style={{ width: '120px', padding: '0.9rem', fontSize: '0.8rem', color: '#fbbf24', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -1351,7 +1445,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
                       <Award size={36} color="#f59e0b" style={{ opacity: 0.6, marginBottom: '8px' }} />
                       <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.95rem' }}>Belum ada hasil penilaian</div>
-                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Pilih nama pelamar di menu atas untuk memulai penginputan formulir penilaian.</p>
+                      <p style={{ fontSize: '0.8rem', marginTop: '4px' }}>Klik tombol "Pilih Pelamar Untuk Dinilai" di atas untuk mencari pelamar dan memulai penginputan evaluasi.</p>
                     </td>
                   </tr>
                 ) : (
@@ -1359,7 +1453,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     <tr key={asm.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                       {/* Tgl Nilai */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', whiteSpace: 'nowrap' }}>
                           {formatDisplayDate(asm.tanggalPenilaian)}
                         </div>
                       </td>
@@ -1433,8 +1527,8 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         </span>
                       </td>
 
-                      {/* Keputusan */}
-                      <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
+                      {/* Keputusan (Tidak Terpotong) */}
+                      <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center', width: '170px', minWidth: '170px' }}>
                         <span
                           style={{
                             background: asm.keputusanAkhir === 'Lolos' ? 'rgba(16, 185, 129, 0.15)' :
@@ -1445,14 +1539,15 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                               asm.keputusanAkhir === 'Lolos' ? '#10b981' :
                               asm.keputusanAkhir === 'Dipertimbangkan' ? '#f59e0b' : '#ef4444'
                             }`,
-                            padding: '3px 8px',
+                            padding: '4px 10px',
                             borderRadius: '12px',
-                            fontSize: '0.72rem',
+                            fontSize: '0.74rem',
                             fontWeight: 800,
-                            display: 'inline-block'
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
                           }}
                         >
-                          {asm.keputusanAkhir}
+                          {asm.keputusanAkhir === 'Lolos' ? 'Lolos (Siap Offering)' : asm.keputusanAkhir}
                         </span>
                       </td>
 
@@ -1526,7 +1621,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>
-                Penerbitan Surat Penawaran Kerja (Offering Letter), penetapan tanggal mulai masuk kerja (Jadwal On Duty), dan cetak dokumen resmi.
+                Penerbitan Surat Penawaran Kerja (Offering Letter), penetapan tanggal mulai masuk kerja (Jadwal On Duty), kirim WA ke pelamar, dan cetak dokumen resmi.
               </p>
             </div>
 
@@ -1551,15 +1646,15 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
           {/* Table Offering & On Duty */}
           <div className="table-container" style={{ border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse' }}>
+            <table className="custom-table" style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1.5px solid rgba(16, 185, 129, 0.4)' }}>
-                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>No. Surat & Tgl</th>
-                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Nama Pelamar & Jabatan</th>
-                  <th style={{ width: '160px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Jadwal On Duty</th>
-                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800 }}>Gaji & Tunjangan</th>
-                  <th style={{ width: '140px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center' }}>Status Surat</th>
-                  <th style={{ width: '170px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center' }}>Dokumen & Aksi</th>
+                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>No. Surat & Tgl</th>
+                  <th style={{ minWidth: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Nama Pelamar & Jabatan</th>
+                  <th style={{ width: '160px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Jadwal On Duty</th>
+                  <th style={{ width: '180px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, whiteSpace: 'nowrap' }}>Gaji & Tunjangan</th>
+                  <th style={{ width: '130px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Status Surat</th>
+                  <th style={{ width: '210px', padding: '0.9rem', fontSize: '0.8rem', color: '#34d399', fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap' }}>Dokumen, WA & Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -1579,7 +1674,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94a3b8', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>
                           {off.noSurat}
                         </span>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px', whiteSpace: 'nowrap' }}>
                           Terbit: {formatDisplayDate(off.tanggalOffering)}
                         </div>
                       </td>
@@ -1605,7 +1700,8 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             borderRadius: '8px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            whiteSpace: 'nowrap'
                           }}
                         >
                           <Calendar size={14} color="#10b981" />
@@ -1620,13 +1716,13 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
                       {/* Gaji & Tunjangan */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem' }}>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc' }}>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#f8fafc', whiteSpace: 'nowrap' }}>
                           {formatRupiah(off.gajiPokok)}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px', whiteSpace: 'nowrap' }}>
                           + Tunjangan: {formatRupiah(off.tunjangan)}
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, marginTop: '1px' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700, marginTop: '1px', whiteSpace: 'nowrap' }}>
                           Total: {formatRupiah(Number(off.gajiPokok) + Number(off.tunjangan))}
                         </div>
                       </td>
@@ -1650,21 +1746,44 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                             borderRadius: '12px',
                             fontSize: '0.72rem',
                             fontWeight: 800,
-                            display: 'inline-block'
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
                           }}
                         >
                           {off.statusOffering}
                         </span>
                         {off.batasKonfirmasi && (
-                          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '3px' }}>
+                          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '3px', whiteSpace: 'nowrap' }}>
                             Batas: {formatDisplayDate(off.batasKonfirmasi)}
                           </div>
                         )}
                       </td>
 
-                      {/* Dokumen & Aksi */}
+                      {/* Dokumen, WA & Aksi */}
                       <td style={{ verticalAlign: 'top', padding: '0.85rem', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {/* Tombol Kirim WhatsApp Offering */}
+                          <button
+                            onClick={() => handleSendWhatsAppOffering(off)}
+                            style={{
+                              background: '#25D366',
+                              border: 'none',
+                              color: '#ffffff',
+                              padding: '4px 7px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 5px rgba(37, 211, 102, 0.3)'
+                            }}
+                            title="Kirim Konfirmasi Offering Letter & On Duty via WhatsApp ke Pelamar"
+                          >
+                            <MessageSquare size={12} /> WA
+                          </button>
+
                           <button
                             onClick={() => setViewingOfferingDoc(off)}
                             className="btn btn-sm"
@@ -1678,11 +1797,12 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                               borderRadius: '6px',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '4px'
+                              gap: '4px',
+                              whiteSpace: 'nowrap'
                             }}
                             title="Pratinjau & Cetak Dokumen Offering Letter"
                           >
-                            <FileText size={12} /> Cetak Surat
+                            <FileText size={12} /> Cetak
                           </button>
 
                           <button
@@ -1709,6 +1829,110 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL KHUSUS: PILIH PELAMAR UNTUK DINILAI DENGAN PENCARIAN (SEARCH)   */}
+      {/* ===================================================================== */}
+      {isPickerModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #f59e0b', borderRadius: '16px', width: '100%', maxWidth: '620px', maxHeight: '85vh', overflowY: 'auto', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={18} color="#f59e0b" />
+                <span>Pilih Pelamar Untuk Dinilai</span>
+              </div>
+              <button onClick={() => setIsPickerModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Input Search Box Pelamar */}
+            <div style={{ position: 'relative', marginBottom: '1rem' }}>
+              <Search size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: '#f59e0b' }} />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Cari nama pelamar, posisi, atau proyek..."
+                value={pickerSearch}
+                onChange={(e) => setPickerSearch(e.target.value)}
+                className="form-control"
+                style={{ paddingLeft: '38px', height: '40px', fontSize: '0.85rem', borderColor: '#f59e0b' }}
+              />
+            </div>
+
+            {/* Daftar Nama Pelamar */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '50vh', overflowY: 'auto' }}>
+              {filteredPickerApplicants.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b', fontSize: '0.85rem' }}>
+                  Tidak ada pelamar yang cocok dengan pencarian "{pickerSearch}".
+                </div>
+              ) : (
+                filteredPickerApplicants.map((app) => {
+                  const alreadyAssessed = assessments.some(a => a.applicantId === app.id || a.applicantName === app.nama);
+                  return (
+                    <div
+                      key={app.id}
+                      onClick={() => {
+                        setIsPickerModalOpen(false);
+                        handleOpenAssessmentModal(app);
+                      }}
+                      style={{
+                        padding: '12px 14px',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f59e0b'}
+                      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 800, color: '#ffffff', fontSize: '0.9rem' }}>{app.nama}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#38bdf8', marginTop: '2px' }}>
+                          {app.posisi} • <span style={{ color: '#94a3b8' }}>{app.project}</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {alreadyAssessed ? (
+                          <span style={{ fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '3px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                            ✓ Sudah Dinilai
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.7rem', color: '#fbbf24', background: 'rgba(245, 158, 11, 0.15)', padding: '3px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                            Belum Dinilai
+                          </span>
+                        )}
+                        <button
+                          className="btn btn-primary btn-sm"
+                          style={{
+                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                            border: 'none',
+                            fontWeight: 800,
+                            fontSize: '0.75rem',
+                            padding: '4px 10px'
+                          }}
+                        >
+                          Pilih & Nilai →
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+              <button onClick={() => setIsPickerModalOpen(false)} className="btn btn-secondary btn-sm" style={{ fontSize: '0.8rem' }}>
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -2064,7 +2288,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Nama Penilai:</span>
                     <input
                       type="text"
-                      value={asmForm.penilai1?.nama}
+                      value={asmForm.penilai1?.nama || ''}
                       onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, nama: e.target.value } })}
                       className="form-control"
                       style={{ height: '28px', fontSize: '0.74rem', width: '220px' }}
@@ -2079,8 +2303,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai1?.sikap}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, sikap: Number(e.target.value) } })}
+                      value={asmForm.penilai1?.sikap ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai1: { ...prev.penilai1, sikap: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2091,8 +2318,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai1?.komunikasi}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, komunikasi: Number(e.target.value) } })}
+                      value={asmForm.penilai1?.komunikasi ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai1: { ...prev.penilai1, komunikasi: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2103,8 +2333,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai1?.motivasi}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, motivasi: Number(e.target.value) } })}
+                      value={asmForm.penilai1?.motivasi ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai1: { ...prev.penilai1, motivasi: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2115,8 +2348,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai1?.skor}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, skor: Number(e.target.value) } })}
+                      value={asmForm.penilai1?.skor ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai1: { ...prev.penilai1, skor: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#10b981' }}
                     />
@@ -2127,7 +2363,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   <input
                     type="text"
                     placeholder="Catatan & ulasan HRD mengenai kandidat..."
-                    value={asmForm.penilai1?.catatan}
+                    value={asmForm.penilai1?.catatan || ''}
                     onChange={(e) => setAsmForm({ ...asmForm, penilai1: { ...asmForm.penilai1, catatan: e.target.value } })}
                     className="form-control"
                     style={{ height: '32px', fontSize: '0.76rem' }}
@@ -2155,7 +2391,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Nama Penilai:</span>
                     <input
                       type="text"
-                      value={asmForm.penilai2?.nama}
+                      value={asmForm.penilai2?.nama || ''}
                       onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, nama: e.target.value } })}
                       className="form-control"
                       style={{ height: '28px', fontSize: '0.74rem', width: '220px' }}
@@ -2170,8 +2406,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai2?.kompetensiTeknis}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, kompetensiTeknis: Number(e.target.value) } })}
+                      value={asmForm.penilai2?.kompetensiTeknis ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, kompetensiTeknis: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2182,8 +2421,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai2?.pengalamanKerja}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, pengalamanKerja: Number(e.target.value) } })}
+                      value={asmForm.penilai2?.pengalamanKerja ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, pengalamanKerja: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2194,8 +2436,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai2?.problemSolving}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, problemSolving: Number(e.target.value) } })}
+                      value={asmForm.penilai2?.problemSolving ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, problemSolving: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.82rem' }}
                     />
@@ -2206,8 +2451,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       type="number"
                       min="0"
                       max="100"
-                      value={asmForm.penilai2?.skor}
-                      onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, skor: Number(e.target.value) } })}
+                      value={asmForm.penilai2?.skor ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : Number(e.target.value);
+                        setAsmForm(prev => ({ ...prev, penilai2: { ...prev.penilai2, skor: val } }));
+                      }}
                       className="form-control"
                       style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#38bdf8' }}
                     />
@@ -2218,7 +2466,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   <input
                     type="text"
                     placeholder="Catatan teknis dari kepala divisi terkait..."
-                    value={asmForm.penilai2?.catatan}
+                    value={asmForm.penilai2?.catatan || ''}
                     onChange={(e) => setAsmForm({ ...asmForm, penilai2: { ...asmForm.penilai2, catatan: e.target.value } })}
                     className="form-control"
                     style={{ height: '32px', fontSize: '0.76rem' }}
@@ -2259,7 +2507,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                         <label style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Nama Direksi / BOD</label>
                         <input
                           type="text"
-                          value={asmForm.penilai3?.nama}
+                          value={asmForm.penilai3?.nama || ''}
                           onChange={(e) => setAsmForm({ ...asmForm, penilai3: { ...asmForm.penilai3, nama: e.target.value } })}
                           className="form-control"
                           style={{ height: '32px', fontSize: '0.76rem' }}
@@ -2271,8 +2519,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                           type="number"
                           min="0"
                           max="100"
-                          value={asmForm.penilai3?.kulturKarakter}
-                          onChange={(e) => setAsmForm({ ...asmForm, penilai3: { ...asmForm.penilai3, kulturKarakter: Number(e.target.value) } })}
+                          value={asmForm.penilai3?.kulturKarakter ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? '' : Number(e.target.value);
+                            setAsmForm(prev => ({ ...prev, penilai3: { ...prev.penilai3, kulturKarakter: val } }));
+                          }}
                           className="form-control"
                           style={{ height: '32px', fontSize: '0.82rem' }}
                         />
@@ -2283,8 +2534,11 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                           type="number"
                           min="0"
                           max="100"
-                          value={asmForm.penilai3?.skor}
-                          onChange={(e) => setAsmForm({ ...asmForm, penilai3: { ...asmForm.penilai3, skor: Number(e.target.value) } })}
+                          value={asmForm.penilai3?.skor ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? '' : Number(e.target.value);
+                            setAsmForm(prev => ({ ...prev, penilai3: { ...prev.penilai3, skor: val } }));
+                          }}
                           className="form-control"
                           style={{ height: '32px', fontSize: '0.85rem', fontWeight: 800, borderColor: '#f59e0b' }}
                         />
@@ -2295,7 +2549,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                       <input
                         type="text"
                         placeholder="Arahan / catatan dari direksi..."
-                        value={asmForm.penilai3?.catatan}
+                        value={asmForm.penilai3?.catatan || ''}
                         onChange={(e) => setAsmForm({ ...asmForm, penilai3: { ...asmForm.penilai3, catatan: e.target.value } })}
                         className="form-control"
                         style={{ height: '32px', fontSize: '0.76rem' }}
@@ -2315,7 +2569,7 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                 )}
               </div>
 
-              {/* RANGKUMAN & KEPUTUSAN AKHIR */}
+              {/* RANGKUMAN & KEPUTUSAN AKHIR (LEBAR SELECT DIPERBESAR SEHINGGA TIDAK KEPOTONG) */}
               <div style={{ background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))', border: '1.5px solid #10b981', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ fontWeight: 900, color: '#34d399', fontSize: '0.9rem' }}>
@@ -2329,17 +2583,18 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Keputusan Akhir:</label>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Keputusan Akhir:</label>
                     <select
                       value={asmForm.keputusanAkhir}
                       onChange={(e) => setAsmForm({ ...asmForm, keputusanAkhir: e.target.value })}
                       className="form-control"
                       style={{
-                        height: '34px',
-                        fontSize: '0.82rem',
+                        height: '36px',
+                        fontSize: '0.84rem',
                         fontWeight: 900,
+                        padding: '0 0.65rem',
                         color: asmForm.keputusanAkhir === 'Lolos' ? '#10b981' : asmForm.keputusanAkhir === 'Dipertimbangkan' ? '#f59e0b' : '#ef4444'
                       }}
                     >
@@ -2349,14 +2604,14 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
                     </select>
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Catatan Rekomendasi HR/User:</label>
+                    <label style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Catatan Rekomendasi HR/User:</label>
                     <input
                       type="text"
                       placeholder="Contoh: Diteruskan untuk penerbitan offering letter..."
-                      value={asmForm.catatanAkhir}
+                      value={asmForm.catatanAkhir || ''}
                       onChange={(e) => setAsmForm({ ...asmForm, catatanAkhir: e.target.value })}
                       className="form-control"
-                      style={{ height: '34px', fontSize: '0.78rem' }}
+                      style={{ height: '36px', fontSize: '0.82rem' }}
                     />
                   </div>
                 </div>
