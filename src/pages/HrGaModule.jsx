@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
-import { RecruitmentATSModule } from '../components/RecruitmentATSModule';
+import { RecruitmentModule } from '../components/RecruitmentModule';
 import { ContractApprovalModule } from '../components/ContractApprovalModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
@@ -2164,6 +2164,8 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
             </div>
         )}
       </div>
+      ) : activeTab === 'recruitment' ? (
+        <RecruitmentModule currentUser={currentUser} showNotification={showNotification} />
       ) : (
         /* KONTEN KOSONG UNTUK SEMUA SUB-MODUL LAINNYA (NAVIGASI TETAP LENGKAP) */
         <div className="glass-card" style={{ padding: '4.5rem 2rem', textAlign: 'center', marginBottom: '1.5rem', borderRadius: '12px', border: '1px solid #1e293b' }}>
