@@ -41,6 +41,7 @@ import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 import { RecruitmentModule } from '../components/RecruitmentModule';
 import { ContractApprovalModule } from '../components/ContractApprovalModule';
 import { KontrakKerjaModule } from '../components/KontrakKerjaModule';
+import { GatheringModule } from '../components/GatheringModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -2195,6 +2196,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           setEmployees={setEmployees}
           currentUser={currentUser}
           showNotification={showNotification}
+          onSwitchTab={handleTabChange}
+        />
+      ) : activeTab === 'gathering' ? (
+        <GatheringModule
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onOpenFundRequest={() => setIsFundModalOpen(true)}
           onSwitchTab={handleTabChange}
         />
       ) : (
