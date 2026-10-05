@@ -843,8 +843,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
     namaPenerima: '',
     posPengeluaran: '',
     uraian: '',
-    rencana: 10000000,
-    realisasi: 9500000,
+    rencana: '',
+    realisasi: '',
     status: 'Pending',
     fundRequestId: null,
     kwitansi: '',
@@ -882,8 +882,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       namaPenerima: '',
       posPengeluaran: '',
       uraian: '',
-      rencana: 10000000,
-      realisasi: 9500000,
+      rencana: '',
+      realisasi: '',
       status: 'Pending',
       fundRequestId: null,
       kwitansi: `KW-${Math.floor(10000 + Math.random() * 90000)}.pdf`,
@@ -894,7 +894,11 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
 
   const handleOpenEditBudget = (bdg) => {
     setEditingBudget(bdg);
-    setBudgetForm({ ...bdg });
+    setBudgetForm({
+      ...bdg,
+      rencana: bdg.rencana !== undefined && bdg.rencana !== null ? (bdg.rencana === 0 ? '' : String(bdg.rencana)) : '',
+      realisasi: bdg.realisasi !== undefined && bdg.realisasi !== null ? (bdg.realisasi === 0 ? '' : String(bdg.realisasi)) : ''
+    });
     setIsBudgetModalOpen(true);
   };
 
@@ -909,12 +913,18 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       return;
     }
 
+    const payload = {
+      ...budgetForm,
+      rencana: Number(budgetForm.rencana) || 0,
+      realisasi: Number(budgetForm.realisasi) || 0
+    };
+
     if (editingBudget) {
-      setBudgets(budgets.map(b => b.id === editingBudget.id ? { ...b, ...budgetForm } : b));
+      setBudgets(budgets.map(b => b.id === editingBudget.id ? { ...b, ...payload } : b));
       showNotification && showNotification(`Pos anggaran ${budgetForm.posPengeluaran} berhasil diperbarui!`, 'success');
     } else {
       const newId = `BDG-${String(budgets.length + 1).padStart(3, '0')}`;
-      const newB = { ...budgetForm, id: newId };
+      const newB = { ...payload, id: newId };
       setBudgets([...budgets, newB]);
       showNotification && showNotification(`Pos anggaran ${budgetForm.posPengeluaran} berhasil ditambahkan!`, 'success');
     }
@@ -3356,26 +3366,62 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Rencana Anggaran (Rp) *</label>
+                  <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Rencana Anggaran (Rp) *
+                  </label>
                   <input
                     type="number"
                     required
-                    value={budgetForm.rencana}
-                    onChange={(e) => setBudgetForm({ ...budgetForm, rencana: Number(e.target.value) })}
+                    placeholder="Contoh: 15000000"
+                    value={budgetForm.rencana === 0 || budgetForm.rencana === '0' ? '' : budgetForm.rencana}
+                    onFocus={(e) => {
+                      if (budgetForm.rencana === 0 || budgetForm.rencana === '0' || budgetForm.rencana === '') {
+                        setBudgetForm(prev => ({ ...prev, rencana: '' }));
+                      } else {
+                        e.target.select();
+                      }
+                    }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBudgetForm(prev => ({ ...prev, rencana: val }));
+                    }}
                     className="form-control"
                     style={{ fontSize: '0.84rem', fontWeight: 800 }}
                   />
+                  {budgetForm.rencana !== '' && Number(budgetForm.rencana) > 0 && (
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '3px' }}>
+                      {formatRupiah(Number(budgetForm.rencana))}
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.76rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '4px' }}>Realisasi Pengeluaran (Rp) *</label>
+                  <label style={{ fontSize: '0.76rem', color: '#34d399', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                    Realisasi Pengeluaran (Rp) *
+                  </label>
                   <input
                     type="number"
                     required
-                    value={budgetForm.realisasi}
-                    onChange={(e) => setBudgetForm({ ...budgetForm, realisasi: Number(e.target.value) })}
+                    placeholder="Contoh: 14500000"
+                    value={budgetForm.realisasi === 0 || budgetForm.realisasi === '0' ? '' : budgetForm.realisasi}
+                    onFocus={(e) => {
+                      if (budgetForm.realisasi === 0 || budgetForm.realisasi === '0' || budgetForm.realisasi === '') {
+                        setBudgetForm(prev => ({ ...prev, realisasi: '' }));
+                      } else {
+                        e.target.select();
+                      }
+                    }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBudgetForm(prev => ({ ...prev, realisasi: val }));
+                    }}
                     className="form-control"
                     style={{ fontSize: '0.84rem', fontWeight: 800 }}
                   />
+                  {budgetForm.realisasi !== '' && Number(budgetForm.realisasi) > 0 && (
+                    <div style={{ fontSize: '0.7rem', color: '#34d399', marginTop: '3px' }}>
+                      {formatRupiah(Number(budgetForm.realisasi))}
+                    </div>
+                  )}
                 </div>
               </div>
 
