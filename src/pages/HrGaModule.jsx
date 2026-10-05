@@ -40,6 +40,7 @@ import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
 import { RecruitmentModule } from '../components/RecruitmentModule';
 import { ContractApprovalModule } from '../components/ContractApprovalModule';
+import { KontrakKerjaModule } from '../components/KontrakKerjaModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -2125,6 +2126,28 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
 
                             <button
                               type="button"
+                              onClick={() => handleTabChange('kontrak-kerja')}
+                              style={{
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#34d399',
+                                border: '1px solid #10b981',
+                                padding: '4px 8px',
+                                borderRadius: '5px',
+                                fontWeight: 800,
+                                fontSize: '0.72rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}
+                              title="Buka Dokumen Kontrak & Grafik Kenaikan Gaji"
+                            >
+                              <FileText size={12} />
+                              <span>Kontrak</span>
+                            </button>
+
+                            <button
+                              type="button"
                               onClick={() => handleOpenEdit(item)}
                               style={{
                                 background: '#1e293b',
@@ -2165,7 +2188,15 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         )}
       </div>
       ) : activeTab === 'recruitment' ? (
-        <RecruitmentModule currentUser={currentUser} showNotification={showNotification} />
+        <RecruitmentModule currentUser={currentUser} showNotification={showNotification} onSwitchTab={handleTabChange} />
+      ) : activeTab === 'kontrak-kerja' ? (
+        <KontrakKerjaModule
+          employees={employees}
+          setEmployees={setEmployees}
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onSwitchTab={handleTabChange}
+        />
       ) : (
         /* KONTEN KOSONG UNTUK SEMUA SUB-MODUL LAINNYA (NAVIGASI TETAP LENGKAP) */
         <div className="glass-card" style={{ padding: '4.5rem 2rem', textAlign: 'center', marginBottom: '1.5rem', borderRadius: '12px', border: '1px solid #1e293b' }}>

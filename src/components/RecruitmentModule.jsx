@@ -259,7 +259,7 @@ const INITIAL_OFFERINGS = [
   }
 ];
 
-export const RecruitmentModule = ({ currentUser, showNotification }) => {
+export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }) => {
   // Sub-Tab Navigation (4 Sub-Modul Permintaan User - Tanpa Angka Badge)
   const [activeSubTab, setActiveSubTab] = useState('cv-pelamar');
 
@@ -945,6 +945,127 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
     }
   };
 
+  const handleIssueContractFromOffering = (off) => {
+    try {
+      const STORAGE_CONTRACTS = 'ams_hr_kontrak_kerja_v1';
+      const STORAGE_EMPLOYEES = 'ams_hr_database_karyawan_v5';
+      const STORAGE_SALARY = 'ams_hr_salary_history_v1';
+
+      // 1. Ambil kontrak yang ada
+      let currentContracts = [];
+      try {
+        const cStr = localStorage.getItem(STORAGE_CONTRACTS);
+        currentContracts = cStr ? JSON.parse(cStr) : [];
+      } catch {}
+
+      const nextNum = currentContracts.length + 1;
+      const ctrId = `CTR-${new Date().getFullYear()}-${String(nextNum).padStart(3, '0')}`;
+      const docType = (off.statusKerja || '').includes('PKWTT') ? 'PKWTT' : ((off.statusKerja || '').includes('LOI') ? 'LOI' : 'PKWT');
+
+      const existingCtr = currentContracts.find(c => c.employeeId === off.applicantId || c.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+
+      if (!existingCtr) {
+        const newContract = {
+          id: ctrId,
+          noDok: `${String(nextNum).padStart(3, '0')}/${docType}/HR-AMS/${new Date().getFullYear()}`,
+          employeeId: off.applicantId || `APP-${Date.now()}`,
+          nama: off.applicantName,
+          nik: `320101${Date.now().toString().slice(-10)}`,
+          jabatan: off.posisi,
+          penempatan: off.penempatan,
+          jenisDokumen: docType,
+          tanggalMulai: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+          tanggalBerakhir: docType === 'PKWTT' ? '2099-12-31' : new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+          gajiPokok: Number(off.gajiPokok) || 6500000,
+          tunjangan: Number(off.tunjangan) || 1500000,
+          statusKontrak: 'Aktif',
+          catatan: `Kontrak kerja diterbitkan otomatis dari Rekrutmen surat offering ${off.noSurat}`,
+          files: [{ name: `${docType}_${(off.applicantName || 'karyawan').replace(/\s+/g, '_')}.pdf`, size: '1.2 MB' }]
+        };
+        currentContracts = [newContract, ...currentContracts];
+        localStorage.setItem(STORAGE_CONTRACTS, JSON.stringify(currentContracts));
+      }
+
+      // 2. Sinkron ke Database Karyawan
+      let currentEmployees = [];
+      try {
+        const eStr = localStorage.getItem(STORAGE_EMPLOYEES);
+        currentEmployees = eStr ? JSON.parse(eStr) : [];
+      } catch {}
+
+      const empExists = currentEmployees.some(e => e.id === off.applicantId || e.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+      if (!empExists) {
+        const newEmpId = `EMP-${String(currentEmployees.length + 1).padStart(3, '0')}`;
+        const newEmp = {
+          id: newEmpId,
+          noDok: `AMS-${new Date().getFullYear()}-${String(currentEmployees.length + 1).padStart(3, '0')}`,
+          nama: off.applicantName,
+          nik: `320101${Date.now().toString().slice(-10)}`,
+          npwp: '00.000.000.0-000.000',
+          noRekening: 'BCA (Payroll)',
+          alamat: 'Bogor, Jawa Barat',
+          noHp: '0812-0000-0000',
+          phone: '0812-0000-0000',
+          jabatan: off.posisi,
+          penempatan: off.penempatan,
+          status: docType === 'PKWTT' ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
+          tanggalMasuk: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+          tanggalDok: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+          project: off.penempatan,
+          kategori: docType === 'PKWTT' ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
+          catatan: `Karyawan Resmi Masuk dari Rekrutmen (Offering: ${off.noSurat})`,
+          files: []
+        };
+        currentEmployees = [newEmp, ...currentEmployees];
+        localStorage.setItem(STORAGE_EMPLOYEES, JSON.stringify(currentEmployees));
+      }
+
+      // 3. Sinkron ke Riwayat Gaji
+      let currentSalaries = [];
+      try {
+        const sStr = localStorage.getItem(STORAGE_SALARY);
+        currentSalaries = sStr ? JSON.parse(sStr) : [];
+      } catch {}
+
+      const salExists = currentSalaries.some(s => s.employeeId === off.applicantId || s.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+      if (!salExists) {
+        const newSal = {
+          employeeId: off.applicantId || ctrId,
+          nama: off.applicantName,
+          jabatan: off.posisi,
+          penempatan: off.penempatan,
+          gajiAwal: Number(off.gajiPokok) || 6500000,
+          gajiSaatIni: Number(off.gajiPokok) || 6500000,
+          history: [
+            {
+              bulan: new Date(off.jadwalOnDuty || Date.now()).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }),
+              tanggal: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+              nominal: Number(off.gajiPokok) || 6500000,
+              kategori: `Gaji Awal (${docType})`,
+              catatan: `Penetapan starting salary rekrutmen surat ${off.noSurat}`
+            }
+          ]
+        };
+        currentSalaries = [newSal, ...currentSalaries];
+        localStorage.setItem(STORAGE_SALARY, JSON.stringify(currentSalaries));
+      }
+
+      // Update status offering menjadi Diterima jika sebelumnya belum
+      setOfferings(prev => prev.map(o => o.id === off.id ? { ...o, statusOffering: 'Diterima' } : o));
+
+      showNotification && showNotification(
+        `Kontrak kerja untuk ${off.applicantName} berhasil disiapkan & otomatis terdaftar di Database Karyawan serta Riwayat Gaji!`,
+        'success'
+      );
+
+      if (onSwitchTab) {
+        setTimeout(() => onSwitchTab('kontrak-kerja'), 400);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // 1. Filtered applicants (Sub-Modul 1)
   const filteredApplicants = useMemo(() => {
     return applicants.filter(app => {
@@ -1517,7 +1638,7 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
                         <div style={{ fontSize: '0.8rem', color: '#f8fafc', fontWeight: 600 }}>{intw.metode}</div>
                         {intw.lokasiLink && (
                           <div style={{ fontSize: '0.73rem', color: '#94a3b8', marginTop: '2px', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px' }}>
-                            📍 {intw.lokasiLink}
+                            {intw.lokasiLink}
                           </div>
                         )}
                       </td>
@@ -2134,6 +2255,28 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
                             title="Kirim Konfirmasi Offering Letter & On Duty via WhatsApp ke Pelamar"
                           >
                             <MessageSquare size={12} /> WA
+                          </button>
+
+                          {/* Tombol Terbitkan / Buka Kontrak Kerja */}
+                          <button
+                            onClick={() => handleIssueContractFromOffering(off)}
+                            style={{
+                              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                              border: 'none',
+                              color: '#ffffff',
+                              padding: '4px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 5px rgba(16, 185, 129, 0.35)'
+                            }}
+                            title="Terbitkan Kontrak Kerja Resmi & Sinkronkan ke Database Karyawan serta Riwayat Gaji"
+                          >
+                            <FileText size={12} /> Kontrak
                           </button>
 
                           <button
