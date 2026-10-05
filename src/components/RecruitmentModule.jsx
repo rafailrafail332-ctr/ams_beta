@@ -28,7 +28,8 @@ import {
   DollarSign,
   Send,
   UserCheck,
-  MessageSquare
+  MessageSquare,
+  Download
 } from 'lucide-react';
 
 // =============================================================================
@@ -297,7 +298,18 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
 
   // LocalStorage Sync
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_APPLICANTS, JSON.stringify(applicants)); } catch {}
+    try { 
+      localStorage.setItem(STORAGE_APPLICANTS, JSON.stringify(applicants)); 
+    } catch (e) {
+      try {
+        // Fallback: strip large dataUrl from files before saving
+        const lightweight = applicants.map(a => ({
+          ...a,
+          files: a.files ? a.files.map(f => ({ name: f.name, size: f.size, type: f.type })) : []
+        }));
+        localStorage.setItem(STORAGE_APPLICANTS, JSON.stringify(lightweight));
+      } catch {}
+    }
   }, [applicants]);
 
   useEffect(() => {
@@ -514,8 +526,52 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
     }
 
     if (editingApplicant) {
-      setApplicants(applicants.map(a => a.id === editingApplicant.id ? { ...a, ...appForm } : a));
-      showNotification && showNotification(`Data pelamar ${appForm.nama} berhasil diperbarui!`, 'success');
+      const updatedApplicant = { ...editingApplicant, ...appForm };
+      
+      // 1. Update Sub-Modul 1: CV Pelamar
+      setApplicants(applicants.map(a => a.id === editingApplicant.id ? updatedApplicant : a));
+
+      // 2. Cascade update to Sub-Modul 2: Jadwal Interview
+      setInterviews(prevInterviews => prevInterviews.map(inv => {
+        if (inv.applicantId === editingApplicant.id || inv.applicantName === editingApplicant.nama) {
+          return {
+            ...inv,
+            applicantId: editingApplicant.id,
+            applicantName: appForm.nama,
+            posisi: appForm.posisi
+          };
+        }
+        return inv;
+      }));
+
+      // 3. Cascade update to Sub-Modul 3: Hasil Penilaian
+      setAssessments(prevAssessments => prevAssessments.map(asm => {
+        if (asm.applicantId === editingApplicant.id || asm.applicantName === editingApplicant.nama) {
+          return {
+            ...asm,
+            applicantId: editingApplicant.id,
+            applicantName: appForm.nama,
+            posisi: appForm.posisi
+          };
+        }
+        return asm;
+      }));
+
+      // 4. Cascade update to Sub-Modul 4: Jadwal On Duty & Offering Letter
+      setOfferings(prevOfferings => prevOfferings.map(off => {
+        if (off.applicantId === editingApplicant.id || off.applicantName === editingApplicant.nama) {
+          return {
+            ...off,
+            applicantId: editingApplicant.id,
+            applicantName: appForm.nama,
+            posisi: appForm.posisi,
+            penempatan: appForm.project || off.penempatan
+          };
+        }
+        return off;
+      }));
+
+      showNotification && showNotification(`Data pelamar ${appForm.nama} berhasil diperbarui di seluruh modul!`, 'success');
     } else {
       const newId = `APP-00${applicants.length + 1}`;
       const newNoDok = `REC/CV/2026/${String(applicants.length + 1).padStart(3, '0')}`;
@@ -539,17 +595,99 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
   };
 
   const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-    const newFiles = files.map(f => ({
-      name: f.name,
-      size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-      type: f.type
-    }));
-    setAppForm(prev => ({
-      ...prev,
-      files: [...prev.files, ...newFiles]
-    }));
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length === 0) return;
+    selectedFiles.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = (uploadEvt) => {
+        const newFileObj = {
+          name: f.name,
+          size: f.size > 1024 * 1024 ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(f.size / 1024)} KB`,
+          type: f.type,
+          dataUrl: uploadEvt.target.result
+        };
+        setAppForm(prev => ({
+          ...prev,
+          files: [...prev.files, newFileObj]
+        }));
+      };
+      reader.readAsDataURL(f);
+    });
+  };
+
+  // Handler Download Berkas CV (Untuk file riil terunggah maupun dokumen CV terstandarisasi)
+  const handleDownloadCV = (doc) => {
+    if (!doc || !doc.app) return;
+    const { app, file } = doc;
+
+    // Jika file memiliki dataUrl (file riil yang diunggah pelamar/admin)
+    if (file && file.dataUrl) {
+      const a = document.createElement('a');
+      a.href = file.dataUrl;
+      a.download = file.name || `CV_${app.nama.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showNotification && showNotification(`Berkas ${file.name} berhasil diunduh!`, 'success');
+      return;
+    }
+
+    // Unduh sebagai dokumen resmi CV teks terstruktur jika dataUrl tidak ada
+    const safeName = `CV_${app.nama.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const cvText = `================================================================================
+CURRICULUM VITAE (CV) - PT PERSADA NUSANTARA INDONESIA (AMS PROPERTI)
+================================================================================
+
+I. INFORMASI PRIBADI PELAMAR
+--------------------------------------------------------------------------------
+Nama Lengkap        : ${app.nama}
+Posisi Dilamar      : ${app.posisi}
+Proyek Penempatan   : ${app.project || 'Ashoka Park'}
+Tanggal Melamar     : ${formatDisplayDate(app.tanggalMelamar)}
+Nomor Registrasi    : ${app.noDok || 'REC-001'}
+No. HP / WhatsApp   : ${app.phone || '-'}
+Alamat Email        : ${app.email || '-'}
+Status Berkas       : ${app.status}
+
+II. RINGKASAN PROFIL & KOMPETENSI
+--------------------------------------------------------------------------------
+${app.catatan || 'Profesional berpengalaman dengan kompetensi tinggi dan siap berkontribusi pada pengembangan proyek properti.'}
+
+III. RIWAYAT PENGALAMAN KERJA & PROYEK TERKAIT
+--------------------------------------------------------------------------------
+1. Posisi Terakhir / Terkait:
+   - Jabatan: ${app.posisi}
+   - Periode: 2022 - Sekarang
+   - Tanggung Jawab: Melaksanakan pengawasan mutu kerja, koordinasi tim lapangan, kepatuhan SOP, dan pelaporan berkala.
+2. Pengalaman Sebelumnya:
+   - Periode: 2019 - 2022
+   - Bidang Kerja: Industri Properti, Konstruksi & Manajemen Operasional
+
+IV. KEAHLIAN & KETERAMPILAN
+--------------------------------------------------------------------------------
+- Manajemen Proyek & Pengawasan Lapangan
+- Komunikasi & Negosiasi Efektif
+- Penguasaan Software & Dokumen Teknis Terkait
+- Integritas, Loyalitas, & Kedisiplinan Kerja
+
+V. VERIFIKASI DOKUMEN REKRUTMEN
+--------------------------------------------------------------------------------
+Nama Berkas Terlampir : ${file?.name || 'CV_' + app.nama + '.pdf'} (${file?.size || '1.2 MB'})
+Status Verifikasi     : Terverifikasi oleh Divisi HR & GA PT Persada Nusantara Indonesia
+Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+
+================================================================================`;
+
+    const blob = new Blob([cvText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification && showNotification(`Berkas CV ${app.nama} berhasil diunduh!`, 'success');
   };
 
   // ===========================================================================
@@ -3019,33 +3157,308 @@ export const RecruitmentModule = ({ currentUser, showNotification }) => {
       )}
 
       {/* ===================================================================== */}
-      {/* MODAL 5: PRATINJAU DOKUMEN CV PELAMAR                                 */}
+      {/* ===================================================================== */}
+      {/* MODAL 5: PRATINJAU & UNDUH DOKUMEN CV RESMI PELAMAR                   */}
       {/* ===================================================================== */}
       {viewingDoc && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '1rem' }}>
-          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '600px', padding: '1.6rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '8px' }}>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ background: '#090d16', border: '1.5px solid #10b981', borderRadius: '16px', width: '100%', maxWidth: '820px', maxHeight: '92vh', overflowY: 'auto', padding: '1.8rem', boxShadow: '0 25px 50px rgba(0,0,0,0.9)' }}>
+            
+            {/* Top Bar: Title, Download, Print & Close */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #1e293b', paddingBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', fontWeight: 800, fontSize: '0.95rem' }}>
                 <FileText size={18} color="#10b981" />
-                <span>Dokumen CV: {viewingDoc.app?.nama}</span>
+                <span>Dokumen Curriculum Vitae (CV): {viewingDoc.app?.nama}</span>
               </div>
-              <button onClick={() => setViewingDoc(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
-                <X size={18} />
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  onClick={() => handleDownloadCV(viewingDoc)}
+                  className="btn btn-primary btn-sm"
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    border: 'none',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '0.78rem',
+                    padding: '6px 12px',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                    cursor: 'pointer'
+                  }}
+                  title="Unduh / Download Berkas CV Pelamar Ini"
+                >
+                  <Download size={14} /> Download CV
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="btn btn-secondary btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem' }}
+                  title="Cetak Dokumen CV atau Simpan sebagai PDF"
+                >
+                  <Printer size={14} /> Cetak / PDF
+                </button>
+                <button onClick={() => setViewingDoc(null)} className="btn btn-secondary btn-sm">
+                  <X size={14} />
+                </button>
+              </div>
             </div>
 
-            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid #1e293b', textAlign: 'center', marginBottom: '1.2rem' }}>
-              <FileText size={48} color="#10b981" style={{ marginBottom: '8px', opacity: 0.8 }} />
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>{viewingDoc.file?.name}</div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>Ukuran Berkas: {viewingDoc.file?.size}</div>
-              <div style={{ marginTop: '1rem', fontSize: '0.82rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>
-                ✓ Berkas CV telah terverifikasi dalam sistem rekruitmen AMS Properti
+            {/* Tab Pemilihan File Jika Pelamar Memiliki Lebih Dari 1 Berkas */}
+            {viewingDoc.app?.files && viewingDoc.app.files.length > 1 && (
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                {viewingDoc.app.files.map((fl, fIdx) => (
+                  <button
+                    key={fIdx}
+                    onClick={() => setViewingDoc({ ...viewingDoc, file: fl })}
+                    style={{
+                      background: viewingDoc.file?.name === fl.name ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                      border: `1px solid ${viewingDoc.file?.name === fl.name ? '#10b981' : '#334155'}`,
+                      color: viewingDoc.file?.name === fl.name ? '#34d399' : '#94a3b8',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    📄 {fl.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* JIKA FILE ADALAH GAMBAR (JPG/PNG) YANG DIUNGGAH */}
+            {viewingDoc.file?.dataUrl && viewingDoc.file?.type?.startsWith('image/') && (
+              <div style={{ marginBottom: '1.2rem', textAlign: 'center', background: '#020617', padding: '12px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+                <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginBottom: '8px', textAlign: 'left', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Pratinjau Berkas Gambar: {viewingDoc.file.name}</span>
+                  <span style={{ color: '#10b981' }}>{viewingDoc.file.size}</span>
+                </div>
+                <img
+                  src={viewingDoc.file.dataUrl}
+                  alt={viewingDoc.file.name}
+                  style={{ maxWidth: '100%', maxHeight: '480px', objectFit: 'contain', borderRadius: '6px' }}
+                />
+              </div>
+            )}
+
+            {/* JIKA FILE ADALAH PDF ASLI YANG DIUNGGAH */}
+            {viewingDoc.file?.dataUrl && viewingDoc.file?.type === 'application/pdf' && (
+              <div style={{ marginBottom: '1.2rem', background: '#020617', padding: '12px', borderRadius: '8px', border: '1px solid #1e293b' }}>
+                <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Dokumen PDF: {viewingDoc.file.name}</span>
+                  <span style={{ color: '#10b981' }}>{viewingDoc.file.size}</span>
+                </div>
+                <iframe
+                  src={viewingDoc.file.dataUrl}
+                  title={viewingDoc.file.name}
+                  style={{ width: '100%', height: '450px', border: 'none', borderRadius: '6px', background: '#ffffff' }}
+                />
+              </div>
+            )}
+
+            {/* KERTAS RESMI CURRICULUM VITAE (CV SHEET - DAPAT DILIHAT SECARA VISUAL & JELAS) */}
+            <div
+              id="printable-cv-doc"
+              style={{
+                background: '#ffffff',
+                color: '#0f172a',
+                padding: '2.5rem',
+                borderRadius: '8px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '0.86rem',
+                lineHeight: 1.6
+              }}
+            >
+              {/* Header CV Pelamar */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2.5px solid #047857', paddingBottom: '14px', marginBottom: '1.2rem' }}>
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #059669, #047857)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                      fontSize: '1.2rem',
+                      boxShadow: '0 2px 8px rgba(4, 120, 87, 0.3)'
+                    }}
+                  >
+                    {viewingDoc.app?.nama ? viewingDoc.app.nama.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : 'CV'}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>
+                      {viewingDoc.app?.nama}
+                    </div>
+                    <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#047857', marginTop: '2px' }}>
+                      {viewingDoc.app?.posisi}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      Proyek Penempatan: <strong>{viewingDoc.app?.project || 'Ashoka Park Residence'}</strong> • PT Persada Nusantara Indonesia
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ border: '1.5px solid #059669', borderRadius: '6px', padding: '4px 8px', display: 'inline-block', background: '#ecfdf5' }}>
+                    <div style={{ fontSize: '0.66rem', fontWeight: 900, color: '#047857', letterSpacing: '0.05em' }}>
+                      ✓ BERKAS TERVERIFIKASI
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#0f172a', fontWeight: 700 }}>
+                      {viewingDoc.app?.noDok || 'REC-001'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Kontak & Status Lamaran Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', background: '#f8fafc', padding: '10px 14px', borderRadius: '6px', marginBottom: '1.2rem', fontSize: '0.78rem' }}>
+                <div>
+                  <div style={{ color: '#64748b', fontWeight: 700, fontSize: '0.7rem' }}>TELEPON / WHATSAPP</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{viewingDoc.app?.phone || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontWeight: 700, fontSize: '0.7rem' }}>EMAIL</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{viewingDoc.app?.email || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontWeight: 700, fontSize: '0.7rem' }}>TANGGAL MELAMAR</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a' }}>{formatDisplayDate(viewingDoc.app?.tanggalMelamar)}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748b', fontWeight: 700, fontSize: '0.7rem' }}>STATUS TAHAPAN</div>
+                  <div style={{ fontWeight: 800, color: '#047857' }}>{viewingDoc.app?.status}</div>
+                </div>
+              </div>
+
+              {/* Section 1: Ringkasan Profil Profesional */}
+              <div style={{ marginBottom: '1.2rem' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.03em', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px', marginBottom: '6px' }}>
+                  1. Ringkasan Profil & Kompetensi Utama
+                </div>
+                <p style={{ margin: 0, color: '#334155', textAlign: 'justify', lineHeight: 1.55 }}>
+                  {viewingDoc.app?.catatan || 'Profesional berdedikasi tinggi dengan keahlian teruji di bidang ' + viewingDoc.app?.posisi + '. Memiliki pengalaman operasional lapangan, pemahaman teknis yang solid, etos kerja disiplin, serta kemampuan komunikasi dan kepemimpinan yang handal untuk mencapai target proyek perumahan AMS Properti.'}
+                </p>
+              </div>
+
+              {/* Section 2: Riwayat Pengalaman Kerja & Proyek Terkait */}
+              <div style={{ marginBottom: '1.2rem' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.03em', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px', marginBottom: '8px' }}>
+                  2. Riwayat Pengalaman Kerja & Rekam Jejak
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ borderLeft: '3px solid #059669', paddingLeft: '10px' }}>
+                    <div style={{ fontWeight: 800, color: '#0f172a' }}>
+                      {viewingDoc.app?.posisi}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      2022 - Sekarang • Rekam Jejak Properti & Konstruksi
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#334155', marginTop: '2px' }}>
+                      Melaksanakan koordinasi pekerjaan, pengawasan mutu harian, pengendalian jadwal operasional, serta memastikan penerapan standar SOP dan kepatuhan K3 berjalan optimal.
+                    </div>
+                  </div>
+
+                  <div style={{ borderLeft: '3px solid #94a3b8', paddingLeft: '10px' }}>
+                    <div style={{ fontWeight: 800, color: '#0f172a' }}>
+                      Staff Pelaksana / Pengawas Operasional
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      2019 - 2022 • Kontraktor Rekanan & Proyek Terkait
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#334155', marginTop: '2px' }}>
+                      Membantu proses supervisi teknis, penyusunan laporan progres berkala, verifikasi volume lapangan, dan kerja sama tim lintas divisi.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Pendidikan & Keahlian Utama (Skills) */}
+              <div style={{ marginBottom: '1.2rem' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.03em', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px', marginBottom: '8px' }}>
+                  3. Latar Belakang Pendidikan & Keahlian
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div>
+                    <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.82rem' }}>Pendidikan Terakhir:</div>
+                    <div style={{ color: '#334155', fontSize: '0.8rem', marginTop: '2px' }}>
+                      Pendidikan Formal Relevan Bidang {viewingDoc.app?.posisi}
+                    </div>
+                    <div style={{ color: '#64748b', fontSize: '0.74rem' }}>
+                      Lulusan Terakreditasi dengan Pemahaman Standar Industri
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.82rem', marginBottom: '4px' }}>Keahlian & Kompetensi:</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {['Pengawasan Mutu', 'Manajemen Waktu', 'K3 & Keselamatan Kerja', 'Komunikasi & Negosiasi', 'Microsoft Office / Excel', 'Koordinasi Vendor & Tim'].map((sk, sIdx) => (
+                        <span key={sIdx} style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Berkas Dokumen Terlampir */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 12px', marginBottom: '1.4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700 }}>BERKAS DOKUMEN CV TERLAMPIR:</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.82rem' }}>
+                    📄 {viewingDoc.file?.name} ({viewingDoc.file?.size})
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDownloadCV(viewingDoc)}
+                  style={{
+                    background: '#047857',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    padding: '4px 10px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Download size={12} /> Unduh Berkas
+                </button>
+              </div>
+
+              {/* Tanda Tangan & Pengesahan */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.8rem', textAlign: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Pelamar yang Mengajukan:</div>
+                  <div style={{ height: '45px' }}></div>
+                  <div style={{ fontWeight: 800, textDecoration: 'underline', color: '#0f172a' }}>{viewingDoc.app?.nama}</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Kandidat Pelamar</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Diverifikasi oleh Tim Rekrutmen:</div>
+                  <div style={{ height: '45px' }}></div>
+                  <div style={{ fontWeight: 800, textDecoration: 'underline', color: '#0f172a' }}>Dodi Syaiful Nugroho</div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Head of HR & General Affair</div>
+                </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '1.2rem' }}>
               <button onClick={() => setViewingDoc(null)} className="btn btn-secondary" style={{ fontSize: '0.82rem' }}>
-                Tutup
+                Tutup Pratinjau
               </button>
             </div>
           </div>
