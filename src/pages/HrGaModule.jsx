@@ -45,6 +45,7 @@ import { GatheringModule } from '../components/GatheringModule';
 import { AssetManagementModule } from '../components/AssetManagementModule';
 import { MaintenanceModule } from '../components/MaintenanceModule';
 import { FacilityModule } from '../components/FacilityModule';
+import { AttendanceModule } from '../components/AttendanceModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -2225,6 +2226,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           currentUser={currentUser}
           showNotification={showNotification}
           onSwitchTab={handleTabChange}
+        />
+      ) : activeTab === 'absensi' ? (
+        <AttendanceModule
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onSwitchTab={handleTabChange}
+          employees={employees}
         />
       ) : (
         /* KONTEN KOSONG UNTUK SEMUA SUB-MODUL LAINNYA (NAVIGASI TETAP LENGKAP) */
