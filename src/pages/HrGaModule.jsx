@@ -44,6 +44,7 @@ import { KontrakKerjaModule } from '../components/KontrakKerjaModule';
 import { GatheringModule } from '../components/GatheringModule';
 import { AssetManagementModule } from '../components/AssetManagementModule';
 import { MaintenanceModule } from '../components/MaintenanceModule';
+import { FacilityModule } from '../components/FacilityModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -2215,6 +2216,12 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         />
       ) : activeTab === 'maintanance' || activeTab === 'maintenance' ? (
         <MaintenanceModule
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onSwitchTab={handleTabChange}
+        />
+      ) : activeTab === 'fasilitas' ? (
+        <FacilityModule
           currentUser={currentUser}
           showNotification={showNotification}
           onSwitchTab={handleTabChange}
