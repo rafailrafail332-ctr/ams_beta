@@ -48,6 +48,7 @@ import { FacilityModule } from '../components/FacilityModule';
 import { AttendanceModule } from '../components/AttendanceModule';
 import { SecurityModule } from '../components/SecurityModule';
 import { CleaningModule } from '../components/CleaningModule';
+import { KpiModule } from '../components/KpiModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -2245,6 +2246,13 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
         />
       ) : activeTab === 'kebersihan' ? (
         <CleaningModule
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onSwitchTab={handleTabChange}
+          employees={employees}
+        />
+      ) : activeTab === 'kpi' ? (
+        <KpiModule
           currentUser={currentUser}
           showNotification={showNotification}
           onSwitchTab={handleTabChange}
