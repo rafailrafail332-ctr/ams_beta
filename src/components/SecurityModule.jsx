@@ -33,17 +33,45 @@ import {
   ArrowRight,
   Sparkles,
   Lock,
-  Camera
+  Camera,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Image as ImageIcon
 } from 'lucide-react';
 
 // =============================================================================
-// STORAGE KEYS & SEED DATA KEAMANAN
+// STORAGE KEYS & HELPER SVG PHOTO GENERATOR
 // =============================================================================
-const STORAGE_SECURITY_SHIFTS_KEY = 'ams_hr_security_shifts_v2';
-const STORAGE_SECURITY_VISITORS_KEY = 'ams_hr_security_visitors_v2';
-const STORAGE_SECURITY_MATERIALS_KEY = 'ams_hr_security_materials_v2';
-const STORAGE_SECURITY_PATROLS_KEY = 'ams_hr_security_patrols_v2';
+const STORAGE_SECURITY_SHIFTS_KEY = 'ams_hr_security_shifts_v3';
+const STORAGE_SECURITY_VISITORS_KEY = 'ams_hr_security_visitors_v3';
+const STORAGE_SECURITY_MATERIALS_KEY = 'ams_hr_security_materials_v3';
+const STORAGE_SECURITY_PATROLS_KEY = 'ams_hr_security_patrols_v3';
 
+// Helper membuat foto SVG beresolusi tinggi untuk demo dan pratinjau instan
+const makeSvgPhoto = (title, subtitle, accent = '#10b981') => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+    <defs>
+      <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#090d16"/>
+        <stop offset="100%" stop-color="#0f172a"/>
+      </linearGradient>
+    </defs>
+    <rect width="800" height="500" fill="url(#bg)"/>
+    <rect x="24" y="24" width="752" height="452" rx="16" fill="none" stroke="${accent}" stroke-width="2" stroke-dasharray="6,4" opacity="0.6"/>
+    <circle cx="400" cy="180" r="54" fill="${accent}" fill-opacity="0.12" stroke="${accent}" stroke-width="2"/>
+    <path d="M375 180h50M400 155v50" stroke="${accent}" stroke-width="3" stroke-linecap="round"/>
+    <text x="400" y="280" font-family="system-ui, sans-serif" font-size="24" font-weight="800" fill="#f8fafc" text-anchor="middle">${title}</text>
+    <text x="400" y="318" font-family="system-ui, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle">${subtitle}</text>
+    <rect x="260" y="360" width="280" height="36" rx="18" fill="${accent}" fill-opacity="0.2" stroke="${accent}" stroke-width="1"/>
+    <text x="400" y="383" font-family="system-ui, sans-serif" font-size="13" font-weight="800" fill="${accent}" text-anchor="middle">AMS SECURITY CAMERA RECORD</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+// =============================================================================
+// SEED DATA 4 SUB-MODUL LENGKAP DENGAN MULTI-FOTO
+// =============================================================================
 // 1. SEED BUKU MUTASI SHIFT JAGA
 const INITIAL_SHIFTS = [
   {
@@ -60,9 +88,19 @@ const INITIAL_SHIFTS = [
     tamuCount: 14,
     trukCount: 6,
     catatan: 'Serah terima tugas berjalan lancar. Pintu portal utama ditutup separuh saat hujan sore hari.',
-    lampiran: 'Buku_Mutasi_Satpam_Siang.pdf',
-    lampiranFile: null,
-    status: 'Selesai Bertugas'
+    status: 'Selesai Bertugas',
+    photos: [
+      {
+        name: 'Foto_Apel_Serah_Terima.jpg',
+        caption: 'Apel Serah Terima Tugas Shift Siang di Depan Pos Utama',
+        url: makeSvgPhoto('Apel Serah Terima Shift', 'Danru Hartono & Personil Jaga', '#10b981')
+      },
+      {
+        name: 'Pemeriksaan_HT_Inventaris.jpg',
+        caption: 'Pemeriksaan Kondisi Radio HT & Senter Jaga',
+        url: makeSvgPhoto('Pemeriksaan Inventaris Pos', 'Radio HT 3 Unit & Senter Charger', '#38bdf8')
+      }
+    ]
   },
   {
     id: 'SHF-2026-002',
@@ -78,9 +116,14 @@ const INITIAL_SHIFTS = [
     tamuCount: 2,
     trukCount: 0,
     catatan: 'Patroli berkala setiap 2 jam keliling kavling blok A & B, gudang material aman terkunci.',
-    lampiran: 'Buku_Mutasi_Satpam_Malam.pdf',
-    lampiranFile: null,
-    status: 'Sedang Bertugas'
+    status: 'Sedang Bertugas',
+    photos: [
+      {
+        name: 'Situasi_Malam_Gerbang.jpg',
+        caption: 'Situasi Penerangan Gerbang Utama Malam Hari',
+        url: makeSvgPhoto('Situasi Gerbang Malam', 'Portal Tertutup Siaga Pemeriksaan', '#fbbf24')
+      }
+    ]
   },
   {
     id: 'SHF-2026-003',
@@ -96,9 +139,14 @@ const INITIAL_SHIFTS = [
     tamuCount: 8,
     trukCount: 3,
     catatan: 'Kunjungan calon konsumen cluster sore hari 3 rombongan diantar tim marketing.',
-    lampiran: 'Logbook_Pos_Ashoka_View.pdf',
-    lampiranFile: null,
-    status: 'Selesai Bertugas'
+    status: 'Selesai Bertugas',
+    photos: [
+      {
+        name: 'Pos_Jaga_Ashoka_View.jpg',
+        caption: 'Pos Jaga Depan Lahan Proyek Ashoka View Cidokom',
+        url: makeSvgPhoto('Pos Lapangan Ashoka View', 'Supardi & Rahmat Hidayat Jaga Siang', '#10b981')
+      }
+    ]
   }
 ];
 
@@ -119,7 +167,24 @@ const INITIAL_VISITORS = [
     keperluan: 'Cek Rumah Contoh Tipe 36/72 Blok B-05 & Simulasi KPR Bank BTN',
     status: 'Selesai Keluar',
     petugasPenerima: 'Hartono (Danru)',
-    catatan: 'Sudah diantar keliling rumah contoh dengan mobil golf/berjalan kaki.'
+    catatan: 'Sudah diantar keliling rumah contoh dengan mobil golf/berjalan kaki.',
+    photos: [
+      {
+        name: 'Foto_Tamu_Gerbang.jpg',
+        caption: 'Kunjungan Bpk. Hendra Gunawan di Pos Gerbang Utama',
+        url: makeSvgPhoto('Foto Tamu di Gerbang', 'Bpk. Hendra Gunawan & Keluarga', '#38bdf8')
+      },
+      {
+        name: 'Foto_Plat_Innova_Zenix.jpg',
+        caption: 'Dokumentasi Kendaraan Plat Nomor B 1928 KFA',
+        url: makeSvgPhoto('Plat Nomor B 1928 KFA', 'Toyota Innova Zenix Putih', '#10b981')
+      },
+      {
+        name: 'Foto_Survey_Rumah_Contoh.jpg',
+        caption: 'Konsumen Menuju Rumah Contoh Tipe 36/72 Blok B-05',
+        url: makeSvgPhoto('Survey Rumah Contoh', 'Didampingi Marketing Fresda', '#fbbf24')
+      }
+    ]
   },
   {
     id: 'VIS-2026-002',
@@ -136,7 +201,19 @@ const INITIAL_VISITORS = [
     keperluan: 'Penilaian Fisik Bangunan & Lingkungan Berkas Akad Konsumen Blok A-08',
     status: 'Selesai Keluar',
     petugasPenerima: 'Agus Suhendra',
-    catatan: 'Pengambilan foto fasad depan, row jalan utama, dan saluran drainase.'
+    catatan: 'Pengambilan foto fasad depan, row jalan utama, dan saluran drainase.',
+    photos: [
+      {
+        name: 'Foto_Surveyor_Bank_BTN.jpg',
+        caption: 'Surveyor KPR Bank BTN Memeriksa Bangunan',
+        url: makeSvgPhoto('Surveyor Bank BTN', 'Bpk. Adi Saputra - Appraisal Blok A-08', '#38bdf8')
+      },
+      {
+        name: 'Foto_Kendaraan_Surveyor.jpg',
+        caption: 'Kendaraan Honda HR-V Plat B 2210 SJK',
+        url: makeSvgPhoto('Plat Nomor B 2210 SJK', 'Honda HR-V Hitam Surveyor', '#10b981')
+      }
+    ]
   },
   {
     id: 'VIS-2026-003',
@@ -153,7 +230,14 @@ const INITIAL_VISITORS = [
     keperluan: 'Penyerahan Salinan Akta Jual Beli (AJB) & Validasi Pajak BPHTB',
     status: 'Sedang di Lokasi',
     petugasPenerima: 'Hartono (Danru)',
-    catatan: 'Tamu sedang berada di ruang rapat Legal lantai 1 Marketing Gallery.'
+    catatan: 'Tamu sedang berada di ruang rapat Legal lantai 1 Marketing Gallery.',
+    photos: [
+      {
+        name: 'Foto_Staf_Notaris.jpg',
+        caption: 'Penyerahan Dokumen AJB Notaris di Pos Gerbang',
+        url: makeSvgPhoto('Tamu Notaris PPAT', 'Ibu Ratna Dewi, S.H Menyerahkan Berkas', '#a855f7')
+      }
+    ]
   },
   {
     id: 'VIS-2026-004',
@@ -170,7 +254,14 @@ const INITIAL_VISITORS = [
     keperluan: 'Inspeksi Kepadatan Tanah & Tes Sondir Lereng Blok Belakang View',
     status: 'Selesai Keluar',
     petugasPenerima: 'Supardi',
-    catatan: 'Pengambilan sampel tanah di kavling 15-20 selesai aman.'
+    catatan: 'Pengambilan sampel tanah di kavling 15-20 selesai aman.',
+    photos: [
+      {
+        name: 'Foto_Konsultan_Tanah.jpg',
+        caption: 'Konsultan Struktur Tiba di Pos Lapangan View',
+        url: makeSvgPhoto('Konsultan Struktur', 'Bpk. Ir. Bambang Soediro', '#10b981')
+      }
+    ]
   }
 ];
 
@@ -192,9 +283,24 @@ const INITIAL_MATERIALS = [
     penerima: 'Mandor Subur & QC Fajar Logistik',
     petugasSatpam: 'Hartono (Danru)',
     status: 'Selesai Bongkar & Keluar',
-    lampiran: 'Surat_Jalan_Adhimix_K250.pdf',
-    lampiranFile: null,
-    catatan: 'Slump test 12±2 cm sesuai spek teknik. Bongkar lancar tidak ada tumpahan di boulevard.'
+    catatan: 'Slump test 12±2 cm sesuai spek teknik. Bongkar lancar tidak ada tumpahan di jalan.',
+    photos: [
+      {
+        name: 'Foto_Truk_Molen_Gerbang.jpg',
+        caption: 'Truk Molen Hino Dutro B 9104 TYX di Portal Masuk',
+        url: makeSvgPhoto('Truk Molen Ready Mix', 'PT Adhimix Precast B 9104 TYX', '#fbbf24')
+      },
+      {
+        name: 'Surat_Jalan_Adhimix.jpg',
+        caption: 'Surat Jalan Resmi No. SJ-ADH-2026-8819 Volume 7 m³',
+        url: makeSvgPhoto('Surat Jalan Ready Mix', 'Volume 7 m3 - Cor Dak Blok A-12', '#10b981')
+      },
+      {
+        name: 'Foto_Bongkar_Cor_Kavling.jpg',
+        caption: 'Proses Pengecoran Dak Lantai 2 Didampingi Mandor Subur',
+        url: makeSvgPhoto('Proses Bongkar Beton', 'Mandor Subur & Tim Lapangan', '#38bdf8')
+      }
+    ]
   },
   {
     id: 'MAT-2026-002',
@@ -212,16 +318,26 @@ const INITIAL_MATERIALS = [
     penerima: 'Mandor Subur',
     petugasSatpam: 'Agus Suhendra',
     status: 'Selesai Bongkar & Keluar',
-    lampiran: 'Surat_Jalan_Pasir_Bangka.pdf',
-    lampiranFile: null,
-    catatan: 'Pasir bersih tidak berlumpur, sudah di-cek mandor dan diarahkan ke stok cadangan.'
+    catatan: 'Pasir bersih tidak berlumpur, sudah di-cek mandor dan diarahkan ke stok cadangan.',
+    photos: [
+      {
+        name: 'Foto_Dumptruk_Pasir.jpg',
+        caption: 'Dumptruk Pasir Bangka F 8820 FG Tiba di Gerbang',
+        url: makeSvgPhoto('Truk Pasir Bangka 8 m3', 'TB Sinar Terang F 8820 FG', '#fbbf24')
+      },
+      {
+        name: 'Foto_Surat_Jalan_Pasir.jpg',
+        caption: 'Surat Jalan DO Pasir Bangka Terstempel Satpam',
+        url: makeSvgPhoto('Surat Jalan Pasir', 'Penerima: Mandor Subur', '#10b981')
+      }
+    ]
   },
   {
     id: 'MAT-2026-003',
     noDok: 'MAT/AMS-GT/2026/1006-03',
     tanggal: '2026-10-06',
     jamMasuk: '13:00 WIB',
-    jamKeluar: '14:20 WIB',
+    jamKeluar: '-',
     proyek: 'Ashoka Park',
     namaVendor: 'PT Powerblock Indonesia',
     noSuratJalan: 'PBI-SJ-2026-0941',
@@ -231,10 +347,15 @@ const INITIAL_MATERIALS = [
     lokasiBongkar: 'Depan Kavling Blok B-03 & B-04',
     penerima: 'Fajar (Logistik GA)',
     petugasSatpam: 'Hartono (Danru)',
-    status: 'Selesai Bongkar & Keluar',
-    lampiran: 'DO_Hebel_Powerblock.pdf',
-    lampiranFile: null,
-    catatan: 'Kondisi bata utuh, tingkat patahan < 1%. Surat jalan sudah ditandatangani dan distempel satpam.'
+    status: 'Sedang Bongkar',
+    catatan: 'Kondisi bata utuh, tingkat patahan < 1%. Sedang proses bongkar pallet di kavling.',
+    photos: [
+      {
+        name: 'Foto_Truk_Hebel.jpg',
+        caption: 'Truk Engkel Fuso B 9482 KDA Muatan 12 Pallet Hebel',
+        url: makeSvgPhoto('Truk Bata Ringan Hebel', 'PT Powerblock B 9482 KDA', '#fbbf24')
+      }
+    ]
   },
   {
     id: 'MAT-2026-004',
@@ -252,9 +373,14 @@ const INITIAL_MATERIALS = [
     penerima: 'Mandor Kholidin',
     petugasSatpam: 'Supardi',
     status: 'Selesai Bongkar & Keluar',
-    lampiran: 'Surat_Jalan_Besi_Beton.pdf',
-    lampiranFile: null,
-    catatan: 'Penghitungan fisik bersama mandor lengkap 350 batang, disimpan di rak besi bertutup terpal.'
+    catatan: 'Penghitungan fisik bersama mandor lengkap 350 batang, disimpan di rak besi bertutup terpal.',
+    photos: [
+      {
+        name: 'Foto_Truk_Besi.jpg',
+        caption: 'Truk Tronton Isuzu Giga Muatan Besi Beton SNI',
+        url: makeSvgPhoto('Truk Besi Beton SNI', 'PT Master Steel B 9031 TY', '#fbbf24')
+      }
+    ]
   }
 ];
 
@@ -271,8 +397,25 @@ const INITIAL_PATROLS = [
     kondisiLampu: 'PJU Menyala Normal 18 Titik',
     kondisiPagar: 'Pagar Keliling Aman, Gembok Gudang Semen Terkunci',
     statusKawasan: 'Aman Kondusif',
+    status: 'Verified Patrol',
     catatan: 'Genset dan panel PLN terkunci rapat. Tidak ditemukan aktivitas orang asing mencurigakan.',
-    status: 'Verified Patrol'
+    photos: [
+      {
+        name: 'Patroli_PJU_BlokA.jpg',
+        caption: 'Pemeriksaan Lampu PJU Blok A Menyala Terang',
+        url: makeSvgPhoto('PJU Menyala Normal', 'Pemeriksaan PJU Jalan Boulevard', '#10b981')
+      },
+      {
+        name: 'Pemeriksaan_Gudang_Semen.jpg',
+        caption: 'Gembok Gudang Semen & Material Terkunci Rapat',
+        url: makeSvgPhoto('Gudang Semen Terkunci', 'Gembok Master Gudang Utuh', '#38bdf8')
+      },
+      {
+        name: 'Pagar_Perimeter_Belakang.jpg',
+        caption: 'Batas Perimeter Lahan Belakang Aman Terkendali',
+        url: makeSvgPhoto('Pagar Perimeter Belakang', 'Kondisi Aman Tanpa Aktivitas Asing', '#a855f7')
+      }
+    ]
   },
   {
     id: 'PTR-2026-002',
@@ -285,8 +428,15 @@ const INITIAL_PATROLS = [
     kondisiLampu: 'Lampu Gallery & Taman Menyala Terang',
     kondisiPagar: 'Pagar Seng Batas Lahan Belakang Utuh & Terkunci',
     statusKawasan: 'Aman Kondusif',
+    status: 'Verified Patrol',
     catatan: 'Cuaca gerimis ringan, air saluran mengalir lancar tidak ada sumbatan.',
-    status: 'Verified Patrol'
+    photos: [
+      {
+        name: 'Gallery_Malam_Hari.jpg',
+        caption: 'Marketing Gallery & Showroom Maket Terkunci Rapat',
+        url: makeSvgPhoto('Marketing Gallery Aman', 'Pintu Kaca Utama Terkunci Rapat', '#10b981')
+      }
+    ]
   },
   {
     id: 'PTR-2026-003',
@@ -299,8 +449,15 @@ const INITIAL_PATROLS = [
     kondisiLampu: 'Lampu PJU Dipadamkan Otomatis Jam 05:30',
     kondisiPagar: 'Pintu Portal Utama Dibuka Bertahap',
     statusKawasan: 'Aman Kondusif',
+    status: 'Verified Patrol',
     catatan: 'Pekerja proyek mulai bangun beraktivitas normal. Situasi terkendali siap serah terima.',
-    status: 'Verified Patrol'
+    photos: [
+      {
+        name: 'Pagi_Gerbang_Utama.jpg',
+        caption: 'Pintu Portal Dibuka Siap Menyambut Pekerja & Konsumen',
+        url: makeSvgPhoto('Gerbang Siap Buka Pagi', 'Danru Hartono & Agus Suhendra', '#10b981')
+      }
+    ]
   },
   {
     id: 'PTR-2026-004',
@@ -313,8 +470,15 @@ const INITIAL_PATROLS = [
     kondisiLampu: 'Sorot LED 100W Pos Jaga Menyala Normal',
     kondisiPagar: 'Portal Besi Dirantai Gembok Master',
     statusKawasan: 'Aman Kondusif',
+    status: 'Verified Patrol',
     catatan: 'Pengecekan armada pick-up operasional terparkir rapi di dekat pos jaga.',
-    status: 'Verified Patrol'
+    photos: [
+      {
+        name: 'Patroli_Lahan_View.jpg',
+        caption: 'Pengecekan Armada Operasional & Portal Depan View',
+        url: makeSvgPhoto('Portal Depan Ashoka View', 'Supardi & Rahmat Hidayat Kontrol 23:30', '#10b981')
+      }
+    ]
   }
 ];
 
@@ -325,7 +489,7 @@ export const SecurityModule = ({
   employees
 }) => {
   // ---------------------------------------------------------------------------
-  // 1. STATE MANAGEMENT SUB-TABS
+  // 1. STATE MANAGEMENT
   // ---------------------------------------------------------------------------
   // Sub-tabs: 'mutasi-shift' | 'buku-tamu' | 'truk-material' | 'patroli-insiden'
   const [activeSubTab, setActiveSubTab] = useState('mutasi-shift');
@@ -394,9 +558,8 @@ export const SecurityModule = ({
   const [startDate, setStartDate] = useState('2026-10-01');
   const [endDate, setEndDate] = useState('2026-10-31');
   const [projectFilter, setProjectFilter] = useState('ALL');
-  const [statusFilter, setStatusFilter] = useState('ALL');
 
-  // Modals
+  // Modals Form
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [isVisitorModalOpen, setIsVisitorModalOpen] = useState(false);
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
@@ -404,8 +567,22 @@ export const SecurityModule = ({
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
-  // File Upload Ref
-  const fileUploadRef = useRef(null);
+  // Modal Gallery Photo Slider (Carousel)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryPhotos, setGalleryPhotos] = useState([]);
+  const [galleryTitle, setGalleryTitle] = useState('');
+  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+
+  // Modal Detail View
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [detailItem, setDetailItem] = useState(null);
+  const [detailType, setDetailType] = useState('shift'); // 'shift', 'visitor', 'material', 'patrol'
+
+  // Ref Input File Upload untuk masing-masing form
+  const shiftFileRef = useRef(null);
+  const visitorFileRef = useRef(null);
+  const materialFileRef = useRef(null);
+  const patrolFileRef = useRef(null);
 
   // Form States
   const [shiftForm, setShiftForm] = useState({
@@ -418,8 +595,8 @@ export const SecurityModule = ({
     kondisi: 'Aman & Kondusif',
     inventarisPos: 'HT 3 Unit, Senter 2 Unit, Rompi 4, Kunci Portal',
     catatan: '',
-    lampiran: '',
-    lampiranFile: null
+    status: 'Sedang Bertugas',
+    photos: []
   });
 
   const [visitorForm, setVisitorForm] = useState({
@@ -435,7 +612,8 @@ export const SecurityModule = ({
     keperluan: '',
     status: 'Sedang di Lokasi',
     petugasPenerima: 'Hartono (Danru)',
-    catatan: ''
+    catatan: '',
+    photos: []
   });
 
   const [materialForm, setMaterialForm] = useState({
@@ -453,8 +631,7 @@ export const SecurityModule = ({
     petugasSatpam: 'Hartono (Danru)',
     status: 'Sedang Bongkar',
     catatan: '',
-    lampiran: '',
-    lampiranFile: null
+    photos: []
   });
 
   const [patrolForm, setPatrolForm] = useState({
@@ -466,7 +643,9 @@ export const SecurityModule = ({
     kondisiLampu: 'PJU Menyala Terang',
     kondisiPagar: 'Pagar Keliling Aman Terkunci',
     statusKawasan: 'Aman Kondusif',
-    catatan: ''
+    status: 'Verified Patrol',
+    catatan: '',
+    photos: []
   });
 
   // Helper Format Tanggal
@@ -481,7 +660,6 @@ export const SecurityModule = ({
     }
   };
 
-  // Helper Normalisasi Tanggal ke YYYY-MM-DD
   const normalizeDate = (dVal) => {
     if (!dVal) return '';
     if (typeof dVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dVal)) return dVal;
@@ -497,10 +675,25 @@ export const SecurityModule = ({
     }
   };
 
+  // Keyboard Navigation untuk Photo Gallery Slider
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isGalleryOpen || galleryPhotos.length <= 1) return;
+      if (e.key === 'ArrowLeft') {
+        setActivePhotoIdx(prev => (prev > 0 ? prev - 1 : galleryPhotos.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        setActivePhotoIdx(prev => (prev < galleryPhotos.length - 1 ? prev + 1 : 0));
+      } else if (e.key === 'Escape') {
+        setIsGalleryOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryOpen, galleryPhotos]);
+
   // ---------------------------------------------------------------------------
   // 2. FILTERED DATASETS
   // ---------------------------------------------------------------------------
-  // Filtered Shifts
   const filteredShifts = useMemo(() => {
     return shifts.filter(item => {
       const q = searchTerm.toLowerCase();
@@ -528,7 +721,6 @@ export const SecurityModule = ({
     });
   }, [shifts, searchTerm, startDate, endDate, projectFilter]);
 
-  // Filtered Visitors
   const filteredVisitors = useMemo(() => {
     return visitors.filter(item => {
       const q = searchTerm.toLowerCase();
@@ -557,7 +749,6 @@ export const SecurityModule = ({
     });
   }, [visitors, searchTerm, startDate, endDate, projectFilter]);
 
-  // Filtered Materials
   const filteredMaterials = useMemo(() => {
     return materials.filter(item => {
       const q = searchTerm.toLowerCase();
@@ -586,7 +777,6 @@ export const SecurityModule = ({
     });
   }, [materials, searchTerm, startDate, endDate, projectFilter]);
 
-  // Filtered Patrols
   const filteredPatrols = useMemo(() => {
     return patrols.filter(item => {
       const q = searchTerm.toLowerCase();
@@ -613,9 +803,7 @@ export const SecurityModule = ({
     });
   }, [patrols, searchTerm, startDate, endDate, projectFilter]);
 
-  // ---------------------------------------------------------------------------
-  // 3. TOP KPI CARDS
-  // ---------------------------------------------------------------------------
+  // Top KPI Stats
   const metrics = useMemo(() => {
     const totalShifts = shifts.length;
     const totalVisitors = visitors.length;
@@ -633,33 +821,94 @@ export const SecurityModule = ({
   }, [shifts, visitors, materials, patrols]);
 
   // ---------------------------------------------------------------------------
-  // 4. ACTION HANDLERS
+  // 3. ACTION HANDLERS & STATUS TOGGLES
   // ---------------------------------------------------------------------------
   const handleResetFilter = () => {
     setSearchTerm('');
     setStartDate('2026-10-01');
     setEndDate('2026-10-31');
     setProjectFilter('ALL');
-    setStatusFilter('ALL');
     showNotification && showNotification('Filter tanggal dan kriteria pos keamanan telah di-reset.', 'info');
   };
 
-  // Check-out visitor cepat
-  const handleCheckOutVisitor = (id) => {
-    const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-    setVisitors(prev =>
-      prev.map(v => (v.id === id ? { ...v, status: 'Selesai Keluar', jamKeluar: timeNow } : v))
-    );
-    showNotification && showNotification('Tamu berhasil di-checkout keluar gerbang.', 'success');
+  // Buka Galeri Slider
+  const openGallery = (photos, title) => {
+    if (!photos || photos.length === 0) {
+      showNotification && showNotification('Belum ada foto dokumentasi yang diunggah untuk data ini.', 'info');
+      return;
+    }
+    setGalleryPhotos(photos);
+    setGalleryTitle(title || 'Dokumentasi Pos Keamanan');
+    setActivePhotoIdx(0);
+    setIsGalleryOpen(true);
   };
 
-  // Check-out material truk cepat
-  const handleCheckOutMaterial = (id) => {
+  // Buka Detail Lengkap
+  const openDetail = (item, type) => {
+    setDetailItem(item);
+    setDetailType(type);
+    setIsDetailModalOpen(true);
+  };
+
+  // Toggle Status Cepat (Buku Mutasi)
+  const toggleShiftStatus = (id) => {
+    setShifts(prev =>
+      prev.map(s => {
+        if (s.id === id) {
+          const nextStatus = s.status === 'Sedang Bertugas' ? 'Selesai Bertugas' : 'Sedang Bertugas';
+          showNotification && showNotification(`Status shift diubah menjadi: ${nextStatus}`, 'success');
+          return { ...s, status: nextStatus };
+        }
+        return s;
+      })
+    );
+  };
+
+  // Toggle Status Cepat (Buku Tamu)
+  const toggleVisitorStatus = (id) => {
+    const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    setVisitors(prev =>
+      prev.map(v => {
+        if (v.id === id) {
+          const nextStatus = v.status === 'Sedang di Lokasi' ? 'Selesai Keluar' : 'Sedang di Lokasi';
+          const nextJamKeluar = nextStatus === 'Selesai Keluar' ? timeNow : '-';
+          showNotification && showNotification(`Status tamu diubah menjadi: ${nextStatus}`, 'success');
+          return { ...v, status: nextStatus, jamKeluar: nextJamKeluar };
+        }
+        return v;
+      })
+    );
+  };
+
+  // Toggle Status Cepat (Truk Material)
+  const toggleMaterialStatus = (id) => {
     const timeNow = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     setMaterials(prev =>
-      prev.map(m => (m.id === id ? { ...m, status: 'Selesai Bongkar & Keluar', jamKeluar: timeNow } : m))
+      prev.map(m => {
+        if (m.id === id) {
+          let nextStatus = 'Selesai Bongkar & Keluar';
+          if (m.status === 'Selesai Bongkar & Keluar') nextStatus = 'Sedang Bongkar';
+          const nextJamKeluar = nextStatus === 'Selesai Bongkar & Keluar' ? timeNow : '-';
+          showNotification && showNotification(`Status truk material diubah menjadi: ${nextStatus}`, 'success');
+          return { ...m, status: nextStatus, jamKeluar: nextJamKeluar };
+        }
+        return m;
+      })
     );
-    showNotification && showNotification('Truk material selesai bongkar dan keluar gerbang.', 'success');
+  };
+
+  // Toggle Status Cepat (Patroli)
+  const togglePatrolStatus = (id) => {
+    setPatrols(prev =>
+      prev.map(p => {
+        if (p.id === id) {
+          const nextStatus = p.status === 'Verified Patrol' ? 'Perlu Tindak Lanjut' : 'Verified Patrol';
+          showNotification && showNotification(`Status patroli diubah menjadi: ${nextStatus}`, 'info');
+          return { ...p, status: nextStatus };
+        }
+        return p;
+      })
+    );
   };
 
   // Delete Handlers
@@ -672,6 +921,37 @@ export const SecurityModule = ({
     showNotification && showNotification('Catatan keamanan berhasil dihapus.', 'info');
   };
 
+  // Handle Upload Foto ke Form (Multiple)
+  const handlePhotosUpload = (e, setFormCallback) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        const photoObj = {
+          name: file.name,
+          caption: file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+          url: loadEvt.target.result,
+          size: file.size / 1024 < 1000 ? `${Math.round(file.size / 1024)} KB` : `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        };
+        setFormCallback(prev => ({
+          ...prev,
+          photos: [...(prev.photos || []), photoObj]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+    showNotification && showNotification(`${files.length} foto berhasil ditambahkan ke formulir!`, 'success');
+  };
+
+  const removePhotoFromForm = (idx, setFormCallback) => {
+    setFormCallback(prev => ({
+      ...prev,
+      photos: (prev.photos || []).filter((_, i) => i !== idx)
+    }));
+  };
+
   // Submit Shift
   const handleSubmitShift = (e) => {
     e.preventDefault();
@@ -679,15 +959,14 @@ export const SecurityModule = ({
       setShifts(prev =>
         prev.map(x => (x.id === editingItem.id ? { ...x, ...shiftForm } : x))
       );
-      showNotification && showNotification('Laporan mutasi shift berhasil diperbarui!', 'success');
+      showNotification && showNotification('Buku mutasi shift jaga berhasil diperbarui!', 'success');
     } else {
       const newShift = {
         id: `SHF-${Date.now()}`,
         noDok: `SEC/AMS-POS/2026/${new Date().getMonth() + 1}${new Date().getDate()}-${Math.floor(10 + Math.random() * 90)}`,
         ...shiftForm,
         tamuCount: 0,
-        trukCount: 0,
-        status: 'Sedang Bertugas'
+        trukCount: 0
       };
       setShifts([newShift, ...shifts]);
       showNotification && showNotification('Buku mutasi shift jaga berhasil dicatat!', 'success');
@@ -758,8 +1037,7 @@ export const SecurityModule = ({
       const newPtr = {
         id: `PTR-${Date.now()}`,
         noDok: `PTR/AMS-SEC/2026/${new Date().getMonth() + 1}${new Date().getDate()}-${Math.floor(10 + Math.random() * 90)}`,
-        ...patrolForm,
-        status: 'Verified Patrol'
+        ...patrolForm
       };
       setPatrols([newPtr, ...patrols]);
       showNotification && showNotification('Checklist patroli keliling berhasil disimpan!', 'success');
@@ -768,7 +1046,7 @@ export const SecurityModule = ({
     setEditingItem(null);
   };
 
-  // Export ke Excel berdasarkan Tab Aktif
+  // Export Excel
   const handleExportExcel = () => {
     try {
       let dataToExport = [];
@@ -787,6 +1065,7 @@ export const SecurityModule = ({
           'Kondisi Keamanan': s.kondisi,
           'Inventaris Pos': s.inventarisPos,
           'Catatan Kejadian': s.catatan,
+          'Jumlah Foto': (s.photos || []).length,
           'Status': s.status
         }));
         filename = 'AMS_Buku_Mutasi_Satpam.xlsx';
@@ -805,6 +1084,7 @@ export const SecurityModule = ({
           'Tujuan Bertemu': v.tujuanBertemu,
           'Keperluan': v.keperluan,
           'Status Kunjungan': v.status,
+          'Jumlah Foto': (v.photos || []).length,
           'Petugas Penerima': v.petugasPenerima
         }));
         filename = 'AMS_Buku_Tamu_Konsumen.xlsx';
@@ -823,7 +1103,8 @@ export const SecurityModule = ({
           'No Plat Truk': m.noPlat,
           'Lokasi Bongkar': m.lokasiBongkar,
           'Penerima Lapangan': m.penerima,
-          'Status': m.status
+          'Status': m.status,
+          'Jumlah Foto': (m.photos || []).length
         }));
         filename = 'AMS_Kontrol_Truk_Material.xlsx';
       } else {
@@ -838,6 +1119,8 @@ export const SecurityModule = ({
           'Kondisi PJU': p.kondisiLampu,
           'Pagar Perimeter': p.kondisiPagar,
           'Status Kawasan': p.statusKawasan,
+          'Status': p.status,
+          'Jumlah Foto': (p.photos || []).length,
           'Catatan': p.catatan
         }));
         filename = 'AMS_Patroli_Keamanan.xlsx';
@@ -855,7 +1138,7 @@ export const SecurityModule = ({
   };
 
   // ---------------------------------------------------------------------------
-  // 5. RENDER UTAMA
+  // 4. RENDER UTAMA
   // ---------------------------------------------------------------------------
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -898,7 +1181,7 @@ export const SecurityModule = ({
                 Modul Keamanan & Pos Satpam Kawasan
               </h2>
               <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>
-                Manajemen buku mutasi shift satpam, pencatatan tamu & konsumen, kontrol armada truk material, dan patroli malam keliling kawasan.
+                Manajemen buku mutasi shift satpam, buku tamu, kontrol truk material, dan patroli malam (lengkap dengan upload & geser foto).
               </p>
             </div>
           </div>
@@ -920,8 +1203,8 @@ export const SecurityModule = ({
                   kondisi: 'Aman & Kondusif',
                   inventarisPos: 'HT 3 Unit, Senter 2 Unit, Rompi 4, Kunci Portal',
                   catatan: '',
-                  lampiran: '',
-                  lampiranFile: null
+                  status: 'Sedang Bertugas',
+                  photos: []
                 });
                 setIsShiftModalOpen(true);
               }}
@@ -960,7 +1243,8 @@ export const SecurityModule = ({
                   keperluan: '',
                   status: 'Sedang di Lokasi',
                   petugasPenerima: 'Hartono (Danru)',
-                  catatan: ''
+                  catatan: '',
+                  photos: []
                 });
                 setIsVisitorModalOpen(true);
               }}
@@ -978,7 +1262,7 @@ export const SecurityModule = ({
                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
               }}
             >
-              <Plus size={15} /> Catat Tamu Masuk
+              <Plus size={15} /> Catat Tamu & Konsumen
             </button>
           )}
 
@@ -1001,8 +1285,7 @@ export const SecurityModule = ({
                   petugasSatpam: 'Hartono (Danru)',
                   status: 'Sedang Bongkar',
                   catatan: '',
-                  lampiran: '',
-                  lampiranFile: null
+                  photos: []
                 });
                 setIsMaterialModalOpen(true);
               }}
@@ -1037,7 +1320,9 @@ export const SecurityModule = ({
                   kondisiLampu: 'PJU Menyala Terang',
                   kondisiPagar: 'Pagar Keliling Aman Terkunci',
                   statusKawasan: 'Aman Kondusif',
-                  catatan: ''
+                  status: 'Verified Patrol',
+                  catatan: '',
+                  photos: []
                 });
                 setIsPatrolModalOpen(true);
               }}
@@ -1111,7 +1396,6 @@ export const SecurityModule = ({
           gap: '12px'
         }}
       >
-        {/* Card 1: Mutasi Shift */}
         <div
           className="glass-card"
           style={{
@@ -1135,24 +1419,11 @@ export const SecurityModule = ({
               <ShieldCheck size={12} /> Serah Terima Terdata
             </div>
           </div>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.25)',
-              color: '#10b981',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Shield size={20} />
           </div>
         </div>
 
-        {/* Card 2: Tamu Masuk */}
         <div
           className="glass-card"
           style={{
@@ -1176,24 +1447,11 @@ export const SecurityModule = ({
               <Users size={12} /> {metrics.activeVisitors} Sedang di Lokasi
             </div>
           </div>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(56, 189, 248, 0.12)',
-              border: '1px solid rgba(56, 189, 248, 0.25)',
-              color: '#38bdf8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.25)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Users size={20} />
           </div>
         </div>
 
-        {/* Card 3: Truk Material */}
         <div
           className="glass-card"
           style={{
@@ -1217,24 +1475,11 @@ export const SecurityModule = ({
               <Truck size={12} /> Surat Jalan Diverifikasi
             </div>
           </div>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(251, 191, 36, 0.12)',
-              border: '1px solid rgba(251, 191, 36, 0.25)',
-              color: '#fbbf24',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(251, 191, 36, 0.12)', border: '1px solid rgba(251, 191, 36, 0.25)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Truck size={20} />
           </div>
         </div>
 
-        {/* Card 4: Status Patroli Kawasan */}
         <div
           className="glass-card"
           style={{
@@ -1258,19 +1503,7 @@ export const SecurityModule = ({
               <Radio size={12} /> 100% Kondusif & Terkendali
             </div>
           </div>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(52, 211, 153, 0.12)',
-              border: '1px solid rgba(52, 211, 153, 0.25)',
-              color: '#34d399',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.25)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Radio size={20} />
           </div>
         </div>
@@ -1434,7 +1667,7 @@ export const SecurityModule = ({
       </div>
 
       {/* ------------------------------------------------------------------- */}
-      {/* FILTER BAR TERPADU DENGAN FILTER TANGGAL LENGKAP                    */}
+      {/* FILTER BAR TERPADU                                                  */}
       {/* ------------------------------------------------------------------- */}
       <div
         className="glass-card"
@@ -1476,7 +1709,6 @@ export const SecurityModule = ({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'center' }}>
-          {/* Search */}
           <div>
             <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Pencarian Cepat</label>
             <div style={{ position: 'relative' }}>
@@ -1499,7 +1731,6 @@ export const SecurityModule = ({
             </div>
           </div>
 
-          {/* Dari Tanggal */}
           <div>
             <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Dari Tanggal</label>
             <input
@@ -1518,7 +1749,6 @@ export const SecurityModule = ({
             />
           </div>
 
-          {/* Sampai Tanggal */}
           <div>
             <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Sampai Tanggal</label>
             <input
@@ -1537,7 +1767,6 @@ export const SecurityModule = ({
             />
           </div>
 
-          {/* Proyek */}
           <div>
             <label style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '3px' }}>Titik Proyek</label>
             <select
@@ -1566,32 +1795,14 @@ export const SecurityModule = ({
       {/* KONTEN TAB 1: BUKU MUTASI & SHIFT JAGA                              */}
       {/* ------------------------------------------------------------------- */}
       {activeSubTab === 'mutasi-shift' && (
-        <div
-          className="glass-card"
-          style={{
-            borderRadius: '14px',
-            border: '1px solid #1e293b',
-            background: 'rgba(15, 23, 42, 0.75)',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              padding: '1rem 1.4rem',
-              borderBottom: '1px solid #1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}
-          >
+        <div className="glass-card" style={{ borderRadius: '14px', border: '1px solid #1e293b', background: 'rgba(15, 23, 42, 0.75)', overflow: 'hidden' }}>
+          <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>
                 Buku Mutasi & Serah Terima Tugas Jaga Satpam
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Laporan pergantian shift, personil regu, checklist perlengkapan pos, dan situasi keamanan lapangan.
+                Laporan pergantian shift, personil regu, checklist inventaris pos, dan foto serah terima tugas.
               </div>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
@@ -1607,9 +1818,9 @@ export const SecurityModule = ({
                   <th style={{ padding: '10px 14px' }}>Tanggal & Shift</th>
                   <th style={{ padding: '10px 14px' }}>Pos & Proyek</th>
                   <th style={{ padding: '10px 14px' }}>Danru & Personil</th>
-                  <th style={{ padding: '10px 14px' }}>Inventaris Pos</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Dokumentasi Foto</th>
                   <th style={{ padding: '10px 14px' }}>Situasi & Catatan</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status Shift</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
@@ -1621,99 +1832,114 @@ export const SecurityModule = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredShifts.map((shift, idx) => (
-                    <tr
-                      key={shift.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)'
-                      }}
-                    >
-                      <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc' }}>{shift.shift}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                          {formatDisplayDate(shift.tanggal)} &bull; {shift.noDok}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 700, color: '#cbd5e1' }}>{shift.posJaga}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
-                          <MapPin size={11} /> {shift.proyek}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#34d399' }}>{shift.danru}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{shift.personil}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>{shift.inventarisPos}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
-                          Lalu-lintas: {shift.tamuCount || 0} Tamu, {shift.trukCount || 0} Truk
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', maxWidth: '280px' }}>
-                        <div
-                          style={{
-                            display: 'inline-block',
-                            padding: '2px 7px',
-                            borderRadius: '5px',
-                            background: 'rgba(16, 185, 129, 0.12)',
-                            color: '#34d399',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            marginBottom: '4px'
-                          }}
-                        >
-                          {shift.kondisi}
-                        </div>
-                        <div style={{ fontSize: '0.73rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {shift.catatan}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: shift.status === 'Sedang Bertugas' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                            color: shift.status === 'Sedang Bertugas' ? '#38bdf8' : '#10b981',
-                            fontSize: '0.72rem',
-                            fontWeight: 800
-                          }}
-                        >
-                          <Check size={11} /> {shift.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                  filteredShifts.map((shift, idx) => {
+                    const photosCount = (shift.photos || []).length;
+                    return (
+                      <tr key={shift.id} style={{ borderBottom: '1px solid #1e293b', background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)' }}>
+                        <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#f8fafc' }}>{shift.shift}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                            {formatDisplayDate(shift.tanggal)} &bull; {shift.noDok}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700, color: '#cbd5e1' }}>{shift.posJaga}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
+                            <MapPin size={11} /> {shift.proyek}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#34d399' }}>{shift.danru}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{shift.personil}</div>
+                        </td>
+                        {/* Tombol Lihat Foto Slider */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                           <button
-                            onClick={() => {
-                              setEditingItem(shift);
-                              setShiftForm({ ...shift });
-                              setIsShiftModalOpen(true);
+                            onClick={() => openGallery(shift.photos, `Foto Mutasi Shift: ${shift.noDok} - ${shift.shift}`)}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              background: photosCount > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.5)',
+                              border: photosCount > 0 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #334155',
+                              color: photosCount > 0 ? '#34d399' : '#94a3b8',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
                             }}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
-                            title="Edit Catatan Shift"
                           >
-                            <Edit3 size={13} />
+                            <Camera size={12} />
+                            <span>Lihat Foto ({photosCount})</span>
                           </button>
+                        </td>
+                        <td style={{ padding: '12px 14px', maxWidth: '240px' }}>
+                          <div style={{ display: 'inline-block', padding: '2px 7px', borderRadius: '5px', background: 'rgba(16, 185, 129, 0.12)', color: '#34d399', fontSize: '0.7rem', fontWeight: 700, marginBottom: '3px' }}>
+                            {shift.kondisi}
+                          </div>
+                          <div style={{ fontSize: '0.73rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {shift.catatan}
+                          </div>
+                        </td>
+                        {/* Status Shift dengan Toggle Cepat */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                           <button
-                            onClick={() => handleDeleteItem(shift.id, 'shift')}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
-                            title="Hapus"
+                            onClick={() => toggleShiftStatus(shift.id)}
+                            style={{
+                              background: shift.status === 'Sedang Bertugas' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                              border: shift.status === 'Sedang Bertugas' ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                              color: shift.status === 'Sedang Bertugas' ? '#38bdf8' : '#10b981',
+                              padding: '4px 9px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            title="Klik untuk mengubah status shift (Sedang Bertugas / Selesai)"
                           >
-                            <Trash2 size={13} />
+                            <Check size={11} /> {shift.status}
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button
+                              onClick={() => openDetail(shift, 'shift')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#38bdf8' }}
+                              title="Lihat Detail Lengkap"
+                            >
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingItem(shift);
+                                setShiftForm({ ...shift });
+                                setIsShiftModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
+                              title="Edit Catatan Shift"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(shift.id, 'shift')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
+                              title="Hapus"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -1725,32 +1951,14 @@ export const SecurityModule = ({
       {/* KONTEN TAB 2: BUKU TAMU & KUNJUNGAN KONSUMEN                        */}
       {/* ------------------------------------------------------------------- */}
       {activeSubTab === 'buku-tamu' && (
-        <div
-          className="glass-card"
-          style={{
-            borderRadius: '14px',
-            border: '1px solid #1e293b',
-            background: 'rgba(15, 23, 42, 0.75)',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              padding: '1rem 1.4rem',
-              borderBottom: '1px solid #1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}
-          >
+        <div className="glass-card" style={{ borderRadius: '14px', border: '1px solid #1e293b', background: 'rgba(15, 23, 42, 0.75)', overflow: 'hidden' }}>
+          <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>
                 Buku Tamu & Kunjungan Konsumen / Calon Pembeli
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Pencatatan konsumen survey rumah contoh, surveyor KPR Bank BTN, notaris PPAT, dan tamu manajemen.
+                Pencatatan konsumen survey rumah contoh, surveyor bank BTN, notaris PPAT, dan dokumentasi foto tamu.
               </div>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
@@ -1766,7 +1974,7 @@ export const SecurityModule = ({
                   <th style={{ padding: '10px 14px' }}>Tanggal & Jam</th>
                   <th style={{ padding: '10px 14px' }}>Nama Tamu & Kontak</th>
                   <th style={{ padding: '10px 14px' }}>Kendaraan</th>
-                  <th style={{ padding: '10px 14px' }}>Kategori Tamu</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Dokumentasi Foto</th>
                   <th style={{ padding: '10px 14px' }}>Tujuan & Keperluan</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status Kunjungan</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Aksi</th>
@@ -1780,127 +1988,112 @@ export const SecurityModule = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredVisitors.map((vis, idx) => (
-                    <tr
-                      key={vis.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)'
-                      }}
-                    >
-                      <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc' }}>
-                          In: {vis.jamMasuk}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                          Out: {vis.jamKeluar || '-'} &bull; {formatDisplayDate(vis.tanggal)}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc' }}>{vis.namaTamu}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <Phone size={10} /> {vis.noHp || '-'}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 700, color: '#cbd5e1' }}>{vis.noPlat || 'Pejalan Kaki'}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#10b981' }}>{vis.proyek}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: 'rgba(56, 189, 248, 0.12)',
-                            color: '#38bdf8',
-                            fontSize: '0.72rem',
-                            fontWeight: 700
-                          }}
-                        >
-                          {vis.kategori}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', maxWidth: '260px' }}>
-                        <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.76rem' }}>{vis.tujuanBertemu}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {vis.keperluan}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        {vis.status === 'Sedang di Lokasi' ? (
-                          <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
-                            <span
-                              style={{
-                                padding: '2px 8px',
-                                borderRadius: '6px',
-                                background: 'rgba(251, 191, 36, 0.15)',
-                                color: '#fbbf24',
-                                fontSize: '0.72rem',
-                                fontWeight: 800
-                              }}
-                            >
-                              Sedang di Lokasi
-                            </span>
+                  filteredVisitors.map((vis, idx) => {
+                    const photosCount = (vis.photos || []).length;
+                    return (
+                      <tr key={vis.id} style={{ borderBottom: '1px solid #1e293b', background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)' }}>
+                        <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#f8fafc' }}>In: {vis.jamMasuk}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                            Out: {vis.jamKeluar || '-'} &bull; {formatDisplayDate(vis.tanggal)}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#f8fafc' }}>{vis.namaTamu}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            <Phone size={10} /> {vis.noHp || '-'}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700, color: '#cbd5e1' }}>{vis.noPlat || 'Pejalan Kaki'}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#10b981' }}>{vis.proyek}</div>
+                        </td>
+                        {/* Tombol Lihat Foto Slider */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => openGallery(vis.photos, `Foto Kunjungan Tamu: ${vis.namaTamu} (${vis.noPlat || 'Pejalan Kaki'})`)}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              background: photosCount > 0 ? 'rgba(56, 189, 248, 0.15)' : 'rgba(30, 41, 59, 0.5)',
+                              border: photosCount > 0 ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid #334155',
+                              color: photosCount > 0 ? '#38bdf8' : '#94a3b8',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            <Camera size={12} />
+                            <span>Lihat Foto ({photosCount})</span>
+                          </button>
+                        </td>
+                        <td style={{ padding: '12px 14px', maxWidth: '240px' }}>
+                          <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.76rem' }}>{vis.tujuanBertemu}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {vis.keperluan}
+                          </div>
+                        </td>
+                        {/* Status Kunjungan dengan Toggle Cepat */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => toggleVisitorStatus(vis.id)}
+                            style={{
+                              background: vis.status === 'Sedang di Lokasi' ? 'rgba(251, 191, 36, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                              border: vis.status === 'Sedang di Lokasi' ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                              color: vis.status === 'Sedang di Lokasi' ? '#fbbf24' : '#10b981',
+                              padding: '4px 9px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            title="Klik untuk toggle status kunjungan (Sedang di Lokasi / Selesai Keluar)"
+                          >
+                            <Check size={11} /> {vis.status}
+                          </button>
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
                             <button
-                              onClick={() => handleCheckOutVisitor(vis.id)}
-                              style={{
-                                background: 'rgba(16, 185, 129, 0.15)',
-                                border: '1px solid rgba(16, 185, 129, 0.3)',
-                                color: '#34d399',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontSize: '0.68rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                              title="Klik jika tamu sudah keluar"
+                              onClick={() => openDetail(vis, 'visitor')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#38bdf8' }}
+                              title="Lihat Detail Lengkap"
                             >
-                              Check-Out
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingItem(vis);
+                                setVisitorForm({ ...vis });
+                                setIsVisitorModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
+                              title="Edit"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(vis.id, 'visitor')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
+                              title="Hapus"
+                            >
+                              <Trash2 size={13} />
                             </button>
                           </div>
-                        ) : (
-                          <span
-                            style={{
-                              padding: '2px 8px',
-                              borderRadius: '6px',
-                              background: 'rgba(16, 185, 129, 0.15)',
-                              color: '#10b981',
-                              fontSize: '0.72rem',
-                              fontWeight: 800
-                            }}
-                          >
-                            Selesai Keluar
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            onClick={() => {
-                              setEditingItem(vis);
-                              setVisitorForm({ ...vis });
-                              setIsVisitorModalOpen(true);
-                            }}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
-                            title="Edit"
-                          >
-                            <Edit3 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(vis.id, 'visitor')}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -1909,35 +2102,17 @@ export const SecurityModule = ({
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* KONTEN TAB 3: KONTROL ARMADA TRUK MATERIAL & LOGISTIK               */}
+      {/* KONTEN TAB 3: KONTROL ARMADA TRUK MATERIAL                          */}
       {/* ------------------------------------------------------------------- */}
       {activeSubTab === 'truk-material' && (
-        <div
-          className="glass-card"
-          style={{
-            borderRadius: '14px',
-            border: '1px solid #1e293b',
-            background: 'rgba(15, 23, 42, 0.75)',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              padding: '1rem 1.4rem',
-              borderBottom: '1px solid #1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}
-          >
+        <div className="glass-card" style={{ borderRadius: '14px', border: '1px solid #1e293b', background: 'rgba(15, 23, 42, 0.75)', overflow: 'hidden' }}>
+          <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>
                 Kontrol Gerbang Keluar-Masuk Armada Truk Material Proyek
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Pemeriksaan surat jalan resmi, jenis muatan material, supir, dan mandor penerima di kavling.
+                Pemeriksaan surat jalan resmi, foto fisik armada truk di gerbang, dan mandor penerima lapangan.
               </div>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
@@ -1951,9 +2126,9 @@ export const SecurityModule = ({
                 <tr style={{ background: 'rgba(9, 13, 22, 0.85)', borderBottom: '1px solid #1e293b', color: '#94a3b8' }}>
                   <th style={{ padding: '10px 14px', width: '35px' }}>No</th>
                   <th style={{ padding: '10px 14px' }}>Waktu & Surat Jalan</th>
-                  <th style={{ padding: '10px 14px' }}>Vendor Pengirim</th>
-                  <th style={{ padding: '10px 14px' }}>Muatan Material</th>
+                  <th style={{ padding: '10px 14px' }}>Vendor & Material</th>
                   <th style={{ padding: '10px 14px' }}>Armada & Supir</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Dokumentasi Foto</th>
                   <th style={{ padding: '10px 14px' }}>Lokasi & Penerima</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status Gerbang</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Aksi</th>
@@ -1967,128 +2142,115 @@ export const SecurityModule = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredMaterials.map((mat, idx) => (
-                    <tr
-                      key={mat.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)'
-                      }}
-                    >
-                      <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc' }}>
-                          In: {mat.jamMasuk}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#38bdf8', fontFamily: 'monospace', marginTop: '2px' }}>
-                          SJ: {mat.noSuratJalan || mat.noDok}
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                          Out: {mat.jamKeluar || '-'} &bull; {formatDisplayDate(mat.tanggal)}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#cbd5e1' }}>{mat.namaVendor}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <MapPin size={10} /> {mat.proyek}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: 'rgba(251, 191, 36, 0.12)',
-                            color: '#fbbf24',
-                            fontSize: '0.74rem',
-                            fontWeight: 800
-                          }}
-                        >
-                          {mat.jenisMaterial}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 700, color: '#f8fafc' }}>{mat.noPlat}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Supir: {mat.namaSupir}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 600, color: '#cbd5e1' }}>{mat.lokasiBongkar}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Penerima: {mat.penerima}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        {mat.status === 'Sedang Bongkar' ? (
-                          <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
-                            <span
-                              style={{
-                                padding: '2px 8px',
-                                borderRadius: '6px',
-                                background: 'rgba(251, 191, 36, 0.15)',
-                                color: '#fbbf24',
-                                fontSize: '0.72rem',
-                                fontWeight: 800
-                              }}
-                            >
-                              Sedang Bongkar
+                  filteredMaterials.map((mat, idx) => {
+                    const photosCount = (mat.photos || []).length;
+                    return (
+                      <tr key={mat.id} style={{ borderBottom: '1px solid #1e293b', background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)' }}>
+                        <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#f8fafc' }}>In: {mat.jamMasuk}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#38bdf8', fontFamily: 'monospace', marginTop: '2px' }}>
+                            SJ: {mat.noSuratJalan || mat.noDok}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            Out: {mat.jamKeluar || '-'} &bull; {formatDisplayDate(mat.tanggal)}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#cbd5e1' }}>{mat.namaVendor}</div>
+                          <div style={{ marginTop: '2px' }}>
+                            <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'rgba(251, 191, 36, 0.12)', color: '#fbbf24', fontSize: '0.72rem', fontWeight: 800 }}>
+                              {mat.jenisMaterial}
                             </span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 700, color: '#f8fafc' }}>{mat.noPlat}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Supir: {mat.namaSupir}</div>
+                        </td>
+                        {/* Tombol Lihat Foto Slider */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => openGallery(mat.photos, `Foto Armada Truk: ${mat.namaVendor} (${mat.noPlat})`)}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              background: photosCount > 0 ? 'rgba(251, 191, 36, 0.15)' : 'rgba(30, 41, 59, 0.5)',
+                              border: photosCount > 0 ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid #334155',
+                              color: photosCount > 0 ? '#fbbf24' : '#94a3b8',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            <Camera size={12} />
+                            <span>Lihat Foto ({photosCount})</span>
+                          </button>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 600, color: '#cbd5e1' }}>{mat.lokasiBongkar}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Penerima: {mat.penerima}</div>
+                        </td>
+                        {/* Status Gerbang dengan Toggle Cepat */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => toggleMaterialStatus(mat.id)}
+                            style={{
+                              background: mat.status === 'Sedang Bongkar' ? 'rgba(251, 191, 36, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                              border: mat.status === 'Sedang Bongkar' ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                              color: mat.status === 'Sedang Bongkar' ? '#fbbf24' : '#10b981',
+                              padding: '4px 9px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            title="Klik untuk toggle status truk (Sedang Bongkar / Selesai Keluar)"
+                          >
+                            <Check size={11} /> {mat.status}
+                          </button>
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
                             <button
-                              onClick={() => handleCheckOutMaterial(mat.id)}
-                              style={{
-                                background: 'rgba(16, 185, 129, 0.15)',
-                                border: '1px solid rgba(16, 185, 129, 0.3)',
-                                color: '#34d399',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontSize: '0.68rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                              title="Truk selesai bongkar & keluar gerbang"
+                              onClick={() => openDetail(mat, 'material')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#38bdf8' }}
+                              title="Lihat Detail Lengkap"
                             >
-                              Keluar Gerbang
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingItem(mat);
+                                setMaterialForm({ ...mat });
+                                setIsMaterialModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
+                              title="Edit"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(mat.id, 'material')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
+                              title="Hapus"
+                            >
+                              <Trash2 size={13} />
                             </button>
                           </div>
-                        ) : (
-                          <span
-                            style={{
-                              padding: '2px 8px',
-                              borderRadius: '6px',
-                              background: 'rgba(16, 185, 129, 0.15)',
-                              color: '#10b981',
-                              fontSize: '0.72rem',
-                              fontWeight: 800
-                            }}
-                          >
-                            Selesai & Keluar
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            onClick={() => {
-                              setEditingItem(mat);
-                              setMaterialForm({ ...mat });
-                              setIsMaterialModalOpen(true);
-                            }}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
-                            title="Edit"
-                          >
-                            <Edit3 size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(mat.id, 'material')}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
-                            title="Hapus"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -2100,32 +2262,14 @@ export const SecurityModule = ({
       {/* KONTEN TAB 4: PATROLI KAVLING & INSIDEN                             */}
       {/* ------------------------------------------------------------------- */}
       {activeSubTab === 'patroli-insiden' && (
-        <div
-          className="glass-card"
-          style={{
-            borderRadius: '14px',
-            border: '1px solid #1e293b',
-            background: 'rgba(15, 23, 42, 0.75)',
-            overflow: 'hidden'
-          }}
-        >
-          <div
-            style={{
-              padding: '1rem 1.4rem',
-              borderBottom: '1px solid #1e293b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}
-          >
+        <div className="glass-card" style={{ borderRadius: '14px', border: '1px solid #1e293b', background: 'rgba(15, 23, 42, 0.75)', overflow: 'hidden' }}>
+          <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>
                 Patroli Keliling Kavling & Pengawasan Perimeter
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Checklist kontrol malam tiap 2 jam, pengecekan PJU, gudang semen/material, dan pagar batas kawasan.
+                Checklist kontrol malam, cek lampu PJU, gembok gudang material, dan bukti foto titik kontrol.
               </div>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
@@ -2141,9 +2285,9 @@ export const SecurityModule = ({
                   <th style={{ padding: '10px 14px' }}>Tanggal & Jam</th>
                   <th style={{ padding: '10px 14px' }}>Proyek & Petugas</th>
                   <th style={{ padding: '10px 14px' }}>Rute Patroli</th>
-                  <th style={{ padding: '10px 14px' }}>Kondisi Lampu PJU</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Dokumentasi Foto</th>
                   <th style={{ padding: '10px 14px' }}>Pagar & Gudang</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status Kawasan</th>
+                  <th style={{ padding: '10px 14px', textAlign: 'center' }}>Status Patroli</th>
                   <th style={{ padding: '10px 14px', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
@@ -2155,82 +2299,112 @@ export const SecurityModule = ({
                     </td>
                   </tr>
                 ) : (
-                  filteredPatrols.map((ptr, idx) => (
-                    <tr
-                      key={ptr.id}
-                      style={{
-                        borderBottom: '1px solid #1e293b',
-                        background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)'
-                      }}
-                    >
-                      <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <Clock size={13} color="#10b981" /> {ptr.jamPatroli}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                          {formatDisplayDate(ptr.tanggal)}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 800, color: '#cbd5e1' }}>{ptr.petugas}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <MapPin size={10} /> {ptr.proyek}
-                        </div>
-                      </td>
-                      <td style={{ padding: '12px 14px', maxWidth: '280px' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#f8fafc', fontWeight: 600 }}>{ptr.rutePatroli}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{ptr.catatan}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontSize: '0.74rem', color: '#fbbf24', fontWeight: 600 }}>{ptr.kondisiLampu}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 600 }}>{ptr.kondisiPagar}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: 'rgba(16, 185, 129, 0.15)',
-                            color: '#10b981',
-                            fontSize: '0.72rem',
-                            fontWeight: 800
-                          }}
-                        >
-                          <ShieldCheck size={12} /> {ptr.statusKawasan}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                  filteredPatrols.map((ptr, idx) => {
+                    const photosCount = (ptr.photos || []).length;
+                    return (
+                      <tr key={ptr.id} style={{ borderBottom: '1px solid #1e293b', background: idx % 2 === 0 ? 'transparent' : 'rgba(15, 23, 42, 0.35)' }}>
+                        <td style={{ padding: '12px 14px', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <Clock size={13} color="#10b981" /> {ptr.jamPatroli}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
+                            {formatDisplayDate(ptr.tanggal)}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 800, color: '#cbd5e1' }}>{ptr.petugas}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            <MapPin size={10} /> {ptr.proyek}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 14px', maxWidth: '240px' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#f8fafc', fontWeight: 600 }}>{ptr.rutePatroli}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{ptr.catatan}</div>
+                        </td>
+                        {/* Tombol Lihat Foto Slider */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                           <button
-                            onClick={() => {
-                              setEditingItem(ptr);
-                              setPatrolForm({ ...ptr });
-                              setIsPatrolModalOpen(true);
+                            onClick={() => openGallery(ptr.photos, `Foto Patroli Malam: ${ptr.proyek} (${ptr.jamPatroli})`)}
+                            className="btn btn-secondary btn-sm"
+                            style={{
+                              background: photosCount > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(30, 41, 59, 0.5)',
+                              border: photosCount > 0 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #334155',
+                              color: photosCount > 0 ? '#34d399' : '#94a3b8',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px'
                             }}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
-                            title="Edit"
                           >
-                            <Edit3 size={13} />
+                            <Camera size={12} />
+                            <span>Lihat Foto ({photosCount})</span>
                           </button>
+                        </td>
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontSize: '0.74rem', color: '#34d399', fontWeight: 600 }}>{ptr.kondisiPagar}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#fbbf24', marginTop: '2px' }}>{ptr.kondisiLampu}</div>
+                        </td>
+                        {/* Status Patroli dengan Toggle Cepat */}
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                           <button
-                            onClick={() => handleDeleteItem(ptr.id, 'patrol')}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
-                            title="Hapus"
+                            onClick={() => togglePatrolStatus(ptr.id)}
+                            style={{
+                              background: ptr.status === 'Verified Patrol' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                              border: ptr.status === 'Verified Patrol' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                              color: ptr.status === 'Verified Patrol' ? '#10b981' : '#f87171',
+                              padding: '4px 9px',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                            title="Klik untuk mengubah status checklist patroli"
                           >
-                            <Trash2 size={13} />
+                            <ShieldCheck size={11} /> {ptr.status || 'Verified Patrol'}
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button
+                              onClick={() => openDetail(ptr, 'patrol')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#38bdf8' }}
+                              title="Lihat Detail Lengkap"
+                            >
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingItem(ptr);
+                                setPatrolForm({ ...ptr });
+                                setIsPatrolModalOpen(true);
+                              }}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#94a3b8' }}
+                              title="Edit"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(ptr.id, 'patrol')}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '4px 8px', borderRadius: '6px', color: '#f87171' }}
+                              title="Hapus"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -2239,7 +2413,421 @@ export const SecurityModule = ({
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* MODAL 1: FORM BUKU MUTASI SHIFT JAGA                                */}
+      {/* MODAL GALLERY: PHOTO SLIDER / CAROUSEL DENGAN TOMBOL GESER          */}
+      {/* ------------------------------------------------------------------- */}
+      {isGalleryOpen && galleryPhotos.length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.92)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '1.5rem'
+          }}
+          onClick={() => setIsGalleryOpen(false)}
+        >
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '820px',
+              borderRadius: '16px',
+              border: '1px solid #1e293b',
+              background: '#090d16',
+              overflow: 'hidden',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header Modal Slider */}
+            <div
+              style={{
+                padding: '12px 18px',
+                borderBottom: '1px solid #1e293b',
+                background: '#0f172a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Camera size={18} color="#10b981" />
+                <div>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                    {galleryTitle}
+                  </h3>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    Gunakan tombol geser kiri/kanan atau klik thumbnail di bawah
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    color: '#34d399',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    padding: '3px 10px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  Foto {activePhotoIdx + 1} dari {galleryPhotos.length}
+                </span>
+                <button
+                  onClick={() => setIsGalleryOpen(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Area Tampilan Gambar Utama dengan Tombol Geser */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '420px',
+                background: '#030712',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Gambar Aktif */}
+              <img
+                src={galleryPhotos[activePhotoIdx]?.url}
+                alt={galleryPhotos[activePhotoIdx]?.name || 'Dokumentasi'}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '4px',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+
+              {/* Tombol Geser Kiri */}
+              {galleryPhotos.length > 1 && (
+                <button
+                  onClick={() => setActivePhotoIdx(prev => (prev > 0 ? prev - 1 : galleryPhotos.length - 1))}
+                  style={{
+                    position: 'absolute',
+                    left: '14px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    border: '1px solid #334155',
+                    color: '#f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Foto Sebelumnya (Panah Kiri)"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+
+              {/* Tombol Geser Kanan */}
+              {galleryPhotos.length > 1 && (
+                <button
+                  onClick={() => setActivePhotoIdx(prev => (prev < galleryPhotos.length - 1 ? prev + 1 : 0))}
+                  style={{
+                    position: 'absolute',
+                    right: '14px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    border: '1px solid #334155',
+                    color: '#f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Foto Selanjutnya (Panah Kanan)"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              )}
+
+              {/* Caption Overlay di Bawah Foto */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(to top, rgba(3, 7, 18, 0.95), rgba(3, 7, 18, 0.4), transparent)',
+                  padding: '12px 18px',
+                  color: '#f8fafc',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end'
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#34d399' }}>
+                    {galleryPhotos[activePhotoIdx]?.caption || galleryPhotos[activePhotoIdx]?.name}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                    {galleryPhotos[activePhotoIdx]?.name} {galleryPhotos[activePhotoIdx]?.size && `\u2022 ${galleryPhotos[activePhotoIdx]?.size}`}
+                  </div>
+                </div>
+
+                {galleryPhotos[activePhotoIdx]?.url && (
+                  <button
+                    onClick={() => {
+                      const w = window.open('');
+                      if (w) w.document.write(`<img src="${galleryPhotos[activePhotoIdx].url}" style="max-width:100%; height:auto;" />`);
+                    }}
+                    style={{
+                      background: 'rgba(15, 23, 42, 0.8)',
+                      border: '1px solid #334155',
+                      color: '#38bdf8',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Maximize2 size={12} /> Buka Tab Penuh
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Strip Thumbnail di Bawah (Bisa Diklik Langsung untuk Berpindah) */}
+            {galleryPhotos.length > 1 && (
+              <div
+                style={{
+                  padding: '10px 14px',
+                  background: '#0f172a',
+                  borderTop: '1px solid #1e293b',
+                  display: 'flex',
+                  gap: '8px',
+                  overflowX: 'auto',
+                  alignItems: 'center'
+                }}
+              >
+                {galleryPhotos.map((p, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => setActivePhotoIdx(idx)}
+                    style={{
+                      width: '64px',
+                      height: '48px',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      border: idx === activePhotoIdx ? '2px solid #10b981' : '1px solid #334155',
+                      opacity: idx === activePhotoIdx ? 1 : 0.6,
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0,
+                      background: '#030712'
+                    }}
+                  >
+                    <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* MODAL DETAIL VIEW LENGKAP                                           */}
+      {/* ------------------------------------------------------------------- */}
+      {isDetailModalOpen && detailItem && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1.5rem'
+          }}
+          onClick={() => setIsDetailModalOpen(false)}
+        >
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '680px',
+              borderRadius: '16px',
+              border: '1px solid #1e293b',
+              background: '#0f172a',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Eye size={18} color="#38bdf8" />
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                  Detail Catatan Pos Keamanan ({detailItem.noDok})
+                </h3>
+              </div>
+              <button onClick={() => setIsDetailModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '78vh', overflowY: 'auto' }}>
+              {/* Header Box */}
+              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Nomor Dokumen & Tanggal:</div>
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#f8fafc' }}>{detailItem.noDok}</div>
+                  <div style={{ fontSize: '0.74rem', color: '#10b981' }}>{formatDisplayDate(detailItem.tanggal)} &bull; {detailItem.proyek}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#64748b', textAlign: 'right' }}>Status Saat Ini:</div>
+                  <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontWeight: 800, fontSize: '0.76rem' }}>
+                    {detailItem.status || 'Verified'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Konten Berdasarkan Tipe */}
+              <div style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '14px 16px', fontSize: '0.78rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {detailType === 'shift' && (
+                  <>
+                    <div><span style={{ color: '#64748b' }}>Shift Jaga:</span> <strong style={{ color: '#f8fafc', display: 'block' }}>{detailItem.shift}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Lokasi Pos:</span> <strong style={{ color: '#f8fafc', display: 'block' }}>{detailItem.posJaga}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Danru:</span> <strong style={{ color: '#34d399', display: 'block' }}>{detailItem.danru}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Personil:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.personil}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Inventaris Pos:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.inventarisPos}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Catatan Situasi:</span> <div style={{ color: '#e2e8f0', marginTop: '2px' }}>{detailItem.catatan}</div></div>
+                  </>
+                )}
+
+                {detailType === 'visitor' && (
+                  <>
+                    <div><span style={{ color: '#64748b' }}>Nama Tamu:</span> <strong style={{ color: '#f8fafc', display: 'block' }}>{detailItem.namaTamu}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>No. Handphone:</span> <strong style={{ color: '#38bdf8', display: 'block' }}>{detailItem.noHp || '-'}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Kendaraan / Plat:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.noPlat || 'Pejalan Kaki'}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Kategori Tamu:</span> <strong style={{ color: '#fbbf24', display: 'block' }}>{detailItem.kategori}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Tujuan Bertemu:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.tujuanBertemu}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Keperluan:</span> <div style={{ color: '#e2e8f0', marginTop: '2px' }}>{detailItem.keperluan}</div></div>
+                  </>
+                )}
+
+                {detailType === 'material' && (
+                  <>
+                    <div><span style={{ color: '#64748b' }}>Vendor Pengirim:</span> <strong style={{ color: '#f8fafc', display: 'block' }}>{detailItem.namaVendor}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>No. Surat Jalan:</span> <strong style={{ color: '#38bdf8', display: 'block' }}>{detailItem.noSuratJalan}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Muatan Material:</span> <strong style={{ color: '#fbbf24', display: 'block' }}>{detailItem.jenisMaterial}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Armada & Supir:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.noPlat} ({detailItem.namaSupir})</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Lokasi Bongkar:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.lokasiBongkar}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Penerima:</span> <strong style={{ color: '#10b981', display: 'block' }}>{detailItem.penerima}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Catatan Pemeriksaan:</span> <div style={{ color: '#e2e8f0', marginTop: '2px' }}>{detailItem.catatan}</div></div>
+                  </>
+                )}
+
+                {detailType === 'patrol' && (
+                  <>
+                    <div><span style={{ color: '#64748b' }}>Jam Patroli:</span> <strong style={{ color: '#10b981', display: 'block' }}>{detailItem.jamPatroli}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Petugas Patroli:</span> <strong style={{ color: '#cbd5e1', display: 'block' }}>{detailItem.petugas}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Rute Patroli:</span> <strong style={{ color: '#f8fafc', display: 'block' }}>{detailItem.rutePatroli}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Penerangan PJU:</span> <strong style={{ color: '#fbbf24', display: 'block' }}>{detailItem.kondisiLampu}</strong></div>
+                    <div><span style={{ color: '#64748b' }}>Pagar & Gudang:</span> <strong style={{ color: '#34d399', display: 'block' }}>{detailItem.kondisiPagar}</strong></div>
+                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: '#64748b' }}>Temuan Khusus:</span> <div style={{ color: '#e2e8f0', marginTop: '2px' }}>{detailItem.catatan}</div></div>
+                  </>
+                )}
+              </div>
+
+              {/* Dokumentasi Foto di dalam Detail View */}
+              <div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>Dokumentasi Foto Lapangan ({(detailItem.photos || []).length} Foto):</span>
+                  {(detailItem.photos || []).length > 0 && (
+                    <button
+                      onClick={() => openGallery(detailItem.photos, `Galeri: ${detailItem.noDok}`)}
+                      style={{ background: 'transparent', border: 'none', color: '#10b981', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      Buka di Galeri Geser &rarr;
+                    </button>
+                  )}
+                </div>
+
+                {(detailItem.photos || []).length === 0 ? (
+                  <div style={{ padding: '1.2rem', textAlign: 'center', background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', color: '#64748b', fontSize: '0.75rem' }}>
+                    Belum ada foto yang diunggah untuk data ini.
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px' }}>
+                    {detailItem.photos.map((p, pIdx) => (
+                      <div
+                        key={pIdx}
+                        onClick={() => openGallery(detailItem.photos, `Galeri: ${detailItem.noDok}`)}
+                        style={{
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          border: '1px solid #334155',
+                          background: '#090d16',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          height: '90px'
+                        }}
+                      >
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', padding: '2px 4px', fontSize: '0.62rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {p.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="btn btn-secondary"
+                  style={{ background: '#090d16', border: '1px solid #334155', color: '#94a3b8', padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem' }}
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* MODAL 1: FORM BUKU MUTASI SHIFT JAGA (DENGAN UPLOAD FOTO & STATUS)  */}
       {/* ------------------------------------------------------------------- */}
       {isShiftModalOpen && (
         <div
@@ -2259,7 +2847,7 @@ export const SecurityModule = ({
             className="glass-card"
             style={{
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '580px',
               borderRadius: '16px',
               border: '1px solid #1e293b',
               background: '#0f172a',
@@ -2267,15 +2855,7 @@ export const SecurityModule = ({
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
             }}
           >
-            <div
-              style={{
-                padding: '1rem 1.4rem',
-                borderBottom: '1px solid #1e293b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldCheck size={18} color="#10b981" />
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
@@ -2287,7 +2867,7 @@ export const SecurityModule = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmitShift} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSubmitShift} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '78vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Tanggal Jaga</label>
@@ -2326,14 +2906,15 @@ export const SecurityModule = ({
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Lokasi Pos</label>
-                  <input
-                    type="text"
-                    value={shiftForm.posJaga}
-                    onChange={(e) => setShiftForm({ ...shiftForm, posJaga: e.target.value })}
-                    placeholder="Contoh: Pos Gerbang Utama / Pos Kavling"
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Status Shift Jaga</label>
+                  <select
+                    value={shiftForm.status}
+                    onChange={(e) => setShiftForm({ ...shiftForm, status: e.target.value })}
                     style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
-                  />
+                  >
+                    <option value="Sedang Bertugas">Sedang Bertugas</option>
+                    <option value="Selesai Bertugas">Selesai Bertugas</option>
+                  </select>
                 </div>
               </div>
 
@@ -2374,12 +2955,65 @@ export const SecurityModule = ({
               <div>
                 <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Catatan Khusus / Situasi Lapangan</label>
                 <textarea
-                  rows="3"
+                  rows="2"
                   value={shiftForm.catatan}
                   onChange={(e) => setShiftForm({ ...shiftForm, catatan: e.target.value })}
                   placeholder="Catatan serah terima tugas, cuaca, atau kejadian tertentu..."
                   style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem', resize: 'none' }}
                 />
+              </div>
+
+              {/* Upload Foto Dokumentasi Shift (Multi-Photo) */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#34d399', display: 'block', marginBottom: '4px', fontWeight: 800 }}>
+                  Upload Foto Dokumentasi Serah Terima & Pos Jaga (Bisa Pilih Banyak Foto)
+                </label>
+                <input
+                  ref={shiftFileRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf"
+                  onChange={(e) => handlePhotosUpload(e, setShiftForm)}
+                  style={{ display: 'none' }}
+                />
+                <div
+                  onClick={() => shiftFileRef.current && shiftFileRef.current.click()}
+                  style={{
+                    border: '2px dashed #334155',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    background: 'rgba(9, 13, 22, 0.6)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    color: '#94a3b8',
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  <UploadCloud size={16} color="#10b981" />
+                  <span>Klik untuk Upload Foto (Bisa pilih beberapa foto sekaligus)</span>
+                </div>
+
+                {/* Grid Preview Foto yang Diunggah */}
+                {(shiftForm.photos || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {shiftForm.photos.map((p, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #10b981' }}>
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          onClick={() => removePhotoFromForm(idx, setShiftForm)}
+                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(239, 68, 68, 0.85)', border: 'none', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '10px' }}>
@@ -2396,7 +3030,7 @@ export const SecurityModule = ({
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* MODAL 2: FORM BUKU TAMU MASUK                                       */}
+      {/* MODAL 2: FORM BUKU TAMU MASUK (DENGAN UPLOAD FOTO & STATUS)         */}
       {/* ------------------------------------------------------------------- */}
       {isVisitorModalOpen && (
         <div
@@ -2416,7 +3050,7 @@ export const SecurityModule = ({
             className="glass-card"
             style={{
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '580px',
               borderRadius: '16px',
               border: '1px solid #1e293b',
               background: '#0f172a',
@@ -2424,15 +3058,7 @@ export const SecurityModule = ({
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
             }}
           >
-            <div
-              style={{
-                padding: '1rem 1.4rem',
-                borderBottom: '1px solid #1e293b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Users size={18} color="#38bdf8" />
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
@@ -2444,7 +3070,7 @@ export const SecurityModule = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmitVisitor} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSubmitVisitor} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '78vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Nama Lengkap Tamu *</label>
@@ -2481,6 +3107,20 @@ export const SecurityModule = ({
                   />
                 </div>
                 <div>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Status Kunjungan</label>
+                  <select
+                    value={visitorForm.status}
+                    onChange={(e) => setVisitorForm({ ...visitorForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
+                  >
+                    <option value="Sedang di Lokasi">Sedang di Lokasi</option>
+                    <option value="Selesai Keluar">Selesai Keluar</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Kategori Tamu</label>
                   <select
                     value={visitorForm.kategori}
@@ -2493,12 +3133,8 @@ export const SecurityModule = ({
                     <option value="Notaris & PPAT / BPN">Notaris & PPAT / BPN</option>
                     <option value="Vendor / Rekanan Teknik">Vendor / Rekanan Teknik</option>
                     <option value="Tamu Manajemen / Direksi">Tamu Manajemen / Direksi</option>
-                    <option value="Instansi / Aparat">Instansi / Aparat</option>
                   </select>
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Bertemu dengan Siapa</label>
                   <input
@@ -2508,18 +3144,6 @@ export const SecurityModule = ({
                     placeholder="Contoh: Marketing Gallery (Fresda)"
                     style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
                   />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Titik Proyek</label>
-                  <select
-                    value={visitorForm.proyek}
-                    onChange={(e) => setVisitorForm({ ...visitorForm, proyek: e.target.value })}
-                    style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
-                  >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
-                    <option value="Head Office Bizhub">Head Office Bizhub</option>
-                  </select>
                 </div>
               </div>
 
@@ -2532,6 +3156,59 @@ export const SecurityModule = ({
                   placeholder="Contoh: Survey rumah contoh tipe 36, simulasi cicilan KPR, atau tanda tangan dokumen."
                   style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem', resize: 'none' }}
                 />
+              </div>
+
+              {/* Upload Foto Tamu & Kendaraan (Multi-Photo) */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#38bdf8', display: 'block', marginBottom: '4px', fontWeight: 800 }}>
+                  Upload Foto Tamu & Kendaraan (Bisa Pilih Banyak Foto: Foto Tamu, Plat, dll)
+                </label>
+                <input
+                  ref={visitorFileRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf"
+                  onChange={(e) => handlePhotosUpload(e, setVisitorForm)}
+                  style={{ display: 'none' }}
+                />
+                <div
+                  onClick={() => visitorFileRef.current && visitorFileRef.current.click()}
+                  style={{
+                    border: '2px dashed #334155',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    background: 'rgba(9, 13, 22, 0.6)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    color: '#94a3b8',
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  <UploadCloud size={16} color="#38bdf8" />
+                  <span>Klik untuk Upload Foto Tamu & Kendaraan (Bisa pilih beberapa foto)</span>
+                </div>
+
+                {/* Grid Preview Foto */}
+                {(visitorForm.photos || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {visitorForm.photos.map((p, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #38bdf8' }}>
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          onClick={() => removePhotoFromForm(idx, setVisitorForm)}
+                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(239, 68, 68, 0.85)', border: 'none', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '10px' }}>
@@ -2548,7 +3225,7 @@ export const SecurityModule = ({
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* MODAL 3: FORM KONTROL TRUK MATERIAL                                 */}
+      {/* MODAL 3: FORM KONTROL TRUK MATERIAL (DENGAN UPLOAD FOTO & STATUS)   */}
       {/* ------------------------------------------------------------------- */}
       {isMaterialModalOpen && (
         <div
@@ -2576,15 +3253,7 @@ export const SecurityModule = ({
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
             }}
           >
-            <div
-              style={{
-                padding: '1rem 1.4rem',
-                borderBottom: '1px solid #1e293b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Truck size={18} color="#fbbf24" />
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
@@ -2596,7 +3265,7 @@ export const SecurityModule = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmitMaterial} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSubmitMaterial} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '78vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Nama Vendor / Pengirim *</label>
@@ -2634,25 +3303,27 @@ export const SecurityModule = ({
                   />
                 </div>
                 <div>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Status Gerbang Truk</label>
+                  <select
+                    value={materialForm.status}
+                    onChange={(e) => setMaterialForm({ ...materialForm, status: e.target.value })}
+                    style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
+                  >
+                    <option value="Sedang Bongkar">Sedang Bongkar</option>
+                    <option value="Selesai Bongkar & Keluar">Selesai Bongkar & Keluar</option>
+                    <option value="Menunggu Cek Gerbang">Menunggu Cek Gerbang</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>No. Plat Truk & Supir</label>
                   <input
                     type="text"
                     value={materialForm.noPlat}
                     onChange={(e) => setMaterialForm({ ...materialForm, noPlat: e.target.value })}
                     placeholder="Contoh: B 9104 TYX (Supir: Yanto)"
-                    style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Lokasi Bongkar Material</label>
-                  <input
-                    type="text"
-                    value={materialForm.lokasiBongkar}
-                    onChange={(e) => setMaterialForm({ ...materialForm, lokasiBongkar: e.target.value })}
-                    placeholder="Contoh: Kavling Blok A-12 / Gudang Semen"
                     style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
                   />
                 </div>
@@ -2679,6 +3350,59 @@ export const SecurityModule = ({
                 />
               </div>
 
+              {/* Upload Foto Truk & Surat Jalan (Multi-Photo) */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#fbbf24', display: 'block', marginBottom: '4px', fontWeight: 800 }}>
+                  Upload Foto Truk & Surat Jalan (Bisa Pilih Banyak Foto: Fisik Truk, DO, Muatan)
+                </label>
+                <input
+                  ref={materialFileRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf"
+                  onChange={(e) => handlePhotosUpload(e, setMaterialForm)}
+                  style={{ display: 'none' }}
+                />
+                <div
+                  onClick={() => materialFileRef.current && materialFileRef.current.click()}
+                  style={{
+                    border: '2px dashed #334155',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    background: 'rgba(9, 13, 22, 0.6)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    color: '#94a3b8',
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  <UploadCloud size={16} color="#fbbf24" />
+                  <span>Klik untuk Upload Foto Truk & Surat Jalan (Bisa pilih beberapa foto)</span>
+                </div>
+
+                {/* Grid Preview Foto */}
+                {(materialForm.photos || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {materialForm.photos.map((p, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #fbbf24' }}>
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          onClick={() => removePhotoFromForm(idx, setMaterialForm)}
+                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(239, 68, 68, 0.85)', border: 'none', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" onClick={() => setIsMaterialModalOpen(false)} className="btn btn-secondary" style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8', padding: '7px 14px', borderRadius: '8px', fontSize: '0.8rem' }}>
                   Batal
@@ -2693,7 +3417,7 @@ export const SecurityModule = ({
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* MODAL 4: FORM PATROLI KAVLING                                       */}
+      {/* MODAL 4: FORM PATROLI KAVLING (DENGAN UPLOAD FOTO & STATUS)         */}
       {/* ------------------------------------------------------------------- */}
       {isPatrolModalOpen && (
         <div
@@ -2713,7 +3437,7 @@ export const SecurityModule = ({
             className="glass-card"
             style={{
               width: '100%',
-              maxWidth: '560px',
+              maxWidth: '580px',
               borderRadius: '16px',
               border: '1px solid #1e293b',
               background: '#0f172a',
@@ -2721,15 +3445,7 @@ export const SecurityModule = ({
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
             }}
           >
-            <div
-              style={{
-                padding: '1rem 1.4rem',
-                borderBottom: '1px solid #1e293b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <div style={{ padding: '1rem 1.4rem', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Radio size={18} color="#34d399" />
                 <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
@@ -2741,7 +3457,7 @@ export const SecurityModule = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmitPatrol} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <form onSubmit={handleSubmitPatrol} style={{ padding: '1.4rem', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '78vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Tanggal Patroli</label>
@@ -2776,15 +3492,14 @@ export const SecurityModule = ({
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Titik Proyek</label>
+                  <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Status Patroli</label>
                   <select
-                    value={patrolForm.proyek}
-                    onChange={(e) => setPatrolForm({ ...patrolForm, proyek: e.target.value })}
+                    value={patrolForm.status}
+                    onChange={(e) => setPatrolForm({ ...patrolForm, status: e.target.value })}
                     style={{ width: '100%', background: '#090d16', border: '1px solid #334155', borderRadius: '8px', padding: '8px 10px', color: '#f8fafc', fontSize: '0.8rem' }}
                   >
-                    <option value="Ashoka Park">Ashoka Park</option>
-                    <option value="Ashoka View">Ashoka View</option>
-                    <option value="Head Office Bizhub">Head Office Bizhub</option>
+                    <option value="Verified Patrol">Verified Patrol (Sesuai SOP)</option>
+                    <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
                   </select>
                 </div>
               </div>
@@ -2834,6 +3549,59 @@ export const SecurityModule = ({
                 />
               </div>
 
+              {/* Upload Foto Patroli (Multi-Photo) */}
+              <div>
+                <label style={{ fontSize: '0.74rem', color: '#34d399', display: 'block', marginBottom: '4px', fontWeight: 800 }}>
+                  Upload Foto Dokumentasi Patroli (Bisa Pilih Banyak Foto: Titik Checkpoint, PJU, dll)
+                </label>
+                <input
+                  ref={patrolFileRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf"
+                  onChange={(e) => handlePhotosUpload(e, setPatrolForm)}
+                  style={{ display: 'none' }}
+                />
+                <div
+                  onClick={() => patrolFileRef.current && patrolFileRef.current.click()}
+                  style={{
+                    border: '2px dashed #334155',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    textAlign: 'center',
+                    background: 'rgba(9, 13, 22, 0.6)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    color: '#94a3b8',
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  <UploadCloud size={16} color="#34d399" />
+                  <span>Klik untuk Upload Foto Patroli (Bisa pilih beberapa foto)</span>
+                </div>
+
+                {/* Grid Preview Foto */}
+                {(patrolForm.photos || []).length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {patrolForm.photos.map((p, idx) => (
+                      <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #10b981' }}>
+                        <img src={p.url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          onClick={() => removePhotoFromForm(idx, setPatrolForm)}
+                          style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(239, 68, 68, 0.85)', border: 'none', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" onClick={() => setIsPatrolModalOpen(false)} className="btn btn-secondary" style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8', padding: '7px 14px', borderRadius: '8px', fontSize: '0.8rem' }}>
                   Batal
@@ -2865,7 +3633,6 @@ export const SecurityModule = ({
             overflowY: 'auto'
           }}
         >
-          {/* Print CSS scoped */}
           <style>
             {`
               @media print {
@@ -2918,7 +3685,6 @@ export const SecurityModule = ({
               fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
-            {/* Header Action Bar (No Print) */}
             <div
               className="no-print"
               style={{
@@ -2970,7 +3736,6 @@ export const SecurityModule = ({
               </div>
             </div>
 
-            {/* KOP SURAT PERUSAHAAN */}
             <div
               style={{
                 display: 'flex',
@@ -3010,7 +3775,6 @@ export const SecurityModule = ({
               </div>
             </div>
 
-            {/* JUDUL DOKUMEN LAPORAN */}
             <div style={{ textAlign: 'center', margin: '14px 0 20px 0' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', margin: 0 }}>
                 BUKU MUTASI & LAPORAN PENJAGAAN POS SATPAM
@@ -3020,7 +3784,6 @@ export const SecurityModule = ({
               </div>
             </div>
 
-            {/* TABEL PRINTABLE MUTASI SHIFT */}
             <div style={{ marginBottom: '16px', fontWeight: 800, fontSize: '0.85rem' }}>1. Catatan Mutasi & Serah Terima Shift Jaga</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem', marginBottom: '20px' }}>
               <thead>
@@ -3029,7 +3792,7 @@ export const SecurityModule = ({
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Shift</th>
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Pos Jaga</th>
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Danru & Personil</th>
-                  <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Inventaris Serah Terima</th>
+                  <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Status Shift</th>
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Situasi Keamanan</th>
                 </tr>
               </thead>
@@ -3040,14 +3803,13 @@ export const SecurityModule = ({
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1', fontWeight: 700 }}>{s.shift}</td>
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{s.posJaga}</td>
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{s.danru} ({s.personil})</td>
-                    <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{s.inventarisPos}</td>
+                    <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, color: s.status === 'Sedang Bertugas' ? '#0284c7' : '#059669' }}>{s.status}</td>
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{s.kondisi} - {s.catatan}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* TABEL PRINTABLE KONTROL TRUK MATERIAL */}
             <div style={{ marginBottom: '10px', fontWeight: 800, fontSize: '0.85rem' }}>2. Ringkasan Keluar-Masuk Armada Truk Material Proyek</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem', marginBottom: '24px' }}>
               <thead>
@@ -3057,7 +3819,7 @@ export const SecurityModule = ({
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Vendor & Surat Jalan</th>
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Jenis Material</th>
                   <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>No Plat & Supir</th>
-                  <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1' }}>Penerima Lapangan</th>
+                  <th style={{ padding: '6px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>Status Gerbang</th>
                 </tr>
               </thead>
               <tbody>
@@ -3068,13 +3830,12 @@ export const SecurityModule = ({
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1', fontWeight: 700 }}>{m.namaVendor} ({m.noSuratJalan})</td>
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{m.jenisMaterial}</td>
                     <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{m.noPlat} ({m.namaSupir})</td>
-                    <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1' }}>{m.penerima}</td>
+                    <td style={{ padding: '5px 8px', border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800 }}>{m.status}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* TANDA TANGAN KOP SURAT */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pageBreakInside: 'avoid', marginTop: '30px' }}>
               <div style={{ textAlign: 'center', width: '220px' }}>
                 <div style={{ fontSize: '0.78rem', color: '#475569' }}>Dibuat Oleh:</div>
@@ -3089,7 +3850,6 @@ export const SecurityModule = ({
                 <div style={{ fontSize: '0.78rem', color: '#475569' }}>Bogor, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700 }}>Mengetahui & Menyetujui:</div>
                 <div style={{ height: '65px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {/* Stempel Cap Resmi */}
                   <div
                     style={{
                       border: '2px solid #059669',
