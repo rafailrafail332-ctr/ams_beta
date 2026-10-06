@@ -33,7 +33,8 @@ import {
   ArrowRight,
   Check,
   CreditCard,
-  Send
+  Send,
+  RotateCcw
 } from 'lucide-react';
 import { submitFundRequest, getFundRequests } from '../services/financeService';
 
@@ -498,6 +499,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   // ===========================================================================
   const [searchSchedule, setSearchSchedule] = useState('');
   const [filterScheduleStatus, setFilterScheduleStatus] = useState('ALL'); // ALL, Mendatang, Berjalan, Selesai
+  const [filterScheduleStartDate, setFilterScheduleStartDate] = useState('');
+  const [filterScheduleEndDate, setFilterScheduleEndDate] = useState('');
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
@@ -526,9 +529,16 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
         item.pic.toLowerCase().includes(q);
 
       const matchStatus = filterScheduleStatus === 'ALL' || item.status === filterScheduleStatus;
-      return matchSearch && matchStatus;
+
+      // Filter Rentang Tanggal
+      const itemStart = item.tanggalMulai || '';
+      const itemEnd = item.tanggalSelesai || item.tanggalMulai || '';
+      const matchStart = !filterScheduleStartDate || itemEnd >= filterScheduleStartDate;
+      const matchEnd = !filterScheduleEndDate || itemStart <= filterScheduleEndDate;
+
+      return matchSearch && matchStatus && matchStart && matchEnd;
     });
-  }, [schedules, searchSchedule, filterScheduleStatus]);
+  }, [schedules, searchSchedule, filterScheduleStatus, filterScheduleStartDate, filterScheduleEndDate]);
 
   const handleOpenAddSchedule = () => {
     setEditingSchedule(null);
@@ -596,6 +606,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   // SUB-MODUL 2: GOALS, TUJUAN & MOM NOTULEN STATE & HANDLERS
   // ===========================================================================
   const [searchMOM, setSearchMOM] = useState('');
+  const [filterMOMStartDate, setFilterMOMStartDate] = useState('');
+  const [filterMOMEndDate, setFilterMOMEndDate] = useState('');
   const [isMOMModalOpen, setIsMOMModalOpen] = useState(false);
   const [editingMOM, setEditingMOM] = useState(null);
   const [viewingMOMDoc, setViewingMOMDoc] = useState(null);
@@ -617,14 +629,20 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   const filteredMOMs = useMemo(() => {
     return moms.filter(item => {
       const q = searchMOM.toLowerCase().trim();
-      return !q ||
+      const matchSearch = !q ||
         item.namaAcara.toLowerCase().includes(q) ||
         item.lokasi.toLowerCase().includes(q) ||
         item.goals.toLowerCase().includes(q) ||
         item.tujuan.toLowerCase().includes(q) ||
         item.momHasil.toLowerCase().includes(q);
+
+      const itemDate = item.tanggal || '';
+      const matchStart = !filterMOMStartDate || itemDate >= filterMOMStartDate;
+      const matchEnd = !filterMOMEndDate || itemDate <= filterMOMEndDate;
+
+      return matchSearch && matchStart && matchEnd;
     });
-  }, [moms, searchMOM]);
+  }, [moms, searchMOM, filterMOMStartDate, filterMOMEndDate]);
 
   const handleOpenAddMOM = () => {
     setEditingMOM(null);
@@ -693,6 +711,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   const [filterDocEvent, setFilterDocEvent] = useState('ALL');
   const [filterDocMonthYear, setFilterDocMonthYear] = useState('ALL');
   const [filterDocCategory, setFilterDocCategory] = useState('ALL');
+  const [filterDocStartDate, setFilterDocStartDate] = useState('');
+  const [filterDocEndDate, setFilterDocEndDate] = useState('');
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [viewingLightboxIndex, setViewingLightboxIndex] = useState(null);
@@ -740,9 +760,13 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
       const matchMonth = filterDocMonthYear === 'ALL' || item.bulanTahun === filterDocMonthYear;
       const matchCategory = filterDocCategory === 'ALL' || item.kategori === filterDocCategory;
 
-      return matchSearch && matchEvent && matchMonth && matchCategory;
+      const itemDate = item.tanggal || '';
+      const matchStartDate = !filterDocStartDate || (itemDate && itemDate >= filterDocStartDate);
+      const matchEndDate = !filterDocEndDate || (itemDate && itemDate <= filterDocEndDate);
+
+      return matchSearch && matchEvent && matchMonth && matchCategory && matchStartDate && matchEndDate;
     });
-  }, [docs, searchDoc, filterDocEvent, filterDocMonthYear, filterDocCategory]);
+  }, [docs, searchDoc, filterDocEvent, filterDocMonthYear, filterDocCategory, filterDocStartDate, filterDocEndDate]);
 
   const handleOpenAddDoc = () => {
     const firstSch = schedules[0];
@@ -830,6 +854,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   // SUB-MODUL 4: RINCIAN ANGGARAN, REKENING BANK & GRAFIK TREN BIAYA
   // ===========================================================================
   const [searchBudget, setSearchBudget] = useState('');
+  const [filterBudgetStatus, setFilterBudgetStatus] = useState('ALL'); // ALL, Lunas, Diajukan ke Finance, Pending
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
   const [selectedBudgetForPayment, setSelectedBudgetForPayment] = useState(null); // Modal Konfirmasi Bayar ke Finance
@@ -854,7 +879,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   const filteredBudgets = useMemo(() => {
     return budgets.filter(item => {
       const q = searchBudget.toLowerCase().trim();
-      return !q ||
+      const matchSearch = !q ||
         item.posPengeluaran.toLowerCase().includes(q) ||
         item.uraian.toLowerCase().includes(q) ||
         item.namaAcara.toLowerCase().includes(q) ||
@@ -862,8 +887,11 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
         (item.noRekening && item.noRekening.toLowerCase().includes(q)) ||
         (item.namaPenerima && item.namaPenerima.toLowerCase().includes(q)) ||
         (item.catatan && item.catatan.toLowerCase().includes(q));
+
+      const matchStatus = filterBudgetStatus === 'ALL' || item.status === filterBudgetStatus;
+      return matchSearch && matchStatus;
     });
-  }, [budgets, searchBudget]);
+  }, [budgets, searchBudget, filterBudgetStatus]);
 
   // Kalkulasi Total Finansial
   const totalRencana = useMemo(() => budgets.reduce((acc, b) => acc + (Number(b.rencana) || 0), 0), [budgets]);
@@ -1244,7 +1272,8 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Filter Status Acara */}
               <select
                 value={filterScheduleStatus}
                 onChange={(e) => setFilterScheduleStatus(e.target.value)}
@@ -1265,6 +1294,83 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                 <option value="Berjalan">Sedang Berjalan</option>
                 <option value="Selesai">Selesai Dilaksanakan</option>
               </select>
+
+              {/* Filter Rentang Tanggal Acara */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Calendar size={13} color="#10b981" /> Dari:
+                </span>
+                <input
+                  type="date"
+                  value={filterScheduleStartDate}
+                  onChange={(e) => setFilterScheduleStartDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal mulai dari"
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Sampai:</span>
+                <input
+                  type="date"
+                  value={filterScheduleEndDate}
+                  onChange={(e) => setFilterScheduleEndDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal selesai sampai"
+                />
+              </div>
+
+              {/* Reset Filter Jika Aktif */}
+              {(filterScheduleStartDate || filterScheduleEndDate || filterScheduleStatus !== 'ALL' || searchSchedule) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchSchedule('');
+                    setFilterScheduleStatus('ALL');
+                    setFilterScheduleStartDate('');
+                    setFilterScheduleEndDate('');
+                  }}
+                  style={{
+                    height: '38px',
+                    padding: '0 10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#f87171',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Reset Semua Filter Jadwal"
+                >
+                  <RotateCcw size={13} /> Reset
+                </button>
+              )}
 
               <button
                 onClick={handleOpenAddSchedule}
@@ -1497,23 +1603,101 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            <button
-              onClick={handleOpenAddMOM}
-              className="btn btn-primary"
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.82rem',
-                height: '38px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-              }}
-            >
-              <Plus size={16} /> + Terbitkan Notulen / MOM Baru
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Filter Rentang Tanggal Notulen */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Calendar size={13} color="#10b981" /> Dari:
+                </span>
+                <input
+                  type="date"
+                  value={filterMOMStartDate}
+                  onChange={(e) => setFilterMOMStartDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal notulen mulai dari"
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Sampai:</span>
+                <input
+                  type="date"
+                  value={filterMOMEndDate}
+                  onChange={(e) => setFilterMOMEndDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal notulen sampai"
+                />
+              </div>
+
+              {/* Reset Filter Jika Aktif */}
+              {(filterMOMStartDate || filterMOMEndDate || searchMOM) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchMOM('');
+                    setFilterMOMStartDate('');
+                    setFilterMOMEndDate('');
+                  }}
+                  style={{
+                    height: '38px',
+                    padding: '0 10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#f87171',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Reset Semua Filter MOM"
+                >
+                  <RotateCcw size={13} /> Reset
+                </button>
+              )}
+
+              <button
+                onClick={handleOpenAddMOM}
+                className="btn btn-primary"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  height: '38px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <Plus size={16} /> + Terbitkan Notulen / MOM Baru
+              </button>
+            </div>
           </div>
 
           <div className="table-container" style={{ border: '1px solid #1e293b', borderRadius: '12px', overflowX: 'auto' }}>
@@ -1692,7 +1876,7 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            {/* Filter Acara, Bulan, & Kategori Momen */}
+            {/* Filter Acara, Bulan, Kategori, & Rentang Tanggal Momen */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {/* Filter Acara */}
               <select
@@ -1761,6 +1945,85 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
                   return <option key={i} value={m}>{monthName}</option>;
                 })}
               </select>
+
+              {/* Filter Rentang Tanggal Foto */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Calendar size={13} color="#10b981" /> Dari:
+                </span>
+                <input
+                  type="date"
+                  value={filterDocStartDate}
+                  onChange={(e) => setFilterDocStartDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal foto mulai dari"
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Sampai:</span>
+                <input
+                  type="date"
+                  value={filterDocEndDate}
+                  onChange={(e) => setFilterDocEndDate(e.target.value)}
+                  style={{
+                    height: '38px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '0 8px',
+                    outline: 'none',
+                    colorScheme: 'dark'
+                  }}
+                  title="Filter tanggal foto sampai"
+                />
+              </div>
+
+              {/* Reset Filter Jika Aktif */}
+              {(filterDocStartDate || filterDocEndDate || filterDocEvent !== 'ALL' || filterDocCategory !== 'ALL' || filterDocMonthYear !== 'ALL' || searchDoc) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchDoc('');
+                    setFilterDocEvent('ALL');
+                    setFilterDocCategory('ALL');
+                    setFilterDocMonthYear('ALL');
+                    setFilterDocStartDate('');
+                    setFilterDocEndDate('');
+                  }}
+                  style={{
+                    height: '38px',
+                    padding: '0 10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#f87171',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Reset Semua Filter Dokumentasi"
+                >
+                  <RotateCcw size={13} /> Reset
+                </button>
+              )}
 
               <button
                 onClick={handleOpenAddDoc}
@@ -2482,23 +2745,73 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
               />
             </div>
 
-            <button
-              onClick={handleOpenAddBudget}
-              className="btn btn-primary"
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                fontWeight: 800,
-                fontSize: '0.82rem',
-                height: '38px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-              }}
-            >
-              <Plus size={16} /> + Tambah Pos Anggaran Baru
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <select
+                value={filterBudgetStatus}
+                onChange={(e) => setFilterBudgetStatus(e.target.value)}
+                style={{
+                  height: '38px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  border: '1px solid #334155',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="ALL">Semua Status Bayar</option>
+                <option value="Lunas">Lunas (Sudah Cair)</option>
+                <option value="Diajukan ke Finance">Diajukan ke Finance</option>
+                <option value="Pending">Pending (Belum Diajukan)</option>
+              </select>
+
+              {(filterBudgetStatus !== 'ALL' || searchBudget) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchBudget('');
+                    setFilterBudgetStatus('ALL');
+                  }}
+                  style={{
+                    height: '38px',
+                    padding: '0 10px',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#f87171',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Reset Filter Anggaran"
+                >
+                  <RotateCcw size={13} /> Reset
+                </button>
+              )}
+
+              <button
+                onClick={handleOpenAddBudget}
+                className="btn btn-primary"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  height: '38px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <Plus size={16} /> + Tambah Pos Anggaran Baru
+              </button>
+            </div>
           </div>
 
           {/* TABEL RINCIAN ANGGARAN GATHERING LENGKAP DENGAN REKENING & KLIK BAYAR */}
