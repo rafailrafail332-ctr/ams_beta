@@ -30,6 +30,7 @@ import {
   Navigation,
   FileText,
   Upload,
+  UploadCloud,
   AlertCircle,
   ThumbsUp,
   ThumbsDown,
@@ -401,8 +402,47 @@ export const AttendanceModule = ({
     endDate: todayStr,
     type: 'Izin Sakit',
     reason: '',
-    attachmentName: ''
+    attachmentName: '',
+    attachmentFile: null
   });
+
+  const leaveFileInputRef = useRef(null);
+
+  const handleLeaveFileUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const sizeStr = file.size / 1024 < 1000 
+      ? `${Math.round(file.size / 1024)} KB` 
+      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      setLeaveForm(prev => ({
+        ...prev,
+        attachmentName: file.name,
+        attachmentFile: {
+          name: file.name,
+          size: sizeStr,
+          data: loadEvt.target.result,
+          type: file.type
+        }
+      }));
+      showNotification && showNotification(`Dokumen "${file.name}" (${sizeStr}) berhasil dipilih!`, 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLeaveFile = () => {
+    setLeaveForm(prev => ({
+      ...prev,
+      attachmentName: '',
+      attachmentFile: null
+    }));
+    if (leaveFileInputRef.current) {
+      leaveFileInputRef.current.value = '';
+    }
+  };
 
   // Helper Format Tanggal
   const formatDisplayDate = (dStr) => {
@@ -710,7 +750,8 @@ export const AttendanceModule = ({
       endDate: leaveForm.endDate,
       type: leaveForm.type,
       reason: leaveForm.reason || 'Tidak ada catatan tambahan',
-      attachment: leaveForm.attachmentName || 'Surat_Keterangan_Resmi.pdf',
+      attachment: leaveForm.attachmentName || (leaveForm.attachmentFile ? leaveForm.attachmentFile.name : 'Surat_Keterangan_Resmi.pdf'),
+      attachmentFile: leaveForm.attachmentFile || null,
       status: 'APPROVED',
       approvedBy: `${currentUser?.name || 'Head HR & GA'} (${currentUser?.role || 'Management'})`,
       accTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB'
@@ -727,8 +768,12 @@ export const AttendanceModule = ({
       endDate: todayStr,
       type: 'Izin Sakit',
       reason: '',
-      attachmentName: ''
+      attachmentName: '',
+      attachmentFile: null
     });
+    if (leaveFileInputRef.current) {
+      leaveFileInputRef.current.value = '';
+    }
 
     showNotification && showNotification(`Dokumen ${newLeave.type} untuk ${newLeave.name} berhasil diterbitkan dan masuk rekapan!`, 'success');
   };
@@ -2263,26 +2308,157 @@ export const AttendanceModule = ({
                 />
               </div>
 
-              {/* Nama File Bukti Lampiran */}
+              {/* Upload Dokumen Lampiran (Surat Dokter / Form Cuti) */}
               <div>
-                <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '4px', fontWeight: 700 }}>
-                  Nama Dokumen Lampiran (Surat Dokter / Form Cuti)
+                <label style={{ fontSize: '0.74rem', color: '#cbd5e1', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
+                  Upload Dokumen Lampiran (Surat Dokter / Form Cuti)
                 </label>
+
                 <input
-                  type="text"
-                  placeholder="Contoh: Surat_Keterangan_Dokter_RSUD.pdf"
-                  value={leaveForm.attachmentName}
-                  onChange={(e) => setLeaveForm({ ...leaveForm, attachmentName: e.target.value })}
-                  style={{
-                    width: '100%',
-                    background: '#090d16',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    padding: '8px 10px',
-                    color: '#f8fafc',
-                    fontSize: '0.8rem'
-                  }}
+                  ref={leaveFileInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  onChange={handleLeaveFileUpload}
+                  style={{ display: 'none' }}
                 />
+
+                {!leaveForm.attachmentFile ? (
+                  <div
+                    onClick={() => leaveFileInputRef.current && leaveFileInputRef.current.click()}
+                    style={{
+                      border: '2px dashed #334155',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      textAlign: 'center',
+                      background: 'rgba(9, 13, 22, 0.6)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#334155';
+                      e.currentTarget.style.background = 'rgba(9, 13, 22, 0.6)';
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '8px',
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        border: '1px solid rgba(16, 185, 129, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#10b981'
+                      }}
+                    >
+                      <UploadCloud size={20} />
+                    </div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f8fafc' }}>
+                      Klik untuk Pilih / Upload Berkas
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                      Format: PDF, JPG, PNG, DOCX (Maksimal 10 MB)
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      border: '1px solid #10b981',
+                      borderRadius: '10px',
+                      padding: '10px 14px',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '8px',
+                          background: 'rgba(16, 185, 129, 0.2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#10b981',
+                          flexShrink: 0
+                        }}
+                      >
+                        <FileText size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {leaveForm.attachmentFile.name}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#34d399' }}>
+                          {leaveForm.attachmentFile.size} &bull; Berkas Siap Diunggah
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      {leaveForm.attachmentFile.data && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const w = window.open('');
+                            if (w) {
+                              w.document.write(`<title>${leaveForm.attachmentFile.name}</title><iframe src="${leaveForm.attachmentFile.data}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                            }
+                          }}
+                          className="btn btn-secondary btn-sm"
+                          style={{
+                            background: '#090d16',
+                            border: '1px solid #334155',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            color: '#38bdf8',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          title="Pratinjau Dokumen"
+                        >
+                          <Eye size={12} /> Lihat
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleRemoveLeaveFile}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          color: '#f87171',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        title="Hapus / Ganti Dokumen"
+                      >
+                        <Trash2 size={12} /> Hapus
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
