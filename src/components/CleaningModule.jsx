@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import {
   Sparkles,
   Droplets,
@@ -419,29 +420,49 @@ export const CleaningModule = ({
     return INITIAL_PESTS;
   });
 
-  // Save changes to localStorage
+  // Initial fetch from MySQL Database on Sengked Hosting
+  useEffect(() => {
+    fetchCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setChecklists(val);
+    });
+    fetchCloudStore(STORAGE_CLEANING_GARDENS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setGardens(val);
+    });
+    fetchCloudStore(STORAGE_CLEANING_WASTES_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setWasteLogs(val);
+    });
+    fetchCloudStore(STORAGE_CLEANING_PESTS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setPestControls(val);
+    });
+  }, []);
+
+  // Save changes to localStorage & MySQL Database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_CLEANING_CHECKLISTS_KEY, JSON.stringify(checklists));
     } catch {}
+    saveCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, checklists);
   }, [checklists]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_CLEANING_GARDENS_KEY, JSON.stringify(gardens));
     } catch {}
+    saveCloudStore(STORAGE_CLEANING_GARDENS_KEY, gardens);
   }, [gardens]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_CLEANING_WASTES_KEY, JSON.stringify(wasteLogs));
     } catch {}
+    saveCloudStore(STORAGE_CLEANING_WASTES_KEY, wasteLogs);
   }, [wasteLogs]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_CLEANING_PESTS_KEY, JSON.stringify(pestControls));
     } catch {}
+    saveCloudStore(STORAGE_CLEANING_PESTS_KEY, pestControls);
   }, [pestControls]);
 
   // Filter States

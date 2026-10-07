@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import * as XLSX from 'xlsx';
 import {
   Clock,
@@ -326,10 +327,19 @@ export const AttendanceModule = ({
     return SEED_LEAVE_REQUESTS;
   });
 
+  // Initial fetch from MySQL Database on Sengked Hosting
+  useEffect(() => {
+    fetchCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setLeaveRequests(val);
+    });
+  }, []);
+
+  // Save changes to localStorage & MySQL Database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_ATTENDANCE_LEAVE_KEY, JSON.stringify(leaveRequests));
     } catch {}
+    saveCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, leaveRequests);
   }, [leaveRequests]);
 
   // Merge Live App Attendances dengan Seed jika AppContext attendances kosong

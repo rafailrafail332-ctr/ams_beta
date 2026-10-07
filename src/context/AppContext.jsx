@@ -435,8 +435,18 @@ export const AppProvider = ({ children }) => {
         setTodos(val);
       }
     });
+    fetchCloudStore('ams_work_instructions_v2', null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setInstructions(val);
+      }
+    });
+    fetchCloudStore('ams_attendances_clean_v15', null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setAttendances(val);
+      }
+    });
 
-    // Auto real-time background sync every 10 seconds
+    // Auto real-time background sync every 10 seconds from MySQL Database
     const interval = setInterval(() => {
       fetchCloudStore('ams_todos_master_v5', null).then(val => {
         if (val && Array.isArray(val) && val.length > 0) {
@@ -446,6 +456,11 @@ export const AppProvider = ({ children }) => {
       fetchCloudStore('ams_work_instructions_v2', null).then(val => {
         if (val && Array.isArray(val) && val.length > 0) {
           setInstructions(val);
+        }
+      });
+      fetchCloudStore('ams_attendances_clean_v15', null).then(val => {
+        if (val && Array.isArray(val) && val.length > 0) {
+          setAttendances(val);
         }
       });
     }, 10000);
@@ -625,6 +640,7 @@ export const AppProvider = ({ children }) => {
     try {
       localStorage.setItem('ams_attendances_clean_v15', JSON.stringify(attendances));
     } catch (e) {}
+    saveCloudStore('ams_attendances_clean_v15', attendances);
   }, [attendances]);
 
   // ACC Photo Selfie Approval Helper Actions

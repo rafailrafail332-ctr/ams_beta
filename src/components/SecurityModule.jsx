@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import {
   Shield,
   ShieldCheck,
@@ -527,29 +528,49 @@ export const SecurityModule = ({
     return INITIAL_PATROLS;
   });
 
-  // Save changes to localStorage
+  // Initial fetch from MySQL Database on Sengked Hosting
+  useEffect(() => {
+    fetchCloudStore(STORAGE_SECURITY_SHIFTS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setShifts(val);
+    });
+    fetchCloudStore(STORAGE_SECURITY_VISITORS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setVisitors(val);
+    });
+    fetchCloudStore(STORAGE_SECURITY_MATERIALS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setMaterials(val);
+    });
+    fetchCloudStore(STORAGE_SECURITY_PATROLS_KEY, null).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setPatrols(val);
+    });
+  }, []);
+
+  // Save changes to localStorage & MySQL Database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_SECURITY_SHIFTS_KEY, JSON.stringify(shifts));
     } catch {}
+    saveCloudStore(STORAGE_SECURITY_SHIFTS_KEY, shifts);
   }, [shifts]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_SECURITY_VISITORS_KEY, JSON.stringify(visitors));
     } catch {}
+    saveCloudStore(STORAGE_SECURITY_VISITORS_KEY, visitors);
   }, [visitors]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_SECURITY_MATERIALS_KEY, JSON.stringify(materials));
     } catch {}
+    saveCloudStore(STORAGE_SECURITY_MATERIALS_KEY, materials);
   }, [materials]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_SECURITY_PATROLS_KEY, JSON.stringify(patrols));
     } catch {}
+    saveCloudStore(STORAGE_SECURITY_PATROLS_KEY, patrols);
   }, [patrols]);
 
   // Filter States

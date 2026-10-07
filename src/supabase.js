@@ -1,8 +1,8 @@
-// AMS Database Connection - 100% MySQL Database (Hosting cPanel amsprope_amsdb)
+// AMS Database Connection - 100% MySQL Database (Terpusat di Hosting / Server)
 
-const MYSQL_API_URL = typeof window !== 'undefined' && window.location.origin.includes('amsproperti.online')
+const MYSQL_API_URL = typeof window !== 'undefined'
   ? `${window.location.origin}/app_api.php`
-  : 'http://amsproperti.online/app_api.php';
+  : '/app_api.php';
 
 // Supabase client instance (kept as placeholder for authentication token compatibility if needed)
 export const supabase = {
