@@ -13,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $db_host = "127.0.0.1";
-$db_user = "u643087735_ashokaproprty";
-$db_pass = "Ashokaview2026";
-$db_name = "u643087735_ashokaproperty";
+$db_user = "u643087735_ams";
+$db_pass = "Ams2026#";
+$db_name = "u643087735_ams";
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass, [
