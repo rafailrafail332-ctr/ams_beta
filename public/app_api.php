@@ -12,10 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$db_host = "localhost";
-$db_user = "amsprope";
-$db_pass = "X9182Ynrh+;XEv";
-$db_name = "amsprope_amsdb";
+$db_host = "127.0.0.1";
+$db_user = "u643087735_ashokaproprty";
+$db_pass = "Ashokaview2026";
+$db_name = "u643087735_ashokaproperty";
 
 try {
     $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass, [

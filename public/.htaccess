@@ -1,3 +1,6 @@
+# Directory Index
+DirectoryIndex index.html index.php
+
 # Disable directory browsing
 Options -Indexes
 
@@ -43,12 +46,10 @@ Options -Indexes
 	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 	RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
 
-	# Checks to see if the user is attempting to access a valid file,
-	# such as an image or css document, if this isn't true it sends the
-	# request to the front controller, index.php
+	# Single Page Application routing (fallback to index.html)
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteRule ^([\s\S]*)$ index.php/$1 [L,NC,QSA]
+	RewriteRule ^ index.html [L]
 
 	# Ensure Authorization header is passed along
 	RewriteCond %{HTTP:Authorization} .
@@ -56,9 +57,7 @@ Options -Indexes
 </IfModule>
 
 <IfModule !mod_rewrite.c>
-	# If we don't have mod_rewrite installed, all 404's
-	# can be sent to index.php, and everything works as normal.
-	ErrorDocument 404 index.php
+	ErrorDocument 404 /index.html
 </IfModule>
 
 # Disable server signature start

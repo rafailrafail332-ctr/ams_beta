@@ -6,6 +6,8 @@ dist-ssr/
 *.local
 *.zip
 downloaded_app_api.php
+index.php.ci_old
+scratch/
 
 #-------------------------
 # Operating Specific Junk Files
