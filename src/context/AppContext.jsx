@@ -200,55 +200,22 @@ export const AppProvider = ({ children }) => {
     }
   ];
 
-  // 1. PERSISTENT USERS STORE FROM LOCALSTORAGE (KEEPS ALL OFFICIAL ACCOUNTS)
-  const getSavedUsers = () => {
-    try {
-      const saved = localStorage.getItem('ams_users_clean_v23');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 17) {
-          return parsed.map(u => u.id === 'USR-002' ? { ...u, email: 'ams@gmail.com' } : u);
-        }
-      }
-    } catch (e) {
-      console.error('Error loading users:', e);
-    }
-    return officialCompanyUsers;
-  };
-
-  const [users, setUsers] = useState(getSavedUsers);
+  // 1. PERSISTENT USERS STORE FROM MYSQL DATABASE (ZERO LOCALSTORAGE)
+  const [users, setUsers] = useState(officialCompanyUsers);
 
   // 2. PERSISTENT CURRENT LOGGED-IN USER
   const getSavedCurrentUser = (userList) => {
-    try {
-      const saved = localStorage.getItem('ams_current_user_clean_v23');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const matched = userList.find(u => u.email.toLowerCase() === parsed.email.toLowerCase() || u.id === parsed.id || (parsed.id === 'USR-002' && u.id === 'USR-002'));
-        if (matched) return { ...matched, ...parsed, email: matched.email, allowedModules: matched.allowedModules, role: matched.role };
-      }
-    } catch (e) {}
-    const yazidDefault = userList.find(u => u.email.toLowerCase() === 'ams@gmail.com' || u.email.toLowerCase() === 'yazid@ams.co.id');
+    const yazidDefault = userList.find(u => u.email?.toLowerCase() === 'ams@gmail.com' || u.email?.toLowerCase() === 'yazid@ams.co.id');
     return yazidDefault || userList[0] || officialCompanyUsers[0];
   };
 
-  const [currentUser, setCurrentUser] = useState(() => getSavedCurrentUser(users));
+  const [currentUser, setCurrentUser] = useState(() => getSavedCurrentUser(officialCompanyUsers));
 
-  // Sync users to localStorage
+  // Sync users to MySQL Database
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_users_clean_v23', JSON.stringify(users));
-    } catch (e) {}
+    saveCloudStore('ams_users', users);
   }, [users]);
 
-  // Sync currentUser to localStorage
-  useEffect(() => {
-    try {
-      if (currentUser) {
-        localStorage.setItem('ams_current_user_clean_v23', JSON.stringify(currentUser));
-      }
-    } catch (e) {}
-  }, [currentUser]);
   // Helper avatar generator for fallback initials
   const getAvatarUrl = (user) => {
     if (user && user.avatar && user.avatar.trim() !== '') {
@@ -301,28 +268,15 @@ export const AppProvider = ({ children }) => {
   const resetToOfficialCompanyUsers = () => {
     setUsers(officialCompanyUsers);
     setCurrentUser(officialCompanyUsers[0]);
-    try {
-      localStorage.setItem('ams_users_clean_v15', JSON.stringify(officialCompanyUsers));
-      localStorage.setItem('ams_current_user_clean_v15', JSON.stringify(officialCompanyUsers[0]));
-    } catch (e) {}
+    saveCloudStore('ams_users', officialCompanyUsers);
     showNotification('AKUN DITERBITKAN KEMBALI! Seluruh 17 akun pimpinan & staf resmi aktif.', 'info');
   };
 
-  // 3. HOUSING UNITS STORE (CLEAN EMPTY INITIAL STATE - 0% S-CURVE BASELINE)
-  const getInitialUnits = () => {
-    try {
-      const saved = localStorage.getItem('ams_units_clean_v22');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return []; // Clean Empty List: Progress, Cashflow & S-Curve start at 0%
-  };
-
-  const [units, setUnits] = useState(getInitialUnits);
+  // 3. HOUSING UNITS STORE FROM MYSQL DATABASE (ZERO LOCALSTORAGE)
+  const [units, setUnits] = useState([]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_units_clean_v22', JSON.stringify(units));
-    } catch (e) {}
+    saveCloudStore('ams_units', units);
   }, [units]);
 
   // 4. CLEAN TO-DO LIST STORE (FORMAT LAPORAN PEKERJAAN HARIAN: TANGGAL, WAKTU, PROYEK, LAPORAN, KORDINASI, PIC)
@@ -397,74 +351,52 @@ export const AppProvider = ({ children }) => {
     }
   ];
 
-  const getInitialTodos = () => {
-    try {
-      const saved = localStorage.getItem('ams_todos_master_v5');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-      const old4 = localStorage.getItem('ams_todos_master_v4');
-      if (old4) {
-        const parsedOld = JSON.parse(old4);
-        if (Array.isArray(parsedOld) && parsedOld.length > 0) {
-          return parsedOld.map((item, idx) => ({
-            ...item,
-            proyek: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View'),
-            project: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View')
-          }));
-        }
-      }
-    } catch (e) {}
-    return defaultInitialTodos;
-  };
+  const [todos, setTodos] = useState(defaultInitialTodos);
 
-  const [todos, setTodos] = useState(getInitialTodos);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_todos_master_v5', JSON.stringify(todos));
-    } catch (e) {}
     saveCloudStore('ams_todos_master_v5', todos);
   }, [todos]);
 
-  // Initial fetch and polling sync from MySQL for Todos
+  // Initial fetch and real-time polling sync from MySQL Database (Zero LocalStorage)
   useEffect(() => {
-    fetchCloudStore('ams_todos_master_v5', null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) {
-        setTodos(val);
-      }
-    });
-    fetchCloudStore('ams_work_instructions_v2', null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) {
-        setInstructions(val);
-      }
-    });
-    fetchCloudStore('ams_attendances_clean_v15', null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) {
-        setAttendances(val);
-      }
-    });
-
-    // Auto real-time background sync every 10 seconds from MySQL Database
-    const interval = setInterval(() => {
+    const fetchAllFromMySQL = () => {
+      fetchCloudStore('ams_users', null).then(val => {
+        if (Array.isArray(val) && val.length > 0) setUsers(val);
+      });
+      fetchCloudStore('ams_units', null).then(val => {
+        if (Array.isArray(val)) setUnits(val);
+      });
       fetchCloudStore('ams_todos_master_v5', null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) {
-          setTodos(val);
-        }
+        if (Array.isArray(val) && val.length > 0) setTodos(val);
       });
       fetchCloudStore('ams_work_instructions_v2', null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) {
-          setInstructions(val);
-        }
+        if (Array.isArray(val) && val.length > 0) setInstructions(val);
       });
       fetchCloudStore('ams_attendances_clean_v15', null).then(val => {
-        if (val && Array.isArray(val) && val.length > 0) {
-          setAttendances(val);
-        }
+        if (Array.isArray(val) && val.length > 0) setAttendances(val);
       });
-    }, 10000);
+      fetchCloudStore('ams_media_info_v1', null).then(val => {
+        if (Array.isArray(val) && val.length > 0) setMediaInfoList(val);
+      });
+      fetchCloudStore('ams_facilities', null).then(val => {
+        if (Array.isArray(val) && val.length > 0) setFacilities(val);
+      });
+      fetchCloudStore('ams_commercials', null).then(val => {
+        if (Array.isArray(val) && val.length > 0) setCommercials(val);
+      });
+      fetchCloudStore('ams_utilities', null).then(val => {
+        if (Array.isArray(val) && val.length > 0) setUtilities(val);
+      });
+      fetchCloudStore('ams_working_hours_v2', null).then(val => {
+        if (val && typeof val === 'object' && val.headOffice) setWorkingHours(val);
+      });
+    };
 
+    fetchAllFromMySQL();
+
+    // Auto real-time background sync every 10 seconds directly from MySQL Database
+    const interval = setInterval(fetchAllFromMySQL, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -526,31 +458,9 @@ export const AppProvider = ({ children }) => {
     }
   ];
 
-  const getInitialInstructions = () => {
-    try {
-      const saved = localStorage.getItem('ams_work_instructions_v2');
-      if (saved) return JSON.parse(saved);
-      const old = localStorage.getItem('ams_work_instructions_v1');
-      if (old) {
-        const parsed = JSON.parse(old);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((item, idx) => ({
-            ...item,
-            proyek: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View'),
-            project: item.proyek || item.project || (idx % 2 === 0 ? 'Ashoka Park' : 'Ashoka View')
-          }));
-        }
-      }
-    } catch (e) {}
-    return defaultInitialInstructions;
-  };
-
-  const [instructions, setInstructions] = useState(getInitialInstructions);
+  const [instructions, setInstructions] = useState(defaultInitialInstructions);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_work_instructions_v2', JSON.stringify(instructions));
-    } catch (e) {}
     saveCloudStore('ams_work_instructions_v2', instructions);
   }, [instructions]);
 
@@ -609,37 +519,16 @@ export const AppProvider = ({ children }) => {
     }
   ];
 
-  const getInitialMediaInfo = () => {
-    try {
-      const saved = localStorage.getItem('ams_media_info_v1');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return defaultInitialMediaInfo;
-  };
-
-  const [mediaInfoList, setMediaInfoList] = useState(getInitialMediaInfo);
+  const [mediaInfoList, setMediaInfoList] = useState(defaultInitialMediaInfo);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_media_info_v1', JSON.stringify(mediaInfoList));
-    } catch (e) {}
+    saveCloudStore('ams_media_info_v1', mediaInfoList);
   }, [mediaInfoList]);
 
-  // 5. CLEAN ATTENDANCE LOGS STORE (EMPTY LIST READY FOR MANUAL TESTING)
-  const getInitialAttendances = () => {
-    try {
-      const saved = localStorage.getItem('ams_attendances_clean_v15');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return []; // Clean Empty List
-  };
-
-  const [attendances, setAttendances] = useState(getInitialAttendances);
+  // 5. CLEAN ATTENDANCE LOGS STORE (ZERO LOCALSTORAGE - 100% MYSQL)
+  const [attendances, setAttendances] = useState([]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_attendances_clean_v15', JSON.stringify(attendances));
-    } catch (e) {}
     saveCloudStore('ams_attendances_clean_v15', attendances);
   }, [attendances]);
 
@@ -838,30 +727,15 @@ export const AppProvider = ({ children }) => {
     security: { hours: '24 Jam (3 Rotasi Shift)', days: '7 Hari / Minggu • Siaga Pos' }
   };
 
-  const [workingHours, setWorkingHours] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_working_hours_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object' && parsed.headOffice && parsed.siteOffice && parsed.security) {
-          return parsed;
-        }
-      }
-    } catch (e) {}
-    return initialWorkingHours;
-  });
+  const [workingHours, setWorkingHours] = useState(initialWorkingHours);
 
   const updateWorkingHours = (newHours) => {
     setWorkingHours(newHours);
-    try {
-      localStorage.setItem('ams_working_hours_v2', JSON.stringify(newHours));
-    } catch (e) {}
+    saveCloudStore('ams_working_hours_v2', newHours);
   };
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_working_hours_v2', JSON.stringify(workingHours));
-    } catch (e) {}
+    saveCloudStore('ams_working_hours_v2', workingHours);
   }, [workingHours]);
 
   const canAccessModule = (moduleKey, userOverride = null) => {

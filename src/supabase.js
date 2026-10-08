@@ -1,4 +1,5 @@
-// AMS Database Connection - 100% MySQL Database (Terpusat di Hosting / Server)
+// AMS Database Connection - 100% Murni MySQL Database (Terpusat di Hostinger Server)
+// Tanpa ketergantungan pada localStorage
 
 const MYSQL_API_URL = typeof window !== 'undefined'
   ? `${window.location.origin}/app_api.php`
@@ -10,27 +11,16 @@ export const supabase = {
 };
 
 /**
- * 100% MySQL Database Sync:
- * - Reads directly from MySQL Database on Hosting
- * - Saves directly to MySQL Database on Hosting
+ * 100% Pure MySQL Database Sync:
+ * - Reads directly from MySQL Database on Hostinger (Single Source of Truth)
+ * - Zero localStorage usage
  */
 export const fetchCloudStore = async (key, defaultValue) => {
-  // Read local first as fallback
-  let localValue = null;
-  try {
-    const local = localStorage.getItem(key);
-    if (local) localValue = JSON.parse(local);
-  } catch (e) {}
-
-  // 1. Fetch from MySQL Database on Sengked Hosting (Single Source of Truth)
   try {
     const res = await fetch(`${MYSQL_API_URL}?action=get&key=${encodeURIComponent(key)}&_t=${Date.now()}`);
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'success' && json.value !== undefined && json.value !== null) {
-        try {
-          localStorage.setItem(key, JSON.stringify(json.value));
-        } catch (e) {}
         return json.value;
       }
     }
@@ -38,21 +28,15 @@ export const fetchCloudStore = async (key, defaultValue) => {
     console.warn(`[MySQL Fetch Error for ${key}]:`, err);
   }
 
-  // 2. Fallback to LocalStorage if offline / fetch failed
-  if (localValue !== null && localValue !== undefined) {
-    return localValue;
-  }
-
   return defaultValue;
 };
 
+/**
+ * 100% Pure MySQL Database Save:
+ * - Saves directly to MySQL Database on Hostinger
+ * - Zero localStorage usage
+ */
 export const saveCloudStore = async (key, value) => {
-  // 1. Fast local cache
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {}
-
-  // 2. Save directly to MySQL Database on Hosting
   try {
     return await fetch(MYSQL_API_URL, {
       method: 'POST',
@@ -63,4 +47,3 @@ export const saveCloudStore = async (key, value) => {
     console.error(`[MySQL Save Error for ${key}]:`, err);
   }
 };
-
