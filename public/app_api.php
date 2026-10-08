@@ -614,8 +614,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $vis['name'] ?? $vis['namaTamu'],
                         $vis['phone'] ?? ($vis['noHp'] ?? null),
                         $vis['purpose'] ?? ($vis['keperluan'] ?? null),
-                        $vis['destination'] ?? ($vis['tujuan'] ?? null),
-                        $vis['officer'] ?? ($vis['petugas'] ?? null),
+                        $vis['destination'] ?? ($vis['tujuan'] ?? ($vis['blokTujuan'] ?? null)),
+                        $vis['officer'] ?? ($vis['petugas'] ?? ($vis['petugasSatpam'] ?? null)),
                         $vis['photo'] ?? ($vis['foto'] ?? null)
                     ]);
                 }
@@ -636,11 +636,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $mat['type'] ?? ($mat['jenis'] ?? 'Masuk'),
                         $mat['materialName'] ?? $mat['namaMaterial'],
                         $mat['quantity'] ?? ($mat['jumlah'] ?? null),
-                        $mat['supplier'] ?? ($mat['vendor'] ?? null),
+                        $mat['supplier'] ?? ($mat['vendor'] ?? ($mat['namaVendor'] ?? null)),
                         $mat['recipient'] ?? ($mat['penerima'] ?? null),
                         $mat['deliveryNote'] ?? ($mat['noSuratJalan'] ?? null),
                         $mat['photo'] ?? ($mat['foto'] ?? null),
-                        $mat['officer'] ?? ($mat['petugas'] ?? null)
+                        $mat['officer'] ?? ($mat['petugas'] ?? ($mat['petugasSatpam'] ?? null))
                     ]);
                 }
             }
@@ -652,15 +652,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `kondisi`=VALUES(`kondisi`), `foto_patroli`=VALUES(`foto_patroli`)");
             foreach ($parsed as $pat) {
-                if (!empty($pat['checkpoint']) || !empty($pat['titikPos'])) {
+                if (!empty($pat['checkpoint']) || !empty($pat['titikPos']) || !empty($pat['rutePatroli'])) {
                     $pId = $pat['id'] ?? ('pat_' . substr(md5(microtime()), 0, 8));
                     $stmtPat->execute([
                         $pId,
                         $pat['date'] ?? ($pat['tanggal'] ?? date('Y-m-d')),
-                        $pat['time'] ?? ($pat['jam'] ?? null),
+                        $pat['time'] ?? ($pat['jam'] ?? ($pat['jamPatroli'] ?? null)),
                         $pat['officer'] ?? ($pat['petugas'] ?? 'Petugas'),
-                        $pat['checkpoint'] ?? ($pat['titikPos'] ?? 'Pos'),
-                        $pat['condition'] ?? ($pat['kondisi'] ?? 'Aman Terkendali'),
+                        $pat['checkpoint'] ?? ($pat['titikPos'] ?? ($pat['rutePatroli'] ?? 'Pos')),
+                        $pat['condition'] ?? ($pat['kondisi'] ?? ($pat['statusKawasan'] ?? 'Aman Terkendali')),
                         $pat['notes'] ?? ($pat['catatan'] ?? null),
                         $pat['photo'] ?? ($pat['foto'] ?? null)
                     ]);
@@ -669,19 +669,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // F. Cleaning - Checklist Kebersihan (dengan Foto Sebelum & Sesudah)
-        if (strpos($key, 'cleaning_checklists') !== false && is_array($parsed)) {
+        if (strpos($key, 'cleaning') !== false && is_array($parsed)) {
             $stmtCln = $pdo->prepare("INSERT INTO tbl_cleaning_checklist (`id`, `tanggal`, `area`, `petugas`, `status_kebersihan`, `catatan`, `foto_sebelum`, `foto_sesudah`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `status_kebersihan`=VALUES(`status_kebersihan`), `foto_sebelum`=VALUES(`foto_sebelum`), `foto_sesudah`=VALUES(`foto_sesudah`)");
             foreach ($parsed as $cln) {
-                if (!empty($cln['area'])) {
+                if (!empty($cln['area']) || !empty($cln['namaArea'])) {
                     $cId = $cln['id'] ?? ('cln_' . substr(md5(microtime()), 0, 8));
                     $stmtCln->execute([
                         $cId,
                         $cln['date'] ?? ($cln['tanggal'] ?? date('Y-m-d')),
-                        $cln['area'],
+                        $cln['area'] ?? ($cln['namaArea'] ?? ''),
                         $cln['cleaner'] ?? ($cln['petugas'] ?? 'Petugas'),
-                        $cln['status'] ?? ($cln['statusKebersihan'] ?? 'Bersih'),
+                        $cln['status'] ?? ($cln['statusKebersihan'] ?? ($cln['kondisi'] ?? 'Bersih')),
                         $cln['notes'] ?? ($cln['catatan'] ?? null),
                         $cln['photoBefore'] ?? ($cln['fotoSebelum'] ?? null),
                         $cln['photoAfter'] ?? ($cln['fotoSesudah'] ?? null)
@@ -713,21 +713,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // H. To-Do List Instruksi Tugas (dengan Foto Bukti)
-        if (strpos($key, 'todo_list') !== false && is_array($parsed)) {
+        if ((strpos($key, 'todo') !== false || strpos($key, 'instruction') !== false) && is_array($parsed)) {
             $stmtTodo = $pdo->prepare("INSERT INTO tbl_instruksi_tugas (`id`, `tanggal`, `judul_tugas`, `karyawan_target`, `prioritas`, `status`, `catatan`, `foto_bukti`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `status`=VALUES(`status`), `foto_bukti`=VALUES(`foto_bukti`), `catatan`=VALUES(`catatan`)");
             foreach ($parsed as $td) {
-                if (!empty($td['task']) || !empty($td['judulTugas'])) {
+                $taskTitle = $td['task'] ?? ($td['judulTugas'] ?? ($td['laporan'] ?? ($td['text'] ?? ($td['instruction'] ?? ''))));
+                if (!empty($taskTitle)) {
                     $tId = $td['id'] ?? ('tdo_' . substr(md5(microtime()), 0, 8));
                     $stmtTodo->execute([
                         $tId,
                         $td['date'] ?? ($td['tanggal'] ?? date('Y-m-d')),
-                        $td['task'] ?? ($td['judulTugas'] ?? ''),
-                        $td['assignee'] ?? ($td['karyawanTarget'] ?? ''),
+                        $taskTitle,
+                        $td['assignee'] ?? ($td['karyawanTarget'] ?? ($td['pic'] ?? '')),
                         $td['priority'] ?? ($td['prioritas'] ?? 'Normal'),
-                        $td['status'] ?? 'Pending',
-                        $td['notes'] ?? ($td['catatan'] ?? null),
+                        $td['status'] ?? (!empty($td['completed']) ? 'Selesai' : 'Pending'),
+                        $td['notes'] ?? ($td['catatan'] ?? ($td['reportNotes'] ?? null)),
                         $td['photo'] ?? ($td['fotoBukti'] ?? null)
                     ]);
                 }
@@ -735,25 +736,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // I. KPI Evaluasi Performa
-        if (strpos($key, 'kpi_data') !== false && is_array($parsed)) {
+        if ((strpos($key, 'kpi') !== false || strpos($key, 'scorecard') !== false) && is_array($parsed)) {
             $stmtKpi = $pdo->prepare("INSERT INTO tbl_kpi_evaluasi (`id`, `nama_karyawan`, `divisi`, `bulan`, `tahun`, `skor_disiplin`, `skor_tugas`, `skor_kerjasama`, `skor_total`, `grade`, `catatan`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE `skor_disiplin`=VALUES(`skor_disiplin`), `skor_tugas`=VALUES(`skor_tugas`), `skor_total`=VALUES(`skor_total`), `grade`=VALUES(`grade`), `catatan`=VALUES(`catatan`)");
             foreach ($parsed as $kp) {
-                if (!empty($kp['employeeName']) || !empty($kp['namaKaryawan'])) {
-                    $kpId = $kp['id'] ?? ('kpi_' . substr(md5(($kp['employeeName']??'').($kp['month']??'').($kp['year']??'')), 0, 10));
+                $empName = $kp['employeeName'] ?? ($kp['namaKaryawan'] ?? '');
+                if (!empty($empName)) {
+                    $kpId = $kp['id'] ?? ('kpi_' . substr(md5($empName . ($kp['month'] ?? ($kp['periode'] ?? ''))), 0, 10));
                     $stmtKpi->execute([
                         $kpId,
-                        $kp['employeeName'] ?? ($kp['namaKaryawan'] ?? ''),
-                        $kp['division'] ?? ($kp['divisi'] ?? 'Umum'),
-                        $kp['month'] ?? ($kp['bulan'] ?? date('F')),
+                        $empName,
+                        $kp['division'] ?? ($kp['divisi'] ?? 'Operasional'),
+                        $kp['month'] ?? ($kp['periode'] ?? date('F')),
                         intval($kp['year'] ?? ($kp['tahun'] ?? date('Y'))),
-                        floatval($kp['disciplineScore'] ?? ($kp['skorDisiplin'] ?? 0)),
-                        floatval($kp['taskScore'] ?? ($kp['skorTugas'] ?? 0)),
-                        floatval($kp['cooperationScore'] ?? ($kp['skorKerjasama'] ?? 0)),
-                        floatval($kp['totalScore'] ?? ($kp['skorTotal'] ?? 0)),
-                        $kp['grade'] ?? 'B',
-                        $kp['notes'] ?? ($kp['catatan'] ?? null)
+                        floatval($kp['disciplineScore'] ?? ($kp['attendanceScore'] ?? 0)),
+                        floatval($kp['taskScore'] ?? ($kp['todoExecutionScore'] ?? 0)),
+                        floatval($kp['cooperationScore'] ?? ($kp['softSkillsScore'] ?? 0)),
+                        floatval($kp['totalScore'] ?? 0),
+                        $kp['grade'] ?? 'Grade B',
+                        $kp['notes'] ?? ($kp['catatanEvaluator'] ?? null)
+                    ]);
+                }
+            }
+        }
+
+        // I-2. Unit Kavling
+        if ((strpos($key, 'unit') !== false || strpos($key, 'kavling') !== false) && is_array($parsed)) {
+            $stmtUnit = $pdo->prepare("INSERT INTO tbl_unit_kavling (`id`, `proyek`, `blok`, `nomor`, `type`, `lb`, `lt`, `status_penjualan`, `harga`, `foto_unit`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `proyek`=VALUES(`proyek`), `status_penjualan`=VALUES(`status_penjualan`), `harga`=VALUES(`harga`), `foto_unit`=VALUES(`foto_unit`)");
+            foreach ($parsed as $u) {
+                if (!empty($u['unitNo']) || !empty($u['nomor'])) {
+                    $uId = $u['id'] ?? ('unt_' . substr(md5(($u['proyek'] ?? '') . ($u['unitNo'] ?? '')), 0, 8));
+                    $stmtUnit->execute([
+                        $uId,
+                        $u['proyek'] ?? ($u['project'] ?? 'Ashoka Park'),
+                        $u['blok'] ?? ($u['block'] ?? 'A'),
+                        $u['unitNo'] ?? ($u['nomor'] ?? '01'),
+                        $u['type'] ?? '36/72',
+                        floatval($u['lb'] ?? 36),
+                        floatval($u['lt'] ?? 72),
+                        $u['status'] ?? ($u['statusPenjualan'] ?? 'Tersedia'),
+                        floatval($u['price'] ?? ($u['harga'] ?? 0)),
+                        $u['progressPhoto'] ?? ($u['fotoUnit'] ?? null)
                     ]);
                 }
             }
