@@ -8,13 +8,13 @@ import { fetchCloudStore, saveCloudStore } from '../supabase';
 export const STORAGE_KEYS = {
   FUND_REQUESTS: 'ams_shared_fund_requests_v1',
   BANKS: 'ams_fin_banks_v1',
-  COA: 'ams_fin_coa_v1',
+  COA: 'ams_fin_coa_v2',
   JURNAL: 'ams_fin_jurnal_v1',
   SALES: 'ams_fin_sales_v1',
   PAYABLES: 'ams_fin_payables_v1',
   TAXES: 'ams_fin_taxes_v1',
   PO: 'ams_fin_po_v1',
-  JOBLIST: 'ams_fin_joblist_v1',
+  JOBLIST: 'ams_fin_joblist_v2',
   AUDIT: 'ams_fin_audit_v1'
 };
 
@@ -234,8 +234,8 @@ export const INITIAL_BANKS = [
     accountNumber: '002-988-1234',
     accountHolder: 'PT Ashoka Multi Sinergi',
     bankType: 'Bank Operasional',
-    balance: 473200000, // Setelah dikurangi REQ-2026-003 Rp 6.8jt
-    accountCode: '1-102',
+    balance: 473200000,
+    accountCode: '1-1150',
     status: 'Aktif',
     color: '#0284c7'
   },
@@ -246,9 +246,20 @@ export const INITIAL_BANKS = [
     accountHolder: 'PT Ashoka Multi Sinergi (Escrow)',
     bankType: 'Rekening Escrow / Konsumen',
     balance: 750000000,
-    accountCode: '1-103',
+    accountCode: '1-1130',
     status: 'Aktif',
     color: '#0d9488'
+  },
+  {
+    id: 'BRI-01',
+    name: 'BRI Operasional Proyek',
+    accountNumber: '0291-0182-9471',
+    accountHolder: 'PT Ashoka Multi Sinergi',
+    bankType: 'Bank Operasional',
+    balance: 280000000,
+    accountCode: '1-1140',
+    status: 'Aktif',
+    color: '#f59e0b'
   },
   {
     id: 'BSI-01',
@@ -257,7 +268,7 @@ export const INITIAL_BANKS = [
     accountHolder: 'PT Ashoka Properti Syariah',
     bankType: 'Bank Konstruksi',
     balance: 320000000,
-    accountCode: '1-104',
+    accountCode: '1-1160',
     status: 'Aktif',
     color: '#16a34a'
   },
@@ -268,49 +279,27 @@ export const INITIAL_BANKS = [
     accountHolder: 'Kasir Internal Finance (HO)',
     bankType: 'Kas Tunai',
     balance: 25000000,
-    accountCode: '1-101',
+    accountCode: '1-1110',
     status: 'Aktif',
     color: '#d97706'
   }
 ];
 
 // =============================================================================
-// 3. DATA AWAL: BAGAN AKUN STANDAR PROPERTI (CHART OF ACCOUNTS - COA)
+// 3. DATA AWAL: BAGAN AKUN STANDAR PROPERTI BERJENJANG (CHART OF ACCOUNTS - COA)
 // =============================================================================
 export const INITIAL_COA = [
-  // 1. ASET
-  { code: '1-101', name: 'Kas Tunai / Kas Kecil', category: 'Aset Lancar', normalBalance: 'Debit', balance: 25000000, description: 'Uang kas tunai di brankas kantor HO' },
-  { code: '1-102', name: 'Bank BCA Operasional Utama', category: 'Aset Lancar', normalBalance: 'Debit', balance: 473200000, description: 'Rekening operasional harian' },
-  { code: '1-103', name: 'Bank Mandiri Escrow Penjualan', category: 'Aset Lancar', normalBalance: 'Debit', balance: 750000000, description: 'Rekening penampungan cicilan konsumen' },
-  { code: '1-104', name: 'Bank BSI Proyek Syariah', category: 'Aset Lancar', normalBalance: 'Debit', balance: 320000000, description: 'Rekening konstruksi proyek syariah' },
-  { code: '1-105', name: 'Piutang Konsumen (KPR/Cicilan)', category: 'Aset Lancar', normalBalance: 'Debit', balance: 1850000000, description: 'Sisa cicilan unit yang belum lunas' },
-  { code: '1-106', name: 'Uang Muka Proyek & Vendor', category: 'Aset Lancar', normalBalance: 'Debit', balance: 85000000, description: 'DP yang telah dibayarkan ke rekanan' },
-  { code: '1-201', name: 'Persediaan Lahan & Unit Rumah', category: 'Aset Lancar', normalBalance: 'Debit', balance: 4200000000, description: 'Nilai unit siap huni & kavling siap bangun' },
-  { code: '1-301', name: 'Aset Tetap - Tanah & Gedung Kantor', category: 'Aset Tetap', normalBalance: 'Debit', balance: 1500000000, description: 'Kantor Pemasaran & Kantor Operasional' },
-  { code: '1-302', name: 'Aset Tetap - Kendaraan Operasional', category: 'Aset Tetap', normalBalance: 'Debit', balance: 340000000, description: 'Mobil operasional & motor dinas' },
-  { code: '1-303', name: 'Akumulasi Penyusutan Aset', category: 'Kontra Aset', normalBalance: 'Kredit', balance: 75000000, description: 'Penyusutan kendaraan & perlengkapan' },
-
-  // 2. KEWAJIBAN / HUTANG
-  { code: '2-101', name: 'Hutang Usaha / Vendor Material', category: 'Kewajiban Lancar', normalBalance: 'Kredit', balance: 210000000, description: 'Tagihan supplier semen, pasir, besi beton' },
-  { code: '2-102', name: 'Hutang Termin Kontraktor (BATP)', category: 'Kewajiban Lancar', normalBalance: 'Kredit', balance: 345000000, description: 'Kewajiban progres fisik rumah ke mandor' },
-  { code: '2-103', name: 'Hutang Pajak (PPN & PPh Final)', category: 'Kewajiban Lancar', normalBalance: 'Kredit', balance: 82500000, description: 'Pajak penjualan unit belum disetor' },
-  { code: '2-201', name: 'Hutang Bank Jangka Panjang', category: 'Kewajiban Jangka Panjang', normalBalance: 'Kredit', balance: 1200000000, description: 'Pinjaman modal kerja perbankan' },
-
-  // 3. MODAL / EKUITAS
-  { code: '3-101', name: 'Modal Disetor Pemegang Saham', category: 'Ekuitas', normalBalance: 'Kredit', balance: 5000000000, description: 'Modal awal pendirian perseroan' },
-  { code: '3-102', name: 'Laba Ditahan (Retained Earnings)', category: 'Ekuitas', normalBalance: 'Kredit', balance: 1845700000, description: 'Akumulasi laba bersih periode lampau' },
-
-  // 4. PENDAPATAN
-  { code: '4-101', name: 'Pendapatan Penjualan Unit Rumah', category: 'Pendapatan', normalBalance: 'Kredit', balance: 2450000000, description: 'Akad jual beli unit rumah tapak' },
-  { code: '4-102', name: 'Pendapatan Penjualan Ruko & Komersil', category: 'Pendapatan', normalBalance: 'Kredit', balance: 850000000, description: 'Penjualan kavling komersil & ruko' },
-  { code: '4-201', name: 'Pendapatan Denda & Bunga', category: 'Pendapatan Lain', normalBalance: 'Kredit', balance: 12500000, description: 'Denda keterlambatan angsuran' },
-
-  // 5. BEBAN
-  { code: '5-101', name: 'HPP Konstruksi & Pembangunan', category: 'Beban Pokok', normalBalance: 'Debit', balance: 1650000000, description: 'Biaya material, upah tukang & mandor' },
-  { code: '5-201', name: 'Beban Pemasaran, Iklan & Event', category: 'Beban Operasional', normalBalance: 'Debit', balance: 85000000, description: 'Iklan sosmed, pameran expo, brosur' },
-  { code: '5-301', name: 'Beban Umum, HR & General Affair', category: 'Beban Operasional', normalBalance: 'Debit', balance: 64800000, description: 'Gaji, listrik, pemeliharaan kantor, ATK' },
-  { code: '5-401', name: 'Beban Perizinan, Sertifikat & Legal', category: 'Beban Operasional', normalBalance: 'Debit', balance: 42500000, description: 'Notaris, BPHTB, validasi BPN, perizinan' },
-  { code: '5-501', name: 'Beban Pajak Penghasilan (PPh)', category: 'Beban Pajak', normalBalance: 'Debit', balance: 61250000, description: 'PPh final penjualan 2.5%' }
+  // =========================================================================
+  // 8 KELOMPOK UTAMA (CHART OF ACCOUNTS INDUK PUNCAK)
+  // =========================================================================
+  { code: '1-0000', name: 'Aktiva', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Debet', category: 'Aktiva', balance: 0, description: 'Kelompok Utama Aktiva / Aset' },
+  { code: '2-0000', name: 'Hutang', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Kredit', category: 'Hutang', balance: 0, description: 'Kelompok Utama Hutang / Kewajiban' },
+  { code: '3-0000', name: 'Ekuitas', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Kredit', category: 'Ekuitas', balance: 0, description: 'Kelompok Utama Modal / Ekuitas' },
+  { code: '4-0000', name: 'Pendapatan', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Kredit', category: 'Pendapatan', balance: 0, description: 'Kelompok Utama Pendapatan Usaha' },
+  { code: '5-0000', name: 'HPP', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Debet', category: 'HPP', balance: 0, description: 'Kelompok Utama Harga Pokok Penjualan' },
+  { code: '6-0000', name: 'Beban Operasional', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Debet', category: 'Beban Operasional', balance: 0, description: 'Kelompok Utama Biaya & Beban Operasional' },
+  { code: '7-0000', name: 'Pendapatan Lain-lain', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Kredit', category: 'Pendapatan Lain-lain', balance: 0, description: 'Kelompok Utama Pendapatan Non-Operasional' },
+  { code: '8-0000', name: 'Biaya Lain-lain', parentCode: null, level: 1, kriteria: 'Header', posisi: 'Debet', category: 'Biaya Lain-lain', balance: 0, description: 'Kelompok Utama Beban & Biaya Non-Operasional' }
 ];
 
 // =============================================================================
@@ -546,45 +535,30 @@ export const INITIAL_TAXES = [
 ];
 
 // =============================================================================
-// 8. DATA AWAL: JOBLIST & AGENDA TIM FINANCE
+// 8. DATA AWAL: JOBLIST & SUB-PEKERJAAN PROYEK (COST CENTER 2-LEVEL)
 // =============================================================================
 export const INITIAL_JOBLIST = [
-  {
-    id: 'JOB-001',
-    task: 'Rekonsiliasi Mutasi Rekening Koran Bank BCA & Mandiri',
-    assignee: 'Yazid Hizbullah, S.E.,S.T',
-    priority: 'Tinggi',
-    dueDate: '2026-10-03',
-    status: 'In Progress',
-    notes: 'Cocokkan mutasi kas masuk DP konsumen unit A12'
-  },
-  {
-    id: 'JOB-002',
-    task: 'Review & Otorisasi Pengajuan Dana Termin BATP Blok A5',
-    assignee: 'Ahmad Rafail (Super Admin)',
-    priority: 'Mendesak',
-    dueDate: '2026-10-04',
-    status: 'To Do',
-    notes: 'Periksa lampiran BATP dari Pak Hapip & Kholidin'
-  },
-  {
-    id: 'JOB-003',
-    task: 'Penyusunan Kertas Kerja Worksheet & Laba Rugi Akhir Kuartal',
-    assignee: 'Staff Akuntansi',
-    priority: 'Sedang',
-    dueDate: '2026-10-10',
-    status: 'To Do',
-    notes: 'Kompilasi neraca saldo dan ayat jurnal penyesuaian'
-  },
-  {
-    id: 'JOB-004',
-    task: 'Pelaporan SPT Masa PPh Final 2.5% Penjualan Rumah',
-    assignee: 'Staff Pajak',
-    priority: 'Tinggi',
-    dueDate: '2026-10-15',
-    status: 'To Do',
-    notes: 'Generate kode billing dan setor via internet banking'
-  }
+  // =========================================================================
+  // 1. PROYEK ASHOKA VIEW (LEVEL 1)
+  // =========================================================================
+  { code: 'AV-100', name: 'Ashoka View', parentCode: null, level: 1, type: 'Project', description: 'Proyek Perumahan Ashoka View' },
+  { code: 'AV-110', name: 'Pembelian Lahan', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Biaya pembelian & pembebasan lahan' },
+  { code: 'AV-120', name: 'Perizinan', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Biaya legalitas, perizinan PBG & BPN' },
+  { code: 'AV-130', name: 'Pematangan Lahan', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Pekerjaan cut & fill, urug dan perataan lahan' },
+  { code: 'AV-140', name: 'Utilitas', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Pekerjaan saluran drainase, listrik PLN & air' },
+  { code: 'AV-150', name: 'Konstruksi unit', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Konstruksi bangunan fisik unit rumah' },
+  { code: 'AV-160', name: 'Pembangunan Fasum', parentCode: 'AV-100', level: 2, type: 'Job', description: 'Pembangunan taman, pos security & jalan' },
+
+  // =========================================================================
+  // 2. PROYEK ASHOKA PARK (LEVEL 1)
+  // =========================================================================
+  { code: 'AP-100', name: 'Ashoka Park', parentCode: null, level: 1, type: 'Project', description: 'Proyek Perumahan Ashoka Park' },
+  { code: 'AP-110', name: 'Pembelian Lahan', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Biaya pembelian & pembebasan lahan' },
+  { code: 'AP-120', name: 'Perizinan', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Biaya legalitas, perizinan PBG & BPN' },
+  { code: 'AP-130', name: 'Pematangan Lahan', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Pekerjaan cut & fill, urug dan perataan lahan' },
+  { code: 'AP-140', name: 'Utilitas', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Pekerjaan saluran drainase, listrik PLN & air' },
+  { code: 'AP-150', name: 'Konstruksi unit', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Konstruksi bangunan fisik unit rumah' },
+  { code: 'AP-160', name: 'Pembangunan Fasum', parentCode: 'AP-100', level: 2, type: 'Job', description: 'Pembangunan taman, pos security & jalan' }
 ];
 
 // =============================================================================
@@ -1153,10 +1127,124 @@ export const getBanks = () => getStoredItem(STORAGE_KEYS.BANKS, INITIAL_BANKS);
 export const saveBanks = (list) => setStoredItem(STORAGE_KEYS.BANKS, list);
 
 // -----------------------------------------------------------------------------
-// BAGAN AKUN (COA)
+// BAGAN AKUN (CHART OF ACCOUNTS - COA) HIERARKI & POHON KELOMPOK
 // -----------------------------------------------------------------------------
-export const getCoa = () => getStoredItem(STORAGE_KEYS.COA, INITIAL_COA);
-export const saveCoa = (list) => setStoredItem(STORAGE_KEYS.COA, list);
+export const sortCoaTree = (coaList) => {
+  if (!Array.isArray(coaList) || coaList.length === 0) return [];
+  const accounts = coaList.map(a => ({ ...a }));
+  accounts.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+  const rootNodes = accounts.filter(a => !a.parentCode || a.level === 1);
+  const result = [];
+  const visited = new Set();
+
+  const traverse = (node) => {
+    result.push(node);
+    visited.add(node.code);
+    const children = accounts.filter(a => a.parentCode === node.code);
+    children.forEach(child => traverse(child));
+  };
+
+  rootNodes.forEach(root => traverse(root));
+
+  // Akun yatim / belum terkunjungi (jika ada)
+  accounts.forEach(a => {
+    if (!visited.has(a.code)) {
+      result.push(a);
+    }
+  });
+
+  return result;
+};
+
+export const generateNextAccountCode = (parentAcc, coaList = []) => {
+  if (!parentAcc || !parentAcc.code) return '';
+  const parts = (parentAcc.code || '').split('-');
+  const prefix = parts[0] || '1';
+  const parentSuffix = parts[1] || '0000';
+  const parentLevel = parentAcc.level || 1;
+  const childLevel = parentLevel + 1;
+
+  // Step penomoran bertingkat:
+  // Induk Level 1 (misal 1-0000) -> Anak Level 2: kelipatan 1000 (1-1000, 1-2000, dst.)
+  // Induk Level 2 (misal 1-1000) -> Anak Level 3: kelipatan 100 (1-1100, 1-1200, dst.)
+  // Induk Level 3 (misal 1-1100) -> Anak Level 4: kelipatan 10 (1-1110, 1-1120, dst.)
+  // Induk Level 4 (misal 1-1110) -> Anak Level 5: kelipatan 1 (1-1111, 1-1112, dst.)
+  let step = 1000;
+  if (childLevel === 2) step = 1000;
+  else if (childLevel === 3) step = 100;
+  else if (childLevel === 4) step = 10;
+  else step = 1;
+
+  const children = (coaList || []).filter(c => c.parentCode === parentAcc.code);
+  if (children.length === 0) {
+    const parentNum = parseInt(parentSuffix, 10) || 0;
+    const nextNum = parentNum + step;
+    return `${prefix}-${String(nextNum).padStart(4, '0')}`;
+  }
+
+  let maxNum = 0;
+  children.forEach(c => {
+    const cParts = (c.code || '').split('-');
+    if (cParts.length === 2 && !isNaN(cParts[1])) {
+      const n = parseInt(cParts[1], 10);
+      if (n > maxNum) maxNum = n;
+    }
+  });
+
+  const baseNum = maxNum > 0 ? maxNum : (parseInt(parentSuffix, 10) || 0);
+  const nextNum = baseNum + step;
+  return `${prefix}-${String(nextNum).padStart(4, '0')}`;
+};
+
+export const calculateCoaBalances = (coaList) => {
+  if (!Array.isArray(coaList)) return [];
+  const accounts = coaList.map(a => ({ ...a }));
+  const detailAccounts = accounts.filter(a => a.kriteria === 'Detail');
+
+  const isDescendant = (child, ancestor) => {
+    if (child.parentCode === ancestor.code) return true;
+    let curr = child.parentCode;
+    while (curr) {
+      if (curr === ancestor.code) return true;
+      const p = accounts.find(a => a.code === curr);
+      curr = p ? p.parentCode : null;
+    }
+    const prefix = (ancestor.code || '').split('-')[0];
+    const subPrefix = (ancestor.code || '').replace(/-0+$/, '');
+    if (ancestor.level === 1) return (child.code || '').startsWith(prefix + '-');
+    if (ancestor.level === 2 && subPrefix.length > 2) return (child.code || '').startsWith(subPrefix);
+    if (ancestor.level === 3 && subPrefix.length > 3) return (child.code || '').startsWith(subPrefix);
+    return false;
+  };
+
+  accounts.forEach(acc => {
+    if (acc.kriteria === 'Header') {
+      const descendants = detailAccounts.filter(d => isDescendant(d, acc));
+      const total = descendants.reduce((sum, d) => sum + (Number(d.balance) || 0), 0);
+      acc.balance = total;
+    }
+  });
+
+  return accounts;
+};
+
+export const getCoa = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('ams_fin_coa_v1')) {
+      localStorage.removeItem('ams_fin_coa_v1');
+    }
+  } catch (e) {}
+  const data = getStoredItem(STORAGE_KEYS.COA, INITIAL_COA);
+  if (!Array.isArray(data) || data.length === 0 || !data[0].kriteria) {
+    const initialTree = sortCoaTree(calculateCoaBalances(INITIAL_COA));
+    saveCoa(initialTree);
+    return initialTree;
+  }
+  return sortCoaTree(calculateCoaBalances(data));
+};
+
+export const saveCoa = (list) => setStoredItem(STORAGE_KEYS.COA, sortCoaTree(list));
 
 // -----------------------------------------------------------------------------
 // BUKU JURNAL UMUM
@@ -1203,10 +1291,75 @@ export const getTaxes = () => getStoredItem(STORAGE_KEYS.TAXES, INITIAL_TAXES);
 export const saveTaxes = (list) => setStoredItem(STORAGE_KEYS.TAXES, list);
 
 // -----------------------------------------------------------------------------
-// JOBLIST & AGENDA TIM FINANCE
+// JOBLIST & SUB-PEKERJAAN PROYEK (COST CENTER 2-LEVEL)
 // -----------------------------------------------------------------------------
-export const getJoblist = () => getStoredItem(STORAGE_KEYS.JOBLIST, INITIAL_JOBLIST);
-export const saveJoblist = (list) => setStoredItem(STORAGE_KEYS.JOBLIST, list);
+export const sortJoblistTree = (list) => {
+  if (!Array.isArray(list) || list.length === 0) return [];
+  const items = list.map(item => ({ ...item }));
+  items.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+  const projects = items.filter(i => !i.parentCode || i.level === 1);
+  const result = [];
+  const visited = new Set();
+
+  projects.forEach(proj => {
+    result.push(proj);
+    visited.add(proj.code);
+    const children = items.filter(i => i.parentCode === proj.code);
+    children.forEach(child => {
+      result.push(child);
+      visited.add(child.code);
+    });
+  });
+
+  items.forEach(i => {
+    if (!visited.has(i.code)) result.push(i);
+  });
+
+  return result;
+};
+
+export const generateNextJobCode = (parentProject, joblist = []) => {
+  if (!parentProject || !parentProject.code) return '';
+  const parts = (parentProject.code || '').split('-');
+  const prefix = parts[0] || 'PRJ';
+  const parentSuffix = parts[1] || '100';
+  const children = (joblist || []).filter(j => j.parentCode === parentProject.code);
+
+  if (children.length === 0) {
+    const parentNum = parseInt(parentSuffix, 10) || 100;
+    return `${prefix}-${parentNum + 10}`;
+  }
+
+  let maxNum = 0;
+  children.forEach(c => {
+    const cParts = (c.code || '').split('-');
+    if (cParts.length === 2 && !isNaN(cParts[1])) {
+      const n = parseInt(cParts[1], 10);
+      if (n > maxNum) maxNum = n;
+    }
+  });
+
+  const nextNum = maxNum > 0 ? maxNum + 10 : (parseInt(parentSuffix, 10) || 100) + 10;
+  return `${prefix}-${nextNum}`;
+};
+
+export const getJoblist = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('ams_fin_joblist_v1')) {
+      localStorage.removeItem('ams_fin_joblist_v1');
+    }
+  } catch (e) {}
+  const data = getStoredItem(STORAGE_KEYS.JOBLIST, INITIAL_JOBLIST);
+  if (!Array.isArray(data) || data.length === 0 || !data[0].code) {
+    const initialTree = sortJoblistTree(INITIAL_JOBLIST);
+    saveJoblist(initialTree);
+    return initialTree;
+  }
+  return sortJoblistTree(data);
+};
+
+export const saveJoblist = (list) => setStoredItem(STORAGE_KEYS.JOBLIST, sortJoblistTree(list));
 
 // -----------------------------------------------------------------------------
 // AUDIT LOG
@@ -1326,16 +1479,16 @@ export const deleteTax = (id, user = 'Finance User') => {
   return updated;
 };
 
-export const deleteJoblistItem = (id, user = 'Finance User') => {
+export const deleteJoblistItem = (code, user = 'Finance User') => {
   const current = getJoblist();
-  const target = current.find(j => j.id === id);
-  const updated = current.filter(j => j.id !== id);
+  const target = current.find(j => j.code === code || j.id === code);
+  const updated = current.filter(j => j.code !== code && j.id !== code && j.parentCode !== code);
   saveJoblist(updated);
   if (target) {
     addAuditLog({
       user,
-      action: 'Hapus Tugas Joblist',
-      details: `Menghapus tugas ${id}: ${target.task}`,
+      action: 'Hapus Item Joblist',
+      details: `Menghapus ${target.type === 'Project' ? 'Proyek' : 'Sub-Job'} ${code}: ${target.name || target.task}`,
       module: 'Finance & Acc'
     });
   }

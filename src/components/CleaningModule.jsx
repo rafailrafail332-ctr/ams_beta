@@ -387,82 +387,56 @@ export const CleaningModule = ({
   // Sub-tabs: 'checklist-kantor' | 'kebersihan-taman' | 'angkut-sampah' | 'fogging-pest'
   const [activeSubTab, setActiveSubTab] = useState('checklist-kantor');
 
-  // Stores
-  const [checklists, setChecklists] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_CLEANING_CHECKLISTS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_CHECKLISTS;
-  });
-
-  const [gardens, setGardens] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_CLEANING_GARDENS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_GARDENS;
-  });
-
-  const [wasteLogs, setWasteLogs] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_CLEANING_WASTES_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_WASTES;
-  });
-
-  const [pestControls, setPestControls] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_CLEANING_PESTS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_PESTS;
-  });
+  // Stores (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [checklists, setChecklists] = useState(INITIAL_CHECKLISTS);
+  const [gardens, setGardens] = useState(INITIAL_GARDENS);
+  const [wasteLogs, setWasteLogs] = useState(INITIAL_WASTES);
+  const [pestControls, setPestControls] = useState(INITIAL_PESTS);
+  const isCleaningLoadedRef = useRef(false);
 
   // Initial fetch from MySQL Database on Sengked Hosting
   useEffect(() => {
-    fetchCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setChecklists(val);
+    let isMounted = true;
+    Promise.all([
+      fetchCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, INITIAL_CHECKLISTS),
+      fetchCloudStore(STORAGE_CLEANING_GARDENS_KEY, INITIAL_GARDENS),
+      fetchCloudStore(STORAGE_CLEANING_WASTES_KEY, INITIAL_WASTES),
+      fetchCloudStore(STORAGE_CLEANING_PESTS_KEY, INITIAL_PESTS)
+    ]).then(([cVal, gVal, wVal, pVal]) => {
+      if (isMounted) {
+        if (cVal && Array.isArray(cVal) && cVal.length > 0) setChecklists(cVal);
+        if (gVal && Array.isArray(gVal) && gVal.length > 0) setGardens(gVal);
+        if (wVal && Array.isArray(wVal) && wVal.length > 0) setWasteLogs(wVal);
+        if (pVal && Array.isArray(pVal) && pVal.length > 0) setPestControls(pVal);
+        isCleaningLoadedRef.current = true;
+      }
     });
-    fetchCloudStore(STORAGE_CLEANING_GARDENS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setGardens(val);
-    });
-    fetchCloudStore(STORAGE_CLEANING_WASTES_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setWasteLogs(val);
-    });
-    fetchCloudStore(STORAGE_CLEANING_PESTS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setPestControls(val);
-    });
+    return () => { isMounted = false; };
   }, []);
 
-  // Save changes to localStorage & MySQL Database
+  // Save changes to MySQL Database Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_CLEANING_CHECKLISTS_KEY, JSON.stringify(checklists));
-    } catch {}
-    saveCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, checklists);
+    if (isCleaningLoadedRef.current) {
+      saveCloudStore(STORAGE_CLEANING_CHECKLISTS_KEY, checklists);
+    }
   }, [checklists]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_CLEANING_GARDENS_KEY, JSON.stringify(gardens));
-    } catch {}
-    saveCloudStore(STORAGE_CLEANING_GARDENS_KEY, gardens);
+    if (isCleaningLoadedRef.current) {
+      saveCloudStore(STORAGE_CLEANING_GARDENS_KEY, gardens);
+    }
   }, [gardens]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_CLEANING_WASTES_KEY, JSON.stringify(wasteLogs));
-    } catch {}
-    saveCloudStore(STORAGE_CLEANING_WASTES_KEY, wasteLogs);
+    if (isCleaningLoadedRef.current) {
+      saveCloudStore(STORAGE_CLEANING_WASTES_KEY, wasteLogs);
+    }
   }, [wasteLogs]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_CLEANING_PESTS_KEY, JSON.stringify(pestControls));
-    } catch {}
-    saveCloudStore(STORAGE_CLEANING_PESTS_KEY, pestControls);
+    if (isCleaningLoadedRef.current) {
+      saveCloudStore(STORAGE_CLEANING_PESTS_KEY, pestControls);
+    }
   }, [pestControls]);
 
   // Filter States

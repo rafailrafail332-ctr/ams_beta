@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import * as XLSX from 'xlsx';
 import {
   Users,
@@ -34,7 +35,14 @@ import {
   ArrowRight,
   UserCheck,
   Sparkles,
-  DollarSign
+  DollarSign,
+  Camera,
+  Video,
+  Radio,
+  Maximize2,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 import { FundRequestModal } from '../components/FundRequestModal';
 import { FundRequestTrackerModal } from '../components/FundRequestTrackerModal';
@@ -49,6 +57,7 @@ import { AttendanceModule } from '../components/AttendanceModule';
 import { SecurityModule } from '../components/SecurityModule';
 import { CleaningModule } from '../components/CleaningModule';
 import { KpiModule } from '../components/KpiModule';
+import { CctvModule } from '../components/CctvModule';
 
 export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   const { currentUser, showNotification, activeSubTab, setActiveSubTab } = useApp();
@@ -438,736 +447,18 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
     }
   ];
 
-  const [employees, setEmployees] = useState(() => {
-    try {
-      const savedV5 = localStorage.getItem('ams_hr_database_karyawan_v5');
-      if (savedV5) return JSON.parse(savedV5);
-      const savedV4 = localStorage.getItem('ams_hr_database_karyawan_v4') || localStorage.getItem('ams_hr_database_karyawan_v3');
-      if (savedV4) {
-        const parsed = JSON.parse(savedV4);
-        return parsed.map((item, idx) => {
-          const match = initialEmployees.find(ie => ie.id === item.id) || initialEmployees[idx] || {};
-          return {
-            ...match,
-            ...item,
-            nik: item.nik || match.nik || `320101${String(idx + 1).padStart(10, '0')}`,
-            npwp: item.npwp || match.npwp || '00.000.000.0-000.000',
-            noRekening: item.noRekening || match.noRekening || 'BCA 0000000000',
-            alamat: item.alamat || match.alamat || 'Bogor, Jawa Barat',
-            noHp: item.noHp || item.phone || match.noHp || '0812-0000-0000',
-            phone: item.phone || item.noHp || match.phone || '0812-0000-0000',
-            jabatan: item.jabatan || item.judulDokumen || match.jabatan || 'Staff',
-            penempatan: item.penempatan || item.project || match.penempatan || 'Head Office Bizhub',
-            status: item.status || item.catatan || match.status || 'Karyawan Tetap (PKWTT)',
-            namaKeluarga: item.namaKeluarga || match.namaKeluarga || { istriSuami: '-', anak1: '', anak2: '', anak3: '', anak4: '' },
-            tanggalMasuk: item.tanggalMasuk || item.tanggalDok || match.tanggalMasuk || '2024-01-01',
-            files: item.files || match.files || []
-          };
-        });
+  const [employees, setEmployees] = useState(initialEmployees);
+
+  // Sinkronisasi Data Base Karyawan Terpusat dari MySQL Hosting (Tanpa LocalStorage)
+  useEffect(() => {
+    fetchCloudStore('ams_hr_database_karyawan_v5', initialEmployees).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setEmployees(val);
+      } else {
+        saveCloudStore('ams_hr_database_karyawan_v5', initialEmployees);
       }
-    } catch {}
-    return initialEmployees;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_database_karyawan_v5', JSON.stringify(employees));
-    } catch {}
-  }, [employees]);
-
-  // =============================================================
-  // 2. RECRUITMENT STORE
-  // =============================================================
-  const initialCandidates = [
-    {
-      id: 'CND-001',
-      noDok: 'REC/AMS-JOB/2026/01',
-      tanggalDok: '2026-09-18',
-      project: 'Ashoka Park',
-      nama: 'Bambang Triatmojo, S.T',
-      kategori: 'Site Supervisor Sipil',
-      judulDokumen: 'Berkas Lamaran & Portofolio Supervisor Sipil',
-      catatan: 'Tahap: Interview User • Skor 86/100 • Pengalaman 5 Th WIKA',
-      files: [{ name: 'CV_Bambang_Triatmojo.pdf', size: '1.8 MB' }, { name: 'Portofolio_Proyek.pdf', size: '4.2 MB' }]
-    },
-    {
-      id: 'CND-002',
-      noDok: 'REC/AMS-JOB/2026/02',
-      tanggalDok: '2026-09-20',
-      project: 'Ashoka View',
-      nama: 'Rina Sugianti',
-      kategori: 'Property Sales Executive',
-      judulDokumen: 'Berkas Lamaran & Surat Rekomendasi Sales',
-      catatan: 'Tahap: Offering Letter • Skor 92/100 • Closing Record Kuat',
-      files: [{ name: 'CV_Rina_Sugianti.pdf', size: '1.1 MB' }, { name: 'Offering_Letter_Rina.pdf', size: '650 KB' }]
-    },
-    {
-      id: 'CND-003',
-      noDok: 'REC/AMS-JOB/2026/03',
-      tanggalDok: '2026-09-22',
-      project: 'Head Office Bizhub',
-      nama: 'Derry Kurniawan, A.Md',
-      kategori: 'Staff Pajak & Akuntansi',
-      judulDokumen: 'Berkas Lamaran & Sertifikat Brevet AB',
-      catatan: 'Tahap: Interview HR • Skor 78/100 • Paham e-Faktur Properti',
-      files: [{ name: 'CV_Derry_Kurniawan.pdf', size: '1.3 MB' }]
-    },
-    {
-      id: 'CND-004',
-      noDok: 'REC/AMS-JOB/2026/04',
-      tanggalDok: '2026-09-24',
-      project: 'Ashoka Park',
-      nama: 'Joko Susanto',
-      kategori: 'Petugas Keamanan Satpam',
-      judulDokumen: 'Berkas Lamaran & Ijazah Gada Pratama',
-      catatan: 'Tahap: Diterima (Hired) • Skor 90/100 • Siap Shift Malam',
-      files: [{ name: 'CV_Joko_Susanto.pdf', size: '850 KB' }, { name: 'SKCK_Polres.pdf', size: '520 KB' }]
-    }
-  ];
-
-  const [candidates, setCandidates] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_candidates_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialCandidates;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_candidates_v2', JSON.stringify(candidates));
-    } catch {}
-  }, [candidates]);
-
-  // =============================================================
-  // 3. KONTRAK KERJA STORE
-  // =============================================================
-  const initialContracts = [
-    {
-      id: 'CTR-001',
-      noDok: '014/PKWT-HR/AMS/IV/2026',
-      tanggalDok: '2026-05-01',
-      project: 'Ashoka View',
-      nama: 'Amanda Chesyariani Hermawan',
-      kategori: 'PKWT (Kontrak 1 Tahun)',
-      judulDokumen: 'Perjanjian Kerja Waktu Tertentu Admin Marketing',
-      catatan: 'Aktif s/d 2027-04-30 • Sisa 216 Hari • Insentif SPR',
-      files: [{ name: 'Draf_PKWT_Amanda_TTD.pdf', size: '1.6 MB' }]
-    },
-    {
-      id: 'CTR-002',
-      noDok: '008/PKWT-HR/AMS/II/2026',
-      tanggalDok: '2026-06-01',
-      project: 'Ashoka Park',
-      nama: 'Hartono (Danru)',
-      kategori: 'PKWT (Kontrak 6 Bulan)',
-      judulDokumen: 'Perjanjian Kerja Komandan Regu Keamanan Site',
-      catatan: 'Aktif s/d 2026-11-30 • Peringatan 65 Hari Jatuh Tempo',
-      files: [{ name: 'Draf_PKWT_Hartono_TTD.pdf', size: '1.2 MB' }]
-    },
-    {
-      id: 'CTR-003',
-      noDok: '002/PKWTT-HR/AMS/I/2024',
-      tanggalDok: '2024-02-15',
-      project: 'Head Office & Site',
-      nama: 'Dodi Syaiful Nugroho',
-      kategori: 'PKWTT (Karyawan Tetap)',
-      judulDokumen: 'Surat Keputusan Pengangkatan Karyawan Tetap Head HR & GA',
-      catatan: 'Status Permanen Seumur Hidup / Pensiun • Tunjangan Dept',
-      files: [{ name: 'SK_Pengangkatan_PKWTT_Dodi.pdf', size: '1.9 MB' }]
-    },
-    {
-      id: 'CTR-004',
-      noDok: '021/SPK-MDR/AMS/VIII/2026',
-      tanggalDok: '2026-08-01',
-      project: 'Ashoka Park',
-      nama: 'Mandor Subur (12 Pekerja)',
-      kategori: 'SPK Borongan Sipil',
-      judulDokumen: 'SPK Perjanjian Kerja Borongan Pasang Dinding & Atap',
-      catatan: '⚠️ Kritis Sisa 35 Hari (Berakhir 2026-10-31) • Opname 2 Mingguan',
-      files: [{ name: 'SPK_Mandor_Subur_BlokA.pdf', size: '2.4 MB' }]
-    }
-  ];
-
-  const [contracts, setContracts] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_contracts_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialContracts;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_contracts_v2', JSON.stringify(contracts));
-    } catch {}
-  }, [contracts]);
-
-  // =============================================================
-  // 4. FASILITAS STORE
-  // =============================================================
-  const initialFacilities = [
-    {
-      id: 'FAS-001',
-      noDok: 'FAS/AMS-GAL/2026/01',
-      tanggalDok: '2024-01-15',
-      project: 'Ashoka Park',
-      nama: 'Dodi Syaiful (PIC GA)',
-      kategori: 'Kantor & Galeri Pemasaran',
-      judulDokumen: 'Marketing Gallery & Showroom Maket Ashoka Park',
-      catatan: 'Kondisi Sangat Baik • AC Daikin 4 Unit, WiFi, Sofa Tamu • Rp 4.500.000/bln',
-      files: [{ name: 'Foto_Fasilitas_Gallery_Park.jpg', size: '2.1 MB' }, { name: 'BA_Serah_Terima_AC.pdf', size: '820 KB' }]
-    },
-    {
-      id: 'FAS-002',
-      noDok: 'FAS/AMS-GAL/2026/02',
-      tanggalDok: '2024-03-20',
-      project: 'Ashoka View',
-      nama: 'Dodi Syaiful (PIC GA)',
-      kategori: 'Kantor & Galeri Pemasaran',
-      judulDokumen: 'Marketing Gallery & Ruang Akad Konsumen Ashoka View',
-      catatan: 'Kondisi Sangat Baik • Smart TV, Meja Rapat Mini, Pantry • Rp 3.200.000/bln',
-      files: [{ name: 'Foto_Gallery_Ashoka_View.jpg', size: '1.9 MB' }]
-    },
-    {
-      id: 'FAS-003',
-      noDok: 'FAS/AMS-MSS/2026/03',
-      tanggalDok: '2024-02-10',
-      project: 'Ashoka Park',
-      nama: 'Mandor Subur',
-      kategori: 'Akomodasi & Mess Pekerja',
-      judulDokumen: 'Mess Pekerja Konstruksi & Mandor Kavling C Belakang',
-      catatan: 'Kondisi Baik • Kapasitas 50 Pekerja, Dapur & MCK • Rp 2.000.000/bln',
-      files: [{ name: 'Denah_Mess_Pekerja_Site.pdf', size: '1.4 MB' }]
-    },
-    {
-      id: 'FAS-004',
-      noDok: 'FAS/AMS-GEN/2026/04',
-      tanggalDok: '2024-05-12',
-      project: 'Ashoka Park',
-      nama: 'Teknik GA Lapangan',
-      kategori: 'Utilitas Listrik Cadangan',
-      judulDokumen: 'Genset Silent Backup Denyo 30 kVA Gardu Utama',
-      catatan: 'Kondisi Siap Operasi • Siaga Pemadaman PLN Parung • Rp 1.500.000/bln',
-      files: [{ name: 'Manual_Book_Denyo_30kVA.pdf', size: '3.1 MB' }]
-    }
-  ];
-
-  const [facilities, setFacilities] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_facilities_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialFacilities;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_facilities_v2', JSON.stringify(facilities));
-    } catch {}
-  }, [facilities]);
-
-  // =============================================================
-  // 5. ABSENSI STORE
-  // =============================================================
-  const initialAttendance = [
-    {
-      id: 'ATT-001',
-      noDok: 'ATT/AMS-PR/2026/0926-01',
-      tanggalDok: '2026-09-26',
-      project: 'Head Office Bizhub',
-      nama: 'Ahmad Rafail',
-      kategori: 'Hadir Tepat Waktu',
-      judulDokumen: 'Presensi Pagi (In 07:45 - Out 17:30)',
-      catatan: 'Rapat Direksi Utama & Tinjauan Lahan Site',
-      files: [{ name: 'Log_Fingerprint_Rafail.pdf', size: '420 KB' }]
-    },
-    {
-      id: 'ATT-002',
-      noDok: 'ATT/AMS-PR/2026/0926-02',
-      tanggalDok: '2026-09-26',
-      project: 'Head Office Bizhub',
-      nama: 'Yazid Hizbullah, S.E.,S.T',
-      kategori: 'Hadir Tepat Waktu',
-      judulDokumen: 'Presensi Pagi (In 07:50 - Out 17:15)',
-      catatan: 'Kordinasi Cashflow Bank BTN & Notaris',
-      files: [{ name: 'Log_Fingerprint_Yazid.pdf', size: '410 KB' }]
-    },
-    {
-      id: 'ATT-003',
-      noDok: 'ATT/AMS-PR/2026/0926-03',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Wahyu Salma Septiani, S.H',
-      kategori: 'Terlambat (Toleransi)',
-      judulDokumen: 'Presensi Pagi (In 08:15 - Out 17:00)',
-      catatan: 'Koordinasi Pengukuran Tanah Kantor Pertanahan BPN Pagi Hari',
-      files: [{ name: 'Surat_Tugas_BPN_Salma.pdf', size: '890 KB' }]
-    },
-    {
-      id: 'ATT-004',
-      noDok: 'ATT/AMS-PR/2026/0926-04',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka View',
-      nama: 'Amanda Chesyariani Hermawan',
-      kategori: 'Hadir Tepat Waktu',
-      judulDokumen: 'Presensi Pagi (In 07:52 - Out 17:05)',
-      catatan: 'Cetak Berkas SPR Konsumen Akad Kredit',
-      files: [{ name: 'Foto_Selfie_Absen_Amanda.jpg', size: '650 KB' }]
-    },
-    {
-      id: 'ATT-005',
-      noDok: 'ATT/AMS-PR/2026/0926-05',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Kholidin',
-      kategori: 'Izin Sakit',
-      judulDokumen: 'Surat Izin Tidak Masuk Kerja (Sakit 1 Hari)',
-      catatan: 'Surat Keterangan Dokter Klinik Terlampir & Terverifikasi',
-      files: [{ name: 'Surat_Dokter_Kholidin.pdf', size: '1.1 MB' }]
-    }
-  ];
-
-  const [attendances, setAttendances] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_attendance_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialAttendance;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_attendance_v2', JSON.stringify(attendances));
-    } catch {}
-  }, [attendances]);
-
-  // =============================================================
-  // 6. KPI STORE
-  // =============================================================
-  const initialKpis = [
-    {
-      id: 'KPI-001',
-      noDok: 'KPI/AMS-Q3/2026/01',
-      tanggalDok: '2026-09-25',
-      project: 'Ashoka View',
-      nama: 'Amanda Chesyariani Hermawan',
-      kategori: 'Grade A (Sangat Memuaskan)',
-      judulDokumen: 'Evaluasi Kinerja Kuartal III 2026 (Skor: 90.8)',
-      catatan: 'Disiplin SPR 92% • Target Closing 90% • Evaluator: Yulieka Rachmawati',
-      files: [{ name: 'Lembar_Rapor_KPI_Amanda.pdf', size: '1.4 MB' }]
-    },
-    {
-      id: 'KPI-002',
-      noDok: 'KPI/AMS-Q3/2026/02',
-      tanggalDok: '2026-09-25',
-      project: 'Head Office Bizhub',
-      nama: 'Tarkum Aditya',
-      kategori: 'Grade A (Sangat Memuaskan)',
-      judulDokumen: 'Evaluasi Kinerja Kuartal III 2026 (Skor: 93.0)',
-      catatan: 'Rekon Piutang 95% • Buku Kas Akurat • Evaluator: Yazid Hizbullah',
-      files: [{ name: 'Lembar_Rapor_KPI_Tarkum.pdf', size: '1.5 MB' }]
-    },
-    {
-      id: 'KPI-003',
-      noDok: 'KPI/AMS-Q3/2026/03',
-      tanggalDok: '2026-09-25',
-      project: 'Head Office & Site',
-      nama: 'Dodi Syaiful Nugroho',
-      kategori: 'Grade A (Sangat Memuaskan)',
-      judulDokumen: 'Evaluasi Kinerja Kuartal III 2026 (Skor: 91.8)',
-      catatan: 'Aset & Logistik Site Kondusif • Evaluator: Adhi Himawan (GM)',
-      files: [{ name: 'Lembar_Rapor_KPI_Dodi.pdf', size: '1.3 MB' }]
-    },
-    {
-      id: 'KPI-004',
-      noDok: 'KPI/AMS-Q3/2026/04',
-      tanggalDok: '2026-09-25',
-      project: 'Ashoka Park',
-      nama: 'Kholidin',
-      kategori: 'Grade B (Baik & Produktif)',
-      judulDokumen: 'Evaluasi Kinerja Kuartal III 2026 (Skor: 83.2)',
-      catatan: 'Pengawasan Mutu Sipil Rapi • Perlu Ketepatan Waktu Absen',
-      files: [{ name: 'Lembar_Rapor_KPI_Kholidin.pdf', size: '1.2 MB' }]
-    }
-  ];
-
-  const [kpis, setKpis] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_kpis_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialKpis;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_kpis_v2', JSON.stringify(kpis));
-    } catch {}
-  }, [kpis]);
-
-  // =============================================================
-  // 7. MANAGEMENT ASSET STORE
-  // =============================================================
-  const initialAssets = [
-    {
-      id: 'AST-001',
-      noDok: 'AST-GA-2024-001',
-      tanggalDok: '2024-03-15',
-      project: 'Ashoka Park',
-      nama: 'Budi (Driver Site)',
-      kategori: 'Kendaraan Operasional',
-      judulDokumen: 'Mobil Toyota Hilux Double Cabin 4x4 (B 9102 GA)',
-      catatan: 'Aktif Digunakan • Kondisi Sangat Baik • Nilai Perolehan Rp 485.000.000',
-      files: [{ name: 'BPKB_STNK_Hilux.pdf', size: '2.5 MB' }, { name: 'Foto_Fisik_Hilux.jpg', size: '1.8 MB' }]
-    },
-    {
-      id: 'AST-002',
-      noDok: 'AST-GA-2024-002',
-      tanggalDok: '2024-04-10',
-      project: 'Head Office Bizhub',
-      nama: 'Staf Arsitek & Desain',
-      kategori: 'Peralatan IT & Komputer',
-      judulDokumen: 'Laptop ASUS ROG Staf Arsitek & Rendering 3D',
-      catatan: 'Aktif Digunakan • Kondisi Sangat Baik • Nilai Perolehan Rp 24.500.000',
-      files: [{ name: 'Faktur_Beli_Asus_ROG.pdf', size: '950 KB' }]
-    },
-    {
-      id: 'AST-003',
-      noDok: 'AST-GA-2024-003',
-      tanggalDok: '2024-05-20',
-      project: 'Ashoka Park',
-      nama: 'Dedi (Teknik GA)',
-      kategori: 'Mesin & Peralatan Proyek',
-      judulDokumen: 'Genset Silent Denyo 30 kVA Gardu Utama Kawasan',
-      catatan: 'Standby Cadangan • Siap Pakai • Nilai Perolehan Rp 85.000.000',
-      files: [{ name: 'Faktur_Garansi_Denyo.pdf', size: '1.3 MB' }]
-    },
-    {
-      id: 'AST-004',
-      noDok: 'AST-GA-2024-004',
-      tanggalDok: '2024-02-15',
-      project: 'Ashoka Park',
-      nama: 'Amanda (Admin Mkt)',
-      kategori: 'Peralatan Kantor',
-      judulDokumen: 'Printer Epson L3210 All-in-One InkTank Galeri Pemasaran',
-      catatan: 'Aktif Digunakan • Kondisi Baik • Nilai Perolehan Rp 2.850.000',
-      files: [{ name: 'Kuitansi_Epson_L3210.pdf', size: '520 KB' }]
-    },
-    {
-      id: 'AST-005',
-      noDok: 'AST-GA-2024-005',
-      tanggalDok: '2024-06-12',
-      project: 'Ashoka View',
-      nama: 'Surveyor Proyek',
-      kategori: 'Peralatan Pengukuran Site',
-      judulDokumen: 'Total Station Topcon Alat Ukur Kontur & Kavling',
-      catatan: 'Tersimpan di Brankas • Terkalibrasi Valid • Nilai Perolehan Rp 65.000.000',
-      files: [{ name: 'Sertifikat_Kalibrasi_Topcon.pdf', size: '1.7 MB' }]
-    }
-  ];
-
-  const [assets, setAssets] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_assets_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialAssets;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_assets_v2', JSON.stringify(assets));
-    } catch {}
-  }, [assets]);
-
-  // =============================================================
-  // 8. MAINTANANCE STORE
-  // =============================================================
-  const initialMaintenanceTickets = [
-    {
-      id: 'MNT-001',
-      noDok: 'MNT/AMS-TKT/2026/01',
-      tanggalDok: '2026-09-20',
-      project: 'Ashoka Park',
-      nama: 'Bengkel Resmi Auto2000',
-      kategori: 'Servis Mobil Dinas',
-      judulDokumen: 'Servis Berkala Toyota Hilux Double Cabin 10.000 KM',
-      catatan: 'Status Selesai • Ganti Oli & Kampas Rem • Biaya: Rp 1.850.000',
-      files: [{ name: 'Faktur_Servis_Auto2000.pdf', size: '1.2 MB' }]
-    },
-    {
-      id: 'MNT-002',
-      noDok: 'MNT/AMS-TKT/2026/02',
-      tanggalDok: '2026-09-24',
-      project: 'Ashoka Park',
-      nama: 'CV Sejuk Abadi Mandiri',
-      kategori: 'Perbaikan AC',
-      judulDokumen: 'Perbaikan & Tambah Freon AC Daikin 2 PK Galeri Park',
-      catatan: 'Status Selesai • Hembusan Angin Dingin Normal • Biaya: Rp 450.000',
-      files: [{ name: 'Kwitansi_Servis_AC.pdf', size: '650 KB' }]
-    },
-    {
-      id: 'MNT-003',
-      noDok: 'MNT/AMS-TKT/2026/03',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Teknisi Diesel GA Pak Joko',
-      kategori: 'Perawatan Genset',
-      judulDokumen: 'Running Test Beban 30 Menit & Pembersihan Filter Solar',
-      catatan: 'Sedang Dikerjakan (Target: 2026-09-28) • Biaya: Rp 650.000',
-      files: [{ name: 'Foto_Running_Test_Genset.jpg', size: '2.4 MB' }]
-    },
-    {
-      id: 'MNT-004',
-      noDok: 'MNT/AMS-TKT/2026/04',
-      tanggalDok: '2026-09-25',
-      project: 'Ashoka Park',
-      nama: 'Mandor Subur',
-      kategori: 'Perbaikan Pompa Air',
-      judulDokumen: 'Penggantian Otomatis Saklar Jetpump Mess Pekerja',
-      catatan: 'Menunggu Sparepart (Target: 2026-09-27) • Biaya: Rp 350.000',
-      files: [{ name: 'Foto_Kerusakan_Saklar.jpg', size: '1.5 MB' }]
-    }
-  ];
-
-  const [maintenanceTickets, setMaintenanceTickets] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_maintenance_v2');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialMaintenanceTickets;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_maintenance_v2', JSON.stringify(maintenanceTickets));
-    } catch {}
-  }, [maintenanceTickets]);
-
-  // =============================================================
-  // 9. KEAMANAN POS SATPAM STORE
-  // =============================================================
-  const initialSecurities = [
-    {
-      id: 'SEC-001',
-      noDok: 'SEC/AMS-POS/2026/0926-01',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Hartono (Danru) & Agus Suhendra',
-      kategori: 'Keamanan (Shift Siang)',
-      judulDokumen: 'Laporan Jaga Gerbang Utama Shift Siang (07:00 - 19:00)',
-      catatan: 'Aman Kondusif • Tamu: 14 Orang, Truk Material: 6 Armada',
-      files: [{ name: 'Buku_Mutasi_Satpam_Siang.pdf', size: '1.6 MB' }]
-    },
-    {
-      id: 'SEC-002',
-      noDok: 'SEC/AMS-POS/2026/0926-02',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Bambang Irawan & Didik Prasetyo',
-      kategori: 'Keamanan (Shift Malam)',
-      judulDokumen: 'Laporan Jaga Gerbang Utama Shift Malam (19:00 - 07:00)',
-      catatan: 'Aman Terkendali • Patroli Keliling Kavling Setiap 2 Jam',
-      files: [{ name: 'Buku_Mutasi_Satpam_Malam.pdf', size: '1.4 MB' }]
-    },
-    {
-      id: 'SEC-003',
-      noDok: 'SEC/AMS-POS/2026/0926-03',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka View',
-      nama: 'Supardi & Rahmat Hidayat',
-      kategori: 'Keamanan (Shift 24 Jam)',
-      judulDokumen: 'Laporan Jaga Pos Lapangan Ashoka View Cidokom',
-      catatan: 'Patroli Rutin Aktif • Tamu: 8 Orang, Truk Material: 3 Unit',
-      files: [{ name: 'Logbook_Pos_Ashoka_View.pdf', size: '1.2 MB' }]
-    }
-  ];
-
-  const [securities, setSecurities] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_security_v3');
-      if (s) return JSON.parse(s);
-      const old = localStorage.getItem('ams_hr_security_v2');
-      if (old) {
-        const parsed = JSON.parse(old);
-        const filtered = parsed.filter(item => !item.id?.startsWith('CLN-'));
-        if (filtered.length > 0) return filtered;
-      }
-    } catch {}
-    return initialSecurities;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_security_v3', JSON.stringify(securities));
-    } catch {}
-  }, [securities]);
-
-  // =============================================================
-  // 10. KEBERSIHAN & SANITASI STORE
-  // =============================================================
-  const initialCleanings = [
-    {
-      id: 'CLN-001',
-      noDok: 'CLN/AMS-OPS/2026/0926-01',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Siti Aminah (Petugas CS)',
-      kategori: 'Kebersihan & Sanitasi',
-      judulDokumen: 'Checklist Kebersihan Marketing Gallery & Toilet Tamu',
-      catatan: 'Selesai Wangi & Rapi • Jadwal Pagi 07:00 & Sore 16:30',
-      files: [{ name: 'Checklist_Kebersihan_Gallery.pdf', size: '920 KB' }]
-    },
-    {
-      id: 'CLN-002',
-      noDok: 'CLN/AMS-OPS/2026/0926-02',
-      tanggalDok: '2026-09-26',
-      project: 'Head Office Bizhub',
-      nama: 'Wawan K. (Petugas CS)',
-      kategori: 'Kebersihan & Sanitasi',
-      judulDokumen: 'Checklist Kebersihan Ruang Direksi & Kantor Head Office',
-      catatan: 'Selesai Dibersihkan • Meja Rapat, Karpet & Sanitasi Rapi',
-      files: [{ name: 'Checklist_HO_Bizhub.pdf', size: '850 KB' }]
-    },
-    {
-      id: 'CLN-003',
-      noDok: 'CLN/AMS-OPS/2026/0926-03',
-      tanggalDok: '2026-09-26',
-      project: 'Ashoka Park',
-      nama: 'Siti Aminah & Tim CS Lapangan',
-      kategori: 'Kebersihan Taman & Kawasan',
-      judulDokumen: 'Laporan Pembersihan Jalur Boulevard & Taman Utama Proyek',
-      catatan: 'Penyiraman Tanaman & Pembuangan Sampah Terjadwal • Kawasan Bersih & Rapi',
-      files: [{ name: 'Logbook_Kebersihan_Taman.pdf', size: '1.1 MB' }]
-    }
-  ];
-
-  const [cleanings, setCleanings] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_cleaning_v1');
-      if (s) return JSON.parse(s);
-      const old = localStorage.getItem('ams_hr_security_v2');
-      if (old) {
-        const parsed = JSON.parse(old);
-        const filtered = parsed.filter(item => item.id?.startsWith('CLN-'));
-        if (filtered.length > 0) return filtered;
-      }
-    } catch {}
-    return initialCleanings;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_cleaning_v1', JSON.stringify(cleanings));
-    } catch {}
-  }, [cleanings]);
-
-  // =============================================================
-  // 10. CCTV MONITORING & KEAMANAN STORE
-  // =============================================================
-  const initialCctvs = [
-    {
-      id: 'CCTV-001',
-      noDok: 'CCTV/AMS-SEC/2026/01',
-      tanggalDok: '2026-09-25',
-      project: 'Ashoka Park',
-      nama: 'Titik Pos Satpam & Gerbang Utama',
-      kategori: 'Kamera Gerbang & Perimeter',
-      judulDokumen: 'Kamera IP Hikvision 4MP DarkFighter - Gerbang Utama In/Out',
-      catatan: 'Aktif 24 Jam • Cloud Storage NVR 30 Hari • Fitur Plat Nomor ANPR',
-      files: [{ name: 'Log_Setup_CCTV_Gerbang_AshokaPark.pdf', size: '1.4 MB' }]
-    },
-    {
-      id: 'CCTV-002',
-      noDok: 'CCTV/AMS-SEC/2026/02',
-      tanggalDok: '2026-09-26',
-      project: 'Head Office Bizhub',
-      nama: 'Titik Lobby & Marketing Gallery',
-      kategori: 'Kamera Indoor & Kantor',
-      judulDokumen: 'Kamera Dome Audio Dual-Way - Lobby Resepsionis & Ruang Rapat',
-      catatan: 'Resolusi 2K QHD • Backup UPS 4 Jam • Live Streaming Aplikasi',
-      files: [{ name: 'Manual_NVR_Bizhub_CCTV.pdf', size: '2.1 MB' }]
-    },
-    {
-      id: 'CCTV-003',
-      noDok: 'CCTV/AMS-SEC/2026/03',
-      tanggalDok: '2026-09-27',
-      project: 'Ashoka View',
-      nama: 'Titik Gudang Material & Workshop',
-      kategori: 'Kamera Proyek & Lahan',
-      judulDokumen: 'Kamera PTZ 360 Outdoor Night Vision - Area Gudang & Batching Plant',
-      catatan: 'Infra Red 100m • Motion Detection Alarm • Sensor Gerak Malam',
-      files: [{ name: 'Denah_Titik_Kamera_AshokaView.pdf', size: '1.8 MB' }]
-    }
-  ];
-
-  const [cctvs, setCctvs] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_cctv_v1');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialCctvs;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_cctv_v1', JSON.stringify(cctvs));
-    } catch {}
-  }, [cctvs]);
-
-  // =============================================================
-  // 11. GATHERING & OUTING STORE
-  // =============================================================
-  const initialGatherings = [
-    {
-      id: 'GTH-001',
-      noDok: 'GTH/AMS-HR/2026/01',
-      tanggalDok: '2026-08-15',
-      project: 'Semua Proyek',
-      nama: 'Panitia Gathering HR & GA (PIC: Dodi Syaiful)',
-      kategori: 'Family Gathering',
-      judulDokumen: 'Proposal & Anggaran Family Gathering Tahunan PT Yazfi - Puncak Bogor',
-      catatan: 'Rencana 120 Peserta Karyawan & Keluarga • Rundown Acara, Doorprize & Transportasi Bus Pariwisata',
-      files: [{ name: 'Proposal_Family_Gathering_2026.pdf', size: '2.4 MB' }]
-    },
-    {
-      id: 'GTH-002',
-      noDok: 'GTH/AMS-HR/2026/02',
-      tanggalDok: '2026-04-10',
-      project: 'Head Office Bizhub',
-      nama: 'Panitia Halal Bihalal & Silaturahmi Direksi',
-      kategori: 'Halal Bihalal',
-      judulDokumen: 'Laporan & Dokumentasi Silaturahmi Halal Bihalal Idul Fitri 1447 H',
-      catatan: 'Sukses Terlaksana di Marketing Gallery Bizhub • Tausiyah & Ramah Tamah Manajemen',
-      files: [{ name: 'Dokumentasi_Halal_Bihalal_2026.pdf', size: '3.1 MB' }]
-    },
-    {
-      id: 'GTH-003',
-      noDok: 'GTH/AMS-HR/2026/03',
-      tanggalDok: '2026-06-20',
-      project: 'Ashoka Park',
-      nama: 'Team Building Lapangan & Marketing',
-      kategori: 'Team Building',
-      judulDokumen: 'Kegiatan Outbound & Leadership Training Karyawan Proyek Ashoka Park',
-      catatan: 'Peningkatan Sinergi Tim Lapangan, Teknik & Sales • Lokasi Camp Hulu Cai Ciawi',
-      files: [{ name: 'LPJ_Team_Building_Outbound.pdf', size: '1.9 MB' }]
-    }
-  ];
-
-  const [gatherings, setGatherings] = useState(() => {
-    try {
-      const s = localStorage.getItem('ams_hr_gathering_v1');
-      if (s) return JSON.parse(s);
-    } catch {}
-    return initialGatherings;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ams_hr_gathering_v1', JSON.stringify(gatherings));
-    } catch {}
-  }, [gatherings]);
+    });
+  }, []);
 
   // =============================================================
   // COMMON SEARCH & FILTER STATES FOR EACH TAB
@@ -1391,24 +682,21 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
   };
 
   const handleDeleteItem = (id, title) => {
-    if (confirm(`Yakin ingin menghapus dokumen "${title || id}"?`)) {
-      const updater = (prev) => prev.filter(x => x.id !== id);
-      switch (activeTab) {
-        case 'database-karyawan': setEmployees(updater); break;
-        case 'recruitment': setCandidates(updater); break;
-        case 'kontrak-kerja': setContracts(updater); break;
-        case 'absensi': setAttendances(updater); break;
-        case 'kpi': setKpis(updater); break;
-        case 'gathering': setGatherings(updater); break;
-        case 'management-asset': setAssets(updater); break;
-        case 'maintanance': setMaintenanceTickets(updater); break;
-        case 'fasilitas': setFacilities(updater); break;
-        case 'keamanan': setSecurities(updater); break;
-        case 'kebersihan': setCleanings(updater); break;
-        case 'keamanan-kebersihan': setSecurities(updater); break;
-        case 'cctv': setCctvs(updater); break;
+    if (confirm(`Yakin ingin menghapus data "${title || id}"?`)) {
+      if (activeTab === 'database-karyawan') {
+        setEmployees(prev => {
+          const next = prev.filter(x => x.id !== id);
+          saveCloudStore('ams_hr_database_karyawan_v5', next);
+          return next;
+        });
+      } else if (activeTab === 'cctv') {
+        setCctvs(prev => {
+          const next = prev.filter(x => x.id !== id);
+          saveCloudStore('ams_ga_cctv_v2', next);
+          return next;
+        });
       }
-      showNotification(`Dokumen "${title || id}" berhasil dihapus!`, 'info');
+      showNotification(`Data "${title || id}" berhasil dihapus dari sistem & database!`, 'info');
     }
   };
 
@@ -1461,24 +749,22 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
       }
     };
 
-    switch (activeTab) {
-      case 'database-karyawan': setEmployees(updater); break;
-      case 'recruitment': setCandidates(updater); break;
-      case 'kontrak-kerja': setContracts(updater); break;
-      case 'absensi': setAttendances(updater); break;
-      case 'kpi': setKpis(updater); break;
-      case 'gathering': setGatherings(updater); break;
-      case 'management-asset': setAssets(updater); break;
-      case 'maintanance': setMaintenanceTickets(updater); break;
-      case 'fasilitas': setFacilities(updater); break;
-      case 'keamanan': setSecurities(updater); break;
-      case 'kebersihan': setCleanings(updater); break;
-      case 'keamanan-kebersihan': setSecurities(updater); break;
-      case 'cctv': setCctvs(updater); break;
+    if (activeTab === 'database-karyawan') {
+      setEmployees(prev => {
+        const next = updater(prev);
+        saveCloudStore('ams_hr_database_karyawan_v5', next);
+        return next;
+      });
+    } else if (activeTab === 'cctv') {
+      setCctvs(prev => {
+        const next = updater(prev);
+        saveCloudStore('ams_ga_cctv_v2', next);
+        return next;
+      });
     }
 
     setIsFormModalOpen(false);
-    showNotification(`Data ${formState.nama} berhasil ${editingItemId ? 'diperbarui' : 'disimpan'}!`, 'success');
+    showNotification(`Data ${formState.nama} berhasil ${editingItemId ? 'diperbarui' : 'disimpan'} ke database!`, 'success');
   };
 
   // Upload file handlers
@@ -2257,6 +1543,12 @@ export const HrGaModule = ({ onSwitchToLegalCorporate }) => {
           showNotification={showNotification}
           onSwitchTab={handleTabChange}
           employees={employees}
+        />
+      ) : activeTab === 'cctv' ? (
+        <CctvModule
+          currentUser={currentUser}
+          showNotification={showNotification}
+          onSwitchTab={handleTabChange}
         />
       ) : (
         /* KONTEN KOSONG UNTUK SEMUA SUB-MODUL LAINNYA (NAVIGASI TETAP LENGKAP) */

@@ -37,14 +37,15 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { submitFundRequest, getFundRequests } from '../services/financeService';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 
 // =============================================================================
 // STORAGE KEYS & SEED DATA
 // =============================================================================
-const STORAGE_GATHERING_SCHEDULES = 'ams_hr_gathering_schedules_v1';
-const STORAGE_GATHERING_MOMS = 'ams_hr_gathering_moms_v1';
-const STORAGE_GATHERING_DOCS = 'ams_hr_gathering_docs_v1';
-const STORAGE_GATHERING_BUDGETS = 'ams_hr_gathering_budgets_v1';
+const STORAGE_GATHERING_SCHEDULES = 'ams_hr_gathering_schedules_v2';
+const STORAGE_GATHERING_MOMS = 'ams_hr_gathering_moms_v2';
+const STORAGE_GATHERING_DOCS = 'ams_hr_gathering_docs_v2';
+const STORAGE_GATHERING_BUDGETS = 'ams_hr_gathering_budgets_v2';
 
 // 1. DATA SEED JADWAL GATHERING
 const INITIAL_SCHEDULES = [
@@ -382,54 +383,62 @@ export const GatheringModule = ({ currentUser, showNotification, onOpenFundReque
   // Navigasi 4 Sub-Modul
   const [activeSubTab, setActiveSubTab] = useState('jadwal'); // 'jadwal' | 'mom' | 'dokumentasi' | 'anggaran'
 
-  // Datasets State
-  const [schedules, setSchedules] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_GATHERING_SCHEDULES);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_SCHEDULES;
-  });
+  // Datasets State (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [schedules, setSchedules] = useState(INITIAL_SCHEDULES);
+  const [moms, setMoms] = useState(INITIAL_MOMS);
+  const [docs, setDocs] = useState(INITIAL_DOCS);
+  const [budgets, setBudgets] = useState(INITIAL_BUDGETS);
+  const isLoadedRef = useRef(false);
 
-  const [moms, setMoms] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_GATHERING_MOMS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_MOMS;
-  });
-
-  const [docs, setDocs] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_GATHERING_DOCS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_DOCS;
-  });
-
-  const [budgets, setBudgets] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_GATHERING_BUDGETS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_BUDGETS;
-  });
-
-  // LocalStorage Persistence
+  // Ambil Data Gathering dari MySQL Database Terpusat
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_GATHERING_SCHEDULES, JSON.stringify(schedules)); } catch {}
+    let isMounted = true;
+    const loadData = async () => {
+      try {
+        const [cloudSch, cloudMom, cloudDoc, cloudBdg] = await Promise.all([
+          fetchCloudStore(STORAGE_GATHERING_SCHEDULES, INITIAL_SCHEDULES),
+          fetchCloudStore(STORAGE_GATHERING_MOMS, INITIAL_MOMS),
+          fetchCloudStore(STORAGE_GATHERING_DOCS, INITIAL_DOCS),
+          fetchCloudStore(STORAGE_GATHERING_BUDGETS, INITIAL_BUDGETS)
+        ]);
+        if (isMounted) {
+          if (Array.isArray(cloudSch) && cloudSch.length > 0) setSchedules(cloudSch);
+          if (Array.isArray(cloudMom) && cloudMom.length > 0) setMoms(cloudMom);
+          if (Array.isArray(cloudDoc) && cloudDoc.length > 0) setDocs(cloudDoc);
+          if (Array.isArray(cloudBdg) && cloudBdg.length > 0) setBudgets(cloudBdg);
+          isLoadedRef.current = true;
+        }
+      } catch (err) {
+        console.error('Error loading gathering data from MySQL:', err);
+      }
+    };
+    loadData();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Simpan ke MySQL Terpusat
+  useEffect(() => {
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_GATHERING_SCHEDULES, schedules);
+    }
   }, [schedules]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_GATHERING_MOMS, JSON.stringify(moms)); } catch {}
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_GATHERING_MOMS, moms);
+    }
   }, [moms]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_GATHERING_DOCS, JSON.stringify(docs)); } catch {}
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_GATHERING_DOCS, docs);
+    }
   }, [docs]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_GATHERING_BUDGETS, JSON.stringify(budgets)); } catch {}
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_GATHERING_BUDGETS, budgets);
+    }
   }, [budgets]);
 
   // REAL-TIME SYNC DENGAN FINANCE: Jika pengajuan dana gathering sudah cair di Finance, ubah status jadi 'Lunas'

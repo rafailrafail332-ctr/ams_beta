@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Wrench,
   Calendar,
@@ -30,12 +30,13 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { submitFundRequest, getFundRequests } from '../services/financeService';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 
 // =============================================================================
 // STORAGE KEYS & SEED DATA
 // =============================================================================
-const STORAGE_MAINTENANCE_KEY = 'ams_hr_maintenance_v2';
-const STORAGE_ASSETS_KEY = 'ams_hr_assets_v2';
+const STORAGE_MAINTENANCE_KEY = 'ams_ga_maintenance_v2';
+const STORAGE_ASSETS_KEY = 'ams_ga_assets_master_v2';
 
 const INITIAL_MAINTENANCE_DATA = [
   {
@@ -149,37 +150,42 @@ export const MaintenanceModule = ({ currentUser, showNotification, onSwitchTab }
   // Navigasi 3 Sub-Modul
   const [activeSubTab, setActiveSubTab] = useState('request'); // 'request' | 'jadwal' | 'status'
 
-  // Master Data Maintenance
-  const [tickets, setTickets] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_MAINTENANCE_KEY);
-      if (s) {
-        const parsed = JSON.parse(s);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_MAINTENANCE_DATA;
-  });
-
-  // Ambil Data Aset dari Management Asset untuk integrasi
+  // Master Data Maintenance (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [tickets, setTickets] = useState(INITIAL_MAINTENANCE_DATA);
   const [assetsList, setAssetsList] = useState([]);
+  const isLoadedRef = useRef(false);
+
+  // Ambil Data Tiket Maintenance & Aset dari MySQL Database Terpusat
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_ASSETS_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setAssetsList(parsed);
+    let isMounted = true;
+    const loadData = async () => {
+      try {
+        const [cloudMnt, cloudAst] = await Promise.all([
+          fetchCloudStore(STORAGE_MAINTENANCE_KEY, INITIAL_MAINTENANCE_DATA),
+          fetchCloudStore(STORAGE_ASSETS_KEY, [])
+        ]);
+        if (isMounted) {
+          if (Array.isArray(cloudMnt) && cloudMnt.length > 0) {
+            setTickets(cloudMnt);
+          }
+          if (Array.isArray(cloudAst) && cloudAst.length > 0) {
+            setAssetsList(cloudAst);
+          }
+          isLoadedRef.current = true;
         }
+      } catch (err) {
+        console.error('Error loading maintenance data from MySQL:', err);
       }
-    } catch {}
+    };
+    loadData();
+    return () => { isMounted = false; };
   }, []);
 
-  // Simpan ke LocalStorage
+  // Simpan ke MySQL Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_MAINTENANCE_KEY, JSON.stringify(tickets));
-    } catch {}
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_MAINTENANCE_KEY, tickets);
+    }
   }, [tickets]);
 
   // Sinkronisasi Real-Time dengan Modul Finance & Accounting

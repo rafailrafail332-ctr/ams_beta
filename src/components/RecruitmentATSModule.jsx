@@ -406,17 +406,10 @@ export const RecruitmentATSModule = ({ candidates = [], setCandidates, showNotif
   // 6. comm-hub = Centralized Communication Hub & WhatsApp/Email Triggers
   const [activeView, setActiveView] = useState('kanban');
 
-  // Master Data Local + Cloud Sync State
-  const [dataList, setDataList] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_CANDIDATES);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_CANDIDATES_RICH;
-  });
+  // Master Data Local + Cloud Sync State (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [dataList, setDataList] = useState(
+    Array.isArray(candidates) && candidates.length > 0 ? candidates : INITIAL_CANDIDATES_RICH
+  );
 
   // Filter & Search
   const [searchTerm, setSearchTerm] = useState('');
@@ -493,13 +486,10 @@ export const RecruitmentATSModule = ({ candidates = [], setCandidates, showNotif
   const [testResult, setTestResult] = useState(null);
 
   // ===========================================================================
-  // SYNC TO LOCAL STORAGE & CLOUD STORE
+  // SYNC TO MYSQL CLOUD STORE (Zero LocalStorage)
   // ===========================================================================
   const updateDataList = (newList) => {
     setDataList(newList);
-    try {
-      localStorage.setItem(STORAGE_KEY_CANDIDATES, JSON.stringify(newList));
-    } catch {}
     try {
       saveCloudStore(STORAGE_KEY_CANDIDATES, newList);
     } catch {}

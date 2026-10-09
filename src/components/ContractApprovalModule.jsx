@@ -221,17 +221,10 @@ export const ContractApprovalModule = ({ contracts = [], setContracts, showNotif
   // 4. audit-trail = Log Jejak Digital & Legal Compliance
   const [activeTab, setActiveTab] = useState('pipeline');
 
-  // Master Data
-  const [contractList, setContractList] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_CONTRACTS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_CONTRACTS_RICH;
-  });
+  // Master Data (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [contractList, setContractList] = useState(
+    Array.isArray(contracts) && contracts.length > 0 ? contracts : INITIAL_CONTRACTS_RICH
+  );
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -272,13 +265,10 @@ export const ContractApprovalModule = ({ contracts = [], setContracts, showNotif
   });
 
   // ===========================================================================
-  // SYNC TO LOCAL STORAGE & CLOUD STORE
+  // SYNC TO MYSQL CLOUD STORE (Zero LocalStorage)
   // ===========================================================================
   const updateContractList = (newList) => {
     setContractList(newList);
-    try {
-      localStorage.setItem(STORAGE_KEY_CONTRACTS, JSON.stringify(newList));
-    } catch {}
     try {
       saveCloudStore(STORAGE_KEY_CONTRACTS, newList);
     } catch {}

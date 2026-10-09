@@ -495,82 +495,56 @@ export const SecurityModule = ({
   // Sub-tabs: 'mutasi-shift' | 'buku-tamu' | 'truk-material' | 'patroli-insiden'
   const [activeSubTab, setActiveSubTab] = useState('mutasi-shift');
 
-  // Stores
-  const [shifts, setShifts] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_SECURITY_SHIFTS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_SHIFTS;
-  });
-
-  const [visitors, setVisitors] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_SECURITY_VISITORS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_VISITORS;
-  });
-
-  const [materials, setMaterials] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_SECURITY_MATERIALS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_MATERIALS;
-  });
-
-  const [patrols, setPatrols] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_SECURITY_PATROLS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_PATROLS;
-  });
+  // Stores (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [shifts, setShifts] = useState(INITIAL_SHIFTS);
+  const [visitors, setVisitors] = useState(INITIAL_VISITORS);
+  const [materials, setMaterials] = useState(INITIAL_MATERIALS);
+  const [patrols, setPatrols] = useState(INITIAL_PATROLS);
+  const isSecurityLoadedRef = useRef(false);
 
   // Initial fetch from MySQL Database on Sengked Hosting
   useEffect(() => {
-    fetchCloudStore(STORAGE_SECURITY_SHIFTS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setShifts(val);
+    let isMounted = true;
+    Promise.all([
+      fetchCloudStore(STORAGE_SECURITY_SHIFTS_KEY, INITIAL_SHIFTS),
+      fetchCloudStore(STORAGE_SECURITY_VISITORS_KEY, INITIAL_VISITORS),
+      fetchCloudStore(STORAGE_SECURITY_MATERIALS_KEY, INITIAL_MATERIALS),
+      fetchCloudStore(STORAGE_SECURITY_PATROLS_KEY, INITIAL_PATROLS)
+    ]).then(([sVal, vVal, mVal, pVal]) => {
+      if (isMounted) {
+        if (sVal && Array.isArray(sVal) && sVal.length > 0) setShifts(sVal);
+        if (vVal && Array.isArray(vVal) && vVal.length > 0) setVisitors(vVal);
+        if (mVal && Array.isArray(mVal) && mVal.length > 0) setMaterials(mVal);
+        if (pVal && Array.isArray(pVal) && pVal.length > 0) setPatrols(pVal);
+        isSecurityLoadedRef.current = true;
+      }
     });
-    fetchCloudStore(STORAGE_SECURITY_VISITORS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setVisitors(val);
-    });
-    fetchCloudStore(STORAGE_SECURITY_MATERIALS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setMaterials(val);
-    });
-    fetchCloudStore(STORAGE_SECURITY_PATROLS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setPatrols(val);
-    });
+    return () => { isMounted = false; };
   }, []);
 
-  // Save changes to localStorage & MySQL Database
+  // Save changes to MySQL Database Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_SECURITY_SHIFTS_KEY, JSON.stringify(shifts));
-    } catch {}
-    saveCloudStore(STORAGE_SECURITY_SHIFTS_KEY, shifts);
+    if (isSecurityLoadedRef.current) {
+      saveCloudStore(STORAGE_SECURITY_SHIFTS_KEY, shifts);
+    }
   }, [shifts]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_SECURITY_VISITORS_KEY, JSON.stringify(visitors));
-    } catch {}
-    saveCloudStore(STORAGE_SECURITY_VISITORS_KEY, visitors);
+    if (isSecurityLoadedRef.current) {
+      saveCloudStore(STORAGE_SECURITY_VISITORS_KEY, visitors);
+    }
   }, [visitors]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_SECURITY_MATERIALS_KEY, JSON.stringify(materials));
-    } catch {}
-    saveCloudStore(STORAGE_SECURITY_MATERIALS_KEY, materials);
+    if (isSecurityLoadedRef.current) {
+      saveCloudStore(STORAGE_SECURITY_MATERIALS_KEY, materials);
+    }
   }, [materials]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_SECURITY_PATROLS_KEY, JSON.stringify(patrols));
-    } catch {}
-    saveCloudStore(STORAGE_SECURITY_PATROLS_KEY, patrols);
+    if (isSecurityLoadedRef.current) {
+      saveCloudStore(STORAGE_SECURITY_PATROLS_KEY, patrols);
+    }
   }, [patrols]);
 
   // Filter States

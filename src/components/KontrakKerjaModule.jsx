@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import {
   FileText,
   TrendingUp,
@@ -31,8 +32,8 @@ import {
 // =============================================================================
 const STORAGE_CONTRACTS = 'ams_hr_kontrak_kerja_v1';
 const STORAGE_SALARY_HISTORY = 'ams_hr_salary_history_v1';
-const STORAGE_APPLICANTS = 'ams_recruitment_applicants_v2';
-const STORAGE_OFFERINGS = 'ams_recruitment_offerings_v2';
+const STORAGE_APPLICANTS = 'ams_hr_recruitment_applicants_v2';
+const STORAGE_OFFERINGS = 'ams_hr_recruitment_offerings_v2';
 const STORAGE_EMPLOYEES = 'ams_hr_database_karyawan_v5';
 
 // 1. DATA SEED DOKUMEN KONTRAK KERJA
@@ -228,30 +229,37 @@ export const KontrakKerjaModule = ({ employees, setEmployees, currentUser, showN
   // Sub-Tab Navigasi (Sesuai Permintaan User: 2 Sub-Modul)
   const [activeSubTab, setActiveSubTab] = useState('jenis-dokumen'); // 'jenis-dokumen' | 'peningkatan-salary'
 
-  // Datasets State
-  const [contracts, setContracts] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_CONTRACTS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_CONTRACTS;
-  });
+  // Datasets State Terpusat MySQL Database
+  const [contracts, setContracts] = useState(INITIAL_CONTRACTS);
+  const [salaryRecords, setSalaryRecords] = useState(INITIAL_SALARY_HISTORY);
+  const [applicantsList, setApplicantsList] = useState([]);
+  const [offeringsList, setOfferingsList] = useState([]);
 
-  const [salaryRecords, setSalaryRecords] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_SALARY_HISTORY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_SALARY_HISTORY;
-  });
-
-  // LocalStorage Sync
+  // Sinkronisasi Real-Time MySQL Database Sengked Hosting
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_CONTRACTS, JSON.stringify(contracts)); } catch {}
+    fetchCloudStore(STORAGE_CONTRACTS, INITIAL_CONTRACTS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setContracts(val);
+      else saveCloudStore(STORAGE_CONTRACTS, INITIAL_CONTRACTS);
+    });
+    fetchCloudStore(STORAGE_SALARY_HISTORY, INITIAL_SALARY_HISTORY).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setSalaryRecords(val);
+      else saveCloudStore(STORAGE_SALARY_HISTORY, INITIAL_SALARY_HISTORY);
+    });
+    fetchCloudStore(STORAGE_APPLICANTS, []).then(val => {
+      if (val && Array.isArray(val)) setApplicantsList(val);
+    });
+    fetchCloudStore(STORAGE_OFFERINGS, []).then(val => {
+      if (val && Array.isArray(val)) setOfferingsList(val);
+    });
+  }, []);
+
+  // Save changes ke MySQL Database Terpusat (Tanpa LocalStorage)
+  useEffect(() => {
+    saveCloudStore(STORAGE_CONTRACTS, contracts);
   }, [contracts]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_SALARY_HISTORY, JSON.stringify(salaryRecords)); } catch {}
+    saveCloudStore(STORAGE_SALARY_HISTORY, salaryRecords);
   }, [salaryRecords]);
 
   // Format Helpers
@@ -302,11 +310,8 @@ export const KontrakKerjaModule = ({ employees, setEmployees, currentUser, showN
     const emp = employees?.find(e => e.id === ctr.employeeId || e.nama === ctr.nama);
     if (emp) phone = emp.noHp || emp.phone;
     if (!phone) {
-      try {
-        const apps = JSON.parse(localStorage.getItem(STORAGE_APPLICANTS) || '[]');
-        const matchedApp = apps.find(a => a.id === ctr.employeeId || a.nama === ctr.nama);
-        if (matchedApp) phone = matchedApp.phone;
-      } catch {}
+      const matchedApp = applicantsList.find(a => a.id === ctr.employeeId || a.nama === ctr.nama);
+      if (matchedApp) phone = matchedApp.phone;
     }
 
     if (!phone) {
@@ -353,50 +358,43 @@ export const KontrakKerjaModule = ({ employees, setEmployees, currentUser, showN
 
   const [viewingContractDoc, setViewingContractDoc] = useState(null);
 
-  // Kandidat Pelamar dari Rekrutmen (Offering & Lolos Seleksi)
+  // Kandidat Pelamar dari Rekrutmen (Offering & Lolos Seleksi) Terpusat
   const recruitmentCandidates = useMemo(() => {
-    try {
-      const offs = JSON.parse(localStorage.getItem(STORAGE_OFFERINGS) || '[]');
-      const apps = JSON.parse(localStorage.getItem(STORAGE_APPLICANTS) || '[]');
-      const candidates = [];
-
-      offs.forEach(o => {
-        candidates.push({
-          id: o.applicantId || o.id,
-          nama: o.applicantName,
-          jabatan: o.posisi,
-          penempatan: o.penempatan,
-          gajiPokok: o.gajiPokok,
-          tunjangan: o.tunjangan,
-          tanggalMulai: o.jadwalOnDuty,
-          statusKerja: o.statusKerja,
-          source: 'Offering'
-        });
+    const candidates = [];
+    (offeringsList || []).forEach(o => {
+      candidates.push({
+        id: o.applicantId || o.id,
+        nama: o.applicantName,
+        jabatan: o.posisi,
+        penempatan: o.penempatan,
+        gajiPokok: o.gajiPokok,
+        tunjangan: o.tunjangan,
+        tanggalMulai: o.jadwalOnDuty,
+        statusKerja: o.statusKerja,
+        source: 'Offering'
       });
+    });
 
-      apps.forEach(a => {
-        if (!candidates.some(c => c.nama && a.nama && c.nama.toLowerCase() === a.nama.toLowerCase())) {
-          if (a.status === 'Offering' || a.status === 'Diterima' || a.status === 'Lolos Screening') {
-            candidates.push({
-              id: a.id,
-              nama: a.nama,
-              jabatan: a.posisi,
-              penempatan: a.project,
-              gajiPokok: 6500000,
-              tunjangan: 1500000,
-              tanggalMulai: new Date().toISOString().split('T')[0],
-              statusKerja: 'PKWT',
-              source: 'Pelamar'
-            });
-          }
+    (applicantsList || []).forEach(a => {
+      if (!candidates.some(c => c.nama && a.nama && c.nama.toLowerCase() === a.nama.toLowerCase())) {
+        if (a.status === 'Offering' || a.status === 'Diterima' || a.status === 'Lolos Screening') {
+          candidates.push({
+            id: a.id,
+            nama: a.nama,
+            jabatan: a.posisi,
+            penempatan: a.project,
+            gajiPokok: 6500000,
+            tunjangan: 1500000,
+            tanggalMulai: new Date().toISOString().split('T')[0],
+            statusKerja: 'PKWT',
+            source: 'Pelamar'
+          });
         }
-      });
+      }
+    });
 
-      return candidates;
-    } catch {
-      return [];
-    }
-  }, [isContractModalOpen]);
+    return candidates;
+  }, [offeringsList, applicantsList, isContractModalOpen]);
 
   // Filter Dokumen Kontrak
   const filteredContracts = useMemo(() => {

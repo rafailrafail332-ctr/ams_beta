@@ -347,28 +347,27 @@ export const KpiModule = ({
   // Sub-tabs: 'scorecard' | 'todo-speed' | 'kpi-matrix' | 'action-plan' | 'grafik-bulanan'
   const [activeSubTab, setActiveSubTab] = useState('scorecard');
 
-  // Scorecards Store
-  const [scorecards, setScorecards] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_KPIS_SCORECARDS_KEY);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_SCORECARDS;
-  });
+  // Scorecards Store (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [scorecards, setScorecards] = useState(INITIAL_SCORECARDS);
+  const isKpiLoadedRef = useRef(false);
 
   // Initial fetch from MySQL Database on Sengked Hosting
   useEffect(() => {
-    fetchCloudStore(STORAGE_KPIS_SCORECARDS_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setScorecards(val);
+    let isMounted = true;
+    fetchCloudStore(STORAGE_KPIS_SCORECARDS_KEY, INITIAL_SCORECARDS).then(val => {
+      if (isMounted) {
+        if (val && Array.isArray(val) && val.length > 0) setScorecards(val);
+        isKpiLoadedRef.current = true;
+      }
     });
+    return () => { isMounted = false; };
   }, []);
 
-  // Save changes to localStorage & MySQL Database
+  // Save changes to MySQL Database Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KPIS_SCORECARDS_KEY, JSON.stringify(scorecards));
-    } catch {}
-    saveCloudStore(STORAGE_KPIS_SCORECARDS_KEY, scorecards);
+    if (isKpiLoadedRef.current) {
+      saveCloudStore(STORAGE_KPIS_SCORECARDS_KEY, scorecards);
+    }
   }, [scorecards]);
 
   // Filter States

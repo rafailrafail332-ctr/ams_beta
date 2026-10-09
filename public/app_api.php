@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Konfigurasi Database Terpusat Hostinger
-$db_host = "127.0.0.1";
+$db_host = "localhost";
 $db_user = "u643087735_ams";
 $db_pass = "Ams2026#";
 $db_name = "u643087735_ams";
@@ -101,16 +101,152 @@ try {
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_karyawan (
         `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
         `nama` VARCHAR(150) NOT NULL,
         `no_hp` VARCHAR(50) NULL,
         `nik` VARCHAR(50) NULL,
-        `ttl` VARCHAR(100) NULL,
+        `npwp` VARCHAR(50) NULL,
+        `no_rekening` VARCHAR(100) NULL,
         `alamat` TEXT NULL,
-        `divisi` VARCHAR(100) DEFAULT 'Teknik & Konstruksi',
+        `divisi` VARCHAR(100) DEFAULT 'Umum',
         `jabatan` VARCHAR(100) NULL,
-        `status_nikah` VARCHAR(50) DEFAULT 'Menikah',
+        `penempatan` VARCHAR(150) NULL,
+        `status` VARCHAR(100) DEFAULT 'Karyawan Tetap (PKWTT)',
+        `nama_keluarga` TEXT NULL,
+        `tanggal_masuk` DATE NULL,
         `ktp_file` LONGTEXT NULL,
         `foto_profil` LONGTEXT NULL,
+        `files_json` LONGTEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // Pastikan kolom-kolom baru di tbl_karyawan sudah ada jika tabel sudah pernah dibuat sebelumnya
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM tbl_karyawan")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('no_dok', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `no_dok` VARCHAR(100) NULL");
+        if (!in_array('npwp', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `npwp` VARCHAR(50) NULL");
+        if (!in_array('no_rekening', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `no_rekening` VARCHAR(100) NULL");
+        if (!in_array('penempatan', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `penempatan` VARCHAR(150) NULL");
+        if (!in_array('status', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `status` VARCHAR(100) DEFAULT 'Karyawan Tetap (PKWTT)'");
+        if (!in_array('nama_keluarga', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `nama_keluarga` TEXT NULL");
+        if (!in_array('tanggal_masuk', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `tanggal_masuk` DATE NULL");
+        if (!in_array('files_json', $cols)) $pdo->exec("ALTER TABLE tbl_karyawan ADD COLUMN `files_json` LONGTEXT NULL");
+    } catch (Exception $colEx) {}
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_recruitment_pelamar (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
+        `nama` VARCHAR(150) NOT NULL,
+        `posisi` VARCHAR(150) NULL,
+        `proyek` VARCHAR(150) NULL,
+        `email` VARCHAR(150) NULL,
+        `no_hp` VARCHAR(50) NULL,
+        `status_tahap` VARCHAR(50) DEFAULT 'Interview User',
+        `skor` VARCHAR(50) NULL,
+        `tanggal_lamar` DATE NULL,
+        `berkas_cv` LONGTEXT NULL,
+        `media_sosial` LONGTEXT NULL,
+        `catatan` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    try {
+        $rpCols = $pdo->query("SHOW COLUMNS FROM tbl_recruitment_pelamar")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('media_sosial', $rpCols)) $pdo->exec("ALTER TABLE tbl_recruitment_pelamar ADD COLUMN `media_sosial` LONGTEXT NULL");
+    } catch (Exception $rpEx) {}
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_kontrak_kerja (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NOT NULL,
+        `employee_id` VARCHAR(64) NULL,
+        `nama` VARCHAR(150) NOT NULL,
+        `nik` VARCHAR(50) NULL,
+        `jabatan` VARCHAR(150) NULL,
+        `penempatan` VARCHAR(150) NULL,
+        `jenis_dokumen` VARCHAR(50) DEFAULT 'PKWT',
+        `tanggal_mulai` DATE NULL,
+        `tanggal_berakhir` DATE NULL,
+        `gaji_pokok` DECIMAL(18,2) DEFAULT 0,
+        `tunjangan` DECIMAL(18,2) DEFAULT 0,
+        `status_kontrak` VARCHAR(50) DEFAULT 'Aktif',
+        `catatan` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_aset_inventaris (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
+        `nama_aset` VARCHAR(255) NOT NULL,
+        `jenis_aset` VARCHAR(100) NULL,
+        `tahun_perolehan` VARCHAR(20) NULL,
+        `tanggal_perolehan` DATE NULL,
+        `harga` DECIMAL(18,2) DEFAULT 0,
+        `lokasi` VARCHAR(150) NULL,
+        `kondisi` VARCHAR(50) DEFAULT 'Baik',
+        `penanggung_jawab` VARCHAR(150) NULL,
+        `catatan` TEXT NULL,
+        `foto_aset` LONGTEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_maintenance_tiket (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
+        `asset_id` VARCHAR(64) NULL,
+        `nama_barang` VARCHAR(255) NOT NULL,
+        `lokasi` VARCHAR(150) NULL,
+        `jenis_kerusakan` TEXT NULL,
+        `urgensi` VARCHAR(50) DEFAULT 'Normal',
+        `pemohon` VARCHAR(150) NULL,
+        `vendor` VARCHAR(150) NULL,
+        `biaya` DECIMAL(18,2) DEFAULT 0,
+        `status_maintenance` VARCHAR(50) DEFAULT 'Menunggu Maintenance',
+        `status_pembayaran` VARCHAR(50) DEFAULT 'Pending',
+        `catatan` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_fasilitas_kantor (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
+        `nama_fasilitas` VARCHAR(255) NOT NULL,
+        `kategori` VARCHAR(100) NULL,
+        `lokasi` VARCHAR(150) NULL,
+        `jumlah` INT DEFAULT 1,
+        `kondisi` VARCHAR(50) DEFAULT 'Baik',
+        `penanggung_jawab` VARCHAR(150) NULL,
+        `status` VARCHAR(50) DEFAULT 'Tersedia',
+        `kelengkapan` TEXT NULL,
+        `catatan` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_gathering_agenda (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `no_dok` VARCHAR(100) NULL,
+        `nama_event` VARCHAR(255) NOT NULL,
+        `kategori` VARCHAR(100) NULL,
+        `tanggal_mulai` DATE NULL,
+        `tanggal_selesai` DATE NULL,
+        `lokasi` VARCHAR(255) NULL,
+        `penanggung_jawab` VARCHAR(150) NULL,
+        `anggaran` DECIMAL(18,2) DEFAULT 0,
+        `status` VARCHAR(50) DEFAULT 'Direncanakan',
+        `catatan` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_cctv_monitoring (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `kode_titik` VARCHAR(50) NOT NULL,
+        `nama_kamera` VARCHAR(255) NOT NULL,
+        `lokasi` VARCHAR(150) NULL,
+        `ip_address` VARCHAR(100) NULL,
+        `tipe_kamera` VARCHAR(100) DEFAULT 'IP Camera Outdoor',
+        `status` VARCHAR(50) DEFAULT 'ONLINE',
+        `resolusi` VARCHAR(50) DEFAULT '4K / 8MP',
+        `catatan` TEXT NULL,
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
@@ -336,6 +472,39 @@ try {
         `pembayaran_saat_ini` DECIMAL(18,2) DEFAULT 0,
         `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (`rab_id`) REFERENCES tbl_rab_borongan(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // 16. TABEL BAGAN AKUN (CHART OF ACCOUNTS - COA / ACCOUNT LIST)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_coa (
+        `code` VARCHAR(50) PRIMARY KEY,
+        `name` VARCHAR(255) NOT NULL,
+        `parent_code` VARCHAR(50) NULL,
+        `level` INT DEFAULT 1,
+        `kriteria` VARCHAR(20) DEFAULT 'Detail',
+        `posisi` VARCHAR(20) DEFAULT 'Debet',
+        `category` VARCHAR(100) NULL,
+        `balance` DECIMAL(18,2) DEFAULT 0,
+        `description` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX `idx_parent` (`parent_code`),
+        INDEX `idx_kriteria` (`kriteria`),
+        INDEX `idx_category` (`category`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    // 17. TABEL JOBLIST & SUB-PEKERJAAN PROYEK (2-LEVEL COST CENTER)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tbl_joblist (
+        `code` VARCHAR(50) PRIMARY KEY,
+        `name` VARCHAR(255) NOT NULL,
+        `parent_code` VARCHAR(50) NULL,
+        `level` INT DEFAULT 1,
+        `type` VARCHAR(50) DEFAULT 'Project',
+        `description` TEXT NULL,
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX `idx_parent` (`parent_code`),
+        INDEX `idx_level` (`level`),
+        INDEX `idx_type` (`type`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
 } catch (PDOException $e) {
@@ -860,6 +1029,269 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // N. Relasi Data Base Karyawan (HR)
+        if (strpos($key, 'karyawan') !== false && is_array($parsed)) {
+            $stmtEmp = $pdo->prepare("INSERT INTO tbl_karyawan (`id`, `no_dok`, `nama`, `no_hp`, `nik`, `npwp`, `no_rekening`, `alamat`, `divisi`, `jabatan`, `penempatan`, `status`, `nama_keluarga`, `tanggal_masuk`, `files_json`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `no_dok`=VALUES(`no_dok`), `nama`=VALUES(`nama`), `no_hp`=VALUES(`no_hp`), `nik`=VALUES(`nik`), `npwp`=VALUES(`npwp`), `no_rekening`=VALUES(`no_rekening`), `alamat`=VALUES(`alamat`), `jabatan`=VALUES(`jabatan`), `penempatan`=VALUES(`penempatan`), `status`=VALUES(`status`), `nama_keluarga`=VALUES(`nama_keluarga`), `tanggal_masuk`=VALUES(`tanggal_masuk`), `files_json`=VALUES(`files_json`)");
+            foreach ($parsed as $e) {
+                if (!empty($e['nama']) || !empty($e['name'])) {
+                    $eId = $e['id'] ?? ('EMP-' . substr(md5($e['nama'] ?? $e['name']), 0, 8));
+                    $famStr = is_array($e['namaKeluarga'] ?? null) ? json_encode($e['namaKeluarga'], JSON_UNESCAPED_UNICODE) : ($e['namaKeluarga'] ?? null);
+                    $filesStr = !empty($e['files']) ? json_encode($e['files'], JSON_UNESCAPED_UNICODE) : null;
+                    $tglMasuk = !empty($e['tanggalMasuk']) && $e['tanggalMasuk'] !== '-' ? $e['tanggalMasuk'] : (!empty($e['tanggalDok']) ? $e['tanggalDok'] : null);
+                    $stmtEmp->execute([
+                        $eId,
+                        $e['noDok'] ?? null,
+                        $e['nama'] ?? ($e['name'] ?? ''),
+                        $e['noHp'] ?? ($e['phone'] ?? null),
+                        $e['nik'] ?? null,
+                        $e['npwp'] ?? null,
+                        $e['noRekening'] ?? null,
+                        $e['alamat'] ?? null,
+                        $e['divisi'] ?? 'Umum',
+                        $e['jabatan'] ?? ($e['judulDokumen'] ?? null),
+                        $e['penempatan'] ?? ($e['project'] ?? null),
+                        $e['status'] ?? ($e['kategori'] ?? 'Karyawan Tetap (PKWTT)'),
+                        $famStr,
+                        $tglMasuk,
+                        $filesStr
+                    ]);
+                }
+            }
+        }
+
+        // O. Relasi Recruitment Pelamar (HR)
+        if ((strpos($key, 'recruitment') !== false || strpos($key, 'applicant') !== false || strpos($key, 'kandidat') !== false) && is_array($parsed)) {
+            $stmtRec = $pdo->prepare("INSERT INTO tbl_recruitment_pelamar (`id`, `no_dok`, `nama`, `posisi`, `proyek`, `email`, `no_hp`, `status_tahap`, `skor`, `tanggal_lamar`, `berkas_cv`, `media_sosial`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `posisi`=VALUES(`posisi`), `status_tahap`=VALUES(`status_tahap`), `skor`=VALUES(`skor`), `media_sosial`=VALUES(`media_sosial`), `catatan`=VALUES(`catatan`), `berkas_cv`=VALUES(`berkas_cv`)");
+            foreach ($parsed as $rc) {
+                if (!empty($rc['nama']) || !empty($rc['name'])) {
+                    $rcId = $rc['id'] ?? ('APP-' . substr(md5($rc['nama'] ?? $rc['name']), 0, 8));
+                    $cvStr = !empty($rc['files']) ? json_encode($rc['files'], JSON_UNESCAPED_UNICODE) : null;
+                    $socStr = !empty($rc['socialMedia']) ? (is_string($rc['socialMedia']) ? $rc['socialMedia'] : json_encode($rc['socialMedia'], JSON_UNESCAPED_UNICODE)) : null;
+                    $stmtRec->execute([
+                        $rcId,
+                        $rc['noDok'] ?? ($rc['noRegistrasi'] ?? null),
+                        $rc['nama'] ?? ($rc['name'] ?? ''),
+                        $rc['posisi'] ?? ($rc['kategori'] ?? ($rc['judulDokumen'] ?? null)),
+                        $rc['project'] ?? ($rc['penempatan'] ?? null),
+                        $rc['email'] ?? null,
+                        $rc['phone'] ?? ($rc['noHp'] ?? null),
+                        $rc['statusTahap'] ?? ($rc['tahap'] ?? 'Interview User'),
+                        $rc['skor'] ?? null,
+                        $rc['tanggalLamar'] ?? ($rc['tanggalDok'] ?? null),
+                        $cvStr,
+                        $socStr,
+                        $rc['catatan'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // P. Relasi Kontrak Kerja (HR)
+        if ((strpos($key, 'kontrak') !== false || strpos($key, 'contract') !== false) && is_array($parsed)) {
+            $stmtCtr = $pdo->prepare("INSERT INTO tbl_kontrak_kerja (`id`, `no_dok`, `employee_id`, `nama`, `nik`, `jabatan`, `penempatan`, `jenis_dokumen`, `tanggal_mulai`, `tanggal_berakhir`, `gaji_pokok`, `tunjangan`, `status_kontrak`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `jabatan`=VALUES(`jabatan`), `jenis_dokumen`=VALUES(`jenis_dokumen`), `tanggal_mulai`=VALUES(`tanggal_mulai`), `tanggal_berakhir`=VALUES(`tanggal_berakhir`), `gaji_pokok`=VALUES(`gaji_pokok`), `tunjangan`=VALUES(`tunjangan`), `status_kontrak`=VALUES(`status_kontrak`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $ct) {
+                if (!empty($ct['nama']) || !empty($ct['noDok'])) {
+                    $cId = $ct['id'] ?? ('CTR-' . substr(md5($ct['noDok'] ?? $ct['nama']), 0, 8));
+                    $stmtCtr->execute([
+                        $cId,
+                        $ct['noDok'] ?? ('CTR/'.date('Y').'/'.$cId),
+                        $ct['employeeId'] ?? null,
+                        $ct['nama'] ?? '',
+                        $ct['nik'] ?? null,
+                        $ct['jabatan'] ?? null,
+                        $ct['penempatan'] ?? null,
+                        $ct['jenisDokumen'] ?? 'PKWT',
+                        $ct['tanggalMulai'] ?? null,
+                        $ct['tanggalBerakhir'] ?? null,
+                        floatval($ct['gajiPokok'] ?? 0),
+                        floatval($ct['tunjangan'] ?? 0),
+                        $ct['statusKontrak'] ?? 'Aktif',
+                        $ct['catatan'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // Q. Relasi Management Aset Inventaris (GA)
+        if ((strpos($key, 'asset') !== false || strpos($key, 'aset') !== false) && is_array($parsed)) {
+            $stmtAst = $pdo->prepare("INSERT INTO tbl_aset_inventaris (`id`, `no_dok`, `nama_aset`, `jenis_aset`, `tahun_perolehan`, `tanggal_perolehan`, `harga`, `lokasi`, `kondisi`, `penanggung_jawab`, `catatan`, `foto_aset`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `nama_aset`=VALUES(`nama_aset`), `jenis_aset`=VALUES(`jenis_aset`), `harga`=VALUES(`harga`), `kondisi`=VALUES(`kondisi`), `lokasi`=VALUES(`lokasi`), `penanggung_jawab`=VALUES(`penanggung_jawab`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $as) {
+                $namaAst = $as['namaAsset'] ?? ($as['namaAset'] ?? ($as['nama'] ?? ''));
+                if (!empty($namaAst)) {
+                    $aId = $as['id'] ?? ('AST-' . substr(md5($namaAst), 0, 8));
+                    $tglP = !empty($as['tanggalPerolehan']) && $as['tanggalPerolehan'] !== '-' ? $as['tanggalPerolehan'] : null;
+                    $fotoAst = !empty($as['files']) ? json_encode($as['files'], JSON_UNESCAPED_UNICODE) : null;
+                    $stmtAst->execute([
+                        $aId,
+                        $as['noDok'] ?? null,
+                        $namaAst,
+                        $as['jenisAsset'] ?? ($as['jenisAset'] ?? 'Inventaris Umum'),
+                        $as['tahunPerolehan'] ?? date('Y'),
+                        $tglP,
+                        floatval($as['harga'] ?? 0),
+                        $as['lokasiAsset'] ?? ($as['lokasi'] ?? null),
+                        $as['kondisi'] ?? 'Baik',
+                        $as['penanggungJawab'] ?? null,
+                        $as['catatan'] ?? null,
+                        $fotoAst
+                    ]);
+                }
+            }
+        }
+
+        // R. Relasi Maintenance Tiket (GA)
+        if ((strpos($key, 'maintenance') !== false || strpos($key, 'maintanance') !== false) && is_array($parsed)) {
+            $stmtMnt = $pdo->prepare("INSERT INTO tbl_maintenance_tiket (`id`, `no_dok`, `asset_id`, `nama_barang`, `lokasi`, `jenis_kerusakan`, `urgensi`, `pemohon`, `vendor`, `biaya`, `status_maintenance`, `status_pembayaran`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `status_maintenance`=VALUES(`status_maintenance`), `status_pembayaran`=VALUES(`status_pembayaran`), `biaya`=VALUES(`biaya`), `vendor`=VALUES(`vendor`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $mt) {
+                $namaBrg = $mt['namaBarang'] ?? ($mt['namaAsset'] ?? ($mt['judul'] ?? ''));
+                if (!empty($namaBrg)) {
+                    $mtId = $mt['id'] ?? ('MNT-' . substr(md5($mt['noDok'] ?? $namaBrg), 0, 8));
+                    $stmtMnt->execute([
+                        $mtId,
+                        $mt['noDok'] ?? null,
+                        $mt['assetId'] ?? null,
+                        $namaBrg,
+                        $mt['lokasiAsset'] ?? ($mt['lokasi'] ?? null),
+                        $mt['jenisKerusakan'] ?? null,
+                        $mt['urgensi'] ?? 'Normal',
+                        $mt['pemohon'] ?? null,
+                        $mt['namaVendor'] ?? ($mt['vendor'] ?? null),
+                        floatval($mt['biaya'] ?? 0),
+                        $mt['statusMaintenance'] ?? 'Menunggu Maintenance',
+                        $mt['statusPembayaran'] ?? 'Pending',
+                        $mt['catatan'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // S. Relasi Fasilitas Kantor (GA)
+        if ((strpos($key, 'facilit') !== false || strpos($key, 'fasilitas') !== false) && is_array($parsed)) {
+            $stmtFas = $pdo->prepare("INSERT INTO tbl_fasilitas_kantor (`id`, `no_dok`, `nama_fasilitas`, `kategori`, `lokasi`, `jumlah`, `kondisi`, `penanggung_jawab`, `status`, `kelengkapan`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `nama_fasilitas`=VALUES(`nama_fasilitas`), `kondisi`=VALUES(`kondisi`), `status`=VALUES(`status`), `penanggung_jawab`=VALUES(`penanggung_jawab`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $fs) {
+                $namaFas = $fs['namaFasilitas'] ?? ($fs['nama'] ?? ($fs['fasilitas'] ?? ''));
+                if (!empty($namaFas)) {
+                    $fId = $fs['id'] ?? ('FAS-' . substr(md5($namaFas), 0, 8));
+                    $stmtFas->execute([
+                        $fId,
+                        $fs['noDok'] ?? null,
+                        $namaFas,
+                        $fs['kategori'] ?? 'Fasilitas Kantor',
+                        $fs['lokasi'] ?? ($fs['project'] ?? null),
+                        intval($fs['jumlah'] ?? 1),
+                        $fs['kondisi'] ?? 'Baik',
+                        $fs['penanggungJawab'] ?? null,
+                        $fs['status'] ?? 'Tersedia',
+                        $fs['kelengkapan'] ?? null,
+                        $fs['catatan'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // T. Relasi Gathering Agenda (HR)
+        if (strpos($key, 'gathering') !== false && is_array($parsed)) {
+            $stmtGth = $pdo->prepare("INSERT INTO tbl_gathering_agenda (`id`, `no_dok`, `nama_event`, `kategori`, `tanggal_mulai`, `tanggal_selesai`, `lokasi`, `penanggung_jawab`, `anggaran`, `status`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `nama_event`=VALUES(`nama_event`), `tanggal_mulai`=VALUES(`tanggal_mulai`), `status`=VALUES(`status`), `anggaran`=VALUES(`anggaran`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $gt) {
+                $namaEvt = $gt['namaAcara'] ?? ($gt['title'] ?? ($gt['namaEvent'] ?? ($gt['judul'] ?? ($gt['nama'] ?? ''))));
+                if (!empty($namaEvt)) {
+                    $gId = $gt['id'] ?? ('GTH-' . substr(md5($namaEvt), 0, 8));
+                    $stmtGth->execute([
+                        $gId,
+                        $gt['noDok'] ?? null,
+                        $namaEvt,
+                        $gt['kategori'] ?? 'Family Gathering',
+                        $gt['startDate'] ?? ($gt['tanggalMulai'] ?? ($gt['tanggal'] ?? null)),
+                        $gt['endDate'] ?? ($gt['tanggalSelesai'] ?? null),
+                        $gt['location'] ?? ($gt['lokasi'] ?? null),
+                        $gt['pic'] ?? ($gt['penanggungJawab'] ?? null),
+                        floatval($gt['budget'] ?? ($gt['anggaran'] ?? ($gt['totalBiaya'] ?? ($gt['totalEstimasi'] ?? 0)))),
+                        $gt['status'] ?? 'Direncanakan',
+                        $gt['notes'] ?? ($gt['catatan'] ?? ($gt['deskripsi'] ?? null))
+                    ]);
+                }
+            }
+        }
+
+        // U. Relasi CCTV Monitoring (GA)
+        if (strpos($key, 'cctv') !== false && is_array($parsed)) {
+            $stmtCtv = $pdo->prepare("INSERT INTO tbl_cctv_monitoring (`id`, `kode_titik`, `nama_kamera`, `lokasi`, `ip_address`, `tipe_kamera`, `status`, `resolusi`, `catatan`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `nama_kamera`=VALUES(`nama_kamera`), `lokasi`=VALUES(`lokasi`), `ip_address`=VALUES(`ip_address`), `status`=VALUES(`status`), `resolusi`=VALUES(`resolusi`), `catatan`=VALUES(`catatan`)");
+            foreach ($parsed as $cv) {
+                $namaCam = $cv['namaKamera'] ?? ($cv['name'] ?? ($cv['nama'] ?? ''));
+                if (!empty($namaCam) || !empty($cv['kodeTitik'])) {
+                    $cId = $cv['id'] ?? ('CTV-' . substr(md5($namaCam . ($cv['kodeTitik'] ?? '')), 0, 8));
+                    $stmtCtv->execute([
+                        $cId,
+                        $cv['kodeTitik'] ?? ('CCTV-' . substr($cId, 4)),
+                        $namaCam,
+                        $cv['lokasi'] ?? ($cv['project'] ?? null),
+                        $cv['ipAddress'] ?? ($cv['ip'] ?? null),
+                        $cv['tipeKamera'] ?? 'IP Camera Outdoor',
+                        $cv['status'] ?? 'ONLINE',
+                        $cv['resolusi'] ?? '4K / 8MP',
+                        $cv['catatan'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // Z. Relasi Chart of Accounts (COA / Account List)
+        if (strpos($key, 'coa') !== false && is_array($parsed)) {
+            $stmtCoa = $pdo->prepare("INSERT INTO tbl_coa (`code`, `name`, `parent_code`, `level`, `kriteria`, `posisi`, `category`, `balance`, `description`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `parent_code`=VALUES(`parent_code`), `level`=VALUES(`level`), `kriteria`=VALUES(`kriteria`), `posisi`=VALUES(`posisi`), `category`=VALUES(`category`), `balance`=VALUES(`balance`), `description`=VALUES(`description`)");
+            foreach ($parsed as $ca) {
+                if (!empty($ca['code']) && !empty($ca['name'])) {
+                    $stmtCoa->execute([
+                        $ca['code'],
+                        $ca['name'],
+                        $ca['parentCode'] ?? null,
+                        intval($ca['level'] ?? 1),
+                        $ca['kriteria'] ?? 'Detail',
+                        $ca['posisi'] ?? ($ca['normalBalance'] ?? 'Debet'),
+                        $ca['category'] ?? 'Umum',
+                        floatval($ca['balance'] ?? 0),
+                        $ca['description'] ?? null
+                    ]);
+                }
+            }
+        }
+
+        // AA. Relasi Joblist & Sub-Pekerjaan Proyek (2-Level)
+        if (strpos($key, 'joblist') !== false && is_array($parsed)) {
+            $stmtJob = $pdo->prepare("INSERT INTO tbl_joblist (`code`, `name`, `parent_code`, `level`, `type`, `description`)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE `name`=VALUES(`name`), `parent_code`=VALUES(`parent_code`), `level`=VALUES(`level`), `type`=VALUES(`type`), `description`=VALUES(`description`)");
+            foreach ($parsed as $jb) {
+                if (!empty($jb['code']) && !empty($jb['name'])) {
+                    $stmtJob->execute([
+                        $jb['code'],
+                        $jb['name'],
+                        $jb['parentCode'] ?? null,
+                        intval($jb['level'] ?? 1),
+                        $jb['type'] ?? 'Project',
+                        $jb['description'] ?? null
+                    ]);
                 }
             }
         }

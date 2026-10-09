@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import { 
   Building, 
   Car, 
@@ -49,101 +50,46 @@ export const GeneralAffairModule = () => {
     { id: 'GA-SO-04', name: 'Pos Keamanan Utama & Gerbang Keluar-Masuk Material', category: 'Keamanan Konstruksi', status: 'Penjagaan 24 Jam', location: 'Main Entrance Gate', pic: 'Danru Satpam Hartono', condition: 'Penjagaan Ketat' }
   ];
 
-  const [siteOfficeList, setSiteOfficeList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_ga_site_office_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return initialSiteOffice;
-  });
+  // 100% MySQL Database Terpusat, Zero LocalStorage
+  const [siteOfficeList, setSiteOfficeList] = useState(initialSiteOffice);
+  const [permitsList, setPermitsList] = useState(initialPermits);
+  const [fleetList, setFleetList] = useState(initialFleet);
+  const [k3List, setK3List] = useState(initialK3);
+  const isGaLoadedRef = useRef(false);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_ga_site_office_v2', JSON.stringify(siteOfficeList));
-    } catch (e) {}
+    let isMounted = true;
+    Promise.all([
+      fetchCloudStore('ams_ga_site_office_v2', initialSiteOffice),
+      fetchCloudStore('ams_ga_permits_v2', initialPermits),
+      fetchCloudStore('ams_ga_fleet_v2', initialFleet),
+      fetchCloudStore('ams_ga_k3_v2', initialK3)
+    ]).then(([so, pr, fl, k3]) => {
+      if (isMounted) {
+        if (so && Array.isArray(so) && so.length > 0) setSiteOfficeList(so);
+        if (pr && Array.isArray(pr) && pr.length > 0) setPermitsList(pr);
+        if (fl && Array.isArray(fl) && fl.length > 0) setFleetList(fl);
+        if (k3 && Array.isArray(k3) && k3.length > 0) setK3List(k3);
+        isGaLoadedRef.current = true;
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (isGaLoadedRef.current) saveCloudStore('ams_ga_site_office_v2', siteOfficeList);
   }, [siteOfficeList]);
 
-  // ==========================================
-  // 2. PERIZINAN & HUBUNGAN WARGA
-  // ==========================================
-  const initialPermits = [
-    { id: 'GA-LIC-01', permitName: 'Kesesuaian Kegiatan Pemanfaatan Ruang (KKPR)', agency: 'Dinas PUPR & BPN', status: 'Resmi Terbit', progress: 100, note: 'SK No. 503/KKPR/2024' },
-    { id: 'GA-LIC-02', permitName: 'Persetujuan Bangunan Gedung (PBG Induk)', agency: 'Dinas Perizinan Terpadu', status: 'Resmi Terbit', progress: 100, note: 'PBG No. 2025/PBG-0089' },
-    { id: 'GA-LIC-03', permitName: 'Persetujuan Lingkungan (AMDAL / UKL-UPL)', agency: 'Dinas Lingkungan Hidup', status: 'Resmi Terbit', progress: 100, note: 'Rekomendasi LH Ready' },
-    { id: 'GA-LIC-04', permitName: 'Social Mapping & Kesepakatan Warga Sekitar', agency: 'RT/RW & Tokoh Masyarakat Local', status: 'Kondusif & Disetujui', progress: 95, note: 'Kompensasi & CSR Terdistribusi' }
-  ];
-
-  const [permitsList, setPermitsList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_ga_permits_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return initialPermits;
-  });
-
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_ga_permits_v2', JSON.stringify(permitsList));
-    } catch (e) {}
+    if (isGaLoadedRef.current) saveCloudStore('ams_ga_permits_v2', permitsList);
   }, [permitsList]);
 
-  // ==========================================
-  // 3. FLEET & TRANSPORTASI LAPANGAN
-  // ==========================================
-  const initialFleet = [
-    { id: 'GA-FLT-01', vehicle: 'Toyota Hilux Double Cabin 4x4 (B 9102 GA)', type: 'Kendaraan Off-Road Pengawas Lapangan', driver: 'Budi (Driver GA)', status: 'Siap Pakai', serviceDue: '2025-09-01' },
-    { id: 'GA-FLT-02', vehicle: 'Mitsubishi Triton 4x4 (B 9044 XZ)', type: 'Kendaraan Surveyor & Manajer Proyek', driver: 'Dodi (Driver Site)', status: 'Sedang Dipakai Lapangan', serviceDue: '2025-08-25' },
-    { id: 'GA-FLT-03', vehicle: 'Toyota HiAce VIP Executive (B 7721 SAK)', type: 'Armada Antar-Jemput Site Visit Konsumen', driver: 'Rahmat (Driver Executive)', status: 'Siap Visit Konsumen', serviceDue: '2025-09-15' }
-  ];
-
-  const [fleetList, setFleetList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_ga_fleet_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return initialFleet;
-  });
-
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_ga_fleet_v2', JSON.stringify(fleetList));
-    } catch (e) {}
+    if (isGaLoadedRef.current) saveCloudStore('ams_ga_fleet_v2', fleetList);
   }, [fleetList]);
 
-  // ==========================================
-  // 4. K3 & TANGGAP DARURAT PROYEK
-  // ==========================================
-  const initialK3 = [
-    { id: 'GA-K3-01', title: 'APAR Powder 6kg & CO2 (Titik Krusial Proyek)', qty: '12 Tabung APAR', location: 'Marketing Gallery, Posko & Gudang', status: 'Terinspeksi Aktif', lastCheck: '2025-08-01' },
-    { id: 'GA-K3-02', title: 'Posko First Aid (P3K) & Obat-Obatan Darurat', qty: '2 Unit Kotak P3K Standard', location: 'Kantor Site Office & Pos Satpam', status: 'Lengkap & Ready', lastCheck: '2025-08-05' },
-    { id: 'GA-K3-03', title: 'Sistem Pompa Drainase & Mitigasi Banjir Proyek', qty: '4 Unit Pompa Submersible 3 inchi', location: 'Saluran Outfall Utama', status: 'Standby Bencana', lastCheck: '2025-07-28' },
-    { id: 'GA-K3-04', title: 'Jalur Evakuasi & Rambu Peringatan Keselamatan (Safety Signage)', qty: '24 Papan Rambu K3', location: 'Area Konstruksi Kavling A & B', status: 'Terpasang Jelas', lastCheck: '2025-08-02' }
-  ];
-
-  const [k3List, setK3List] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ams_ga_k3_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return initialK3;
-  });
-
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_ga_k3_v2', JSON.stringify(k3List));
-    } catch (e) {}
+    if (isGaLoadedRef.current) saveCloudStore('ams_ga_k3_v2', k3List);
   }, [k3List]);
 
   // ==========================================

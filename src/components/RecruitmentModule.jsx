@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import {
   Users,
   Briefcase,
@@ -29,16 +30,38 @@ import {
   Send,
   UserCheck,
   MessageSquare,
-  Download
+  Download,
+  Globe,
+  Share2,
+  ExternalLink
 } from 'lucide-react';
 
 // =============================================================================
 // STORAGE KEYS & SEED DATA
 // =============================================================================
-const STORAGE_APPLICANTS = 'ams_recruitment_applicants_v2';
-const STORAGE_INTERVIEWS = 'ams_recruitment_interviews_v2';
-const STORAGE_ASSESSMENTS = 'ams_recruitment_assessments_v2';
-const STORAGE_OFFERINGS = 'ams_recruitment_offerings_v2';
+const STORAGE_APPLICANTS = 'ams_hr_recruitment_applicants_v2';
+const STORAGE_INTERVIEWS = 'ams_hr_recruitment_interviews_v2';
+const STORAGE_ASSESSMENTS = 'ams_hr_recruitment_assessments_v2';
+const STORAGE_OFFERINGS = 'ams_hr_recruitment_offerings_v2';
+
+const SOCIAL_PLATFORMS = [
+  'LinkedIn',
+  'Instagram',
+  'TikTok',
+  'Facebook',
+  'Twitter / X',
+  'YouTube',
+  'GitHub',
+  'Website / Portofolio',
+  'Lainnya'
+];
+
+const DEFAULT_SOCIAL_MEDIA = [
+  { platform: 'LinkedIn', handle: '' },
+  { platform: 'Instagram', handle: '' },
+  { platform: 'TikTok', handle: '' },
+  { platform: 'Facebook', handle: '' }
+];
 
 const INITIAL_APPLICANTS = [
   {
@@ -55,6 +78,12 @@ const INITIAL_APPLICANTS = [
     files: [
       { name: 'CV_Bambang_Triatmojo.pdf', size: '1.8 MB', type: 'application/pdf' },
       { name: 'Portofolio_Pengawasan_Proyek.pdf', size: '3.4 MB', type: 'application/pdf' }
+    ],
+    socialMedia: [
+      { platform: 'LinkedIn', handle: 'linkedin.com/in/bambang-triatmojo' },
+      { platform: 'Instagram', handle: '@bambang_civil_qc' },
+      { platform: 'Facebook', handle: 'facebook.com/bambang.triatmojo.spv' },
+      { platform: 'TikTok', handle: '@bambang_teknik_sipil' }
     ]
   },
   {
@@ -70,6 +99,12 @@ const INITIAL_APPLICANTS = [
     catatan: 'Track record penjualan unit cluster sangat baik, relasi konsumen kuat di Bogor.',
     files: [
       { name: 'CV_Rina_Sugianti.pdf', size: '1.2 MB', type: 'application/pdf' }
+    ],
+    socialMedia: [
+      { platform: 'LinkedIn', handle: 'linkedin.com/in/rina-sugianti-properti' },
+      { platform: 'Instagram', handle: '@rina_property_expert' },
+      { platform: 'TikTok', handle: '@rina_spesialis_kpr' },
+      { platform: 'Facebook', handle: 'facebook.com/rina.sugianti.sales' }
     ]
   },
   {
@@ -85,6 +120,12 @@ const INITIAL_APPLICANTS = [
     catatan: 'Sertifikasi Brevet AB, mahir e-Faktur dan rekonsiliasi bank perumahan.',
     files: [
       { name: 'CV_Derry_Kurniawan.pdf', size: '1.4 MB', type: 'application/pdf' }
+    ],
+    socialMedia: [
+      { platform: 'LinkedIn', handle: 'linkedin.com/in/derry-kurniawan-tax' },
+      { platform: 'Instagram', handle: '@derry_finance' },
+      { platform: 'GitHub', handle: 'github.com/derrykurniawan' },
+      { platform: 'Facebook', handle: 'facebook.com/derry.kurniawan' }
     ]
   },
   {
@@ -101,6 +142,10 @@ const INITIAL_APPLICANTS = [
     files: [
       { name: 'CV_Joko_Susanto.pdf', size: '920 KB', type: 'application/pdf' },
       { name: 'Sertifikat_Gada_Pratama.pdf', size: '1.1 MB', type: 'application/pdf' }
+    ],
+    socialMedia: [
+      { platform: 'Facebook', handle: 'facebook.com/joko.susanto.sec' },
+      { platform: 'Instagram', handle: '@joko_satpam_berkah' }
     ]
   }
 ];
@@ -263,65 +308,47 @@ export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }
   // Sub-Tab Navigation (4 Sub-Modul Permintaan User - Tanpa Angka Badge)
   const [activeSubTab, setActiveSubTab] = useState('cv-pelamar');
 
-  // Datasets
-  const [applicants, setApplicants] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_APPLICANTS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_APPLICANTS;
-  });
+  // Datasets Terpusat MySQL Database
+  const [applicants, setApplicants] = useState(INITIAL_APPLICANTS);
+  const [interviews, setInterviews] = useState(INITIAL_INTERVIEWS);
+  const [assessments, setAssessments] = useState(INITIAL_ASSESSMENTS);
+  const [offerings, setOfferings] = useState(INITIAL_OFFERINGS);
 
-  const [interviews, setInterviews] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_INTERVIEWS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_INTERVIEWS;
-  });
-
-  const [assessments, setAssessments] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_ASSESSMENTS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_ASSESSMENTS;
-  });
-
-  const [offerings, setOfferings] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_OFFERINGS);
-      if (s) return JSON.parse(s);
-    } catch {}
-    return INITIAL_OFFERINGS;
-  });
-
-  // LocalStorage Sync
+  // Sinkronisasi Real-Time MySQL Database Sengked Hosting (Tanpa LocalStorage)
   useEffect(() => {
-    try { 
-      localStorage.setItem(STORAGE_APPLICANTS, JSON.stringify(applicants)); 
-    } catch (e) {
-      try {
-        // Fallback: strip large dataUrl from files before saving
-        const lightweight = applicants.map(a => ({
-          ...a,
-          files: a.files ? a.files.map(f => ({ name: f.name, size: f.size, type: f.type })) : []
-        }));
-        localStorage.setItem(STORAGE_APPLICANTS, JSON.stringify(lightweight));
-      } catch {}
-    }
+    fetchCloudStore(STORAGE_APPLICANTS, INITIAL_APPLICANTS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setApplicants(val);
+      else saveCloudStore(STORAGE_APPLICANTS, INITIAL_APPLICANTS);
+    });
+    fetchCloudStore(STORAGE_INTERVIEWS, INITIAL_INTERVIEWS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setInterviews(val);
+      else saveCloudStore(STORAGE_INTERVIEWS, INITIAL_INTERVIEWS);
+    });
+    fetchCloudStore(STORAGE_ASSESSMENTS, INITIAL_ASSESSMENTS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setAssessments(val);
+      else saveCloudStore(STORAGE_ASSESSMENTS, INITIAL_ASSESSMENTS);
+    });
+    fetchCloudStore(STORAGE_OFFERINGS, INITIAL_OFFERINGS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) setOfferings(val);
+      else saveCloudStore(STORAGE_OFFERINGS, INITIAL_OFFERINGS);
+    });
+  }, []);
+
+  // Save changes ke MySQL Database Terpusat
+  useEffect(() => {
+    saveCloudStore(STORAGE_APPLICANTS, applicants);
   }, [applicants]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_INTERVIEWS, JSON.stringify(interviews)); } catch {}
+    saveCloudStore(STORAGE_INTERVIEWS, interviews);
   }, [interviews]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_ASSESSMENTS, JSON.stringify(assessments)); } catch {}
+    saveCloudStore(STORAGE_ASSESSMENTS, assessments);
   }, [assessments]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_OFFERINGS, JSON.stringify(offerings)); } catch {}
+    saveCloudStore(STORAGE_OFFERINGS, offerings);
   }, [offerings]);
 
   // Search & Filter State per Sub-Modul
@@ -407,7 +434,13 @@ export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }
     project: 'Ashoka Park',
     status: 'Lolos Screening',
     catatan: '',
-    files: []
+    files: [],
+    socialMedia: [
+      { platform: 'LinkedIn', handle: '' },
+      { platform: 'Instagram', handle: '' },
+      { platform: 'TikTok', handle: '' },
+      { platform: 'Facebook', handle: '' }
+    ]
   });
 
   // 2. Modal Atur Jadwal Interview
@@ -507,15 +540,70 @@ export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }
       project: 'Ashoka Park',
       status: 'Lolos Screening',
       catatan: '',
-      files: []
+      files: [],
+      socialMedia: [
+        { platform: 'LinkedIn', handle: '' },
+        { platform: 'Instagram', handle: '' },
+        { platform: 'TikTok', handle: '' },
+        { platform: 'Facebook', handle: '' }
+      ]
     });
     setIsApplicantModalOpen(true);
   };
 
   const handleOpenEditApplicant = (app) => {
     setEditingApplicant(app);
-    setAppForm({ ...app });
+    let socList = Array.isArray(app.socialMedia) ? app.socialMedia.map(s => ({ ...s })) : [];
+    if (socList.length === 0) {
+      socList = [
+        { platform: 'LinkedIn', handle: '' },
+        { platform: 'Instagram', handle: '' },
+        { platform: 'TikTok', handle: '' },
+        { platform: 'Facebook', handle: '' }
+      ];
+    } else if (socList.length < 4) {
+      const existing = socList.map(s => s.platform);
+      ['LinkedIn', 'Instagram', 'TikTok', 'Facebook'].forEach(p => {
+        if (!existing.includes(p) && socList.length < 4) {
+          socList.push({ platform: p, handle: '' });
+        }
+      });
+      while (socList.length < 4) {
+        socList.push({ platform: 'Lainnya', handle: '' });
+      }
+    }
+    setAppForm({
+      ...app,
+      socialMedia: socList
+    });
     setIsApplicantModalOpen(true);
+  };
+
+  const handleSocialMediaChange = (index, field, value) => {
+    const updated = [...(appForm.socialMedia || [])];
+    updated[index] = { ...updated[index], [field]: value };
+    setAppForm({ ...appForm, socialMedia: updated });
+  };
+
+  const handleAddSocialMediaRow = () => {
+    const current = appForm.socialMedia || [];
+    setAppForm({
+      ...appForm,
+      socialMedia: [...current, { platform: 'Lainnya', handle: '' }]
+    });
+  };
+
+  const handleRemoveSocialMediaRow = (index) => {
+    const current = appForm.socialMedia || [];
+    if (current.length <= 1) {
+      setAppForm({
+        ...appForm,
+        socialMedia: [{ platform: 'LinkedIn', handle: '' }]
+      });
+      return;
+    }
+    const updated = current.filter((_, idx) => idx !== index);
+    setAppForm({ ...appForm, socialMedia: updated });
   };
 
   const handleSaveApplicant = (e) => {
@@ -525,8 +613,14 @@ export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }
       return;
     }
 
+    const filteredSocialMedia = (appForm.socialMedia || []).filter(item => item && item.handle && item.handle.trim() !== '');
+
     if (editingApplicant) {
-      const updatedApplicant = { ...editingApplicant, ...appForm };
+      const updatedApplicant = {
+        ...editingApplicant,
+        ...appForm,
+        socialMedia: filteredSocialMedia
+      };
       
       // 1. Update Sub-Modul 1: CV Pelamar
       setApplicants(applicants.map(a => a.id === editingApplicant.id ? updatedApplicant : a));
@@ -579,6 +673,7 @@ export const RecruitmentModule = ({ currentUser, showNotification, onSwitchTab }
         ...appForm,
         id: newId,
         noDok: newNoDok,
+        socialMedia: filteredSocialMedia,
         files: appForm.files.length > 0 ? appForm.files : [{ name: `CV_${appForm.nama.replace(/\s+/g, '_')}.pdf`, size: '1.2 MB', type: 'application/pdf' }]
       };
       setApplicants([newApp, ...applicants]);
@@ -951,104 +1046,94 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
       const STORAGE_EMPLOYEES = 'ams_hr_database_karyawan_v5';
       const STORAGE_SALARY = 'ams_hr_salary_history_v1';
 
-      // 1. Ambil kontrak yang ada
-      let currentContracts = [];
-      try {
-        const cStr = localStorage.getItem(STORAGE_CONTRACTS);
-        currentContracts = cStr ? JSON.parse(cStr) : [];
-      } catch {}
+      // 1. Ambil kontrak yang ada dan sinkronkan ke MySQL
+      fetchCloudStore(STORAGE_CONTRACTS, []).then(currentContracts => {
+        let list = Array.isArray(currentContracts) ? [...currentContracts] : [];
+        const nextNum = list.length + 1;
+        const ctrId = `CTR-${new Date().getFullYear()}-${String(nextNum).padStart(3, '0')}`;
+        const docType = (off.statusKerja || '').includes('PKWTT') ? 'PKWTT' : ((off.statusKerja || '').includes('LOI') ? 'LOI' : 'PKWT');
 
-      const nextNum = currentContracts.length + 1;
-      const ctrId = `CTR-${new Date().getFullYear()}-${String(nextNum).padStart(3, '0')}`;
-      const docType = (off.statusKerja || '').includes('PKWTT') ? 'PKWTT' : ((off.statusKerja || '').includes('LOI') ? 'LOI' : 'PKWT');
+        const existingCtr = list.find(c => c.employeeId === off.applicantId || c.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+        if (!existingCtr) {
+          const newContract = {
+            id: ctrId,
+            noDok: `${String(nextNum).padStart(3, '0')}/${docType}/HR-AMS/${new Date().getFullYear()}`,
+            employeeId: off.applicantId || `APP-${Date.now()}`,
+            nama: off.applicantName,
+            nik: `320101${Date.now().toString().slice(-10)}`,
+            jabatan: off.posisi,
+            penempatan: off.penempatan,
+            jenisDokumen: docType,
+            tanggalMulai: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+            tanggalBerakhir: docType === 'PKWTT' ? '2099-12-31' : new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+            gajiPokok: Number(off.gajiPokok) || 6500000,
+            tunjangan: Number(off.tunjangan) || 1500000,
+            statusKontrak: 'Aktif',
+            catatan: `Kontrak kerja diterbitkan otomatis dari Rekrutmen surat offering ${off.noSurat}`,
+            files: [{ name: `${docType}_${(off.applicantName || 'karyawan').replace(/\s+/g, '_')}.pdf`, size: '1.2 MB' }]
+          };
+          list = [newContract, ...list];
+          saveCloudStore(STORAGE_CONTRACTS, list);
+        }
+      });
 
-      const existingCtr = currentContracts.find(c => c.employeeId === off.applicantId || c.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+      // 2. Sinkron ke Database Karyawan di MySQL
+      fetchCloudStore(STORAGE_EMPLOYEES, []).then(currentEmployees => {
+        let list = Array.isArray(currentEmployees) ? [...currentEmployees] : [];
+        const empExists = list.some(e => e.id === off.applicantId || e.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+        if (!empExists) {
+          const newEmpId = `EMP-${String(list.length + 1).padStart(3, '0')}`;
+          const newEmp = {
+            id: newEmpId,
+            noDok: `AMS-${new Date().getFullYear()}-${String(list.length + 1).padStart(3, '0')}`,
+            nama: off.applicantName,
+            nik: `320101${Date.now().toString().slice(-10)}`,
+            npwp: '00.000.000.0-000.000',
+            noRekening: 'BCA (Payroll)',
+            alamat: 'Bogor, Jawa Barat',
+            noHp: '0812-0000-0000',
+            phone: '0812-0000-0000',
+            jabatan: off.posisi,
+            penempatan: off.penempatan,
+            status: (off.statusKerja || '').includes('PKWTT') ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
+            tanggalMasuk: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+            tanggalDok: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+            project: off.penempatan,
+            kategori: (off.statusKerja || '').includes('PKWTT') ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
+            catatan: `Karyawan Resmi Masuk dari Rekrutmen (Offering: ${off.noSurat})`,
+            files: []
+          };
+          list = [newEmp, ...list];
+          saveCloudStore(STORAGE_EMPLOYEES, list);
+        }
+      });
 
-      if (!existingCtr) {
-        const newContract = {
-          id: ctrId,
-          noDok: `${String(nextNum).padStart(3, '0')}/${docType}/HR-AMS/${new Date().getFullYear()}`,
-          employeeId: off.applicantId || `APP-${Date.now()}`,
-          nama: off.applicantName,
-          nik: `320101${Date.now().toString().slice(-10)}`,
-          jabatan: off.posisi,
-          penempatan: off.penempatan,
-          jenisDokumen: docType,
-          tanggalMulai: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
-          tanggalBerakhir: docType === 'PKWTT' ? '2099-12-31' : new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
-          gajiPokok: Number(off.gajiPokok) || 6500000,
-          tunjangan: Number(off.tunjangan) || 1500000,
-          statusKontrak: 'Aktif',
-          catatan: `Kontrak kerja diterbitkan otomatis dari Rekrutmen surat offering ${off.noSurat}`,
-          files: [{ name: `${docType}_${(off.applicantName || 'karyawan').replace(/\s+/g, '_')}.pdf`, size: '1.2 MB' }]
-        };
-        currentContracts = [newContract, ...currentContracts];
-        localStorage.setItem(STORAGE_CONTRACTS, JSON.stringify(currentContracts));
-      }
-
-      // 2. Sinkron ke Database Karyawan
-      let currentEmployees = [];
-      try {
-        const eStr = localStorage.getItem(STORAGE_EMPLOYEES);
-        currentEmployees = eStr ? JSON.parse(eStr) : [];
-      } catch {}
-
-      const empExists = currentEmployees.some(e => e.id === off.applicantId || e.nama?.toLowerCase() === off.applicantName?.toLowerCase());
-      if (!empExists) {
-        const newEmpId = `EMP-${String(currentEmployees.length + 1).padStart(3, '0')}`;
-        const newEmp = {
-          id: newEmpId,
-          noDok: `AMS-${new Date().getFullYear()}-${String(currentEmployees.length + 1).padStart(3, '0')}`,
-          nama: off.applicantName,
-          nik: `320101${Date.now().toString().slice(-10)}`,
-          npwp: '00.000.000.0-000.000',
-          noRekening: 'BCA (Payroll)',
-          alamat: 'Bogor, Jawa Barat',
-          noHp: '0812-0000-0000',
-          phone: '0812-0000-0000',
-          jabatan: off.posisi,
-          penempatan: off.penempatan,
-          status: docType === 'PKWTT' ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
-          tanggalMasuk: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
-          tanggalDok: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
-          project: off.penempatan,
-          kategori: docType === 'PKWTT' ? 'Karyawan Tetap (PKWTT)' : 'Karyawan Kontrak (PKWT)',
-          catatan: `Karyawan Resmi Masuk dari Rekrutmen (Offering: ${off.noSurat})`,
-          files: []
-        };
-        currentEmployees = [newEmp, ...currentEmployees];
-        localStorage.setItem(STORAGE_EMPLOYEES, JSON.stringify(currentEmployees));
-      }
-
-      // 3. Sinkron ke Riwayat Gaji
-      let currentSalaries = [];
-      try {
-        const sStr = localStorage.getItem(STORAGE_SALARY);
-        currentSalaries = sStr ? JSON.parse(sStr) : [];
-      } catch {}
-
-      const salExists = currentSalaries.some(s => s.employeeId === off.applicantId || s.nama?.toLowerCase() === off.applicantName?.toLowerCase());
-      if (!salExists) {
-        const newSal = {
-          employeeId: off.applicantId || ctrId,
-          nama: off.applicantName,
-          jabatan: off.posisi,
-          penempatan: off.penempatan,
-          gajiAwal: Number(off.gajiPokok) || 6500000,
-          gajiSaatIni: Number(off.gajiPokok) || 6500000,
-          history: [
-            {
-              bulan: new Date(off.jadwalOnDuty || Date.now()).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }),
-              tanggal: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
-              nominal: Number(off.gajiPokok) || 6500000,
-              kategori: `Gaji Awal (${docType})`,
-              catatan: `Penetapan starting salary rekrutmen surat ${off.noSurat}`
-            }
-          ]
-        };
-        currentSalaries = [newSal, ...currentSalaries];
-        localStorage.setItem(STORAGE_SALARY, JSON.stringify(currentSalaries));
-      }
+      // 3. Sinkron ke Riwayat Gaji di MySQL
+      fetchCloudStore(STORAGE_SALARY, []).then(currentSalaries => {
+        let list = Array.isArray(currentSalaries) ? [...currentSalaries] : [];
+        const salExists = list.some(s => s.employeeId === off.applicantId || s.nama?.toLowerCase() === off.applicantName?.toLowerCase());
+        if (!salExists) {
+          const newSal = {
+            employeeId: off.applicantId || `CTR-${Date.now()}`,
+            nama: off.applicantName,
+            jabatan: off.posisi,
+            penempatan: off.penempatan,
+            gajiAwal: Number(off.gajiPokok) || 6500000,
+            gajiSaatIni: Number(off.gajiPokok) || 6500000,
+            history: [
+              {
+                bulan: new Date(off.jadwalOnDuty || Date.now()).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }),
+                tanggal: off.jadwalOnDuty || new Date().toISOString().split('T')[0],
+                nominal: Number(off.gajiPokok) || 6500000,
+                kategori: `Gaji Awal (${(off.statusKerja || '').includes('PKWTT') ? 'PKWTT' : 'PKWT'})`,
+                catatan: `Penetapan starting salary rekrutmen surat ${off.noSurat}`
+              }
+            ]
+          };
+          list = [newSal, ...list];
+          saveCloudStore(STORAGE_SALARY, list);
+        }
+      });
 
       // Update status offering menjadi Diterima jika sebelumnya belum
       setOfferings(prev => prev.map(o => o.id === off.id ? { ...o, statusOffering: 'Diterima' } : o));
@@ -1386,6 +1471,33 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
                         {app.email && (
                           <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Mail size={11} color="#10b981" /> {app.email}
+                          </div>
+                        )}
+
+                        {/* Media Sosial Badges */}
+                        {app.socialMedia && Array.isArray(app.socialMedia) && app.socialMedia.filter(s => s && s.handle).length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginTop: '6px' }}>
+                            {app.socialMedia.filter(s => s && s.handle).map((sm, smIdx) => (
+                              <span
+                                key={smIdx}
+                                style={{
+                                  fontSize: '0.67rem',
+                                  background: 'rgba(59, 130, 246, 0.1)',
+                                  color: '#93c5fd',
+                                  border: '1px solid rgba(59, 130, 246, 0.25)',
+                                  padding: '1px 5px',
+                                  borderRadius: '4px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  lineHeight: 1.3
+                                }}
+                                title={`${sm.platform}: ${sm.handle}`}
+                              >
+                                <Share2 size={9} color="#60a5fa" />
+                                <strong style={{ color: '#bfdbfe' }}>{sm.platform}:</strong> {sm.handle.length > 14 ? sm.handle.substring(0, 13) + '…' : sm.handle}
+                              </span>
+                            ))}
                           </div>
                         )}
                       </td>
@@ -2531,6 +2643,87 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
                 )}
               </div>
 
+              {/* Input Media Sosial Pelamar (Bisa 4 atau lebih) */}
+              <div style={{ marginBottom: '16px', padding: '12px 14px', background: 'rgba(15, 23, 42, 0.7)', borderRadius: '10px', border: '1px solid #1e293b' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.78rem', color: '#60a5fa', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                    <Share2 size={14} color="#60a5fa" />
+                    <span>Akun Media Sosial Pelamar ({appForm.socialMedia?.length || 0} Akun)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddSocialMediaRow}
+                    style={{
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid #3b82f6',
+                      color: '#60a5fa',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '3px 9px',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title="Tambah akun media sosial baru"
+                  >
+                    <Plus size={12} /> + Tambah Akun Lain
+                  </button>
+                </div>
+                <p style={{ fontSize: '0.7rem', color: '#94a3b8', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                  Tersedia 4 akun default dan dapat ditambah lebih dari 4 secara leluasa (LinkedIn, Instagram, TikTok, Facebook, Twitter, Portofolio, dll).
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {(appForm.socialMedia || []).map((sm, sIdx) => (
+                    <div key={sIdx} style={{ display: 'grid', gridTemplateColumns: '130px 1fr 32px', gap: '8px', alignItems: 'center' }}>
+                      <select
+                        value={sm.platform}
+                        onChange={(e) => handleSocialMediaChange(sIdx, 'platform', e.target.value)}
+                        className="form-control"
+                        style={{ fontSize: '0.8rem', padding: '6px 8px', background: '#0b1329', borderColor: '#334155', color: '#f8fafc' }}
+                      >
+                        {SOCIAL_PLATFORMS.map(plat => (
+                          <option key={plat} value={plat}>{plat}</option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="text"
+                        placeholder={`Akun ${sm.platform} (cth: @username / url profil)`}
+                        value={sm.handle || ''}
+                        onChange={(e) => handleSocialMediaChange(sIdx, 'handle', e.target.value)}
+                        className="form-control"
+                        style={{ fontSize: '0.8rem', padding: '6px 10px', background: '#0b1329', borderColor: '#334155', color: '#f8fafc' }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSocialMediaRow(sIdx)}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.35)',
+                          color: '#ef4444',
+                          height: '32px',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold'
+                        }}
+                        title="Hapus baris media sosial ini"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ fontSize: '0.76rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Catatan Pengalaman / Ringkasan</label>
                 <textarea
@@ -3482,6 +3675,30 @@ Tanggal Unduh         : ${new Date().toLocaleDateString('id-ID', { day: '2-digit
                   <div style={{ fontWeight: 800, color: '#047857' }}>{viewingDoc.app?.status}</div>
                 </div>
               </div>
+
+              {/* Media Sosial & Jejak Digital Pelamar */}
+              {viewingDoc.app?.socialMedia && Array.isArray(viewingDoc.app.socialMedia) && viewingDoc.app.socialMedia.filter(s => s && s.handle).length > 0 && (
+                <div style={{ marginBottom: '1.2rem', background: '#f8fafc', padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#047857', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Globe size={13} color="#047857" /> JEJAK DIGITAL & MEDIA SOSIAL PELAMAR ({viewingDoc.app.socialMedia.filter(s => s && s.handle).length} AKUN)
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+                    {viewingDoc.app.socialMedia.filter(s => s && s.handle).map((sm, idx) => (
+                      <div key={idx} style={{ background: '#ffffff', padding: '6px 10px', borderRadius: '5px', border: '1px solid #cbd5e1', fontSize: '0.76rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                        <div>
+                          <span style={{ fontWeight: 800, color: '#0f172a' }}>{sm.platform}:</span>{' '}
+                          <span style={{ color: '#0284c7', wordBreak: 'break-all' }}>{sm.handle}</span>
+                        </div>
+                        {sm.handle.startsWith('http') && (
+                          <a href={sm.handle} target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', display: 'flex', alignItems: 'center' }} title="Buka Profil">
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Section 1: Ringkasan Profil Profesional */}
               <div style={{ marginBottom: '1.2rem' }}>

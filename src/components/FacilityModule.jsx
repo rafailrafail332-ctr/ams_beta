@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Building2,
   Calendar,
@@ -26,13 +26,14 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 
 // =============================================================================
 // STORAGE KEYS & SEED DATA FASILITAS KARYAWAN
 // =============================================================================
-const STORAGE_FACILITIES_KEY = 'ams_hr_facilities_v2';
-const STORAGE_ASSETS_KEY = 'ams_hr_assets_v2';
-const STORAGE_EMPLOYEES_KEY = 'ams_hr_employees_v2';
+const STORAGE_FACILITIES_KEY = 'ams_ga_facilities_v2';
+const STORAGE_ASSETS_KEY = 'ams_ga_assets_master_v2';
+const STORAGE_EMPLOYEES_KEY = 'ams_hr_database_karyawan_v5';
 
 const INITIAL_FACILITIES = [
   {
@@ -134,45 +135,47 @@ const INITIAL_FACILITIES = [
 ];
 
 export const FacilityModule = ({ currentUser, showNotification, onSwitchTab }) => {
-  // Datasets Fasilitas
-  const [facilities, setFacilities] = useState(() => {
-    try {
-      const s = localStorage.getItem(STORAGE_FACILITIES_KEY);
-      if (s) {
-        const parsed = JSON.parse(s);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_FACILITIES;
-  });
-
-  // Data Aset & Karyawan Terdaftar
+  // Datasets Fasilitas (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [facilities, setFacilities] = useState(INITIAL_FACILITIES);
   const [assetsList, setAssetsList] = useState([]);
   const [employeesList, setEmployeesList] = useState([]);
+  const isLoadedRef = useRef(false);
 
+  // Ambil Data Fasilitas, Aset, & Karyawan dari MySQL Database Terpusat
   useEffect(() => {
-    try {
-      const storedAssets = localStorage.getItem(STORAGE_ASSETS_KEY);
-      if (storedAssets) {
-        const parsed = JSON.parse(storedAssets);
-        if (Array.isArray(parsed)) setAssetsList(parsed);
+    let isMounted = true;
+    const loadData = async () => {
+      try {
+        const [cloudFas, cloudAst, cloudEmp] = await Promise.all([
+          fetchCloudStore(STORAGE_FACILITIES_KEY, INITIAL_FACILITIES),
+          fetchCloudStore(STORAGE_ASSETS_KEY, []),
+          fetchCloudStore(STORAGE_EMPLOYEES_KEY, [])
+        ]);
+        if (isMounted) {
+          if (Array.isArray(cloudFas) && cloudFas.length > 0) {
+            setFacilities(cloudFas);
+          }
+          if (Array.isArray(cloudAst) && cloudAst.length > 0) {
+            setAssetsList(cloudAst);
+          }
+          if (Array.isArray(cloudEmp) && cloudEmp.length > 0) {
+            setEmployeesList(cloudEmp);
+          }
+          isLoadedRef.current = true;
+        }
+      } catch (err) {
+        console.error('Error loading facilities data from MySQL:', err);
       }
-    } catch {}
-
-    try {
-      const storedEmp = localStorage.getItem(STORAGE_EMPLOYEES_KEY);
-      if (storedEmp) {
-        const parsed = JSON.parse(storedEmp);
-        if (Array.isArray(parsed)) setEmployeesList(parsed);
-      }
-    } catch {}
+    };
+    loadData();
+    return () => { isMounted = false; };
   }, []);
 
-  // Simpan ke LocalStorage
+  // Simpan ke MySQL Database Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_FACILITIES_KEY, JSON.stringify(facilities));
-    } catch {}
+    if (isLoadedRef.current) {
+      saveCloudStore(STORAGE_FACILITIES_KEY, facilities);
+    }
   }, [facilities]);
 
   // Helpers Format Tanggal

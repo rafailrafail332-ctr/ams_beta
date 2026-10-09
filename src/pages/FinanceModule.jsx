@@ -46,7 +46,8 @@ import {
   RotateCcw,
   FileCheck,
   Trash2,
-  Paperclip
+  Paperclip,
+  CornerDownRight
 } from 'lucide-react';
 import { FinanceLineChart } from '../components/FinanceLineChart';
 import { FinanceDonutChart } from '../components/FinanceDonutChart';
@@ -66,6 +67,9 @@ import {
   getCoa,
   saveCoa,
   deleteCoaAccount,
+  calculateCoaBalances,
+  sortCoaTree,
+  generateNextAccountCode,
   getJurnal,
   saveJurnal,
   addJurnalEntry,
@@ -82,6 +86,8 @@ import {
   getJoblist,
   saveJoblist,
   deleteJoblistItem,
+  sortJoblistTree,
+  generateNextJobCode,
   getAuditLogs,
   addAuditLog,
   syncFundRequestsFromCloud,
@@ -90,7 +96,7 @@ import {
 
 export const FINANCE_SUBMODULES = [
   // KELOMPOK 1: MODUL UTAMA (6 MENU)
-  { id: 'account_list', label: 'Account List', group: 'utama', icon: BookOpen },
+  { id: 'account_list', label: 'Chart of Accounts', group: 'utama', icon: BookOpen },
   { id: 'joblist', label: 'Joblist', group: 'utama', icon: Briefcase },
   { id: 'jurnal', label: 'Jurnal', group: 'utama', icon: Book },
   { id: 'bank', label: 'Bank', group: 'utama', icon: Landmark },
@@ -181,13 +187,34 @@ export const FinanceModule = () => {
     project: 'Head Office Bizhub'
   });
 
+  // State Filter & Pencarian Khusus Account List (COA)
+  const [coaSearch, setCoaSearch] = useState('');
+  const [coaFilterKriteria, setCoaFilterKriteria] = useState('ALL'); // 'ALL' | 'Header' | 'Detail'
+  const [coaFilterGroup, setCoaFilterGroup] = useState('ALL'); // 'ALL' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8'
+
   const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
   const [newAccountForm, setNewAccountForm] = useState({
     code: '',
     name: '',
-    category: 'Aset Lancar',
-    normalBalance: 'Debit',
+    parentCode: '',
+    level: 4,
+    kriteria: 'Detail',
+    posisi: 'Debet',
+    category: 'Aktiva',
     balance: '',
+    description: ''
+  });
+
+  // State Filter & Form Khusus Joblist (Struktur 2-Level: Proyek & Sub-Pekerjaan)
+  const [joblistSearch, setJoblistSearch] = useState('');
+  const [joblistFilterProject, setJoblistFilterProject] = useState('ALL');
+  const [isNewJobModalOpen, setIsNewJobModalOpen] = useState(false);
+  const [newJobForm, setNewJobForm] = useState({
+    code: '',
+    name: '',
+    parentCode: '',
+    level: 1, // 1: Proyek (Header), 2: Sub-Pekerjaan (Detail)
+    type: 'Header', // 'Header' | 'Detail'
     description: ''
   });
 
@@ -422,11 +449,20 @@ export const FinanceModule = () => {
   };
 
   const handleDeleteCoa = (item) => {
-    if (window.confirm(`Hapus akun COA ${item.code} - "${item.name}"?\nPastikan akun tidak lagi memiliki mutasi aktif.`)) {
+    if (item.level === 1 || !item.parentCode) {
+      alert(`Akun "${item.name}" (${item.code}) merupakan Kelompok Utama Puncak dan tidak dapat dihapus.`);
+      return;
+    }
+    const hasChildren = coa.some(c => c.parentCode === item.code);
+    if (hasChildren) {
+      alert(`Akun ${item.code} - "${item.name}" memiliki sub-anak akun di bawahnya! Harap hapus atau pindahkan sub-anak akun terlebih dahulu sebelum menghapus akun induk ini.`);
+      return;
+    }
+    if (window.confirm(`Hapus akun Bagan Akun (COA) ${item.code} - "${item.name}"?\nPastikan akun tidak lagi memiliki mutasi aktif.`)) {
       deleteCoaAccount(item.code, 'Yazid Hizbullah, S.E.,S.T');
       setCoa(getCoa());
       setAuditLogs(getAuditLogs());
-      showNotification(`Akun COA ${item.code} berhasil dihapus.`);
+      showNotification(`Akun ${item.code} berhasil dihapus.`);
     }
   };
 
@@ -457,12 +493,88 @@ export const FinanceModule = () => {
     }
   };
 
-  const handleDeleteJoblist = (item) => {
-    if (window.confirm(`Hapus agenda tugas "${item.task}"?`)) {
-      deleteJoblistItem(item.id, 'Yazid Hizbullah, S.E.,S.T');
+  // ===========================================================================
+  // HANDLERS FOR JOBLIST (PROJECT & SUB-JOB 2-LEVEL COST CENTER)
+  // ===========================================================================
+  const handleOpenAddJobProject = () => {
+    setNewJobForm({
+      code: '',
+      name: '',
+      parentCode: '',
+      level: 1,
+      type: 'Header',
+      description: ''
+    });
+    setIsNewJobModalOpen(true);
+  };
+
+  const handleOpenAddSubJob = (parentProject) => {
+    const suggestedCode = parentProject ? generateNextJobCode(parentProject, joblist) : '';
+    setNewJobForm({
+      code: suggestedCode,
+      name: '',
+      parentCode: parentProject ? parentProject.code : '',
+      level: 2,
+      type: 'Detail',
+      description: ''
+    });
+    setIsNewJobModalOpen(true);
+  };
+
+  const handleSaveJob = (e) => {
+    e.preventDefault();
+    if (!newJobForm.code || !newJobForm.name) {
+      alert('Mohon lengkapi kode dan nama pekerjaan/proyek!');
+      return;
+    }
+
+    const cleanCode = newJobForm.code.trim().toUpperCase();
+    if (joblist.some(j => j.code.toUpperCase() === cleanCode)) {
+      alert(`Kode pekerjaan ${cleanCode} sudah ada di Joblist! Silakan gunakan kode lain.`);
+      return;
+    }
+
+    const parent = joblist.find(j => j.code === newJobForm.parentCode);
+    const calculatedLevel = parent ? 2 : (newJobForm.level || 1);
+    const calculatedType = calculatedLevel === 1 ? 'Header' : 'Detail';
+
+    const newJob = {
+      code: cleanCode,
+      name: newJobForm.name.trim(),
+      parentCode: parent ? parent.code : null,
+      level: calculatedLevel,
+      type: calculatedType,
+      description: newJobForm.description ? newJobForm.description.trim() : ''
+    };
+
+    const updated = sortJoblistTree([...joblist, newJob]);
+    saveJoblist(updated);
+    setJoblist(updated);
+    setIsNewJobModalOpen(false);
+    setNewJobForm({
+      code: '',
+      name: '',
+      parentCode: '',
+      level: 1,
+      type: 'Header',
+      description: ''
+    });
+    showNotification(`Pekerjaan ${newJob.code} - ${newJob.name} (${newJob.type}) berhasil disimpan ke Joblist!`);
+  };
+
+  const handleDeleteJob = (item) => {
+    const isParent = item.level === 1;
+    const childCount = joblist.filter(j => j.parentCode === item.code).length;
+
+    const confirmMsg = isParent && childCount > 0
+      ? `Hapus Proyek "${item.code} - ${item.name}" beserta ${childCount} sub-pekerjaan di dalamnya?`
+      : `Hapus pekerjaan "${item.code} - ${item.name}" dari Joblist?`;
+
+    if (window.confirm(confirmMsg)) {
+      deleteJoblistItem(item.code, 'Yazid Hizbullah, S.E.,S.T');
       setJoblist(getJoblist());
       setAuditLogs(getAuditLogs());
-      showNotification(`Agenda tugas berhasil dihapus.`);
+      showNotification(`Pekerjaan ${item.code} berhasil dihapus dari Joblist.`);
     }
   };
 
@@ -539,36 +651,110 @@ export const FinanceModule = () => {
   // ===========================================================================
   // HANDLERS FOR ACCOUNT LIST (COA)
   // ===========================================================================
+  const handleOpenAddSubAccount = (parentAcc) => {
+    const suggestedCode = parentAcc ? generateNextAccountCode(parentAcc, coa) : '';
+
+    setNewAccountForm({
+      code: suggestedCode,
+      name: '',
+      parentCode: parentAcc ? parentAcc.code : '',
+      level: parentAcc ? (parentAcc.level || 1) + 1 : 1,
+      kriteria: 'Detail',
+      posisi: parentAcc ? (parentAcc.posisi || 'Debet') : 'Debet',
+      category: parentAcc ? (parentAcc.category || 'Aktiva') : 'Aktiva',
+      balance: '',
+      description: ''
+    });
+    setIsNewAccountModalOpen(true);
+  };
+
   const handleCreateAccount = (e) => {
     e.preventDefault();
     if (!newAccountForm.code || !newAccountForm.name) {
       alert('Mohon lengkapi kode dan nama akun!');
       return;
     }
-    const updated = [
-      ...coa,
-      {
-        ...newAccountForm,
-        balance: Number(newAccountForm.balance) || 0
-      }
-    ];
+
+    const cleanCode = newAccountForm.code.trim();
+    if (coa.some(c => c.code.toLowerCase() === cleanCode.toLowerCase())) {
+      alert(`Kode akun ${cleanCode} sudah ada di Bagan Akun! Silakan gunakan kode lain.`);
+      return;
+    }
+
+    const parent = coa.find(c => c.code === newAccountForm.parentCode);
+    const calculatedLevel = parent ? (parent.level || 1) + 1 : (newAccountForm.level || 1);
+
+    const newAcc = {
+      code: cleanCode,
+      name: newAccountForm.name.trim(),
+      parentCode: newAccountForm.parentCode || null,
+      level: calculatedLevel,
+      kriteria: newAccountForm.kriteria || 'Detail',
+      posisi: newAccountForm.posisi || (parent ? (parent.posisi || 'Debet') : 'Debet'),
+      category: parent ? (parent.category || 'Aktiva') : (newAccountForm.category || 'Aktiva'),
+      balance: newAccountForm.kriteria === 'Header' ? 0 : (Number(newAccountForm.balance) || 0),
+      description: newAccountForm.description || ''
+    };
+
+    const updated = sortCoaTree(calculateCoaBalances([...coa, newAcc]));
     saveCoa(updated);
     setCoa(updated);
     setIsNewAccountModalOpen(false);
     setNewAccountForm({
       code: '',
       name: '',
-      category: 'Aset Lancar',
-      normalBalance: 'Debit',
+      parentCode: '',
+      level: 4,
+      kriteria: 'Detail',
+      posisi: 'Debet',
+      category: 'Aktiva',
       balance: '',
       description: ''
     });
-    showNotification(`Akun ${newAccountForm.code} - ${newAccountForm.name} berhasil ditambahkan ke COA!`);
+    showNotification(`Akun ${newAcc.code} - ${newAcc.name} (${newAcc.kriteria}) berhasil ditambahkan ke Bagan Akun!`);
   };
 
   // ===========================================================================
   // FILTERED DATASETS & METRICS (PROYEK & PERIODE FILTER)
   // ===========================================================================
+  const filteredCoa = useMemo(() => {
+    const treeOrdered = sortCoaTree(coa);
+    return treeOrdered.filter(item => {
+      if (!item) return false;
+      if (coaSearch.trim()) {
+        const q = coaSearch.toLowerCase().trim();
+        const match = item.code.toLowerCase().includes(q) || item.name.toLowerCase().includes(q) || (item.category && item.category.toLowerCase().includes(q));
+        if (!match) return false;
+      }
+      if (coaFilterKriteria !== 'ALL') {
+        if (item.kriteria !== coaFilterKriteria) return false;
+      }
+      if (coaFilterGroup !== 'ALL') {
+        if (!item.code.startsWith(coaFilterGroup + '-')) return false;
+      }
+      return true;
+    });
+  }, [coa, coaSearch, coaFilterKriteria, coaFilterGroup]);
+
+  const filteredJoblist = useMemo(() => {
+    const treeOrdered = sortJoblistTree(joblist);
+    return treeOrdered.filter(item => {
+      if (!item) return false;
+      if (joblistSearch.trim()) {
+        const q = joblistSearch.toLowerCase().trim();
+        const match =
+          (item.code || '').toLowerCase().includes(q) ||
+          (item.name || '').toLowerCase().includes(q) ||
+          (item.description && item.description.toLowerCase().includes(q));
+        if (!match) return false;
+      }
+      if (joblistFilterProject !== 'ALL') {
+        if (item.code !== joblistFilterProject && item.parentCode !== joblistFilterProject) return false;
+      }
+      return true;
+    });
+  }, [joblist, joblistSearch, joblistFilterProject]);
+
   const filteredFundRequests = useMemo(() => {
     return fundRequests.filter(item => {
       if (!item) return false;
@@ -1122,6 +1308,7 @@ export const FinanceModule = () => {
       {/* ========================================================================= */}
       {/* 🔍 MASTER TOOLBAR FILTER: FILTER PROYEK & WAKTU (BULANAN / HARIAN)         */}
       {/* ========================================================================= */}
+      {activeSubModule !== 'account_list' && activeSubModule !== 'joblist' && (
       <div
         className="glass-card no-print"
         style={{
@@ -1321,6 +1508,7 @@ export const FinanceModule = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 🌟 KONTEN DINAMIS: MENAMPILKAN 17 SUB-MODUL FINANCE SECARA LENGKAP         */}
@@ -2379,96 +2567,341 @@ export const FinanceModule = () => {
       {activeSubModule === 'account_list' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
+          {/* Header & Aksi Utama */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                Bagan Akun (Chart of Accounts / COA)
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                Account List
               </h2>
-              <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: '4px 0 0' }}>
-                Master kode akun standar akuntansi properti untuk seluruh klasifikasi Aset, Kewajiban, Modal, Pendapatan, dan Beban.
-              </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsNewAccountModalOpen(true)}
-              style={{
-                background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
-                border: '1px solid #ef4444',
-                color: '#ffffff',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <Plus size={16} /> Tambah Akun Baru
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '6px', fontSize: '0.74rem' }}>
+                <span style={{ background: '#0f172a', border: '1px solid #334155', padding: '4px 10px', borderRadius: '6px', color: '#94a3b8' }}>
+                  Total: <strong style={{ color: '#ffffff' }}>{coa.length}</strong>
+                </span>
+                <span style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '4px 10px', borderRadius: '6px', color: '#60a5fa' }}>
+                  Header: <strong style={{ color: '#93c5fd' }}>{coa.filter(c => c.kriteria === 'Header').length}</strong>
+                </span>
+                <span style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 10px', borderRadius: '6px', color: '#34d399' }}>
+                  Detail: <strong style={{ color: '#6ee7b7' }}>{coa.filter(c => c.kriteria === 'Detail').length}</strong>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setNewAccountForm({
+                    code: '',
+                    name: '',
+                    parentCode: '',
+                    level: 1,
+                    kriteria: 'Detail',
+                    posisi: 'Debet',
+                    category: 'Aktiva',
+                    balance: '',
+                    description: ''
+                  });
+                  setIsNewAccountModalOpen(true);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                  border: '1px solid #ef4444',
+                  color: '#ffffff',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)'
+                }}
+              >
+                <Plus size={16} /> + Tambah Akun Baru
+              </button>
+            </div>
           </div>
 
-          {/* Tabel COA */}
+          {/* Bar Filter & Pencarian */}
+          <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '10px 14px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1', minWidth: '220px' }}>
+              <Search size={16} color="#64748b" />
+              <input
+                type="text"
+                placeholder="Cari kode atau nama akun..."
+                value={coaSearch}
+                onChange={(e) => setCoaSearch(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', width: '100%', outline: 'none' }}
+              />
+              {coaSearch && (
+                <button onClick={() => setCoaSearch('')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              {/* Filter Kriteria */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Kriteria:</span>
+                <select
+                  value={coaFilterKriteria}
+                  onChange={(e) => setCoaFilterKriteria(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', color: '#ffffff', borderRadius: '6px', padding: '5px 8px', fontSize: '0.76rem', fontWeight: 700 }}
+                >
+                  <option value="ALL">Semua Kriteria</option>
+                  <option value="Header">Header Saja (Induk)</option>
+                  <option value="Detail">Detail Saja (Transaksi)</option>
+                </select>
+              </div>
+
+              {/* Filter Kelompok / Golongan */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Kelompok:</span>
+                <select
+                  value={coaFilterGroup}
+                  onChange={(e) => setCoaFilterGroup(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', color: '#ffffff', borderRadius: '6px', padding: '5px 8px', fontSize: '0.76rem', fontWeight: 700 }}
+                >
+                  <option value="ALL">Semua Kelompok (1 - 8)</option>
+                  <option value="1">1 - Aktiva (Aset)</option>
+                  <option value="2">2 - Hutang (Kewajiban)</option>
+                  <option value="3">3 - Ekuitas (Modal)</option>
+                  <option value="4">4 - Pendapatan</option>
+                  <option value="5">5 - HPP Proyek</option>
+                  <option value="6">6 - Beban Operasional</option>
+                  <option value="7">7 - Pendapatan Lain-lain</option>
+                  <option value="8">8 - Biaya Lain-lain</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabel COA Berjenjang */}
           <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
                 <thead>
-                  <tr style={{ background: '#0b1120', color: '#94a3b8', borderBottom: '1px solid #1e293b' }}>
-                    <th style={{ padding: '12px 14px' }}>Kode Akun</th>
-                    <th style={{ padding: '12px 14px' }}>Nama Akun</th>
-                    <th style={{ padding: '12px 14px' }}>Kategori Klasifikasi</th>
-                    <th style={{ padding: '12px 14px' }}>Posisi Normal</th>
-                    <th style={{ padding: '12px 14px', textAlign: 'right' }}>Saldo Berjalan (Rp)</th>
-                    <th style={{ padding: '12px 14px' }}>Keterangan</th>
-                    <th style={{ padding: '12px 14px', textAlign: 'center' }}>Aksi</th>
+                  <tr style={{ background: '#0b1120', color: '#94a3b8', borderBottom: '1.5px solid #1e293b' }}>
+                    <th style={{ padding: '12px 14px', width: '130px' }}>Kode Akun</th>
+                    <th style={{ padding: '12px 14px', minWidth: '340px' }}>Nama Akun & Struktur Hierarki</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '110px' }}>Kriteria</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '90px' }}>Posisi</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'right', width: '160px' }}>Saldo Berjalan (Rp)</th>
+                    <th style={{ padding: '12px 14px' }}>Keterangan Fungsi</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '110px' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {coa.map((item) => (
-                    <tr key={item.code} style={{ borderBottom: '1px solid #1e293b' }}>
-                      <td style={{ padding: '12px 14px', fontWeight: 900, color: '#f87171' }}>{item.code}</td>
-                      <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ffffff' }}>{item.name}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ background: '#0f172a', border: '1px solid #334155', color: '#93c5fd', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>
-                          {item.category}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', color: item.normalBalance === 'Debit' ? '#34d399' : '#f87171', fontWeight: 700 }}>
-                        {item.normalBalance}
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: 900, color: '#38bdf8' }}>
-                        Rp {Number(item.balance).toLocaleString('id-ID')}
-                      </td>
-                      <td style={{ padding: '12px 14px', color: '#64748b', fontSize: '0.74rem' }}>
-                        {item.description}
-                      </td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCoa(item)}
-                          title="Hapus Akun COA"
-                          style={{
-                            background: 'rgba(239, 68, 68, 0.15)',
-                            color: '#f87171',
-                            border: '1px solid rgba(239, 68, 68, 0.4)',
-                            borderRadius: '6px',
-                            padding: '5px 8px',
-                            fontSize: '0.72rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
-                          onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                  {filteredCoa.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                        Tidak ada akun yang cocok dengan kata kunci atau filter yang dipilih.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredCoa.map((item) => {
+                      const isHeader = item.kriteria === 'Header';
+                      const isDebet = item.posisi === 'Debet' || item.normalBalance === 'Debit';
+                      const level = item.level || (item.parentCode ? 4 : 1);
+                      const indentPx = (level - 1) * 22;
+
+                      return (
+                        <tr
+                          key={item.code}
+                          style={{
+                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                            background: level === 1 ? 'rgba(239, 68, 68, 0.06)' : level === 2 ? 'rgba(15, 23, 42, 0.4)' : 'transparent',
+                            transition: 'background 0.15s ease'
+                          }}
+                        >
+                          {/* Kode Akun */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <span
+                              style={{
+                                fontWeight: isHeader ? 900 : 700,
+                                color: level === 1 ? '#ef4444' : isHeader ? '#f87171' : '#cbd5e1',
+                                fontSize: level === 1 ? '0.88rem' : '0.82rem',
+                                letterSpacing: '0.02em'
+                              }}
+                            >
+                              {item.code}
+                            </span>
+                          </td>
+
+                          {/* Nama Akun dengan Indentasi Pohon Hierarki */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: `${indentPx}px` }}>
+                              {level > 1 && (
+                                <CornerDownRight
+                                  size={12}
+                                  color={level === 2 ? '#60a5fa' : level === 3 ? '#94a3b8' : '#64748b'}
+                                  style={{ marginRight: '6px', flexShrink: 0 }}
+                                />
+                              )}
+                              <span
+                                style={{
+                                  fontWeight: level === 1 ? 900 : level === 2 ? 800 : level === 3 ? 700 : 500,
+                                  color: level === 1 ? '#ffffff' : level === 2 ? '#f1f5f9' : level === 3 ? '#e2e8f0' : '#cbd5e1',
+                                  fontSize: level === 1 ? '0.88rem' : level === 2 ? '0.84rem' : '0.81rem',
+                                  textTransform: level === 1 ? 'uppercase' : 'none'
+                                }}
+                              >
+                                {item.name}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Kriteria (Header / Detail) */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                            {isHeader ? (
+                              <span
+                                style={{
+                                  background: 'rgba(59, 130, 246, 0.15)',
+                                  border: '1px solid rgba(59, 130, 246, 0.4)',
+                                  color: '#60a5fa',
+                                  padding: '2px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                                title="Akun Induk (Penampung Akumulasi Saldo Sub-Akun)"
+                              >
+                                Header (H)
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  background: 'rgba(16, 185, 129, 0.15)',
+                                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                                  color: '#34d399',
+                                  padding: '2px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                                title="Akun Detail Transaksi Langsung"
+                              >
+                                Detail (D)
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Posisi Normal (Debet / Kredit) */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                            {isDebet ? (
+                              <span
+                                style={{
+                                  background: 'rgba(245, 158, 11, 0.15)',
+                                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                                  color: '#fbbf24',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800
+                                }}
+                              >
+                                Debet
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                                  color: '#f87171',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800
+                                }}
+                              >
+                                Kredit
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Saldo Berjalan (Rp) */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                            <div
+                              style={{
+                                fontWeight: isHeader ? 900 : 700,
+                                color: isHeader ? '#38bdf8' : '#f8fafc',
+                                fontSize: isHeader ? '0.88rem' : '0.80rem'
+                              }}
+                            >
+                              Rp {Number(item.balance || 0).toLocaleString('id-ID')}
+                            </div>
+                            {isHeader && (
+                              <div style={{ fontSize: '0.64rem', color: '#64748b' }}>
+                                (Total Akumulasi)
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Keterangan */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', color: '#94a3b8', fontSize: '0.74rem', maxWidth: '240px' }}>
+                            {item.description || '-'}
+                          </td>
+
+                          {/* Aksi */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              {isHeader && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAddSubAccount(item)}
+                                  title={`Tambah Sub-Akun di bawah ${item.name}`}
+                                  style={{
+                                    background: 'rgba(59, 130, 246, 0.15)',
+                                    color: '#60a5fa',
+                                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                                    borderRadius: '5px',
+                                    padding: '3px 7px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  <Plus size={11} /> + Sub
+                                </button>
+                              )}
+
+                              {item.level > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCoa(item)}
+                                  title={`Hapus Akun ${item.code}`}
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.12)',
+                                    color: '#f87171',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    borderRadius: '5px',
+                                    padding: '4px 6px',
+                                    fontSize: '0.7rem',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -3433,84 +3866,275 @@ export const FinanceModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. SUB-MODUL: JOBLIST (AGENDA & TUGAS TIM FINANCE)                         */}
+      {/* 2. SUB-MODUL: JOBLIST (STRUKTUR 2-LEVEL: PROYEK & SUB-PEKERJAAN)           */}
       {/* ========================================================================= */}
       {activeSubModule === 'joblist' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
-          <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
-              Joblist & Agenda Tim Keuangan
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: '4px 0 0' }}>
-              Daftar penugasan closing bulanan, audit rekonsiliasi kas, dan batas waktu pelaporan pajak.
-            </p>
+          {/* Header & Aksi Utama */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                Joblist
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '6px', fontSize: '0.74rem' }}>
+                <span style={{ background: '#0f172a', border: '1px solid #334155', padding: '4px 10px', borderRadius: '6px', color: '#94a3b8' }}>
+                  Total Item: <strong style={{ color: '#ffffff' }}>{joblist.length}</strong>
+                </span>
+                <span style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '4px 10px', borderRadius: '6px', color: '#f87171' }}>
+                  Proyek: <strong style={{ color: '#fca5a5' }}>{joblist.filter(j => j.level === 1).length}</strong>
+                </span>
+                <span style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 10px', borderRadius: '6px', color: '#34d399' }}>
+                  Sub-Pekerjaan: <strong style={{ color: '#6ee7b7' }}>{joblist.filter(j => j.level === 2).length}</strong>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenAddJobProject}
+                style={{
+                  background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)',
+                  border: '1px solid #ef4444',
+                  color: '#ffffff',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)'
+                }}
+              >
+                <Plus size={16} /> + Tambah Proyek Baru
+              </button>
+            </div>
           </div>
 
-          {joblist.length === 0 ? (
-            <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', padding: '2.5rem', textAlign: 'center', color: '#64748b' }}>
-              Tidak ada agenda tugas tim keuangan saat ini.
+          {/* Bar Filter & Pencarian */}
+          <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '10px', padding: '10px 14px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1', minWidth: '220px' }}>
+              <Search size={16} color="#64748b" />
+              <input
+                type="text"
+                placeholder="Cari kode atau nama pekerjaan/proyek..."
+                value={joblistSearch}
+                onChange={(e) => setJoblistSearch(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: '#ffffff', fontSize: '0.82rem', width: '100%', outline: 'none' }}
+              />
+              {joblistSearch && (
+                <button onClick={() => setJoblistSearch('')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
+              )}
             </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-              {joblist.map((job) => (
-                <div
-                  key={job.id}
-                  className="glass-card"
-                  style={{
-                    background: '#090d16',
-                    border: '1px solid #1e293b',
-                    borderRadius: '12px',
-                    padding: '1.2rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
-                  }}
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 700 }}>Filter Proyek:</span>
+                <select
+                  value={joblistFilterProject}
+                  onChange={(e) => setJoblistFilterProject(e.target.value)}
+                  style={{ background: '#0f172a', border: '1px solid #334155', color: '#ffffff', borderRadius: '6px', padding: '5px 8px', fontSize: '0.76rem', fontWeight: 700 }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#f87171' }}>{job.id}</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: job.status === 'In Progress' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(234, 179, 8, 0.15)', color: job.status === 'In Progress' ? '#60a5fa' : '#facc15' }}>
-                      {job.status}
-                    </span>
-                  </div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
-                    {job.task}
-                  </h4>
-                  <div style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
-                    PIC: <strong style={{ color: '#38bdf8' }}>{job.assignee}</strong>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
-                    {job.notes}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.72rem', color: '#f59e0b' }}>
-                    <span>Jatuh Tempo: {job.dueDate}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#ef4444', fontWeight: 800 }}>Prioritas {job.priority}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteJoblist(job)}
-                        title="Hapus Agenda Tugas"
-                        style={{
-                          background: 'rgba(239, 68, 68, 0.15)',
-                          color: '#f87171',
-                          border: '1px solid rgba(239, 68, 68, 0.4)',
-                          borderRadius: '4px',
-                          padding: '3px 6px',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center'
-                        }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#f87171'; }}
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  <option value="ALL">Semua Proyek</option>
+                  {joblist.filter(j => j.level === 1).map((proj) => (
+                    <option key={proj.code} value={proj.code}>
+                      {proj.code} - {proj.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Tabel Joblist Berjenjang 2-Level */}
+          <div className="glass-card" style={{ background: '#090d16', border: '1px solid #1e293b', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ background: '#0b1120', color: '#94a3b8', borderBottom: '1.5px solid #1e293b' }}>
+                    <th style={{ padding: '12px 14px', width: '120px' }}>Kode Job</th>
+                    <th style={{ padding: '12px 14px', minWidth: '320px' }}>Nama Proyek / Sub-Pekerjaan</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '140px' }}>Tingkat</th>
+                    <th style={{ padding: '12px 14px', width: '180px' }}>Induk Proyek</th>
+                    <th style={{ padding: '12px 14px' }}>Keterangan</th>
+                    <th style={{ padding: '12px 14px', textAlign: 'center', width: '140px' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredJoblist.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '2.5rem', color: '#64748b' }}>
+                        Tidak ada item pekerjaan yang cocok dengan pencarian atau filter yang dipilih.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredJoblist.map((item) => {
+                      const isLevel1 = item.level === 1;
+                      const parent = !isLevel1 ? joblist.find(j => j.code === item.parentCode) : null;
+
+                      return (
+                        <tr
+                          key={item.code}
+                          style={{
+                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                            background: isLevel1 ? 'rgba(239, 68, 68, 0.06)' : 'transparent',
+                            transition: 'background 0.15s ease'
+                          }}
+                        >
+                          {/* Kode Job */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <span
+                              style={{
+                                fontWeight: isLevel1 ? 900 : 700,
+                                color: isLevel1 ? '#ef4444' : '#cbd5e1',
+                                fontSize: isLevel1 ? '0.88rem' : '0.82rem',
+                                letterSpacing: '0.02em'
+                              }}
+                            >
+                              {item.code}
+                            </span>
+                          </td>
+
+                          {/* Nama Proyek / Sub-Pekerjaan */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: isLevel1 ? '0px' : '26px' }}>
+                              {!isLevel1 && (
+                                <CornerDownRight
+                                  size={13}
+                                  color="#38bdf8"
+                                  style={{ marginRight: '8px', flexShrink: 0 }}
+                                />
+                              )}
+                              <span
+                                style={{
+                                  fontWeight: isLevel1 ? 900 : 600,
+                                  color: isLevel1 ? '#ffffff' : '#e2e8f0',
+                                  fontSize: isLevel1 ? '0.88rem' : '0.82rem',
+                                  textTransform: isLevel1 ? 'uppercase' : 'none'
+                                }}
+                              >
+                                {item.name}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Tingkat */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                            {isLevel1 ? (
+                              <span
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  color: '#f87171',
+                                  padding: '2px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                                title="Tingkat 1: Proyek Utama (Header)"
+                              >
+                                Level 1 (Proyek)
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  background: 'rgba(16, 185, 129, 0.15)',
+                                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                                  color: '#34d399',
+                                  padding: '2px 8px',
+                                  borderRadius: '5px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                                title="Tingkat 2: Sub-Pekerjaan Lapangan (Detail)"
+                              >
+                                Level 2 (Sub-Job)
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Induk Proyek */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', fontSize: '0.74rem' }}>
+                            {isLevel1 ? (
+                              <span style={{ color: '#64748b' }}>- (Proyek Induk)</span>
+                            ) : (
+                              <span style={{ color: '#38bdf8', fontWeight: 700 }}>
+                                {parent ? `${parent.code} - ${parent.name}` : item.parentCode}
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Keterangan */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', color: '#94a3b8', fontSize: '0.74rem', maxWidth: '260px' }}>
+                            {item.description || '-'}
+                          </td>
+
+                          {/* Aksi */}
+                          <td style={{ padding: '10px 14px', verticalAlign: 'middle', textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              {/* HANYA Level 1 yang memiliki tombol "+ Sub", Level 2 TIDAK BISA tambah anak lagi (maksimal 2 tingkat) */}
+                              {isLevel1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAddSubJob(item)}
+                                  title={`Tambah Sub-Pekerjaan di bawah ${item.name}`}
+                                  style={{
+                                    background: 'rgba(59, 130, 246, 0.15)',
+                                    color: '#60a5fa',
+                                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                                    borderRadius: '5px',
+                                    padding: '3px 8px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px'
+                                  }}
+                                >
+                                  <Plus size={11} /> + Sub
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteJob(item)}
+                                title={`Hapus ${isLevel1 ? 'Proyek' : 'Pekerjaan'} ${item.code}`}
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.12)',
+                                  color: '#f87171',
+                                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                                  borderRadius: '5px',
+                                  padding: '4px 6px',
+                                  fontSize: '0.7rem',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
@@ -4868,75 +5492,206 @@ export const FinanceModule = () => {
             </div>
 
             <form onSubmit={handleCreateAccount} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* 1. Pilih Akun Induk */}
               <div>
-                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Kode Akun (Contoh: 5-202)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: 5-202"
-                  value={newAccountForm.code}
-                  onChange={(e) => setNewAccountForm({ ...newAccountForm, code: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
-                />
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                  1. Pilih Akun Induk (Parent)
+                </label>
+                <select
+                  value={newAccountForm.parentCode || ''}
+                  onChange={(e) => {
+                    const selCode = e.target.value;
+                    const parent = coa.find(c => c.code === selCode);
+                    const suggested = parent ? generateNextAccountCode(parent, coa) : '';
+                    setNewAccountForm({
+                      ...newAccountForm,
+                      parentCode: selCode,
+                      code: suggested || newAccountForm.code,
+                      posisi: parent ? (parent.posisi || 'Debet') : newAccountForm.posisi,
+                      category: parent ? (parent.category || 'Aktiva') : newAccountForm.category,
+                      level: parent ? (parent.level || 1) + 1 : 1
+                    });
+                  }}
+                  style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                >
+                  <option value="">(Tanpa Induk - Sebagai Puncak Level 1)</option>
+                  {coa.filter(c => c.kriteria === 'Header').map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} - {c.name} ({c.category})
+                    </option>
+                  ))}
+                </select>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                  Pilih induk untuk menempatkan akun ini di bawah kelompok tertentu.
+                </span>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Nama Akun</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Beban Pemeliharaan Website & Aplikasi"
-                  value={newAccountForm.name}
-                  onChange={(e) => setNewAccountForm({ ...newAccountForm, name: e.target.value })}
-                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Kategori</label>
-                  <select
-                    value={newAccountForm.category}
-                    onChange={(e) => setNewAccountForm({ ...newAccountForm, category: e.target.value })}
-                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+              {/* 2. Opsi: Apakah Mau Didetailkan Lagi? */}
+              <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px' }}>
+                <label style={{ fontSize: '0.78rem', color: '#38bdf8', fontWeight: 800, display: 'block', marginBottom: '8px' }}>
+                  2. Apakah akun ini mau didetailkan lagi (punya sub-anak)?
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '8px',
+                      background: newAccountForm.kriteria === 'Header' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.02)',
+                      border: newAccountForm.kriteria === 'Header' ? '1.5px solid #3b82f6' : '1px solid #334155',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <option value="Aset Lancar">Aset Lancar</option>
-                    <option value="Aset Tetap">Aset Tetap</option>
-                    <option value="Kewajiban Lancar">Kewajiban Lancar</option>
-                    <option value="Kewajiban Jangka Panjang">Kewajiban Jangka Panjang</option>
-                    <option value="Ekuitas">Ekuitas</option>
-                    <option value="Pendapatan">Pendapatan</option>
-                    <option value="Beban Pokok">Beban Pokok</option>
-                    <option value="Beban Operasional">Beban Operasional</option>
-                    <option value="Beban Pajak">Beban Pajak</option>
-                  </select>
+                    <input
+                      type="radio"
+                      name="kriteriaOption"
+                      value="Header"
+                      checked={newAccountForm.kriteria === 'Header'}
+                      onChange={() => setNewAccountForm({ ...newAccountForm, kriteria: 'Header' })}
+                      style={{ marginTop: '3px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 800, color: newAccountForm.kriteria === 'Header' ? '#60a5fa' : '#ffffff' }}>
+                        Ya, sebagai Header (H)
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px', lineHeight: 1.3 }}>
+                        Akun induk/kelompok yang akan punya anak lagi.
+                      </div>
+                    </div>
+                  </label>
+
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '8px',
+                      background: newAccountForm.kriteria === 'Detail' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.02)',
+                      border: newAccountForm.kriteria === 'Detail' ? '1.5px solid #10b981' : '1px solid #334155',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="kriteriaOption"
+                      value="Detail"
+                      checked={newAccountForm.kriteria === 'Detail'}
+                      onChange={() => setNewAccountForm({ ...newAccountForm, kriteria: 'Detail' })}
+                      style={{ marginTop: '3px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 800, color: newAccountForm.kriteria === 'Detail' ? '#34d399' : '#ffffff' }}>
+                        Tidak, sebagai Detail (D)
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '2px', lineHeight: 1.3 }}>
+                        Akun transaksi langsung (ujung) untuk jurnal & kas.
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* 3. Kode Akun & Nama Akun */}
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Kode Akun *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: 1-1000"
+                    value={newAccountForm.code}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, code: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                    Saran otomatis (bebas diedit manual)
+                  </span>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Posisi Normal</label>
-                  <select
-                    value={newAccountForm.normalBalance}
-                    onChange={(e) => setNewAccountForm({ ...newAccountForm, normalBalance: e.target.value })}
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nama Akun *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Bank Danamon Operasional"
+                    value={newAccountForm.name}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, name: e.target.value })}
                     style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
-                  >
-                    <option value="Debit">Debit</option>
-                    <option value="Kredit">Kredit</option>
-                  </select>
+                  />
                 </div>
               </div>
 
+              {/* 4. Posisi Normal (Debet / Kredit) */}
               <div>
-                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Saldo Awal (Rp)</label>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Posisi Normal (Debet / Kredit)
+                </label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: '#fbbf24' }}>
+                    <input
+                      type="radio"
+                      name="posisiNormal"
+                      value="Debet"
+                      checked={newAccountForm.posisi === 'Debet'}
+                      onChange={() => setNewAccountForm({ ...newAccountForm, posisi: 'Debet' })}
+                    />
+                    <strong>Debet</strong> (Aset, HPP, Beban)
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: '#f87171' }}>
+                    <input
+                      type="radio"
+                      name="posisiNormal"
+                      value="Kredit"
+                      checked={newAccountForm.posisi === 'Kredit'}
+                      onChange={() => setNewAccountForm({ ...newAccountForm, posisi: 'Kredit' })}
+                    />
+                    <strong>Kredit</strong> (Hutang, Ekuitas, Pendapatan)
+                  </label>
+                </div>
+              </div>
+
+              {/* 5. Saldo Awal (Hanya untuk Detail) */}
+              {newAccountForm.kriteria === 'Detail' ? (
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Saldo Awal (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={newAccountForm.balance}
+                    onChange={(e) => setNewAccountForm({ ...newAccountForm, balance: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                  />
+                </div>
+              ) : (
+                <div style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px dashed rgba(59, 130, 246, 0.3)', padding: '8px 12px', borderRadius: '6px', fontSize: '0.72rem', color: '#93c5fd' }}>
+                  💡 Akun <strong>Header</strong> tidak memerlukan input saldo awal. Saldonya dihitung otomatis oleh sistem dari akumulasi seluruh sub-anak akunnya.
+                </div>
+              )}
+
+              {/* 6. Keterangan */}
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Keterangan Fungsi Akun
+                </label>
                 <input
-                  type="number"
-                  placeholder="0"
-                  value={newAccountForm.balance}
-                  onChange={(e) => setNewAccountForm({ ...newAccountForm, balance: e.target.value })}
+                  type="text"
+                  placeholder="Keterangan singkat peruntukan akun..."
+                  value={newAccountForm.description}
+                  onChange={(e) => setNewAccountForm({ ...newAccountForm, description: e.target.value })}
                   style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '12px' }}>
                 <button
                   type="button"
                   onClick={() => setIsNewAccountModalOpen(false)}
@@ -4948,7 +5703,161 @@ export const FinanceModule = () => {
                   type="submit"
                   style={{ background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)', border: '1px solid #ef4444', color: '#ffffff', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
                 >
-                  Simpan Akun
+                  Simpan Akun Bagan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4B: TAMBAH ITEM JOBLIST (PROYEK ATAU SUB-PEKERJAAN 2-LEVEL)          */}
+      {/* ========================================================================= */}
+      {isNewJobModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+        >
+          <div
+            className="glass-card"
+            style={{
+              background: '#090d16',
+              border: '2px solid #ef4444',
+              borderRadius: '14px',
+              maxWidth: '520px',
+              width: '100%',
+              padding: '1.75rem',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.8)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1.5px solid #1e293b', paddingBottom: '10px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  {newJobForm.level === 1 ? 'Tambah Proyek Baru (Level 1)' : 'Tambah Sub-Pekerjaan (Level 2)'}
+                </h3>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                  {newJobForm.level === 1
+                    ? 'Membuat Proyek Induk Utama (Cost Center Level 1)'
+                    : `Membuat Sub-Pekerjaan Lapangan di bawah ${newJobForm.parentCode}`}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsNewJobModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveJob} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* 1. Pilih Proyek Induk */}
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 800, display: 'block', marginBottom: '4px' }}>
+                  Proyek Induk (Parent)
+                </label>
+                <select
+                  value={newJobForm.parentCode || ''}
+                  onChange={(e) => {
+                    const selCode = e.target.value;
+                    const parent = joblist.find(j => j.code === selCode);
+                    const suggested = parent ? generateNextJobCode(parent, joblist) : '';
+                    setNewJobForm({
+                      ...newJobForm,
+                      parentCode: selCode,
+                      code: suggested || newJobForm.code,
+                      level: parent ? 2 : 1,
+                      type: parent ? 'Detail' : 'Header'
+                    });
+                  }}
+                  style={{ width: '100%', background: '#0f172a', border: '1.5px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                >
+                  <option value="">(Tanpa Induk - Sebagai Proyek Baru Level 1)</option>
+                  {joblist.filter(j => j.level === 1).map(p => (
+                    <option key={p.code} value={p.code}>
+                      {p.code} - {p.name}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                  {newJobForm.parentCode ? 'Item ini otomatis menjadi Sub-Pekerjaan (Level 2).' : 'Kosongkan jika membuat Proyek Induk baru (Level 1).'}
+                </span>
+              </div>
+
+              {/* 2. Kode Pekerjaan & Nama Pekerjaan */}
+              <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Kode Job *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={newJobForm.level === 1 ? 'Contoh: AV-100' : 'Contoh: AV-110'}
+                    value={newJobForm.code}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, code: e.target.value.toUpperCase() })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 800 }}
+                  />
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                    Saran otomatis (bebas edit)
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                    Nama {newJobForm.level === 1 ? 'Proyek' : 'Sub-Pekerjaan'} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={newJobForm.level === 1 ? 'Contoh: Bizhub Commercial' : 'Contoh: Konstruksi unit'}
+                    value={newJobForm.name}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, name: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem', fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+
+              {/* 3. Deskripsi / Keterangan */}
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                  Keterangan / Uraian Pekerjaan
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Pekerjaan cut and fill, pengurugan dan pemadatan tanah..."
+                  value={newJobForm.description}
+                  onChange={(e) => setNewJobForm({ ...newJobForm, description: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 12px', color: '#ffffff', fontSize: '0.82rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem', borderTop: '1px solid #1e293b', paddingTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsNewJobModalOpen(false)}
+                  style={{ background: '#1e293b', color: '#cbd5e1', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.82rem', cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  style={{ background: 'linear-gradient(135deg, #7f0000 0%, #991b1b 100%)', border: '1px solid #ef4444', color: '#ffffff', borderRadius: '8px', padding: '8px 18px', fontSize: '0.82rem', fontWeight: 800, cursor: 'pointer' }}
+                >
+                  Simpan ke Joblist
                 </button>
               </div>
             </form>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import { 
   Users, 
   DollarSign, 
@@ -200,24 +201,25 @@ export const HumanResourcesModule = () => {
     }
   ];
 
-  // Persistent Payroll State
-  const getSavedPayrolls = () => {
-    try {
-      const saved = localStorage.getItem('ams_payroll_data_clean_v2');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return initialPayrolls;
-  };
-
-  const [payrolls, setPayrolls] = useState(getSavedPayrolls);
+  // Persistent Payroll State (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [payrolls, setPayrolls] = useState(initialPayrolls);
+  const isPayrollLoadedRef = useRef(false);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ams_payroll_data_clean_v2', JSON.stringify(payrolls));
-    } catch (e) {}
+    let isMounted = true;
+    fetchCloudStore('ams_payroll_data_clean_v2', initialPayrolls).then(val => {
+      if (isMounted) {
+        if (val && Array.isArray(val) && val.length > 0) setPayrolls(val);
+        isPayrollLoadedRef.current = true;
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (isPayrollLoadedRef.current) {
+      saveCloudStore('ams_payroll_data_clean_v2', payrolls);
+    }
   }, [payrolls]);
 
   // Payroll Add/Edit Modal State

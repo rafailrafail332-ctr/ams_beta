@@ -318,28 +318,29 @@ export const AttendanceModule = ({
   // Sub-tabs: 'log-presensi' (Log Presensi Geofencing GPS) | 'rekapan-bulanan' (Timesheet Bulanan)
   const [activeSubTab, setActiveSubTab] = useState('log-presensi');
 
-  // Izin & Sakit HR Store
-  const [leaveRequests, setLeaveRequests] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_ATTENDANCE_LEAVE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return SEED_LEAVE_REQUESTS;
-  });
+  // Izin & Sakit HR Store (100% MySQL Database Terpusat, Zero LocalStorage)
+  const [leaveRequests, setLeaveRequests] = useState(SEED_LEAVE_REQUESTS);
+  const isLeaveLoadedRef = useRef(false);
 
   // Initial fetch from MySQL Database on Sengked Hosting
   useEffect(() => {
-    fetchCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, null).then(val => {
-      if (val && Array.isArray(val) && val.length > 0) setLeaveRequests(val);
+    let isMounted = true;
+    fetchCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, SEED_LEAVE_REQUESTS).then(val => {
+      if (isMounted) {
+        if (val && Array.isArray(val) && val.length > 0) {
+          setLeaveRequests(val);
+        }
+        isLeaveLoadedRef.current = true;
+      }
     });
+    return () => { isMounted = false; };
   }, []);
 
-  // Save changes to localStorage & MySQL Database
+  // Save changes to MySQL Database Terpusat
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_ATTENDANCE_LEAVE_KEY, JSON.stringify(leaveRequests));
-    } catch {}
-    saveCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, leaveRequests);
+    if (isLeaveLoadedRef.current) {
+      saveCloudStore(STORAGE_ATTENDANCE_LEAVE_KEY, leaveRequests);
+    }
   }, [leaveRequests]);
 
   // Merge Live App Attendances dengan Seed jika AppContext attendances kosong
@@ -362,26 +363,26 @@ export const AttendanceModule = ({
   // Synchronize initial attendances back into AppContext jika masih kosong
   useEffect(() => {
     if (setAppAttendances && Array.isArray(appAttendances) && appAttendances.length === 0) {
-      try {
-        const savedClean = localStorage.getItem('ams_attendances_clean_v15');
-        if (!savedClean || JSON.parse(savedClean).length === 0) {
-          setAppAttendances(SEED_ATTENDANCE_LOGS);
-        }
-      } catch {}
+      setAppAttendances(SEED_ATTENDANCE_LOGS);
     }
   }, [appAttendances, setAppAttendances]);
 
-  // Data Karyawan (diambil dari props atau localStorage HR Database)
+  // Data Karyawan (diambil dari props atau MySQL Database Terpusat)
+  const [fetchedEmployees, setFetchedEmployees] = useState([]);
+  useEffect(() => {
+    if (!Array.isArray(propEmployees) || propEmployees.length === 0) {
+      fetchCloudStore(STORAGE_EMPLOYEES_KEY, []).then(res => {
+        if (Array.isArray(res)) setFetchedEmployees(res);
+      });
+    }
+  }, [propEmployees]);
+
   const employeesList = useMemo(() => {
     if (Array.isArray(propEmployees) && propEmployees.length > 0) {
       return propEmployees;
     }
-    try {
-      const saved = localStorage.getItem(STORAGE_EMPLOYEES_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return [];
-  }, [propEmployees]);
+    return fetchedEmployees;
+  }, [propEmployees, fetchedEmployees]);
 
   // Filter States
   const todayStr = new Date().toISOString().split('T')[0];

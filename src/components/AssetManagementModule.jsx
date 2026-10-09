@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { fetchCloudStore, saveCloudStore } from '../supabase';
 import {
   Box,
   Calendar,
@@ -28,7 +29,7 @@ import {
 // =============================================================================
 // STORAGE KEY & SEED DATA INITIAL ASSETS
 // =============================================================================
-const STORAGE_ASSETS_KEY = 'ams_hr_assets_v2';
+const STORAGE_ASSETS_KEY = 'ams_ga_assets_master_v2';
 
 const INITIAL_ASSETS = [
   {
@@ -155,25 +156,23 @@ const normalizeAssetItem = (item, idx) => {
 };
 
 export const AssetManagementModule = ({ currentUser, showNotification, onSwitchTab }) => {
-  // State Master Dataset Assets
-  const [assetList, setAssetList] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_ASSETS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((item, idx) => normalizeAssetItem(item, idx));
-        }
-      }
-    } catch {}
-    return INITIAL_ASSETS;
-  });
+  // State Master Dataset Assets Terpusat MySQL Database
+  const [assetList, setAssetList] = useState(INITIAL_ASSETS);
 
-  // Persist ke localStorage
+  // Sinkronisasi Real-Time MySQL Database Sengked Hosting (Tanpa LocalStorage)
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_ASSETS_KEY, JSON.stringify(assetList));
-    } catch {}
+    fetchCloudStore(STORAGE_ASSETS_KEY, INITIAL_ASSETS).then(val => {
+      if (val && Array.isArray(val) && val.length > 0) {
+        setAssetList(val.map((item, idx) => normalizeAssetItem(item, idx)));
+      } else {
+        saveCloudStore(STORAGE_ASSETS_KEY, INITIAL_ASSETS);
+      }
+    });
+  }, []);
+
+  // Save changes ke MySQL Database Terpusat
+  useEffect(() => {
+    saveCloudStore(STORAGE_ASSETS_KEY, assetList);
   }, [assetList]);
 
   // Formatter Rupiah & Tanggal
